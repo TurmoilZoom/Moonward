@@ -1,0 +1,142 @@
+name: Publish PubRes With SignPath
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  build-sign-pubres:
+    runs-on: windows-2025-vs2026
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        global-json-file: global.json
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v3
+
+    - name: Install UPX
+      shell: pwsh
+      run: |
+        Invoke-WebRequest https://github.com/upx/upx/releases/download/v5.0.2/upx-5.0.2-win64.zip -OutFile $env:RUNNER_TEMP/upx.zip
+        Expand-Archive -Path $env:RUNNER_TEMP/upx.zip -DestinationPath $env:RUNNER_TEMP/upx
+        Move-Item -Path $env:RUNNER_TEMP/upx/upx-5.0.2-win64/upx.exe -Destination C:/Windows/System32/upx.exe -Force
+
+    - name: Build pub_res
+      shell: pwsh
+      run: dotnet run publish.cs -- res
+
+    - name: Detect pub_res tag
+      id: detect-tag
+      shell: pwsh
+      run: |
+        $jsonPath = "publish/pub_res/pub_res.json"
+        if (-not (Test-Path $jsonPath)) {
+          throw "Cannot find $jsonPath"
+        }
+
+        $pubRes = Get-Content -Path $jsonPath -Raw | ConvertFrom-Json
+        $tag = [string]$pubRes.Tag
+        if ([string]::IsNullOrWhiteSpace($tag)) {
+          throw "Tag is missing in $jsonPath"
+        }
+
+        "tag=$tag" >> $env:GITHUB_OUTPUT
+        Write-Host "Detected tag: $tag"
+
+    - name: Upload unsigned artifact
+      id: upload-unsigned
+      uses: actions/upload-artifact@v7
+      with:
+        name: pub_res_unsigned_${{ steps.detect-tag.outputs.tag }}
+        path: |
+          publish/pub_res/Starward.Setup_x64_${{ steps.detect-tag.outputs.tag }}.exe
+          publish/pub_res/Starward.Setup_arm64_${{ steps.detect-tag.outputs.tag }}.exe
+          publish/pub_res/Starward_x64_${{ steps.detect-tag.outputs.tag }}.exe
+          publish/pub_res/Starward_arm64_${{ steps.detect-tag.outputs.tag }}.exe
+        if-no-files-found: error
+
+    - name: Sign with SignPath
+      uses: signpath/github-action-submit-signing-request@v2
+      with:
+        api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+        organization-id: '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
+        project-slug: '${{ vars.SIGNPATH_PROJECT_SLUG }}'
+        signing-policy-slug: '${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}'
+        github-artifact-id: '${{ steps.upload-unsigned.outputs.artifact-id }}'
+        wait-for-completion: true
+        output-artifact-directory: publish/sign-output
+        wait-for-completion-timeout-in-seconds: 3600
+
+    - name: Rebuild pub_res.json from signed files
+      shell: pwsh
+      run: |
+        $tag = "${{ steps.detect-tag.outputs.tag }}"
+        $urlPrefix = "https://starward-static.scighost.com/release/pub_res"
+
+        function Get-Sha256Hex([string]$path) {
+          $hash = Get-FileHash -Path $path -Algorithm SHA256
+          return $hash.Hash.ToLowerInvariant()
+        }
+
+        function Get-Entry([string]$path, [string]$urlFileName, [string]$logicalName) {
+          if (-not (Test-Path $path)) {
+            throw "Missing signed file: $path"
+          }
+
+          return [ordered]@{
+            FileName = $logicalName
+            Size = (Get-Item $path).Length
+            Hash = (Get-Sha256Hex $path)
+            Url = "$urlPrefix/$urlFileName"
+          }
+        }
+
+        $setupX64Name = "Starward.Setup_x64_${tag}.exe"
+        $setupArm64Name = "Starward.Setup_arm64_${tag}.exe"
+        $launcherX64Name = "Starward_x64_${tag}.exe"
+        $launcherArm64Name = "Starward_arm64_${tag}.exe"
+
+        function Resolve-SignedPath([string]$name) {
+          $signed = Get-ChildItem -Path publish/sign-output -Recurse -File -Filter $name | Select-Object -First 1
+          if (-not $signed) {
+            throw "Signed file not found in publish/sign-output: $name"
+          }
+          return $signed.FullName
+        }
+
+        $setupX64Path = Resolve-SignedPath $setupX64Name
+        $setupArm64Path = Resolve-SignedPath $setupArm64Name
+        $launcherX64Path = Resolve-SignedPath $launcherX64Name
+        $launcherArm64Path = Resolve-SignedPath $launcherArm64Name
+
+        $obj = [ordered]@{
+          Tag = $tag
+          SetupX64 = (Get-Entry $setupX64Path $setupX64Name "Starward.Setup.exe")
+          SetupArm64 = (Get-Entry $setupArm64Path $setupArm64Name "Starward.Setup.exe")
+          LauncherX64 = (Get-Entry $launcherX64Path $launcherX64Name "Starward.exe")
+          LauncherArm64 = (Get-Entry $launcherArm64Path $launcherArm64Name "Starward.exe")
+        }
+
+        $json = $obj | ConvertTo-Json -Depth 6
+        Set-Content -Path publish/sign-output/pub_res.json -Value $json -Encoding utf8
+
+    - name: Upload signed pub_res artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: pub_res_signed_${{ steps.detect-tag.outputs.tag }}_run${{ github.run_number }}
+        path: |
+          publish/sign-output/**/Starward.Setup_x64_${{ steps.detect-tag.outputs.tag }}.exe
+          publish/sign-output/**/Starward.Setup_arm64_${{ steps.detect-tag.outputs.tag }}.exe
+          publish/sign-output/**/Starward_x64_${{ steps.detect-tag.outputs.tag }}.exe
+          publish/sign-output/**/Starward_arm64_${{ steps.detect-tag.outputs.tag }}.exe
+          publish/sign-output/pub_res.json
+        if-no-files-found: error
