@@ -68,9 +68,9 @@ jobs:
       uses: signpath/github-action-submit-signing-request@v2
       with:
         api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-        organization-id: '${{ vars.SIGNPATH_ORGANIZATION_ID }}'
-        project-slug: '${{ vars.SIGNPATH_PROJECT_SLUG }}'
-        signing-policy-slug: '${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}'
+        organization-id: '${{ secrets.SIGNPATH_ORGANIZATION_ID }}'
+        project-slug: '${{ secrets.SIGNPATH_PROJECT_SLUG }}'
+        signing-policy-slug: '${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}'
         github-artifact-id: '${{ steps.upload-unsigned.outputs.artifact-id }}'
         wait-for-completion: true
         output-artifact-directory: publish/sign-output
