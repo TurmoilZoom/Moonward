@@ -133,6 +133,12 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    public static bool ToolbarPinned
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
+
     public static StartGameAction StartGameAction
     {
         get => GetValue<StartGameAction>();
