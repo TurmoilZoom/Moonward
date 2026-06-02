@@ -1,0 +1,42 @@
+name: Sync Upstream Main
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: sync-upstream-main
+  cancel-in-progress: true
+
+jobs:
+  sync-main:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Sync fork main with upstream
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            try {
+              const response =
+                await github.rest.repos.mergeUpstream({
+                  owner,
+                  repo,
+                  branch: 'main'
+                });
+
+              console.log(response.data);
+
+            } catch (error) {
+              if (error.status === 409) {
+                console.log('存在冲突，需要人工处理');
+                return;
+              }
+              throw error;
+            }
