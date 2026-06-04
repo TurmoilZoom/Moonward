@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
+using Starward.Controls;
 using Starward.Frameworks;
 using System;
 
@@ -19,6 +20,16 @@ public sealed partial class SettingPage : PageBase
         this.InitializeComponent();
         Frame_Setting.Navigate(typeof(AboutSetting));
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
+    }
+
+
+
+    private readonly FluidNavigationViewHoverEffect _navHoverEffect = new();
+
+
+    protected override void OnLoaded()
+    {
+        _navHoverEffect.Attach(NavView, NavIndicatorHost, _logger);
     }
 
 
@@ -56,6 +67,7 @@ public sealed partial class SettingPage : PageBase
     protected override void OnUnloaded()
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
+        _navHoverEffect.Detach();
     }
 
 

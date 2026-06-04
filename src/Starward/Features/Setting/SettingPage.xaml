@@ -16,7 +16,8 @@
 
     <Grid>
 
-        <NavigationView IsBackButtonVisible="Collapsed"
+        <NavigationView x:Name="NavView"
+                        IsBackButtonVisible="Collapsed"
                         IsPaneToggleButtonVisible="False"
                         IsSettingsVisible="False"
                         ItemInvoked="NavigationView_ItemInvoked"
@@ -28,6 +29,9 @@
                 <Thickness x:Key="NavigationViewContentMargin">0</Thickness>
                 <Thickness x:Key="NavigationViewHeaderMargin">0</Thickness>
                 <x:Double x:Key="PaneToggleButtonHeight">0</x:Double>
+                <!--  悬停 / 按下的内置背景由流体高亮条 + 悬停文字右移 + 整体按压缩放 + Z轴按压下沉动画接管，故置为透明  -->
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="Transparent" />
             </NavigationView.Resources>
 
             <NavigationView.PaneHeader>
@@ -102,6 +106,12 @@
             <Frame Name="Frame_Setting" Margin="24,24,0,0" />
 
         </NavigationView>
+
+        <!--  流体悬停指示器宿主：覆盖在导航栏窗格之上，承载 Composition 高亮条。IsHitTestVisible=False 以便指针事件穿透到导航项  -->
+        <Grid x:Name="NavIndicatorHost"
+              Width="260"
+              HorizontalAlignment="Left"
+              IsHitTestVisible="False" />
 
     </Grid>
 

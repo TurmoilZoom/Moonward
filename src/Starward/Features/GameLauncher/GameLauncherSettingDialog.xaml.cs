@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Background;
@@ -51,6 +52,9 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
     private readonly BackgroundService _backgroundService = AppConfig.GetService<BackgroundService>();
+
+
+    private readonly FluidNavigationViewHoverEffect _navHoverEffect = new();
 
 
     public GameLauncherSettingDialog()
@@ -132,6 +136,8 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
     private async void GameLauncherSettingDialog_Loaded(object sender, RoutedEventArgs e)
     {
+        _navHoverEffect.Attach(NavView, NavIndicatorHost, _logger);
+
         CurrentGameBiz = CurrentGameId?.GameBiz ?? GameBiz.None;
         WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(this, OnAccentColorChanged);
         CheckCanRepairGame();
@@ -144,6 +150,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
     private void GameLauncherSettingDialog_Unloaded(object sender, RoutedEventArgs e)
     {
+        _navHoverEffect.Detach();
         WeakReferenceMessenger.Default.UnregisterAll(this);
         LatestPackageGroups = null!;
         PreInstallPackageGroups = null!;
