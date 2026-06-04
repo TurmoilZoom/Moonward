@@ -218,6 +218,15 @@ public sealed partial class MainWindow : WindowEx
                 // WTS_SESSION_UNLOCK 
             }
         }
+        else if (uMsg == 0x0005 /* WM_SIZE */)
+        {
+            if (wParam == 1 /* SIZE_MINIMIZED */)
+            {
+                // 窗口最小化，通知暂停/释放背景视频资源
+                WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { Hide = true, CurrentTime = DateTimeOffset.Now });
+                GC.Collect();
+            }
+        }
         else if (uMsg == (uint)User32.WindowMessage.WM_DEVICECHANGE)
         {
             // 存储设备插入/拔出

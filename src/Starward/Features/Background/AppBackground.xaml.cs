@@ -612,16 +612,29 @@ public sealed partial class AppBackground : UserControl
     {
         try
         {
-            if (_mediaPlayer is not null)
+            if (message.Hide || message.SessionLock)
             {
-                var state = _mediaPlayer.PlaybackSession.PlaybackState;
-                if (message.Activate && state is not MediaPlaybackState.Playing)
+                // 窗口隐藏、最小化或锁屏时释放视频解码与渲染资源，减少硬件占用
+                DisposeVideoResource();
+            }
+            else if (message.Activate)
+            {
+                if (_mediaPlayer is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
                 {
-                    _mediaPlayer.Play();
+                    // 恢复显示时重新开始解码渲染背景视频
+                    StartMediaPlayer(_lastBackgroundFile!);
+                    if (CurrentGameBackground?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && CurrentGameBackground.Theme?.Url is string url && !string.IsNullOrEmpty(url))
+                    {
+                        _ = PrepareVideoOverlayImageAsync(url);
+                    }
                 }
-                else if (message.Hide || message.SessionLock)
+                else if (_mediaPlayer is not null)
                 {
-                    _mediaPlayer.Pause();
+                    var state = _mediaPlayer.PlaybackSession.PlaybackState;
+                    if (state is not MediaPlaybackState.Playing)
+                    {
+                        _mediaPlayer.Play();
+                    }
                 }
             }
         }
