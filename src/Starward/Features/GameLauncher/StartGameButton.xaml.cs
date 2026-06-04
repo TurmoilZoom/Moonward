@@ -20,10 +20,38 @@ public sealed partial class StartGameButton : UserControl
     private static Brush TextOnAccentFillColorPrimaryBrush => (Brush)Application.Current.Resources["TextOnAccentFillColorPrimaryBrush"];
 
 
+    private readonly StartGameButtonEffects _effects = new();
+
+
     public StartGameButton()
     {
         this.InitializeComponent();
         this.ActualThemeChanged += StartGameButton_ActualThemeChanged;
+        this.Loaded += StartGameButton_Loaded;
+        this.Unloaded += StartGameButton_Unloaded;
+    }
+
+
+    private void StartGameButton_Loaded(object sender, RoutedEventArgs e)
+    {
+        _effects.Attach(Grid_Root, Grid_GlowHost, Grid_EffectHost, Button_GameAction);
+        UpdateEffectsState();
+    }
+
+
+    /// <summary>
+    /// 同步动效启用状态：呼吸光晕仅在「可开始游戏」时亮；
+    /// 流光 / 聚光灯 / 点击光爆在所有显示强调色背景的可操作状态（开始 / 安装 / 更新 等）都亮。
+    /// </summary>
+    private void UpdateEffectsState()
+    {
+        _effects.SetState(GameState is GameState.StartGame, IsAccentColorBackgroundVisible);
+    }
+
+
+    private void StartGameButton_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _effects.Detach();
     }
 
 
@@ -99,6 +127,7 @@ public sealed partial class StartGameButton : UserControl
         OnPropertyChanged(nameof(IsGameActionCommandRunning));
         OnPropertyChanged(nameof(StartGameButtonText));
         UpdateButtonForeground();
+        UpdateEffectsState();
     }
 
 
@@ -117,6 +146,7 @@ public sealed partial class StartGameButton : UserControl
         OnPropertyChanged(nameof(IsGameActionCommandRunning));
         OnPropertyChanged(nameof(ActionButtonForeground));
         OnPropertyChanged(nameof(SettingButtonForeground));
+        UpdateEffectsState();
     }
 
 
@@ -355,6 +385,7 @@ public sealed partial class StartGameButton : UserControl
     {
         OnPropertyChanged(nameof(ActionButtonForeground));
         OnPropertyChanged(nameof(SettingButtonForeground));
+        _effects.OnThemeChanged();
     }
 
 

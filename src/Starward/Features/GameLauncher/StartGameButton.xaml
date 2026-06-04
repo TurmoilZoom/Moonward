@@ -91,6 +91,12 @@
         </Style>
     </UserControl.Resources>
 
+    <!--  外层壳：自身不裁剪，承载会向外溢出的呼吸光晕  -->
+    <Grid x:Name="LayoutRoot">
+
+        <!--  呼吸光晕宿主：位于胶囊之外、之下，辉光向外溢出且不被圆角裁剪  -->
+        <Grid x:Name="Grid_GlowHost" IsHitTestVisible="False" />
+
     <Grid x:Name="Grid_Root"
           Height="44"
           MinWidth="180"
@@ -106,6 +112,9 @@
                    Fill="{ThemeResource AccentFillColorDefaultBrush}"
                    IsHitTestVisible="False"
                    Visibility="{x:Bind IsAccentColorBackgroundVisible}" />
+
+        <!--  流光 / 聚光灯 / 点击光爆宿主：位于强调色之上、文字之下，被胶囊圆角裁剪  -->
+        <Grid x:Name="Grid_EffectHost" IsHitTestVisible="False" />
 
         <!--  主要按键  -->
         <Button x:Name="Button_GameAction"
@@ -406,6 +415,8 @@
 
         </Popup>
 
+
+    </Grid>
 
     </Grid>
 
