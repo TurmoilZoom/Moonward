@@ -152,141 +152,139 @@
 
         <MenuFlyoutSeparator Grid.Row="7" Visibility="Collapsed" />
 
-        <Pivot Grid.Row="8" SelectedIndex="{x:Bind Segmented_GachaItemList.SelectedIndex, Mode=TwoWay}">
-            <Pivot.Resources>
-                <Thickness x:Key="PivotItemMargin">0,0,0,0</Thickness>
-                <Thickness x:Key="PivotHeaderItemMargin">12,0,12,0</Thickness>
-                <Style BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" TargetType="PivotHeaderItem">
-                    <Setter Property="Height" Value="36" />
-                </Style>
-            </Pivot.Resources>
-            <PivotItem>
-                <ItemsRepeater ItemsSource="{x:Bind WarpTypeStats.List_5}">
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="local:GachaLogItemEx">
-                            <Grid Name="Grid_Rarity5Item"
-                                  Height="28"
-                                  Background="Transparent"
-                                  PointerEntered="Grid_Rarity5Item_PointerEntered"
-                                  PointerExited="Grid_Rarity5Item_PointerExited"
-                                  Tag="{x:Bind}"
-                                  ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40" />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" MinWidth="20" />
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="1"
-                                        Height="24"
-                                        Margin="-4,0,-4,0"
-                                        VerticalAlignment="Center"
-                                        Background="{x:Bind Converter={StaticResource GachaPityProgressBackgroundBrushConverter}}" />
-                                <sc:CachedImage Width="28"
-                                                Height="28"
-                                                HorizontalAlignment="Left"
-                                                Source="{x:Bind Icon}" />
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Text="{x:Bind Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                                <TextBlock Grid.Column="3"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           IsTextScaleFactorEnabled="False"
-                                           Text="{x:Bind Pity}"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Foreground="{ThemeResource Rarity5ForegroundBrush}"
-                                           Text="{x:Bind Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                <TextBlock Grid.Column="3"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           Foreground="{ThemeResource Rarity5ForegroundBrush}"
-                                           IsTextScaleFactorEnabled="False"
-                                           Text="{x:Bind Pity}"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                <TextBlock Grid.Column="2"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           FontSize="12"
-                                           FontStyle="Italic"
-                                           Foreground="{ThemeResource Rarity5ForegroundBrush}"
-                                           IsTextScaleFactorEnabled="False"
-                                           Opacity="{x:Bind UpTextOpacity}"
-                                           Text="up!"
-                                           Visibility="{x:Bind HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-            </PivotItem>
-            <PivotItem>
-                <ItemsRepeater ItemsSource="{x:Bind WarpTypeStats.List_4}">
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="local:GachaLogItemEx">
-                            <Grid Name="Grid_Rarity4Item"
-                                  Height="28"
-                                  Background="Transparent"
-                                  ColumnSpacing="8"
-                                  PointerEntered="Grid_Rarity4Item_PointerEntered"
-                                  PointerExited="Grid_Rarity4Item_PointerExited"
-                                  Tag="{x:Bind}"
-                                  ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="28" />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="24" />
-                                </Grid.ColumnDefinitions>
-                                <sc:CachedImage Width="28"
-                                                Height="28"
-                                                Source="{x:Bind Icon}" />
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Text="{x:Bind Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                                <TextBlock Grid.Column="2"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           Text="{x:Bind Pity}"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Foreground="{ThemeResource Rarity4ForegroundBrush}"
-                                           Text="{x:Bind Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                <TextBlock Grid.Column="2"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           Foreground="{ThemeResource Rarity4ForegroundBrush}"
-                                           Text="{x:Bind Pity}"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+        <Grid Grid.Row="8"
+              RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            </PivotItem>
-        </Pivot>
+            <cwc:Segmented x:Name="Segmented_GachaItemList"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Center"
+                           SelectedIndex="0">
+                <cwc:SegmentedItem>
+                    <TextBlock Foreground="{ThemeResource Rarity5ForegroundBrush}" Text="S" />
+                </cwc:SegmentedItem>
+                <cwc:SegmentedItem>
+                    <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="A" />
+                </cwc:SegmentedItem>
+            </cwc:Segmented>
 
-        <cwc:Segmented x:Name="Segmented_GachaItemList"
-                       Grid.Row="8"
-                       HorizontalAlignment="Stretch"
-                       VerticalAlignment="Top"
-                       SelectedIndex="0">
-            <cwc:SegmentedItem>
-                <TextBlock Foreground="{ThemeResource Rarity5ForegroundBrush}" Text="S" />
-            </cwc:SegmentedItem>
-            <cwc:SegmentedItem>
-                <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="A" />
-            </cwc:SegmentedItem>
-        </cwc:Segmented>
+            <ItemsRepeater x:Name="ItemsRepeater_List_5"
+                           Grid.Row="1"
+                           ItemsSource="{x:Bind WarpTypeStats.List_5}">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="local:GachaLogItemEx">
+                        <Grid Name="Grid_Rarity5Item"
+                              Height="28"
+                              Background="Transparent"
+                              PointerEntered="Grid_Rarity5Item_PointerEntered"
+                              PointerExited="Grid_Rarity5Item_PointerExited"
+                              Tag="{x:Bind}"
+                              ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40" />
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" MinWidth="20" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="1"
+                                    Height="24"
+                                    Margin="-4,0,-4,0"
+                                    VerticalAlignment="Center"
+                                    Background="{x:Bind Converter={StaticResource GachaPityProgressBackgroundBrushConverter}}" />
+                            <sc:CachedImage Width="28"
+                                            Height="28"
+                                            HorizontalAlignment="Left"
+                                            Source="{x:Bind Icon}" />
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       Text="{x:Bind Name}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                            <TextBlock Grid.Column="3"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       IsTextScaleFactorEnabled="False"
+                                       Text="{x:Bind Pity}"
+                                       Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                                       Text="{x:Bind Name}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock Grid.Column="3"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                                       IsTextScaleFactorEnabled="False"
+                                       Text="{x:Bind Pity}"
+                                       Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock Grid.Column="2"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       FontStyle="Italic"
+                                       Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                                       IsTextScaleFactorEnabled="False"
+                                       Opacity="{x:Bind UpTextOpacity}"
+                                       Text="up!"
+                                       Visibility="{x:Bind HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+
+            <ItemsRepeater x:Name="ItemsRepeater_List_4"
+                           Grid.Row="1"
+                           ItemsSource="{x:Bind WarpTypeStats.List_4}">
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="local:GachaLogItemEx">
+                        <Grid Name="Grid_Rarity4Item"
+                              Height="28"
+                              Background="Transparent"
+                              ColumnSpacing="8"
+                              PointerEntered="Grid_Rarity4Item_PointerEntered"
+                              PointerExited="Grid_Rarity4Item_PointerExited"
+                              Tag="{x:Bind}"
+                              ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="24" />
+                            </Grid.ColumnDefinitions>
+                            <sc:CachedImage Width="28"
+                                            Height="28"
+                                            Source="{x:Bind Icon}" />
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       Text="{x:Bind Name}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                            <TextBlock Grid.Column="2"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Text="{x:Bind Pity}"
+                                       Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource Rarity4ForegroundBrush}"
+                                       Text="{x:Bind Name}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <TextBlock Grid.Column="2"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource Rarity4ForegroundBrush}"
+                                       Text="{x:Bind Pity}"
+                                       Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </Grid>
 
 
     </Grid>

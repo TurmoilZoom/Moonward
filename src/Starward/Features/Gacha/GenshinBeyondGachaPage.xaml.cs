@@ -35,6 +35,8 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
     public GenshinBeyondGachaPage()
     {
         InitializeComponent();
+        GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList1000, ItemsRepeater_List_4_1000, ItemsRepeater_List_3_1000);
+        GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList2000, ItemsRepeater_List_5_2000, ItemsRepeater_List_4_2000);
     }
 
 

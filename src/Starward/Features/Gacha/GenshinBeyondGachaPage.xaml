@@ -293,16 +293,28 @@
 
                         <MenuFlyoutSeparator Grid.Row="7" Visibility="Collapsed" />
 
-                        <Pivot Grid.Row="8" SelectedIndex="{x:Bind Segmented_GachaItemList1000.SelectedIndex, Mode=TwoWay}">
-                            <Pivot.Resources>
-                                <Thickness x:Key="PivotItemMargin">0,0,0,0</Thickness>
-                                <Thickness x:Key="PivotHeaderItemMargin">12,0,12,0</Thickness>
-                                <Style BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" TargetType="PivotHeaderItem">
-                                    <Setter Property="Height" Value="36" />
-                                </Style>
-                            </Pivot.Resources>
-                            <PivotItem>
-                                <ItemsRepeater ItemsSource="{x:Bind GachaStatsType1000.List_4}">
+                        <Grid Grid.Row="8"
+                              RowSpacing="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="36" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <cwc:Segmented x:Name="Segmented_GachaItemList1000"
+                                           HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Center"
+                                           SelectedIndex="0">
+                                <cwc:SegmentedItem>
+                                    <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="4★" />
+                                </cwc:SegmentedItem>
+                                <cwc:SegmentedItem>
+                                    <TextBlock Foreground="{ThemeResource Rarity3ForegroundBrush}" Text="3★" />
+                                </cwc:SegmentedItem>
+                            </cwc:Segmented>
+
+                            <ItemsRepeater x:Name="ItemsRepeater_List_4_1000"
+                                           Grid.Row="1"
+                                           ItemsSource="{x:Bind GachaStatsType1000.List_4}">
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
                                             <Grid Name="Grid_Rarity5Item"
@@ -338,9 +350,10 @@
                                         </DataTemplate>
                                     </ItemsRepeater.ItemTemplate>
                                 </ItemsRepeater>
-                            </PivotItem>
-                            <PivotItem>
-                                <ItemsRepeater ItemsSource="{x:Bind GachaStatsType1000.List_3}">
+
+                            <ItemsRepeater x:Name="ItemsRepeater_List_3_1000"
+                                           Grid.Row="1"
+                                           ItemsSource="{x:Bind GachaStatsType1000.List_3}">
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
                                             <Grid Name="Grid_Rarity4Item"
@@ -371,22 +384,7 @@
                                         </DataTemplate>
                                     </ItemsRepeater.ItemTemplate>
                                 </ItemsRepeater>
-
-                            </PivotItem>
-                        </Pivot>
-
-                        <cwc:Segmented x:Name="Segmented_GachaItemList1000"
-                                       Grid.Row="8"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Top"
-                                       SelectedIndex="0">
-                            <cwc:SegmentedItem>
-                                <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="4★" />
-                            </cwc:SegmentedItem>
-                            <cwc:SegmentedItem>
-                                <TextBlock Foreground="{ThemeResource Rarity3ForegroundBrush}" Text="3★" />
-                            </cwc:SegmentedItem>
-                        </cwc:Segmented>
+                        </Grid>
 
 
                     </Grid>
@@ -492,16 +490,28 @@
 
                         <MenuFlyoutSeparator Grid.Row="7" Visibility="Collapsed" />
 
-                        <Pivot Grid.Row="8" SelectedIndex="{x:Bind Segmented_GachaItemList2000.SelectedIndex, Mode=TwoWay}">
-                            <Pivot.Resources>
-                                <Thickness x:Key="PivotItemMargin">0,0,0,0</Thickness>
-                                <Thickness x:Key="PivotHeaderItemMargin">12,0,12,0</Thickness>
-                                <Style BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" TargetType="PivotHeaderItem">
-                                    <Setter Property="Height" Value="36" />
-                                </Style>
-                            </Pivot.Resources>
-                            <PivotItem>
-                                <ItemsRepeater ItemsSource="{x:Bind GachaStatsType2000.List_5}">
+                        <Grid Grid.Row="8"
+                              RowSpacing="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="36" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <cwc:Segmented x:Name="Segmented_GachaItemList2000"
+                                           HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Center"
+                                           SelectedIndex="0">
+                                <cwc:SegmentedItem>
+                                    <TextBlock Foreground="{ThemeResource Rarity5ForegroundBrush}" Text="5★" />
+                                </cwc:SegmentedItem>
+                                <cwc:SegmentedItem>
+                                    <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="4★" />
+                                </cwc:SegmentedItem>
+                            </cwc:Segmented>
+
+                            <ItemsRepeater x:Name="ItemsRepeater_List_5_2000"
+                                           Grid.Row="1"
+                                           ItemsSource="{x:Bind GachaStatsType2000.List_5}">
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
                                             <Grid Name="Grid_Rarity5Item"
@@ -537,9 +547,10 @@
                                         </DataTemplate>
                                     </ItemsRepeater.ItemTemplate>
                                 </ItemsRepeater>
-                            </PivotItem>
-                            <PivotItem>
-                                <ItemsRepeater ItemsSource="{x:Bind GachaStatsType2000.List_4}">
+
+                            <ItemsRepeater x:Name="ItemsRepeater_List_4_2000"
+                                           Grid.Row="1"
+                                           ItemsSource="{x:Bind GachaStatsType2000.List_4}">
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
                                             <Grid Name="Grid_Rarity4Item"
@@ -570,22 +581,7 @@
                                         </DataTemplate>
                                     </ItemsRepeater.ItemTemplate>
                                 </ItemsRepeater>
-
-                            </PivotItem>
-                        </Pivot>
-
-                        <cwc:Segmented x:Name="Segmented_GachaItemList2000"
-                                       Grid.Row="8"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Top"
-                                       SelectedIndex="0">
-                            <cwc:SegmentedItem>
-                                <TextBlock Foreground="{ThemeResource Rarity5ForegroundBrush}" Text="5★" />
-                            </cwc:SegmentedItem>
-                            <cwc:SegmentedItem>
-                                <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="4★" />
-                            </cwc:SegmentedItem>
-                        </cwc:Segmented>
+                        </Grid>
 
 
                     </Grid>
