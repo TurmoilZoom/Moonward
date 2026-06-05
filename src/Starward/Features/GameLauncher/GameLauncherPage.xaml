@@ -475,10 +475,17 @@
                         Command="{x:Bind PinToolbarCommand}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind ToolbarPinTooltip, Mode=OneWay}">
-                    <FontIcon FontSize="16"
-                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                              Glyph="{x:Bind PinGlyph, Mode=OneWay}"
-                              IsTextScaleFactorEnabled="False" />
+                    <Grid>
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE718;"
+                                  IsTextScaleFactorEnabled="False" />
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE841;"
+                                  IsTextScaleFactorEnabled="False"
+                                  Visibility="{x:Bind IsToolbarPinned, Mode=OneWay}" />
+                    </Grid>
                 </Button>
                 <!--  播放/暂停  -->
                 <Button Padding="4"

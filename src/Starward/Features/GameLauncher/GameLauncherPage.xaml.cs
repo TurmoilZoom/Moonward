@@ -58,12 +58,12 @@ public sealed partial class GameLauncherPage : PageBase
         _dispatchTimer.Tick += UpdateGameInstallTaskProgress;
         if (AppConfig.ToolbarPinned)
         {
-            PinGlyph = PinnedGlyph;
+            IsToolbarPinned = true;
             ToolbarPinTooltip = Lang.GameLauncherPage_UnpinToolbar;
         }
         else
         {
-            PinGlyph = UnpinnedGlyph;
+            IsToolbarPinned = false;
             ToolbarPinTooltip = Lang.GameLauncherPage_PinToolbar;
         }
     }
@@ -846,10 +846,6 @@ public sealed partial class GameLauncherPage : PageBase
 
     private const string PauseIcon = "\uE62E";
 
-    private const string PinnedGlyph = "\uE77A";
-
-    private const string UnpinnedGlyph = "\uE718";
-
 
     public List<GameBackground> BackgroundImages { get; set => SetProperty(ref field, value); }
 
@@ -857,7 +853,7 @@ public sealed partial class GameLauncherPage : PageBase
 
     public string StartStopButtonIcon { get; set => SetProperty(ref field, value); }
 
-    public string PinGlyph { get; set => SetProperty(ref field, value); }
+    public bool IsToolbarPinned { get; set => SetProperty(ref field, value); }
 
     public string ToolbarPinTooltip { get; set => SetProperty(ref field, value); }
 
@@ -996,15 +992,14 @@ public sealed partial class GameLauncherPage : PageBase
     private void PinToolbar()
     {
         AppConfig.ToolbarPinned = !AppConfig.ToolbarPinned;
+        IsToolbarPinned = AppConfig.ToolbarPinned;
         if (AppConfig.ToolbarPinned)
         {
-            PinGlyph = PinnedGlyph;
             ToolbarPinTooltip = Lang.GameLauncherPage_UnpinToolbar;
             Border_SwitchBackgroundImage.Opacity = 1;
         }
         else
         {
-            PinGlyph = UnpinnedGlyph;
             ToolbarPinTooltip = Lang.GameLauncherPage_PinToolbar;
             Border_SwitchBackgroundImage.Opacity = 0;
         }
