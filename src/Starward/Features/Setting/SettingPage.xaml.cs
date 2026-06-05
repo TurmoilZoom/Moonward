@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using Starward.Controls;
 using Starward.Frameworks;
 using System;
@@ -18,8 +20,36 @@ public sealed partial class SettingPage : PageBase
     public SettingPage()
     {
         this.InitializeComponent();
+        // 在首次导航前订阅，使「关于」页（默认落地页）的入场同样触发级联动画
+        Frame_Setting.Navigated += Frame_Setting_Navigated;
         Frame_Setting.Navigate(typeof(AboutSetting));
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
+    }
+
+
+
+    /// <summary>
+    /// 每次切换设置页（含首次进入），在新页面加载后对其内容区播放「逐个错峰、上滑 + 淡入」级联入场动画。
+    /// 设置页均为全新的 Frame 实例，因此 Loaded 在每次导航时都会触发，无需各页单独接线。
+    /// </summary>
+    private void Frame_Setting_Navigated(object sender, NavigationEventArgs e)
+    {
+        if (e.Content is Page page)
+        {
+            if (page.IsLoaded)
+            {
+                SettingsEntranceAnimation.Play(page);
+            }
+            else
+            {
+                void OnPageLoaded(object s, RoutedEventArgs args)
+                {
+                    page.Loaded -= OnPageLoaded;
+                    SettingsEntranceAnimation.Play(page);
+                }
+                page.Loaded += OnPageLoaded;
+            }
+        }
     }
 
 
