@@ -1,12 +1,12 @@
-﻿param(
+﻿# visual studio中进入开发者powershell执行
+# 执行前，允许执行该未签名脚本：Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+param(
     [string] $Architecture = "x64",
     [string] $Version = "1.0.0",
     [string] $Output = "build/Starward"
 )
 
 $ErrorActionPreference = "Stop";
-
-$env:Path += ';C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\';
 
 dotnet publish src/Starward -c Release -r "win-$Architecture" -o "$Output/app-$Version" -p:Platform=$Architecture -p:Version=$Version;
 
