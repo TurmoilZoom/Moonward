@@ -124,6 +124,7 @@ public sealed partial class GachaLogPage : PageBase
                 _ = UpdateGachaLogInternalAsync(m.Url);
             }
         });
+        WeakReferenceMessenger.Default.Register<GachaLogImportedMessage>(this, (s, m) => OnGachaLogImported(m));
         Grid_GachaStats.PointerWheelChanged += Grid_GachaStats_PointerWheelChanged;
         Initialize();
         await UpdateWikiDataAsync();
@@ -1049,6 +1050,52 @@ public sealed partial class GachaLogPage : PageBase
     private void OpenUIGF4Window()
     {
         new UIGF4GachaWindow().Activate();
+    }
+
+
+
+    /// <summary>
+    /// 收到本地导入完成通知后刷新当前游戏的抽卡页面。
+    /// 规则：仅处理属于当前游戏的 Uid；当前展示的 Uid 若在本次导入中则刷新它，否则切换到本次导入的第一位玩家。
+    /// </summary>
+    private void OnGachaLogImported(GachaLogImportedMessage message)
+    {
+        try
+        {
+            var uids = message.ImportedUids
+                              .Where(x => x.Game == CurrentGameBiz.Game)
+                              .Select(x => x.Uid)
+                              .Distinct()
+                              .ToList();
+            if (uids.Count == 0)
+            {
+                return;
+            }
+            UidList ??= [];
+            foreach (long uid in uids)
+            {
+                if (!UidList.Contains(uid))
+                {
+                    UidList.Add(uid);
+                }
+            }
+            // 当前展示的 Uid 也在本次导入中则刷新它，否则切到导入的第一位
+            long target = SelectUid is long current && current != 0 && uids.Contains(current)
+                ? current
+                : uids[0];
+            if (SelectUid == target)
+            {
+                UpdateGachaTypeStats(target);
+            }
+            else
+            {
+                SelectUid = target;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "On gacha log imported");
+        }
     }
 
 

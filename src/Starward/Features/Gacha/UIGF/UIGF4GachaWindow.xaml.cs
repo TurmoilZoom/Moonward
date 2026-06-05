@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -165,7 +166,16 @@ public sealed partial class UIGF4GachaWindow : WindowEx
             ImportError = null;
             if (ListView_Import.SelectedItems.Count > 0)
             {
-                await _uigfGachaService.ImportAsync(ListView_Import.SelectedItems.Cast<GachaUidArchiveDisplay>());
+                var selected = ListView_Import.SelectedItems.Cast<GachaUidArchiveDisplay>().ToList();
+                await _uigfGachaService.ImportAsync(selected);
+                // 每导入成功一次就通知抽卡页面刷新（无需关闭本窗口）
+                var imported = selected.Where(x => x.Error is null)
+                                       .Select(x => (x.Game, x.Uid))
+                                       .ToList();
+                if (imported.Count > 0)
+                {
+                    WeakReferenceMessenger.Default.Send(new GachaLogImportedMessage(imported));
+                }
             }
         }
         catch (Exception ex)
