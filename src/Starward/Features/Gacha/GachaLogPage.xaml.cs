@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.Gacha;
 using Starward.Core.GameRecord;
@@ -368,51 +369,51 @@ public sealed partial class GachaLogPage : PageBase
     }
 
 
+    /// <summary>抽卡统计卡片的固定宽度，即原先自适应布局的最小尺寸。</summary>
+    private const double GachaStatsCardWidth = 262;
+
+
+    /// <summary>
+    /// 将每张抽卡统计卡片的宽度固定为最小尺寸 <see cref="GachaStatsCardWidth"/>，不再随窗口宽度拉伸。
+    /// </summary>
     private void UpdateGachaStatsCardLayout()
     {
         try
         {
-            if (ItemsControl_GachaStats != null)
-            {
-                int count = ItemsControl_GachaStats.Items.Count;
-                if (count > 0)
-                {
-                    double width = (ScrollViewer_GachaStats.ActualWidth - 40 - (count - 1) * 12) / count;
-                    width = Math.Clamp(width, 262, double.MaxValue);
-                    for (int i = 0; i < count; i++)
-                    {
-                        var a = ItemsControl_GachaStats.ContainerFromIndex(i);
-                        if (ItemsControl_GachaStats.ContainerFromIndex(i) is ContentPresenter presenter)
-                        {
-                            presenter.Width = width;
-                        }
-                    }
-                }
-            }
-            if (ItemsControl_ZZZGachaStats != null)
-            {
-                int count = ItemsControl_ZZZGachaStats.Items.Count;
-                if (count > 0)
-                {
-                    double width = (ScrollViewer_GachaStats.ActualWidth - 40 - (count - 1) * 12) / count;
-                    width = Math.Clamp(width, 262, double.MaxValue);
-                    for (int i = 0; i < count; i++)
-                    {
-                        if (ItemsControl_ZZZGachaStats.ContainerFromIndex(i) is ContentPresenter presenter)
-                        {
-                            presenter.Width = width;
-                        }
-                    }
-                }
-            }
+            SetGachaStatsCardWidth(ItemsControl_GachaStats);
+            SetGachaStatsCardWidth(ItemsControl_ZZZGachaStats);
         }
         catch { }
+    }
+
+
+    private static void SetGachaStatsCardWidth(ItemsControl? itemsControl)
+    {
+        if (itemsControl is null)
+        {
+            return;
+        }
+        for (int i = 0; i < itemsControl.Items.Count; i++)
+        {
+            if (itemsControl.ContainerFromIndex(i) is ContentPresenter presenter)
+            {
+                presenter.Width = GachaStatsCardWidth;
+            }
+        }
     }
 
 
     private void GachaStatsCard_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateGachaStatsCardLayout();
+        // 每张卡片在自身加载时按其在列表中的次序错峰，从右向左滑入。
+        if (sender is FrameworkElement card)
+        {
+            int index = card.DataContext is GachaTypeStats stats && DisplayGachaTypeStatsCollection is { } collection
+                ? Math.Max(0, collection.IndexOf(stats))
+                : 0;
+            EntranceAnimation.PlayItem(card, index);
+        }
     }
 
 

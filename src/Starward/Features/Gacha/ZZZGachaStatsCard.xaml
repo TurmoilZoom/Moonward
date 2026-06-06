@@ -189,7 +189,8 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" MinWidth="20" />
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="1"
+                            <Border x:Name="PityBar"
+                                    Grid.Column="1"
                                     Height="24"
                                     Margin="-4,0,-4,0"
                                     VerticalAlignment="Center"

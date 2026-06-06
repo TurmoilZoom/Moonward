@@ -38,14 +38,14 @@ public sealed partial class SettingPage : PageBase
         {
             if (page.IsLoaded)
             {
-                SettingsEntranceAnimation.Play(page);
+                EntranceAnimation.Play(page);
             }
             else
             {
                 void OnPageLoaded(object s, RoutedEventArgs args)
                 {
                     page.Loaded -= OnPageLoaded;
-                    SettingsEntranceAnimation.Play(page);
+                    EntranceAnimation.Play(page);
                 }
                 page.Loaded += OnPageLoaded;
             }

@@ -12,6 +12,7 @@ public sealed partial class GachaStatsCard : UserControl
     {
         this.InitializeComponent();
         GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList, ItemsRepeater_List_5, ItemsRepeater_List_4);
+        GachaPityBarAnimation.Bind(ItemsRepeater_List_5);
     }
 
 
