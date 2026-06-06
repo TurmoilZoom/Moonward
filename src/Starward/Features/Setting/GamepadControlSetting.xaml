@@ -15,7 +15,7 @@
     </Page.Resources>
 
 
-    <ScrollViewer x:Name="scr" Background="{x:Null}">
+    <ScrollViewer x:Name="scr" Background="Transparent">
         <StackPanel Padding="0,0,24,0">
 
             <!--  手柄增强  -->

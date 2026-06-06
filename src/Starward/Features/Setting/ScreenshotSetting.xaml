@@ -12,7 +12,7 @@
              mc:Ignorable="d">
 
 
-    <ScrollViewer Background="{x:Null}">
+    <ScrollViewer Background="Transparent">
         <StackPanel Padding="0,0,24,24">
 
             <!--  游戏截图  -->

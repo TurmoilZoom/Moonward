@@ -10,7 +10,7 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
-    <ScrollViewer x:Name="scr" Background="{x:Null}">
+    <ScrollViewer x:Name="scr" Background="Transparent">
         <StackPanel>
 
             <!--  快捷键  -->
