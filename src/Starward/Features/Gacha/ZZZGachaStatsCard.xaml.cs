@@ -8,11 +8,27 @@ namespace Starward.Features.Gacha;
 public sealed partial class ZZZGachaStatsCard : UserControl
 {
 
+    private GachaStatsSegmentedListHelper.GachaStatsSegmentedListBinding? _segmentedListBinding;
+
+    private GachaPityBarAnimation.GachaPityBarBinding? _pityBarBinding;
+
+
     public ZZZGachaStatsCard()
     {
         this.InitializeComponent();
-        GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList, ItemsRepeater_List_5, ItemsRepeater_List_4);
-        GachaPityBarAnimation.Bind(ItemsRepeater_List_5);
+        _segmentedListBinding = GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList, ItemsRepeater_List_5, ItemsRepeater_List_4);
+        _pityBarBinding = GachaPityBarAnimation.Bind(ItemsRepeater_List_5);
+        Unloaded += OnCardUnloaded;
+    }
+
+
+    private void OnCardUnloaded(object sender, RoutedEventArgs e)
+    {
+        Unloaded -= OnCardUnloaded;
+        _segmentedListBinding?.Dispose();
+        _segmentedListBinding = null;
+        _pityBarBinding?.Dispose();
+        _pityBarBinding = null;
     }
 
 

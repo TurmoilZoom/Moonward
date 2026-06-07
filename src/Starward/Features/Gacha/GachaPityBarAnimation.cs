@@ -6,6 +6,8 @@ using Microsoft.UI.Xaml.Media;
 using Starward.Controls;
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using Windows.Foundation;
 
 
 namespace Starward.Features.Gacha;
@@ -33,19 +35,17 @@ internal static class GachaPityBarAnimation
     /// <summary>柱条 <see cref="Border"/> 在数据模板中的 x:Name。</summary>
     private const string DefaultBarName = "PityBar";
 
+    private static readonly ConditionalWeakTable<FrameworkElement, PendingElement> PendingElements = new();
+
 
     /// <summary>
     /// 绑定一个 <see cref="ItemsRepeater"/>：其每个表项被实现（<see cref="ItemsRepeater.ElementPrepared"/>）时，
     /// 找到名为 <paramref name="barName"/> 的柱条并播放「自左生长」入场动画，按表项索引错峰。
-    /// 在控件构造函数里调用即可（与 <see cref="GachaStatsSegmentedListHelper.Bind"/> 同样的接入方式）。
+    /// 返回的句柄须在控件 <c>Unloaded</c> 时调用 <see cref="GachaPityBarBinding.Dispose"/> 解除绑定。
     /// </summary>
-    public static void Bind(ItemsRepeater repeater, string barName = DefaultBarName)
+    public static GachaPityBarBinding Bind(ItemsRepeater repeater, string barName = DefaultBarName)
     {
-        if (repeater is null)
-        {
-            return;
-        }
-        repeater.ElementPrepared += (_, e) => OnElementPrepared(e, barName);
+        return new GachaPityBarBinding(repeater, barName);
     }
 
 
@@ -64,13 +64,52 @@ internal static class GachaPityBarAnimation
         }
         void OnLoaded(object sender, RoutedEventArgs args)
         {
-            root.Loaded -= OnLoaded;
+            CleanupPending(root);
             if (FindByName(root, barName) is FrameworkElement b)
             {
                 Play(b, index);
             }
         }
+        PendingElements.Add(root, new PendingElement(OnLoaded, barName));
         root.Loaded += OnLoaded;
+    }
+
+
+    private static void OnElementClearing(ItemsRepeaterElementClearingEventArgs e, string barName)
+    {
+        if (e.Element is not FrameworkElement root)
+        {
+            return;
+        }
+        CleanupPending(root);
+        ResetBar(root, barName);
+    }
+
+
+    private static void CleanupPending(FrameworkElement root)
+    {
+        if (PendingElements.TryGetValue(root, out PendingElement? pending))
+        {
+            root.Loaded -= pending.LoadedHandler;
+            PendingElements.Remove(root);
+        }
+    }
+
+
+    /// <summary>停止柱条动画并复位缩放，供元素回收或控件卸载时调用。</summary>
+    private static void ResetBar(FrameworkElement root, string barName)
+    {
+        if (FindByName(root, barName) is not FrameworkElement bar)
+        {
+            return;
+        }
+        Visual visual = ElementCompositionPreview.GetElementVisual(bar);
+        try
+        {
+            visual.StopAnimation(nameof(Visual.Scale));
+        }
+        catch { }
+        visual.Scale = Vector3.One;
     }
 
 
@@ -153,6 +192,46 @@ internal static class GachaPityBarAnimation
             }
         }
         return null;
+    }
+
+
+    private sealed class PendingElement(RoutedEventHandler loadedHandler, string barName)
+    {
+        public RoutedEventHandler LoadedHandler { get; } = loadedHandler;
+
+        public string BarName { get; } = barName;
+    }
+
+
+    internal sealed class GachaPityBarBinding : IDisposable
+    {
+        private readonly ItemsRepeater _repeater;
+        private readonly string _barName;
+        private readonly TypedEventHandler<ItemsRepeater, ItemsRepeaterElementPreparedEventArgs> _preparedHandler;
+        private readonly TypedEventHandler<ItemsRepeater, ItemsRepeaterElementClearingEventArgs> _clearingHandler;
+        private bool _disposed;
+
+        internal GachaPityBarBinding(ItemsRepeater repeater, string barName)
+        {
+            _repeater = repeater;
+            _barName = barName;
+            _preparedHandler = (_, e) => OnElementPrepared(e, barName);
+            _clearingHandler = (_, e) => OnElementClearing(e, barName);
+            _repeater.ElementPrepared += _preparedHandler;
+            _repeater.ElementClearing += _clearingHandler;
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            _disposed = true;
+            _repeater.ElementPrepared -= _preparedHandler;
+            _repeater.ElementClearing -= _clearingHandler;
+            _repeater.ItemsSource = null;
+        }
     }
 
 }

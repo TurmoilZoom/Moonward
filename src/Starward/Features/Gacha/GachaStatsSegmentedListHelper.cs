@@ -28,35 +28,12 @@ internal static class GachaStatsSegmentedListHelper
     private const int FadeDurationMs = 200;
 
 
-    public static void Bind(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList)
+    /// <summary>
+    /// 绑定 Segmented 与两个互斥列表。返回的句柄须在控件 <c>Unloaded</c> 时调用 <see cref="GachaStatsSegmentedListBinding.Dispose"/> 解除绑定。
+    /// </summary>
+    public static GachaStatsSegmentedListBinding Bind(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList)
     {
-        // 记录上一次选中索引，用于推断滑动方向。
-        int previousIndex = Math.Max(0, segmented.SelectedIndex);
-        // 代际计数：仅最后一次切换负责收尾（折叠旧列表），避免快速来回切换时误折叠。
-        int generation = 0;
-
-        void Apply(bool animate)
-        {
-            int index = Math.Max(0, segmented.SelectedIndex);
-            bool showFirst = index == 0;
-            ItemsRepeater incoming = showFirst ? firstList : secondList;
-            ItemsRepeater outgoing = showFirst ? secondList : firstList;
-
-            if (!animate || !EntranceAnimation.AnimationsEnabled())
-            {
-                ShowInstant(incoming, outgoing);
-                previousIndex = index;
-                return;
-            }
-
-            float direction = index >= previousIndex ? 1f : -1f;
-            previousIndex = index;
-            int myGeneration = ++generation;
-            AnimateSwap(incoming, outgoing, direction, () => generation == myGeneration);
-        }
-
-        segmented.RegisterPropertyChangedCallback(Selector.SelectedIndexProperty, (_, _) => Apply(true));
-        Apply(false);
+        return new GachaStatsSegmentedListBinding(segmented, firstList, secondList);
     }
 
 
@@ -141,6 +118,12 @@ internal static class GachaStatsSegmentedListHelper
     private static void ResetVisual(UIElement element)
     {
         Visual visual = ElementCompositionPreview.GetElementVisual(element);
+        try
+        {
+            visual.StopAnimation("Translation");
+            visual.StopAnimation(nameof(Visual.Opacity));
+        }
+        catch { }
         visual.Opacity = 1;
         try
         {
@@ -148,6 +131,70 @@ internal static class GachaStatsSegmentedListHelper
             visual.Properties.InsertVector3("Translation", Vector3.Zero);
         }
         catch { }
+    }
+
+
+    internal sealed class GachaStatsSegmentedListBinding : IDisposable
+    {
+        private readonly Segmented _segmented;
+        private readonly ItemsRepeater _firstList;
+        private readonly ItemsRepeater _secondList;
+        private readonly long _callbackToken;
+        private readonly DependencyPropertyChangedCallback _selectedIndexChanged;
+        private int _previousIndex;
+        private int _generation;
+        private bool _disposed;
+
+        internal GachaStatsSegmentedListBinding(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList)
+        {
+            _segmented = segmented;
+            _firstList = firstList;
+            _secondList = secondList;
+            _previousIndex = Math.Max(0, segmented.SelectedIndex);
+            _selectedIndexChanged = (_, _) => Apply(true);
+            _callbackToken = segmented.RegisterPropertyChangedCallback(Selector.SelectedIndexProperty, _selectedIndexChanged);
+            Apply(false);
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            _disposed = true;
+            // 使进行中的切换动画回调失效，避免卸载后仍持有 UI 引用。
+            _generation++;
+            _segmented.UnregisterPropertyChangedCallback(Selector.SelectedIndexProperty, _callbackToken);
+            ResetVisual(_firstList);
+            ResetVisual(_secondList);
+            _firstList.ItemsSource = null;
+            _secondList.ItemsSource = null;
+        }
+
+        private void Apply(bool animate)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            int index = Math.Max(0, _segmented.SelectedIndex);
+            bool showFirst = index == 0;
+            ItemsRepeater incoming = showFirst ? _firstList : _secondList;
+            ItemsRepeater outgoing = showFirst ? _secondList : _firstList;
+
+            if (!animate || !EntranceAnimation.AnimationsEnabled())
+            {
+                ShowInstant(incoming, outgoing);
+                _previousIndex = index;
+                return;
+            }
+
+            float direction = index >= _previousIndex ? 1f : -1f;
+            _previousIndex = index;
+            int myGeneration = ++_generation;
+            AnimateSwap(incoming, outgoing, direction, () => !_disposed && _generation == myGeneration);
+        }
     }
 
 }
