@@ -16,6 +16,8 @@
 
 😊「祈愿记录」，tab标签其实是两个控件叠在了一起，这里隐藏了没用的那个。
 
+😋「隐藏卡池」迁移到「筛选卡池」，给了一点额外的能力，全选、反选~
+
 
 
 ## 新增了什么
@@ -40,5 +42,9 @@ https://github.com/user-attachments/assets/00da1f4b-d713-4728-8719-492c46c609f9
 
 🤦‍♂️「首页」「开始游戏」按钮添加了呼吸灯、聚光灯、流光效果，单纯想看看winUI行不行。
 
-😒还想要拖拉拽的卡片功能，试试能不能做 ing.......
+😒「拖拽卡池」，灵活调整位置
+
+[output.webm](https://github.com/user-attachments/assets/5cdbba7d-4b89-4ebf-ad51-7bd9423abae4)
+
+
 
