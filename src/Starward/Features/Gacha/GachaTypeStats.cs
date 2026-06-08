@@ -3,47 +3,169 @@ using System.Collections.Generic;
 
 namespace Starward.Features.Gacha;
 
+/// <summary>
+/// 单个卡池（祈愿/跃迁/频段）的统计数据。
+/// 由 <see cref="GachaLogService.GetGachaTypeStats"/>（及各游戏子类的重写）填充，用于 GachaStatsCard / ZZZGachaStatsCard 等 UI 展示。
+/// </summary>
 public class GachaTypeStats
 {
 
+    /// <summary>
+    /// 卡池类型（GachaType）的整数值。
+    ///
+    /// 不同游戏的取值与含义如下（来自各游戏的 *GachaType 常量）：
+    ///
+    /// 【原神 / Genshin (hk4e)】
+    ///   100  - 新手祈愿 (NoviceWish)
+    ///   200  - 常驻祈愿 (PermanentWish)
+    ///   301  - 角色活动祈愿 (CharacterEventWish)
+    ///   302  - 武器活动祈愿 (WeaponEventWish)
+    ///   400  - 角色活动祈愿-2（与 301 合并统计，CharacterEventWish_2）
+    ///   500  - 集录祈愿 (ChronicledWish)
+    ///
+    /// 【崩坏：星穹铁道 / Star Rail (hkrpg)】
+    ///   1    - 群星跃迁 (StellarWarp，常驻)
+    ///   2    - 始发跃迁 (DepartureWarp，新手/始发)
+    ///   11   - 角色活动跃迁 (CharacterEventWarp)
+    ///   12   - 光锥活动跃迁 (LightConeEventWarp)
+    ///   21   - 角色联动跃迁 (CharacterCollaborationWarp)
+    ///   22   - 光锥联动跃迁 (LightConeCollaborationWarp)
+    ///
+    /// 【绝区零 / ZZZ (nap)】
+    ///   1    - 常驻频段 (StandardChannel)
+    ///   2    - 独家频段 (ExclusiveChannel，代理人)
+    ///   3    - 音擎频段 (WEngineChannel)
+    ///   5    - 邦布频段 (BangbooChannel)
+    ///   102  - 独家重映 (ExclusiveRescreening，与 2 共用非UP判定)
+    ///   103  - 音擎回响 (WEngineReverberation，与 3 共用非UP判定)
+    ///
+    /// 注意：
+    /// - ZZZ 的统计中，“5星”相关字段实际对应数据库 RankType==4（S级），“4星”对应 RankType==3（A级），Count_3 对应 RankType==2（B级）。
+    /// - 原神 301 与 400 在统计时会被合并为同一个 GachaTypeStats（见 GenshinGachaService.GetGachaLogItemsByQueryType）。
+    /// - 新手池（原神100、星铁2）在抽满固定次数（20/50）后，UI 中通常不会为其添加当前 pity 占位项。
+    /// </summary>
     public int GachaType { get; set; }
 
+    /// <summary>
+    /// 卡池类型的本地化显示名称（如“角色活动祈愿”、“群星跃迁”、“独家频段”等）。
+    /// 来源于对应 *GachaType.ToLocalization() 的返回值（从 CoreLang 资源读取）。
+    /// </summary>
     public string GachaTypeText { get; set; }
 
+    /// <summary>
+    /// 该卡池的总抽取次数（包含所有稀有度）。
+    /// </summary>
     public int Count { get; set; }
 
+    /// <summary>
+    /// 当前 5 星（或最高稀有度）的小保底进度（pity）。
+    /// 计算规则：从最近一次 5 星（或对应等级）之后到最后一条记录的抽数。
+    /// 如果最后一条记录本身就是 5 星，则为 0。
+    /// ZZZ 中此字段实际统计 S 级（RankType==4）的 pity。
+    /// </summary>
     public int Pity_5 { get; set; }
 
+    /// <summary>
+    /// 当前 4 星的小保底进度（pity）。
+    /// 计算：总记录数 - 1 - 最后一次 4 星在列表中的索引。
+    /// ZZZ 中此字段实际统计 A 级（RankType==3）的 pity。
+    /// </summary>
     public int Pity_4 { get; set; }
 
+    /// <summary>
+    /// 该卡池第一条记录的抽取时间（最早时间）。
+    /// </summary>
     public DateTime StartTime { get; set; }
 
+    /// <summary>
+    /// 该卡池最后一条记录的抽取时间（最晚时间）。
+    /// </summary>
     public DateTime EndTime { get; set; }
 
+    /// <summary>
+    /// 5 星（最高稀有度）获取数量。
+    /// ZZZ 中实际为 S 级（RankType == 4）的数量。
+    /// </summary>
     public int Count_5 { get; set; }
 
+    /// <summary>
+    /// UP 5 星（当期 UP / 限定角色或武器）的获取数量。
+    /// 仅当该卡池存在“非UP”机制（见 GachaNoUp.Dictionary）时才有值，否则为 0。
+    /// 常见于：
+    /// - 原神 301/400（常驻五星角色在特定时期为非UP）
+    /// - 星铁 11/12/21/22（老角色/联动常驻角色为非UP）
+    /// - ZZZ 2/102（独家频段部分代理人）、3/103（音擎）
+    /// 在 ZZZ 服务中实际统计 RankType==4 且 IsUp==true 的数量。
+    /// </summary>
     public int Count_5_Up { get; set; }
 
+    /// <summary>
+    /// 4 星获取数量。
+    /// ZZZ 中实际为 A 级（RankType == 3）的数量。
+    /// </summary>
     public int Count_4 { get; set; }
 
+    /// <summary>
+    /// 3 星获取数量。
+    /// ZZZ 中实际为 B 级（RankType == 2）的数量。
+    /// </summary>
     public int Count_3 { get; set; }
 
+    /// <summary>
+    /// 5 星出率（Count_5 / Count）。
+    /// </summary>
     public double Ratio_5 { get; set; }
 
+    /// <summary>
+    /// 4 星出率（Count_4 / Count）。
+    /// </summary>
     public double Ratio_4 { get; set; }
 
+    /// <summary>
+    /// 3 星出率（Count_3 / Count）。
+    /// </summary>
     public double Ratio_3 { get; set; }
 
+    /// <summary>
+    /// 5 星平均抽数（不含当前 pity 的平均）。
+    /// 计算公式：(Count - Pity_5) / Count_5
+    /// 当 Count_5 为 0 时会产生除零，实际使用中通常有值或由 UI 处理。
+    /// </summary>
     public double Average_5 { get; set; }
 
+    /// <summary>
+    /// UP 5 星的平均抽数（仅当 Count_5_Up &gt; 0 时有意义）。
+    /// 计算公式与 Average_5 类似，但分子分母都只考虑 UP 五星的区间。
+    /// </summary>
     public double Average_5_Up { get; set; }
 
+    /// <summary>
+    /// 该卡池所有 5 星（最高稀有度）记录的列表（已按时间正序反转，最新在后）。
+    /// 列表头部通常会插入一条特殊的“当前 pity”占位记录（Name = Lang.GachaStatsCard_Pity），
+    /// 除非是已满的新手池（原神20抽、星铁50抽）。
+    /// ZZZ 中列表内容为 S 级记录。
+    /// </summary>
     public List<GachaLogItemEx> List_5 { get; set; }
 
+    /// <summary>
+    /// 该卡池所有 4 星记录的列表（结构与 List_5 类似）。
+    /// ZZZ 中为 A 级记录。
+    /// </summary>
     public List<GachaLogItemEx> List_4 { get; set; }
 
+    /// <summary>
+    /// 5 星平均抽数描述文本的后缀。
+    /// 当 Count_5_Up &gt; 0 时返回 " / UP"，否则返回空字符串。
+    /// 绑定到 UI 用于显示“平均XX抽 / UP”。
+    /// 注意属性名拼写为 Avarage（代码中实际使用的拼写）。
+    /// </summary>
     public string Avarage_5_Desc_Text => Count_5_Up == 0 ? "" : $" / UP";
 
+    /// <summary>
+    /// UP 5 星的平均抽数与次数的格式化文本。
+    /// 当 Count_5_Up &gt; 0 时返回形如 " / 65.43 (12)" 的字符串，否则返回空字符串。
+    /// 注意属性名拼写为 Avarage（代码中实际使用的拼写）。
+    /// </summary>
     public string Avarage_5_Up_Text => Count_5_Up == 0 ? "" : $" / {Average_5_Up:F2} ({Count_5_Up})";
 
 }

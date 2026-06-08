@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Starward.Features.Gacha;
 
-public sealed partial class ZZZGachaStatsCard : UserControl
+public sealed partial class ZZZGachaStatsCard : UserControl, IGachaStatsDragCard
 {
 
     private GachaStatsSegmentedListHelper.GachaStatsSegmentedListBinding? _segmentedListBinding;
@@ -31,6 +31,21 @@ public sealed partial class ZZZGachaStatsCard : UserControl
         _pityBarBinding = null;
     }
 
+
+    /// <summary>拖拽手柄：tab 标签上方的卡池统计信息区域，按住此处可拖动整张卡片换位。</summary>
+    public FrameworkElement DragHandle => DragHandleBorder;
+
+
+    private void DragHandle_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        DragHintBorder.Visibility = Visibility.Visible;
+    }
+
+
+    private void DragHandle_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        DragHintBorder.Visibility = Visibility.Collapsed;
+    }
 
 
     public GachaTypeStats WarpTypeStats

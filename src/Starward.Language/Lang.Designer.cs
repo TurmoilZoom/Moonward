@@ -483,7 +483,43 @@ namespace Starward.Language {
                 return ResourceManager.GetString("Common_Clear", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Select All 的本地化字符串。
+        /// </summary>
+        public static string Common_SelectAll {
+            get {
+                return ResourceManager.GetString("Common_SelectAll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Reset 的本地化字符串。
+        /// </summary>
+        public static string Common_Reset {
+            get {
+                return ResourceManager.GetString("Common_Reset", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Invert 的本地化字符串。
+        /// </summary>
+        public static string Common_InvertSelection {
+            get {
+                return ResourceManager.GetString("Common_InvertSelection", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Banner Filter 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_GachaBannerFilter {
+            get {
+                return ResourceManager.GetString("GachaLogPage_GachaBannerFilter", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Confirm 的本地化字符串。
         /// </summary>
@@ -2446,7 +2482,16 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GachaStatsCard_Average", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Draggable 的本地化字符串。
+        /// </summary>
+        public static string GachaStatsCard_Draggable {
+            get {
+                return ResourceManager.GetString("GachaStatsCard_Draggable", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Pity 的本地化字符串。
         /// </summary>

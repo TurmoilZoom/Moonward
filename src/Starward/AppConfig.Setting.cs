@@ -555,7 +555,7 @@ public static partial class AppConfig
         SetValue(value, $"last_region_of_{game}");
     }
 
-
+    //记住用户在这个游戏里“选择了哪些卡池来显示统计”。
     public static string? GetDisplayGachaBanners(GameBiz biz)
     {
         return GetValue<string>(default, $"display_gacha_banners_{biz}");
@@ -564,6 +564,20 @@ public static partial class AppConfig
     public static void SetDisplayGachaBanners(GameBiz biz, string value)
     {
         SetValue(value, $"display_gacha_banners_{biz}");
+    }
+
+
+    /// <summary>
+    /// 抽卡统计卡片的自定义排列次序（卡池类型逗号串），按游戏持久化；拖拽换位后保存，刷新数据后据此还原相对位置。
+    /// </summary>
+    public static string? GetGachaCardOrder(GameBiz biz)
+    {
+        return GetValue<string>(default, $"gacha_card_order_{biz}");
+    }
+
+    public static void SetGachaCardOrder(GameBiz biz, string value)
+    {
+        SetValue(value, $"gacha_card_order_{biz}");
     }
 
 

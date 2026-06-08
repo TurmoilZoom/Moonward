@@ -2,9 +2,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
@@ -23,6 +25,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
@@ -45,10 +48,21 @@ public sealed partial class GachaLogPage : PageBase
     private GachaLogService _gachaLogService;
 
 
+    /// <summary>卡片拖拽换位逻辑（按住统计区域拖动、悬停即换位、松手提交并持久化）。</summary>
+    private readonly GachaStatsCardDragReorder _dragReorder;
+
+    /// <summary>常驻抽卡卡片池：按卡池类型(GachaType)复用卡片实例。</summary>
+    private readonly Dictionary<int, FrameworkElement> _gachaCardPool = new();
+
+    /// <summary>上次重建卡片所基于的统计数据引用</summary>
+    private List<GachaTypeStats>? _reconciledStatsSource;
+
+
 
     public GachaLogPage()
     {
         this.InitializeComponent();
+        _dragReorder = new GachaStatsCardDragReorder(ScrollViewer_GachaStats, Grid_GachaStats, StackPanel_GachaStats, SaveGachaCardOrder);
     }
 
 
@@ -114,6 +128,19 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 页面加载完成后的初始化逻辑（由 <see cref="PageBase"/> 的 Loaded 事件在构造函数中订阅后触发）。
+    /// <para>无显式输入参数。</para>
+    /// <para>隐式输入依赖：</para>
+    /// <para>1. <see cref="OnNavigatedTo(NavigationEventArgs)"/> 已执行，CurrentGameId / CurrentGameBiz 已正确设置；</para>
+    /// <para>2. XAML 控件树已完成加载（Grid_GachaStats、ScrollViewer_GachaStats 等控件可用）。</para>
+    /// <para>输出/副作用：</para>
+    /// <para>1. 延迟一帧（Task.Delay(16)）后注册两个 WeakReferenceMessenger 处理器：<see cref="UpdateGachaLogMessage"/>（外部触发抽卡记录更新时激活窗口并拉取）和 <see cref="GachaLogImportedMessage"/>（本地导入完成后刷新 UID 列表与统计）；</para>
+    /// <para>2. 订阅 <see cref="Grid_GachaStats"/> 的 PointerWheelChanged 事件，用于拖拽时横向滚轮优先滚动；</para>
+    /// <para>3. 调用 <see cref="Initialize"/> 完成卡池筛选列表（GachaBanners）、UID 列表加载、恢复上次选中 UID、以及空数据时的表情占位显示；</para>
+    /// <para>4. 异步调用 <see cref="UpdateWikiDataAsync"/> 更新当前语言的卡池/物品维基数据（不阻塞 UI）。</para>
+    /// <para>注意：方法为 async void，符合基类事件驱动约定，不应被直接 await。</para>
+    /// </summary>
     protected override async void OnLoaded()
     {
         await Task.Delay(16);
@@ -133,21 +160,23 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 页面卸载时的资源清理（对应 OnLoaded 的初始化）。
+    /// <para>1. 注销所有 WeakReferenceMessenger 注册的消息处理器（UpdateGachaLogMessage、GachaLogImportedMessage 等）；</para>
+    /// <para>2. 移除 Grid_GachaStats 的 PointerWheelChanged 事件订阅；</para>
+    /// <para>3. 调用 ClearGachaCards 清理常驻卡片池（_gachaCardPool）、解绑所有拖拽手柄并清空面板子元素；</para>
+    /// <para>4. 清空并置空 GachaItemStats（物品统计列表）和 GachaBanners（卡池筛选列表），释放对象引用。</para>
+    /// </summary>
     protected override void OnUnloaded()
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
         Grid_GachaStats.PointerWheelChanged -= Grid_GachaStats_PointerWheelChanged;
-        if (DisplayGachaTypeStatsCollection is not null)
-        {
-            DisplayGachaTypeStatsCollection.Clear();
-            DisplayGachaTypeStatsCollection = null!;
-        }
+        ClearGachaCards();
         if (GachaItemStats is not null)
         {
             GachaItemStats.Clear();
             GachaItemStats = null;
         }
-        ListView_GachaBanners.SelectionChanged -= ListView_GachaBanners_SelectionChanged;
         if (GachaBanners is not null)
         {
             GachaBanners.Clear();
@@ -157,6 +186,13 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 初始化 GachaLogPage 的核心状态（在 OnLoaded 中调用一次）。
+    /// <para>1. 调用 InitializeGachaBanners 初始化卡池筛选列表及默认/保存的勾选状态；</para>
+    /// <para>2. 从服务加载当前游戏的所有 UID 列表；</para>
+    /// <para>3. 尝试恢复上次在此页面选中的 UID（按游戏持久化），若不存在则选第一个；</para>
+    /// <para>4. 若该游戏没有任何抽卡记录，则显示表情占位提示用户去获取数据。</para>
+    /// </summary>
     private void Initialize()
     {
         try
@@ -188,6 +224,11 @@ public sealed partial class GachaLogPage : PageBase
 
     private void Grid_GachaStats_PointerWheelChanged(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
+        // 拖拽中优先用滚轮横向滚动（以便拖到视口外的第 5、6 个卡池）。
+        if (_dragReorder.HandleWheel(e))
+        {
+            return;
+        }
         var properties = e.GetCurrentPoint(Grid_GachaStats).Properties;
         if (properties.IsHorizontalMouseWheel || InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down))
         {
@@ -199,6 +240,20 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 更新抽卡维基数据（物品/角色/邦布名称本地化信息）。
+    /// <para>在 <see cref="OnLoaded"/> 末尾被 await 调用（不阻塞页面其他初始化），确保 UI 能以正确语言显示抽卡记录。</para>
+    /// <para>无参数。</para>
+    /// <para>输入依赖：</para>
+    /// <para>1. <see cref="GachaLanguage"/> 属性（用户设置的抽卡数据语言），若为空或空白则回退为 <see cref="System.Globalization.CultureInfo.CurrentUICulture"/>.Name；</para>
+    /// <para>2. <see cref="CurrentGameBiz"/>（决定使用哪个具体 gacha service 以及写入哪张本地表）；</para>
+    /// <para>3. <see cref="_gachaLogService"/>（在 OnNavigatedTo 中根据游戏类型注入为 GenshinGachaService / StarRailGachaService / ZZZGachaService 之一）。</para>
+    /// <para>输出/副作用：</para>
+    /// <para>通过服务层的 <see cref="GachaLogService.UpdateGachaInfoAsync(GameBiz, string, CancellationToken)"/> 从 miHoYo 服务器获取指定语言的抽卡信息（AllAvatar、AllWeapon 等），执行 INSERT OR REPLACE 写入本地 SQLite 表（GenshinGachaInfo / StarRailGachaInfo / ZZZGachaInfo）；</para>
+    /// <para>更新后，<see cref="GachaLogItemEx"/>、统计卡片、物品统计列表等会使用本地化的最新名称；</para>
+    /// <para>服务内部还会执行 UpdateGachaItemId 等后续处理。</para>
+    /// <para>任何异常仅记录日志（_logger），不抛出，不影响页面加载和主要功能。</para>
+    /// </summary>
     private async Task UpdateWikiDataAsync()
     {
         try
@@ -237,9 +292,6 @@ public sealed partial class GachaLogPage : PageBase
     public List<GachaBanner> GachaBanners { get; set => SetProperty(ref field, value); }
 
 
-    public ObservableCollection<GachaTypeStats> DisplayGachaTypeStatsCollection { get; set => SetProperty(ref field, value); }
-
-
     public List<GachaLogItemEx>? GachaItemStats { get; set => SetProperty(ref field, value); }
 
 
@@ -249,62 +301,74 @@ public sealed partial class GachaLogPage : PageBase
     private int errorCount = 0;
 
 
+    /// <summary>
+    /// 初始化卡池筛选列表（GachaBanners）。
+    /// <para>从 _gachaLogService.QueryGachaTypes 获取当前游戏所有卡池类型，包装成 GachaBanner；</para>
+    /// <para>然后从 AppConfig 读取用户上次保存的勾选状态（逗号分隔的 Value 列表）并恢复 IsSelected；</para>
+    /// <para>若没有任何卡池被选中（首次或配置为空），则默认全选以避免空白；</para>
+    /// <para>针对版本更新新增的卡池（星铁联动、ZZZ 重映/回响），在首次遇到时自动勾选并持久化标记，避免用户错过新卡池。</para>
+    /// </summary>
     private void InitializeGachaBanners()
     {
         GachaBanners = _gachaLogService.QueryGachaTypes.Select(x => new GachaBanner(x)).ToList();
         string? banner = AppConfig.GetDisplayGachaBanners(CurrentGameBiz.Game);
+        bool anySelected = false;
         if (!string.IsNullOrWhiteSpace(banner))
         {
-            foreach (var item in banner.Split(','))
+            var saved = banner.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                              .Select(x => int.TryParse(x, out int v) ? v : int.MinValue)
+                              .Where(x => x != int.MinValue)
+                              .ToHashSet();
+            foreach (GachaBanner b in GachaBanners)
             {
-                if (int.TryParse(item, out int type))
-                {
-                    if (GachaBanners.FirstOrDefault(x => x.Value == type) is GachaBanner gachaType)
-                    {
-                        ListView_GachaBanners.SelectedItems.Add(gachaType);
-                    }
-                }
+                b.IsSelected = saved.Contains(b.Value);
+                anySelected |= b.IsSelected;
             }
         }
-        if (ListView_GachaBanners.SelectedItems.Count == 0)
+        // 无有效配置时默认全选（避免空白）。
+        if (!anySelected)
         {
-            foreach (var item in GachaBanners)
+            foreach (GachaBanner b in GachaBanners)
             {
-                ListView_GachaBanners.SelectedItems.Add(item);
+                b.IsSelected = true;
             }
         }
+        // 版本更新后默认勾选新增卡池。
         if (CurrentGameBiz.Game is GameBiz.hkrpg && !AppConfig.GetValue(false, "SavedStarRailBannersAfterCollaborationStarting"))
         {
-            if (ListView_GachaBanners.SelectedItems.Cast<GachaBanner>().FirstOrDefault(x => x.Value == 21) is null)
+            foreach (GachaBanner b in GachaBanners.Where(x => x.Value is 21 or 22))
             {
-                ListView_GachaBanners.SelectedItems.Add(GachaBanners.FirstOrDefault(x => x.Value == 21));
-            }
-            if (ListView_GachaBanners.SelectedItems.Cast<GachaBanner>().FirstOrDefault(x => x.Value == 22) is null)
-            {
-                ListView_GachaBanners.SelectedItems.Add(GachaBanners.FirstOrDefault(x => x.Value == 22));
+                b.IsSelected = true;
             }
         }
         if (CurrentGameBiz.Game is GameBiz.nap && !AppConfig.GetValue(false, "SavedZZZBannersSinceVersion2"))
         {
-            if (ListView_GachaBanners.SelectedItems.Cast<GachaBanner>().FirstOrDefault(x => x.Value == 102) is null)
+            foreach (GachaBanner b in GachaBanners.Where(x => x.Value is 102 or 103))
             {
-                ListView_GachaBanners.SelectedItems.Add(GachaBanners.FirstOrDefault(x => x.Value == 102));
-            }
-            if (ListView_GachaBanners.SelectedItems.Cast<GachaBanner>().FirstOrDefault(x => x.Value == 103) is null)
-            {
-                ListView_GachaBanners.SelectedItems.Add(GachaBanners.FirstOrDefault(x => x.Value == 103));
+                b.IsSelected = true;
             }
         }
-        ListView_GachaBanners.SelectionChanged -= ListView_GachaBanners_SelectionChanged;
-        ListView_GachaBanners.SelectionChanged += ListView_GachaBanners_SelectionChanged;
+        UpdateGachaBannerFilterIndicator();
     }
 
 
-    private void ListView_GachaBanners_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    /// <summary>用户点击某个卡池复选框 → 实时提交筛选。</summary>
+    private void GachaBannerCheckBox_Click(object sender, RoutedEventArgs e)
+    {
+        ApplyGachaBannerFilter();
+    }
+
+
+    /// <summary>提交卡池筛选：持久化所选卡池并刷新显示（实时生效）。</summary>
+    private void ApplyGachaBannerFilter()
     {
         try
         {
-            string value = string.Join(',', ListView_GachaBanners.SelectedItems.Cast<GachaBanner>().Select(x => x.Value));
+            if (GachaBanners is null)
+            {
+                return;
+            }
+            string value = string.Join(',', GachaBanners.Where(x => x.IsSelected).Select(x => x.Value));
             AppConfig.SetDisplayGachaBanners(CurrentGameBiz.Game, value);
             if (CurrentGameBiz.Game is GameBiz.hkrpg)
             {
@@ -314,13 +378,78 @@ public sealed partial class GachaLogPage : PageBase
             {
                 AppConfig.SetValue(true, "SavedZZZBannersSinceVersion2.5");
             }
-            UpdateDisplayGachaTypeStats();
+            UpdateDisplayGachaTypeStats(playEntranceAnimation: false);
+            UpdateGachaBannerFilterIndicator();
+        }
+        catch { }
+    }
+
+
+    /// <summary>全选：显示全部卡池。</summary>
+    private void GachaBannerSelectAll_Click(object sender, RoutedEventArgs e)
+    {
+        if (GachaBanners is null)
+        {
+            return;
+        }
+        foreach (GachaBanner b in GachaBanners)
+        {
+            b.IsSelected = true;
+        }
+        ApplyGachaBannerFilter();
+    }
+
+
+    /// <summary>清除：取消全部勾选（不显示任何卡池）。</summary>
+    private void GachaBannerClear_Click(object sender, RoutedEventArgs e)
+    {
+        if (GachaBanners is null)
+        {
+            return;
+        }
+        foreach (GachaBanner b in GachaBanners)
+        {
+            b.IsSelected = false;
+        }
+        ApplyGachaBannerFilter();
+    }
+
+
+    /// <summary>反选：逐项翻转勾选状态。</summary>
+    private void GachaBannerInvert_Click(object sender, RoutedEventArgs e)
+    {
+        if (GachaBanners is null)
+        {
+            return;
+        }
+        foreach (GachaBanner b in GachaBanners)
+        {
+            b.IsSelected = !b.IsSelected;
+        }
+        ApplyGachaBannerFilter();
+    }
+
+
+    /// <summary>筛选生效（非全选）时把筛选按钮图标点亮为强调色，提示「正在筛选」。</summary>
+    private void UpdateGachaBannerFilterIndicator()
+    {
+        try
+        {
+            bool filtered = GachaBanners is { Count: > 0 } && GachaBanners.Any(x => !x.IsSelected);
+            FontIcon_GachaBannerFilter.Foreground = filtered
+                ? (Brush)Application.Current.Resources["AccentTextFillColorPrimaryBrush"]
+                : (Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
         }
         catch { }
     }
 
 
 
+    /// <summary>
+    /// 根据选中的 uid 加载并更新抽卡统计数据。
+    /// <para>uid 为空或 0：清空 gachaTypeStats、物品统计与卡片池，显示表情占位；</para>
+    /// <para>否则调用服务 GetGachaTypeStats 获取各卡池统计与物品统计，然后触发显示刷新（含入场动画）并隐藏表情。</para>
+    /// </summary>
     private void UpdateGachaTypeStats(long? uid)
     {
         try
@@ -328,14 +457,15 @@ public sealed partial class GachaLogPage : PageBase
             if (uid is null or 0)
             {
                 gachaTypeStats = null;
-                DisplayGachaTypeStatsCollection = [];
+                _reconciledStatsSource = null;
+                ClearGachaCards();
                 GachaItemStats = null;
                 StackPanel_Emoji.Visibility = Visibility.Visible;
             }
             else
             {
                 (gachaTypeStats, GachaItemStats) = _gachaLogService.GetGachaTypeStats(uid.Value);
-                UpdateDisplayGachaTypeStats();
+                UpdateDisplayGachaTypeStats(playEntranceAnimation: true);
                 StackPanel_Emoji.Visibility = Visibility.Collapsed;
             }
         }
@@ -346,80 +476,198 @@ public sealed partial class GachaLogPage : PageBase
     }
 
 
-    private void UpdateDisplayGachaTypeStats()
+    /// <summary>
+    /// 根据当前卡池筛选（GachaBanners 勾选状态）和用户拖拽保存的次序，刷新统计卡片的显示。
+    /// <para>从 gachaTypeStats 中筛选已选卡池 → ApplySavedCardOrder 稳定排序 → ReconcileGachaCards。</para>
+    /// <para>playEntranceAnimation 控制是否播放入场动画（数据刷新时为 true，筛选切换时通常为 false）。</para>
+    /// </summary>
+    private void UpdateDisplayGachaTypeStats(bool playEntranceAnimation = true)
     {
         if (gachaTypeStats is null)
         {
             return;
         }
-        DisplayGachaTypeStatsCollection ??= [];
-        DisplayGachaTypeStatsCollection.Clear();
-        var list = ListView_GachaBanners.SelectedItems.Cast<GachaBanner>().ToList();
-        if (list.Count == 0)
+        // 勾选=显示；按卡池固有次序取所选项，未勾选任何卡池即不显示。
+        var stats = new List<GachaTypeStats>();
+        if (GachaBanners is not null)
         {
-            list = GachaBanners;
-        }
-        foreach (var item in list)
-        {
-            if (gachaTypeStats.FirstOrDefault(x => x.GachaType == item.Value) is GachaTypeStats stats)
+            foreach (GachaBanner banner in GachaBanners)
             {
-                DisplayGachaTypeStatsCollection.Add(stats);
+                if (banner.IsSelected
+                    && gachaTypeStats.FirstOrDefault(x => x.GachaType == banner.Value) is GachaTypeStats s)
+                {
+                    stats.Add(s);
+                }
             }
+        }
+        // 应用用户拖拽保存的卡片次序（按游戏持久化），刷新数据后仍保持卡片之间的相对位置；交给卡片池对齐。
+        ReconcileGachaCards(ApplySavedCardOrder(stats), playEntranceAnimation);
+    }
+
+
+    /// <summary>把当前展示卡片的卡池次序持久化（拖拽换位提交后回调）。次序 = 面板里可见卡片的子元素顺序。</summary>
+    private void SaveGachaCardOrder()
+    {
+        try
+        {
+            var order = new List<int>();
+            foreach (UIElement child in StackPanel_GachaStats.Children)
+            {
+                if (child is IGachaStatsDragCard card
+                    && child is FrameworkElement { Visibility: Visibility.Visible }
+                    && card.WarpTypeStats is { } stats)
+                {
+                    order.Add(stats.GachaType);
+                }
+            }
+            AppConfig.SetGachaCardOrder(CurrentGameBiz.Game, string.Join(',', order));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Save gacha card order");
         }
     }
 
 
-    /// <summary>抽卡统计卡片的固定宽度，即原先自适应布局的最小尺寸。</summary>
+    /// <summary>
+    /// 按持久化的卡片次序对卡池统计稳定排序：已记录的卡池按记录次序在前，未记录的维持原有相对次序在后。
+    /// </summary>
+    private List<GachaTypeStats> ApplySavedCardOrder(List<GachaTypeStats> stats)
+    {
+        try
+        {
+            string? saved = AppConfig.GetGachaCardOrder(CurrentGameBiz.Game);
+            if (string.IsNullOrWhiteSpace(saved))
+            {
+                return stats;
+            }
+            var order = saved.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                             .Select(x => int.TryParse(x, out int v) ? v : int.MinValue)
+                             .Where(x => x != int.MinValue)
+                             .ToList();
+            if (order.Count == 0)
+            {
+                return stats;
+            }
+            // OrderBy 为稳定排序：键相同（均未记录 = int.MaxValue）的项维持原有相对次序。
+            return stats.OrderBy(s =>
+            {
+                int i = order.IndexOf(s.GachaType);
+                return i < 0 ? int.MaxValue : i;
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Apply saved gacha card order");
+            return stats;
+        }
+    }
+
+
+    /// <summary>抽卡统计卡片的固定宽度</summary>
     private const double GachaStatsCardWidth = 262;
 
 
     /// <summary>
-    /// 将每张抽卡统计卡片的宽度固定为最小尺寸 <see cref="GachaStatsCardWidth"/>，不再随窗口宽度拉伸。
+    /// 按「最终展示次序」对齐常驻卡片池与面板子元素：复用已有卡片，只切 Visibility、用 <see cref="UIElementCollection.Move(uint, uint)"/> 重排。
+    /// <para>核心优化：_gachaCardPool 作为常驻池，纯筛选（卡池勾选变化）时零重建，仅通过 Visibility + Move 调整可见顺序；</para>
+    /// <para>仅当 gachaTypeStats 引用变化（切 UID、数据刷新/导入后）时才调用 ClearGachaCards 彻底重建。</para>
     /// </summary>
-    private void UpdateGachaStatsCardLayout()
+    private void ReconcileGachaCards(List<GachaTypeStats> ordered, bool playEntranceAnimation = true)
     {
-        try
-        {
-            SetGachaStatsCardWidth(ItemsControl_GachaStats);
-            SetGachaStatsCardWidth(ItemsControl_ZZZGachaStats);
-        }
-        catch { }
-    }
+        Panel panel = StackPanel_GachaStats;
 
-
-    private static void SetGachaStatsCardWidth(ItemsControl? itemsControl)
-    {
-        if (itemsControl is null)
+        if (!ReferenceEquals(gachaTypeStats, _reconciledStatsSource))
         {
-            return;
+            ClearGachaCards();
+            _reconciledStatsSource = gachaTypeStats;
         }
-        for (int i = 0; i < itemsControl.Items.Count; i++)
+
+        for (int i = 0; i < ordered.Count; i++)
         {
-            if (itemsControl.ContainerFromIndex(i) is ContentPresenter presenter)
+            //重要：开始和子页面交互
+            FrameworkElement card = GetOrCreateGachaCard(ordered[i]);
+            card.Visibility = Visibility.Visible;
+
+            int current = panel.Children.IndexOf(card);
+            if (current < 0)
             {
-                presenter.Width = GachaStatsCardWidth;
+                // 插入时用 Math.Min 防止索引越界（极端情况下面板子元素数量可能少于 i）。
+                panel.Children.Insert(Math.Min(i, panel.Children.Count), card);
+            }
+            else if (current != i)
+            {
+                panel.Children.Move((uint)current, (uint)i);
+            }
+        }
+
+        // 隐藏未被选中的卡片。把不在 visible 中的卡片设为 Collapsed。
+        var visible = new HashSet<int>();
+        foreach (GachaTypeStats s in ordered)
+        {
+            visible.Add(s.GachaType);
+        }
+        foreach (KeyValuePair<int, FrameworkElement> kv in _gachaCardPool)
+        {
+            if (!visible.Contains(kv.Key))
+            {
+                kv.Value.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        // 按需播放入场动画。
+        if (playEntranceAnimation && EntranceAnimation.AnimationsEnabled())
+        {
+            for (int i = 0; i < ordered.Count; i++)
+            {
+                if (_gachaCardPool.TryGetValue(ordered[i].GachaType, out FrameworkElement? card))
+                {
+                    EntranceAnimation.PlayItem(card, i);
+                }
             }
         }
     }
 
 
-    private void GachaStatsCard_Loaded(object sender, RoutedEventArgs e)
+    /// <summary>取池中卡片；没有则按当前游戏建对应类型卡片，赋数据/宽度、挂拖拽手柄后入池（尚未加入面板）。</summary>
+    private FrameworkElement GetOrCreateGachaCard(GachaTypeStats stats)
     {
-        UpdateGachaStatsCardLayout();
-        // 每张卡片在自身加载时按其在列表中的次序错峰，从右向左滑入。
-        if (sender is FrameworkElement card)
+        if (_gachaCardPool.TryGetValue(stats.GachaType, out FrameworkElement? existing))
         {
-            int index = card.DataContext is GachaTypeStats stats && DisplayGachaTypeStatsCollection is { } collection
-                ? Math.Max(0, collection.IndexOf(stats))
-                : 0;
-            EntranceAnimation.PlayItem(card, index);
+            return existing;
         }
+        IGachaStatsDragCard card;
+        if (IsZZZGachaStatsCardVisible)
+        {
+            //创建卡片控件
+            card = new ZZZGachaStatsCard();
+        }
+        else
+        {
+            card = new GachaStatsCard();
+        }
+        FrameworkElement element = (FrameworkElement)card;
+        element.Width = GachaStatsCardWidth;
+        element.DataContext = stats;     // 供拖拽手柄识别其卡池数据
+        card.WarpTypeStats = stats;      // 须在加入可视化树前赋值，卡片内 OneTime x:Bind 才能取到
+        _dragReorder.Attach(card.DragHandle);
+        _gachaCardPool[stats.GachaType] = element;
+        return element;
     }
 
 
-    private void GachaStatsCard_Unloaded(object sender, RoutedEventArgs e)
+    /// <summary>清空卡片池与面板子元素（数据刷新/切 uid/离开页面）：解绑手柄并移除子元素，触发卡片 Unloaded 释放其内部绑定。</summary>
+    private void ClearGachaCards()
     {
-        UpdateGachaStatsCardLayout();
+        foreach (FrameworkElement card in _gachaCardPool.Values)
+        {
+            if (card is IGachaStatsDragCard dragCard)
+            {
+                _dragReorder.Detach(dragCard.DragHandle);
+            }
+        }
+        _gachaCardPool.Clear();
+        StackPanel_GachaStats?.Children.Clear();
     }
 
 

@@ -159,6 +159,9 @@
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>平均</value>
   </data>
+  <data name="GachaStatsCard_Draggable" xml:space="preserve">
+    <value>可拖拽</value>
+  </data>
   <data name="GachaStatsCard_Stats" xml:space="preserve">
     <value>统计</value>
   </data>
@@ -2527,6 +2530,18 @@
   </data>
   <data name="Common_Clear" xml:space="preserve">
     <value>清除</value>
+  </data>
+  <data name="Common_SelectAll" xml:space="preserve">
+    <value>全选</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Common_InvertSelection" xml:space="preserve">
+    <value>反选</value>
+  </data>
+  <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
+    <value>卡池筛选</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>输出文件夹</value>
