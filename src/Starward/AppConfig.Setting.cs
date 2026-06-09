@@ -14,8 +14,11 @@ namespace Starward;
 public static partial class AppConfig
 {
 
+    // 注意：本文件包含大量用户设置属性。
+    // 静态设置直接暴露为属性；按游戏区分的动态设置通过 GetXXX(biz) / SetXXX(biz, value) 访问，
+    // 底层统一走 GetValue<T> / SetValue<T> + 数据库 Setting 表持久化。
 
-    #region Static Setting
+    #region Static Setting（全局静态设置属性）
 
 
     public static bool EnablePreviewRelease
@@ -398,9 +401,13 @@ public static partial class AppConfig
 
 
 
-    #region Dynamic Setting
+    #region Dynamic Setting（按游戏区服持久化的动态设置）
 
-
+    /// <summary>
+    /// 获取指定游戏的背景设置（通常是背景图片路径或标识）。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <returns>背景设置字符串。</returns>
     public static string? GetBg(GameBiz biz)
     {
         return GetValue<string>(default, $"bg_{biz}");
@@ -456,11 +463,21 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 获取指定游戏的安装路径。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <returns>安装目录完整路径或 null。</returns>
     public static string? GetGameInstallPath(GameBiz biz)
     {
         return GetValue<string>(default, $"install_path_{biz}");
     }
 
+    /// <summary>
+    /// 设置指定游戏的安装路径。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">安装目录路径。</param>
     public static void SetGameInstallPath(GameBiz biz, string? value)
     {
         SetValue(value, $"install_path_{biz}");
@@ -512,31 +529,36 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 无边框窗口
+    /// 获取指定游戏是否使用无边框（Popup）窗口模式。
     /// </summary>
-    /// <param name="biz"></param>
-    /// <returns></returns>
+    /// <param name="biz">游戏业务线。</param>
     public static bool GetUsePopupWindow(GameBiz biz)
     {
         return GetValue<bool>(false, $"use_popup_window_{biz}");
     }
 
     /// <summary>
-    /// 无边框窗口
+    /// 设置指定游戏是否使用无边框（Popup）窗口模式。
     /// </summary>
-    /// <param name="biz"></param>
-    /// <param name="value"></param>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">是否启用。</param>
     public static void SetUsePopupWindow(GameBiz biz, bool value)
     {
         SetValue(value, $"use_popup_window_{biz}");
     }
 
 
+    /// <summary>
+    /// 获取指定游戏在抽卡记录页面最后查看的 UID。
+    /// </summary>
     public static long GetLastUidInGachaLogPage(GameBiz biz)
     {
         return GetValue<long>(default, $"last_gacha_uid_{biz}");
     }
 
+    /// <summary>
+    /// 保存指定游戏在抽卡记录页面最后查看的 UID。
+    /// </summary>
     public static void SetLastUidInGachaLogPage(GameBiz biz, long value)
     {
         SetValue(value, $"last_gacha_uid_{biz}");
@@ -556,6 +578,9 @@ public static partial class AppConfig
     }
 
     //记住用户在这个游戏里“选择了哪些卡池来显示统计”。
+    /// <summary>
+    /// 获取指定游戏在抽卡统计页面显示哪些卡池的逗号分隔字符串。
+    /// </summary>
     public static string? GetDisplayGachaBanners(GameBiz biz)
     {
         return GetValue<string>(default, $"display_gacha_banners_{biz}");
@@ -570,11 +595,14 @@ public static partial class AppConfig
     /// <summary>
     /// 抽卡统计卡片的自定义排列次序（卡池类型逗号串），按游戏持久化；拖拽换位后保存，刷新数据后据此还原相对位置。
     /// </summary>
+    /// <param name="biz">游戏业务线。</param>
     public static string? GetGachaCardOrder(GameBiz biz)
     {
         return GetValue<string>(default, $"gacha_card_order_{biz}");
     }
 
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">卡池类型逗号串。</param>
     public static void SetGachaCardOrder(GameBiz biz, string value)
     {
         SetValue(value, $"gacha_card_order_{biz}");
@@ -582,20 +610,16 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 外部截图文件夹
+    /// 获取指定游戏的外部截图文件夹路径。
     /// </summary>
-    /// <param name="biz"></param>
-    /// <returns></returns>
     public static string? GetExternalScreenshotFolder(GameBiz biz)
     {
         return GetValue<string>(default, $"external_screenshot_folder_{biz}");
     }
 
     /// <summary>
-    /// 外部截图文件夹
+    /// 设置指定游戏的外部截图文件夹路径。
     /// </summary>
-    /// <param name="biz"></param>
-    /// <param name="value"></param>
     public static void SetExternalScreenshotFolder(GameBiz biz, string? value)
     {
         SetValue(value, $"external_screenshot_folder_{biz}");
@@ -614,16 +638,19 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 背景视频音量，每个游戏区服独立设置
+    /// 获取指定游戏的背景视频音量（0-100）。
     /// </summary>
+    /// <param name="biz">游戏业务线。</param>
     public static int GetVideoBgVolume(GameBiz biz)
     {
         return Math.Clamp(GetValue(0, $"video_bg_volume_{biz}"), 0, 100);
     }
 
     /// <summary>
-    /// 背景视频音量，每个游戏区服独立设置
+    /// 设置指定游戏的背景视频音量（0-100）。
     /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">音量值。</param>
     public static void SetVideoBgVolume(GameBiz biz, int value)
     {
         SetValue(value, $"video_bg_volume_{biz}");
@@ -634,12 +661,18 @@ public static partial class AppConfig
 
 
 
-    #region Setting Method
+    #region Setting Method（设置读写核心实现）
 
 
+    /// <summary>
+    /// 内存中的设置缓存（Key → Value 字符串）。
+    /// </summary>
     private static Dictionary<string, string?> _settingCache;
 
 
+    /// <summary>
+    /// 初始化设置缓存（从数据库 Setting 表一次性加载所有键值对）。
+    /// </summary>
     private static void InitializeSettingProvider()
     {
         try
@@ -654,6 +687,14 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 获取指定 Key 的设置值（泛型自动转换）。
+    /// 优先从内存缓存读取，未命中时从数据库读取并回填缓存。
+    /// </summary>
+    /// <typeparam name="T">目标类型（通过 TypeConverter 转换）。</typeparam>
+    /// <param name="defaultValue">当 Key 不存在或转换失败时返回的默认值。</param>
+    /// <param name="key">设置键名。通常由 [CallerMemberName] 自动传入属性名，也可手动指定（用于 per-game 动态设置）。</param>
+    /// <returns>转换后的值或 defaultValue。</returns>
     public static T? GetValue<T>(T? defaultValue = default, [CallerMemberName] string? key = null)
     {
         if (string.IsNullOrWhiteSpace(key))
@@ -687,6 +728,12 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 将字符串值通过 TypeConverter 转换为目标类型 T。
+    /// </summary>
+    /// <typeparam name="T">目标类型。</typeparam>
+    /// <param name="value">数据库/缓存中的字符串值。</param>
+    /// <param name="defaultValue">转换失败时的回退值。</param>
     private static T? ConvertFromString<T>(string? value, T? defaultValue = default)
     {
         if (value is null)
@@ -702,6 +749,13 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 设置指定 Key 的值（会写入数据库并更新内存缓存）。
+    /// 如果新值与缓存中的值相同则跳过写入。
+    /// </summary>
+    /// <typeparam name="T">值类型。</typeparam>
+    /// <param name="value">要保存的值（会调用 ToString() 持久化）。</param>
+    /// <param name="key">设置键名（通常由 CallerMemberName 提供）。</param>
     public static void SetValue<T>(T? value, [CallerMemberName] string? key = null)
     {
         if (string.IsNullOrWhiteSpace(key))
@@ -732,6 +786,9 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 删除 Setting 表中所有记录（危险操作，主要用于重置或测试）。
+    /// </summary>
     public static void DeleteAllSettings()
     {
         try
@@ -743,6 +800,9 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 清空内存设置缓存（下次 GetValue 时会重新从数据库加载）。
+    /// </summary>
     public static void ClearCache()
     {
         _settingCache.Clear();

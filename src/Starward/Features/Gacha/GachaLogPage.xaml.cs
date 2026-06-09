@@ -44,7 +44,7 @@ public sealed partial class GachaLogPage : PageBase
 
     private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
 
-
+    /// <summary>当前游戏对应的抽卡日志服务（由 <see cref="OnNavigatedTo"/> 根据游戏类型注入，支持原神/星铁/绝区零）。</summary>
     private GachaLogService _gachaLogService;
 
 
@@ -66,7 +66,13 @@ public sealed partial class GachaLogPage : PageBase
     }
 
 
-
+    /// <summary>
+    /// 页面导航到此时初始化游戏特定的抽卡服务、UI 标志位与表情图标。
+    /// <para><b>输入：</b><paramref name="e"/> — 导航事件参数（基类 PageBase 从中解析 CurrentGameBiz / CurrentGameId）。</para>
+    /// <para><b>副作用：</b>设置 <see cref="GachaTypeText"/> 文本；根据游戏类型注入对应 <see cref="_gachaLogService"/>
+    /// （GenshinGachaService / StarRailGachaService / ZZZGachaService）、启用对应物品统计视图标志位、
+    /// 设置表情图标；对国服绝区零显示米游社同步菜单项、国际服显示 HoYoLAB 同步菜单项；关闭国际服的云游戏入口。</para>
+    /// </summary>
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
@@ -117,6 +123,7 @@ public sealed partial class GachaLogPage : PageBase
     public ObservableCollection<long> UidList { get; set => SetProperty(ref field, value); }
 
 
+    /// <summary>当前选中的 UID。切换时持久化并刷新抽卡统计数据。</summary>
     [ObservableProperty]
     public partial long? SelectUid { get; set; }
     partial void OnSelectUidChanged(long? value)
@@ -223,6 +230,11 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 卡池卡片区域的滚轮事件处理：拖拽中横向滚轮优先交给拖拽逻辑，否则 Shift+滚轮横向滚动 ScrollViewer。
+    /// <para><b>输入：</b><paramref name="sender"/> — Grid_GachaStats；<paramref name="e"/> — 指针滚轮事件。</para>
+    /// <para><b>输出：</b>无返回值；通过 <see cref="_dragReorder"/>.HandleWheel 消费拖拽滚动，否则手动横向滚动 <see cref="ScrollViewer_GachaStats"/>。</para>
+    /// </summary>
     private void Grid_GachaStats_PointerWheelChanged(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
         // 拖拽中优先用滚轮横向滚动（以便拖到视口外的第 5、6 个卡池）。
@@ -271,6 +283,7 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>打开右侧物品统计面板（SplitView 的 Pane）。由工具栏 "Pane" 按钮绑定。</summary>
     [RelayCommand]
     private void OpenItemStatsPane()
     {
@@ -284,21 +297,25 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>是否启用原神抽卡物品统计视图（x:Load 标志）。</summary>
     public bool EnableGenshinGachaItemStats { get; set => SetProperty(ref field, value); }
 
+    /// <summary>是否启用星穹铁道抽卡物品统计视图（x:Load 标志）。</summary>
     public bool EnableStarRailGachaItemStats { get; set => SetProperty(ref field, value); }
 
+    /// <summary>是否启用绝区零抽卡物品统计视图（x:Load 标志）。</summary>
     public bool EnableZZZGachaItemStats { get; set => SetProperty(ref field, value); }
 
+    /// <summary>卡池筛选列表（DropDownButton 弹出菜单的数据源）。每项绑定一个 CheckBox 控制显示/隐藏。</summary>
     public List<GachaBanner> GachaBanners { get; set => SetProperty(ref field, value); }
 
-
+    /// <summary>当前 UID 的物品统计列表（右侧 SplitView.Pane 数据源），按抽到次数降序。</summary>
     public List<GachaLogItemEx>? GachaItemStats { get; set => SetProperty(ref field, value); }
 
-
+    /// <summary>当前 UID 的各卡池统计原始数据（内存缓存）。</summary>
     private List<GachaTypeStats>? gachaTypeStats;
 
-
+    /// <summary>连续获取抽卡记录失败计数，用于触发"删除缓存文件"提示。</summary>
     private int errorCount = 0;
 
 
@@ -672,6 +689,12 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 更新抽卡记录（SplitButton 主命令）。
+    /// <para><b>输入：</b><paramref name="param"/> — 可选参数：
+    /// <c>"cache"</c> 使用已缓存的 URL 更新；<c>"all"</c> 更新全部记录；<c>null</c> 从游戏 Web 缓存获取最新 URL。</para>
+    /// <para><b>副作用：</b>调用 <see cref="UpdateGachaLogInternalAsync"/> 执行网络请求；失败时通过 InAppToast 提示用户；连续失败达到阈值时建议删除缓存。</para>
+    /// </summary>
     [RelayCommand]
     private async Task UpdateGachaLogAsync(string? param = null)
     {
@@ -734,6 +757,13 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 执行实际的抽卡记录网络请求（带进度 InfoBar 和取消支持）。
+    /// <para><b>输入：</b><paramref name="url"/> — 抽卡 API 完整 URL（含 authkey）；
+    /// <paramref name="all"/> — 是否拉取全部记录（默认 false 仅拉取最新）。</para>
+    /// <para><b>副作用：</b>通过 <see cref="_gachaLogService"/>.GetGachaLogAsync 拉取数据写入本地数据库；
+    /// 成功后刷新 UID 列表与统计卡片；可取消（TaskCanceledException 仅记录日志）。</para>
+    /// </summary>
     private async Task UpdateGachaLogInternalAsync(string url, bool all = false)
     {
         try
@@ -813,6 +843,11 @@ public sealed partial class GachaLogPage : PageBase
     }
 
 
+    /// <summary>
+    /// 从米游社/HoYoLAB 同步绝区零抽卡记录。
+    /// <para><b>输入：</b><paramref name="param"/> — <c>"all"</c> 同步全部记录，<c>null</c> 仅最新。</para>
+    /// <para><b>副作用：</b>仅支持绝区零国服/国际服；多角色时弹出选择对话框；通过 ZZZGachaService 拉取数据，带可取消的进度 InfoBar。</para>
+    /// </summary>
     [RelayCommand]
     private async Task SyncFromMiyousheAsync(string? param = null)
     {
@@ -914,6 +949,11 @@ public sealed partial class GachaLogPage : PageBase
         }
     }
 
+    /// <summary>
+    /// 弹出 ComboBox 对话框让用户选择米游社/HoYoLAB 角色。
+    /// <para><b>输入：</b><paramref name="roles"/> — 游戏角色列表；<paramref name="roleGameBiz"/> — 角色对应的 GameBiz。</para>
+    /// <para><b>返回值：</b>用户选中的 <see cref="GameRecordRole"/>，取消则返回 null。</para>
+    /// </summary>
     private async Task<GameRecordRole?> SelectMiyousheRoleAsync(List<GameRecordRole> roles, GameBiz roleGameBiz)
     {
         var items = roles.Select(role => new MiyousheRoleItem(role)).ToList();
@@ -982,6 +1022,10 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 手动输入抽卡 URL 进行更新。
+    /// <para><b>副作用：</b>弹出 ContentDialog 让用户粘贴 URL，确认后调用 <see cref="UpdateGachaLogInternalAsync"/> 拉取数据。</para>
+    /// </summary>
     [RelayCommand]
     private async Task InputUrlAsync()
     {
@@ -1020,6 +1064,7 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>打开云游戏抽卡窗口（通过云游戏方式获取抽卡 URL）。</summary>
     [RelayCommand]
     private void OpenCloudGameWindow()
     {
@@ -1039,6 +1084,10 @@ public sealed partial class GachaLogPage : PageBase
     #region Gacha Setting Panel
 
 
+    /// <summary>
+    /// 抽卡数据语言代码（如 "zh-cn"、"en-us"）。设置后持久化到 AppConfig。
+    /// <para>用于从 miHoYo 服务器拉取对应语言的物品名称。</para>
+    /// </summary>
     public string? GachaLanguage
     {
         get;
@@ -1052,7 +1101,10 @@ public sealed partial class GachaLogPage : PageBase
     } = AppConfig.GachaLanguage;
 
 
-
+    /// <summary>
+    /// 将当前 UID 的抽卡 URL 复制到剪贴板。
+    /// <para><b>副作用：</b>复制成功后按钮图标短暂变为 ✓（1 秒后恢复）。</para>
+    /// </summary>
     [RelayCommand]
     private async Task CopyUrlAsync()
     {
@@ -1079,6 +1131,11 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 将当前 UID 的抽卡物品名称切换为指定语言。
+    /// <para><b>副作用：</b>调用服务层 <see cref="GachaLogService.ChangeGachaItemNameAsync"/> 批量更新本地数据库；
+    /// 成功后显示 Toast 提示变更数量，并刷新统计卡片。</para>
+    /// </summary>
     [RelayCommand]
     private async Task ChangeGachaItemNameAsync()
     {
@@ -1097,6 +1154,10 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 删除当前 UID 的全部抽卡记录。
+    /// <para><b>副作用：</b>弹出确认对话框；确认后调用服务删除并显示 Toast，然后重新初始化页面。</para>
+    /// </summary>
     [RelayCommand]
     private async Task DeleteUidAsync()
     {
@@ -1138,6 +1199,10 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 按时间段删除抽卡记录。
+    /// <para><b>副作用：</b>弹出 <see cref="DeleteGachaLogDialog"/> 让用户选择时间范围；删除后刷新统计。</para>
+    /// </summary>
     [RelayCommand]
     private async Task DeleteUidByTimeAsync()
     {
@@ -1163,6 +1228,10 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 打开游戏缓存文件夹以让用户手动删除缓存文件（解决 authkey timeout 问题）。
+    /// <para><b>副作用：</b>通过文件资源管理器打开 WebCache 文件夹并选中。</para>
+    /// </summary>
     [RelayCommand]
     private async Task DeleteGachaCacheFolderAsync()
     {
@@ -1189,6 +1258,10 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 检查游戏抽卡缓存文件是否存在。
+    /// <para><b>返回值：</b><c>true</c> — 缓存文件存在；<c>false</c> — 不存在或检查过程异常。</para>
+    /// </summary>
     private bool IsGachaCacheFileExists()
     {
         try
@@ -1217,6 +1290,11 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 导出当前 UID 的抽卡记录到文件。
+    /// <para><b>输入：</b><paramref name="format"/> — 导出格式（<c>"excel"</c> 或 <c>"json"</c>）。</para>
+    /// <para><b>副作用：</b>弹出保存文件对话框让用户选择路径；导出完成后打开文件所在文件夹并选中。</para>
+    /// </summary>
     [RelayCommand]
     private async Task ExportGachaLogAsync(string format)
     {
@@ -1254,6 +1332,10 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>
+    /// 从 JSON 文件导入抽卡记录。
+    /// <para><b>副作用：</b>弹出文件选择对话框；导入后刷新 UID 列表并切换到导入的 UID。</para>
+    /// </summary>
     [RelayCommand]
     private async Task ImportGachaLogAsync()
     {
@@ -1287,6 +1369,7 @@ public sealed partial class GachaLogPage : PageBase
 
 
 
+    /// <summary>打开 UIGF v4.0 导入窗口（支持批量导入多个游戏的抽卡记录）。</summary>
     [RelayCommand]
     private void OpenUIGF4Window()
     {

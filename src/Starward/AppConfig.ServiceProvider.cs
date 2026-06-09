@@ -37,6 +37,10 @@ public static partial class AppConfig
     private static IServiceProvider _serviceProvider;
 
 
+    /// <summary>
+    /// 构建并缓存 IServiceProvider（仅首次调用时执行）。
+    /// 负责注册所有核心服务（Client、Service、HttpClient 等）。
+    /// </summary>
     private static void BuildServiceProvider()
     {
         if (_serviceProvider == null)
@@ -99,24 +103,42 @@ public static partial class AppConfig
         }
     }
 
+    /// <summary>
+    /// 获取指定类型的服务实例（通过内部 DI 容器）。
+    /// 首次调用时会触发 BuildServiceProvider。
+    /// </summary>
+    /// <typeparam name="T">要获取的服务类型。</typeparam>
+    /// <returns>服务实例（非空）。</returns>
     public static T GetService<T>()
     {
         BuildServiceProvider();
         return _serviceProvider.GetService<T>()!;
     }
 
+    /// <summary>
+    /// 获取指定类型的 ILogger 实例。
+    /// </summary>
+    /// <typeparam name="T">日志类别类型（通常是当前类）。</typeparam>
     public static ILogger<T> GetLogger<T>()
     {
         BuildServiceProvider();
         return _serviceProvider.GetService<ILogger<T>>()!;
     }
 
+    /// <summary>
+    /// 创建一个新的 SQLite 数据库连接（委托给 DatabaseService）。
+    /// </summary>
     public static SqliteConnection CreateDatabaseConnection()
     {
         return DatabaseService.CreateConnection();
     }
 
 
+    /// <summary>
+    /// 为普通的 HttpClient 配置默认设置（User-Agent、HTTP 版本策略、自动解压、多路复用等）。
+    /// 由 <c>sc.AddHttpClient().ConfigureHttpClientDefaults(...)</c> 调用。
+    /// </summary>
+    /// <param name="builder">IHttpClientBuilder。</param>
     private static void ConfigDefaultHttpClient(this IHttpClientBuilder builder)
     {
         builder.RemoveAllLoggers();
@@ -140,6 +162,11 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 为 Starward 自有后端/服务使用的 HttpClient 配置（额外携带 DeviceId、SessionId、AppVersion 等头）。
+    /// 通常通过 <c>AddHttpClient&lt;T&gt;().ConfigStarwardHttpClient()</c> 使用。
+    /// </summary>
+    /// <param name="builder">IHttpClientBuilder。</param>
     private static void ConfigStarwardHttpClient(this IHttpClientBuilder builder)
     {
         builder.RemoveAllLoggers();
@@ -165,6 +192,5 @@ public static partial class AppConfig
             PooledConnectionLifetime = TimeSpan.FromMinutes(10),
         });
     }
-
 
 }
