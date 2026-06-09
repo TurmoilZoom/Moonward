@@ -198,6 +198,7 @@ public sealed partial class GachaLogPage : PageBase
         try
         {
             InitializeGachaBanners();
+            //获取上次选中的 UID，若无则默认第一个
             SelectUid = null;
             UidList = new(_gachaLogService.GetUids());
             var lastUid = AppConfig.GetLastUidInGachaLogPage(CurrentGameBiz.Game);
@@ -305,7 +306,6 @@ public sealed partial class GachaLogPage : PageBase
     /// 初始化卡池筛选列表（GachaBanners）。
     /// <para>从 _gachaLogService.QueryGachaTypes 获取当前游戏所有卡池类型，包装成 GachaBanner；</para>
     /// <para>然后从 AppConfig 读取用户上次保存的勾选状态（逗号分隔的 Value 列表）并恢复 IsSelected；</para>
-    /// <para>若没有任何卡池被选中（首次或配置为空），则默认全选以避免空白；</para>
     /// <para>针对版本更新新增的卡池（星铁联动、ZZZ 重映/回响），在首次遇到时自动勾选并持久化标记，避免用户错过新卡池。</para>
     /// </summary>
     private void InitializeGachaBanners()
@@ -325,14 +325,6 @@ public sealed partial class GachaLogPage : PageBase
                 anySelected |= b.IsSelected;
             }
         }
-        // 无有效配置时默认全选（避免空白）。
-        if (!anySelected)
-        {
-            foreach (GachaBanner b in GachaBanners)
-            {
-                b.IsSelected = true;
-            }
-        }
         // 版本更新后默认勾选新增卡池。
         if (CurrentGameBiz.Game is GameBiz.hkrpg && !AppConfig.GetValue(false, "SavedStarRailBannersAfterCollaborationStarting"))
         {
@@ -341,7 +333,7 @@ public sealed partial class GachaLogPage : PageBase
                 b.IsSelected = true;
             }
         }
-        if (CurrentGameBiz.Game is GameBiz.nap && !AppConfig.GetValue(false, "SavedZZZBannersSinceVersion2"))
+        if (CurrentGameBiz.Game is GameBiz.nap && !AppConfig.GetValue(false, "SavedZZZBannersSinceVersion2.5"))
         {
             foreach (GachaBanner b in GachaBanners.Where(x => x.Value is 102 or 103))
             {
