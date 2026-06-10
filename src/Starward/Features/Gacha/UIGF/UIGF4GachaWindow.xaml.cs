@@ -50,6 +50,8 @@ public sealed partial class UIGF4GachaWindow : WindowEx
         SystemBackdrop = new DesktopAcrylicBackdrop();
         AdaptTitleBarButtonColorToActuallTheme();
         SetIcon();
+        // 导入页列数最多，按其内容宽度给定初始窗口大小并居中（此前未设置，会沿用 WinUI 默认尺寸）。
+        CenterInScreen(1120, 720);
     }
 
 
@@ -160,6 +162,14 @@ public sealed partial class UIGF4GachaWindow : WindowEx
             _logger.LogError(ex, "Select uigf4 file");
             WindowToast?.Error(ex);
         }
+    }
+
+
+
+    /// <summary>全选导入列表中的所有账号（ListView 为多选模式，SelectAll 直接生效）。</summary>
+    private void Button_SelectAllImport_Click(object sender, RoutedEventArgs e)
+    {
+        ListView_Import.SelectAll();
     }
 
 

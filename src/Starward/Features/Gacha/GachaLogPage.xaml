@@ -164,7 +164,7 @@
                     <TextBlock Text="{x:Bind lang:Lang.Common_Setting}" />
                 </StackPanel>
                 <Button.Flyout>
-                    <Flyout>
+                    <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
                         <StackPanel MinWidth="200" Spacing="8">
                             <!--  其他设置  -->
                             <TextBlock FontSize="16" Text="{x:Bind lang:Lang.GachaLogPage_OtherSettings}" />

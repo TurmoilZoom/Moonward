@@ -17,6 +17,25 @@
     <Grid x:Name="RootGrid"
           Loaded="RootGrid_Loaded"
           Unloaded="RootGrid_Unloaded">
+        <Grid.Resources>
+            <!--  共享列宽：表头占位单元与列表行单元绑定同一资源，配合相同的 ColumnSpacing 与左缩进自动对齐，无需手算累加边距。  -->
+            <x:Double x:Key="GachaColIcon">36</x:Double>
+            <x:Double x:Key="GachaColUid">96</x:Double>
+            <x:Double x:Key="GachaColCount">56</x:Double>
+            <x:Double x:Key="GachaColTime">150</x:Double>
+            <x:Double x:Key="GachaColName">160</x:Double>
+            <x:Double x:Key="GachaColOffset">140</x:Double>
+
+            <!--  列表项左内边距 12 与表头左边距 12 一致，使表头与各列严格对齐；选中高亮铺满整行宽度。  -->
+            <Style x:Key="GachaArchiveItemStyle"
+                   BasedOn="{StaticResource DefaultListViewItemStyle}"
+                   TargetType="ListViewItem">
+                <Setter Property="Margin" Value="0,1,0,1" />
+                <Setter Property="Padding" Value="12,6,12,6" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="32" />
             <RowDefinition />
@@ -46,11 +65,10 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Margin="12,0,0,0"
+                    <StackPanel Margin="12,4,12,0"
                                 Orientation="Horizontal"
                                 Spacing="12">
                         <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.GachaImportAndExportWindow_SelectTheGachaRecordsToExport}" />
@@ -59,63 +77,104 @@
                                 Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Export}" />
                         <TextBlock VerticalAlignment="Center"
                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                   Text="{x:Bind ExportError}" />
+                                   Text="{x:Bind ExportError}"
+                                   TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <TextBlock Grid.Row="1"
-                               Margin="296,8,0,0"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind lang:Lang.GachaImportAndExportWindow_TheLastGachaPull}" />
-
-                    <StackPanel Grid.Row="2"
-                                Margin="92,0,0,0"
-                                Orientation="Horizontal"
-                                Spacing="12">
-                        <TextBlock Width="100"
-                                   VerticalAlignment="Center"
+                    <!--  表头  -->
+                    <Grid Grid.Row="1"
+                          Margin="12,12,12,2"
+                          ColumnSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="3"
+                                   Grid.ColumnSpan="3"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.GachaImportAndExportWindow_TheLastGachaPull}" />
+                        <Border Grid.Row="1"
+                                Grid.Column="0"
+                                Width="{StaticResource GachaColIcon}" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Width="{StaticResource GachaColUid}"
+                                   VerticalAlignment="Bottom"
+                                   FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="Uid" />
-                        <TextBlock Width="80"
-                                   VerticalAlignment="Center"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="2"
+                                   Width="{StaticResource GachaColCount}"
+                                   VerticalAlignment="Bottom"
+                                   FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.GachaImportAndExportWindow_Count}" />
-                        <TextBlock Width="160"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="3"
+                                   Width="{StaticResource GachaColTime}"
                                    VerticalAlignment="Bottom"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.GachaImportAndExportWindow_TimeServerTimeZone}" />
-                        <TextBlock Width="200"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="4"
+                                   Width="{StaticResource GachaColName}"
                                    VerticalAlignment="Bottom"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.GachaImportAndExportWindow_Name}" />
-                    </StackPanel>
+                    </Grid>
 
                     <ListView x:Name="ListView_Export"
-                              Grid.Row="3"
-                              Margin="0,8,0,0"
+                              Grid.Row="2"
+                              Padding="0,0,0,12"
+                              ItemContainerStyle="{StaticResource GachaArchiveItemStyle}"
                               ItemsSource="{x:Bind GachaExportArchives}"
                               SelectionMode="Multiple">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="local:GachaUidArchiveDisplay">
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <cc:CachedImage Width="36"
-                                                    Height="36"
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <cc:CachedImage Grid.Column="0"
+                                                    Width="{StaticResource GachaColIcon}"
+                                                    Height="{StaticResource GachaColIcon}"
                                                     CornerRadius="8"
                                                     Source="{x:Bind GameIcon}" />
-                                    <TextBlock Width="100"
+                                    <TextBlock Grid.Column="1"
+                                               Width="{StaticResource GachaColUid}"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind Uid}" />
-                                    <TextBlock Width="80"
+                                    <TextBlock Grid.Column="2"
+                                               Width="{StaticResource GachaColCount}"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind Count}" />
-                                    <TextBlock Width="160"
+                                    <TextBlock Grid.Column="3"
+                                               Width="{StaticResource GachaColTime}"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind LastItemTime.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}" />
-                                    <TextBlock Width="200"
+                                    <TextBlock Grid.Column="4"
+                                               Width="{StaticResource GachaColName}"
                                                VerticalAlignment="Center"
-                                               Text="{x:Bind LastItemName}" />
-                                </StackPanel>
+                                               Text="{x:Bind LastItemName}"
+                                               TextTrimming="CharacterEllipsis" />
+                                </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
@@ -130,117 +189,153 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Margin="12,0,0,0"
+                    <StackPanel Margin="12,4,12,0"
                                 Orientation="Horizontal"
                                 Spacing="12">
                         <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.GachaImportAndExportWindow_SelectTheFileToImport}" />
                         <Button x:Name="Button_SelectFile"
                                 Command="{x:Bind SelectFileCommand}"
                                 Content="{x:Bind lang:Lang.GachaImportAndExportWindow_SelectFile}" />
+                        <Button x:Name="Button_SelectAllImport"
+                                Click="Button_SelectAllImport_Click"
+                                Content="{x:Bind lang:Lang.Common_SelectAll}" />
                         <Button x:Name="Button_Import"
                                 Command="{x:Bind ImportCommand}"
                                 Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Import}" />
                         <TextBlock VerticalAlignment="Center"
                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                   Text="{x:Bind ImportError}" />
+                                   Text="{x:Bind ImportError}"
+                                   TextWrapping="Wrap" />
                     </StackPanel>
 
                     <TextBlock Grid.Row="1"
-                               Margin="12,8,0,0"
+                               Margin="12,8,12,0"
                                Foreground="{ThemeResource SystemFillColorCautionBrush}"
                                Text="{x:Bind lang:Lang.GachaImportAndExportWindow_TimeZoneOffsetWarning}"
                                TextWrapping="Wrap" />
 
-                    <TextBlock Grid.Row="2"
-                               Margin="296,8,0,0"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind lang:Lang.GachaImportAndExportWindow_TheLastGachaPull}" />
-
-                    <StackPanel Grid.Row="3"
-                                Margin="92,0,0,0"
-                                Orientation="Horizontal"
-                                Spacing="12">
-                        <TextBlock Width="100"
-                                   VerticalAlignment="Center"
+                    <!--  表头  -->
+                    <Grid Grid.Row="2"
+                          Margin="12,12,12,2"
+                          ColumnSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="3"
+                                   Grid.ColumnSpan="5"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.GachaImportAndExportWindow_TheLastGachaPull}" />
+                        <Border Grid.Row="1"
+                                Grid.Column="0"
+                                Width="{StaticResource GachaColIcon}" />
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Width="{StaticResource GachaColUid}"
+                                   VerticalAlignment="Bottom"
+                                   FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="Uid" />
-                        <TextBlock Width="80"
-                                   VerticalAlignment="Center"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="2"
+                                   Width="{StaticResource GachaColCount}"
+                                   VerticalAlignment="Bottom"
+                                   FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.GachaImportAndExportWindow_Count}" />
-                        <TextBlock Width="160"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="3"
+                                   Width="{StaticResource GachaColTime}"
                                    VerticalAlignment="Bottom"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.GachaImportAndExportWindow_TimeServerTimeZone}" />
-                        <TextBlock Width="200"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="4"
+                                   Width="{StaticResource GachaColName}"
                                    VerticalAlignment="Bottom"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.GachaImportAndExportWindow_Name}" />
-                        <TextBlock Width="160"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="5"
+                                   Width="{StaticResource GachaColOffset}"
                                    VerticalAlignment="Bottom"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.GachaImportAndExportWindow_TimeZoneOffset}" />
-                        <TextBlock Width="160"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="6"
+                                   Width="{StaticResource GachaColTime}"
                                    VerticalAlignment="Bottom"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{x:Bind lang:Lang.GachaImportAndExportWindow_OffsetTime}" />
-                    </StackPanel>
+                    </Grid>
 
 
                     <ListView x:Name="ListView_Import"
-                              Grid.Row="4"
-                              Margin="0,4,0,0"
+                              Grid.Row="3"
+                              Padding="0,0,0,12"
+                              ItemContainerStyle="{StaticResource GachaArchiveItemStyle}"
                               ItemsSource="{x:Bind GachaImportArchives}"
                               SelectionMode="Multiple">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="local:GachaUidArchiveDisplay">
                                 <Grid ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="36" />
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="80" />
-                                        <ColumnDefinition Width="160" />
-                                        <ColumnDefinition Width="200" />
-                                        <ColumnDefinition Width="160" />
-                                        <ColumnDefinition Width="160" />
-                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <cc:CachedImage Grid.Column="0"
-                                                    Width="36"
-                                                    Height="36"
+                                                    Width="{StaticResource GachaColIcon}"
+                                                    Height="{StaticResource GachaColIcon}"
                                                     CornerRadius="8"
                                                     Source="{x:Bind GameIcon}" />
                                     <TextBlock Grid.Column="1"
-                                               Width="100"
+                                               Width="{StaticResource GachaColUid}"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind Uid}" />
                                     <TextBlock Grid.Column="2"
-                                               Width="80"
+                                               Width="{StaticResource GachaColCount}"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind Count}" />
                                     <TextBlock Grid.Column="3"
-                                               Width="160"
+                                               Width="{StaticResource GachaColTime}"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind LastItemTime.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}" />
                                     <TextBlock Grid.Column="4"
-                                               Width="200"
+                                               Width="{StaticResource GachaColName}"
                                                VerticalAlignment="Center"
-                                               Text="{x:Bind LastItemName}" />
+                                               Text="{x:Bind LastItemName}"
+                                               TextTrimming="CharacterEllipsis" />
                                     <NumberBox Grid.Column="5"
-                                               Width="160"
+                                               Width="{StaticResource GachaColOffset}"
                                                VerticalAlignment="Center"
                                                SpinButtonPlacementMode="Inline"
                                                Value="{x:Bind Timezone, Mode=TwoWay}" />
                                     <TextBlock Grid.Column="6"
-                                               Width="160"
+                                               Width="{StaticResource GachaColTime}"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind LastItemTimeOffest.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}" />
                                     <TextBlock Grid.Column="7"
