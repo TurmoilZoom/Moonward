@@ -118,6 +118,18 @@ internal class GenshinBeyondGachaService
             var newCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
             // 获取 {list.Count} 条记录，新增 {newCount - oldCount} 条记录
             progress?.Report(string.Format(Lang.GachaLogService_GetGachaResult, list.Count, newCount - oldCount));
+            // 本次确有拉取到记录时，检测是否出现本地未收录的新物品，若有则静默联网补全物品信息（图标）。
+            if (list.Count > 0 && HasUnknownItems(uid))
+            {
+                try
+                {
+                    await UpdateGachaInfoAsync(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Ensure beyond gacha info for unknown items failed, uid {uid}", uid);
+                }
+            }
         }
         return uid;
     }
@@ -330,6 +342,40 @@ internal class GenshinBeyondGachaService
         const string insertSql = """INSERT OR REPLACE INTO GenshinBeyondGachaInfo (Id, Name, Rank, Icon) VALUES (@Id, @Name, @Rank, @Icon);""";
         dapper.Execute(insertSql, data, t);
         t.Commit();
+    }
+
+
+
+    /// <summary>
+    /// 确保本地已有千星奇域物品信息（图标）：表为空时才全量下载 <see cref="UpdateGachaInfoAsync"/>。
+    /// 软件首次启动由 <see cref="GachaItemNameService"/> 调用完成全量更新（失败则打开页面/下次启动时重试）；
+    /// 此后版本更新带来的新物品由更新记录时的 <see cref="HasUnknownItems"/> 检测按需增量补全。
+    /// </summary>
+    public async Task EnsureGachaInfoAsync(CancellationToken cancellationToken = default)
+    {
+        using (var dapper = DatabaseService.CreateConnection())
+        {
+            if (dapper.QueryFirstOrDefault<int>("SELECT COUNT(*) FROM GenshinBeyondGachaInfo;") > 0)
+            {
+                return;
+            }
+        }
+        await UpdateGachaInfoAsync(cancellationToken);
+    }
+
+
+
+    /// <summary>该 UID 是否存在本地物品信息表（GenshinBeyondGachaInfo）收录不到的记录（缺图标的新物品）。</summary>
+    private bool HasUnknownItems(long uid)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.QueryFirstOrDefault<int>("""
+            SELECT EXISTS(
+                SELECT 1 FROM GenshinBeyondGachaItem item
+                LEFT JOIN GenshinBeyondGachaInfo info ON item.ItemId = info.Id
+                WHERE item.Uid = @uid AND info.Id IS NULL
+            );
+            """, new { uid }) == 1;
     }
 
 

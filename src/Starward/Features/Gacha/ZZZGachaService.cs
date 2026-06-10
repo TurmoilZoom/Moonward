@@ -43,6 +43,12 @@ internal class ZZZGachaService : GachaLogService
     /// <summary>对应的数据库表名（ZZZGachaItem）。</summary>
     protected override string GachaTableName { get; } = "ZZZGachaItem";
 
+    /// <summary>物品信息表名（ZZZGachaInfo），提供图标与名称。</summary>
+    protected override string GachaInfoTableName { get; } = "ZZZGachaInfo";
+
+    /// <summary>ZZZGachaInfo 与 ItemId 关联的主键列名。</summary>
+    protected override string GachaInfoIdColumn { get; } = "Id";
+
 
     /// <summary>
     /// 用于从官方战绩（米游社/HoYoLAB）接口拉取抽卡记录。
@@ -177,6 +183,11 @@ internal class ZZZGachaService : GachaLogService
             var newCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
             // 获取 {list.Count} 条记录，新增 {newCount - oldCount} 条记录
             progress?.Report(string.Format(Lang.GachaLogService_GetGachaResult, list.Count, newCount - oldCount));
+            // 本次确有拉取到记录时，检测是否出现本地未收录的新角色/物品，若有则静默联网补全物品信息（图标 + 名称）。
+            if (list.Count > 0)
+            {
+                await EnsureGachaInfoForUnknownItemsAsync(uid, lang, cancellationToken);
+            }
         }
         return uid;
     }
@@ -285,6 +296,11 @@ internal class ZZZGachaService : GachaLogService
         var newCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
         // 获取 {list.Count} 条记录，新增 {newCount - oldCount} 条记录
         progress?.Report(string.Format(Lang.GachaLogService_GetGachaResult, list.Count, newCount - oldCount));
+        // 本次确有拉取到记录时，检测是否出现本地未收录的新角色/物品，若有则静默联网补全物品信息（图标 + 名称）。
+        if (list.Count > 0)
+        {
+            await EnsureGachaInfoForUnknownItemsAsync(uid, lang, cancellationToken);
+        }
         return uid;
     }
 
@@ -554,7 +570,7 @@ internal class ZZZGachaService : GachaLogService
 
     /// <summary>
     /// 从客户端接口拉取最新角色/音擎/邦布信息（名称、图标、稀有度、属性、职业），更新到 ZZZGachaInfo 表。
-    /// 用于后续 ChangeGachaItemNameAsync 修正历史记录中的名称。
+    /// 用于后续 ApplyGachaItemNamesAsync 修正历史记录中的名称，并写入多语言名称缓存。
     /// </summary>
     /// <param name="gameBiz">游戏业务线（nap / nap_global 等）。</param>
     /// <param name="lang">期望的语言代码（如 zh-cn, en-us）。</param>
@@ -571,6 +587,8 @@ internal class ZZZGachaService : GachaLogService
             """;
         dapper.Execute(insertSql, data.List, t);
         t.Commit();
+        // 同步写入多语言名称缓存（GachaItemName），供切换语言/导入时按 ItemId 回写名称。
+        SaveItemNamesToCache(data.List.Select(x => ((long)x.Id, x.Name)), data.Language);
         return data.Language;
     }
 
@@ -583,16 +601,15 @@ internal class ZZZGachaService : GachaLogService
     /// <param name="lang">期望的语言代码。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>元组：(实际使用的语言, 受影响的抽卡记录条数)。</returns>
-    public override async Task<(string Language, int Count)> ChangeGachaItemNameAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default)
+    protected override int RewriteRecordNamesFromCache(string lang, long uid)
     {
-        lang = await UpdateGachaInfoAsync(gameBiz, lang, cancellationToken);
         using var dapper = DatabaseService.CreateConnection();
-        int count = dapper.Execute("""
-             INSERT OR REPLACE INTO ZZZGachaItem (Uid, Id, Name, Time, ItemId, ItemType, RankType, GachaType, Count, Lang)
-             SELECT item.Uid, item.Id, info.Name, Time, ItemId, ItemType, RankType, GachaType, Count, @Lang
-             FROM ZZZGachaItem item INNER JOIN ZZZGachaInfo info ON item.ItemId = info.Id;
-             """, new { Lang = lang });
-        return (lang, count);
+        return dapper.Execute("""
+            INSERT OR REPLACE INTO ZZZGachaItem (Uid, Id, Name, Time, ItemId, ItemType, RankType, GachaType, Count, Lang)
+            SELECT item.Uid, item.Id, n.Name, item.Time, item.ItemId, item.ItemType, item.RankType, item.GachaType, item.Count, @Lang
+            FROM ZZZGachaItem item JOIN GachaItemName n ON item.ItemId = n.ItemId
+            WHERE n.Game = @Game AND n.Lang = @Lang AND item.Uid = @Uid;
+            """, new { Lang = lang, Uid = uid, Game = GameKey });
     }
 
 

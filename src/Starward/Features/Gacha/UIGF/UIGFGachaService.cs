@@ -301,19 +301,24 @@ internal class UIGFGachaService
             {
                 archive.Result = null;
                 archive.Error = null;
-                if (archive.Game == GameBiz.hk4e)
+
+                string? result = await Task.Run(() =>
                 {
-                    ImportForGenshin(archive);
-                }
-                if (archive.Game == GameBiz.hkrpg)
-                {
-                    ImportForStarRail(archive);
-                }
-                if (archive.Game == GameBiz.nap)
-                {
-                    ImportForZZZ(archive);
-                }
-                await Task.Delay(100);
+                    if (archive.Game == GameBiz.hk4e)
+                    {
+                        return ImportForGenshin(archive);
+                    }
+                    if (archive.Game == GameBiz.hkrpg)
+                    {
+                        return ImportForStarRail(archive);
+                    }
+                    if (archive.Game == GameBiz.nap)
+                    {
+                        return ImportForZZZ(archive);
+                    }
+                    return null;
+                });
+                archive.Result = result;
             }
             catch (Exception ex)
             {
@@ -324,7 +329,7 @@ internal class UIGFGachaService
 
 
 
-    private void ImportForGenshin(GachaUidArchiveDisplay archive)
+    private string ImportForGenshin(GachaUidArchiveDisplay archive)
     {
         List<GenshinGachaItem> list = new();
         DateTime TIME = new DateTime(2020, 9, 1);
@@ -375,12 +380,12 @@ internal class UIGFGachaService
             """, list, t);
         t.Commit();
         _logger.LogInformation("Imported {count} gacha records for {game}.", affect, archive.Game);
-        archive.Result = noName ? Lang.UIGFGachaService_ImportSuccessfulButNoRecordItemName : Lang.UIGFGachaService_ImportSuccessful;
+        return noName ? Lang.UIGFGachaService_ImportSuccessfulButNoRecordItemName : Lang.UIGFGachaService_ImportSuccessful;
     }
 
 
 
-    private void ImportForStarRail(GachaUidArchiveDisplay archive)
+    private string ImportForStarRail(GachaUidArchiveDisplay archive)
     {
         List<StarRailGachaItem> list = new();
         DateTime TIME = new DateTime(2023, 4, 1);
@@ -435,12 +440,12 @@ internal class UIGFGachaService
             """, list, t);
         t.Commit();
         _logger.LogInformation("Imported {count} gacha records for {game}.", affect, archive.Game);
-        archive.Result = noName ? Lang.UIGFGachaService_ImportSuccessfulButNoRecordItemName : Lang.UIGFGachaService_ImportSuccessful;
+        return noName ? Lang.UIGFGachaService_ImportSuccessfulButNoRecordItemName : Lang.UIGFGachaService_ImportSuccessful;
     }
 
 
 
-    private void ImportForZZZ(GachaUidArchiveDisplay archive)
+    private string ImportForZZZ(GachaUidArchiveDisplay archive)
     {
         List<ZZZGachaItem> list = new();
         DateTime TIME = new DateTime(2024, 7, 1);
@@ -491,7 +496,7 @@ internal class UIGFGachaService
             """, list, t);
         t.Commit();
         _logger.LogInformation("Imported {count} gacha records for {game}.", affect, archive.Game);
-        archive.Result = noName ? Lang.UIGFGachaService_ImportSuccessfulButNoRecordItemName : Lang.UIGFGachaService_ImportSuccessful;
+        return noName ? Lang.UIGFGachaService_ImportSuccessfulButNoRecordItemName : Lang.UIGFGachaService_ImportSuccessful;
     }
 
 

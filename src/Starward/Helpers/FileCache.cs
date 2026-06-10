@@ -14,12 +14,31 @@ using System.Threading.Tasks;
 
 namespace Starward.Helpers;
 
+/// <summary>
+/// 远程文件（主要是图片资源）的本地磁盘缓存管理器。
+/// 特性：
+/// <list type="bullet">
+/// <item>按 URI 计算稳定文件名（XxHash64 + MD5 混合哈希）。</item>
+/// <item>并发去重：相同 URI 的多次请求会共享同一个下载 Task，避免重复下载。</item>
+/// <item>支持断点续传（HTTP Range + _tmp 临时文件 + 原子 Move）。</item>
+/// <item>基于文件最后写入时间 + <see cref="CacheDuration"/> 判断缓存是否有效（默认 90 天）。</item>
+/// <item>可配置重试次数，默认 3 次。</item>
+/// </list>
+/// 主要由 <see cref="CachedImage"/> 使用，也可直接调用获取任意远程资源的本地缓存路径。
+/// </summary>
 internal static class FileCache
 {
 
-
+    /// <summary>
+    /// 共享的 HttpClient。
+    /// 配置了自动解压、HTTP/2+3 多连接、连接池生命周期 5 分钟等优化。
+    /// </summary>
     private static readonly HttpClient _httpClient;
 
+    /// <summary>
+    /// 按缓存文件名（哈希结果）去重的并发下载任务字典。
+    /// Key 为 <see cref="GetCacheFileName(Uri)"/> 的结果，Value 为正在进行的下载 Task。
+    /// </summary>
     private static readonly ConcurrentDictionary<string, Task<string?>> _concurrentTasks;
 
 
@@ -37,16 +56,22 @@ internal static class FileCache
     }
 
 
-
+    /// <summary>下载失败时的最大重试次数（默认 3）。</summary>
     public static int RetryCount { get; set; } = 3;
 
+    /// <summary>缓存有效期（默认 90 天）。超过此时间或文件为空则视为失效，会重新下载。</summary>
     public static TimeSpan CacheDuration { get; set; } = TimeSpan.FromDays(90);
 
-
+    /// <summary>缓存根目录。必须先调用 <see cref="Initialize(string)"/> 才能使用。</summary>
     public static string CacheFolder { get; private set; }
 
 
-
+    /// <summary>
+    /// 初始化缓存目录。
+    /// 应用启动时由 <see cref="AppConfig"/> 调用一次。
+    /// </summary>
+    /// <param name="folder">缓存根目录路径（通常是 CacheFolder/cache）。</param>
+    /// <returns>初始化是否成功。</returns>
     public static bool Initialize(string folder)
     {
         try
@@ -63,14 +88,22 @@ internal static class FileCache
     }
 
 
-
-
+    /// <summary>
+    /// 获取远程 URI 对应资源的本地缓存文件路径（会自动下载并缓存）。
+    /// </summary>
+    /// <param name="uri">远程资源地址。</param>
+    /// <param name="throwOnError">下载失败时是否抛出异常（默认 false，返回 null）。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>本地缓存文件完整路径；失败时返回 null（除非 throwOnError）。</returns>
     public static async Task<string?> GetFromCacheAsync(Uri uri, bool throwOnError = false, CancellationToken cancellationToken = default)
     {
         return await GetItemAsync(uri, throwOnError, cancellationToken);
     }
 
 
+    /// <summary>
+    /// 内部入口：实现并发去重 + 错误处理 + 清理字典。
+    /// </summary>
     private static async Task<string?> GetItemAsync(Uri uri, bool throwOnError, CancellationToken cancellationToken)
     {
         string fileName = GetCacheFileName(uri);
@@ -103,7 +136,9 @@ internal static class FileCache
     }
 
 
-
+    /// <summary>
+    /// 检查本地缓存是否可用；不可用则下载（带重试）。
+    /// </summary>
     private static async Task<string?> GetFromCacheOrDownloadAsync(Uri uri, string fileName, CancellationToken cancellationToken)
     {
         if (CacheFolder is null)
@@ -134,6 +169,11 @@ internal static class FileCache
     }
 
 
+    /// <summary>
+    /// 核心下载实现：支持断点续传。
+    /// 使用 &lt;path&gt;_tmp 作为临时文件，先写入再原子 Move，避免损坏缓存。
+    /// 通过 Range Header 实现续传（服务器支持时）。
+    /// </summary>
     private static async Task DownloadFileAsync(Uri uri, string path, CancellationToken cancellationToken)
     {
         string path_tmp = path + "_tmp";
@@ -159,8 +199,11 @@ internal static class FileCache
     }
 
 
-
-
+    /// <summary>
+    /// 根据 URI 计算缓存文件名。
+    /// 使用 XxHash64（前 8 字节）+ MD5（后 16 字节）混合哈希，兼顾速度与碰撞抵抗。
+    /// 返回 48 字符十六进制字符串。
+    /// </summary>
     private static string GetCacheFileName(Uri uri)
     {
         byte[] hashBytes = ArrayPool<byte>.Shared.Rent(24);
@@ -178,7 +221,10 @@ internal static class FileCache
     }
 
 
-
+    /// <summary>
+    /// 判断指定路径的缓存文件是否仍然有效。
+    /// 条件：文件存在 + 文件大小 &gt; 0 + 最后写入时间在 CacheDuration 之内。
+    /// </summary>
     private static bool IsFileCacheAvailable(string path, TimeSpan duration)
     {
         if (File.Exists(path))
@@ -190,7 +236,10 @@ internal static class FileCache
     }
 
 
-
+    /// <summary>
+    /// 异步删除指定 URI 对应的缓存文件（如果存在）。
+    /// 通常在图片解码失败（BitmapImage_ImageFailed）时调用，用于清理损坏的缓存。
+    /// </summary>
     public static async void DeleteCacheFile(Uri uri)
     {
         await Task.Run(() =>
@@ -210,7 +259,5 @@ internal static class FileCache
             }
         }).ConfigureAwait(false);
     }
-
-
 
 }

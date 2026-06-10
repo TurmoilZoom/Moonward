@@ -67,6 +67,8 @@ public sealed partial class MainView : UserControl
         WeakReferenceMessenger.Default.Register<MainViewNavigateMessage>(this, OnMainViewNavigateMessageReceived);
         WeakReferenceMessenger.Default.Register<BH3GlobalGameServerChangedMessage>(this, OnBH3GlobalGameServerChanged);
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, (_, _) => _ = CheckUpdateOrShowRecentUpdateContentAsync());
+        // 切换软件语言后，异步把三个游戏的抽卡物品名称回写为新语言
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().ChangeLanguageAsync()));
     }
 
 
@@ -77,6 +79,8 @@ public sealed partial class MainView : UserControl
         CheckSystemProxy();
         HotkeyManager.InitializeHotkey(this.XamlRoot.GetWindowHandle());
         _ = CheckUpdateOrShowRecentUpdateContentAsync();
+        // 启动时为三个游戏按当前语言确保物品名称映射缓存；首次启动/更新后会一次性迁移存量记录名称。
+        _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().EnsureCurrentLanguageOnStartupAsync());
         AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
         LogUploadService.Start();
         if (AppConfig.EnableGamepadController)

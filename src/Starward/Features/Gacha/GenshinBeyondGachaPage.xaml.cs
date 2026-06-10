@@ -69,7 +69,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
     {
         await Task.Delay(16);
         Initialize();
-        await UpdateGachaInfoAsync();
+        await EnsureGachaInfoAsync();
     }
 
 
@@ -160,11 +160,15 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
 
 
 
-    private async Task UpdateGachaInfoAsync()
+    /// <summary>
+    /// 兜底：首次启动时 <see cref="GachaItemNameService"/> 已全量下载物品信息（图标），
+    /// 此处仅在表仍为空（如启动时无网络）时重试下载；新物品由更新记录时按需增量补全。
+    /// </summary>
+    private async Task EnsureGachaInfoAsync()
     {
         try
         {
-            await _gachaLogService.UpdateGachaInfoAsync();
+            await _gachaLogService.EnsureGachaInfoAsync();
         }
         catch (Exception ex)
         {
@@ -262,7 +266,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
             };
             InAppToast.MainWindow?.Show(infoBar);
             var progress = new Progress<string>((str) => infoBar.Message = str);
-            var newUid = await _gachaLogService.GetGachaLogAsync(url, all, GachaLanguage, progress, cancelSource.Token);
+            var newUid = await _gachaLogService.GetGachaLogAsync(url, all, System.Globalization.CultureInfo.CurrentUICulture.Name, progress, cancelSource.Token);
             infoBar.Title = $"Uid {newUid}";
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
@@ -349,20 +353,6 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
             InAppToast.MainWindow?.Error(ex);
         }
     }
-
-
-
-    public string? GachaLanguage
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                AppConfig.GachaLanguage = value;
-            }
-        }
-    } = AppConfig.GachaLanguage;
 
 
 

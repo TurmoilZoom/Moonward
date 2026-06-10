@@ -9,6 +9,7 @@ using Starward.Features.Database;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,6 +54,12 @@ internal abstract class GachaLogService
 
     /// <summary>当前游戏对应的数据库表名（如 "GenshinGachaItem" / "StarRailGachaItem" / "ZZZGachaItem"）。</summary>
     protected abstract string GachaTableName { get; }
+
+    /// <summary>当前游戏的物品信息表名（"GenshinGachaInfo" / "StarRailGachaInfo" / "ZZZGachaInfo"），提供图标与 ItemId 映射。</summary>
+    protected abstract string GachaInfoTableName { get; }
+
+    /// <summary>物品信息表里与 GachaItem.ItemId 关联的主键列名（原神/绝区零为 "Id"，星铁为 "ItemId"）。</summary>
+    protected abstract string GachaInfoIdColumn { get; }
 
     /// <summary>
     /// 根据卡池查询类型（IGachaType）从完整记录列表中筛选出属于该类型（或该类型组）的记录。
@@ -233,6 +240,11 @@ internal abstract class GachaLogService
             var newCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
             // 获取 {list.Count} 条记录，新增 {newCount - oldCount} 条记录
             progress?.Report(string.Format(Lang.GachaLogService_GetGachaResult, list.Count, newCount - oldCount));
+            // 本次确有拉取到记录时，检测是否出现本地未收录的新角色/物品，若有则静默联网补全物品信息（图标 + 名称）。
+            if (list.Count > 0)
+            {
+                await EnsureGachaInfoForUnknownItemsAsync(uid, lang, cancellationToken);
+            }
         }
         return uid;
     }
@@ -420,14 +432,192 @@ internal abstract class GachaLogService
 
 
 
+    /// <summary>当前游戏短键（"hk4e"/"hkrpg"/"nap"），作为多语言名称缓存表 GachaItemName 的 Game 列。</summary>
+    protected string GameKey => CurrentGameBiz.Game;
+
+
+
     /// <summary>
-    /// 先调用 UpdateGachaInfoAsync 更新信息表，再用标准名称回写所有历史记录的 Name 字段（按 ItemId 关联）。
+    /// 把一批 (ItemId, Name) 写入多语言名称缓存表 GachaItemName（按当前游戏 + 规整后的语言）。
+    /// 由各派生类在 <see cref="UpdateGachaInfoAsync"/> 下载 wiki 后调用，使软件可同时缓存多种语言的名称映射。
     /// </summary>
-    /// <param name="gameBiz">游戏业务线。</param>
-    /// <param name="lang">期望的语言代码。</param>
+    /// <param name="items">物品 (ItemId, Name) 序列；ItemId 为 0 或名称为空的项会被忽略。</param>
+    /// <param name="lang">语言代码（内部会用 <see cref="LanguageUtil.FilterLanguage"/> 规整）。</param>
+    protected void SaveItemNamesToCache(IEnumerable<(long ItemId, string Name)> items, string lang)
+    {
+        lang = LanguageUtil.FilterLanguage(lang);
+        string game = GameKey;
+        using var dapper = DatabaseService.CreateConnection();
+        using var t = dapper.BeginTransaction();
+        dapper.Execute("""
+            INSERT OR REPLACE INTO GachaItemName (Game, ItemId, Lang, Name) VALUES (@Game, @ItemId, @Lang, @Name);
+            """,
+            items.Where(x => x.ItemId != 0 && !string.IsNullOrEmpty(x.Name))
+                 .Select(x => new { Game = game, x.ItemId, Lang = lang, x.Name }),
+            t);
+        t.Commit();
+    }
+
+
+
+    /// <summary>本地是否已缓存指定语言（规整后）的名称映射。</summary>
+    /// <param name="lang">语言代码。</param>
+    /// <returns>已有缓存返回 true。</returns>
+    protected bool HasNameCache(string lang)
+    {
+        lang = LanguageUtil.FilterLanguage(lang);
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.QueryFirstOrDefault<int>(
+            "SELECT COUNT(*) FROM GachaItemName WHERE Game = @Game AND Lang = @Lang;",
+            new { Game = GameKey, Lang = lang }) > 0;
+    }
+
+
+
+    /// <summary>
+    /// 确保本地已缓存指定语言的名称映射；缺失则联网下载（<see cref="UpdateGachaInfoAsync"/> 同时刷新 GachaInfo 图标与名称缓存）。
+    /// </summary>
+    /// <param name="lang">语言代码。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>元组：(实际使用的语言, 受影响的抽卡记录条数)。</returns>
-    public abstract Task<(string Language, int Count)> ChangeGachaItemNameAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default);
+    public async Task EnsureNameCacheAsync(string lang, CancellationToken cancellationToken = default)
+    {
+        lang = LanguageUtil.FilterLanguage(lang);
+        if (!HasNameCache(lang))
+        {
+            await UpdateGachaInfoAsync(CurrentGameBiz, lang, cancellationToken);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 指定 UID 是否存在「本地物品信息表里查不到」的记录（缺图标的新角色/物品；原神/星铁亦含 ItemId 仍为 0 的记录）。
+    /// </summary>
+    /// <param name="uid">玩家 UID。</param>
+    /// <returns>存在未收录记录返回 true。</returns>
+    protected bool HasUnknownGachaItems(long uid)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.QueryFirstOrDefault<int>($"""
+            SELECT EXISTS(
+                SELECT 1 FROM {GachaTableName} item
+                LEFT JOIN {GachaInfoTableName} info ON item.ItemId = info.{GachaInfoIdColumn}
+                WHERE item.Uid = @uid AND info.{GachaInfoIdColumn} IS NULL
+            );
+            """, new { uid }) == 1;
+    }
+
+
+
+    /// <summary>
+    /// 拉取记录后调用：若该 UID 出现本地未收录的新角色/物品，则静默联网刷新本游戏物品信息表
+    /// （<see cref="UpdateGachaInfoAsync"/> 会写入图标 + 多语言名称缓存，原神/星铁内部还会回填 ItemId），
+    /// 使本次新增记录立即能正确显示图标与名称。
+    /// 静默、容错：任何失败（含取消、网络错误）仅记日志，不影响已落库的抽卡记录。
+    /// </summary>
+    /// <param name="uid">玩家 UID。</param>
+    /// <param name="lang">目标语言（跟随软件 UI 语言）；为空时取当前 UI 语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    protected async Task EnsureGachaInfoForUnknownItemsAsync(long uid, string? lang, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (uid == 0 || !HasUnknownGachaItems(uid))
+            {
+                return;
+            }
+            string language = string.IsNullOrWhiteSpace(lang)
+                ? CultureInfo.CurrentUICulture.Name
+                : lang;
+            await UpdateGachaInfoAsync(CurrentGameBiz, language, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Ensure gacha info for unknown items failed, uid {uid}", uid);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 把当前游戏所有抽卡记录的名称按 ItemId 回写为指定语言（取自多语言缓存 GachaItemName）。
+    /// 缺失该语言缓存时先联网下载；并按名称跨语言回填旧记录缺失的 ItemId（ZZZ 记录恒带 ItemId，回填为空操作）。
+    /// 按 UID 分批回写以平滑上报进度。
+    /// </summary>
+    /// <param name="lang">目标语言代码（跟随软件 UI 语言；内部会规整）。</param>
+    /// <param name="progress">进度回调（已处理/总数/是否完成）。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>受影响的记录条数。</returns>
+    public virtual async Task<int> ApplyGachaItemNamesAsync(string lang, IProgress<GachaNameProgress>? progress = null, CancellationToken cancellationToken = default)
+    {
+        lang = LanguageUtil.FilterLanguage(lang);
+        int total;
+        using (var counter = DatabaseService.CreateConnection())
+        {
+            total = counter.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName};");
+        }
+        // 下载映射可能耗时：先上报一次让进度提示条尽快出现（此阶段 Done=0，UI 显示为不确定态）。
+        if (total > 0)
+        {
+            progress?.Report(new GachaNameProgress(0, total, false));
+        }
+        await EnsureNameCacheAsync(lang, cancellationToken);
+        BackfillItemIdByNameFromCache();
+        if (total == 0)
+        {
+            progress?.Report(new GachaNameProgress(0, 0, true));
+            return 0;
+        }
+        using var dapper = DatabaseService.CreateConnection();
+        var groups = dapper.Query<GachaUidCount>($"SELECT Uid, COUNT(*) AS Count FROM {GachaTableName} GROUP BY Uid;").ToList();
+        int done = 0;
+        int changed = 0;
+        foreach (GachaUidCount group in groups)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            changed += RewriteRecordNamesFromCache(lang, group.Uid);
+            done += group.Count;
+            progress?.Report(new GachaNameProgress(Math.Min(done, total), total, false));
+        }
+        progress?.Report(new GachaNameProgress(total, total, true));
+        return changed;
+    }
+
+
+
+    /// <summary>
+    /// 按 ItemId 从多语言缓存 GachaItemName 把指定 UID 的记录名称回写为指定语言（派生类实现：列清单各游戏不同）。
+    /// </summary>
+    /// <param name="lang">规整后的语言代码。</param>
+    /// <param name="uid">玩家 UID。</param>
+    /// <returns>受影响条数。</returns>
+    protected abstract int RewriteRecordNamesFromCache(string lang, long uid);
+
+
+
+    /// <summary>
+    /// 按名称跨语言匹配，为 ItemId 为 0 的旧记录回填 ItemId（解决任意语言导入的旧文件无 item_id 问题）。
+    /// ZZZ 记录恒带 ItemId，此操作匹配不到行，为空操作。
+    /// </summary>
+    protected void BackfillItemIdByNameFromCache()
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        dapper.Execute($"""
+            UPDATE {GachaTableName}
+            SET ItemId = (SELECT ItemId FROM GachaItemName WHERE Game = @Game AND Name = {GachaTableName}.Name LIMIT 1)
+            WHERE ItemId = 0 AND EXISTS (SELECT 1 FROM GachaItemName WHERE Game = @Game AND Name = {GachaTableName}.Name);
+            """, new { Game = GameKey });
+    }
+
+
+
+    /// <summary>用于按 UID 统计记录数以推进进度。</summary>
+    private sealed class GachaUidCount
+    {
+        public long Uid { get; set; }
+
+        public int Count { get; set; }
+    }
 
 
 }

@@ -7,7 +7,9 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.Gacha.UIGF"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mxi="using:Microsoft.Xaml.Interactivity"
              xmlns:sf="using:Starward.Frameworks"
+             xmlns:sh="using:Starward.Helpers"
              Title="GachaImportAndExportWindow"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -263,7 +265,20 @@
         </Pivot>
 
 
-
+        <StackPanel x:Name="StackPanel_InAppToast"
+                    Grid.Row="1"
+                    MaxWidth="600"
+                    Margin="24,24,24,24"
+                    VerticalAlignment="Bottom">
+            <StackPanel.Transitions>
+                <TransitionCollection>
+                    <AddDeleteThemeTransition />
+                </TransitionCollection>
+            </StackPanel.Transitions>
+            <mxi:Interaction.Behaviors>
+                <sh:InAppToast />
+            </mxi:Interaction.Behaviors>
+        </StackPanel>
 
 
     </Grid>

@@ -255,7 +255,8 @@ internal static class DatabaseService
         Sql_v15,
         Sql_v16,
         Sql_v17,
-        Sql_v18
+        Sql_v18,
+        Sql_v19
     ];
 
 
@@ -1008,6 +1009,24 @@ internal static class DatabaseService
         );
 
         PRAGMA USER_VERSION = 18;
+        COMMIT TRANSACTION;
+        """;
+
+    private const string Sql_v19 = """
+        BEGIN TRANSACTION;
+
+        CREATE TABLE IF NOT EXISTS GachaItemName
+        (
+            Game   TEXT    NOT NULL,
+            ItemId INTEGER NOT NULL,
+            Lang   TEXT    NOT NULL,
+            Name   TEXT    NOT NULL,
+            PRIMARY KEY (Game, ItemId, Lang)
+        );
+        CREATE INDEX IF NOT EXISTS IX_GachaItemName_Game_Lang ON GachaItemName (Game, Lang);
+        CREATE INDEX IF NOT EXISTS IX_GachaItemName_Game_Lang_Name ON GachaItemName (Game, Lang, Name);
+
+        PRAGMA USER_VERSION = 19;
         COMMIT TRANSACTION;
         """;
 

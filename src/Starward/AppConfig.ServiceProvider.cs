@@ -74,6 +74,7 @@ public static partial class AppConfig
             sc.AddSingleton<GenshinGachaService>();
             sc.AddSingleton<StarRailGachaService>();
             sc.AddSingleton<ZZZGachaService>();
+            sc.AddSingleton<GachaItemNameService>();
             sc.AddSingleton<UIGFGachaService>();
             sc.AddSingleton<GenshinBeyondGachaClient>();
             sc.AddSingleton<GenshinBeyondGachaService>();

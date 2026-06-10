@@ -26,6 +26,10 @@ internal class GenshinGachaService : GachaLogService
 
     protected override string GachaTableName { get; } = "GenshinGachaItem";
 
+    protected override string GachaInfoTableName { get; } = "GenshinGachaInfo";
+
+    protected override string GachaInfoIdColumn { get; } = "Id";
+
 
 
 
@@ -227,6 +231,11 @@ internal class GenshinGachaService : GachaLogService
         dapper.Execute(insertSql, data.AllWeapon, t);
         t.Commit();
         UpdateGachaItemId();
+        // 同步写入多语言名称缓存（GachaItemName），供切换语言/导入时按 ItemId 回写名称。
+        SaveItemNamesToCache(
+            data.AllAvatar.Select(x => ((long)x.Id, x.Name))
+                .Concat(data.AllWeapon.Select(x => ((long)x.Id, x.Name))),
+            data.Language);
         return data.Language;
     }
 
@@ -242,16 +251,15 @@ internal class GenshinGachaService : GachaLogService
     }
 
 
-    public override async Task<(string Language, int Count)> ChangeGachaItemNameAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default)
+    protected override int RewriteRecordNamesFromCache(string lang, long uid)
     {
-        lang = await UpdateGachaInfoAsync(gameBiz, lang, cancellationToken);
         using var dapper = DatabaseService.CreateConnection();
-        int count = dapper.Execute("""
+        return dapper.Execute("""
             INSERT OR REPLACE INTO GenshinGachaItem (Uid, Id, Name, Time, ItemId, ItemType, RankType, GachaType, Count, Lang)
-            SELECT item.Uid, item.Id, info.Name, Time, ItemId, ItemType, RankType, GachaType, Count, @Lang
-            FROM GenshinGachaItem item INNER JOIN GenshinGachaInfo info ON item.ItemId = info.Id;
-            """, new { Lang = lang });
-        return (lang, count);
+            SELECT item.Uid, item.Id, n.Name, item.Time, item.ItemId, item.ItemType, item.RankType, item.GachaType, item.Count, @Lang
+            FROM GenshinGachaItem item JOIN GachaItemName n ON item.ItemId = n.ItemId
+            WHERE n.Game = @Game AND n.Lang = @Lang AND item.Uid = @Uid;
+            """, new { Lang = lang, Uid = uid, Game = GameKey });
     }
 
 

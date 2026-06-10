@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.Xaml.Interactivity;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -25,6 +26,10 @@ public sealed partial class UIGF4GachaWindow : WindowEx
     private readonly ILogger<UIGF4GachaWindow> _logger = AppConfig.GetLogger<UIGF4GachaWindow>();
 
     private readonly UIGFGachaService _uigfGachaService = AppConfig.GetService<UIGFGachaService>();
+
+
+    /// <summary>本窗口的应用内通知（挂载在 StackPanel_InAppToast 上的行为）。</summary>
+    private InAppToast? WindowToast => Interaction.GetBehaviors(StackPanel_InAppToast).OfType<InAppToast>().FirstOrDefault();
 
 
 
@@ -153,6 +158,7 @@ public sealed partial class UIGF4GachaWindow : WindowEx
         {
             ImportError = ex.Message;
             _logger.LogError(ex, "Select uigf4 file");
+            WindowToast?.Error(ex);
         }
     }
 
@@ -168,6 +174,11 @@ public sealed partial class UIGF4GachaWindow : WindowEx
             {
                 var selected = ListView_Import.SelectedItems.Cast<GachaUidArchiveDisplay>().ToList();
                 await _uigfGachaService.ImportAsync(selected);
+                // 导入失败的账号以应用内通知提示（行内红字仅在列表可见时易被忽略）
+                foreach (var failed in selected.Where(x => x.Error is not null))
+                {
+                    WindowToast?.Error(string.Format(Lang.UIGF4GachaWindow_Uid0ImportFailed, failed.Uid), failed.Error);
+                }
                 // 每导入成功一次就通知抽卡页面刷新（无需关闭本窗口）
                 var imported = selected.Where(x => x.Error is null)
                                        .Select(x => (x.Game, x.Uid))
@@ -175,6 +186,11 @@ public sealed partial class UIGF4GachaWindow : WindowEx
                 if (imported.Count > 0)
                 {
                     WeakReferenceMessenger.Default.Send(new GachaLogImportedMessage(imported));
+                    // 导入后按 ItemId 把每个游戏导入记录的名称回写为当前软件语言（缺失则联网下载映射）。
+                    foreach (var game in imported.Select(x => x.Game).Distinct())
+                    {
+                        _ = AppConfig.GetService<GachaItemNameService>().ApplyForGameAsync(game);
+                    }
                 }
             }
         }
@@ -182,6 +198,7 @@ public sealed partial class UIGF4GachaWindow : WindowEx
         {
             ImportError = ex.Message;
             _logger.LogError(ex, "Import uigf4 gacha");
+            WindowToast?.Error(ex);
         }
     }
 

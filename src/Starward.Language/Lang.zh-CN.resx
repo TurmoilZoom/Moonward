@@ -313,6 +313,9 @@
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
     <value>更新记录</value>
   </data>
+  <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
+    <value>正在更新物品名称…</value>
+  </data>
   <data name="GachaLogPage_UpdateSavedURL" xml:space="preserve">
     <value>更新 (保存的 URL)</value>
   </data>
@@ -1904,6 +1907,9 @@
   </data>
   <data name="UIGFGachaService_ImportSuccessful" xml:space="preserve">
     <value>导入成功</value>
+  </data>
+  <data name="UIGF4GachaWindow_Uid0ImportFailed" xml:space="preserve">
+    <value>Uid {0} 导入失败</value>
   </data>
   <data name="UIGFGachaService_0FieldIsMissingInAGachaRecord" xml:space="preserve">
     <value>存在没有 {0} 数据的抽卡记录</value>

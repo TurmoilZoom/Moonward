@@ -313,6 +313,9 @@ closing the program during decompression will cause game file corruption.</value
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
     <value>Update Records</value>
   </data>
+  <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
+    <value>Updating item names…</value>
+  </data>
   <data name="GachaLogPage_UpdateSavedURL" xml:space="preserve">
     <value>Update (Saved URL)</value>
   </data>
@@ -1904,6 +1907,9 @@ You are welcome to submit the exported data to the following repository:</value>
   </data>
   <data name="UIGFGachaService_ImportSuccessful" xml:space="preserve">
     <value>Import successful.</value>
+  </data>
+  <data name="UIGF4GachaWindow_Uid0ImportFailed" xml:space="preserve">
+    <value>Uid {0} import failed.</value>
   </data>
   <data name="UIGFGachaService_0FieldIsMissingInAGachaRecord" xml:space="preserve">
     <value>"{0}" field is missing in a gacha record.</value>

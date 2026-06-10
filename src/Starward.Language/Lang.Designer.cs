@@ -2167,7 +2167,16 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GachaLogPage_GachaLanguageDesc", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Updating item names… 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdatingItemNames {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdatingItemNames", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Game not installed 的本地化字符串。
         /// </summary>
@@ -7359,6 +7368,15 @@ namespace Starward.Language {
             }
         }
         
+        /// <summary>
+        ///   查找类似 Uid {0} import failed. 的本地化字符串。
+        /// </summary>
+        public static string UIGF4GachaWindow_Uid0ImportFailed {
+            get {
+                return ResourceManager.GetString("UIGF4GachaWindow_Uid0ImportFailed", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 &quot;{0}&quot; field is missing in a gacha record. 的本地化字符串。
         /// </summary>

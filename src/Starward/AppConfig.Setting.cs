@@ -57,7 +57,12 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-    public static string? GachaLanguage
+    /// <summary>
+    /// 上次完成抽卡物品名称回写所用的语言（规整后的语言键，如 "zh-cn"）。
+    /// 用于判断软件语言是否变化：与当前 UI 语言不一致（含首次启动后为 null）时触发存量记录名称迁移。
+    /// 取代旧的 GachaLanguage（抽卡名称现跟随软件 UI 语言）。
+    /// </summary>
+    public static string? LastGachaNameLanguage
     {
         get => GetValue<string>();
         set => SetValue(value);

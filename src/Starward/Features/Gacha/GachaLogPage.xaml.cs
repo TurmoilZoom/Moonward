@@ -57,6 +57,9 @@ public sealed partial class GachaLogPage : PageBase
     /// <summary>上次重建卡片所基于的统计数据引用</summary>
     private List<GachaTypeStats>? _reconciledStatsSource;
 
+    /// <summary>当前软件 UI 语言代码。</summary>
+    private static string CurrentLanguage => System.Globalization.CultureInfo.CurrentUICulture.Name;
+
 
 
     public GachaLogPage()
@@ -145,7 +148,7 @@ public sealed partial class GachaLogPage : PageBase
     /// <para>1. 延迟一帧（Task.Delay(16)）后注册两个 WeakReferenceMessenger 处理器：<see cref="UpdateGachaLogMessage"/>（外部触发抽卡记录更新时激活窗口并拉取）和 <see cref="GachaLogImportedMessage"/>（本地导入完成后刷新 UID 列表与统计）；</para>
     /// <para>2. 订阅 <see cref="Grid_GachaStats"/> 的 PointerWheelChanged 事件，用于拖拽时横向滚轮优先滚动；</para>
     /// <para>3. 调用 <see cref="Initialize"/> 完成卡池筛选列表（GachaBanners）、UID 列表加载、恢复上次选中 UID、以及空数据时的表情占位显示；</para>
-    /// <para>4. 异步调用 <see cref="UpdateWikiDataAsync"/> 更新当前语言的卡池/物品维基数据（不阻塞 UI）。</para>
+    /// <para>4. 异步调用 <see cref="EnsureWikiDataAsync"/> 确保当前语言的卡池/物品维基数据已缓存（缺失才联网，不阻塞 UI）。</para>
     /// <para>注意：方法为 async void，符合基类事件驱动约定，不应被直接 await。</para>
     /// </summary>
     protected override async void OnLoaded()
@@ -160,9 +163,10 @@ public sealed partial class GachaLogPage : PageBase
             }
         });
         WeakReferenceMessenger.Default.Register<GachaLogImportedMessage>(this, (s, m) => OnGachaLogImported(m));
+        WeakReferenceMessenger.Default.Register<GachaItemNameProgressMessage>(this, (s, m) => OnGachaItemNameProgress(m));
         Grid_GachaStats.PointerWheelChanged += Grid_GachaStats_PointerWheelChanged;
         Initialize();
-        await UpdateWikiDataAsync();
+        await EnsureWikiDataAsync();
     }
 
 
@@ -254,29 +258,25 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 更新抽卡维基数据（物品/角色/邦布名称本地化信息）。
-    /// <para>在 <see cref="OnLoaded"/> 末尾被 await 调用（不阻塞页面其他初始化），确保 UI 能以正确语言显示抽卡记录。</para>
-    /// <para>无参数。</para>
-    /// <para>输入依赖：</para>
-    /// <para>1. <see cref="GachaLanguage"/> 属性（用户设置的抽卡数据语言），若为空或空白则回退为 <see cref="System.Globalization.CultureInfo.CurrentUICulture"/>.Name；</para>
-    /// <para>2. <see cref="CurrentGameBiz"/>（决定使用哪个具体 gacha service 以及写入哪张本地表）；</para>
-    /// <para>3. <see cref="_gachaLogService"/>（在 OnNavigatedTo 中根据游戏类型注入为 GenshinGachaService / StarRailGachaService / ZZZGachaService 之一）。</para>
-    /// <para>输出/副作用：</para>
-    /// <para>通过服务层的 <see cref="GachaLogService.UpdateGachaInfoAsync(GameBiz, string, CancellationToken)"/> 从 miHoYo 服务器获取指定语言的抽卡信息（AllAvatar、AllWeapon 等），执行 INSERT OR REPLACE 写入本地 SQLite 表（GenshinGachaInfo / StarRailGachaInfo / ZZZGachaInfo）；</para>
-    /// <para>更新后，<see cref="GachaLogItemEx"/>、统计卡片、物品统计列表等会使用本地化的最新名称；</para>
-    /// <para>服务内部还会执行 UpdateGachaItemId 等后续处理。</para>
-    /// <para>任何异常仅记录日志（_logger），不抛出，不影响页面加载和主要功能。</para>
+    /// 确保本地已缓存当前游戏 + 当前 UI 语言的抽卡维基数据（图标 + 多语言名称）。
+    /// <para>在 <see cref="OnLoaded"/> 末尾被 await 调用（不阻塞页面其他初始化）。</para>
+    /// <para><b>仅当本地尚无该游戏+语言的名称缓存时才联网下载</b>（由 <see cref="GachaLogService.EnsureNameCacheAsync"/> 内部判断），
+    /// 因此正常情况下打开页面<b>不会</b>发起网络请求 —— 取代了原先「每次进入页面都无条件刷新 wiki」的实现。</para>
+    /// <para>数据来源兜底：启动时 <see cref="GachaItemNameService.EnsureCurrentLanguageOnStartupAsync"/> 已为三个游戏确保缓存，
+    /// 且 GachaInfo 为持久化表；版本更新带来的新角色/物品由「更新抽卡记录」时的按需补全（EnsureGachaInfoForUnknownItemsAsync）处理。
+    /// 此处仅为首次使用 / 启动下载失败等情况的兜底。</para>
+    /// <para>任何异常仅记录日志，不抛出，不影响页面加载和主要功能。</para>
     /// </summary>
-    private async Task UpdateWikiDataAsync()
+    private async Task EnsureWikiDataAsync()
     {
         try
         {
-            string lang = string.IsNullOrWhiteSpace(GachaLanguage) ? System.Globalization.CultureInfo.CurrentUICulture.Name : GachaLanguage;
-            await _gachaLogService.UpdateGachaInfoAsync(CurrentGameBiz, lang);
+            // 抽卡物品名称跟随软件 UI 语言；缺该语言缓存时才联网下载（图标 + 多语言名称缓存）。
+            await _gachaLogService.EnsureNameCacheAsync(CurrentLanguage);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Update wiki data {gameBiz}", CurrentGameBiz);
+            _logger.LogError(ex, "Ensure wiki data {gameBiz}", CurrentGameBiz);
         }
     }
 
@@ -322,15 +322,18 @@ public sealed partial class GachaLogPage : PageBase
     /// <summary>
     /// 初始化卡池筛选列表（GachaBanners）。
     /// <para>从 _gachaLogService.QueryGachaTypes 获取当前游戏所有卡池类型，包装成 GachaBanner；</para>
-    /// <para>然后从 AppConfig 读取用户上次保存的勾选状态（逗号分隔的 Value 列表）并恢复 IsSelected；</para>
-    /// <para>针对版本更新新增的卡池（星铁联动、ZZZ 重映/回响），在首次遇到时自动勾选并持久化标记，避免用户错过新卡池。</para>
+    /// <para>若无用户保存的勾选偏好（首次启动或该游戏从未在抽卡页配置过），默认勾选全部卡池；</para>
+    /// <para>若用户此前有保存的筛选，则恢复之；针对版本更新新增的卡池（星铁联动、ZZZ 重映/回响），仅对有旧保存的用户做一次性追加勾选，避免错过新内容，同时持久化更新后的选择。</para>
     /// </summary>
     private void InitializeGachaBanners()
     {
         GachaBanners = _gachaLogService.QueryGachaTypes.Select(x => new GachaBanner(x)).ToList();
         string? banner = AppConfig.GetDisplayGachaBanners(CurrentGameBiz.Game);
-        bool anySelected = false;
-        if (!string.IsNullOrWhiteSpace(banner))
+
+        // banner 为 null 表示从未写入过（首次启动）；为 "" 表示用户明确清空过选择。
+        bool hadExplicitSetting = banner is not null;
+
+        if (hadExplicitSetting && !string.IsNullOrWhiteSpace(banner))
         {
             var saved = banner.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                               .Select(x => int.TryParse(x, out int v) ? v : int.MinValue)
@@ -339,24 +342,55 @@ public sealed partial class GachaLogPage : PageBase
             foreach (GachaBanner b in GachaBanners)
             {
                 b.IsSelected = saved.Contains(b.Value);
-                anySelected |= b.IsSelected;
             }
         }
-        // 版本更新后默认勾选新增卡池。
+        // 否则：无保存或保存为空字符串 → 暂不勾选任何（留待下方默认全选或保持清空）。
+
+        // 版本更新一次性追加：仅当用户之前已有保存的筛选时，才把新增卡池类型加入当前选择。
+        // 全新用户走“无保存则默认全选”分支，新池自然包含在内。
+        bool didPromote = false;
         if (CurrentGameBiz.Game is GameBiz.hkrpg && !AppConfig.GetValue(false, "SavedStarRailBannersAfterCollaborationStarting"))
         {
-            foreach (GachaBanner b in GachaBanners.Where(x => x.Value is 21 or 22))
+            if (hadExplicitSetting && !string.IsNullOrWhiteSpace(banner))
             {
-                b.IsSelected = true;
+                foreach (GachaBanner b in GachaBanners.Where(x => x.Value is 21 or 22))
+                {
+                    b.IsSelected = true;
+                }
             }
+            AppConfig.SetValue(true, "SavedStarRailBannersAfterCollaborationStarting");
+            didPromote = true;
         }
         if (CurrentGameBiz.Game is GameBiz.nap && !AppConfig.GetValue(false, "SavedZZZBannersSinceVersion2.5"))
         {
-            foreach (GachaBanner b in GachaBanners.Where(x => x.Value is 102 or 103))
+            if (hadExplicitSetting && !string.IsNullOrWhiteSpace(banner))
+            {
+                foreach (GachaBanner b in GachaBanners.Where(x => x.Value is 102 or 103))
+                {
+                    b.IsSelected = true;
+                }
+            }
+            AppConfig.SetValue(true, "SavedZZZBannersSinceVersion2.5");
+            didPromote = true;
+        }
+
+        // 首次使用该游戏的抽卡记录页面（无显式保存的 banner 偏好）→ 默认选择全部卡池。
+        // 这会让原神、星铁、绝区零在软件首次启动时都显示所有卡池统计卡片。
+        if (!hadExplicitSetting)
+        {
+            foreach (GachaBanner b in GachaBanners)
             {
                 b.IsSelected = true;
             }
         }
+
+        // 持久化默认选择（首次）或升级后的追加选择（旧用户），让偏好在下次启动时被记住。
+        if (!hadExplicitSetting || didPromote)
+        {
+            string value = string.Join(',', GachaBanners.Where(x => x.IsSelected).Select(x => x.Value));
+            AppConfig.SetDisplayGachaBanners(CurrentGameBiz.Game, value);
+        }
+
         UpdateGachaBannerFilterIndicator();
     }
 
@@ -791,7 +825,7 @@ public sealed partial class GachaLogPage : PageBase
             };
             InAppToast.MainWindow?.Show(infoBar);
             var progress = new Progress<string>((str) => infoBar.Message = str);
-            var newUid = await _gachaLogService.GetGachaLogAsync(url, all, GachaLanguage, progress, cancelSource.Token);
+            var newUid = await _gachaLogService.GetGachaLogAsync(url, all, CurrentLanguage, progress, cancelSource.Token);
             infoBar.Title = $"Uid {newUid}";
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
@@ -911,7 +945,7 @@ public sealed partial class GachaLogPage : PageBase
             };
             InAppToast.MainWindow?.Show(infoBar);
             var progress = new Progress<string>((str) => infoBar.Message = str);
-            var uid = await zzzGachaService.GetGachaLogByGameRecordAsync(role, param is "all", GachaLanguage, progress, cancelSource.Token);
+            var uid = await zzzGachaService.GetGachaLogByGameRecordAsync(role, param is "all", CurrentLanguage, progress, cancelSource.Token);
             infoBar.Title = $"Uid {uid}";
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
@@ -1085,23 +1119,6 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 抽卡数据语言代码（如 "zh-cn"、"en-us"）。设置后持久化到 AppConfig。
-    /// <para>用于从 miHoYo 服务器拉取对应语言的物品名称。</para>
-    /// </summary>
-    public string? GachaLanguage
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                AppConfig.GachaLanguage = value;
-            }
-        }
-    } = AppConfig.GachaLanguage;
-
-
-    /// <summary>
     /// 将当前 UID 的抽卡 URL 复制到剪贴板。
     /// <para><b>副作用：</b>复制成功后按钮图标短暂变为 ✓（1 秒后恢复）。</para>
     /// </summary>
@@ -1132,24 +1149,50 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 将当前 UID 的抽卡物品名称切换为指定语言。
-    /// <para><b>副作用：</b>调用服务层 <see cref="GachaLogService.ChangeGachaItemNameAsync"/> 批量更新本地数据库；
-    /// 成功后显示 Toast 提示变更数量，并刷新统计卡片。</para>
+    /// 收到名称回写进度消息时（仅当前游戏）显示/更新进度提示条；完成后关闭并刷新统计以显示新语言名称。
+    /// <para>进度消息来自 <see cref="GachaItemNameService"/>，可能在后台线程发出，故 UI 操作统一切回 DispatcherQueue。</para>
     /// </summary>
-    [RelayCommand]
-    private async Task ChangeGachaItemNameAsync()
+    private void OnGachaItemNameProgress(GachaItemNameProgressMessage message)
     {
-        try
+        if (message.Game.Game != CurrentGameBiz.Game)
         {
-            string lang = string.IsNullOrWhiteSpace(GachaLanguage) ? System.Globalization.CultureInfo.CurrentUICulture.Name : GachaLanguage;
-            (lang, int count) = await _gachaLogService.ChangeGachaItemNameAsync(CurrentGameBiz, lang);
-            InAppToast.MainWindow?.Success(null, string.Format(Lang.GachaLogPage_0GachaItemsHaveBeenChangedToLanguage1, count, lang), 5000);
-            UpdateGachaTypeStats(SelectUid);
+            return;
         }
-        catch (Exception ex)
+        // 直接控制页面内固定的 InfoBar（单实例），不经由 InAppToast 二次延迟入队，避免完成关闭与异步显示乱序导致进度条叠加。
+        this.DispatcherQueue.TryEnqueue(() =>
         {
-            _logger.LogError(ex, "Change gacha item name");
-        }
+            try
+            {
+                if (message.Completed)
+                {
+                    InfoBar_NameProgress.IsOpen = false;
+                    // 回写完成（或失败终止）后重读数据库，显示最新名称。
+                    UpdateGachaTypeStats(SelectUid);
+                    return;
+                }
+                if (message.Total <= 0)
+                {
+                    return;
+                }
+                // 下载映射阶段（Done==0）显示不确定态，回写阶段显示确定进度。
+                if (message.Done == 0)
+                {
+                    ProgressBar_NameProgress.IsIndeterminate = true;
+                    InfoBar_NameProgress.Message = null;
+                }
+                else
+                {
+                    ProgressBar_NameProgress.IsIndeterminate = false;
+                    ProgressBar_NameProgress.Value = (double)message.Done / message.Total * 100;
+                    InfoBar_NameProgress.Message = $"{message.Done} / {message.Total}";
+                }
+                InfoBar_NameProgress.IsOpen = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Show gacha item name progress");
+            }
+        });
     }
 
 
@@ -1357,6 +1400,11 @@ public sealed partial class GachaLogPage : PageBase
                 {
                     UidList.Add(uid);
                     SelectUid = uid;
+                }
+                if (uid != 0)
+                {
+                    // 按 ItemId 把导入记录的名称回写为当前软件语言（缺失则联网下载映射），完成后进度处理器会再次刷新。
+                    _ = AppConfig.GetService<GachaItemNameService>().ApplyForGameAsync(CurrentGameBiz);
                 }
             }
         }

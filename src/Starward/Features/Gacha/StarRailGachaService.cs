@@ -25,6 +25,10 @@ internal class StarRailGachaService : GachaLogService
 
     protected override string GachaTableName { get; } = "StarRailGachaItem";
 
+    protected override string GachaInfoTableName { get; } = "StarRailGachaInfo";
+
+    protected override string GachaInfoIdColumn { get; } = "ItemId";
+
 
 
     public StarRailGachaService(ILogger<StarRailGachaService> logger, StarRailGachaClient client) : base(logger, client)
@@ -218,6 +222,11 @@ internal class StarRailGachaService : GachaLogService
         dapper.Execute(insertSql, data.Equipment, t);
         t.Commit();
         UpdateGachaItemId();
+        // 同步写入多语言名称缓存（GachaItemName），供切换语言/导入时按 ItemId 回写名称。
+        SaveItemNamesToCache(
+            data.Avatar.Select(x => ((long)x.ItemId, x.ItemName))
+                .Concat(data.Equipment.Select(x => ((long)x.ItemId, x.ItemName))),
+            data.Language);
         return data.Language;
     }
 
@@ -234,16 +243,15 @@ internal class StarRailGachaService : GachaLogService
     }
 
 
-    public override async Task<(string Language, int Count)> ChangeGachaItemNameAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default)
+    protected override int RewriteRecordNamesFromCache(string lang, long uid)
     {
-        lang = await UpdateGachaInfoAsync(gameBiz, lang, cancellationToken);
         using var dapper = DatabaseService.CreateConnection();
-        int count = dapper.Execute("""
+        return dapper.Execute("""
             INSERT OR REPLACE INTO StarRailGachaItem (Uid, Id, Name, Time, ItemId, ItemType, RankType, GachaType, GachaId, Count, Lang)
-            SELECT item.Uid, Id, info.ItemName, Time, item.ItemId, ItemType, RankType, GachaType, GachaId, Count, @Lang
-            FROM StarRailGachaItem item INNER JOIN StarRailGachaInfo info ON item.ItemId = info.ItemId;
-            """, new { Lang = lang });
-        return (lang, count);
+            SELECT item.Uid, item.Id, n.Name, item.Time, item.ItemId, item.ItemType, item.RankType, item.GachaType, item.GachaId, item.Count, @Lang
+            FROM StarRailGachaItem item JOIN GachaItemName n ON item.ItemId = n.ItemId
+            WHERE n.Game = @Game AND n.Lang = @Lang AND item.Uid = @Uid;
+            """, new { Lang = lang, Uid = uid, Game = GameKey });
     }
 
 
