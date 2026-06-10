@@ -8,6 +8,17 @@ param(
 
 $ErrorActionPreference = "Stop";
 
+# 干净构建：执行前自动删除 build 目录
+$buildRoot = Split-Path $Output -Parent
+if ([string]::IsNullOrWhiteSpace($buildRoot)) { $buildRoot = $Output }
+if (Test-Path $buildRoot -PathType Container) {
+    Write-Host "Cleaning $buildRoot for clean build..." -ForegroundColor Yellow
+    Remove-Item $buildRoot -Recurse -Force
+}
+
+# 确保输出目录存在（dotnet publish 和 msbuild 需要）
+New-Item -ItemType Directory -Path $Output -Force | Out-Null
+
 dotnet publish src/Starward -c Release -r "win-$Architecture" -o "$Output/app-$Version" -p:Platform=$Architecture -p:Version=$Version;
 
 msbuild src/Starward.Launcher "-property:Configuration=Release;Platform=$Architecture;OutDir=$(Resolve-Path "$Output/")";
