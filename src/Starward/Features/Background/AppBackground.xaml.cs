@@ -250,6 +250,8 @@ public sealed partial class AppBackground : UserControl
                     {
                         // 记录最后使用的背景（包括自定义背景），用于下次启动、切换游戏或移动显示器时恢复。
                         AppConfig.SetBg(CurrentGameId.GameBiz, Path.GetFileName(filePath));
+                        // 记录上次是否使用官方版本海报：背景列表更新后据此恢复海报（见 GetSuggestedGameBackgroundAsync）。
+                        AppConfig.SetUseVersionPoster(CurrentGameId.GameBiz, gameBackground.Type is GameBackground.BACKGROUND_TYPE_POSTER);
                         if (gameBackground.Type is not GameBackground.BACKGROUND_TYPE_CUSTOM)
                         {
                             var list = await _backgroundService.GetGameBackgroundsAsync(CurrentGameId);

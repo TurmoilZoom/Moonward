@@ -171,6 +171,12 @@ public class BackgroundService
                 bg = bg2;
             }
         }
+        else if (AppConfig.GetUseVersionPoster(gameId.GameBiz))
+        {
+            // 背景列表已更新：上次使用的是官方版本海报，则继续使用海报（默认第一张），
+            // 与是否开启自定义背景无关——只要上次显示的是海报就保持海报。
+            bg = backgrounds.FirstOrDefault(x => x.Type is GameBackground.BACKGROUND_TYPE_POSTER);
+        }
         bg ??= backgrounds.FirstOrDefault();
         return bg;
     }
