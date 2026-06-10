@@ -218,9 +218,15 @@ internal class GenshinGachaService : GachaLogService
 
 
 
-    public override async Task<string> UpdateGachaInfoAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default)
+    public override async Task<string> UpdateGachaInfoAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default, bool onlyIfNewItems = false)
     {
         var data = await _client.GetGenshinGachaInfoAsync(gameBiz, lang, cancellationToken);
+        // 导航刷新：仅当当前语言名称缓存缺失或出现新角色/武器时才写入，避免每次导航都重写信息表与名称缓存。
+        if (onlyIfNewItems && !ShouldWriteGachaInfo(data.Language,
+                data.AllAvatar.Select(x => (long)x.Id).Concat(data.AllWeapon.Select(x => (long)x.Id))))
+        {
+            return data.Language;
+        }
         using var dapper = DatabaseService.CreateConnection();
         using var t = dapper.BeginTransaction();
         const string insertSql = """

@@ -258,21 +258,19 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 确保本地已缓存当前游戏 + 当前 UI 语言的抽卡维基数据（图标 + 多语言名称）。
-    /// <para>在 <see cref="OnLoaded"/> 末尾被 await 调用（不阻塞页面其他初始化）。</para>
-    /// <para><b>仅当本地尚无该游戏+语言的名称缓存时才联网下载</b>（由 <see cref="GachaLogService.EnsureNameCacheAsync"/> 内部判断），
-    /// 因此正常情况下打开页面<b>不会</b>发起网络请求 —— 取代了原先「每次进入页面都无条件刷新 wiki」的实现。</para>
-    /// <para>数据来源兜底：启动时 <see cref="GachaItemNameService.EnsureCurrentLanguageOnStartupAsync"/> 已为三个游戏确保缓存，
-    /// 且 GachaInfo 为持久化表；版本更新带来的新角色/物品由「更新抽卡记录」时的按需补全（EnsureGachaInfoForUnknownItemsAsync）处理。
-    /// 此处仅为首次使用 / 启动下载失败等情况的兜底。</para>
-    /// <para>任何异常仅记录日志，不抛出，不影响页面加载和主要功能。</para>
+    /// 打开抽卡记录页时刷新当前游戏的抽卡维基数据（角色/物品信息 + 多语言名称）。
+    /// <para>在 <see cref="OnLoaded"/> 末尾被 await 调用（async void，不阻塞页面其他初始化）。</para>
+    /// <para>委托 <see cref="GachaItemNameService.RefreshGachaInfoForGameAsync"/>：后台联网获取该游戏<b>全部</b>角色/物品信息，
+    /// 与本地信息表比对，<b>仅当出现新角色/新物品（或当前语言名称缓存缺失）时</b>才写入物品信息表与多语言名称缓存。
+    /// 因此首次使用会全量下载，日常打开页面虽会联网比对、但通常无需写库。</para>
+    /// <para>与「切换游戏」触发点共用同一协调方法，按游戏并发去重；任何异常仅记录日志，不影响页面加载。</para>
     /// </summary>
     private async Task EnsureWikiDataAsync()
     {
         try
         {
-            // 抽卡物品名称跟随软件 UI 语言；缺该语言缓存时才联网下载（图标 + 多语言名称缓存）。
-            await _gachaLogService.EnsureNameCacheAsync(CurrentLanguage);
+            // 打开抽卡页：联网获取全部角色/物品信息并比对，出现新内容（或当前语言名称缓存缺失）时更新信息表与多语言名称缓存。
+            await AppConfig.GetService<GachaItemNameService>().RefreshGachaInfoForGameAsync(CurrentGameBiz);
         }
         catch (Exception ex)
         {

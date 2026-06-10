@@ -108,6 +108,8 @@ public sealed partial class MainView : UserControl
         CurrentGameId = e.Item1;
         CurrentGameFeatureConfig = GameFeatureConfig.FromGameId(CurrentGameId);
         UpdateNavigationView();
+        // 切换游戏：后台刷新该游戏抽卡角色/物品信息（仅原神/星铁/绝区零，协调方法内部已过滤、并发去重，异常仅记日志）。
+        _ = AppConfig.GetService<GachaItemNameService>().RefreshGachaInfoForGameAsync(e.Item1.GameBiz);
     }
 
 

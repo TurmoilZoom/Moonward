@@ -576,10 +576,17 @@ internal class ZZZGachaService : GachaLogService
     /// <param name="lang">期望的语言代码（如 zh-cn, en-us）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>实际使用的语言代码（服务器返回的 Language）。</returns>
-    public override async Task<string> UpdateGachaInfoAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default)
+    public override async Task<string> UpdateGachaInfoAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default, bool onlyIfNewItems = false)
     {
+        //全量获取语言包、图标
         var data = await _client.GetZZZGachaInfoAsync(gameBiz, lang, cancellationToken);
+        // 导航刷新：仅当当前语言名称缓存缺失或出现新代理人/音擎/邦布时才写入，避免每次导航都重写信息表与名称缓存。
+        if (onlyIfNewItems && !ShouldWriteGachaInfo(data.Language, data.List.Select(x => (long)x.Id)))
+        {
+            return data.Language;
+        }
         using var dapper = DatabaseService.CreateConnection();
+        //第一个事务，批量写入 ZZZGachaInfo
         using var t = dapper.BeginTransaction();
         const string insertSql = """
             INSERT OR REPLACE INTO ZZZGachaInfo (Id, Name, Icon, Rarity, ElementType, Profession)
@@ -587,7 +594,7 @@ internal class ZZZGachaService : GachaLogService
             """;
         dapper.Execute(insertSql, data.List, t);
         t.Commit();
-        // 同步写入多语言名称缓存（GachaItemName），供切换语言/导入时按 ItemId 回写名称。
+        // 第二个事务，更新语言包
         SaveItemNamesToCache(data.List.Select(x => ((long)x.Id, x.Name)), data.Language);
         return data.Language;
     }

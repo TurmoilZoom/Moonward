@@ -209,9 +209,15 @@ internal class StarRailGachaService : GachaLogService
     }
 
 
-    public override async Task<string> UpdateGachaInfoAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default)
+    public override async Task<string> UpdateGachaInfoAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default, bool onlyIfNewItems = false)
     {
         var data = await _client.GetStarRailGachaInfoAsync(gameBiz, lang, cancellationToken);
+        // 导航刷新：仅当当前语言名称缓存缺失或出现新角色/光锥时才写入，避免每次导航都重写信息表与名称缓存。
+        if (onlyIfNewItems && !ShouldWriteGachaInfo(data.Language,
+                data.Avatar.Select(x => (long)x.ItemId).Concat(data.Equipment.Select(x => (long)x.ItemId))))
+        {
+            return data.Language;
+        }
         using var dapper = DatabaseService.CreateConnection();
         using var t = dapper.BeginTransaction();
         const string insertSql = """

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Starward.Core;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -33,6 +34,9 @@ internal class GachaItemNameService
 
     /// <summary>串行化，避免启动、切换语言、导入回写相互重入。</summary>
     private readonly SemaphoreSlim _semaphore = new(1, 1);
+
+    /// <summary>按游戏去重导航刷新：同一游戏已有刷新在途时跳过本次，避免「切换游戏」与「打开抽卡页」双触发点对同一游戏同时联网。</summary>
+    private readonly ConcurrentDictionary<string, byte> _refreshingGames = new();
 
 
     public GachaItemNameService(ILogger<GachaItemNameService> logger,
@@ -66,6 +70,7 @@ internal class GachaItemNameService
     public async Task EnsureCurrentLanguageOnStartupAsync()
     {
         string lang = CurrentLanguage;
+        // migrate=false时，为软件首次登录，直接安装默认语言去下载语言包
         bool migrate = !string.Equals(AppConfig.LastGachaNameLanguage, lang, StringComparison.OrdinalIgnoreCase);
         bool success = await RunAllAsync(lang, rewrite: migrate);
         // 仅在全部成功后记录语言；若联网失败或进程中途退出，下次启动会因语言不一致而重试（回写幂等）。
@@ -116,6 +121,7 @@ internal class GachaItemNameService
         {
             return;
         }
+        //防止重入
         await _semaphore.WaitAsync();
         try
         {
@@ -137,6 +143,54 @@ internal class GachaItemNameService
 
 
     /// <summary>
+    /// 导航到某个游戏（在 MainView 切换游戏，或打开该游戏的抽卡记录页）时调用：
+    /// 后台联网获取该游戏全部角色/物品信息，与本地信息表比对，仅当出现新角色/新物品
+    /// （或当前语言名称缓存缺失）时，才更新物品信息表（GachaInfo）与多语言名称缓存（GachaItemName）。
+    /// <para>静默、容错：任何失败仅记日志。同一游戏的刷新并发去重——已有刷新在途时本次直接跳过，
+    /// 避免「切换游戏」与「打开抽卡页」两个触发点对同一游戏同时联网。</para>
+    /// </summary>
+    /// <param name="game">游戏业务线；非原神/星铁/绝区零时直接返回。</param>
+    public async Task RefreshGachaInfoForGameAsync(GameBiz game)
+    {
+        GachaLogService? service = _services.FirstOrDefault(x => x.Biz.Game == game.Game).Service;
+        if (service is null)
+        {
+            // 非原神/星铁/绝区零，无抽卡角色/物品信息，无需刷新。
+            return;
+        }
+        string key = game.Game;
+        if (!_refreshingGames.TryAdd(key, 0))
+        {
+            // 该游戏已有刷新在途，跳过本次（双触发点去重）。
+            return;
+        }
+        try
+        {
+            string lang = CurrentLanguage;
+            // 与启动/切换语言/导入回写串行，避免并发写入 GachaInfo / GachaItemName。
+            await _semaphore.WaitAsync();
+            try
+            {
+                await service.RefreshGachaInfoIfNewItemsAsync(lang);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Refresh gacha info for {game} on navigation", game);
+        }
+        finally
+        {
+            _refreshingGames.TryRemove(key, out _);
+        }
+    }
+
+
+
+    /// <summary>
     /// 对三个游戏依次执行：确保缓存（rewrite=false）或确保缓存+回写名称（rewrite=true）。逐游戏容错。
     /// </summary>
     /// <returns>是否全部游戏均成功（任一失败返回 false，调用方据此决定是否记录语言以便下次重试）。</returns>
@@ -146,10 +200,12 @@ internal class GachaItemNameService
         bool allSucceeded = true;
         try
         {
+            // 逐游戏执行，单个游戏失败不影响其他游戏。
             foreach ((GameBiz biz, GachaLogService service) in _services)
             {
                 try
                 {
+                    // rewrite=true 时确保缓存并回写名称；rewrite=false 时仅确保缓存
                     if (rewrite)
                     {
                         var progress = new RelayProgress<GachaNameProgress>(p => WeakReferenceMessenger.Default.Send(new GachaItemNameProgressMessage(biz, p)));
