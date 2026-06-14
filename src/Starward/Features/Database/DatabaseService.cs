@@ -1030,6 +1030,18 @@ internal static class DatabaseService
         COMMIT TRANSACTION;
         """;
 
+    private const string Sql_v20 = """
+        BEGIN TRANSACTION;
+
+        ALTER TABLE StarRailApocalypticShadowInfo ADD COLUMN ExtraStarNum INTEGER DEFAULT 0 NOT NULL;
+        ALTER TABLE StarRailApocalypticShadowInfo ADD COLUMN TierceBossIcon TEXT;
+        ALTER TABLE StarRailPureFictionInfo ADD COLUMN ExtraStarNum INTEGER DEFAULT 0 NOT NULL;
+        ALTER TABLE StarRailForgottenHallInfo ADD COLUMN ExtraStarNum INTEGER DEFAULT 0 NOT NULL;
+
+        PRAGMA USER_VERSION = 19;
+        COMMIT TRANSACTION;
+        """;
+
     #endregion
 
 
