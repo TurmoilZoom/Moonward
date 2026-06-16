@@ -20,15 +20,8 @@ internal class UrlProtocolService
     public static void RegisterProtocol()
     {
         UnregisterProtocol();
-        string exe;
-        if (AppConfig.IsPortable)
-        {
-            exe = AppConfig.StarwardPortableLauncherExecutePath ?? Path.Join(Path.GetDirectoryName(AppContext.BaseDirectory.TrimEnd('\\', '/')), "Starward.exe");
-        }
-        else
-        {
-            exe = AppConfig.StarwardExecutePath;
-        }
+        // Velopack 部署中 current\Starward.exe 是稳定入口（更新时原子替换 current，路径不变），便携版与安装版一致。
+        string exe = AppConfig.StarwardExecutePath;
         string command = $"""
             "{exe}" "%1"
             """;

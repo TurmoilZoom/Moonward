@@ -2,7 +2,6 @@ using Microsoft.Win32;
 using Starward.Features.Database;
 using Starward.Features.ViewHost;
 using Starward.Helpers;
-using Starward.Setup.Core;
 using System;
 using System.Globalization;
 using System.IO;
@@ -19,25 +18,14 @@ public static partial class AppConfig
 {
 
     /// <summary>
-    /// 便携版启动器（外层 Starward.exe）的完整路径。
-    /// 仅在检测到便携版时有值。
-    /// </summary>
-    public static string? StarwardPortableLauncherExecutePath { get; private set; }
-
-    /// <summary>
     /// 应用程序版本号（来自 AssemblyInformationalVersionAttribute）。
     /// </summary>
     public static string AppVersion { get; private set; }
 
     /// <summary>
-    /// 安装类型（Installed / Portable）。
+    /// 当前是否为便携版运行（Velopack 便携包：根目录存在 .portable 标记）。
     /// </summary>
-    public static InstallType InstallType { get; set; }
-
-    /// <summary>
-    /// 当前是否为便携版运行。
-    /// </summary>
-    public static bool IsPortable => InstallType is InstallType.Portable;
+    public static bool IsPortable { get; private set; }
 
     /// <summary>
     /// 应用程序是否运行在可移动存储设备（U 盘等）上。
@@ -106,25 +94,21 @@ public static partial class AppConfig
             AppVersion = typeof(AppConfig).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "";
             IsAppInRemovableStorage = DriveHelper.IsDeviceRemovableOrOnUSB(AppContext.BaseDirectory);
 
-            string? parentFolder = new DirectoryInfo(AppContext.BaseDirectory).Parent?.FullName;
-            string portableExe = Path.Join(parentFolder, "Starward.exe");
-            string portableVersion = Path.Join(parentFolder, "version.ini");
+            // Velopack 部署结构：<root>/current/Starward.exe、<root>/Update.exe；便携版 <root> 下有 .portable 标记。
+            string? rootFolder = new DirectoryInfo(AppContext.BaseDirectory).Parent?.FullName;
+            bool isVelopackInstall = rootFolder is not null && File.Exists(Path.Combine(rootFolder, "Update.exe"));
+            IsPortable = isVelopackInstall && File.Exists(Path.Combine(rootFolder!, ".portable"));
 
-            if (Directory.Exists(parentFolder) && (File.Exists(portableExe) || File.Exists(portableVersion)))
+            if (IsPortable && !HaveWritePermission(rootFolder!))
             {
-                InstallType = InstallType.Portable;
-                StarwardPortableLauncherExecutePath = portableExe;
-                if (!HaveWritePermission(parentFolder))
-                {
-                    await new NoPermissionWindow(parentFolder).WaitAsync();
-                    Environment.Exit(0);
-                }
+                await new NoPermissionWindow(rootFolder!).WaitAsync();
+                Environment.Exit(0);
             }
 
             if (IsAppInRemovableStorage && IsPortable)
             {
-                CacheFolder = Path.Combine(parentFolder!, ".cache");
-                ConfigPath = Path.Combine(parentFolder!, "config.ini");
+                CacheFolder = Path.Combine(rootFolder!, ".cache");
+                ConfigPath = Path.Combine(rootFolder!, "config.ini");
             }
             else if (IsAppInRemovableStorage)
             {
@@ -134,7 +118,7 @@ public static partial class AppConfig
             else if (IsPortable)
             {
                 CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
-                ConfigPath = Path.Combine(parentFolder!, "config.ini");
+                ConfigPath = Path.Combine(rootFolder!, "config.ini");
             }
             else
             {

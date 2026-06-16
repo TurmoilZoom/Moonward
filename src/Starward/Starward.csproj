@@ -60,6 +60,7 @@
 		<PackageReference Include="Vanara.PInvoke.DwmApi" Version="5.0.4" />
 		<PackageReference Include="Vanara.PInvoke.Ole" Version="5.0.4" />
 		<PackageReference Include="Vanara.PInvoke.Shell32" Version="5.0.4" />
+		<PackageReference Include="Velopack" Version="1.2.0" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 

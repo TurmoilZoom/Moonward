@@ -39,7 +39,7 @@
                               Glyph="&#xEBE7;" />
                     <TextBlock VerticalAlignment="Bottom"
                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                               Text="{x:Bind NewVersion.Version}" />
+                               Text="{x:Bind NewVersionText}" />
                 </StackPanel>
 
                 <!--  版本信息  -->
@@ -47,7 +47,6 @@
                       ColumnSpacing="12"
                       RowSpacing="8">
                     <Grid.RowDefinitions>
-                        <RowDefinition />
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
@@ -60,11 +59,9 @@
                                Grid.Column="0"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                Text="{x:Bind lang:Lang.UpdatePage_Architecture}" />
-                    <TextBlock Grid.Row="0" Grid.Column="1">
-                        <Run Text="{x:Bind NewVersion.Architecture}" />
-                        <Run Text="-" />
-                        <Run Text="{x:Bind NewVersion.InstallType}" />
-                    </TextBlock>
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="1"
+                               Text="{x:Bind ArchitectureText}" />
                     <!--  发布渠道  -->
                     <TextBlock Grid.Row="1"
                                Grid.Column="0"
@@ -73,14 +70,6 @@
                     <TextBlock Grid.Row="1"
                                Grid.Column="1"
                                Text="{x:Bind ChannelText}" />
-                    <!--  编译时间：  -->
-                    <TextBlock Grid.Row="2"
-                               Grid.Column="0"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind lang:Lang.UpdatePage_BuiltTime}" />
-                    <TextBlock Grid.Row="2"
-                               Grid.Column="1"
-                               Text="{x:Bind NewVersion.BuildTime.LocalDateTime.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}" />
                 </Grid>
 
                 <!--  相关链接  -->
@@ -97,16 +86,6 @@
                         <HyperlinkButton Click="HyperlinkButton_Click"
                                          Content="{x:Bind lang:Lang.UpdatePage_ReleasePage}"
                                          Tag="release" />
-                        <!--  Window 内不能用 Converter  -->
-                        <HyperlinkButton Click="HyperlinkButton_Click"
-                                         Tag="package"
-                                         Visibility="{x:Bind local:UpdateWindow.StringToVisibility(NewVersion.PackageUrl)}">
-                            <TextBlock>
-                                <Run Text="{x:Bind lang:Lang.UpdateWindow_FullPackage}" />
-                                <Run Text="" />
-                                <Run Text="(" /><Run Text="{x:Bind local:UpdateWindow.ByteLengthToString(NewVersion.PackageSize)}" /><Run Text=")" />
-                            </TextBlock>
-                        </HyperlinkButton>
                     </StackPanel>
                 </Grid>
 

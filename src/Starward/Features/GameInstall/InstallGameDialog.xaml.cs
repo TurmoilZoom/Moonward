@@ -84,9 +84,10 @@ public sealed partial class InstallGameDialog : ContentDialog
             string baseFolder = "";
             if (AppConfig.IsAppInRemovableStorage)
             {
-                if (File.Exists(AppConfig.StarwardPortableLauncherExecutePath))
+                if (AppConfig.IsPortable && Directory.GetParent(AppContext.BaseDirectory) is { } portableRoot)
                 {
-                    baseFolder = Path.Combine(Path.GetDirectoryName(AppConfig.StarwardPortableLauncherExecutePath)!, "Games");
+                    // 便携版：游戏装在 Velopack 根目录（current 的上一级）旁，更新替换 current 时不受影响。
+                    baseFolder = Path.Combine(portableRoot.FullName, "Games");
                 }
                 else
                 {

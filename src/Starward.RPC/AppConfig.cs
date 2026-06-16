@@ -23,9 +23,6 @@ internal static class AppConfig
     public const string StartupMagic = "zb8L3ShgFjeyDxeA";
 
 
-    public static string? StarwardLauncherExecutePath { get; private set; }
-
-
     public static bool IsPortable { get; private set; }
 
 
@@ -44,25 +41,18 @@ internal static class AppConfig
         IsAdmin = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
 
         IsAppInRemovableStorage = IsDeviceRemovableOrOnUSB(AppContext.BaseDirectory);
-        string? parentFolder = new DirectoryInfo(AppContext.BaseDirectory).Parent?.FullName;
-        string launcherExe = Path.Join(parentFolder, "Starward.exe");
-        if (Directory.Exists(parentFolder) && File.Exists(launcherExe))
-        {
-            IsPortable = true;
-            StarwardLauncherExecutePath = launcherExe;
-        }
+        // Velopack 部署结构：<root>/current/Starward.RPC.exe、<root>/Update.exe；便携版 <root> 下有 .portable 标记。
+        string? rootFolder = new DirectoryInfo(AppContext.BaseDirectory).Parent?.FullName;
+        bool isVelopackInstall = rootFolder is not null && File.Exists(Path.Combine(rootFolder, "Update.exe"));
+        IsPortable = isVelopackInstall && File.Exists(Path.Combine(rootFolder!, ".portable"));
 
         if (IsAppInRemovableStorage && IsPortable)
         {
-            CacheFolder = Path.Combine(parentFolder!, ".cache");
+            CacheFolder = Path.Combine(rootFolder!, ".cache");
         }
         else if (IsAppInRemovableStorage)
         {
             CacheFolder = Path.Combine(Path.GetPathRoot(AppContext.BaseDirectory)!, ".StarwardCache");
-        }
-        else if (IsPortable)
-        {
-            CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
         }
         else
         {

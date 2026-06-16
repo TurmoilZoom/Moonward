@@ -82,7 +82,6 @@ public sealed partial class MainView : UserControl
         // 启动时为三个游戏按当前语言确保物品名称映射缓存；首次启动/更新后会一次性迁移存量记录名称。
         _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().EnsureCurrentLanguageOnStartupAsync());
         AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
-        LogUploadService.Start();
         if (AppConfig.EnableGamepadController)
         {
             await Task.Delay(1000);
@@ -326,7 +325,7 @@ public sealed partial class MainView : UserControl
         try
         {
             await Task.Delay(1500);
-            Uri? proxy = HttpClient.DefaultProxy.GetProxy(new Uri("https://starward.scighost.com"));
+            Uri? proxy = HttpClient.DefaultProxy.GetProxy(new Uri("https://github.com"));
             if (proxy is not null)
             {
                 InAppToast.MainWindow?.Information(Lang.MainView_CheckSystemProxy_SystemProxyIsEnabled, proxy.ToString(), 5000);

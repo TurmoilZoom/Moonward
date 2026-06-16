@@ -66,7 +66,6 @@ public static partial class AppConfig
             sc.AddSingleton<GamePackageService>();
             sc.AddSingleton<PlayTimeService>();
             sc.AddSingleton<GameNoticeService>();
-            sc.AddSingleton<SetupService>();
 
             sc.AddSingleton<GenshinGachaClient>();
             sc.AddSingleton<StarRailGachaClient>();
@@ -86,7 +85,8 @@ public static partial class AppConfig
             sc.AddSingleton<SelfQueryClient>();
             sc.AddSingleton<SelfQueryService>();
 
-            sc.AddHttpClient<ReleaseClient>().ConfigStarwardHttpClient();
+            // ReleaseClient 只用于从 GitHub 拉取发行说明（更新本身由 Velopack 负责），用默认 HttpClient 即可。
+            sc.AddHttpClient<ReleaseClient>();
             sc.AddTransient<UpdateService>();
 
             sc.AddSingleton<RpcService>();
@@ -96,9 +96,6 @@ public static partial class AppConfig
             sc.AddSingleton<GameAccountService>();
 
             sc.AddSingleton<ScreenCaptureService>();
-
-            sc.AddHttpClient<LogUploadClient>().ConfigStarwardHttpClient();
-
 
             _serviceProvider = sc.BuildServiceProvider();
         }
@@ -151,38 +148,6 @@ public static partial class AppConfig
 #else
             client.DefaultRequestHeaders.Add("User-Agent", $"Starward/{AppVersion}");
 #endif
-            client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
-        });
-        builder.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
-        {
-            AutomaticDecompression = DecompressionMethods.All,
-            EnableMultipleHttp2Connections = true,
-            EnableMultipleHttp3Connections = true,
-            PooledConnectionLifetime = TimeSpan.FromMinutes(10),
-        });
-    }
-
-
-    /// <summary>
-    /// 为 Starward 自有后端/服务使用的 HttpClient 配置（额外携带 DeviceId、SessionId、AppVersion 等头）。
-    /// 通常通过 <c>AddHttpClient&lt;T&gt;().ConfigStarwardHttpClient()</c> 使用。
-    /// </summary>
-    /// <param name="builder">IHttpClientBuilder。</param>
-    private static void ConfigStarwardHttpClient(this IHttpClientBuilder builder)
-    {
-        builder.RemoveAllLoggers();
-        builder.ConfigureHttpClient(client =>
-        {
-            client.DefaultRequestHeaders.Clear();
-#if DEBUG
-            client.DefaultRequestHeaders.Add("User-Agent", $"Starward.Debug/{AppVersion}");
-#else
-            client.DefaultRequestHeaders.Add("User-Agent", $"Starward/{AppVersion}");
-#endif
-            client.DefaultRequestHeaders.Add("X-Sw-Device-Id", DeviceId.ToString());
-            client.DefaultRequestHeaders.Add("X-Sw-Session-Id", SessionId.ToString());
-            client.DefaultRequestHeaders.Add("X-Sw-App-Version", AppVersion);
-            client.DefaultRequestHeaders.Add("X-Sw-App-Type", "Desktop");
             client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
         });
         builder.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler

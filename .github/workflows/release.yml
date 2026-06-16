@@ -1,0 +1,112 @@
+name: Release
+
+# 用 Velopack(vpk) 打包并发布到本仓库的 GitHub Releases。
+# - 普通 tag（如 1.2.3）        → 稳定版（正式 release）
+# - SemVer 预发布 tag（含 '-'，如 1.2.3-beta.1）→ 预览版（GitHub pre-release，对应「加入预览更新」）
+# 每个架构使用独立渠道：win-x64 / win-arm64；安装版(Setup.exe)与便携版(zip)共用同一渠道的更新源。
+# 增量(delta)更新由 Velopack 自动生成（打包前先 vpk download 拉取上一版本作为差分基准）。
+
+on:
+  push:
+    tags: ["*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version, e.g. 1.2.3 or 1.2.3-beta.1 (used when triggered manually)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      Version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+      RepoUrl: https://github.com/${{ github.repository }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+
+    - name: Install Velopack CLI
+      run: dotnet tool install -g vpk
+
+    - name: Build and pack (x64, arm64)
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        # 原生命令(vpk)的非零退出不自动抛异常；改为手动检查 $LASTEXITCODE。
+        # 这样首个版本无历史时 vpk download 失败可被忽略。
+        $PSNativeCommandUseErrorActionPreference = $false
+        $version = $env:Version
+        # SemVer 预发布版本号含 '-'，发布为 GitHub pre-release（预览渠道）。
+        $pre = $version.Contains("-")
+        Write-Host "Version: $version, prerelease: $pre"
+
+        foreach ($arch in @("x64", "arm64")) {
+          $channel = "win-$arch"
+          $pubDir = "publish/$arch"
+
+          Write-Host "::group::Publish $channel"
+          dotnet publish src/Starward/Starward.csproj -c Release -r "win-$arch" -p:Platform=$arch -p:Version=$version -o $pubDir
+          if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed for $arch" }
+          Write-Host "::endgroup::"
+
+          # 拉取上一版本作为增量差分基准；首个版本无历史，失败可忽略。
+          Write-Host "::group::Download previous release ($channel)"
+          $dlArgs = @("download", "github", "--repoUrl", $env:RepoUrl, "--channel", $channel, "--token", $env:GITHUB_TOKEN)
+          if ($pre) { $dlArgs += "--pre" }
+          vpk @dlArgs
+          Write-Host "::endgroup::"
+
+          # 打包：生成 Setup.exe + 便携 zip + full/delta nupkg + releases.$channel.json
+          Write-Host "::group::Pack $channel"
+          vpk pack `
+            --packId Starward `
+            --packVersion $version `
+            --packDir $pubDir `
+            --mainExe Starward.exe `
+            --packTitle Starward `
+            --packAuthors Scighost `
+            --icon src/logo.ico `
+            --channel $channel `
+            --delta BestSpeed
+          if ($LASTEXITCODE -ne 0) { throw "vpk pack failed for $arch" }
+          Write-Host "::endgroup::"
+        }
+
+    - name: Upload to GitHub Release
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $PSNativeCommandUseErrorActionPreference = $false
+        $version = $env:Version
+        $pre = $version.Contains("-")
+
+        # 两个架构按渠道分别上传到同一个 tag 的 release（--merge 合并）。
+        foreach ($arch in @("x64", "arm64")) {
+          $channel = "win-$arch"
+          Write-Host "::group::Upload $channel"
+          $upArgs = @(
+            "upload", "github",
+            "--repoUrl", $env:RepoUrl,
+            "--channel", $channel,
+            "--token", $env:GITHUB_TOKEN,
+            "--tag", $version,
+            "--releaseName", $version,
+            "--merge",
+            "--publish"
+          )
+          if ($pre) { $upArgs += "--pre" }
+          vpk @upArgs
+          if ($LASTEXITCODE -ne 0) { throw "vpk upload failed for $arch" }
+          Write-Host "::endgroup::"
+        }

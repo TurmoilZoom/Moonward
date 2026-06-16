@@ -4,6 +4,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using Velopack;
 
 namespace Starward;
 
@@ -21,6 +22,10 @@ public static class Program
     [global::System.STAThreadAttribute]
     static void Main(string[] args)
     {
+        // Velopack：必须是 Main 中最早执行的代码。
+        // 安装/更新/卸载等 hook 会在此处理并直接退出进程，不会进入 WinUI。
+        VelopackApp.Build().Run();
+
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Normal;
 

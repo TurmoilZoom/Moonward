@@ -12,6 +12,7 @@ using Starward.Features.Setting;
 using Starward.Frameworks;
 using Starward.Setup.Core;
 using Starward.Setup.Core.Github;
+using Velopack;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -39,8 +40,6 @@ public sealed partial class UpdateWindow : WindowEx
     private readonly ReleaseClient _releaseClient = AppConfig.GetService<ReleaseClient>();
 
     private readonly UpdateService _updateService = AppConfig.GetService<UpdateService>();
-
-    private readonly SetupService _setupService = AppConfig.GetService<SetupService>();
 
 
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _timer;
@@ -122,8 +121,9 @@ public sealed partial class UpdateWindow : WindowEx
 
     private void RootGrid_Loaded(object sender, RoutedEventArgs e)
     {
-        if (NewVersion?.DisableAutoUpdate ?? false)
+        if (NewVersion is not null && !_updateService.IsUpdaterAvailable)
         {
+            // 非 Velopack 部署（开发态/裸发布目录），无法自动更新，需手动下载安装包。
             IsUpdateNowEnabled = false;
             ErrorMessage = Lang.UpdatePage_YouNeedToManuallyDownloadTheNewVersionPackage;
         }
@@ -148,7 +148,29 @@ public sealed partial class UpdateWindow : WindowEx
 
 
 
-    public ReleaseInfoDetail? NewVersion { get; set => SetProperty(ref field, value); }
+    public UpdateInfo? NewVersion
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(NewVersionText));
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 新版本号文本。
+    /// </summary>
+    public string? NewVersionText => NewVersion?.TargetFullRelease?.Version?.ToString();
+
+
+    /// <summary>
+    /// 当前进程架构（Velopack 更新包按架构区分渠道）。
+    /// </summary>
+    public string ArchitectureText => RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 
 
 #if DEBUG
@@ -167,8 +189,7 @@ public sealed partial class UpdateWindow : WindowEx
             {
                 var url = fe.Tag switch
                 {
-                    "release" => $"https://github.com/Scighost/Starward/releases/tag/{NewVersion.Version}",
-                    "package" => NewVersion.PackageUrl,
+                    "release" => $"https://github.com/{ReleaseClient.Repository}/releases/tag/{NewVersionText}",
                     _ => null,
                 };
                 _logger.LogInformation("Open url: {url}", url);
@@ -233,9 +254,6 @@ public sealed partial class UpdateWindow : WindowEx
 
 
 
-    private CancellationTokenSource _updateCts;
-
-
     [RelayCommand]
     private async Task UpdateNowAsync()
     {
@@ -248,37 +266,9 @@ public sealed partial class UpdateWindow : WindowEx
 
             if (NewVersion != null)
             {
-                if (AppConfig.InstallType is InstallType.Setup && NewVersion.Setup is not null)
-                {
-                    Button_Restart.IsEnabled = false;
-                    _updateCts?.Cancel();
-                    _updateCts = new CancellationTokenSource();
-                    CancellationToken cancellationToken = _updateCts.Token;
-                    IsProgressTextVisible = true;
-                    IsProgressBarVisible = true;
-
-                    var task = _setupService.UpdateAsync(NewVersion, cancellationToken);
-
-                    const double MB = 1 << 20;
-                    while (!task.IsCompleted)
-                    {
-                        if (_setupService.SetupTotalBytes > 0)
-                        {
-                            TextBlock_Bytes.Text = $"{_setupService.SetupDownloadBytes / MB:F2}/{_setupService.SetupTotalBytes / MB:F2} MB";
-                            ProgressBar_Update.Value = _setupService.SetupDownloadBytes * 100.0 / _setupService.SetupTotalBytes;
-                        }
-                        await Task.Delay(100);
-                    }
-                    await task;
-                    Button_Restart.IsEnabled = true;
-                    IsProgressTextVisible = false;
-                    IsProgressBarVisible = false;
-                }
-                if (AppConfig.IsPortable)
-                {
-                    _timer.Start();
-                    await _updateService.StartUpdateAsync(NewVersion);
-                }
+                // 统一走 Velopack：下载更新包（含增量），由 _timer 轮询进度/状态。
+                _timer.Start();
+                await _updateService.StartUpdateAsync(NewVersion);
             }
         }
         catch (OperationCanceledException)
@@ -357,16 +347,18 @@ public sealed partial class UpdateWindow : WindowEx
 
     private void UpdateProgressValue()
     {
-        if (_updateService.Progress_TotalBytes == 0 || _updateService.Progress_DownloadBytes == 0)
+        int percent = _updateService.Progress_Percent;
+        ProgressBar_Update.Value = percent;
+        ProgressPercentText = $"{percent / 100.0:P0}";
+        if (_updateService.Progress_TotalBytes > 0)
+        {
+            const double mb = 1 << 20;
+            ProgressBytesText = $"{_updateService.Progress_DownloadBytes / mb:F2}/{_updateService.Progress_TotalBytes / mb:F2} MB";
+        }
+        else
         {
             ProgressBytesText = "";
-            return;
         }
-        const double mb = 1 << 20;
-        ProgressBytesText = $"{_updateService.Progress_DownloadBytes / mb:F2}/{_updateService.Progress_TotalBytes / mb:F2} MB";
-        var progress = (double)_updateService.Progress_DownloadBytes / _updateService.Progress_TotalBytes;
-        ProgressPercentText = $"{progress:P1}";
-        ProgressBar_Update.Value = progress * 100;
     }
 
 
@@ -415,20 +407,14 @@ public sealed partial class UpdateWindow : WindowEx
     {
         try
         {
-            string? launcher = AppConfig.StarwardPortableLauncherExecutePath;
-            if (File.Exists(launcher))
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = launcher,
-                    WorkingDirectory = Path.GetDirectoryName(launcher),
-                });
-                Environment.Exit(0);
-            }
+            // 确保 RPC 子进程随主进程退出，避免占用 current 目录导致 Velopack 替换文件失败。
+            AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);
+            // 由 Velopack 的 Update.exe 在主进程退出后替换文件并重启。
+            _updateService.ApplyAndRestart();
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Restart");
+            _logger.LogWarning(ex, "Apply update and restart");
             ErrorMessage = ex.Message;
         }
     }
@@ -452,7 +438,7 @@ public sealed partial class UpdateWindow : WindowEx
         }
         else
         {
-            AppConfig.IgnoreVersion = NewVersion.Version;
+            AppConfig.IgnoreVersion = NewVersionText;
         }
         this.Close();
     }
@@ -519,8 +505,8 @@ public sealed partial class UpdateWindow : WindowEx
         catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
         {
             _logger.LogError(ex, "Load recent update content");
-            string tag = NewVersion?.Version ?? AppConfig.AppVersion;
-            webview.Source = new Uri($"https://github.com/Scighost/Starward/releases/tag/{tag}");
+            string tag = NewVersionText ?? AppConfig.AppVersion;
+            webview.Source = new Uri($"https://github.com/{ReleaseClient.Repository}/releases/tag/{tag}");
             webview.Visibility = Visibility.Visible;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             StackPanel_Error.Visibility = Visibility.Collapsed;
@@ -549,7 +535,7 @@ public sealed partial class UpdateWindow : WindowEx
         else
         {
             _ = NuGetVersion.TryParse(AppConfig.AppVersion, out startVersion);
-            _ = NuGetVersion.TryParse(NewVersion.Version, out endVersion);
+            _ = NuGetVersion.TryParse(NewVersionText, out endVersion);
         }
         startVersion ??= new NuGetVersion(0, 0, 0);
         endVersion ??= new NuGetVersion(int.MaxValue, int.MaxValue, int.MaxValue);
@@ -608,7 +594,7 @@ public sealed partial class UpdateWindow : WindowEx
         {
             try
             {
-                var r = await _releaseClient.GetGithubReleaseAsync(NewVersion?.Version ?? AppConfig.AppVersion);
+                var r = await _releaseClient.GetGithubReleaseAsync(NewVersionText ?? AppConfig.AppVersion);
                 if (r is not null)
                 {
                     AppendReleaseToStringBuilder(r, markdown);
