@@ -61,7 +61,7 @@ internal class RpcService
                     Verb = "runas",
                     UseShellExecute = true,
                     CreateNoWindow = true,
-                    Arguments = $"rpc {RpcClientFactory.StartupMagic} {Environment.ProcessId}",
+                    Arguments = $"rpc {RpcClientFactory.StartupMagic} {Environment.ProcessId} {AppConfig.GetDataFolderArgument()}",
                 });
             }
             try

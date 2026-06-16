@@ -7765,6 +7765,60 @@ namespace Starward.Language {
                 return ResourceManager.GetString("WelcomeView_StarwardStart", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Migrate and Start 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_MigrateAndStart {
+            get {
+                return ResourceManager.GetString("WelcomeView_MigrateAndStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Legacy data from a previous version was detected. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_LegacyDataMigrationNotice {
+            get {
+                return ResourceManager.GetString("WelcomeView_LegacyDataMigrationNotice", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Please select a data folder. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_PleaseSelectDataFolder {
+            get {
+                return ResourceManager.GetString("WelcomeView_PleaseSelectDataFolder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 This folder requires administrator permission 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_FolderNeedsAdminPermission {
+            get {
+                return ResourceManager.GetString("WelcomeView_FolderNeedsAdminPermission", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Administrator permission is required to complete the migration. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_AdminPermissionRequiredToMigrate {
+            get {
+                return ResourceManager.GetString("WelcomeView_AdminPermissionRequiredToMigrate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 The software will restart to migrate data to the new location. 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_TheSoftwareWillRestartToMigrateData {
+            get {
+                return ResourceManager.GetString("SettingPage_TheSoftwareWillRestartToMigrateData", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 This is a launcher designed specifically for HoYoverse games, helping you easily manage your games and enjoy a better experience. 的本地化字符串。

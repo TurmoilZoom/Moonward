@@ -63,6 +63,7 @@
                 <Button BorderThickness="0"
                         Command="{x:Bind ChangeUserDataFolderCommand}"
                         Content="{x:Bind lang:Lang.SelectDirectoryPage_SelectFolder}"
+                        IsEnabled="{x:Bind CanOperate}"
                         IsTextScaleFactorEnabled="False"
                         Style="{ThemeResource AccentButtonStyle}" />
                 <TextBlock VerticalAlignment="Center"
@@ -71,6 +72,29 @@
                            IsTextScaleFactorEnabled="False"
                            Text="{x:Bind UserDataFolderErrorMessage}"
                            TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!--  旧版本数据迁移提示  -->
+            <TextBlock Margin="0,12,0,0"
+                       FontSize="13"
+                       Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                       IsTextScaleFactorEnabled="False"
+                       Text="{x:Bind MigrationNoticeText}"
+                       TextWrapping="Wrap"
+                       Visibility="{x:Bind sh:BindConverter.BoolToVisibility(HasLegacyData)}" />
+
+            <!--  迁移进度  -->
+            <StackPanel Margin="0,12,0,0"
+                        Spacing="6"
+                        Visibility="{x:Bind sh:BindConverter.BoolToVisibility(IsMigrating)}">
+                <ProgressBar IsIndeterminate="{x:Bind MigrationIsIndeterminate}"
+                             Maximum="100"
+                             Value="{x:Bind MigrationProgressValue}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind MigrationStatus}"
+                           TextTrimming="CharacterEllipsis" />
             </StackPanel>
 
             <!--  必要的检查  -->
@@ -209,7 +233,7 @@
             <TextBlock Margin="4,0,8,0"
                        FontSize="14"
                        IsTextScaleFactorEnabled="False"
-                       Text="{x:Bind lang:Lang.WelcomeView_StarwardStart}" />
+                       Text="{x:Bind StartButtonText}" />
         </Button>
 
 

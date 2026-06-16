@@ -46,7 +46,13 @@ internal static class AppConfig
         bool isVelopackInstall = rootFolder is not null && File.Exists(Path.Combine(rootFolder, "Update.exe"));
         IsPortable = isVelopackInstall && File.Exists(Path.Combine(rootFolder!, ".portable"));
 
-        if (IsAppInRemovableStorage && IsPortable)
+        // 统一数据目录：主程序启动 RPC 子进程时通过 --data-folder 传入，确保 RPC 的日志与游戏缓存与主程序同目录。
+        string? cmdDataFolder = GetCommandLineArgValue("--data-folder");
+        if (!string.IsNullOrWhiteSpace(cmdDataFolder) && Path.IsPathFullyQualified(cmdDataFolder))
+        {
+            CacheFolder = cmdDataFolder;
+        }
+        else if (IsAppInRemovableStorage && IsPortable)
         {
             CacheFolder = Path.Combine(rootFolder!, ".cache");
         }
@@ -59,6 +65,25 @@ internal static class AppConfig
             CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
         }
         Directory.CreateDirectory(CacheFolder);
+    }
+
+
+
+
+    /// <summary>
+    /// 从命令行参数读取指定开关后紧跟的值（如 <c>--data-folder "D:\xxx"</c>）。未找到返回 null。
+    /// </summary>
+    private static string? GetCommandLineArgValue(string name)
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase))
+            {
+                return args[i + 1]?.Trim();
+            }
+        }
+        return null;
     }
 
 

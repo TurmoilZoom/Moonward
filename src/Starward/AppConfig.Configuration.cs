@@ -33,9 +33,15 @@ public static partial class AppConfig
     public static bool IsAppInRemovableStorage { get; private set; }
 
     /// <summary>
-    /// 缓存文件夹路径（通常在 LocalApplicationData\Starward 或便携目录下的 .cache）。
+    /// 缓存文件夹路径。自统一数据目录版本起，其值等于 <see cref="UserDataFolder"/>（数据库、备份、缓存、日志、背景图、webview、游戏缓存全部统一存放于此）。
     /// </summary>
     public static string CacheFolder { get; private set; }
+
+    /// <summary>
+    /// 旧版本缓存根目录（%LocalAppData%\Starward / .StarwardCache / 便携 .cache），<b>仅</b>用于升级迁移时探测旧数据来源，不作为运行期缓存路径。
+    /// 注意：在标准安装下该目录同时是 Velopack 安装根目录（含 current\、Update.exe 等），迁移时必须按白名单只搬运 Starward 自己的数据，绝不能动 Velopack 文件。
+    /// </summary>
+    public static string? LegacyCacheFolder { get; private set; }
 
     /// <summary>
     /// 配置文件路径（config.ini）。便携版或可移动设备下会有值，否则为空（使用注册表）。
@@ -48,9 +54,15 @@ public static partial class AppConfig
     public static string? Language { get; set; }
 
     /// <summary>
-    /// 用户数据文件夹路径（数据库、设置等存放位置）。
+    /// 用户数据文件夹路径（数据库、设置等存放位置）。等于「用户所选目录 \ <see cref="DataSubFolderName"/>」。
     /// </summary>
     public static string? UserDataFolder { get; set; }
+
+    /// <summary>
+    /// 用户所选目录下、实际存放全部数据的子文件夹名。即统一数据目录 = 用户选择目录 \ data，
+    /// 这样数据与 Velopack 文件（current\、Update.exe 等）整齐分隔、互不干扰。
+    /// </summary>
+    public const string DataSubFolderName = "data";
 
     /// <summary>
     /// 当前进程是否以管理员身份运行。
@@ -105,63 +117,67 @@ public static partial class AppConfig
                 Environment.Exit(0);
             }
 
+            // 计算 ConfigPath（marker 存放位置）与 LegacyCacheFolder（旧版缓存根，仅用于升级迁移时探测旧数据来源）。
             if (IsAppInRemovableStorage && IsPortable)
             {
-                CacheFolder = Path.Combine(rootFolder!, ".cache");
+                LegacyCacheFolder = Path.Combine(rootFolder!, ".cache");
                 ConfigPath = Path.Combine(rootFolder!, "config.ini");
             }
             else if (IsAppInRemovableStorage)
             {
-                CacheFolder = Path.Combine(Path.GetPathRoot(AppContext.BaseDirectory)!, ".StarwardCache");
-                ConfigPath = Path.Combine(CacheFolder, "config.ini");
+                LegacyCacheFolder = Path.Combine(Path.GetPathRoot(AppContext.BaseDirectory)!, ".StarwardCache");
+                ConfigPath = Path.Combine(LegacyCacheFolder, "config.ini");
             }
             else if (IsPortable)
             {
-                CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
+                LegacyCacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
                 ConfigPath = Path.Combine(rootFolder!, "config.ini");
             }
             else
             {
-                CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
+                LegacyCacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
             }
 
-            string? userDataFolder = null;
-            if (string.IsNullOrWhiteSpace(ConfigPath))
+            // 子进程短路：命令行带 --data-folder 时直接采用该目录，不显示任何 UI（rpc / playtime / 提权迁移子进程）。
+            string? cmdDataFolder = GetCommandLineArgValue("--data-folder");
+            if (Directory.Exists(cmdDataFolder))
             {
+                UseDataFolder(cmdDataFolder!);
+                LoadConfiguration();
+                return;
+            }
+
 #if DEBUG
-                using RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Starward.Debug");
+            // 开发调试环境：不做迁移检查，数据固定放在程序根目录的 data 文件夹下（没有则创建）。
+            string debugDataFolder = Path.Combine(AppContext.BaseDirectory, DataSubFolderName);
+            Directory.CreateDirectory(debugDataFolder);
+            UseDataFolder(debugDataFolder);
+            LoadConfiguration();
 #else
-                using RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Starward");
-#endif
-                userDataFolder = (key.GetValue("UserDataFolder") as string)?.Trim();
-            }
-            else if (File.Exists(ConfigPath))
-            {
-                string text = File.ReadAllText(ConfigPath);
-                userDataFolder = Regex.Match(text, @"UserDataFolder=(.+)").Groups[1].Value.Trim();
-                if (!string.IsNullOrWhiteSpace(userDataFolder) && !Path.IsPathFullyQualified(userDataFolder))
-                {
-                    userDataFolder = Path.GetFullPath(userDataFolder, Path.GetDirectoryName(ConfigPath)!);
-                }
-            }
+            // 读取已持久化的统一数据目录 DataFolder，以及旧版 UserDataFolder（升级迁移源之一）。
+            (string? dataFolder, string? legacyUserDataFolder) = ReadPersistedDataFolders();
 
-            if (Directory.Exists(userDataFolder))
+            // 提权迁移子进程：带 --migrate-to <target> 时，强制迁移旧数据到指定目录后再继续运行。
+            string? migrateTo = GetCommandLineArgValue("--migrate-to");
+
+            if (string.IsNullOrEmpty(migrateTo) && Directory.Exists(dataFolder))
             {
-                if (HaveWritePermission(userDataFolder))
+                // 已迁移：直接使用统一数据目录。
+                if (HaveWritePermission(dataFolder!))
                 {
-                    UserDataFolder = userDataFolder;
-                    DatabaseService.SetDatabase(userDataFolder);
+                    UseDataFolder(dataFolder!);
                     LoadConfiguration();
                 }
                 else
                 {
-                    await new NoPermissionWindow(userDataFolder).WaitAsync();
+                    await new NoPermissionWindow(dataFolder!).WaitAsync();
                     Environment.Exit(0);
                 }
             }
             else
             {
-                if (await new WelcomeWindow().WaitAsync())
+                // 未迁移 / 全新安装 / 提权迁移子进程：弹出迁移·选择窗口（强制手动选择目标，拒绝则退出，不允许继续使用）。
+                if (await new WelcomeWindow(legacyUserDataFolder, LegacyCacheFolder, migrateTo).WaitAsync())
                 {
                     LoadConfiguration();
                 }
@@ -170,6 +186,7 @@ public static partial class AppConfig
                     Environment.Exit(0);
                 }
             }
+#endif
         }
         catch (Exception ex)
         {
@@ -197,6 +214,84 @@ public static partial class AppConfig
         {
             return false;
         }
+    }
+
+
+    /// <summary>
+    /// 采用指定文件夹作为统一数据目录：<see cref="UserDataFolder"/> 与 <see cref="CacheFolder"/> 同时指向它，并初始化数据库。
+    /// </summary>
+    internal static void UseDataFolder(string folder)
+    {
+        UserDataFolder = folder;
+        CacheFolder = folder;
+        DatabaseService.SetDatabase(folder);
+    }
+
+
+    /// <summary>
+    /// 从命令行参数读取指定开关后紧跟的值（如 <c>--data-folder "D:\xxx"</c>）。未找到返回 null。
+    /// </summary>
+    private static string? GetCommandLineArgValue(string name)
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase))
+            {
+                return args[i + 1]?.Trim();
+            }
+        }
+        return null;
+    }
+
+
+    /// <summary>
+    /// 生成传递给子进程（rpc / playtime / 提权迁移）的数据目录命令行参数，确保子进程使用同一统一数据目录。
+    /// </summary>
+    public static string GetDataFolderArgument()
+    {
+        return string.IsNullOrWhiteSpace(UserDataFolder) ? string.Empty : $"--data-folder \"{UserDataFolder}\"";
+    }
+
+
+    /// <summary>
+    /// 读取已持久化的统一数据目录 DataFolder 与旧版 UserDataFolder（注册表或 config.ini）。
+    /// </summary>
+    private static (string? dataFolder, string? legacyUserDataFolder) ReadPersistedDataFolders()
+    {
+        string? dataFolder = null;
+        string? legacyUserDataFolder = null;
+        if (string.IsNullOrWhiteSpace(ConfigPath))
+        {
+#if DEBUG
+            using RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Starward.Debug");
+#else
+            using RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Starward");
+#endif
+            dataFolder = (key.GetValue("DataFolder") as string)?.Trim();
+            legacyUserDataFolder = (key.GetValue("UserDataFolder") as string)?.Trim();
+        }
+        else if (File.Exists(ConfigPath))
+        {
+            string text = File.ReadAllText(ConfigPath);
+            // DataFolder 是 UserDataFolder 的后缀，必须按行锚定，避免 "UserDataFolder=" 被 "DataFolder=" 误匹配。
+            dataFolder = ResolveConfigFolder(Regex.Match(text, @"^DataFolder=(.+)$", RegexOptions.Multiline).Groups[1].Value.Trim());
+            legacyUserDataFolder = ResolveConfigFolder(Regex.Match(text, @"^UserDataFolder=(.+)$", RegexOptions.Multiline).Groups[1].Value.Trim());
+        }
+        return (dataFolder, legacyUserDataFolder);
+    }
+
+
+    /// <summary>
+    /// 将 config.ini 中的相对路径解析为相对于 config.ini 所在目录的绝对路径。
+    /// </summary>
+    private static string? ResolveConfigFolder(string? folder)
+    {
+        if (!string.IsNullOrWhiteSpace(folder) && !Path.IsPathFullyQualified(folder))
+        {
+            return Path.GetFullPath(folder, Path.GetDirectoryName(ConfigPath)!);
+        }
+        return folder;
     }
 
 
@@ -339,10 +434,13 @@ public static partial class AppConfig
                 {
                     dataFolder = Path.GetRelativePath(parentFolder, UserDataFolder);
                 }
+                // DataFolder 为统一数据目录标记（迁移完成后写入）；UserDataFolder 同步写入以兼容旧版读取。
+                key.SetValue("DataFolder", dataFolder);
                 key.SetValue("UserDataFolder", dataFolder);
             }
             else
             {
+                key.DeleteValue("DataFolder", false);
                 key.DeleteValue("UserDataFolder", false);
             }
             if (EnableLoginAuthTicket.HasValue)
@@ -379,11 +477,13 @@ public static partial class AppConfig
                     dataFolder = Path.GetRelativePath(parentFolder, UserDataFolder);
                 }
                 sb.AppendLine($"Language={Language}");
+                sb.AppendLine($"DataFolder={dataFolder}");
                 sb.AppendLine($"UserDataFolder={dataFolder}");
             }
             else
             {
                 sb.AppendLine($"Language={Language}");
+                sb.AppendLine($"DataFolder=");
                 sb.AppendLine($"UserDataFolder=");
             }
             if (EnableLoginAuthTicket.HasValue)

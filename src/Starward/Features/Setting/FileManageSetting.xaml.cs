@@ -5,6 +5,7 @@ using Microsoft.Windows.AppLifecycle;
 using SharpSevenZip;
 using Starward.Features.Database;
 using Starward.Frameworks;
+using Starward.Helpers;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -51,17 +52,34 @@ public sealed partial class FileManageSetting : PageBase
     {
         try
         {
+            string? folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
+            string target = Path.GetFullPath(folder);
+            // 不能选驱动器根目录，也不能选在程序安装目录下（更新时会被删除）。
+            if (target == Path.GetPathRoot(target) || target.StartsWith(AppContext.BaseDirectory.TrimEnd('/', '\\')))
+            {
+                return;
+            }
+            // 实际数据目录是 所选目录\data，据此判断是否选了同一个目录。
+            string newDataDir = Path.Combine(target, AppConfig.DataSubFolderName);
+            if (string.Equals(newDataDir, Path.GetFullPath(AppConfig.UserDataFolder ?? string.Empty), StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             var dialog = new ContentDialog
             {
                 Title = Lang.SettingPage_ReselectDataFolder,
-                // 当前数据文件夹的位置是：
-                // 想要重新选择吗？（你需要在选择前手动迁移数据文件）
+                // 当前数据文件夹的位置是：xxx  →  新位置\data；软件将重启以迁移数据。
                 Content = $"""
                 {Lang.SettingPage_TheCurrentLocationOfTheDataFolderIs}
 
-                {AppConfig.UserDataFolder}
+                {AppConfig.UserDataFolder}  →  {newDataDir}
 
-                {Lang.SettingPage_WouldLikeToReselectDataFolder}
+                {Lang.SettingPage_TheSoftwareWillRestartToMigrateData}
                 """,
                 PrimaryButtonText = Lang.Common_Yes,
                 SecondaryButtonText = Lang.Common_Cancel,
@@ -71,10 +89,12 @@ public sealed partial class FileManageSetting : PageBase
             var result = await dialog.ShowAsync();
             if (result is ContentDialogResult.Primary)
             {
-                AppConfig.UserDataFolder = null!;
-                AppConfig.SaveConfiguration();
+                // 通过 --migrate-to 重启：由启动流程在数据库打开前完成迁移（与升级迁移同一套搬运服务，按需提权）。
+                var info = new ProcessStartInfo { FileName = AppConfig.StarwardExecutePath };
+                info.ArgumentList.Add("--migrate-to");
+                info.ArgumentList.Add(target);
                 AppInstance.GetCurrent().UnregisterKey();
-                Process.Start(AppConfig.StarwardExecutePath);
+                Process.Start(info);
                 App.Current.Exit();
             }
         }

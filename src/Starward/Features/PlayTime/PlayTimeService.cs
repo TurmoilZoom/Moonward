@@ -441,7 +441,7 @@ internal class PlayTimeService
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = AppConfig.StarwardExecutePath,
-                        Arguments = $"playtime --biz {biz} --pid {process.Id}",
+                        Arguments = $"playtime --biz {biz} --pid {process.Id} {AppConfig.GetDataFolderArgument()}",
                         CreateNoWindow = true,
                     });
                     return process;
@@ -484,7 +484,7 @@ internal class PlayTimeService
             Process? p = Process.Start(new ProcessStartInfo
             {
                 FileName = AppConfig.StarwardExecutePath,
-                Arguments = $"playtime --biz {biz} --pid {process.Id}",
+                Arguments = $"playtime --biz {biz} --pid {process.Id} {AppConfig.GetDataFolderArgument()}",
                 CreateNoWindow = true,
             });
             _logger.LogInformation("Start process to log play time: GameBiz {biz}, Pid {pid}, ProcessId {processId}", biz, pid, p?.Id);

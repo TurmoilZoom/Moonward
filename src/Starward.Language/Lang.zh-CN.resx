@@ -1851,6 +1851,24 @@
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Starward，启动！</value>
   </data>
+  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
+    <value>迁移并启动</value>
+  </data>
+  <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
+    <value>检测到旧版本数据，升级后需要将其迁移到新的数据文件夹才能继续使用。当前数据位置：</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectDataFolder" xml:space="preserve">
+    <value>请选择一个数据文件夹</value>
+  </data>
+  <data name="WelcomeView_FolderNeedsAdminPermission" xml:space="preserve">
+    <value>该目录需要管理员权限，迁移时将请求提权</value>
+  </data>
+  <data name="WelcomeView_AdminPermissionRequiredToMigrate" xml:space="preserve">
+    <value>需要管理员权限才能完成迁移</value>
+  </data>
+  <data name="SettingPage_TheSoftwareWillRestartToMigrateData" xml:space="preserve">
+    <value>软件将重启以把数据迁移到新位置。</value>
+  </data>
   <data name="GameSelector_ClickToSelectOrSwitchGame" xml:space="preserve">
     <value>点击此处选择或切换游戏</value>
   </data>

@@ -1851,6 +1851,24 @@ Do you accept the risk and continue to use it?</value>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Starward, Start!</value>
   </data>
+  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
+    <value>Migrate and Start</value>
+  </data>
+  <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
+    <value>Legacy data from a previous version was detected. It must be migrated to the new data folder before you can continue. Current data location:</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectDataFolder" xml:space="preserve">
+    <value>Please select a data folder.</value>
+  </data>
+  <data name="WelcomeView_FolderNeedsAdminPermission" xml:space="preserve">
+    <value>This folder requires administrator permission; elevation will be requested during migration.</value>
+  </data>
+  <data name="WelcomeView_AdminPermissionRequiredToMigrate" xml:space="preserve">
+    <value>Administrator permission is required to complete the migration.</value>
+  </data>
+  <data name="SettingPage_TheSoftwareWillRestartToMigrateData" xml:space="preserve">
+    <value>The software will restart to migrate data to the new location.</value>
+  </data>
   <data name="GameSelector_ClickToSelectOrSwitchGame" xml:space="preserve">
     <value>Click to select or switch game.</value>
   </data>

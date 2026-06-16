@@ -96,7 +96,12 @@ internal static class DatabaseService
             return;
 #endif
 #pragma warning disable CS0162 // 检测到无法访问的代码
-            string folder = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Starward\DatabaseBackup");
+            // 统一数据目录版本起，自动备份与其它数据一并存放于 UserDataFolder（不再单独写入 AppData）。
+            if (string.IsNullOrWhiteSpace(AppConfig.UserDataFolder))
+            {
+                return;
+            }
+            string folder = Path.Join(AppConfig.UserDataFolder, "DatabaseBackup");
 #pragma warning restore CS0162 // 检测到无法访问的代码
             Directory.CreateDirectory(folder);
             string file = Path.Combine(folder, $"StarwardDatabase_AutoBackup_{DateTime.Now:yyyyMMdd_HHmmss}.db");
