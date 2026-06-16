@@ -1,3 +1,5 @@
+# 编译 Starward 并上传构建产物（Artifacts）。
+# 在 main 或 dev/* 分支的 push / pull_request 时触发，覆盖 Debug/Release × x64/arm64 四种组合。
 
 name: Build
 
@@ -14,6 +16,7 @@ jobs:
     runs-on: windows-2025-vs2026
     strategy:
       matrix:
+        # 四种构建配置并行执行
         configuration: [Debug, Release]
         platform: [x64, arm64]
 
@@ -28,15 +31,18 @@ jobs:
     - name: Install .NET
       uses: actions/setup-dotnet@v5
       with:
+        # SDK 版本由仓库根目录 global.json 指定
         global-json-file: global.json
 
     - name: SHA
       id: sha
+      # 取 commit SHA 前 7 位，用于版本号与产物目录命名
       run: echo "sha=$("${{ github.sha }}".SubString(0, 7))" >> $env:GITHUB_OUTPUT
 
     - name: Build
       run: |
         $sha = "${{ steps.sha.outputs.sha }}"
+        # DONOT_CHECK_UPDATE：CI 构建跳过启动时的更新检查
         dotnet publish src/Starward/Starward.csproj -c $env:Configuration -r "win-$env:Platform" -o "build/Starward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
 
     - name: Upload Artifact

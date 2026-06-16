@@ -1,13 +1,22 @@
+# 将本仓库 main 分支与上游原项目 main 保持同步。
+# 本仓库已脱离 GitHub fork 网络，无法使用 mergeUpstream API，故通过 git fetch + reset 镜像上游。
+# main 分支仅用于跟踪上游，不承载本地开发提交；开发工作在其它分支进行。
+
 name: Sync Upstream Main
 
 on:
   schedule:
+    # 每 30 分钟检查并同步一次
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
 concurrency:
   group: sync-upstream-main
   cancel-in-progress: true
+
+env:
+  # 上游原项目仓库（owner/repo）
+  UPSTREAM_REPO: Scighost/Starward
 
 jobs:
   sync-main:
@@ -17,26 +26,32 @@ jobs:
       contents: write
 
     steps:
-      - name: Sync fork main with upstream
-        uses: actions/github-script@v7
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
-          script: |
-            const { owner, repo } = context.repo;
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-            try {
-              const response =
-                await github.rest.repos.mergeUpstream({
-                  owner,
-                  repo,
-                  branch: 'main'
-                });
+      - name: Sync main with upstream
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-              console.log(response.data);
+          git remote add upstream "https://github.com/${{ env.UPSTREAM_REPO }}.git"
+          git fetch upstream main
 
-            } catch (error) {
-              if (error.status === 409) {
-                console.log('存在冲突，需要人工处理');
-                return;
-              }
-              throw error;
-            }
+          # 已与上游一致则跳过，避免无意义的 force push
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse upstream/main)" ]; then
+            echo "main 已与上游保持一致，无需同步"
+            exit 0
+          fi
+
+          echo "同步前: $(git rev-parse --short HEAD)"
+          echo "上游:   $(git rev-parse --short upstream/main)"
+
+          # 硬重置使 main 与上游完全一致，再强制推送覆盖远端 main
+          git reset --hard upstream/main
+          git push origin main --force
+
+          echo "main 已同步至上游 $(git rev-parse --short HEAD)"
