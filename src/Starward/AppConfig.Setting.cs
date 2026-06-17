@@ -643,6 +643,23 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 启用 DX12
+    /// </summary>
+    public static bool GetEnableDX12(GameBiz biz)
+    {
+        return GetValue<bool>(default, $"enable_dx12_{biz}");
+    }
+
+    /// <summary>
+    /// 启用 DX12
+    /// </summary>
+    public static void SetEnableDX12(GameBiz biz, bool value)
+    {
+        SetValue(value, $"enable_dx12_{biz}");
+    }
+
+
+    /// <summary>
     /// 获取指定游戏的背景视频音量（0-100）。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>
