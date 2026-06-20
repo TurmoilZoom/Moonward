@@ -2545,6 +2545,15 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GachaStatsCard_Stats", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Win Rate 的本地化字符串。
+        /// </summary>
+        public static string GachaStatsCard_NoUpProbability {
+            get {
+                return ResourceManager.GetString("GachaStatsCard_NoUpProbability", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 The currently logged-in account is not saved. 的本地化字符串。

@@ -165,6 +165,9 @@
   <data name="GachaStatsCard_Stats" xml:space="preserve">
     <value>统计</value>
   </data>
+  <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
+    <value>不歪概率</value>
+  </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>很高兴遇见你~</value>
   </data>

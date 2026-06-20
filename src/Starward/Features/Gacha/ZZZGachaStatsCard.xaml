@@ -40,12 +40,6 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <!--<RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />-->
             <RowDefinition />
         </Grid.RowDefinitions>
 
@@ -126,57 +120,45 @@
 
         <!--<MenuFlyoutSeparator Grid.Row="6" />-->
 
-        <!--  5★ 统计  -->
-        <TextBlock Grid.Row="4" Foreground="{ThemeResource Rarity5ForegroundBrush}">
+        <!--  S 统计（非 UP 频段显示）；UP 频段此行改为显示「不歪概率」，二者互斥同占第 4 行  -->
+        <TextBlock Grid.Row="4"
+                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                   Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityReversedConverter}}">
             <Run Text="S" />
             <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
         </TextBlock>
         <TextBlock Grid.Row="4"
                    HorizontalAlignment="Right"
+                   HorizontalTextAlignment="Left"
                    Foreground="{ThemeResource Rarity5ForegroundBrush}"
-                   HorizontalTextAlignment="Left">
+                   Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityReversedConverter}}">
             <Run Text="{x:Bind WarpTypeStats.Count_5}" />
             <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_5.ToString('P2', x:Null)}" /><Run Text="]" />
         </TextBlock>
 
-        <!--  4★ 统计  -->
-        <TextBlock Grid.Row="5" Foreground="{ThemeResource Rarity4ForegroundBrush}">
-            <Run Text="A" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
+        <!--  不歪概率（仅 UP 频段显示）：小保底 50/50 抽到当期 UP 的概率，形如 54.55% (6/11)  -->
+        <TextBlock Grid.Row="4"
+                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                   Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="{x:Bind lang:Lang.GachaStatsCard_NoUpProbability}" />
         </TextBlock>
-        <TextBlock Grid.Row="5"
+        <TextBlock Grid.Row="4"
                    HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity4ForegroundBrush}"
-                   HorizontalTextAlignment="Left">
-            <Run Text="{x:Bind WarpTypeStats.Count_4}" />
-            <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_4.ToString('P2', x:Null)}" /><Run Text="]" />
-        </TextBlock>
+                   HorizontalTextAlignment="Left"
+                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                   Text="{x:Bind WarpTypeStats.FiftyFiftyNoUpText}"
+                   Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-        <!--  3★ 统计  -->
-        <TextBlock Grid.Row="6" Foreground="{ThemeResource Rarity3ForegroundBrush}">
-            <Run Text="B" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-        </TextBlock>
-        <TextBlock Grid.Row="6"
-                   HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity3ForegroundBrush}"
-                   HorizontalTextAlignment="Left">
-            <Run Text="{x:Bind WarpTypeStats.Count_3}" />
-            <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_3.ToString('P2', x:Null)}" /><Run Text="]" />
-        </TextBlock>
-
-        <MenuFlyoutSeparator Grid.Row="7" Visibility="Collapsed" />
-
-        <!--  拖拽手柄：覆盖 tab 标签上方的卡池统计信息区域（第 0~7 行），按住此处可拖动整张卡片换位；指针进入显示「可拖拽」提示并切换手型光标。  -->
+        <!--  拖拽手柄：覆盖 tab 标签上方的卡池统计信息区域（第 0~4 行），按住此处可拖动整张卡片换位；指针进入显示「可拖拽」提示并切换手型光标。  -->
         <Border x:Name="DragHandleBorder"
                 Grid.Row="0"
-                Grid.RowSpan="8"
+                Grid.RowSpan="5"
                 Background="Transparent"
                 helpers:PointerCursor.CursorShape="Hand"
                 PointerEntered="DragHandle_PointerEntered"
                 PointerExited="DragHandle_PointerExited" />
 
-        <Grid Grid.Row="8"
+        <Grid Grid.Row="5"
               RowSpacing="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="36" />

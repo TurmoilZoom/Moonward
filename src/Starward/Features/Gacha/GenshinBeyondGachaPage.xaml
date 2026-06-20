@@ -190,9 +190,6 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
@@ -247,35 +244,7 @@
                             <Run Text="[" /><Run Text="{x:Bind GachaStatsType1000.Ratio_4.ToString('P2', x:Null)}" /><Run Text="]" />
                         </TextBlock>
 
-                        <!--  3★ 统计  -->
-                        <TextBlock Grid.Row="5" Foreground="{ThemeResource Rarity3ForegroundBrush}">
-                            <Run Text="3★" />
-                            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-                        </TextBlock>
-                        <TextBlock Grid.Row="5"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{ThemeResource Rarity3ForegroundBrush}"
-                                   HorizontalTextAlignment="Left">
-                            <Run Text="{x:Bind GachaStatsType1000.Count_3}" />
-                            <Run Text="[" /><Run Text="{x:Bind GachaStatsType1000.Ratio_3.ToString('P2', x:Null)}" /><Run Text="]" />
-                        </TextBlock>
-
-                        <!--  2★ 统计  -->
-                        <TextBlock Grid.Row="6" Foreground="{ThemeResource Rarity2ForegroundBrush}">
-                            <Run Text="2★" />
-                            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-                        </TextBlock>
-                        <TextBlock Grid.Row="6"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{ThemeResource Rarity2ForegroundBrush}"
-                                   HorizontalTextAlignment="Left">
-                            <Run Text="{x:Bind GachaStatsType1000.Count_2}" />
-                            <Run Text="[" /><Run Text="{x:Bind GachaStatsType1000.Ratio_2.ToString('P2', x:Null)}" /><Run Text="]" />
-                        </TextBlock>
-
-                        <MenuFlyoutSeparator Grid.Row="7" Visibility="Collapsed" />
-
-                        <Grid Grid.Row="8"
+                        <Grid Grid.Row="5"
                               RowSpacing="8">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="36" />
@@ -388,9 +357,6 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
@@ -445,35 +411,7 @@
                             <Run Text="[" /><Run Text="{x:Bind GachaStatsType2000.Ratio_5.ToString('P2', x:Null)}" /><Run Text="]" />
                         </TextBlock>
 
-                        <!--  4★ 统计  -->
-                        <TextBlock Grid.Row="5" Foreground="{ThemeResource Rarity4ForegroundBrush}">
-                            <Run Text="4★" />
-                            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-                        </TextBlock>
-                        <TextBlock Grid.Row="5"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{ThemeResource Rarity4ForegroundBrush}"
-                                   HorizontalTextAlignment="Left">
-                            <Run Text="{x:Bind GachaStatsType2000.Count_4}" />
-                            <Run Text="[" /><Run Text="{x:Bind GachaStatsType2000.Ratio_4.ToString('P2', x:Null)}" /><Run Text="]" />
-                        </TextBlock>
-
-                        <!--  3★ 统计  -->
-                        <TextBlock Grid.Row="6" Foreground="{ThemeResource Rarity3ForegroundBrush}">
-                            <Run Text="3★" />
-                            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-                        </TextBlock>
-                        <TextBlock Grid.Row="6"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{ThemeResource Rarity3ForegroundBrush}"
-                                   HorizontalTextAlignment="Left">
-                            <Run Text="{x:Bind GachaStatsType2000.Count_3}" />
-                            <Run Text="[" /><Run Text="{x:Bind GachaStatsType2000.Ratio_3.ToString('P2', x:Null)}" /><Run Text="]" />
-                        </TextBlock>
-
-                        <MenuFlyoutSeparator Grid.Row="7" Visibility="Collapsed" />
-
-                        <Grid Grid.Row="8"
+                        <Grid Grid.Row="5"
                               RowSpacing="8">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="36" />

@@ -312,6 +312,13 @@ internal abstract class GachaLogService
                     stats.Average_5_Up = (double)c / stats.Count_5_Up;
                 }
 
+                // 「不歪概率」：仅 UP（限定）卡池统计小保底 50/50 的不歪情况（5★ 为最高稀有度）。
+                stats.HasUpItem = GachaNoUp.Dictionary.ContainsKey($"{CurrentGameBiz}{type.Value}");
+                if (stats.HasUpItem)
+                {
+                    (stats.FiftyFiftyCount, stats.FiftyFiftyNoUpCount) = CountFiftyFiftyNoUp(list, 5);
+                }
+
                 int pity_4 = 0;
                 foreach (var item in list)
                 {
@@ -364,6 +371,49 @@ internal abstract class GachaLogService
 
 
 
+
+
+
+    /// <summary>
+    /// 统计小保底（50/50）的不歪情况。
+    /// 按时间正序遍历卡池记录，维护「下一个最高稀有度是否为大保底」的状态：
+    /// 在非大保底状态下抽出的最高稀有度记为一次小保底，其中 <see cref="GachaLogItemEx.IsUp"/> 为 true 的记为一次「不歪」；
+    /// 若小保底歪了（非 UP），则下一个最高稀有度为大保底（必出 UP），不计入小保底统计。
+    /// </summary>
+    /// <param name="orderedList">按时间（Id）正序排列的卡池全部记录。</param>
+    /// <param name="highestRankType">最高稀有度对应的 RankType（原神/星铁为 5，绝区零 S 级为 4）。</param>
+    /// <returns>(小保底次数, 小保底不歪次数)。</returns>
+    protected static (int Count, int NoUpCount) CountFiftyFiftyNoUp(IEnumerable<GachaLogItemEx> orderedList, int highestRankType)
+    {
+        int count = 0;
+        int noUpCount = 0;
+        bool guaranteed = false;
+        foreach (GachaLogItemEx item in orderedList)
+        {
+            if (item.RankType != highestRankType)
+            {
+                continue;
+            }
+            if (guaranteed)
+            {
+                // 大保底必出 UP，不计入小保底统计
+                guaranteed = false;
+            }
+            else
+            {
+                count++;
+                if (item.IsUp)
+                {
+                    noUpCount++;
+                }
+                else
+                {
+                    guaranteed = true;
+                }
+            }
+        }
+        return (count, noUpCount);
+    }
 
 
 

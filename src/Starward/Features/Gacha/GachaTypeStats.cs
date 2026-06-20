@@ -168,4 +168,34 @@ public class GachaTypeStats
     /// </summary>
     public string Avarage_5_Up_Text => Count_5_Up == 0 ? "" : $" / {Average_5_Up:F2} ({Count_5_Up})";
 
+
+    /// <summary>
+    /// 该卡池是否存在 UP（限定）机制，即是否有「小保底 50/50」。
+    /// 仅当卡池在 <see cref="GachaNoUp.Dictionary"/> 中存在配置时为 true。
+    /// 用于决定统计卡片是否显示「不歪概率」一栏。
+    /// </summary>
+    public bool HasUpItem { get; set; }
+
+    /// <summary>
+    /// 小保底（50/50）的总次数：即在非大保底状态下抽出的最高稀有度（5★/S 级）数量。
+    /// 大保底（上次小保底歪了之后的必中 UP）不计入。
+    /// </summary>
+    public int FiftyFiftyCount { get; set; }
+
+    /// <summary>
+    /// 小保底不歪（抽到当期 UP）的次数。
+    /// </summary>
+    public int FiftyFiftyNoUpCount { get; set; }
+
+    /// <summary>
+    /// 小保底不歪概率 = <see cref="FiftyFiftyNoUpCount"/> / <see cref="FiftyFiftyCount"/>。
+    /// 无小保底样本时为 0。
+    /// </summary>
+    public double FiftyFiftyNoUpRate => FiftyFiftyCount == 0 ? 0 : (double)FiftyFiftyNoUpCount / FiftyFiftyCount;
+
+    /// <summary>
+    /// 「不歪概率」展示文本：有样本时形如「54.55% (6/11)」，无样本时为「—」。
+    /// </summary>
+    public string FiftyFiftyNoUpText => FiftyFiftyCount == 0 ? "—" : $"{FiftyFiftyNoUpRate:P2} ({FiftyFiftyNoUpCount}/{FiftyFiftyCount})";
+
 }

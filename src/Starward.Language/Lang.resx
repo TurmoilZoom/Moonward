@@ -165,6 +165,9 @@
   <data name="GachaStatsCard_Stats" xml:space="preserve">
     <value>Stats</value>
   </data>
+  <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
+    <value>Win Rate</value>
+  </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>Nice to Meet You ~</value>
   </data>
