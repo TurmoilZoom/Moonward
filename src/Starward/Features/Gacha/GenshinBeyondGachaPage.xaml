@@ -281,6 +281,8 @@
                                                 <sc:CachedImage Grid.Column="0"
                                                                 Width="28"
                                                                 Height="28"
+                                                                DecodeWidth="28"
+                                                                DecodeHeight="28"
                                                                 HorizontalAlignment="Left"
                                                                 Source="{x:Bind Icon}" />
                                                 <Border x:Name="PityBar"
@@ -322,6 +324,8 @@
                                                 <sc:CachedImage Grid.Column="0"
                                                                 Width="28"
                                                                 Height="28"
+                                                                DecodeWidth="28"
+                                                                DecodeHeight="28"
                                                                 Source="{x:Bind Icon}" />
                                                 <TextBlock Grid.Column="1"
                                                            Margin="4,0,4,0"
@@ -448,6 +452,8 @@
                                                 <sc:CachedImage Grid.Column="0"
                                                                 Width="28"
                                                                 Height="28"
+                                                                DecodeWidth="28"
+                                                                DecodeHeight="28"
                                                                 HorizontalAlignment="Left"
                                                                 Source="{x:Bind Icon}" />
                                                 <Border x:Name="PityBar"
@@ -489,6 +495,8 @@
                                                 <sc:CachedImage Grid.Column="0"
                                                                 Width="28"
                                                                 Height="28"
+                                                                DecodeWidth="28"
+                                                                DecodeHeight="28"
                                                                 Source="{x:Bind Icon}" />
                                                 <TextBlock Grid.Column="1"
                                                            Margin="4,0,4,0"
@@ -527,6 +535,7 @@
                                       Margin="4,2,4,2">
                                     <sc:CachedImage Source="{x:Bind RankType, Converter={StaticResource RarityToGIBgConverter}}" />
                                     <sc:CachedImage Height="80"
+                                                    DecodeHeight="80"
                                                     VerticalAlignment="Top"
                                                     CornerRadius="0,0,16,0"
                                                     Source="{x:Bind Icon}" />

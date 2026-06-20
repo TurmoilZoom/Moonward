@@ -354,6 +354,7 @@
                                       Margin="4,2,4,2">
                                     <sc:CachedImage Source="{x:Bind RankType, Converter={StaticResource RarityToGIBgConverter}}" />
                                     <sc:CachedImage Height="80"
+                                                    DecodeHeight="80"
                                                     VerticalAlignment="Top"
                                                     CornerRadius="0,0,16,0"
                                                     Source="{x:Bind Icon}" />
@@ -382,6 +383,7 @@
                                       Margin="4,2,4,2">
                                     <sc:CachedImage Source="{x:Bind RankType, Converter={StaticResource RarityToSRBgConverter}}" />
                                     <sc:CachedImage Width="80"
+                                                    DecodeWidth="80"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Top"
                                                     CornerRadius="0,12,0,0"
@@ -417,10 +419,14 @@
                                       CornerRadius="8">
                                     <sc:CachedImage Width="80"
                                                     Height="80"
+                                                    DecodeWidth="80"
+                                                    DecodeHeight="80"
                                                     VerticalAlignment="Top"
                                                     Source="ms-appx:///Assets/Image/ZZZ_AvatarCard_Background.png" />
                                     <sc:CachedImage Width="80"
                                                     Height="80"
+                                                    DecodeWidth="80"
+                                                    DecodeHeight="80"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Top"
                                                     Source="{x:Bind Icon}"
@@ -431,6 +437,8 @@
                                             CornerRadius="0,0,4,0">
                                         <sc:CachedImage Width="20"
                                                         Height="20"
+                                                        DecodeWidth="20"
+                                                        DecodeHeight="20"
                                                         Margin="2"
                                                         Source="{x:Bind RankType, Converter={StaticResource RarityToZZZIconConverter}}" />
                                     </Border>

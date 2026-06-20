@@ -148,8 +148,10 @@ internal static class FileCache
 
         string filePath = Path.Combine(CacheFolder, fileName);
 
-        await Task.Delay(1, CancellationToken.None).ConfigureAwait(false);
-        if (IsFileCacheAvailable(filePath, CacheDuration))
+        // 缓存命中检查放到线程池执行：避免在 UI 线程上做文件元数据 IO，同时去掉原先固定的 1ms 延迟
+        // （该延迟会让每张图片——即使命中缓存——都至少多等一个计时器周期）。
+        // 这个 await 也会立即让出控制权，使 GetItemAsync 能先把本任务登记进并发去重字典，再继续后续下载。
+        if (await Task.Run(() => IsFileCacheAvailable(filePath, CacheDuration), CancellationToken.None).ConfigureAwait(false))
         {
             return filePath;
         }
