@@ -31,9 +31,10 @@ internal static class GachaStatsSegmentedListHelper
     /// <summary>
     /// 绑定 Segmented 与两个互斥列表。返回的句柄须在控件 <c>Unloaded</c> 时调用 <see cref="GachaStatsSegmentedListBinding.Dispose"/> 解除绑定。
     /// </summary>
-    public static GachaStatsSegmentedListBinding Bind(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList)
+    /// <param name="listScrollViewer">包裹两个列表的竖直滚动容器；切换 tab 时将其滚动位置复位到顶部。</param>
+    public static GachaStatsSegmentedListBinding Bind(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList, ScrollViewer? listScrollViewer = null)
     {
-        return new GachaStatsSegmentedListBinding(segmented, firstList, secondList);
+        return new GachaStatsSegmentedListBinding(segmented, firstList, secondList, listScrollViewer);
     }
 
 
@@ -114,6 +115,21 @@ internal static class GachaStatsSegmentedListHelper
     }
 
 
+    /// <summary>将列表滚动容器复位到顶部。</summary>
+    private static void ResetScrollPosition(ScrollViewer? scrollViewer)
+    {
+        if (scrollViewer is null)
+        {
+            return;
+        }
+        try
+        {
+            scrollViewer.ChangeView(null, 0, null, true);
+        }
+        catch { }
+    }
+
+
     /// <summary>复位元素的不透明度与位移到默认值（完全可见、无偏移）。</summary>
     private static void ResetVisual(UIElement element)
     {
@@ -139,17 +155,19 @@ internal static class GachaStatsSegmentedListHelper
         private readonly Segmented _segmented;
         private readonly ItemsRepeater _firstList;
         private readonly ItemsRepeater _secondList;
+        private readonly ScrollViewer? _listScrollViewer;
         private readonly long _callbackToken;
         private readonly DependencyPropertyChangedCallback _selectedIndexChanged;
         private int _previousIndex;
         private int _generation;
         private bool _disposed;
 
-        internal GachaStatsSegmentedListBinding(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList)
+        internal GachaStatsSegmentedListBinding(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList, ScrollViewer? listScrollViewer)
         {
             _segmented = segmented;
             _firstList = firstList;
             _secondList = secondList;
+            _listScrollViewer = listScrollViewer;
             _previousIndex = Math.Max(0, segmented.SelectedIndex);
             _selectedIndexChanged = (_, _) => Apply(true);
             _callbackToken = segmented.RegisterPropertyChangedCallback(Selector.SelectedIndexProperty, _selectedIndexChanged);
@@ -182,6 +200,11 @@ internal static class GachaStatsSegmentedListHelper
             bool showFirst = index == 0;
             ItemsRepeater incoming = showFirst ? _firstList : _secondList;
             ItemsRepeater outgoing = showFirst ? _secondList : _firstList;
+
+            if (animate && index != _previousIndex)
+            {
+                ResetScrollPosition(_listScrollViewer);
+            }
 
             if (!animate || !EntranceAnimation.AnimationsEnabled())
             {

@@ -16,7 +16,7 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
     public GachaStatsCard()
     {
         this.InitializeComponent();
-        _segmentedListBinding = GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList, ItemsRepeater_List_5, ItemsRepeater_List_4);
+        _segmentedListBinding = GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList, ItemsRepeater_List_5, ItemsRepeater_List_4, ScrollViewer_GachaItemList);
         _pityBarBinding = GachaPityBarAnimation.Bind(ItemsRepeater_List_5);
         Unloaded += OnCardUnloaded;
     }

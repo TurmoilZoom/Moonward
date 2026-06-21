@@ -177,7 +177,8 @@
             </cwc:Segmented>
 
             <!--  记录列表：独立竖直滚动条（右侧留 14px 装订线，避免遮挡每行右侧的保底数字）。统计信息与 Segmented 选项卡在其上方、不随列表滚动。  -->
-            <ScrollViewer Grid.Row="1"
+            <ScrollViewer x:Name="ScrollViewer_GachaItemList"
+                          Grid.Row="1"
                           Padding="0,0,14,0"
                           HorizontalScrollBarVisibility="Disabled"
                           HorizontalScrollMode="Disabled"
