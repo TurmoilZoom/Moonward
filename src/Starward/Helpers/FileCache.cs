@@ -202,16 +202,32 @@ internal static class FileCache
 
 
     /// <summary>
-    /// 根据 URI 计算缓存文件名。
+    /// URI 字符串 → 缓存文件名 的记忆化映射。
+    /// 同一图片 URL（如抽卡列表里反复出现的相同角色/武器图标）只在首次计算一次哈希，之后直接复用结果，
+    /// 避免每条记录、每次重新实现（虚拟化滚动）都重算 XxHash64+MD5。
+    /// 键为完整 URI 字符串、值为 48 字符文件名；条目小、按会话累积（去重后图片 URL 数量有限），无需淘汰。
+    /// </summary>
+    private static readonly ConcurrentDictionary<string, string> _cacheFileNames = new();
+
+
+    /// <summary>
+    /// 根据 URI 计算缓存文件名（记忆化：相同 URI 只计算一次哈希）。
     /// 使用 XxHash64（前 8 字节）+ MD5（后 16 字节）混合哈希，兼顾速度与碰撞抵抗。
     /// 返回 48 字符十六进制字符串。
     /// </summary>
     private static string GetCacheFileName(Uri uri)
     {
+        return _cacheFileNames.GetOrAdd(uri.ToString(), static key => ComputeCacheFileName(key));
+    }
+
+
+    /// <summary>实际的哈希计算，仅在记忆化未命中时调用。输入为完整 URI 字符串（即 <see cref="Uri.ToString"/>）。</summary>
+    private static string ComputeCacheFileName(string uri)
+    {
         byte[] hashBytes = ArrayPool<byte>.Shared.Rent(24);
         try
         {
-            ReadOnlySpan<byte> pathSpan = MemoryMarshal.AsBytes(uri.ToString().AsSpan());
+            ReadOnlySpan<byte> pathSpan = MemoryMarshal.AsBytes(uri.AsSpan());
             XxHash64.Hash(pathSpan, hashBytes.AsSpan(0, 8));
             MD5.HashData(pathSpan, hashBytes.AsSpan(8, 16));
             return Convert.ToHexString(hashBytes.AsSpan(0, 24));

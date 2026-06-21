@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Composition;
-using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
@@ -235,24 +234,21 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 卡池卡片区域的滚轮事件处理：拖拽中横向滚轮优先交给拖拽逻辑，否则 Shift+滚轮横向滚动 ScrollViewer。
-    /// <para><b>输入：</b><paramref name="sender"/> — Grid_GachaStats；<paramref name="e"/> — 指针滚轮事件。</para>
-    /// <para><b>输出：</b>无返回值；通过 <see cref="_dragReorder"/>.HandleWheel 消费拖拽滚动，否则手动横向滚动 <see cref="ScrollViewer_GachaStats"/>。</para>
+    /// 卡池卡片区域的滚轮事件处理：让滚轮「只影响竖直方向」。
+    /// <para>拖拽中：交给 <see cref="_dragReorder"/>.HandleWheel 横向滚动，便于把卡片拖到视口外的卡池处（仅 active drag 生效）。</para>
+    /// <para>非拖拽：一律吞掉滚轮。落在某卡记录列表上的竖直滚轮已被该卡内部 ScrollViewer 处理、不会冒泡到此；
+    /// 落在卡片间隙 / 等高短卡留白 / 列表滚到尽头处的滚轮在此被吞，阻止外层横向 <see cref="ScrollViewer_GachaStats"/>
+    /// 把竖直滚轮转成横向滚动。横向翻看卡池请改用底部横向滚动条。</para>
     /// </summary>
     private void Grid_GachaStats_PointerWheelChanged(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        // 拖拽中优先用滚轮横向滚动（以便拖到视口外的第 5、6 个卡池）。
+        // 拖拽中：用滚轮横向滚动以便把卡片拖到视口外的卡池处。
         if (_dragReorder.HandleWheel(e))
         {
             return;
         }
-        var properties = e.GetCurrentPoint(Grid_GachaStats).Properties;
-        if (properties.IsHorizontalMouseWheel || InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down))
-        {
-            var delta = properties.MouseWheelDelta;
-            ScrollViewer_GachaStats.ChangeView(ScrollViewer_GachaStats.HorizontalOffset - delta, null, null);
-            e.Handled = true;
-        }
+        // 非拖拽：吞掉滚轮，阻止外层横向 ScrollViewer 把竖直滚轮转成横向滚动 → 滚轮只影响竖直方向。
+        e.Handled = true;
     }
 
 
