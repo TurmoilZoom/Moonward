@@ -312,7 +312,7 @@ internal partial class GameLauncherService
     /// 启动游戏
     /// </summary>
     /// <returns></returns>
-    public async Task<Process?> StartGameAsync(GameId gameId, string? installPath = null)
+    public async Task<Process?> StartGameAsync(GameId gameId, string? installPath = null, GameLaunchProfile? profile = null)
     {
         const int ERROR_CANCELLED = 0x000004C7;
         try
@@ -321,6 +321,13 @@ internal partial class GameLauncherService
             {
                 throw new Exception($"Game is running: {existingProcess.ProcessName}.exe ({existingProcess.Id}).");
             }
+            // 启动配置文件：profile 非空时（如 URL 协议指定 Alice…Carol）使用其参数/自定义启动程序，否则使用默认配置（legacy 键）。
+            bool enableThirdPartyTool = profile?.EnableThirdPartyTool ?? AppConfig.GetEnableThirdPartyTool(gameId.GameBiz);
+            string? thirdPartyToolPath = profile is null
+                ? GetThirdPartyToolPath(gameId)
+                : (string.IsNullOrWhiteSpace(profile.ThirdPartyToolPath) ? null : GetFullPathIfRelativePath(profile.ThirdPartyToolPath));
+            string? startArgument = profile is null ? AppConfig.GetStartArgument(gameId.GameBiz) : profile.Argument;
+
             string? exe = null, arg = null, verb = null;
             if (Directory.Exists(installPath))
             {
@@ -331,9 +338,9 @@ internal partial class GameLauncherService
                 }
             }
             bool thirdPartyTool = false;
-            if (string.IsNullOrWhiteSpace(exe) && AppConfig.GetEnableThirdPartyTool(gameId.GameBiz))
+            if (string.IsNullOrWhiteSpace(exe) && enableThirdPartyTool)
             {
-                exe = GetThirdPartyToolPath(gameId);
+                exe = thirdPartyToolPath;
                 if (File.Exists(exe))
                 {
                     thirdPartyTool = true;
@@ -342,8 +349,12 @@ internal partial class GameLauncherService
                 else
                 {
                     exe = null;
-                    SetThirdPartyToolPath(gameId, null);
-                    _logger.LogWarning("Third party tool not found: {path}", exe);
+                    // 仅在使用默认配置时清理失效的 legacy 路径；配置文件的路径不在此清除。
+                    if (profile is null)
+                    {
+                        SetThirdPartyToolPath(gameId, null);
+                    }
+                    _logger.LogWarning("Third party tool not found: {path}", thirdPartyToolPath);
                 }
             }
             if (string.IsNullOrWhiteSpace(exe))
@@ -358,7 +369,7 @@ internal partial class GameLauncherService
                     throw new FileNotFoundException("Game exe not found", name);
                 }
             }
-            arg = AppConfig.GetStartArgument(gameId.GameBiz)?.Trim();
+            arg = startArgument?.Trim();
             if (AppConfig.EnableLoginAuthTicket is true)
             {
                 string? ticket = await _gameAuthLoginService.CreateAuthTicketByGameBiz(gameId);

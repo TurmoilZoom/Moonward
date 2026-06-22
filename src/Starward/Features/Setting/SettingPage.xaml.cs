@@ -20,9 +20,9 @@ public sealed partial class SettingPage : PageBase
     public SettingPage()
     {
         this.InitializeComponent();
-        // 在首次导航前订阅，使「关于」页（默认落地页）的入场同样触发级联动画
+        // 在首次导航前订阅，使「常规」页（默认落地页）的入场同样触发级联动画
         Frame_Setting.Navigated += Frame_Setting_Navigated;
-        Frame_Setting.Navigate(typeof(AboutSetting));
+        Frame_Setting.Navigate(typeof(GeneralSetting));
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
     }
 

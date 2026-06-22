@@ -1189,6 +1189,12 @@
   <data name="SettingPage_TestURLProtocol" xml:space="preserve">
     <value>测试 URL 协议</value>
   </data>
+  <data name="SettingPage_URLProtocolHelpDoc" xml:space="preserve">
+    <value>帮助文档</value>
+  </data>
+  <data name="UrlProtocolDocWindow_Title" xml:space="preserve">
+    <value>URL 协议</value>
+  </data>
   <data name="LauncherPage_OpenInBrowser" xml:space="preserve">
     <value>在浏览器中打开</value>
   </data>
@@ -1693,8 +1699,62 @@
   <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
     <value>游戏包体</value>
   </data>
+  <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
+    <value>快速启动</value>
+  </data>
+  <data name="StartGameMenu_LaunchProfileConfig" xml:space="preserve">
+    <value>启动参数配置</value>
+  </data>
+  <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
+    <value>选择启动方式</value>
+  </data>
+  <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
+    <value>创建游戏快捷方式</value>
+  </data>
+  <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
+    <value>跟随软件设置</value>
+  </data>
+  <data name="StartGameMenu_Generate" xml:space="preserve">
+    <value>生成</value>
+  </data>
+  <data name="StartGameMenu_ShortcutIcon" xml:space="preserve">
+    <value>快捷方式图标</value>
+  </data>
+  <data name="StartGameMenu_UploadIcon" xml:space="preserve">
+    <value>上传 .ico</value>
+  </data>
+  <data name="StartGameMenu_ShortcutCreated" xml:space="preserve">
+    <value>已在桌面生成快捷方式</value>
+  </data>
+  <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
+    <value>启动参数配置</value>
+  </data>
   <data name="GameLauncherSettingDialog_CommandLineArgument" xml:space="preserve">
     <value>命令行参数</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LaunchProfile" xml:space="preserve">
+    <value>配置文件</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NewProfile" xml:space="preserve">
+    <value>新建配置文件</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
+    <value>Url预览指令</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
+    <value>默认配置</value>
+  </data>
+  <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
+    <value>目前仅第一个配置文件在启动游戏时生效</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DiscardUnsavedProfileChanges" xml:space="preserve">
+    <value>当前配置文件有未保存的更改，是否放弃？</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ThirdPartyToolTip" xml:space="preserve">
+    <value>可通过其它程序启动游戏，选择之后，会将启动参数附加在其后</value>
   </data>
   <data name="GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument" xml:space="preserve">
     <value>查看有关命令行参数的更多信息</value>

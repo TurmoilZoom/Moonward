@@ -5,6 +5,7 @@
                xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                xmlns:lang="using:Starward.Language"
+               xmlns:dev="using:DevWin"
                xmlns:local="using:Starward.Features.GameLauncher"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                xmlns:sc="using:Starward.Controls"
@@ -133,15 +134,9 @@
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                     IsSelected="True"
                                     Tag="0" />
-                <NavigationViewItem Content="{x:Bind lang:Lang.GameLauncherSettingDialog_StartupArguments}"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Tag="1" />
                 <NavigationViewItem Content="{x:Bind lang:Lang.GameLauncherSettingDialog_CustomBackground}"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Tag="2" />
-                <NavigationViewItem Content="{x:Bind lang:Lang.GameLauncherSettingDialog_GamePackages}"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Tag="3" />
+                                    Tag="1" />
             </NavigationView.MenuItems>
 
 
@@ -157,7 +152,12 @@
 
                 <!--  基本信息  -->
                 <FlipViewItem>
-                    <StackPanel Spacing="12">
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Spacing="12">
 
                         <Grid ColumnSpacing="20">
                             <Grid.ColumnDefinitions>
@@ -183,36 +183,56 @@
                                        VerticalAlignment="Center"
                                        FontSize="16"
                                        Text="{x:Bind CurrentGameBizIcon.GameName}" />
-                            <!--  定位游戏  -->
-                            <Button Grid.Column="2"
-                                    Height="36"
-                                    Command="{x:Bind LocateGameCommand}"
-                                    CornerRadius="8"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                    Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Width="20"
-                                              Height="20"
-                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                              Glyph="&#xE838;" />
-                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.InstallGameDialog_LocateGame}" />
-                                </StackPanel>
-                            </Button>
-                            <!--  卸载游戏  -->
-                            <Button Grid.Column="2"
-                                    Height="36"
-                                    Command="{x:Bind ShowUninstallGameWarningCommand}"
-                                    CornerRadius="8"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                    Visibility="{x:Bind UninstallAndRepairEnabled}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Width="20"
-                                              Height="20"
-                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                              Glyph="&#xE74D;" />
-                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.LauncherPage_UninstallGame}" />
-                                </StackPanel>
-                            </Button>
+                            <!--  右侧操作：定位 / 重新定位 / 修复 / 卸载  -->
+                            <StackPanel Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        Spacing="12">
+                                <!--  定位游戏  -->
+                                <Button Height="36"
+                                        Command="{x:Bind LocateGameCommand}"
+                                        CornerRadius="8"
+                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                        Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Width="20"
+                                                  Height="20"
+                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                  Glyph="&#xE838;" />
+                                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.InstallGameDialog_LocateGame}" />
+                                    </StackPanel>
+                                </Button>
+                                <!--  重新定位  -->
+                                <Button Height="36"
+                                        Command="{x:Bind LocateGameCommand}"
+                                        CornerRadius="8"
+                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                        Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                    <TextBlock Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_RelocateGame}" />
+                                </Button>
+                                <!--  修复游戏  -->
+                                <Button x:Name="Button_RepairGame"
+                                        Height="36"
+                                        Command="{x:Bind RepairGameCommand}"
+                                        CornerRadius="8"
+                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                        Visibility="{x:Bind UninstallAndRepairEnabled}">
+                                    <TextBlock Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind lang:Lang.LauncherPage_RepairGame}" />
+                                </Button>
+                                <!--  卸载游戏  -->
+                                <Button Height="36"
+                                        Command="{x:Bind ShowUninstallGameWarningCommand}"
+                                        CornerRadius="8"
+                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                        Visibility="{x:Bind UninstallAndRepairEnabled}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Width="20"
+                                                  Height="20"
+                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                  Glyph="&#xE74D;" />
+                                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.LauncherPage_UninstallGame}" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                         </Grid>
 
                         <!--  网络驱动器警告  -->
@@ -297,47 +317,15 @@
                             </Button>
                         </Grid>
 
-                        <!--  一些操作  -->
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <!--  游戏大小  -->
-                            <Button Height="36"
-                                    CornerRadius="8"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    IsEnabled="False"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                    Visibility="{x:Bind GameSize, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                <TextBlock>
-                                    <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_Size}" />
-                                    <Run Text="" />
-                                    <Run Text="{x:Bind GameSize}" />
-                                </TextBlock>
-                            </Button>
-                            <!--  重新定位  -->
-                            <Button Height="36"
-                                    Command="{x:Bind LocateGameCommand}"
-                                    CornerRadius="8"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                    Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                <TextBlock Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_RelocateGame}" />
-                            </Button>
-                            <!--  修复游戏  -->
-                            <Button x:Name="Button_RepairGame"
-                                    Height="36"
-                                    Command="{x:Bind RepairGameCommand}"
-                                    CornerRadius="8"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                    Visibility="{x:Bind UninstallAndRepairEnabled}">
-                                <TextBlock Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind lang:Lang.LauncherPage_RepairGame}" />
-                            </Button>
-                            <!--  开始修复  -->
-                            <Button x:Name="Button_StartRepairing"
-                                    BorderThickness="0"
-                                    Command="{x:Bind RepairGameCommand}"
-                                    Content="{x:Bind lang:Lang.GameLauncherSettingDialog_StartRepairing}"
-                                    IsEnabled="{x:Bind CanRepairGame}"
-                                    Style="{ThemeResource AccentButtonStyle}"
-                                    Visibility="Collapsed" />
-                        </StackPanel>
+                        <!--  开始修复 -->
+                        <Button x:Name="Button_StartRepairing"
+                                HorizontalAlignment="Left"
+                                BorderThickness="0"
+                                Command="{x:Bind RepairGameCommand}"
+                                Content="{x:Bind lang:Lang.GameLauncherSettingDialog_StartRepairing}"
+                                IsEnabled="{x:Bind CanRepairGame}"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                Visibility="Collapsed" />
 
                         <!--  选择语音包  -->
                         <cwc:Segmented x:Name="Segmented_SelectLanguage"
@@ -360,140 +348,81 @@
                         </cwc:Segmented>
 
 
-                        <!--  显示游戏通知  -->
-                        <ToggleSwitch IsOn="{x:Bind EnableBannerAndPost, Mode=TwoWay}"
-                                      OffContent="{x:Bind lang:Lang.LauncherPage_ShowGameAnnouncement}"
-                                      OnContent="{x:Bind lang:Lang.LauncherPage_ShowGameAnnouncement}" />
+                        <!--  「使用 CMD 启动游戏」已移至「启动参数配置」对话框；「游戏启动后」已移至「设置 - 常规」  -->
 
-                        <!--  禁用通知红点提醒  -->
-                        <ToggleSwitch Margin="0,-12,0,0"
-                                      IsEnabled="{x:Bind EnableBannerAndPost}"
-                                      IsOn="{x:Bind DisableGameNoticeRedHot, Mode=TwoWay}"
-                                      OffContent="{x:Bind lang:Lang.ExperienceSettingPage_DisableRedDotReminderForGameNotices}"
-                                      OnContent="{x:Bind lang:Lang.ExperienceSettingPage_DisableRedDotReminderForGameNotices}" />
-
-                        <!--  使用 CMD 启动游戏  -->
-                        <StackPanel Margin="0,-12,0,0"
-                                    Orientation="Horizontal"
-                                    Spacing="8">
-                            <ToggleSwitch IsOn="{x:Bind StartGameWithCMD, Mode=TwoWay}"
-                                          OffContent="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchGameUsingCMD}"
-                                          OnContent="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchGameUsingCMD}" />
-                            <Button Margin="0,2,0,0"
-                                    Padding="4"
-                                    VerticalAlignment="Center"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                                <FontIcon FontSize="16"
-                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                          Glyph="&#xE9CE;" />
-                                <Button.Flyout>
-                                    <Flyout>
-                                        <TextBlock MaxWidth="380" TextWrapping="Wrap">
-                                            <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_AvoidShowingAlertsAboutDetectingIllegalToolInTheGame}" />
-                                            <Hyperlink NavigateUri="https://github.com/Scighost/Starward/issues/1634" UnderlineStyle="None">
-                                                <Run Text="#1634" />
-                                            </Hyperlink>
-                                        </TextBlock>
-                                    </Flyout>
-                                </Button.Flyout>
-                            </Button>
                         </StackPanel>
 
-                    </StackPanel>
-                </FlipViewItem>
+                        <!--  游戏包体  -->
+                        <Pivot Grid.Row="1">
 
-                <!--  启动参数  -->
-                <FlipViewItem>
-                    <StackPanel Spacing="12">
+                            <!--  大小 -->
+                            <Pivot.RightHeader>
+                                <TextBlock Margin="0,0,8,0"
+                                           VerticalAlignment="Top"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Visibility="{x:Bind GameSize, Converter={StaticResource ObjectToVisibilityConverter}}">
+                                    <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_Size}" />
+                                    <Run Text="" />
+                                    <Run Text="{x:Bind GameSize}" />
+                                </TextBlock>
+                            </Pivot.RightHeader>
 
-                        <TextBlock Text="{x:Bind lang:Lang.GameLauncherSettingDialog_CommandLineArgument}" />
+                            <Pivot.Resources>
+                                <Thickness x:Key="PivotItemMargin">0,8,0,0</Thickness>
+                                <Thickness x:Key="PivotHeaderItemMargin">0,0,24,0</Thickness>
+                                <Style BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" TargetType="PivotHeaderItem">
+                                    <Setter Property="Height" Value="28" />
+                                    <Setter Property="FontSize" Value="16" />
+                                    <Setter Property="VerticalContentAlignment" Value="Top" />
+                                </Style>
+                            </Pivot.Resources>
 
-                        <!--  命令行参数  -->
-                        <TextBox MinWidth="320"
-                                 HorizontalAlignment="Left"
-                                 IsSpellCheckEnabled="False"
-                                 Text="{x:Bind StartGameArgument, Mode=TwoWay}"
-                                 TextWrapping="Wrap" />
-                        <TextBlock FontSize="12" TextWrapping="Wrap">
-                            <Hyperlink NavigateUri="https://docs.unity3d.com/Manual/PlayerCommandLineArguments.html" UnderlineStyle="None">
-                                <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument}" />
-                            </Hyperlink>
-                        </TextBlock>
+                            <!--  正式版  -->
+                            <PivotItem Margin="0,-8,0,0">
+                                <PivotItem.Header>
+                                    <TextBlock>
+                                        <Run Text="{x:Bind lang:Lang.GameResourcePage_LatestVersion}" />
+                                        <Run Text="" />
+                                        <Run Text="{x:Bind LatestVersion}" />
+                                    </TextBlock>
+                                </PivotItem.Header>
+                                <ScrollViewer>
+                                    <ItemsControl Margin="0,0,8,0"
+                                                  ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
+                                                  ItemsSource="{x:Bind LatestPackageGroups}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Spacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </PivotItem>
 
-                        <!--  游戏启动后  -->
-                        <TextBlock Margin="0,12,0,0" Text="{x:Bind lang:Lang.ExperienceSettingPage_AfterStartingGame}" />
-                        <ComboBox Name="ComboBox_AfterStartGameAction"
-                                  Height="36"
-                                  MinWidth="280"
-                                  Padding="18.5,0,0,0"
-                                  BorderThickness="0"
-                                  CornerRadius="8"
-                                  SelectedIndex="{x:Bind StartGameAction, Mode=TwoWay}">
-                            <ComboBoxItem Content="{x:Bind lang:Lang.ExperienceSettingPage_DoNothing}" Tag="{x:Bind local:StartGameAction.DoNothing}" />
-                            <ComboBoxItem Content="{x:Bind lang:Lang.ExperienceSettingPage_MinimizeToTaskbar}" Tag="{x:Bind local:StartGameAction.Minimize}" />
-                            <ComboBoxItem Content="{x:Bind lang:Lang.ExperienceSettingPage_MinimizeToSystemTray}" Tag="{x:Bind local:StartGameAction.Hide}" />
-                        </ComboBox>
+                            <!--  预下载  -->
+                            <PivotItem Margin="0,-8,0,0">
+                                <PivotItem.Header>
+                                    <TextBlock>
+                                        <Run Text="{x:Bind lang:Lang.LauncherPage_PreInstall}" />
+                                        <Run Text="" />
+                                        <Run Text="{x:Bind PreInstallVersion}" />
+                                    </TextBlock>
+                                </PivotItem.Header>
+                                <ScrollViewer>
+                                    <ItemsControl Margin="0,0,8,0"
+                                                  ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
+                                                  ItemsSource="{x:Bind PreInstallPackageGroups}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Spacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </PivotItem>
 
-                        <!--  自定义启动程序  -->
-                        <ToggleSwitch Margin="0,4,0,-4"
-                                      FontSize="14"
-                                      IsOn="{x:Bind EnableThirdPartyTool, Mode=TwoWay}"
-                                      OffContent="{x:Bind lang:Lang.LauncherPage_CustomStartExecutable}"
-                                      OnContent="{x:Bind lang:Lang.LauncherPage_CustomStartExecutable}" />
-                        <Grid ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Button Height="36"
-                                    BorderThickness="0"
-                                    Command="{x:Bind ChangeThirdPartyPathCommand}"
-                                    CornerRadius="8"
-                                    IsEnabled="{x:Bind EnableThirdPartyTool}"
-                                    Style="{ThemeResource AccentButtonStyle}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE7FC;" />
-                                    <TextBlock Text="{x:Bind lang:Lang.Common_Select}" />
-                                </StackPanel>
-                            </Button>
-                            <Grid Grid.Column="1"
-                                  Height="36"
-                                  HorizontalAlignment="Left"
-                                  CornerRadius="8"
-                                  Visibility="{x:Bind ThirdPartyToolPath, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <!--  打开自定义启动程序路径  -->
-                                <Button Height="36"
-                                        Padding="16,0,8,1"
-                                        BorderThickness="0"
-                                        Command="{x:Bind OpenThirdPartyToolFolderCommand}"
-                                        CornerRadius="0">
-                                    <TextBlock VerticalAlignment="Center"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
-                                               MaxLines="2"
-                                               Text="{x:Bind ThirdPartyToolPath}"
-                                               TextTrimming="CharacterEllipsis"
-                                               TextWrapping="Wrap" />
-                                </Button>
-                                <!--  删除自定义启动程序设置  -->
-                                <Button Grid.Column="1"
-                                        Height="36"
-                                        BorderThickness="0"
-                                        Command="{x:Bind DeleteThirdPartyToolPathCommand}"
-                                        CornerRadius="0">
-                                    <FontIcon Margin="0,2,2,0"
-                                              FontSize="16"
-                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                              Glyph="&#xE711;" />
-                                </Button>
-                            </Grid>
-                        </Grid>
-
-                    </StackPanel>
+                        </Pivot>
+                    </Grid>
                 </FlipViewItem>
 
                 <!--  自定义背景  -->
@@ -627,67 +556,6 @@
                         </Grid>
 
                     </StackPanel>
-                </FlipViewItem>
-
-                <!--  游戏包体  -->
-                <FlipViewItem>
-                    <Pivot>
-
-                        <Pivot.Resources>
-                            <Thickness x:Key="PivotItemMargin">0,8,0,0</Thickness>
-                            <Thickness x:Key="PivotHeaderItemMargin">0,0,24,0</Thickness>
-                            <Style BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" TargetType="PivotHeaderItem">
-                                <Setter Property="Height" Value="28" />
-                                <Setter Property="FontSize" Value="16" />
-                                <Setter Property="VerticalContentAlignment" Value="Top" />
-                            </Style>
-                        </Pivot.Resources>
-
-                        <!--  正式版  -->
-                        <PivotItem Margin="0,-8,0,0">
-                            <PivotItem.Header>
-                                <TextBlock>
-                                    <Run Text="{x:Bind lang:Lang.GameResourcePage_LatestVersion}" />
-                                    <Run Text="" />
-                                    <Run Text="{x:Bind LatestVersion}" />
-                                </TextBlock>
-                            </PivotItem.Header>
-                            <ScrollViewer>
-                                <ItemsControl Margin="0,0,8,0"
-                                              ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
-                                              ItemsSource="{x:Bind LatestPackageGroups}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Spacing="8" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </PivotItem>
-
-                        <!--  预下载  -->
-                        <PivotItem Margin="0,-8,0,0">
-                            <PivotItem.Header>
-                                <TextBlock>
-                                    <Run Text="{x:Bind lang:Lang.LauncherPage_PreInstall}" />
-                                    <Run Text="" />
-                                    <Run Text="{x:Bind PreInstallVersion}" />
-                                </TextBlock>
-                            </PivotItem.Header>
-                            <ScrollViewer>
-                                <ItemsControl Margin="0,0,8,0"
-                                              ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
-                                              ItemsSource="{x:Bind PreInstallPackageGroups}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Spacing="8" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </PivotItem>
-
-                    </Pivot>
                 </FlipViewItem>
 
             </FlipView>

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Starward;
 
@@ -126,21 +127,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-    /// <summary>
-    /// 游戏账号切换
-    /// </summary>
-    public static bool EnableGameAccountSwitcher
-    {
-        get => GetValue<bool>();
-        set => SetValue(value);
-    }
-
-    public static bool DisableGameNoticeRedHot
-    {
-        get => GetValue<bool>();
-        set => SetValue(value);
-    }
-
     public static bool ToolbarPinned
     {
         get => GetValue(true);
@@ -149,7 +135,7 @@ public static partial class AppConfig
 
     public static StartGameAction StartGameAction
     {
-        get => GetValue<StartGameAction>();
+        get => GetValue(Starward.Features.GameLauncher.StartGameAction.Minimize);
         set => SetValue(value);
     }
 
@@ -530,6 +516,146 @@ public static partial class AppConfig
     public static void SetStartArgument(GameBiz biz, string? value)
     {
         SetValue(value, $"start_argument_{biz}");
+    }
+
+
+    /// <summary>
+    /// 获取指定游戏的额外启动配置文件列表（不含默认配置文件，默认配置文件的数据仍存于 legacy 键）。
+    /// </summary>
+    public static List<GameLaunchProfile> GetExtraLaunchProfiles(GameBiz biz)
+    {
+        var result = new List<GameLaunchProfile>();
+        string? json = GetValue<string>(default, $"launch_profiles_extra_{biz}");
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return result;
+        }
+        List<GameLaunchProfile>? list;
+        try
+        {
+            list = JsonSerializer.Deserialize<List<GameLaunchProfile>>(json, JsonSerializerOptions);
+        }
+        catch
+        {
+            return result;
+        }
+        if (list is null)
+        {
+            return result;
+        }
+        // 规范化内部名：必须取自固定名单、唯一、不与默认配置（Alice）冲突，并限制总数为 MaxCount。
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { GameLaunchProfile.DefaultId };
+        foreach (GameLaunchProfile p in list)
+        {
+            if (result.Count >= GameLaunchProfile.MaxCount - 1)
+            {
+                break;
+            }
+            if (string.IsNullOrEmpty(p.Id) || used.Contains(p.Id) || Array.IndexOf(GameLaunchProfile.InternalNames, p.Id) < 0)
+            {
+                string? free = null;
+                foreach (string name in GameLaunchProfile.InternalNames)
+                {
+                    if (!used.Contains(name))
+                    {
+                        free = name;
+                        break;
+                    }
+                }
+                if (free is null)
+                {
+                    break;
+                }
+                p.Id = free;
+            }
+            used.Add(p.Id);
+            result.Add(p);
+        }
+        return result;
+    }
+
+
+    /// <summary>
+    /// 按内部名获取启动配置文件。null/空/默认名(Alice)/未找到 时返回 null，调用方应回退到默认配置（legacy 键）。
+    /// </summary>
+    public static GameLaunchProfile? GetLaunchProfileById(GameBiz biz, string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id) || string.Equals(id, GameLaunchProfile.DefaultId, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+        foreach (GameLaunchProfile p in GetExtraLaunchProfiles(biz))
+        {
+            if (string.Equals(p.Id, id, StringComparison.OrdinalIgnoreCase))
+            {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// 保存指定游戏的额外启动配置文件列表（不含默认配置文件）。
+    /// </summary>
+    public static void SetExtraLaunchProfiles(GameBiz biz, List<GameLaunchProfile> profiles)
+    {
+        try
+        {
+            string json = JsonSerializer.Serialize(profiles ?? new List<GameLaunchProfile>(), JsonSerializerOptions);
+            SetValue(json, $"launch_profiles_extra_{biz}");
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// 获取默认配置文件的中文显示名（为 null 时由界面回退到本地化默认名）。
+    /// </summary>
+    public static string? GetDefaultLaunchProfileName(GameBiz biz)
+    {
+        return GetValue<string>(default, $"launch_profile_default_name_{biz}");
+    }
+
+    /// <summary>
+    /// 设置默认配置文件的中文显示名。
+    /// </summary>
+    public static void SetDefaultLaunchProfileName(GameBiz biz, string? value)
+    {
+        SetValue(value, $"launch_profile_default_name_{biz}");
+    }
+
+    /// <summary>
+    /// 获取当前在启动参数编辑界面选中的配置文件内部名。
+    /// </summary>
+    public static string? GetSelectedLaunchProfileId(GameBiz biz)
+    {
+        return GetValue<string>(default, $"launch_profile_selected_{biz}");
+    }
+
+    /// <summary>
+    /// 设置当前在启动参数编辑界面选中的配置文件内部名。
+    /// </summary>
+    public static void SetSelectedLaunchProfileId(GameBiz biz, string? value)
+    {
+        SetValue(value, $"launch_profile_selected_{biz}");
+    }
+
+
+    /// <summary>
+    /// 获取当前生效（active）的启动配置文件内部名：点击「开始游戏」按钮、以及不带 profile 参数的
+    /// <c>starward://startgame/{biz}</c>（即「跟随软件设置」）均按此配置启动。
+    /// 与编辑界面用的 <see cref="GetSelectedLaunchProfileId"/> 区分。缺省/Alice/未找到时回退到默认配置（legacy 键）。
+    /// </summary>
+    public static string? GetActiveLaunchProfileId(GameBiz biz)
+    {
+        return GetValue<string>(default, $"launch_profile_active_{biz}");
+    }
+
+    /// <summary>
+    /// 设置当前生效（active）的启动配置文件内部名（「选择启动方式」点击「应用」后写入）。
+    /// </summary>
+    public static void SetActiveLaunchProfileId(GameBiz biz, string? value)
+    {
+        SetValue(value, $"launch_profile_active_{biz}");
     }
 
 

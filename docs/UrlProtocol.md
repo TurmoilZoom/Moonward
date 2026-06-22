@@ -24,7 +24,7 @@ The parameter `game_biz`  in the following is game region identifier and can be 
 ### Start game
 
 ```
-starward://startgame/{game_biz}?install_path={install_path}
+starward://startgame/{game_biz}?install_path={install_path}&profile={profile}
 ```
 
 **Acceptable query arguments**
@@ -32,6 +32,7 @@ starward://startgame/{game_biz}?install_path={install_path}
 |Key|Type|Description|
 |---|---|---|
 |install_path| `string` (Option) | Folder full path of game executable. |
+|profile| `string` (Option) | Launch profile internal name. One of `Alice`, `Bob`, `Charlie`, `Dave`, `Eve`, `Mallory`, `Trent`, `Carol`. `Alice` is the default profile. When omitted, the app's currently active (applied) profile is used ("follow app setting"); when not found or `Alice`, the default profile is used. |
 
 
 ### Record playtime

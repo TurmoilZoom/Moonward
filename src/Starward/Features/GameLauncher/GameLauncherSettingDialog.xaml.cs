@@ -5,6 +5,7 @@ using CommunityToolkit.WinUI.Controls;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using Starward.Controls;
 using Starward.Core;
@@ -13,10 +14,12 @@ using Starward.Features.Background;
 using Starward.Features.GameInstall;
 using Starward.Features.GameSelector;
 using Starward.Features.HoYoPlay;
+using Starward.Features.UrlProtocol;
 using Starward.Helpers;
 using Starward.RPC.GameInstall;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -142,7 +145,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(this, OnAccentColorChanged);
         CheckCanRepairGame();
         await InitializeBasicInfoAsync();
-        InitializeStartArgument();
         InitializeCustomBg();
         await InitializeGamePackagesAsync();
     }
@@ -219,58 +221,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     /// 是否可以卸载和修复
     /// </summary>
     public bool UninstallAndRepairEnabled { get; set => SetProperty(ref field, value); }
-
-    /// <summary>
-    /// 是否启用公告
-    /// </summary>
-    public bool EnableBannerAndPost
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                AppConfig.EnableBannerAndPost = value;
-                WeakReferenceMessenger.Default.Send(new GameAnnouncementSettingChangedMessage());
-            }
-        }
-    } = AppConfig.EnableBannerAndPost;
-
-
-    /// <summary>
-    /// 是否启用游戏公告红点
-    /// </summary>
-    public bool DisableGameNoticeRedHot
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                AppConfig.DisableGameNoticeRedHot = value;
-                WeakReferenceMessenger.Default.Send(new GameAnnouncementSettingChangedMessage());
-            }
-        }
-    } = AppConfig.DisableGameNoticeRedHot;
-
-
-    /// <summary>
-    /// 使用 CMD 启动游戏
-    /// </summary>
-    public bool StartGameWithCMD
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                AppConfig.StartGameWithCMD = value;
-            }
-        }
-    } = AppConfig.StartGameWithCMD;
-
-
-
 
     private async Task InitializeBasicInfoAsync()
     {
@@ -634,140 +584,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
             _logger.LogError(ex, "Try stop game install task {GameBiz}", CurrentGameBiz);
         }
     }
-
-
-
-
-    #endregion
-
-
-
-
-    #region 启动参数
-
-
-    /// <summary>
-    /// 命令行启动参数
-    /// </summary>
-    [ObservableProperty]
-    public string? _StartGameArgument;
-    partial void OnStartGameArgumentChanged(string? value)
-    {
-        AppConfig.SetStartArgument(CurrentGameBiz, value);
-    }
-
-
-    /// <summary>
-    /// 启动游戏后的操作
-    /// </summary>
-    public int StartGameAction
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                AppConfig.StartGameAction = (StartGameAction)value;
-            }
-        }
-    } = Math.Clamp((int)AppConfig.StartGameAction, 0, 2);
-
-
-    /// <summary>
-    /// 是否启用第三方工具
-    /// </summary>
-    [ObservableProperty]
-    public bool _EnableThirdPartyTool;
-    partial void OnEnableThirdPartyToolChanged(bool value)
-    {
-        AppConfig.SetEnableThirdPartyTool(CurrentGameBiz, value);
-    }
-
-
-    /// <summary>
-    /// 第三方工具路径
-    /// </summary>
-    [ObservableProperty]
-    public string? _ThirdPartyToolPath;
-    partial void OnThirdPartyToolPathChanged(string? value)
-    {
-        try
-        {
-            GameLauncherService.SetThirdPartyToolPath(CurrentGameId, value);
-        }
-        catch { }
-    }
-
-
-
-    private void InitializeStartArgument()
-    {
-        _StartGameArgument = AppConfig.GetStartArgument(CurrentGameBiz);
-        _EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz);
-        _ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId);
-        OnPropertyChanged(nameof(StartGameArgument));
-        OnPropertyChanged(nameof(EnableThirdPartyTool));
-        OnPropertyChanged(nameof(ThirdPartyToolPath));
-    }
-
-
-
-    /// <summary>
-    /// 修改第三方启动工具路径
-    /// </summary>
-    /// <returns></returns>
-    [RelayCommand]
-    private async Task ChangeThirdPartyPathAsync()
-    {
-        try
-        {
-            var file = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot);
-            if (File.Exists(file))
-            {
-                ThirdPartyToolPath = file;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Change third party tool path ({biz})", CurrentGameBiz);
-        }
-    }
-
-
-    /// <summary>
-    /// 打开第三方工具文件夹
-    /// </summary>
-    /// <returns></returns>
-    [RelayCommand]
-    private async Task OpenThirdPartyToolFolderAsync()
-    {
-        try
-        {
-            if (File.Exists(ThirdPartyToolPath))
-            {
-                var folder = Path.GetDirectoryName(ThirdPartyToolPath);
-                var file = await StorageFile.GetFileFromPathAsync(ThirdPartyToolPath);
-                var option = new FolderLauncherOptions();
-                option.ItemsToSelect.Add(file);
-                await Launcher.LaunchFolderPathAsync(folder, option);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Open third party tool folder {folder}", ThirdPartyToolPath);
-        }
-    }
-
-
-    /// <summary>
-    /// 删除第三方工具路径
-    /// </summary>
-    [RelayCommand]
-    private void DeleteThirdPartyToolPath()
-    {
-        ThirdPartyToolPath = null;
-    }
-
 
 
 

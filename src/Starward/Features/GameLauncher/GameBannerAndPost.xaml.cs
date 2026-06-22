@@ -33,9 +33,6 @@ public sealed partial class GameBannerAndPost : UserControl
     private readonly HoYoPlayService _hoYoPlayService = AppConfig.GetService<HoYoPlayService>();
 
 
-    private readonly GameNoticeService _gameNoticeService = AppConfig.GetService<GameNoticeService>();
-
-
     public GameId CurrentGameId { get; set; }
 
 
@@ -62,7 +59,7 @@ public sealed partial class GameBannerAndPost : UserControl
         WeakReferenceMessenger.Default.Register<GameNoticeWindowClosedMessage>(this, OnGameNoticeWindowClosed);
         WeakReferenceMessenger.Default.Register<GameAnnouncementSettingChangedMessage>(this, OnGameAnnouncementSettingChanged);
         await UpdateGameContentAsync();
-        await UpdateGameNoticeAlertAsync();
+        UpdateGameNoticeButtonVisibility();
     }
 
 
@@ -95,10 +92,9 @@ public sealed partial class GameBannerAndPost : UserControl
 
 
 
-    private async void OnGameNoticeWindowClosed(object _, GameNoticeWindowClosedMessage message)
+    private void OnGameNoticeWindowClosed(object _, GameNoticeWindowClosedMessage message)
     {
         User32.SetForegroundWindow(XamlRoot.GetWindowHandle());
-        await UpdateGameNoticeAlertAsync();
     }
 
 
@@ -110,14 +106,6 @@ public sealed partial class GameBannerAndPost : UserControl
         {
             ShowBannerAndPost = true;
             await UpdateGameContentAsync();
-            if (AppConfig.DisableGameNoticeRedHot)
-            {
-                IsGameNoticesAlert = false;
-            }
-            else
-            {
-                await UpdateGameNoticeAlertAsync();
-            }
         }
         else
         {
@@ -135,11 +123,6 @@ public sealed partial class GameBannerAndPost : UserControl
 
     public List<GamePostGroup>? PostGroups { get; set => SetProperty(ref field, value); }
 
-
-
-
-
-    public bool IsGameNoticesAlert { get; set => SetProperty(ref field, value); }
 
 
 
@@ -190,31 +173,20 @@ public sealed partial class GameBannerAndPost : UserControl
 
 
 
-    private async Task UpdateGameNoticeAlertAsync()
+    /// <summary>
+    /// 仅控制「游戏内公告」按钮的显隐；红点提醒已移除，始终不显示。
+    /// </summary>
+    private void UpdateGameNoticeButtonVisibility()
     {
         try
         {
-            if (GameFeatureConfig.FromGameId(CurrentGameId).InGameNoticesWindow)
-            {
-                Button_InGameNotices.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                Button_InGameNotices.Visibility = Visibility.Collapsed;
-                return;
-            }
-            if (AppConfig.DisableGameNoticeRedHot)
-            {
-                IsGameNoticesAlert = false;
-            }
-            else
-            {
-                IsGameNoticesAlert = await _gameNoticeService.IsNoticeAlertAsync(CurrentGameId.GameBiz);
-            }
+            Button_InGameNotices.Visibility = GameFeatureConfig.FromGameId(CurrentGameId).InGameNoticesWindow
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Get game launcher content ({CurrentGameId})", CurrentGameId);
+            _logger.LogError(ex, "Update game notice button visibility ({CurrentGameId})", CurrentGameId);
         }
     }
 

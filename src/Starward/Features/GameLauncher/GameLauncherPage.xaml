@@ -11,7 +11,6 @@
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfc="using:Starward.Features.CloudGame"
              xmlns:sfg="using:Starward.Features.GameInstall"
-             xmlns:sfga="using:Starward.Features.GameAccount"
              xmlns:sfgd="using:Starward.Features.GameRecord.DailyNote"
              xmlns:sfp="using:Starward.Features.PlayTime"
              x:DefaultBindMode="OneWay"
@@ -427,7 +426,7 @@
                         Background="Transparent"
                         Orientation="Horizontal"
                         Spacing="4">
-                <!--  index 指示器  -->
+                <!--  index 指示器（仅多张背景时可用）  -->
                 <PipsPager x:Name="PipsPager_SwitchBackgroundImage"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Bottom"
@@ -435,8 +434,20 @@
                            NumberOfPages="{x:Bind BackgroundImages.Count}"
                            PreviousButtonVisibility="VisibleOnPointerOver"
                            SelectedPageIndex="{x:Bind CurrentBackgroundImageIndex, Mode=TwoWay}"
-                           Style="{ThemeResource CustomPipsPagerStyle}" />
-                <AppBarSeparator Padding="0,4,0,4" />
+                           Style="{ThemeResource CustomPipsPagerStyle}"
+                           Visibility="{x:Bind CanSwitchBackgroundImage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <AppBarSeparator Padding="0,4,0,4" Visibility="{x:Bind CanSwitchBackgroundImage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <!--  显示 / 隐藏游戏公告（原「游戏设置-基本信息」中的开关）  -->
+                <Button Padding="4"
+                        VerticalAlignment="Center"
+                        Command="{x:Bind ToggleBannerAndPostCommand}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                        ToolTipService.ToolTip="{x:Bind lang:Lang.LauncherPage_ShowGameAnnouncement}">
+                    <FontIcon FontSize="16"
+                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                              Glyph="{x:Bind BannerAndPostButtonIcon, Mode=OneWay}"
+                              IsTextScaleFactorEnabled="False" />
+                </Button>
                 <!--  图库  -->
                 <Button Padding="4"
                         VerticalAlignment="Center"
@@ -568,10 +579,10 @@
             <local:StartGameButton x:Name="Button_StartGame"
                                    Grid.Column="2"
                                    HorizontalAlignment="Right"
+                                   CurrentGameId="{x:Bind CurrentGameId}"
                                    GameCommand="{x:Bind ClickStartGameButtonCommand}"
                                    GameState="{x:Bind GameState}"
-                                   RunningGameInfo="{x:Bind RunningGameInfo}"
-                                   SettingCommand="{x:Bind OpenGameLauncherSettingDialogCommand}" />
+                                   RunningGameInfo="{x:Bind RunningGameInfo}" />
 
 
             <!--  文字阴影  -->
@@ -654,14 +665,6 @@
 
 
         </Grid>
-
-        <!--  游戏账号切换  -->
-        <sfga:GameAccountSwitcher x:Name="GameLauncherPage_GameAccountSwitcher"
-                                  Margin="0,0,40,100"
-                                  HorizontalAlignment="Right"
-                                  VerticalAlignment="Bottom"
-                                  x:Load="{x:Bind EnableGameAccountSwitcher}"
-                                  CurrentGameBiz="{x:Bind CurrentGameBiz}" />
 
         <!--  崩坏三区服选择  -->
         <ComboBox Height="28"

@@ -115,6 +115,29 @@ public sealed partial class GeneralSetting : PageBase
 
 
 
+    #region 游戏启动后
+
+
+    /// <summary>
+    /// 启动游戏后的操作（全局设置）。原位于「游戏设置 - 基本信息」，现移到「常规」「关闭窗口选项」之上。
+    /// </summary>
+    public int StartGameAction
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.StartGameAction = (Starward.Features.GameLauncher.StartGameAction)value;
+            }
+        }
+    } = Math.Clamp((int)AppConfig.StartGameAction, 0, 2);
+
+
+    #endregion
+
+
+
     #region 关闭窗口选项
 
 
@@ -131,13 +154,14 @@ public sealed partial class GeneralSetting : PageBase
         try
         {
             var option = AppConfig.CloseWindowOption;
-            if (option is MainWindowCloseOption.Hide)
-            {
-                RadioButton_CloseWindowOption_Hide.IsChecked = true;
-            }
-            else if (option is MainWindowCloseOption.Exit)
+            if (option is MainWindowCloseOption.Exit)
             {
                 RadioButton_CloseWindowOption_Exit.IsChecked = true;
+            }
+            else
+            {
+                // 默认（含未设置）UI 上选中「最小化到系统托盘」；不写入配置，故首次关闭窗口仍会弹询问框
+                RadioButton_CloseWindowOption_Hide.IsChecked = true;
             }
             _closeWindowOptionInitialized = true;
         }
@@ -174,26 +198,6 @@ public sealed partial class GeneralSetting : PageBase
 
     #endregion
 
-
-
-    #region 游戏账号切换
-
-
-
-    public bool EnableGameAccountSwitcher
-    {
-        get; set
-        {
-            if (SetProperty(ref field, value))
-            {
-                AppConfig.EnableGameAccountSwitcher = value;
-            }
-        }
-    } = AppConfig.EnableGameAccountSwitcher;
-
-
-
-    #endregion
 
 
 

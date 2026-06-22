@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Features.GameLauncher.StartGameMenu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:helpers="using:Starward.Helpers"
+             xmlns:lang="using:Starward.Language"
+             xmlns:local="using:Starward.Features.GameLauncher"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <!--  菜单行按钮：透明底 + 圆角 + 悬停高亮 + 按压回弹，三栏（图标 / 文本 / 尾随箭头）  -->
+        <Style x:Key="MenuRowButtonStyle"
+               BasedOn="{StaticResource DefaultButtonStyle}"
+               TargetType="Button">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="helpers:FluentAnimations.PressScale" Value="0.97" />
+        </Style>
+
+        <!--  小节标题（caption）  -->
+        <Style x:Key="MenuCaptionStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Style>
+
+    </UserControl.Resources>
+
+    <StackPanel Width="280"
+                Padding="8"
+                Spacing="2">
+
+        <!--  游戏设置  -->
+        <Button Click="Button_GameSetting_Click" Style="{StaticResource MenuRowButtonStyle}">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <FontIcon FontSize="16"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE713;" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind lang:Lang.LauncherPage_GameSetting}" />
+            </Grid>
+        </Button>
+
+        <!--  启动参数配置  -->
+        <Button Click="Button_LaunchProfileConfig_Click" Style="{StaticResource MenuRowButtonStyle}">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <FontIcon FontSize="16"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xEC7A;" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind lang:Lang.StartGameMenu_LaunchProfileConfig}" />
+            </Grid>
+        </Button>
+
+        <MenuFlyoutSeparator Margin="12,6" />
+
+        <!--  选择启动方式：选中配置 + 应用  -->
+        <StackPanel Padding="12,0" Spacing="6">
+            <TextBlock Style="{StaticResource MenuCaptionStyle}" Text="{x:Bind lang:Lang.StartGameMenu_SelectLaunchMethod}" />
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ComboBox x:Name="ComboBox_ActiveProfile"
+                          Grid.Column="0"
+                          Height="34"
+                          HorizontalAlignment="Stretch"
+                          CornerRadius="6"
+                          DropDownClosed="ComboBox_DropDownClosed"
+                          DropDownOpened="ComboBox_DropDownOpened"
+                          ItemsSource="{x:Bind Profiles}"
+                          SelectionChanged="ComboBox_ActiveProfile_SelectionChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button x:Name="Button_ApplyActiveProfile"
+                        Grid.Column="1"
+                        Height="34"
+                        MinWidth="72"
+                        Padding="12,0,10,0"
+                        Click="Button_ApplyActiveProfile_Click"
+                        CornerRadius="6"
+                        IsEnabled="{x:Bind ShowActiveCheck, Converter={StaticResource BoolReversedConverter}}"
+                        Style="{ThemeResource AccentButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Common_Apply}" />
+                        <FontIcon x:Name="FontIcon_ApplyCheck"
+                                  VerticalAlignment="Center"
+                                  FontSize="14"
+                                  Glyph="&#xE73E;"
+                                  Visibility="{x:Bind ShowActiveCheck, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <FontIcon.RenderTransform>
+                                <ScaleTransform x:Name="ApplyCheckScale" CenterX="7" CenterY="7" />
+                            </FontIcon.RenderTransform>
+                        </FontIcon>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </StackPanel>
+
+        <MenuFlyoutSeparator Margin="12,6" />
+
+        <!--  创建游戏启动快捷方式（整行可点击切换展开，展开/折叠时菜单高度带缓动动画）  -->
+        <Button x:Name="Button_ShortcutHeader"
+                Click="Button_ShortcutHeader_Click"
+                Style="{StaticResource MenuRowButtonStyle}">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon FontSize="16"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE945;" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind lang:Lang.StartGameMenu_AddTaskbarLaunch}" />
+                <FontIcon x:Name="FontIcon_ShortcutChevron"
+                          Grid.Column="2"
+                          FontSize="12"
+                          Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                          Glyph="&#xE70D;"
+                          RenderTransformOrigin="0.5,0.5">
+                    <FontIcon.RenderTransform>
+                        <RotateTransform x:Name="ShortcutChevronRotate" />
+                    </FontIcon.RenderTransform>
+                </FontIcon>
+            </Grid>
+        </Button>
+
+        <!--  折叠内容：以 Height 缓动动画展开/收起，溢出部分按裁剪矩形裁掉  -->
+        <Grid x:Name="ShortcutExpandHost"
+              Height="0"
+              VerticalAlignment="Top"
+              SizeChanged="ShortcutExpandHost_SizeChanged">
+            <Grid.Clip>
+                <RectangleGeometry x:Name="ShortcutExpandClip" />
+            </Grid.Clip>
+            <StackPanel x:Name="ShortcutExpandContent"
+                        Padding="12,8,12,2"
+                        VerticalAlignment="Top"
+                        Spacing="6">
+
+                <!--  启动方式（快捷方式按哪个配置启动）+ 生成按钮横向排列  -->
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource MenuCaptionStyle}" Text="{x:Bind lang:Lang.StartGameMenu_SelectLaunchMethod}" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="ComboBox_TaskbarProfile"
+                                  Grid.Column="0"
+                                  Height="34"
+                                  HorizontalAlignment="Stretch"
+                                  CornerRadius="6"
+                                  DropDownClosed="ComboBox_DropDownClosed"
+                                  DropDownOpened="ComboBox_DropDownOpened"
+                                  ItemsSource="{x:Bind TaskbarOptions}"
+                                  SelectedIndex="0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button x:Name="Button_GenerateShortcut"
+                                Grid.Column="1"
+                                Height="34"
+                                MinWidth="72"
+                                Padding="12,0"
+                                Click="Button_GenerateShortcut_Click"
+                                CornerRadius="6"
+                                Style="{ThemeResource AccentButtonStyle}">
+                            <TextBlock VerticalAlignment="Center"
+                                       Text="{x:Bind lang:Lang.StartGameMenu_Generate}" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+            </StackPanel>
+        </Grid>
+
+    </StackPanel>
+
+</UserControl>

@@ -32,6 +32,7 @@
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
 		<!--  DO NOT Update Segmented https://github.com/CommunityToolkit/Windows/pull/699  -->
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.250402" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
 		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.251219" />
 		<PackageReference Include="ComputeSharp.D2D1.WinUI" Version="3.2.0" />
 		<PackageReference Include="Dapper" Version="2.1.79" />
@@ -75,6 +76,14 @@
 	<ItemGroup>
 		<Content Update="Assets\**">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<!--  游戏快捷方式图标：src 目录下的 .ico 复制到输出 Assets\Image，供 GameShortcutService 给 .lnk 设置图标  -->
+		<Content Include="..\bh3.ico;..\hk4e.ico;..\hkrpg.ico;..\nap.ico">
+			<Link>Assets\Image\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 

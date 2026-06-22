@@ -243,8 +243,8 @@
         </Button>
 
 
-        <!--  游戏设置  -->
-        <Button x:Name="Button_Setting"
+        <!--  汉堡菜单（替换原游戏设置齿轮）：悬停弹出快速启动菜单  -->
+        <Button x:Name="Button_Menu"
                 Width="44"
                 Height="44"
                 Padding="12"
@@ -252,21 +252,14 @@
                 VerticalAlignment="Stretch"
                 Background="Transparent"
                 BorderThickness="0"
-                Command="{x:Bind SettingCommand}"
+                Click="Button_Menu_Click"
                 CornerRadius="22"
                 Foreground="{x:Bind SettingButtonForeground}"
-                PointerEntered="Control_PointerEntered"
-                PointerExited="Control_PointerExited"
+                PointerEntered="Button_Menu_PointerEntered"
+                PointerExited="Button_Menu_PointerExited"
                 Style="{ThemeResource GameButtonStyle}"
                 Visibility="Visible">
-            <AnimatedIcon x:Name="AnimatedIcon_Setting">
-                <AnimatedIcon.Source>
-                    <muxca:AnimatedSettingsVisualSource />
-                </AnimatedIcon.Source>
-                <AnimatedIcon.FallbackIconSource>
-                    <FontIconSource Glyph="&#xE713;" />
-                </AnimatedIcon.FallbackIconSource>
-            </AnimatedIcon>
+            <FontIcon FontSize="16" Glyph="&#xE700;" />
         </Button>
 
 
@@ -413,6 +406,31 @@
                 </StackPanel>
             </Grid>
 
+        </Popup>
+
+
+        <!--  快速启动菜单：悬停汉堡按钮时在其上方弹出，右对齐并约束在窗口内  -->
+        <Popup x:Name="Popup_QuickMenu"
+               DesiredPlacement="TopEdgeAlignedRight"
+               PlacementTarget="{x:Bind Button_Menu}"
+               ShouldConstrainToRootBounds="True"
+               VerticalOffset="-8">
+            <Border x:Name="QuickMenuRoot"
+                    Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Opacity="0"
+                    PointerEntered="QuickMenu_PointerEntered"
+                    PointerExited="QuickMenu_PointerExited">
+                <!--  开合动效改为「从一点放大 / 收缩」(Composition)，与抽卡筛选浮层一致，见 StartGameButton.xaml.cs  -->
+                <ScrollViewer x:Name="ScrollViewer_QuickMenu"
+                              Background="Transparent"
+                              VerticalScrollBarVisibility="Auto"
+                              ZoomMode="Disabled">
+                    <local:StartGameMenu x:Name="QuickMenu" CurrentGameId="{x:Bind CurrentGameId}" />
+                </ScrollViewer>
+            </Border>
         </Popup>
 
 

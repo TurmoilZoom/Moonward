@@ -106,14 +106,7 @@ public sealed partial class GameLauncherPage : PageBase
         {
             Button_CloudGame.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
         }
-        if (feature.SupportGameAccountSwitcher && AppConfig.EnableGameAccountSwitcher)
-        {
-            EnableGameAccountSwitcher = true;
-        }
     }
-
-
-    public bool EnableGameAccountSwitcher { get; set => SetProperty(ref field, value); }
 
 
 
@@ -555,7 +548,9 @@ public sealed partial class GameLauncherPage : PageBase
     {
         try
         {
-            var process = await _gameLauncherService.StartGameAsync(CurrentGameId);
+            // 点击开始游戏按当前生效（active）的启动配置文件启动；缺省/默认时回退到默认配置（legacy 键）。
+            GameLaunchProfile? profile = AppConfig.GetLaunchProfileById(CurrentGameBiz, AppConfig.GetActiveLaunchProfileId(CurrentGameBiz));
+            var process = await _gameLauncherService.StartGameAsync(CurrentGameId, null, profile);
             if (process is not null)
             {
                 GameState = GameState.GameIsRunning;
@@ -933,6 +928,11 @@ public sealed partial class GameLauncherPage : PageBase
 
     public bool CanStopVideo { get; set => SetProperty(ref field, value); }
 
+    /// <summary>
+    /// 是否可切换背景图（多张背景时才显示页码指示器与分隔符）。
+    /// </summary>
+    public bool CanSwitchBackgroundImage { get; set => SetProperty(ref field, value); }
+
     public string StartStopButtonIcon { get; set => SetProperty(ref field, value); }
 
     public bool IsToolbarPinned { get; set => SetProperty(ref field, value); }
@@ -1006,10 +1006,12 @@ public sealed partial class GameLauncherPage : PageBase
         {
             CanStopVideo = false;
             BackgroundImages = await _backgroundService.GetGameBackgroundsAsync(CurrentGameId);
-            if (BackgroundImages.Count > 1)
+            // 工具栏始终可用（承载「显示游戏公告」开关等），仅页码指示器与分隔符随是否多图显隐。
+            CanSwitchBackgroundImage = BackgroundImages.Count > 1;
+            Border_SwitchBackgroundImage.Visibility = Visibility.Visible;
+            Border_SwitchBackgroundImage.Opacity = AppConfig.ToolbarPinned ? 1 : 0;
+            if (CanSwitchBackgroundImage)
             {
-                Border_SwitchBackgroundImage.Visibility = Visibility.Visible;
-                Border_SwitchBackgroundImage.Opacity = AppConfig.ToolbarPinned ? 1 : 0;
                 GameBackground? currentBackground = await _backgroundService.GetSuggestedGameBackgroundAsync(CurrentGameId);
                 if (currentBackground != null && BackgroundImages.FirstOrDefault(x => x.Id == currentBackground.Id) is GameBackground current)
                 {
@@ -1022,10 +1024,6 @@ public sealed partial class GameLauncherPage : PageBase
                         StartStopButtonIcon = current.StopVideo ? PlayIcon : PauseIcon;
                     }
                 }
-            }
-            else
-            {
-                Border_SwitchBackgroundImage.Visibility = Visibility.Collapsed;
             }
         }
         catch (Exception ex)
@@ -1217,6 +1215,44 @@ public sealed partial class GameLauncherPage : PageBase
 
     #endregion
 
+
+
+    #region Game Announcement
+
+
+    /// <summary>
+    /// 是否在首页显示游戏公告（Banner 与帖子）。原位于「游戏设置-基本信息」，现移到壁纸下方工具栏。
+    /// </summary>
+    public bool EnableBannerAndPost
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.EnableBannerAndPost = value;
+                OnPropertyChanged(nameof(BannerAndPostButtonIcon));
+                // GameBannerAndPost 监听此消息，读取 AppConfig 后自行显隐与刷新内容。
+                WeakReferenceMessenger.Default.Send(new GameAnnouncementSettingChangedMessage());
+            }
+        }
+    } = AppConfig.EnableBannerAndPost;
+
+
+    /// <summary>
+    /// 工具栏「显示游戏公告」按钮图标：显示时为睁眼，隐藏时为带斜杠的闭眼。
+    /// </summary>
+    public string BannerAndPostButtonIcon => EnableBannerAndPost ? "\uE890" : "\uED1A";
+
+
+    [RelayCommand]
+    private void ToggleBannerAndPost()
+    {
+        EnableBannerAndPost = !EnableBannerAndPost;
+    }
+
+
+    #endregion
 
 
     #region Cloud Game

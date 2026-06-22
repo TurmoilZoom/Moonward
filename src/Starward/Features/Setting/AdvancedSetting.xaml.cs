@@ -103,6 +103,14 @@ public sealed partial class AdvancedSetting : PageBase
     }
 
 
+
+    [RelayCommand]
+    private void OpenUrlProtocolDoc()
+    {
+        new UrlProtocolDocWindow().Activate();
+    }
+
+
     #endregion
 
 

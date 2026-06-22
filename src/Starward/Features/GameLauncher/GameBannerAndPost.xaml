@@ -91,18 +91,10 @@
                             Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
                             ToolTipService.ToolTip="{x:Bind lang:Lang.MainPage_GameNotices}"
                             Visibility="Collapsed">
-                        <Grid>
-                            <FontIcon FontSize="18"
-                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                      Glyph="&#xE789;" />
-                            <Image Name="Image_GameNoticesAlert"
-                                   Width="20"
-                                   Margin="0,-8,-12,0"
-                                   HorizontalAlignment="Right"
-                                   VerticalAlignment="Top"
-                                   Source="ms-appx:///Assets/Image/alert.png"
-                                   Visibility="{x:Bind IsGameNoticesAlert}" />
-                        </Grid>
+                        <!--  始终不显示红点提醒  -->
+                        <FontIcon FontSize="18"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE789;" />
                     </Button>
                 </Pivot.RightHeader>
                 <Pivot.ItemTemplate>

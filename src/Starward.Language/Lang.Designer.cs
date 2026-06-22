@@ -2743,6 +2743,78 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GameLauncherSettingDialog_CommandLineArgument", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Launch Profile 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_LaunchProfile {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_LaunchProfile", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 New Profile 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_NewProfile {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_NewProfile", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Name 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ProfileName {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ProfileName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 URL Preview Command 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_UrlPreviewCommand {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_UrlPreviewCommand", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Default 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_DefaultProfileName {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_DefaultProfileName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Only the first profile currently takes effect when launching the game. 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_OnlyDefaultProfileEffective {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_OnlyDefaultProfileEffective", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 The current profile has unsaved changes. Discard them? 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_DiscardUnsavedProfileChanges {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_DiscardUnsavedProfileChanges", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 You can launch the game through another program. After selecting it, the launch arguments will be appended after it. 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ThirdPartyToolTip {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ThirdPartyToolTip", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Confirm Uninstall 的本地化字符串。
@@ -2779,7 +2851,97 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GameLauncherSettingDialog_GamePackages", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Quick Launch 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_QuickLaunch {
+            get {
+                return ResourceManager.GetString("StartGameMenu_QuickLaunch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Launch Argument Profiles 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_LaunchProfileConfig {
+            get {
+                return ResourceManager.GetString("StartGameMenu_LaunchProfileConfig", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Select Launch Method 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_SelectLaunchMethod {
+            get {
+                return ResourceManager.GetString("StartGameMenu_SelectLaunchMethod", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Create Game Launch Shortcut 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_AddTaskbarLaunch {
+            get {
+                return ResourceManager.GetString("StartGameMenu_AddTaskbarLaunch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Follow App Setting 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_FollowAppSetting {
+            get {
+                return ResourceManager.GetString("StartGameMenu_FollowAppSetting", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Generate 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_Generate {
+            get {
+                return ResourceManager.GetString("StartGameMenu_Generate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Shortcut Icon 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_ShortcutIcon {
+            get {
+                return ResourceManager.GetString("StartGameMenu_ShortcutIcon", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Upload .ico 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_UploadIcon {
+            get {
+                return ResourceManager.GetString("StartGameMenu_UploadIcon", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Shortcut created on the desktop 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_ShortcutCreated {
+            get {
+                return ResourceManager.GetString("StartGameMenu_ShortcutCreated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Launch Argument Profiles 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileWindow_Title {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileWindow_Title", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Launch Game using CMD 的本地化字符串。
         /// </summary>
@@ -6618,6 +6780,24 @@ namespace Starward.Language {
         public static string SettingPage_TestURLProtocol {
             get {
                 return ResourceManager.GetString("SettingPage_TestURLProtocol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Help documentation 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_URLProtocolHelpDoc {
+            get {
+                return ResourceManager.GetString("SettingPage_URLProtocolHelpDoc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 URL Protocol 的本地化字符串。
+        /// </summary>
+        public static string UrlProtocolDocWindow_Title {
+            get {
+                return ResourceManager.GetString("UrlProtocolDocWindow_Title", resourceCulture);
             }
         }
         

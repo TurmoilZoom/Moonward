@@ -42,16 +42,10 @@
             </NavigationView.PaneHeader>
 
             <NavigationView.MenuItems>
-                <!--  关于  -->
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_About}"
-                                    IsSelected="True"
-                                    Tag="AboutSetting">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE946;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
                 <!--  通用  -->
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_General}" Tag="GeneralSetting">
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_General}"
+                                    IsSelected="True"
+                                    Tag="GeneralSetting">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE81E;" />
                     </NavigationViewItem.Icon>
@@ -90,6 +84,12 @@
                 <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_Advanced}" Tag="AdvancedSetting">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xEA86;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <!--  关于  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_About}" Tag="AboutSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
 

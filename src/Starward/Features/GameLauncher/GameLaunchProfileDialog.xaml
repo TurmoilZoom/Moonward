@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog x:Class="Starward.Features.GameLauncher.GameLaunchProfileDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:dev="using:DevWin"
+               xmlns:lang="using:Starward.Language"
+               xmlns:local="using:Starward.Features.GameLauncher"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               x:DefaultBindMode="OneWay"
+               Background="{ThemeResource CustomAcrylicBrush}"
+               BorderThickness="0"
+               CornerRadius="8"
+               Style="{ThemeResource DefaultContentDialogStyle}"
+               mc:Ignorable="d">
+
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">1200</x:Double>
+        <Thickness x:Key="ContentDialogPadding">0</Thickness>
+        <StaticResource x:Key="ContentDialogSmokeFill" ResourceKey="ControlFillColorTransparentBrush" />
+        <StaticResource x:Key="ContentDialogTopOverlay" ResourceKey="ControlFillColorTransparentBrush" />
+    </ContentDialog.Resources>
+
+    <!--  外框宽 576，Padding 24 后内容区宽 528；关闭按钮负边距需配合 Padding 才不被裁切  -->
+    <Grid Width="576"
+          Padding="24,24,24,20">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Margin="0,0,40,8"
+                   FontSize="20"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="{x:Bind lang:Lang.GameLaunchProfileWindow_Title}" />
+
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Disabled"
+                      MaxHeight="432"
+                      VerticalScrollBarVisibility="Hidden">
+            <StackPanel HorizontalAlignment="Stretch"
+                        Spacing="12">
+
+                <!--  配置文件选择  -->
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Text="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchProfile}" />
+                    <ComboBox x:Name="ComboBox_LaunchProfile"
+                              Grid.Column="1"
+                              Height="36"
+                              HorizontalAlignment="Stretch"
+                              BorderThickness="0"
+                              CornerRadius="8"
+                              DisplayMemberPath="DisplayName"
+                              ItemsSource="{x:Bind Profiles}"
+                              SelectedItem="{x:Bind SelectedProfile, Mode=OneWay}"
+                              SelectionChanged="ComboBox_LaunchProfile_SelectionChanged">
+                        <FlyoutBase.AttachedFlyout>
+                            <Flyout>
+                                <StackPanel MaxWidth="260" Spacing="12">
+                                    <TextBlock Text="{x:Bind lang:Lang.GameLauncherSettingDialog_DiscardUnsavedProfileChanges}" TextWrapping="Wrap" />
+                                    <StackPanel HorizontalAlignment="Right"
+                                                Orientation="Horizontal"
+                                                Spacing="8">
+                                        <Button Click="DiscardProfileChanges_Cancel_Click" Content="{x:Bind lang:Lang.Common_Cancel}" />
+                                        <Button Click="DiscardProfileChanges_Confirm_Click"
+                                                Content="{x:Bind lang:Lang.Common_Confirm}"
+                                                Style="{ThemeResource AccentButtonStyle}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Flyout>
+                        </FlyoutBase.AttachedFlyout>
+                    </ComboBox>
+                    <!--  新建配置文件  -->
+                    <Button Grid.Column="2"
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            Command="{x:Bind NewProfileCommand}"
+                            CornerRadius="8"
+                            IsEnabled="{x:Bind CanCreateProfile, Mode=OneWay}"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                            ToolTipService.ToolTip="{x:Bind lang:Lang.GameLauncherSettingDialog_NewProfile}">
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE710;" />
+                    </Button>
+                    <!--  重命名配置文件  -->
+                    <Button Grid.Column="3"
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            Command="{x:Bind ShowRenameProfileCommand}"
+                            CornerRadius="8"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                            ToolTipService.ToolTip="{x:Bind lang:Lang.ImageBatchConvertWindow_Rename}">
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE70F;" />
+                    </Button>
+                    <!--  删除配置文件  -->
+                    <Button x:Name="Button_DeleteProfile"
+                            Grid.Column="4"
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            CornerRadius="8"
+                            IsEnabled="{x:Bind CanDeleteProfile, Mode=OneWay}"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE74D;" />
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel MaxWidth="260" Spacing="12">
+                                    <TextBlock TextWrapping="Wrap"><Run Text="{x:Bind lang:Lang.Common_Delete}" /><Run Text="  " /><Run Text="{x:Bind SelectedProfileInternalName, Mode=OneWay}" /></TextBlock>
+                                    <StackPanel HorizontalAlignment="Right"
+                                                Orientation="Horizontal"
+                                                Spacing="8">
+                                        <Button Click="DeleteProfile_Cancel_Click" Content="{x:Bind lang:Lang.Common_Cancel}" />
+                                        <Button Click="DeleteProfile_Confirm_Click">
+                                            <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind lang:Lang.Common_Delete}" />
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </Grid>
+
+                <!--  配置文件名称（点击重命名后显示）  -->
+                <Grid ColumnSpacing="12" Visibility="{x:Bind RenameAreaVisibility, Mode=OneWay}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ProfileName}" />
+                    <TextBox x:Name="TextBox_ProfileName"
+                             Grid.Column="1"
+                             HorizontalAlignment="Stretch"
+                             IsSpellCheckEnabled="False"
+                             Text="{x:Bind EditingName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <!--  命令行参数：标签 + 输入框同一行，DX12 只读参数接其后  -->
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_CommandLineArgument}" />
+                    <TextBox Grid.Column="1"
+                             MinWidth="160"
+                             VerticalAlignment="Center"
+                             IsSpellCheckEnabled="False"
+                             Text="{x:Bind EditingArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             TextWrapping="Wrap" />
+                    <!--  DX12 自动追加参数：只读、不可编辑、强调色，勾选 DX12 时显示  -->
+                    <Border Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Padding="8,4,8,4"
+                            Background="{ThemeResource ControlFillColorDefaultBrush}"
+                            CornerRadius="6"
+                            IsHitTestVisible="False"
+                            Visibility="{x:Bind Dx12ArgumentVisibility, Mode=OneWay}">
+                        <TextBlock VerticalAlignment="Center"
+                                   FontFamily="Consolas"
+                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                   IsTextSelectionEnabled="False"
+                                   Text="-use-d3d12" />
+                    </Border>
+                </Grid>
+                <TextBlock HorizontalAlignment="Left"
+                           FontSize="12"
+                           TextWrapping="Wrap">
+                    <Hyperlink NavigateUri="https://docs.unity3d.com/Manual/PlayerCommandLineArguments.html" UnderlineStyle="None">
+                        <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument}" />
+                    </Hyperlink>
+                </TextBlock>
+
+                <Grid Margin="0,4,0,0" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!--  ! TeachingTip 触发按钮  -->
+                    <Button x:Name="Button_ThirdPartyToolInfo"
+                            Width="20"
+                            Height="20"
+                            Padding="0"
+                            VerticalAlignment="Center"
+                            Click="Button_ThirdPartyToolInfo_Click"
+                            CornerRadius="10"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE946;" />
+                    </Button>
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{x:Bind lang:Lang.LauncherPage_CustomStartExecutable}" />
+                    <!--  选择自定义启动程序  -->
+                    <Button Grid.Column="2"
+                            Height="36"
+                            BorderThickness="0"
+                            Command="{x:Bind ChangeThirdPartyPathCommand}"
+                            CornerRadius="8"
+                            IsEnabled="{x:Bind IsThirdPartyToolEnabled, Mode=OneWay}"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7FC;" />
+                            <TextBlock Text="{x:Bind lang:Lang.Common_Select}" />
+                        </StackPanel>
+                    </Button>
+                    <!--  使用 CMD 启动游戏：与自定义启动程序互斥，靠右放置  -->
+                    <StackPanel Grid.Column="3"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="4">
+                        <ToggleSwitch MinWidth="0"
+                                      IsEnabled="{x:Bind IsCmdToggleEnabled, Mode=OneWay}"
+                                      IsOn="{x:Bind StartGameWithCMD, Mode=TwoWay}"
+                                      OffContent="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchGameUsingCMD}"
+                                      OnContent="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchGameUsingCMD}" />
+                        <Button Padding="4"
+                                VerticalAlignment="Center"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                            <FontIcon FontSize="16"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE9CE;" />
+                            <Button.Flyout>
+                                <Flyout>
+                                    <TextBlock MaxWidth="380" TextWrapping="Wrap">
+                                        <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_AvoidShowingAlertsAboutDetectingIllegalToolInTheGame}" />
+                                        <Hyperlink NavigateUri="https://github.com/Scighost/Starward/issues/1634" UnderlineStyle="None">
+                                            <Run Text="#1634" />
+                                        </Hyperlink>
+                                    </TextBlock>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                    <TeachingTip x:Name="TeachingTip_ThirdPartyTool"
+                                 IsLightDismissEnabled="True"
+                                 PreferredPlacement="Top"
+                                 Subtitle="{x:Bind lang:Lang.GameLauncherSettingDialog_ThirdPartyToolTip}"
+                                 Target="{x:Bind Button_ThirdPartyToolInfo}" />
+                </Grid>
+
+                <!--  自定义启动程序路径（设置后显示）  -->
+                <Grid Height="36"
+                      HorizontalAlignment="Left"
+                      CornerRadius="8"
+                      Visibility="{x:Bind ThirdPartyToolPathVisibility, Mode=OneWay}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!--  打开自定义启动程序路径  -->
+                    <Button Height="36"
+                            Padding="16,0,8,1"
+                            BorderThickness="0"
+                            Command="{x:Bind OpenThirdPartyToolFolderCommand}"
+                            CornerRadius="0">
+                        <TextBlock VerticalAlignment="Center"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                                   MaxLines="2"
+                                   Text="{x:Bind EditingThirdPartyToolPath, Mode=OneWay}"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="Wrap" />
+                    </Button>
+                    <!--  删除自定义启动程序设置  -->
+                    <Button Grid.Column="1"
+                            Height="36"
+                            BorderThickness="0"
+                            Command="{x:Bind DeleteThirdPartyToolPathCommand}"
+                            CornerRadius="0">
+                        <FontIcon Margin="0,2,2,0"
+                                  FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE711;" />
+                    </Button>
+                </Grid>
+
+                <!--  Url 预览指令  -->
+                <Grid Margin="0,8,0,0" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_UrlPreviewCommand}" />
+                    <Border Grid.Column="1"
+                            MinHeight="36"
+                            Padding="12,8,8,8"
+                            Background="{ThemeResource ControlFillColorDefaultBrush}"
+                            CornerRadius="8">
+                        <dev:AnimatedTextBlock VerticalAlignment="Center"
+                                               FontFamily="Consolas"
+                                               FontSize="12"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind ProfileStartGameUrl, Mode=OneWay}" />
+                    </Border>
+                    <Button x:Name="Button_CopyProfileUrl"
+                            Grid.Column="2"
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            Click="Button_CopyProfileUrl_Click"
+                            CornerRadius="8"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                            ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Copy}">
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE71B;" />
+                    </Button>
+                </Grid>
+
+                <!--  保存配置文件  -->
+                <Button Margin="0,8,0,0"
+                        Height="36"
+                        MinWidth="96"
+                        HorizontalAlignment="Right"
+                        BorderThickness="0"
+                        Command="{x:Bind SaveProfileCommand}"
+                        CornerRadius="8"
+                        IsEnabled="{x:Bind IsDirty, Mode=OneWay}"
+                        Style="{ThemeResource AccentButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="16" Glyph="&#xE74E;" />
+                        <TextBlock Text="{x:Bind lang:Lang.Common_Save}" />
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Button Width="32"
+                Height="32"
+                Margin="-20"
+                Padding="0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                BorderThickness="0"
+                Command="{x:Bind CloseCommand}"
+                CornerRadius="8"
+                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+            <FontIcon FontSize="16"
+                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                      Glyph="&#xE711;"
+                      IsTextScaleFactorEnabled="False" />
+        </Button>
+
+    </Grid>
+
+</ContentDialog>
