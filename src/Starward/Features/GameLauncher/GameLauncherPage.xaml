@@ -459,6 +459,17 @@
                               Glyph="&#xE91B;"
                               IsTextScaleFactorEnabled="False" />
                 </Button>
+                <!--  自定义背景  -->
+                <Button Padding="4"
+                        VerticalAlignment="Center"
+                        Command="{x:Bind OpenCustomBackgroundDialogCommand}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                        ToolTipService.ToolTip="{x:Bind lang:Lang.GameLauncherSettingDialog_CustomBackground}">
+                    <FontIcon FontSize="16"
+                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                              Glyph="&#xE794;"
+                              IsTextScaleFactorEnabled="False" />
+                </Button>
                 <!--  复制  -->
                 <Button Padding="4"
                         VerticalAlignment="Center"

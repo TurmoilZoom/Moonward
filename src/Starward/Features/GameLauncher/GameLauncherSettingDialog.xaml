@@ -99,487 +99,284 @@
     </ContentDialog.Resources>
 
 
-    <Grid Width="800"
+    <Grid Width="600"
           Height="480"
           Padding="24,24,24,0">
 
+        <!--  游戏设置内容（已移除左侧导航栏，直接展示右侧内容）  -->
+        <Grid Margin="0,16,0,0" RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <NavigationView x:Name="NavView"
-                        IsBackButtonVisible="Collapsed"
-                        IsPaneToggleButtonVisible="False"
-                        IsSettingsVisible="False"
-                        ItemInvoked="NavigationView_ItemInvoked"
-                        OpenPaneLength="200"
-                        PaneDisplayMode="Left">
-            <NavigationView.Resources>
-                <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
-                <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
-                <Thickness x:Key="NavigationViewContentMargin">0</Thickness>
-                <Thickness x:Key="NavigationViewHeaderMargin">0</Thickness>
-                <x:Double x:Key="PaneToggleButtonHeight">0</x:Double>
-                <!--  悬停 / 按下的内置背景由流体高亮条 + 悬停文字右移 + 整体按压缩放 + Z轴按压下沉动画接管，故置为透明  -->
-                <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="Transparent" />
-                <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="Transparent" />
-            </NavigationView.Resources>
+            <StackPanel Spacing="12">
 
-            <NavigationView.PaneHeader>
-                <TextBlock Margin="16,0,0,8"
-                           FontSize="20"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="{x:Bind lang:Lang.LauncherPage_GameSetting}" />
-            </NavigationView.PaneHeader>
-
-            <NavigationView.MenuItems>
-                <NavigationViewItem Content="{x:Bind lang:Lang.GameLauncherSettingDialog_BasicInformation}"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    IsSelected="True"
-                                    Tag="0" />
-                <NavigationViewItem Content="{x:Bind lang:Lang.GameLauncherSettingDialog_CustomBackground}"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Tag="1" />
-            </NavigationView.MenuItems>
-
-
-            <FlipView x:Name="FlipView_Settings"
-                      Margin="24,24,0,0"
-                      Background="Transparent"
-                      Loaded="FlipView_Settings_Loaded">
-                <FlipView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel Orientation="Vertical" />
-                    </ItemsPanelTemplate>
-                </FlipView.ItemsPanel>
-
-                <!--  基本信息  -->
-                <FlipViewItem>
-                    <Grid RowSpacing="12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <StackPanel Spacing="12">
-
-                        <Grid ColumnSpacing="20">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <!--  游戏图标  -->
-                            <Grid Width="40"
-                                  Height="40"
-                                  CornerRadius="8">
-                                <sc:CachedImage Width="40"
-                                                Height="40"
-                                                Source="{x:Bind CurrentGameBizIcon.GameIcon, FallbackValue={x:Null}}" />
-                                <sc:CachedImage Width="20"
-                                                Height="20"
-                                                HorizontalAlignment="Right"
-                                                VerticalAlignment="Bottom"
-                                                Source="{x:Bind CurrentGameBizIcon.ServerIcon, FallbackValue={x:Null}}" />
-                            </Grid>
-                            <!--  游戏名  -->
-                            <TextBlock Grid.Column="1"
-                                       VerticalAlignment="Center"
-                                       FontSize="16"
-                                       Text="{x:Bind CurrentGameBizIcon.GameName}" />
-                            <!--  右侧操作：定位 / 重新定位 / 修复 / 卸载  -->
-                            <StackPanel Grid.Column="2"
-                                        Orientation="Horizontal"
-                                        Spacing="12">
-                                <!--  定位游戏  -->
-                                <Button Height="36"
-                                        Command="{x:Bind LocateGameCommand}"
-                                        CornerRadius="8"
-                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                        Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Width="20"
-                                                  Height="20"
-                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                  Glyph="&#xE838;" />
-                                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.InstallGameDialog_LocateGame}" />
-                                    </StackPanel>
-                                </Button>
-                                <!--  重新定位  -->
-                                <Button Height="36"
-                                        Command="{x:Bind LocateGameCommand}"
-                                        CornerRadius="8"
-                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                        Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                    <TextBlock Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_RelocateGame}" />
-                                </Button>
-                                <!--  修复游戏  -->
-                                <Button x:Name="Button_RepairGame"
-                                        Height="36"
-                                        Command="{x:Bind RepairGameCommand}"
-                                        CornerRadius="8"
-                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                        Visibility="{x:Bind UninstallAndRepairEnabled}">
-                                    <TextBlock Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind lang:Lang.LauncherPage_RepairGame}" />
-                                </Button>
-                                <!--  卸载游戏  -->
-                                <Button Height="36"
-                                        Command="{x:Bind ShowUninstallGameWarningCommand}"
-                                        CornerRadius="8"
-                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                        Visibility="{x:Bind UninstallAndRepairEnabled}">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <FontIcon Width="20"
-                                                  Height="20"
-                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                  Glyph="&#xE74D;" />
-                                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.LauncherPage_UninstallGame}" />
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-
-                        <!--  网络驱动器警告  -->
-                        <TextBlock x:Name="TextBlock_NetworkDriveWarning"
-                                   FontSize="12"
-                                   Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                                   Text="{x:Bind lang:Lang.InstallGameDialog_MappedNetworkDrivesAreNotSupportedPleaseUseANetworkSharePathStartingWithDoubleBackslashes}"
-                                   TextWrapping="Wrap"
-                                   Visibility="Collapsed" />
-
-                        <!--  卸载警告  -->
-                        <Grid x:Name="Grid_UninstallWarning"
-                              ColumnSpacing="12"
-                              Visibility="Collapsed">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center"
-                                       FontSize="12"
-                                       Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                                       Text="{x:Bind lang:Lang.GameLauncherSettingDialog_UninstallGameWarning}"
-                                       TextWrapping="Wrap" />
-                            <Button Grid.Column="1" Command="{x:Bind UninstallGameCommand}">
-                                <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ConfirmUninstall}" />
-                            </Button>
-                        </Grid>
-
-                        <!--  卸载错误  -->
-                        <TextBlock FontSize="12"
-                                   Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                   Text="{x:Bind UninstallError}"
-                                   TextWrapping="Wrap"
-                                   Visibility="{x:Bind UninstallError, Converter={StaticResource ObjectToVisibilityConverter}}" />
-
-
-                        <!--  游戏安装位置  -->
-                        <Grid Height="40"
-                              CornerRadius="8"
-                              Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityConverter}}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Button Height="40"
-                                    Padding="0"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Stretch"
-                                    BorderThickness="0"
-                                    Command="{x:Bind OpenInstalGameFolderCommand}"
-                                    CornerRadius="0">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Margin="16,0,16,1"
-                                               VerticalAlignment="Center"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
-                                               MaxLines="2"
-                                               Text="{x:Bind InstallPath}"
-                                               TextTrimming="CharacterEllipsis"
-                                               TextWrapping="Wrap" />
-                                    <FontIcon Grid.Column="1"
-                                              Margin="16,0,16,0"
-                                              FontSize="14"
-                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                              Glyph="&#xE8A7;" />
-                                </Grid>
-                            </Button>
-                            <Button Grid.Column="1"
-                                    Width="40"
-                                    Height="40"
-                                    Padding="0"
-                                    BorderThickness="0"
-                                    Command="{x:Bind DeleteGameInstllPathCommand}"
-                                    CornerRadius="0">
-                                <FontIcon FontSize="14"
-                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                          Glyph="&#xE711;" />
-                            </Button>
-                        </Grid>
-
-                        <!--  开始修复 -->
-                        <Button x:Name="Button_StartRepairing"
-                                HorizontalAlignment="Left"
-                                BorderThickness="0"
-                                Command="{x:Bind RepairGameCommand}"
-                                Content="{x:Bind lang:Lang.GameLauncherSettingDialog_StartRepairing}"
-                                IsEnabled="{x:Bind CanRepairGame}"
-                                Style="{ThemeResource AccentButtonStyle}"
-                                Visibility="Collapsed" />
-
-                        <!--  选择语音包  -->
-                        <cwc:Segmented x:Name="Segmented_SelectLanguage"
-                                       HorizontalAlignment="Stretch"
-                                       SelectionChanged="Segmented_SelectLanguage_SelectionChanged"
-                                       SelectionMode="Multiple"
-                                       Visibility="Collapsed">
-                            <cwc:SegmentedItem x:Name="SegmentedItem_Chinese"
-                                               Content="{x:Bind lang:Lang.Language_Chinese}"
-                                               Tag="zh-cn" />
-                            <cwc:SegmentedItem x:Name="SegmentedItem_English"
-                                               Content="{x:Bind lang:Lang.Language_English}"
-                                               Tag="en-us" />
-                            <cwc:SegmentedItem x:Name="SegmentedItem_Japanese"
-                                               Content="{x:Bind lang:Lang.Language_Japanese}"
-                                               Tag="ja-jp" />
-                            <cwc:SegmentedItem x:Name="SegmentedItem_Korean"
-                                               Content="{x:Bind lang:Lang.Language_Korean}"
-                                               Tag="ko-kr" />
-                        </cwc:Segmented>
-
-
-                        <!--  「使用 CMD 启动游戏」已移至「启动参数配置」对话框；「游戏启动后」已移至「设置 - 常规」  -->
-
-                        </StackPanel>
-
-                        <!--  游戏包体  -->
-                        <Pivot Grid.Row="1">
-
-                            <!--  大小 -->
-                            <Pivot.RightHeader>
-                                <TextBlock Margin="0,0,8,0"
-                                           VerticalAlignment="Top"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           Visibility="{x:Bind GameSize, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                    <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_Size}" />
-                                    <Run Text="" />
-                                    <Run Text="{x:Bind GameSize}" />
-                                </TextBlock>
-                            </Pivot.RightHeader>
-
-                            <Pivot.Resources>
-                                <Thickness x:Key="PivotItemMargin">0,8,0,0</Thickness>
-                                <Thickness x:Key="PivotHeaderItemMargin">0,0,24,0</Thickness>
-                                <Style BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" TargetType="PivotHeaderItem">
-                                    <Setter Property="Height" Value="28" />
-                                    <Setter Property="FontSize" Value="16" />
-                                    <Setter Property="VerticalContentAlignment" Value="Top" />
-                                </Style>
-                            </Pivot.Resources>
-
-                            <!--  正式版  -->
-                            <PivotItem Margin="0,-8,0,0">
-                                <PivotItem.Header>
-                                    <TextBlock>
-                                        <Run Text="{x:Bind lang:Lang.GameResourcePage_LatestVersion}" />
-                                        <Run Text="" />
-                                        <Run Text="{x:Bind LatestVersion}" />
-                                    </TextBlock>
-                                </PivotItem.Header>
-                                <ScrollViewer>
-                                    <ItemsControl Margin="0,0,8,0"
-                                                  ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
-                                                  ItemsSource="{x:Bind LatestPackageGroups}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Spacing="8" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
-                                </ScrollViewer>
-                            </PivotItem>
-
-                            <!--  预下载  -->
-                            <PivotItem Margin="0,-8,0,0">
-                                <PivotItem.Header>
-                                    <TextBlock>
-                                        <Run Text="{x:Bind lang:Lang.LauncherPage_PreInstall}" />
-                                        <Run Text="" />
-                                        <Run Text="{x:Bind PreInstallVersion}" />
-                                    </TextBlock>
-                                </PivotItem.Header>
-                                <ScrollViewer>
-                                    <ItemsControl Margin="0,0,8,0"
-                                                  ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
-                                                  ItemsSource="{x:Bind PreInstallPackageGroups}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Spacing="8" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
-                                </ScrollViewer>
-                            </PivotItem>
-
-                        </Pivot>
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!--  游戏图标  -->
+                    <Grid Width="40"
+                          Height="40"
+                          CornerRadius="8">
+                        <sc:CachedImage Width="40"
+                                        Height="40"
+                                        Source="{x:Bind CurrentGameBizIcon.GameIcon, FallbackValue={x:Null}}" />
+                        <sc:CachedImage Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Bottom"
+                                        Source="{x:Bind CurrentGameBizIcon.ServerIcon, FallbackValue={x:Null}}" />
                     </Grid>
-                </FlipViewItem>
-
-                <!--  自定义背景  -->
-                <FlipViewItem>
-                    <StackPanel Spacing="12">
-                        <!--  自定义背景  -->
-                        <ToggleSwitch Margin="0,0,0,-8"
-                                      IsOn="{x:Bind EnableCustomBg, Mode=TwoWay}"
-                                      OffContent="{x:Bind lang:Lang.SettingPage_CustomBackgroundSupportVideo}"
-                                      OnContent="{x:Bind lang:Lang.SettingPage_CustomBackgroundSupportVideo}" />
-                        <!--  请选择像素大小与应用窗口相匹配的图片，较大的图片会降低性能。  -->
-                        <TextBlock FontSize="12"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   Text="{x:Bind lang:Lang.SettingPage_BgSizeTip}"
-                                   TextWrapping="Wrap" />
-                        <Grid ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <!--  选择  -->
-                            <Button Height="36"
-                                    BorderThickness="0"
-                                    Command="{x:Bind ChangeCustomBgCommand}"
-                                    CornerRadius="8"
-                                    IsEnabled="{x:Bind EnableCustomBg}"
-                                    Style="{ThemeResource AccentButtonStyle}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE91B;" />
-                                    <TextBlock Text="{x:Bind lang:Lang.Common_Select}" />
-                                </StackPanel>
-                            </Button>
-                            <Grid Grid.Column="1"
-                                  Height="36"
-                                  HorizontalAlignment="Left"
-                                  CornerRadius="8"
-                                  Visibility="{x:Bind CustomBg, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Button Height="36"
-                                        BorderThickness="0"
-                                        Command="{x:Bind OpenCustomBgCommand}"
-                                        CornerRadius="0">
-                                    <TextBlock VerticalAlignment="Center"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
-                                               MaxLines="2"
-                                               Text="{x:Bind CustomBg}"
-                                               TextTrimming="CharacterEllipsis"
-                                               TextWrapping="Wrap" />
-                                </Button>
-                                <Button Grid.Column="1"
-                                        Height="36"
-                                        BorderThickness="0"
-                                        Command="{x:Bind DeleteCustomBgCommand}"
-                                        CornerRadius="0">
-                                    <FontIcon Margin="0,2,2,0"
-                                              FontSize="16"
-                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                              Glyph="&#xE711;" />
-                                </Button>
-                            </Grid>
-                        </Grid>
-
-                        <!--  音量  -->
-                        <Grid Margin="0,-4,0,-8"
-                              ColumnSpacing="12"
-                              Visibility="Visible">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Button Width="32"
-                                    Height="32"
-                                    Padding="0"
-                                    Command="{x:Bind MuteCommand}"
-                                    IsEnabled="{x:Bind EnableCustomBg}"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                                <Grid>
-                                    <FontIcon FontSize="16"
-                                              Foreground="{ThemeResource ButtonPointerOverBackgroundThemeBrush}"
-                                              Glyph="&#xE767;" />
-                                    <FontIcon FontSize="16" Glyph="{x:Bind VideoBgVolumeButtonIcon}" />
-                                </Grid>
-                            </Button>
-                            <Slider Grid.Column="1"
-                                    Width="200"
-                                    HorizontalAlignment="Left"
-                                    IsEnabled="{x:Bind EnableCustomBg}"
-                                    Maximum="100"
-                                    Minimum="0"
-                                    Value="{x:Bind VideoBgVolume, Mode=TwoWay}" />
-                        </Grid>
-
-                        <!--  错误提示  -->
-                        <TextBlock Margin="0,0,0,-12"
-                                   Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                   Text="{x:Bind ChangeBgError}"
-                                   TextWrapping="Wrap"
-                                   Visibility="{x:Bind ChangeBgError, Converter={StaticResource ObjectToVisibilityConverter}}" />
-
-                        <!--  拖放区域  -->
-                        <Grid x:Name="Grid_BackgroundDragIn"
-                              Height="140"
-                              Margin="0,12,0,0"
-                              AllowDrop="True"
-                              Background="Transparent"
-                              DragOver="Grid_BackgroundDragIn_DragOver"
-                              Drop="Grid_BackgroundDragIn_Drop">
-                            <Rectangle HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Stretch"
-                                       RadiusX="8"
-                                       RadiusY="8"
-                                       Stroke="{ThemeResource TextFillColorTertiaryBrush}"
-                                       StrokeDashArray="4,2"
-                                       StrokeThickness="2" />
-
-                            <StackPanel HorizontalAlignment="Center"
-                                        Orientation="Horizontal"
-                                        Spacing="12">
-                                <FontIcon FontSize="24"
+                    <!--  游戏名  -->
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               FontSize="16"
+                               Text="{x:Bind CurrentGameBizIcon.GameName}" />
+                    <!--  右侧操作：定位 / 重新定位 / 修复 / 卸载  -->
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                Spacing="12">
+                        <!--  定位游戏  -->
+                        <Button Height="36"
+                                Command="{x:Bind LocateGameCommand}"
+                                CornerRadius="8"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Width="20"
+                                          Height="20"
                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                          Glyph="&#xE91B;" />
-                                <TextBlock VerticalAlignment="Center"
-                                           FontSize="16"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                           Text="{x:Bind lang:Lang.GameLauncherSettingDialog_DragAndDropImageOrVideoFiles}" />
+                                          Glyph="&#xE838;" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.InstallGameDialog_LocateGame}" />
                             </StackPanel>
-                        </Grid>
-
+                        </Button>
+                        <!--  重新定位  -->
+                        <Button Height="36"
+                                Command="{x:Bind LocateGameCommand}"
+                                CornerRadius="8"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityConverter}}">
+                            <TextBlock Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_RelocateGame}" />
+                        </Button>
+                        <!--  修复游戏  -->
+                        <Button x:Name="Button_RepairGame"
+                                Height="36"
+                                Command="{x:Bind RepairGameCommand}"
+                                CornerRadius="8"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                Visibility="{x:Bind UninstallAndRepairEnabled}">
+                            <TextBlock Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind lang:Lang.LauncherPage_RepairGame}" />
+                        </Button>
+                        <!--  卸载游戏  -->
+                        <Button Height="36"
+                                Command="{x:Bind ShowUninstallGameWarningCommand}"
+                                CornerRadius="8"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                Visibility="{x:Bind UninstallAndRepairEnabled}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Width="20"
+                                          Height="20"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE74D;" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.LauncherPage_UninstallGame}" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
-                </FlipViewItem>
+                </Grid>
 
-            </FlipView>
+                <!--  网络驱动器警告  -->
+                <TextBlock x:Name="TextBlock_NetworkDriveWarning"
+                           FontSize="12"
+                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                           Text="{x:Bind lang:Lang.InstallGameDialog_MappedNetworkDrivesAreNotSupportedPleaseUseANetworkSharePathStartingWithDoubleBackslashes}"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed" />
+
+                <!--  卸载警告  -->
+                <Grid x:Name="Grid_UninstallWarning"
+                      ColumnSpacing="12"
+                      Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="12"
+                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                               Text="{x:Bind lang:Lang.GameLauncherSettingDialog_UninstallGameWarning}"
+                               TextWrapping="Wrap" />
+                    <Button Grid.Column="1" Command="{x:Bind UninstallGameCommand}">
+                        <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ConfirmUninstall}" />
+                    </Button>
+                </Grid>
+
+                <!--  卸载错误  -->
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                           Text="{x:Bind UninstallError}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind UninstallError, Converter={StaticResource ObjectToVisibilityConverter}}" />
 
 
+                <!--  游戏安装位置  -->
+                <Grid Height="40"
+                      CornerRadius="8"
+                      Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Height="40"
+                            Padding="0"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            BorderThickness="0"
+                            Command="{x:Bind OpenInstalGameFolderCommand}"
+                            CornerRadius="0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="16,0,16,1"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
+                                       MaxLines="2"
+                                       Text="{x:Bind InstallPath}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" />
+                            <FontIcon Grid.Column="1"
+                                      Margin="16,0,16,0"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE8A7;" />
+                        </Grid>
+                    </Button>
+                    <Button Grid.Column="1"
+                            Width="40"
+                            Height="40"
+                            Padding="0"
+                            BorderThickness="0"
+                            Command="{x:Bind DeleteGameInstllPathCommand}"
+                            CornerRadius="0">
+                        <FontIcon FontSize="14"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE711;" />
+                    </Button>
+                </Grid>
+
+                <!--  开始修复 -->
+                <Button x:Name="Button_StartRepairing"
+                        HorizontalAlignment="Left"
+                        BorderThickness="0"
+                        Command="{x:Bind RepairGameCommand}"
+                        Content="{x:Bind lang:Lang.GameLauncherSettingDialog_StartRepairing}"
+                        IsEnabled="{x:Bind CanRepairGame}"
+                        Style="{ThemeResource AccentButtonStyle}"
+                        Visibility="Collapsed" />
+
+                <!--  选择语音包  -->
+                <cwc:Segmented x:Name="Segmented_SelectLanguage"
+                               HorizontalAlignment="Stretch"
+                               SelectionChanged="Segmented_SelectLanguage_SelectionChanged"
+                               SelectionMode="Multiple"
+                               Visibility="Collapsed">
+                    <cwc:SegmentedItem x:Name="SegmentedItem_Chinese"
+                                       Content="{x:Bind lang:Lang.Language_Chinese}"
+                                       Tag="zh-cn" />
+                    <cwc:SegmentedItem x:Name="SegmentedItem_English"
+                                       Content="{x:Bind lang:Lang.Language_English}"
+                                       Tag="en-us" />
+                    <cwc:SegmentedItem x:Name="SegmentedItem_Japanese"
+                                       Content="{x:Bind lang:Lang.Language_Japanese}"
+                                       Tag="ja-jp" />
+                    <cwc:SegmentedItem x:Name="SegmentedItem_Korean"
+                                       Content="{x:Bind lang:Lang.Language_Korean}"
+                                       Tag="ko-kr" />
+                </cwc:Segmented>
 
 
+                <!--  「使用 CMD 启动游戏」已移至「启动参数配置」对话框；「游戏启动后」已移至「设置 - 常规」  -->
 
+            </StackPanel>
 
+            <!--  游戏包体  -->
+            <Pivot Grid.Row="1" Margin="0,16,0,0">
 
+                <!--  大小 -->
+                <Pivot.RightHeader>
+                    <TextBlock Margin="0,0,8,0"
+                               VerticalAlignment="Top"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Visibility="{x:Bind GameSize, Converter={StaticResource ObjectToVisibilityConverter}}">
+                        <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_Size}" />
+                        <Run Text="" />
+                        <Run Text="{x:Bind GameSize}" />
+                    </TextBlock>
+                </Pivot.RightHeader>
 
+                <Pivot.Resources>
+                    <Thickness x:Key="PivotItemMargin">0,8,0,0</Thickness>
+                    <Thickness x:Key="PivotHeaderItemMargin">0,0,24,0</Thickness>
+                    <Style BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" TargetType="PivotHeaderItem">
+                        <Setter Property="Height" Value="28" />
+                        <Setter Property="FontSize" Value="16" />
+                        <Setter Property="VerticalContentAlignment" Value="Top" />
+                    </Style>
+                </Pivot.Resources>
 
-        </NavigationView>
+                <!--  正式版  -->
+                <PivotItem Margin="0,-8,0,0">
+                    <PivotItem.Header>
+                        <TextBlock>
+                            <Run Text="{x:Bind lang:Lang.GameResourcePage_LatestVersion}" />
+                            <Run Text="" />
+                            <Run Text="{x:Bind LatestVersion}" />
+                        </TextBlock>
+                    </PivotItem.Header>
+                    <ScrollViewer>
+                        <ItemsControl Margin="0,0,8,0"
+                                      ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
+                                      ItemsSource="{x:Bind LatestPackageGroups}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </PivotItem>
 
+                <!--  预下载  -->
+                <PivotItem Margin="0,-8,0,0">
+                    <PivotItem.Header>
+                        <TextBlock>
+                            <Run Text="{x:Bind lang:Lang.LauncherPage_PreInstall}" />
+                            <Run Text="" />
+                            <Run Text="{x:Bind PreInstallVersion}" />
+                        </TextBlock>
+                    </PivotItem.Header>
+                    <ScrollViewer>
+                        <ItemsControl Margin="0,0,8,0"
+                                      ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
+                                      ItemsSource="{x:Bind PreInstallPackageGroups}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </PivotItem>
 
+            </Pivot>
+        </Grid>
 
-
-
-
-        <!--  流体悬停指示器宿主：覆盖在导航栏窗格之上，承载 Composition 高亮条。IsHitTestVisible=False 以便指针事件穿透到导航项  -->
-        <Grid x:Name="NavIndicatorHost"
-              Width="200"
-              HorizontalAlignment="Left"
-              IsHitTestVisible="False" />
 
         <!--  Close Button  -->
         <Button Width="32"

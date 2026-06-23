@@ -54,12 +54,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     private readonly GameInstallService _gameInstallService = AppConfig.GetService<GameInstallService>();
 
 
-    private readonly BackgroundService _backgroundService = AppConfig.GetService<BackgroundService>();
-
-
-    private readonly FluidNavigationViewHoverEffect _navHoverEffect = new();
-
-
     public GameLauncherSettingDialog()
     {
         this.InitializeComponent();
@@ -77,86 +71,21 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
 
-    private void FlipView_Settings_Loaded(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            var grid = VisualTreeHelper.GetChild(FlipView_Settings, 0);
-            if (grid != null)
-            {
-                var count = VisualTreeHelper.GetChildrenCount(grid);
-                if (count > 0)
-                {
-                    for (int i = 0; i < count; i++)
-                    {
-                        var child = VisualTreeHelper.GetChild(grid, i);
-                        if (child is Button button)
-                        {
-                            button.IsHitTestVisible = false;
-                            button.Opacity = 0;
-                        }
-                        else if (child is ScrollViewer scrollViewer)
-                        {
-                            scrollViewer.PointerWheelChanged += (_, e) => e.Handled = true;
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-    }
-
-
-
-    private void NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
-    {
-        try
-        {
-            if (args.InvokedItemContainer?.Tag is string index && int.TryParse(index, out int target))
-            {
-                int steps = target - FlipView_Settings.SelectedIndex;
-                if (steps > 0)
-                {
-                    for (int i = 0; i < steps; i++)
-                    {
-                        FlipView_Settings.SelectedIndex++;
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < -steps; i++)
-                    {
-                        FlipView_Settings.SelectedIndex--;
-                    }
-                }
-            }
-        }
-        catch { }
-    }
-
-
-
-
     private async void GameLauncherSettingDialog_Loaded(object sender, RoutedEventArgs e)
     {
-        _navHoverEffect.Attach(NavView, NavIndicatorHost, _logger);
-
         CurrentGameBiz = CurrentGameId?.GameBiz ?? GameBiz.None;
         WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(this, OnAccentColorChanged);
         CheckCanRepairGame();
         await InitializeBasicInfoAsync();
-        InitializeCustomBg();
         await InitializeGamePackagesAsync();
     }
 
 
     private void GameLauncherSettingDialog_Unloaded(object sender, RoutedEventArgs e)
     {
-        _navHoverEffect.Detach();
         WeakReferenceMessenger.Default.UnregisterAll(this);
         LatestPackageGroups = null!;
         PreInstallPackageGroups = null!;
-        FlipView_Settings.Items.Clear();
     }
 
 
@@ -585,249 +514,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         }
     }
 
-
-
-
-    #endregion
-
-
-
-
-    #region 自定义背景
-
-
-
-    /// <summary>
-    /// 是否启用自定义背景
-    /// </summary>
-    [ObservableProperty]
-    public bool _EnableCustomBg;
-    partial void OnEnableCustomBgChanged(bool value)
-    {
-        AppConfig.SetEnableCustomBg(CurrentGameBiz, value);
-        if (value)
-        {
-            // 启用自定义背景时，将其记录为当前使用的背景。
-            string? customBg = AppConfig.GetCustomBg(CurrentGameBiz);
-            if (!string.IsNullOrWhiteSpace(customBg))
-            {
-                AppConfig.SetBg(CurrentGameBiz, customBg);
-            }
-        }
-        // 音量随自定义背景开关联动：关闭时静音，开启时恢复该游戏的音量。
-        WeakReferenceMessenger.Default.Send(new VideoBgVolumeChangedMessage(value ? _videoBgVolume : 0));
-        OnPropertyChanged(nameof(VideoBgVolume));
-        OnPropertyChanged(nameof(VideoBgVolumeButtonIcon));
-        WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
-    }
-
-
-    /// <summary>
-    /// 自定义背景，文件名，存储在 UserDataFolder/bg
-    /// </summary>
-    public string? CustomBg { get; set => SetProperty(ref field, value); }
-
-
-    /// <summary>
-    /// 修改背景错误信息
-    /// </summary>
-    public string? ChangeBgError { get; set => SetProperty(ref field, value); }
-
-
-    private void InitializeCustomBg()
-    {
-        _EnableCustomBg = AppConfig.GetEnableCustomBg(CurrentGameBiz);
-        CustomBg = AppConfig.GetCustomBg(CurrentGameBiz);
-        _videoBgVolume = AppConfig.GetVideoBgVolume(CurrentGameBiz);
-        OnPropertyChanged(nameof(EnableCustomBg));
-        OnPropertyChanged(nameof(VideoBgVolume));
-        OnPropertyChanged(nameof(VideoBgVolumeButtonIcon));
-    }
-
-
-
-    /// <summary>
-    /// 修改自定义背景
-    /// </summary>
-    /// <returns></returns>
-    [RelayCommand]
-    private async Task ChangeCustomBgAsync()
-    {
-        try
-        {
-            ChangeBgError = null;
-            string? name = await _backgroundService.ChangeCustomBackgroundFileAsync(this.XamlRoot);
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return;
-            }
-            CustomBg = name;
-            AppConfig.SetCustomBg(CurrentGameBiz, name);
-            AppConfig.SetBg(CurrentGameBiz, name);
-            WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
-        }
-        catch (COMException ex)
-        {
-            ChangeBgError = Lang.GameLauncherSettingDialog_CannotDecodeFile;
-            _logger.LogError(ex, "Change custom background failed");
-        }
-        catch (Exception ex)
-        {
-            ChangeBgError = Lang.GameLauncherSettingDialog_AnUnknownErrorOccurredPleaseCheckTheLogs;
-            _logger.LogError(ex, "Change custom background failed");
-        }
-    }
-
-
-
-    /// <summary>
-    /// 打开自定义背景文件
-    /// </summary>
-    /// <returns></returns>
-    [RelayCommand]
-    private async Task OpenCustomBgAsync()
-    {
-        try
-        {
-            string path = Path.Join(AppConfig.CacheFolder, "bg", CustomBg);
-            if (File.Exists(path))
-            {
-                await Launcher.LaunchUriAsync(new Uri(path));
-            }
-        }
-        catch { }
-    }
-
-
-
-    /// <summary>
-    /// 删除自定义背景
-    /// </summary>
-    [RelayCommand]
-    private void DeleteCustomBg()
-    {
-        CustomBg = null;
-        AppConfig.SetCustomBg(CurrentGameBiz, null);
-        WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
-    }
-
-
-
-    /// <summary>
-    /// 视频背景音量，每个游戏区服独立设置。关闭自定义背景时显示为 0 且不可调整。
-    /// </summary>
-    private int _videoBgVolume;
-    public int VideoBgVolume
-    {
-        get => EnableCustomBg ? _videoBgVolume : 0;
-        set
-        {
-            // 关闭自定义背景时不可调整。
-            if (!EnableCustomBg)
-            {
-                return;
-            }
-            if (SetProperty(ref _videoBgVolume, value))
-            {
-                OnPropertyChanged(nameof(VideoBgVolumeButtonIcon));
-                WeakReferenceMessenger.Default.Send(new VideoBgVolumeChangedMessage(value));
-                AppConfig.SetVideoBgVolume(CurrentGameBiz, value);
-            }
-        }
-    }
-
-
-
-    /// <summary>
-    /// 音量图标
-    /// </summary>
-    public string VideoBgVolumeButtonIcon => VideoBgVolume switch
-    {
-        > 66 => "\uE995",
-        > 33 => "\uE994",
-        > 1 => "\uE993",
-        _ => "\uE992",
-    };
-
-
-    private int notMuteVolume = 100;
-
-    /// <summary>
-    /// 静音
-    /// </summary>
-    [RelayCommand]
-    private void Mute()
-    {
-        if (VideoBgVolume > 0)
-        {
-            notMuteVolume = VideoBgVolume;
-            VideoBgVolume = 0;
-        }
-        else
-        {
-            VideoBgVolume = notMuteVolume;
-        }
-    }
-
-
-
-
-
-    /// <summary>
-    /// 接受拖放文件
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void Grid_BackgroundDragIn_DragOver(object sender, DragEventArgs e)
-    {
-        e.AcceptedOperation = DataPackageOperation.Copy;
-    }
-
-
-
-    /// <summary>
-    /// 拖放文件，修改自定义背景
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void Grid_BackgroundDragIn_Drop(object sender, DragEventArgs e)
-    {
-        ChangeBgError = null;
-        var defer = e.GetDeferral();
-        try
-        {
-            if ((await e.DataView.GetStorageItemsAsync()).FirstOrDefault() is StorageFile file)
-            {
-                string? name = await BackgroundService.ChangeCustomBackgroundFileAsync(file);
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    return;
-                }
-                CustomBg = name;
-                AppConfig.SetCustomBg(CurrentGameBiz, name);
-                AppConfig.SetBg(CurrentGameBiz, name);
-                if (EnableCustomBg)
-                {
-                    WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
-                }
-                else
-                {
-                    EnableCustomBg = true;
-                }
-            }
-        }
-        catch (COMException ex)
-        {
-            ChangeBgError = Lang.GameLauncherSettingDialog_CannotDecodeFile;
-            _logger.LogError(ex, "Change custom background failed");
-        }
-        catch (Exception ex)
-        {
-            ChangeBgError = Lang.GameLauncherSettingDialog_AnUnknownErrorOccurredPleaseCheckTheLogs;
-            _logger.LogError(ex, "Change custom background failed");
-        }
-        defer.Complete();
-    }
 
 
 

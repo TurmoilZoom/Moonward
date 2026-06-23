@@ -911,6 +911,17 @@ public sealed partial class GameLauncherPage : PageBase
 
 
 
+    /// <summary>
+    /// 打开自定义背景对话框（由背景工具栏的图标触发）
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenCustomBackgroundDialogAsync()
+    {
+        await new CustomBackgroundDialog { CurrentGameId = this.CurrentGameId, XamlRoot = this.XamlRoot }.ShowAsync();
+    }
+
+
+
 
     #endregion
 
