@@ -1,8 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI;
+using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using Starward.Features.Background;
 using Starward.Features.Database;
@@ -15,19 +18,29 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
+using Windows.Foundation;
 using Windows.Graphics;
 
 
 namespace Starward.Features.ViewHost;
 
+/// <summary>
+/// 应用主窗口。负责标题栏自绘、窗口生命周期（显示/隐藏/关闭）、全局热键与系统消息分发。
+/// </summary>
 [INotifyPropertyChanged]
 public sealed partial class MainWindow : WindowEx
 {
 
 
+    /// <summary>
+    /// 当前主窗口单例，在构造函数中赋值。
+    /// </summary>
     public static new MainWindow Current { get; private set; }
 
 
+    /// <summary>
+    /// 初始化主窗口：注册消息订阅、配置标题栏与窗口行为，并确保系统托盘可用。
+    /// </summary>
     public MainWindow()
     {
         Current = this;
@@ -41,6 +54,9 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 配置窗口外观与行为：标题栏延伸、固定尺寸、拖动区域、会话通知注册等。
+    /// </summary>
     private void InitializeMainWindow()
     {
         Title = "Starward";
@@ -50,19 +66,143 @@ public sealed partial class MainWindow : WindowEx
         AppWindow.Closing += AppWindow_Closing;
         Content.KeyDown += Content_KeyDown;
         CenterInScreen(1200, 676);
-        AdaptTitleBarButtonColorToActuallTheme();
-        SetDragRectangles(new RectInt32(0, 0, 100000, (int)(48 * UIScale)));
+        HideSystemCaptionButtons();
+        // 承载系统按钮的子窗口在窗口首次激活后才创建（且隐藏到托盘再显示时可能重建），
+        // 故在每次激活时销毁它（幂等、自愈）
+        Activated += MainWindow_Activated;
+        //销毁标题栏子窗口之后（只是隐藏），行为、消息仍然可以触发（并且优先级高于客户区），需要设置透传区域让点击落到自绘按钮上
+        StackPanel_WindowCaption.Loaded += StackPanel_WindowCaption_Loaded;
+        StackPanel_WindowCaption.SizeChanged += StackPanel_WindowCaption_SizeChanged;
+        // 排除右上角自绘按钮区域（两个 48px 按钮），使其可点击而非作为拖动区
+        SetDragRectangles(new RectInt32(0, 0, AppWindow.Size.Width - (int)(96 * UIScale), (int)(48 * UIScale)));
         SetIcon();
         WTSRegisterSessionNotification(WindowHandle, 0);
         if (AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsMaximizable = false;
+            presenter.IsMinimizable = false;
             presenter.IsResizable = false;
         }
     }
 
 
 
+    /// <summary>
+    /// 隐藏系统标题栏的最小化/最大化/关闭按钮，改用右上角 XAML 自绘按钮。
+    /// 仅靠 <c>AppWindow.TitleBar.Button*Color</c> 改不动这些按钮的可见性 —— WinUI3 /
+    /// Windows App SDK 用一个名为 "ReunionWindowingCaptionControls" 的子窗口绘制它们，
+    /// 真正的隐藏靠 <see cref="DestroyCaptionControls"/> 销毁该子窗口；此处仅把背景置透明，
+    /// 避免销毁前的一瞬间露出按钮底色。配合 <see cref="SetCaptionButtonPassthroughRegions"/>
+    /// 将自绘按钮区域标记为透传，使点击落到 XAML 控件上。
+    /// </summary>
+    private void HideSystemCaptionButtons()
+    {
+        AppWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+        AppWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+    }
+
+
+
+    /// <summary>
+    /// 窗口激活时销毁系统标题栏按钮子窗口，确保自绘按钮区域可交互。
+    /// </summary>
+    /// <param name="sender">事件源（<see cref="MainWindow"/>）。</param>
+    /// <param name="args">激活事件参数，包含 <see cref="WindowActivatedEventArgs.WindowActivationState"/>。</param>
+    private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        DestroyCaptionControls();
+        SetCaptionButtonPassthroughRegions();
+    }
+
+
+
+    /// <summary>
+    /// 标题栏按钮容器加载完成后，设置右上角按钮的透传区域。
+    /// </summary>
+    private void StackPanel_WindowCaption_Loaded(object sender, RoutedEventArgs e)
+    {
+        SetCaptionButtonPassthroughRegions();
+    }
+
+
+
+    /// <summary>
+    /// 标题栏按钮容器尺寸变化时，重新计算透传区域。
+    /// </summary>
+    private void StackPanel_WindowCaption_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        SetCaptionButtonPassthroughRegions();
+    }
+
+
+
+    /// <summary>
+    /// 将右上角自绘最小化/关闭按钮区域设为透传，使非客户区输入落到 XAML 按钮上。
+    /// </summary>
+    private void SetCaptionButtonPassthroughRegions()
+    {
+        if (AppWindow.TitleBar.ExtendsContentIntoTitleBar is not true)
+        {
+            return;
+        }
+        if (StackPanel_WindowCaption.XamlRoot is null)
+        {
+            return;
+        }
+
+        double scale = StackPanel_WindowCaption.XamlRoot.RasterizationScale;
+        RectInt32[] rects =
+        [
+            GetElementRectInt32(Button_Minimize, scale),
+            GetElementRectInt32(Button_CloseWindow, scale),
+        ];
+
+        InputNonClientPointerSource nonClientInputSource =
+            InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
+        nonClientInputSource.SetRegionRects(NonClientRegionKind.Passthrough, rects);
+    }
+
+
+
+    /// <summary>
+    /// 将 XAML 元素边界转换为物理像素矩形（供 <see cref="SetCaptionButtonPassthroughRegions"/> 使用）。
+    /// </summary>
+    private static RectInt32 GetElementRectInt32(FrameworkElement element, double scale)
+    {
+        GeneralTransform transform = element.TransformToVisual(null);
+        Rect bounds = transform.TransformBounds(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
+        return new RectInt32(
+            (int)Math.Round(bounds.X * scale),
+            (int)Math.Round(bounds.Y * scale),
+            (int)Math.Round(bounds.Width * scale),
+            (int)Math.Round(bounds.Height * scale));
+    }
+
+
+
+    /// <summary>
+    /// 销毁承载系统最小化/最大化/关闭按钮的子窗口（"ReunionWindowingCaptionControls"），
+    /// 从而彻底隐藏系统按钮。该子窗口属于 UI 线程，
+    /// 故必须在 UI 线程调用 DestroyWindow（Activated 事件即在 UI 线程）。
+    /// </summary>
+    private void DestroyCaptionControls()
+    {
+        try
+        {
+            HWND controls = User32.FindWindowEx(WindowHandle, IntPtr.Zero, "ReunionWindowingCaptionControls", "ReunionCaptionControlsWindow");
+            if (!controls.IsNull)
+            {
+                User32.DestroyWindow(controls);
+            }
+        }
+        catch { }
+    }
+
+
+
+    /// <summary>
+    /// 显示主窗口；若当前尺寸偏离默认 1200×676（按 UI 缩放），则重新居中。
+    /// </summary>
     public override void Show()
     {
         double uiScale = UIScale;
@@ -75,6 +215,9 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 由手柄导航唤起主窗口：重置尺寸并居中，同时将鼠标光标移至窗口中心。
+    /// </summary>
     public void ShowByGamepad()
     {
         CenterInScreen(1200, 676);
@@ -84,6 +227,11 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 游戏启动后根据用户配置隐藏或最小化主窗口。
+    /// </summary>
+    /// <param name="_">消息接收者（本窗口实例，未使用）。</param>
+    /// <param name="__"><see cref="GameStartedMessage"/> 消息体（未使用）。</param>
     private void OnGameStarted(object _, GameStartedMessage __)
     {
         StartGameAction action = AppConfig.StartGameAction;
@@ -99,12 +247,56 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 拦截系统关闭请求（标题栏关闭、Alt+F4 等），统一走自定义关闭逻辑。
+    /// </summary>
+    /// <param name="sender">事件源（<see cref="AppWindow"/>）。</param>
+    /// <param name="args">关闭事件参数；本方法将 <see cref="AppWindowClosingEventArgs.Cancel"/> 置为 <see langword="true"/> 以阻止默认关闭。</param>
     private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        // 取消系统关闭，统一走自定义关闭逻辑（Alt+F4 / 系统菜单也经此处）
+        args.Cancel = true;
+        await HandleCloseRequestAsync();
+    }
+
+
+
+    /// <summary>
+    /// 自绘最小化按钮点击：将窗口最小化到任务栏。
+    /// </summary>
+    /// <param name="sender">事件源（最小化按钮）。</param>
+    /// <param name="e">路由事件参数。</param>
+    private void Button_Minimize_Click(object sender, RoutedEventArgs e)
+    {
+        Minimize();
+    }
+
+
+
+    /// <summary>
+    /// 自绘关闭按钮点击：直接调用共享关闭逻辑（不经过 <see cref="AppWindow.Closing"/>）。
+    /// </summary>
+    /// <param name="sender">事件源（关闭按钮）。</param>
+    /// <param name="e">路由事件参数。</param>
+    private async void Button_CloseWindow_Click(object sender, RoutedEventArgs e)
+    {
+        // 自绘关闭按钮：Window.Close() 不会再触发 AppWindow.Closing，故直接调用共享关闭逻辑
+        await HandleCloseRequestAsync();
+    }
+
+
+
+    /// <summary>
+    /// 处理关闭请求：按 <see cref="AppConfig.CloseWindowOption"/> 隐藏到托盘或退出应用。
+    /// 若用户尚未固定选项，则弹出对话框供其选择并持久化。
+    /// </summary>
+    /// <returns>表示异步关闭流程的任务。</returns>
+    private async Task HandleCloseRequestAsync()
     {
         try
         {
-            args.Cancel = true;
             MainWindowCloseOption option = AppConfig.CloseWindowOption;
+            // 未配置固定选项时弹出对话框
             if (option is not MainWindowCloseOption.Hide and not MainWindowCloseOption.Exit)
             {
                 var dialog = new MainWindowCloseDialog
@@ -131,6 +323,7 @@ public sealed partial class MainWindow : WindowEx
             {
                 Close();
                 AppInstance.GetCurrent().UnregisterKey();
+                // 退出前尝试备份数据库，最多等待 30 秒
                 Task backupTask = Task.Run(DatabaseService.AutoBackupToAppDataLocal);
                 Task timeTask = Task.Delay(30000);
                 await Task.WhenAny(backupTask, timeTask);
@@ -142,9 +335,15 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 强调色变更时强制刷新内容区主题，使 Accent 相关资源重新解析。
+    /// </summary>
+    /// <param name="_">消息接收者（本窗口实例，未使用）。</param>
+    /// <param name="__"><see cref="AccentColorChangedMessage"/> 消息体（未使用）。</param>
     private void OnAccentColorChanged(object _, AccentColorChangedMessage __)
     {
         FrameworkElement ele = (FrameworkElement)Content;
+        // 先切换到相反主题再恢复 Default，触发资源重载
         ele.RequestedTheme = ele.ActualTheme switch
         {
             ElementTheme.Light => ElementTheme.Dark,
@@ -156,6 +355,11 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 内容区按键处理：按 Esc 隐藏主窗口（与关闭到托盘行为一致）。
+    /// </summary>
+    /// <param name="sender">事件源（窗口 <see cref="Content"/>）。</param>
+    /// <param name="e">按键路由事件参数，包含 <see cref="Microsoft.UI.Xaml.Input.KeyRoutedEventArgs.Key"/>。</param>
     private void Content_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
     {
         if (e.Key is Windows.System.VirtualKey.Escape)
@@ -166,6 +370,9 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 隐藏主窗口并广播状态变化消息，触发背景资源释放与 GC。
+    /// </summary>
     public override void Hide()
     {
         base.Hide();
@@ -175,11 +382,40 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 上次窗口激活时间，用于计算激活间隔与跨小时判断。
+    /// </summary>
     private DateTimeOffset _lastActivatedTime = DateTimeOffset.Now;
 
 
+
+    /// <summary>
+    /// 窗口子类过程：处理非客户区命中测试、激活/锁屏/最小化、热键与可移动存储设备变更等系统消息。
+    /// </summary>
+    /// <param name="hWnd">窗口句柄。</param>
+    /// <param name="uMsg">Windows 消息 ID。</param>
+    /// <param name="wParam">消息附加参数（含义随 <paramref name="uMsg"/> 变化）。</param>
+    /// <param name="lParam">消息附加参数（含义随 <paramref name="uMsg"/> 变化）。</param>
+    /// <param name="uIdSubclass">子类 ID（由基类注册时分配）。</param>
+    /// <param name="dwRefData">子类引用数据（由基类传入）。</param>
+    /// <returns>消息处理结果；返回 0 表示已消费该消息，否则交由基类默认处理。</returns>
     protected override nint WindowSubclassProc(HWND hWnd, uint uMsg, nint wParam, nint lParam, nuint uIdSubclass, nint dwRefData)
     {
+        if (uMsg == 0x0084 /* WM_NCHITTEST */)
+        {
+            // 取系统命中结果后重映射为客户区，让点击落到右上角自绘按钮上。
+            nint result = base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
+            // 8/9/20 = HTMINBUTTON/HTMAXBUTTON/HTCLOSE：屏蔽系统标题栏按钮命中。
+            // 11/12/14/18 = HTRIGHT/HTTOP/HTTOPRIGHT/HTBORDER：自绘按钮贴在窗口右上角，
+            //   会压到右/上边框的命中区（关闭按钮尤其紧贴右边，HTBORDER 正是“无缩放边框窗口的边框”），
+            //   本窗口不可缩放故这些命中无意义；若不归为客户区，右上角的关闭按钮就点不到。
+            //   注意不动 HTCAPTION(2)，标题栏拖动区仍由 SetDragRectangles 保留。
+            //if (result is 8)
+            //{
+            //    return 1; // HTCLIENT
+            //}
+            return result;
+        }
         if (uMsg == (uint)User32.WindowMessage.WM_ACTIVATE || uMsg == (uint)User32.WindowMessage.WM_POINTERACTIVATE)
         {
             // 窗口激活
@@ -253,6 +489,7 @@ public sealed partial class MainWindow : WindowEx
         {
             if (wParam == 44444)
             {
+                // 全局热键：打开游戏内覆盖层，失败则显示主窗口
                 if (!RunningGameService.OpenOverlayWindow())
                 {
                     this.Show();
@@ -269,6 +506,12 @@ public sealed partial class MainWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 注册窗口以接收终端服务会话变更通知（锁屏/解锁）。
+    /// </summary>
+    /// <param name="hWnd">要接收通知的窗口句柄。</param>
+    /// <param name="dwFlags">通知标志；0 表示仅接收当前会话的通知。</param>
+    /// <returns>注册成功返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     [LibraryImport("wtsapi32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool WTSRegisterSessionNotification(IntPtr hWnd, int dwFlags);
