@@ -616,14 +616,15 @@ public sealed partial class AppBackground : UserControl
         {
             if (message.Hide || message.SessionLock)
             {
-                // 窗口隐藏、最小化或锁屏时释放视频解码与渲染资源，减少硬件占用
-                DisposeVideoResource();
+                // 窗口隐藏、最小化或锁屏时仅暂停视频播放（不释放解码器与渲染资源），
+                // 停止解码以降低占用；恢复显示时直接续播，避免重建资源导致背景闪烁。
+                _mediaPlayer?.Pause();
             }
             else if (message.Activate)
             {
                 if (_mediaPlayer is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
                 {
-                    // 恢复显示时重新开始解码渲染背景视频
+                    // 兜底：若播放器曾在其他路径被释放，则重新开始解码渲染背景视频
                     StartMediaPlayer(_lastBackgroundFile!);
                     if (CurrentGameBackground?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && CurrentGameBackground.Theme?.Url is string url && !string.IsNullOrEmpty(url))
                     {
