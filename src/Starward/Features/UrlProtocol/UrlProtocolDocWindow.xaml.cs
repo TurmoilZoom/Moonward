@@ -24,11 +24,22 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
 
     private const string DocPath = "docs/UrlProtocol.md";
     private const string DocPathZhCN = "docs/UrlProtocol.zh-CN.md";
-    private const string DocBranch = "main";
-    private const string FallbackRepository = "Scighost/Starward";
+
+    /// <summary>
+    /// 文档来源（仓库, 分支），运行时从 GitHub 拉取，不随程序打包 md 文件。
+    /// 主仓库的文档位于其默认分支 rebase/develop（含中文文档）；上游 Scighost 仅 main 分支有英文文档，作兜底。
+    /// </summary>
+    private static readonly (string Repository, string Branch)[] DocSources =
+    [
+        (ReleaseClient.Repository, "rebase/develop"),
+        ("Scighost/Starward", "main"),
+    ];
 
 
-    private string _browserDocPath = DocPath;
+    /// <summary>
+    /// 拉取失败（网络异常）兜底时在 WebView 中打开的 GitHub 页面地址，命中后更新为实际来源与语言。
+    /// </summary>
+    private string _browserUrl = $"https://github.com/{DocSources[0].Repository}/blob/{DocSources[0].Branch}/{DocPath}";
 
 
     private readonly ILogger<UrlProtocolDocWindow> _logger = AppConfig.GetLogger<UrlProtocolDocWindow>();
@@ -114,7 +125,7 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
         catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
         {
             _logger.LogError(ex, "Load url protocol document");
-            webview.Source = new Uri($"https://github.com/{ReleaseClient.Repository}/blob/{DocBranch}/{_browserDocPath}");
+            webview.Source = new Uri(_browserUrl);
             webview.Visibility = Visibility.Visible;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             StackPanel_Error.Visibility = Visibility.Collapsed;
@@ -144,13 +155,13 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
     {
         foreach (string path in GetDocumentPaths())
         {
-            foreach (string repository in new[] { ReleaseClient.Repository, FallbackRepository })
+            foreach (var (repository, branch) in DocSources)
             {
-                string url = $"https://raw.githubusercontent.com/{repository}/{DocBranch}/{path}";
+                string url = $"https://raw.githubusercontent.com/{repository}/{branch}/{path}";
                 using var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
-                    _browserDocPath = path;
+                    _browserUrl = $"https://github.com/{repository}/blob/{branch}/{path}";
                     return await response.Content.ReadAsStringAsync();
                 }
             }
