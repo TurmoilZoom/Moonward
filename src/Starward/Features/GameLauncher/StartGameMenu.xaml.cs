@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Media.Animation;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameSelector;
+using Starward.Features.UrlProtocol;
 using Starward.Helpers;
 using System;
 using System.Collections.ObjectModel;
@@ -115,12 +116,73 @@ public sealed partial class StartGameMenu : UserControl
             _openChildPopupCount = 0;
             CollapseShortcutSection();
             LoadProfiles();
+            RefreshUrlProtocolState();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "StartGameMenu OnOpening ({biz})", CurrentGameBiz);
         }
     }
+
+
+    #region 注册 URL 协议（.url 快捷方式依赖）
+
+
+    private bool _suppressUrlProtocolApply;
+
+
+    /// <summary>
+    /// 「注册 URL 协议」开关。与「设置 - 高级」一致：开 = 注册 <c>starward://</c> 协议，关 = 注销。
+    /// 生成的 .url 快捷方式需系统识别该协议才能启动游戏。
+    /// </summary>
+    public bool EnableUrlProtocol
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value) && !_suppressUrlProtocolApply)
+            {
+                try
+                {
+                    if (value)
+                    {
+                        UrlProtocolService.RegisterProtocol();
+                    }
+                    else
+                    {
+                        UrlProtocolService.UnregisterProtocol();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Toggle url protocol from start game menu");
+                }
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 把「注册 URL 协议」开关同步到系统实际注册状态（不触发注册/注销）。
+    /// </summary>
+    private async void RefreshUrlProtocolState()
+    {
+        try
+        {
+            var status = await Launcher.QueryUriSupportAsync(new Uri("starward://"), LaunchQuerySupportType.Uri);
+            _suppressUrlProtocolApply = true;
+            EnableUrlProtocol = status is LaunchQuerySupportStatus.Available;
+            _suppressUrlProtocolApply = false;
+        }
+        catch (Exception ex)
+        {
+            _suppressUrlProtocolApply = false;
+            _logger.LogError(ex, "Refresh url protocol state");
+        }
+    }
+
+
+    #endregion
 
 
     private void LoadProfiles()
@@ -450,7 +512,7 @@ public sealed partial class StartGameMenu : UserControl
     /// 快捷方式以命令行参数直接把 starward:// 传给 Starward.exe，启动游戏无需注册系统 URL 协议
     /// （系统级协议注册是设置页里的独立开关，仅用于从浏览器/运行框等外部唤起 starward://）。
     /// </summary>
-    private void Button_GenerateShortcut_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void Button_GenerateShortcut_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         try
         {
@@ -459,11 +521,30 @@ public sealed partial class StartGameMenu : UserControl
                 return;
             }
 
+            // 生成的是 .url 快捷方式，依赖系统识别 starward:// 协议；未注册时先征求用户同意再注册。
+            if (!EnableUrlProtocol)
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = Lang.StartGameMenu_AddTaskbarLaunch,
+                    Content = Lang.StartGameMenu_RegisterProtocolForUrlShortcutHint,
+                    PrimaryButtonText = Lang.Common_Confirm,
+                    CloseButtonText = Lang.Common_Cancel,
+                    DefaultButton = ContentDialogButton.Primary,
+                    XamlRoot = this.XamlRoot,
+                };
+                if (await dialog.ShowAsync() is not ContentDialogResult.Primary)
+                {
+                    return; // 用户拒绝：不注册、不生成
+                }
+                EnableUrlProtocol = true; // 用户确定：打开开关（注册协议）
+            }
+
             string gameName = GetGameDisplayName();
             GameShortcutService.IconSource? icon = GameShortcutService.GetGameIconSource(CurrentGameBiz);
-            string lnkPath = GameShortcutService.CreateStartGameShortcut(CurrentGameBiz, gameName, option.ProfileId, option.ProfileDisplayName, icon);
-            InAppToast.MainWindow?.Success(Lang.StartGameMenu_ShortcutCreated, lnkPath);
-            _ = RevealInExplorerAsync(lnkPath);
+            string urlPath = GameShortcutService.CreateStartGameShortcut(CurrentGameBiz, gameName, option.ProfileId, option.ProfileDisplayName, icon);
+            InAppToast.MainWindow?.Success(Lang.StartGameMenu_ShortcutCreated, urlPath);
+            _ = RevealInExplorerAsync(urlPath);
             RequestClose?.Invoke();
         }
         catch (Exception ex)

@@ -1726,6 +1726,9 @@ Do you accept the risk and continue to use it?</value>
   <data name="StartGameMenu_ShortcutCreated" xml:space="preserve">
     <value>Shortcut created on the desktop</value>
   </data>
+  <data name="StartGameMenu_RegisterProtocolForUrlShortcutHint" xml:space="preserve">
+    <value>This creates a URL-format shortcut, which requires registry support so the system can recognize it. Register the URL protocol and continue?</value>
+  </data>
   <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
     <value>Launch Argument Profiles</value>
   </data>

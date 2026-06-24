@@ -80,7 +80,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!--  游戏快捷方式图标：src 目录下的 .ico 复制到输出 Assets\Image，供 GameShortcutService 给 .lnk 设置图标  -->
+		<!--  游戏快捷方式图标：src 目录下的 .ico 复制到输出 Assets\Image，供 GameShortcutService 给 .url 快捷方式设置图标  -->
 		<Content Include="..\bh3.ico;..\hk4e.ico;..\hkrpg.ico;..\nap.ico">
 			<Link>Assets\Image\%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

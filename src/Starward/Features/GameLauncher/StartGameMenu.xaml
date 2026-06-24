@@ -166,6 +166,12 @@
                         VerticalAlignment="Top"
                         Spacing="6">
 
+                <!--  注册 URL 协议：.url 快捷方式需系统识别 starward:// 协议才能启动；与「设置 - 高级」一致  -->
+                <ToggleSwitch MinWidth="0"
+                              IsOn="{x:Bind EnableUrlProtocol, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.SettingPage_RegisterURLProtocol}"
+                              OnContent="{x:Bind lang:Lang.SettingPage_RegisterURLProtocol}" />
+
                 <!--  启动方式（快捷方式按哪个配置启动）+ 生成按钮横向排列  -->
                 <StackPanel Spacing="6">
                     <TextBlock Style="{StaticResource MenuCaptionStyle}" Text="{x:Bind lang:Lang.StartGameMenu_SelectLaunchMethod}" />

@@ -2934,6 +2934,15 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 该操作会创建 URL 格式的快捷方式，需要注册表支持以便系统识别。是否注册并继续？ 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_RegisterProtocolForUrlShortcutHint {
+            get {
+                return ResourceManager.GetString("StartGameMenu_RegisterProtocolForUrlShortcutHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Launch Argument Profiles 的本地化字符串。
         /// </summary>
         public static string GameLaunchProfileWindow_Title {
