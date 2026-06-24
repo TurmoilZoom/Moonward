@@ -1,16 +1,13 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
-using Starward.Core;
-using Starward.Core.HoYoPlay;
-using Starward.Features.GameLauncher;
 using Starward.Features.GamepadControl;
+using Starward.Features.Startup;
 using Starward.Features.UrlProtocol;
 using Starward.Features.ViewHost;
-using Starward.RPC;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -99,8 +96,9 @@ public partial class App : Application
         // 去掉可执行文件路径，仅保留用户传入的参数，那么args[0]为第一个参数
         string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
 
-        // 开发/调试：starward://test/ 协议直接打开测试窗口后退出正常启动流程
-        if (args.Length > 0 && args[0].ToLower().StartsWith("starward://test/"))
+        // 开发/调试：starward://test/ 调试窗口。须在环境初始化（及 DI 容器构建）之前处理，以跳过
+        // 数据目录选择/迁移等副作用，故此分支不进入下方的启动处理器职责链。
+        if (args is [var first, ..] && first.StartsWith(StartupVerbs.TestUrlProtocolPrefix, StringComparison.OrdinalIgnoreCase))
         {
             new TestUrlProtocolWindow().Activate();
             return;
@@ -109,8 +107,8 @@ public partial class App : Application
         // 环境检查：数据目录、配置、服务等初始化
         await AppConfig.CheckEnviromentAsync();
 
-        // 处理 rpc / playtime / startgame / starward:// 等特殊启动参数；若已处理则直接返回
-        if (args.Length > 0 && await HandleStartupAsync(args))
+        // 特殊启动模式（rpc / playtime / startgame / starward://）：交由启动处理器职责链分发；若已接管则直接返回
+        if (await DispatchStartupAsync(new StartupContext(args)))
         {
             return;
         }
@@ -127,7 +125,7 @@ public partial class App : Application
         }
 
         // --hide 参数：仅启动系统托盘，不显示主窗口
-        if (Environment.GetCommandLineArgs().Contains("--hide"))
+        if (args.Contains("--hide"))
         {
             m_SystemTrayWindow = new SystemTrayWindow();
         }
@@ -140,56 +138,27 @@ public partial class App : Application
 
 
     /// <summary>
-    /// 根据命令行首参数分发特殊启动模式（RPC、游玩时长记录、直接启动游戏、URL 协议）。
-    /// 各分支处理完毕后会调用 <see cref="Environment.Exit(int)"/> 终止进程。
+    /// 按注册顺序运行启动处理器职责链（<see cref="IStartupHandler"/>），分发 rpc / playtime /
+    /// startgame / starward:// 等特殊启动模式。命中 <see cref="StartupOutcome.Exit"/> 的处理器在此处
+    /// 统一终止进程，各处理器自身不再负责进程生命周期。
     /// </summary>
-    /// <param name="args">命令行参数数组（不含可执行文件路径）。</param>
-    /// <returns>若已识别并处理启动参数则返回 <see langword="true"/>，否则返回 <see langword="false"/> 以继续正常启动。</returns>
-    private async Task<bool> HandleStartupAsync(string[] args)
+    /// <param name="context">本次启动的命令行上下文。</param>
+    /// <returns>若已被某处理器接管（进程即将退出）则返回 <see langword="true"/>；否则返回 <see langword="false"/> 以继续正常启动。</returns>
+    private static async Task<bool> DispatchStartupAsync(StartupContext context)
     {
-        IConfiguration config = new ConfigurationBuilder().AddCommandLine(args).Build();
-
-        // RPC 子进程模式：执行远程过程调用后退出
-        if (args[0].ToLower() is "rpc")
+        foreach (IStartupHandler handler in AppConfig.GetService<IEnumerable<IStartupHandler>>())
         {
-            RpcRunner.Run(args);
-            Environment.Exit(0);
-        }
-
-        // 游玩时长记录：由游戏进程派生的子进程上报本次会话时长
-        if (args[0].ToLower() is "playtime")
-        {
-            int pid = config.GetValue<int>("pid");
-            GameBiz biz = (GameBiz)config.GetValue<string>("biz");
-            if (pid > 0)
+            if (!handler.CanHandle(context))
             {
-                var playtime = AppConfig.GetService<Features.PlayTime.PlayTimeService>();
-                await playtime.LogPlayTimeAsync(biz, pid);
+                continue;
             }
-            Environment.Exit(0);
-        }
-
-        // 命令行直接启动游戏：--biz 指定游戏业务标识
-        if (args[0].ToLower() is "startgame")
-        {
-            GameBiz biz = (GameBiz)config.GetValue<string>("biz");
-            GameId? gameId = GameId.FromGameBiz(biz);
-            if (gameId is not null)
-            {
-                await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId);
-            }
-            Environment.Exit(0);
-        }
-
-        // URL 协议激活：starward:// 开头的自定义协议链接
-        if (args[0].ToLower().StartsWith("starward://"))
-        {
-            if (await UrlProtocolService.HandleUrlProtocolAsync(args[0]))
+            if (await handler.HandleAsync(context) is StartupOutcome.Exit)
             {
                 Environment.Exit(0);
+                return true; // 不可达：Environment.Exit 已终止进程
             }
+            // Continue：已识别但放行（例如未注册的 starward:// 主机名），继续询问后续处理器
         }
-
         return false;
     }
 

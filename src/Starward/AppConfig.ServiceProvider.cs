@@ -22,6 +22,7 @@ using Starward.Features.PlayTime;
 using Starward.Features.RPC;
 using Starward.Features.Screenshot;
 using Starward.Features.SelfQuery;
+using Starward.Features.Startup;
 using Starward.Features.Update;
 using Starward.Setup.Core;
 using System;
@@ -96,6 +97,12 @@ public static partial class AppConfig
             sc.AddSingleton<GameAccountService>();
 
             sc.AddSingleton<ScreenCaptureService>();
+
+            // 命令行启动模式处理器（职责链）：注册顺序即匹配优先级，由 App.OnLaunched 在环境初始化后依次询问。
+            sc.AddSingleton<IStartupHandler, RpcStartupHandler>();
+            sc.AddSingleton<IStartupHandler, PlayTimeStartupHandler>();
+            sc.AddSingleton<IStartupHandler, StartGameStartupHandler>();
+            sc.AddSingleton<IStartupHandler, UrlProtocolStartupHandler>();
 
             _serviceProvider = sc.BuildServiceProvider();
         }
