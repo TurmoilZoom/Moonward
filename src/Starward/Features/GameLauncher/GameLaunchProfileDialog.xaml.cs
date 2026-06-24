@@ -614,7 +614,8 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             button.IsEnabled = false;
             if (button.Content is FontIcon icon)
             {
-                icon.Glyph = "\uF08C";
+                // Accept
+                icon.Glyph = "\uF78C";
                 await Task.Delay(1000);
             }
         }

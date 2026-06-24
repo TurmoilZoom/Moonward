@@ -1745,7 +1745,7 @@
     <value>名称</value>
   </data>
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
-    <value>Url预览指令</value>
+    <value>URL指令预览</value>
   </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>默认配置</value>
