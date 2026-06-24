@@ -94,6 +94,7 @@ public sealed partial class GeneralSetting : PageBase
                     _logger.LogInformation("Language change to {lang}", lang);
                     AppConfig.SetLanguage(lang);
                     this.Bindings.Update();
+                    RefreshStartGameActionSelectionBox();
                     WeakReferenceMessenger.Default.Send(new LanguageChangedMessage());
                     AppConfig.SaveConfiguration();
                 }
@@ -126,12 +127,43 @@ public sealed partial class GeneralSetting : PageBase
         get;
         set
         {
-            if (SetProperty(ref field, value))
+            if (SetProperty(ref field, value) && !_suppressStartGameActionSave)
             {
                 AppConfig.StartGameAction = (Starward.Features.GameLauncher.StartGameAction)value;
             }
         }
     } = Math.Clamp((int)AppConfig.StartGameAction, 0, 2);
+
+
+    /// <summary>
+    /// 语言切换刷新「已选项」显示文本时临时抑制写库（避免把过渡值 -1 持久化到 Setting 表）。
+    /// </summary>
+    private bool _suppressStartGameActionSave;
+
+
+    /// <summary>
+    /// 语言切换后强制刷新「游戏启动后」ComboBox 折叠态显示的文本。
+    /// WinUI ComboBox 折叠时显示的是缓存的 SelectionBoxItem，Bindings.Update() 只会刷新下拉列表项的内容，
+    /// 不会刷新折叠态显示的文本（否则需手动展开下拉框才生效）。这里通过重新选择一次触发内部 UpdateSelectionBoxItem。
+    /// </summary>
+    private void RefreshStartGameActionSelectionBox()
+    {
+        int index = ComboBox_StartGameAction.SelectedIndex;
+        if (index < 0)
+        {
+            return;
+        }
+        try
+        {
+            _suppressStartGameActionSave = true;
+            ComboBox_StartGameAction.SelectedIndex = -1;
+            ComboBox_StartGameAction.SelectedIndex = index;
+        }
+        finally
+        {
+            _suppressStartGameActionSave = false;
+        }
+    }
 
 
     #endregion

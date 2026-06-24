@@ -38,7 +38,8 @@
             <TextBlock Margin="0,20,0,0"
                        FontSize="20"
                        Text="{x:Bind lang:Lang.ExperienceSettingPage_AfterStartingGame}" />
-            <ComboBox Height="36"
+            <ComboBox Name="ComboBox_StartGameAction"
+                      Height="36"
                       MinWidth="260"
                       Margin="0,12,0,0"
                       Padding="18.5,0,0,0"
