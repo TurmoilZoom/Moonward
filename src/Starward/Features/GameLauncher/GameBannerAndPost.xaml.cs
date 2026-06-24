@@ -4,8 +4,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Starward.Core.HoYoPlay;
 using Starward.Features.HoYoPlay;
 using Starward.Features.ViewHost;
@@ -14,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
-using Windows.System;
 
 
 namespace Starward.Features.GameLauncher;
@@ -22,9 +19,6 @@ namespace Starward.Features.GameLauncher;
 [INotifyPropertyChanged]
 public sealed partial class GameBannerAndPost : UserControl
 {
-
-
-    private Microsoft.UI.Dispatching.DispatcherQueueTimer _bannerTimer;
 
 
     private readonly ILogger<GameBannerAndPost> _logger = AppConfig.GetLogger<GameBannerAndPost>();
@@ -42,10 +36,6 @@ public sealed partial class GameBannerAndPost : UserControl
         this.InitializeComponent();
         this.Loaded += GameBannerAndPost_Loaded;
         this.Unloaded += GameBannerAndPost_Unloaded;
-        _bannerTimer = DispatcherQueue.CreateTimer();
-        _bannerTimer.Interval = TimeSpan.FromSeconds(5);
-        _bannerTimer.IsRepeating = true;
-        _bannerTimer.Tick += _bannerTimer_Tick;
     }
 
 
@@ -66,8 +56,6 @@ public sealed partial class GameBannerAndPost : UserControl
     private void GameBannerAndPost_Unloaded(object sender, RoutedEventArgs e)
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
-        _bannerTimer.Stop();
-        _bannerTimer.Tick -= _bannerTimer_Tick;
         Banners = null;
         PostGroups = null;
     }
@@ -80,11 +68,11 @@ public sealed partial class GameBannerAndPost : UserControl
         {
             if (message.Activate)
             {
-                _bannerTimer.Start();
+                BannerCarousel.ResumeAutoPlay();
             }
             else if (message.Hide || message.SessionLock)
             {
-                _bannerTimer.Stop();
+                BannerCarousel.PauseAutoPlay();
             }
         }
         catch { }
@@ -134,13 +122,13 @@ public sealed partial class GameBannerAndPost : UserControl
         {
             if (value && Banners?.Count > 0 && PostGroups?.Count > 0)
             {
-                _bannerTimer.Start();
+                BannerCarousel.ResumeAutoPlay();
                 this.Opacity = 1;
                 this.IsHitTestVisible = true;
             }
             else
             {
-                _bannerTimer.Stop();
+                BannerCarousel.PauseAutoPlay();
                 this.Opacity = 0;
                 this.IsHitTestVisible = false;
             }
@@ -193,87 +181,6 @@ public sealed partial class GameBannerAndPost : UserControl
 
 
 
-    private void _bannerTimer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
-    {
-        try
-        {
-            if (Banners?.Count > 0)
-            {
-                FlipView_Banner.SelectedIndex = (FlipView_Banner.SelectedIndex + 1) % Banners.Count;
-            }
-        }
-        catch { }
-    }
-
-
-
-    private async void Image_Banner_Tapped(object sender, TappedRoutedEventArgs e)
-    {
-        try
-        {
-            if (sender is FrameworkElement fe && fe.DataContext is GameBanner banner)
-            {
-                await Launcher.LaunchUriAsync(new Uri(banner.Image.Link));
-            }
-        }
-        catch { }
-    }
-
-
-
-    /// <summary>
-    /// 隐藏 FilpView 中自动出现的翻页按键
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void FlipView_Banner_Loaded(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            var grid = VisualTreeHelper.GetChild(FlipView_Banner, 0);
-            if (grid != null)
-            {
-                var count = VisualTreeHelper.GetChildrenCount(grid);
-                if (count > 0)
-                {
-                    for (int i = 0; i < count; i++)
-                    {
-                        var child = VisualTreeHelper.GetChild(grid, i);
-                        if (child is Button button)
-                        {
-
-                            button.IsHitTestVisible = false;
-                            button.Opacity = 0;
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-    }
-
-
-
-
-    private void Grid_BannerContainer_PointerEntered(object sender, PointerRoutedEventArgs e)
-    {
-        _bannerTimer.Stop();
-        Border_PipsPager.Visibility = Visibility.Visible;
-    }
-
-
-
-    private void Grid_BannerContainer_PointerExited(object sender, PointerRoutedEventArgs e)
-    {
-        _bannerTimer.Start();
-        Border_PipsPager.Visibility = Visibility.Collapsed;
-    }
-
-
-
-
-
-
     [RelayCommand]
     private void OpenGameNoticeWindow()
     {
@@ -288,14 +195,6 @@ public sealed partial class GameBannerAndPost : UserControl
         catch { }
     }
 
-
-
-
-
-    public static string AddOne(int number)
-    {
-        return (number + 1).ToString();
-    }
 
 
 

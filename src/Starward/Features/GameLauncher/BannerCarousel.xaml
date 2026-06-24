@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Features.GameLauncher.BannerCarousel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sh="using:Starward.Helpers"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  fast-out-slow-in 缓动曲线；KeySpline 属性需用字符串「x1,y1,x2,y2」由转换器解析，不能用 KeySpline 对象  -->
+        <x:String x:Key="CarouselEaseKeySpline">0.1,0.9,0.2,1</x:String>
+
+        <!--
+            翻页按钮样式（NewPipsPagerNavigationButtonBaseStyle）：
+            背景在所有状态下保持不变（避免默认按钮模板悬停时把背景换成半透明灰、看起来「变透明」），
+            改为缩放箭头字形——悬停放大到 1.3、按下缩小到 0.8，并配合不透明度变化。
+        -->
+        <Style x:Key="CarouselNavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{ThemeResource CustomOverlayAcrylicBrush}" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="RootGrid"
+                              Background="{TemplateBinding Background}"
+                              CornerRadius="{TemplateBinding CornerRadius}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphScale" Storyboard.TargetProperty="ScaleX">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="1" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphScale" Storyboard.TargetProperty="ScaleY">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="1" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphPresenter" Storyboard.TargetProperty="Opacity">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="0.9" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOver">
+                                        <Storyboard>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphScale" Storyboard.TargetProperty="ScaleX">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="1.3" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphScale" Storyboard.TargetProperty="ScaleY">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="1.3" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphPresenter" Storyboard.TargetProperty="Opacity">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="1" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphScale" Storyboard.TargetProperty="ScaleX">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="0.8" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphScale" Storyboard.TargetProperty="ScaleY">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="0.8" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="GlyphPresenter" Storyboard.TargetProperty="Opacity">
+                                                <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                                      KeyTime="0:0:0.167"
+                                                                      Value="0.7" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter x:Name="GlyphPresenter"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding Content}"
+                                              Foreground="{TemplateBinding Foreground}"
+                                              RenderTransformOrigin="0.5,0.5">
+                                <ContentPresenter.RenderTransform>
+                                    <ScaleTransform x:Name="GlyphScale" />
+                                </ContentPresenter.RenderTransform>
+                            </ContentPresenter>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid x:Name="RootGrid"
+          Background="Transparent"
+          PointerEntered="RootGrid_PointerEntered"
+          PointerExited="RootGrid_PointerExited"
+          PointerWheelChanged="RootGrid_PointerWheelChanged">
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommonStates">
+                <!--  默认：左右翻页按钮淡出并轻微缩小  -->
+                <VisualState x:Name="Normal">
+                    <Storyboard>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PreviousButtonRoot" Storyboard.TargetProperty="Opacity">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="0" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NextButtonRoot" Storyboard.TargetProperty="Opacity">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="0" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PreviousButtonScale" Storyboard.TargetProperty="ScaleX">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="0.8" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PreviousButtonScale" Storyboard.TargetProperty="ScaleY">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="0.8" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NextButtonScale" Storyboard.TargetProperty="ScaleX">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="0.8" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NextButtonScale" Storyboard.TargetProperty="ScaleY">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="0.8" />
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+                <!--  悬停：左右翻页按钮淡入并放大到原始大小  -->
+                <VisualState x:Name="PointerOver">
+                    <Storyboard>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PreviousButtonRoot" Storyboard.TargetProperty="Opacity">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="1" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NextButtonRoot" Storyboard.TargetProperty="Opacity">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="1" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PreviousButtonScale" Storyboard.TargetProperty="ScaleX">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="1" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PreviousButtonScale" Storyboard.TargetProperty="ScaleY">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="1" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NextButtonScale" Storyboard.TargetProperty="ScaleX">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="1" />
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="NextButtonScale" Storyboard.TargetProperty="ScaleY">
+                            <SplineDoubleKeyFrame KeySpline="{StaticResource CarouselEaseKeySpline}"
+                                                  KeyTime="0:0:0.25"
+                                                  Value="1" />
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <!--  轮播图呈现区：单槽 Grid，切页时新旧图各自滑动；外层 Border 负责圆角裁剪  -->
+        <Border CornerRadius="8">
+            <Grid x:Name="PresenterGrid" SizeChanged="PresenterGrid_SizeChanged" />
+        </Border>
+
+        <!--  上一张  -->
+        <Grid x:Name="PreviousButtonRoot"
+              Margin="6,0,0,0"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Center"
+              Opacity="0"
+              RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <ScaleTransform x:Name="PreviousButtonScale"
+                                ScaleX="0.8"
+                                ScaleY="0.8" />
+            </Grid.RenderTransform>
+            <Button x:Name="PreviousButton"
+                    Width="28"
+                    Height="44"
+                    sh:PointerCursor.CursorShape="Hand"
+                    Click="PreviousButton_Click"
+                    Style="{StaticResource CarouselNavButtonStyle}">
+                <FontIcon FontSize="14"
+                          Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                          Glyph="&#xE76B;" />
+            </Button>
+        </Grid>
+
+        <!--  下一张  -->
+        <Grid x:Name="NextButtonRoot"
+              Margin="0,0,6,0"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Center"
+              Opacity="0"
+              RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <ScaleTransform x:Name="NextButtonScale"
+                                ScaleX="0.8"
+                                ScaleY="0.8" />
+            </Grid.RenderTransform>
+            <Button x:Name="NextButton"
+                    Width="28"
+                    Height="44"
+                    sh:PointerCursor.CursorShape="Hand"
+                    Click="NextButton_Click"
+                    Style="{StaticResource CarouselNavButtonStyle}">
+                <FontIcon FontSize="14"
+                          Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                          Glyph="&#xE76C;" />
+            </Button>
+        </Grid>
+
+        <!--  可点击的圆点指示器（替代原右下角页数文字）  -->
+        <Border x:Name="PipsPagerBorder"
+                Margin="0,0,0,8"
+                Padding="6,1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                CornerRadius="10">
+            <PipsPager x:Name="BannerPipsPager"
+                       NextButtonVisibility="Collapsed"
+                       NumberOfPages="0"
+                       PreviousButtonVisibility="Collapsed"
+                       SelectedIndexChanged="BannerPipsPager_SelectedIndexChanged"
+                       SelectedPageIndex="0" />
+        </Border>
+
+    </Grid>
+
+</UserControl>

@@ -6,9 +6,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameLauncher"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:sc="using:Starward.Controls"
              xmlns:sch="using:Starward.Core.HoYoPlay"
-             xmlns:sh="using:Starward.Helpers"
              x:DefaultBindMode="OneWay"
              IsHitTestVisible="False"
              Opacity="0"
@@ -31,40 +29,8 @@
             <RowDefinition Height="124" />
         </Grid.RowDefinitions>
 
-        <!--  Banner  -->
-        <Grid Name="Grid_BannerContainer"
-              PointerEntered="Grid_BannerContainer_PointerEntered"
-              PointerExited="Grid_BannerContainer_PointerExited">
-            <FlipView Name="FlipView_Banner"
-                      Background="Transparent"
-                      CornerRadius="8"
-                      ItemsSource="{x:Bind Banners}"
-                      Loaded="FlipView_Banner_Loaded">
-                <FlipView.ItemTemplate>
-                    <DataTemplate x:DataType="sch:GameBanner">
-                        <sc:CachedImage Name="Image_Banner"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        sh:PointerCursor.CursorShape="Hand"
-                                        IsRightTapEnabled="False"
-                                        Source="{x:Bind Image.Url}"
-                                        Stretch="UniformToFill"
-                                        Tapped="Image_Banner_Tapped" />
-                    </DataTemplate>
-                </FlipView.ItemTemplate>
-            </FlipView>
-            <Border Name="Border_PipsPager"
-                    Padding="10,2,10,2"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Background="{ThemeResource CustomOverlayAcrylicBrush}"
-                    CornerRadius="8,0,8,0"
-                    Visibility="Collapsed">
-                <TextBlock FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                    <Run Text="{x:Bind local:GameBannerAndPost.AddOne(FlipView_Banner.SelectedIndex)}" /><Run Text="/" /><Run Text="{x:Bind Banners.Count}" />
-                </TextBlock>
-            </Border>
-        </Grid>
+        <!--  Banner（轮播图，滑动切页 + 圆点指示器 + 翻页按钮）  -->
+        <local:BannerCarousel x:Name="BannerCarousel" Banners="{x:Bind Banners}" />
 
         <!--  Post  -->
         <Border Grid.Row="1">
