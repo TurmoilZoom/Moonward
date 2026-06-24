@@ -1834,7 +1834,34 @@ namespace Starward.Language {
                 return ResourceManager.GetString("FileSettingPage_Cache", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Uninstall 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_Uninstall {
+            get {
+                return ResourceManager.GetString("FileSettingPage_Uninstall", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Delete my data when uninstalling 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_DeleteDataOnUninstall {
+            get {
+                return ResourceManager.GetString("FileSettingPage_DeleteDataOnUninstall", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 When uninstalling from Control Panel, also delete the data folder and registry entries. 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_DeleteDataOnUninstallDesc {
+            get {
+                return ResourceManager.GetString("FileSettingPage_DeleteDataOnUninstallDesc", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Clear Cache 的本地化字符串。
         /// </summary>

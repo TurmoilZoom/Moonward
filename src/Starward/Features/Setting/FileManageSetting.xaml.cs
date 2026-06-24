@@ -164,6 +164,30 @@ public sealed partial class FileManageSetting : PageBase
 
 
 
+    /// <summary>
+    /// 是否显示「卸载」相关选项：仅标准安装版有意义（便携版 / 可移动设备无控制面板卸载）。
+    /// </summary>
+    public bool CanCleanOnUninstall { get; } = !AppConfig.IsPortable && !AppConfig.IsAppInRemovableStorage;
+
+
+    /// <summary>
+    /// 「卸载时删除我的数据」开关，默认开启。值持久化到注册表（卸载钩子在 Velopack 拉起的独立进程中读取，
+    /// 不经数据库），见 <see cref="AppUninstallService"/>。
+    /// </summary>
+    public bool DeleteDataOnUninstall
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppUninstallService.SetDeleteDataOnUninstall(value);
+            }
+        }
+    } = AppUninstallService.GetDeleteDataOnUninstall();
+
+
+
     private void TextBlock_IsTextTrimmedChanged(TextBlock sender, IsTextTrimmedChangedEventArgs args)
     {
         if (sender.FontSize > 12)

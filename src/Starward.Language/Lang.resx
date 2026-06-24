@@ -722,7 +722,7 @@ closing the program during decompression will cause game file corruption.</value
     <value>Reselect Data Folder</value>
   </data>
   <data name="SettingPage_DeleteAllSettings" xml:space="preserve">
-    <value>Delete All Settings</value>
+    <value>Delete Personal Settings</value>
   </data>
   <data name="SettingPage_ClearCachedFiles" xml:space="preserve">
     <value>Clear Cached Files</value>
@@ -1324,6 +1324,15 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="FileSettingPage_ClearCache" xml:space="preserve">
     <value>Clear Cache</value>
+  </data>
+  <data name="FileSettingPage_Uninstall" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstall" xml:space="preserve">
+    <value>Delete my data when uninstalling</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstallDesc" xml:space="preserve">
+    <value>When uninstalling from Control Panel, also delete the data folder and registry entries. Gacha records, play time and other local-only data cannot be recovered. Turn this off to keep your data for reinstalling.</value>
   </data>
   <data name="DownloadGamePage_TheDownloadTaskOfGameIsAlreadyRunning" xml:space="preserve">
     <value>The download task of {0} is already running.</value>

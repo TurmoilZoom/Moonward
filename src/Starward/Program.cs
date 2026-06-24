@@ -24,7 +24,11 @@ public static class Program
     {
         // Velopack：必须是 Main 中最早执行的代码。
         // 安装/更新/卸载等 hook 会在此处理并直接退出进程，不会进入 WinUI。
-        VelopackApp.Build().Run();
+        // 卸载钩子（控制面板卸载或 Update.exe uninstall 都会触发）按用户设置清理数据目录与注册表残留，
+        // 钩子有 30 秒超时且禁止任何 UI，故 PerformUninstallCleanup 全程静默。
+        VelopackApp.Build()
+            .OnBeforeUninstallFastCallback(_ => Features.Setting.AppUninstallService.PerformUninstallCleanup())
+            .Run();
 
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Normal;

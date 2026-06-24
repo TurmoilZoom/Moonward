@@ -722,7 +722,7 @@
     <value>重新选择数据文件夹</value>
   </data>
   <data name="SettingPage_DeleteAllSettings" xml:space="preserve">
-    <value>删除所有设置</value>
+    <value>删除个人设置</value>
   </data>
   <data name="SettingPage_ClearCachedFiles" xml:space="preserve">
     <value>清除缓存文件</value>
@@ -1324,6 +1324,15 @@
   </data>
   <data name="FileSettingPage_ClearCache" xml:space="preserve">
     <value>清理缓存</value>
+  </data>
+  <data name="FileSettingPage_Uninstall" xml:space="preserve">
+    <value>卸载</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstall" xml:space="preserve">
+    <value>卸载时删除我的数据</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstallDesc" xml:space="preserve">
+    <value>从控制面板卸载时，一并删除数据文件夹与注册表项。抽卡记录、游戏时长等仅存于本地的数据将无法恢复。关闭后卸载将保留数据，便于重新安装后续用。</value>
   </data>
   <data name="DownloadGamePage_TheDownloadTaskOfGameIsAlreadyRunning" xml:space="preserve">
     <value>{0} 的下载任务正在运行。</value>
