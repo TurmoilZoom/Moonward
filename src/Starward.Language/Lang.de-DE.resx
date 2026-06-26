@@ -1,110 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -159,8 +100,14 @@
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>Durchschnitt</value>
   </data>
+  <data name="GachaStatsCard_Draggable" xml:space="preserve">
+    <value>Verschiebbar</value>
+  </data>
   <data name="GachaStatsCard_Stats" xml:space="preserve">
     <value>Statistiken</value>
+  </data>
+  <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
+    <value>Trefferquote</value>
   </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>Schön, dich zu treffen ~</value>
@@ -309,6 +256,9 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
     <value>Datensätze aktualisieren</value>
+  </data>
+  <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
+    <value>Gegenstandsnamen werden aktualisiert…</value>
   </data>
   <data name="GachaLogPage_UpdateSavedURL" xml:space="preserve">
     <value>Aktualisiere (Gespeichertes URL)</value>
@@ -1178,6 +1128,12 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="SettingPage_TestURLProtocol" xml:space="preserve">
     <value>Test URL Protocol</value>
   </data>
+  <data name="SettingPage_URLProtocolHelpDoc" xml:space="preserve">
+    <value>Hilfedokumentation</value>
+  </data>
+  <data name="UrlProtocolDocWindow_Title" xml:space="preserve">
+    <value>URL-Protokoll</value>
+  </data>
   <data name="LauncherPage_OpenInBrowser" xml:space="preserve">
     <value>Im Browser öffnen</value>
   </data>
@@ -1307,6 +1263,15 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   </data>
   <data name="FileSettingPage_ClearCache" xml:space="preserve">
     <value>Cache leeren</value>
+  </data>
+  <data name="FileSettingPage_Uninstall" xml:space="preserve">
+    <value>Deinstallieren</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstall" xml:space="preserve">
+    <value>Meine Daten bei Deinstallation löschen</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstallDesc" xml:space="preserve">
+    <value>Beim Deinstallieren über die Systemsteuerung werden auch der Datenordner und Registry-Einträge gelöscht. Gacha-Aufzeichnungen, Spielzeit und andere nur lokal gespeicherte Daten können nicht wiederhergestellt werden. Deaktivieren Sie diese Option, um Ihre Daten für eine Neuinstallation zu behalten.</value>
   </data>
   <data name="DownloadGamePage_TheDownloadTaskOfGameIsAlreadyRunning" xml:space="preserve">
     <value>Die Download-Aufgabe von {0} läuft bereits.</value>
@@ -1682,8 +1647,65 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
     <value>Spielpakete</value>
   </data>
+  <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
+    <value>Schnellstart</value>
+  </data>
+  <data name="StartGameMenu_LaunchProfileConfig" xml:space="preserve">
+    <value>Startargument-Profile</value>
+  </data>
+  <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
+    <value>Startmethode auswählen</value>
+  </data>
+  <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
+    <value>Spielverknüpfung erstellen</value>
+  </data>
+  <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
+    <value>App-Einstellung folgen</value>
+  </data>
+  <data name="StartGameMenu_Generate" xml:space="preserve">
+    <value>Erstellen</value>
+  </data>
+  <data name="StartGameMenu_ShortcutIcon" xml:space="preserve">
+    <value>Verknüpfungssymbol</value>
+  </data>
+  <data name="StartGameMenu_UploadIcon" xml:space="preserve">
+    <value>.ico hochladen</value>
+  </data>
+  <data name="StartGameMenu_ShortcutCreated" xml:space="preserve">
+    <value>Verknüpfung auf dem Desktop erstellt</value>
+  </data>
+  <data name="StartGameMenu_RegisterProtocolForUrlShortcutHint" xml:space="preserve">
+    <value>Dies erstellt eine URL-Verknüpfung, die Registry-Unterstützung benötigt, damit das System sie erkennt. URL-Protokoll registrieren und fortfahren?</value>
+  </data>
+  <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
+    <value>Startargument-Profile</value>
+  </data>
   <data name="GameLauncherSettingDialog_CommandLineArgument" xml:space="preserve">
     <value>Befehlszeilenargument</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LaunchProfile" xml:space="preserve">
+    <value>Startprofil</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NewProfile" xml:space="preserve">
+    <value>Neues Profil</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
+    <value>URL-Vorschau-Befehl</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
+    <value>Derzeit wird beim Spielstart nur das erste Profil angewendet</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DiscardUnsavedProfileChanges" xml:space="preserve">
+    <value>Das aktuelle Profil enthält nicht gespeicherte Änderungen. Verwerfen?</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ThirdPartyToolTip" xml:space="preserve">
+    <value>Sie können das Spiel über ein anderes Programm starten. Nach der Auswahl werden die Startargumente angehängt</value>
   </data>
   <data name="GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument" xml:space="preserve">
     <value>Weitere Informationen über das Befehlszeilenargument.</value>
@@ -1843,6 +1865,24 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Starward, starten!</value>
   </data>
+  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
+    <value>Migrieren und starten</value>
+  </data>
+  <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
+    <value>Alte Daten einer früheren Version wurden erkannt. Sie müssen in den neuen Datenordner migriert werden, bevor Sie fortfahren können. Aktueller Speicherort:</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectDataFolder" xml:space="preserve">
+    <value>Bitte wählen Sie einen Datenordner.</value>
+  </data>
+  <data name="WelcomeView_FolderNeedsAdminPermission" xml:space="preserve">
+    <value>Dieser Ordner erfordert Administratorrechte; bei der Migration wird eine Erhöhung angefordert</value>
+  </data>
+  <data name="WelcomeView_AdminPermissionRequiredToMigrate" xml:space="preserve">
+    <value>Administratorrechte sind erforderlich, um die Migration abzuschließen</value>
+  </data>
+  <data name="SettingPage_TheSoftwareWillRestartToMigrateData" xml:space="preserve">
+    <value>Die Software wird neu gestartet, um Daten an den neuen Speicherort zu migrieren.</value>
+  </data>
   <data name="GameSelector_ClickToSelectOrSwitchGame" xml:space="preserve">
     <value>Klicken Sie, um ein Spiel auszuwählen oder zu wechseln.</value>
   </data>
@@ -1899,6 +1939,9 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   </data>
   <data name="UIGFGachaService_ImportSuccessful" xml:space="preserve">
     <value>Import erfolgreich.</value>
+  </data>
+  <data name="UIGF4GachaWindow_Uid0ImportFailed" xml:space="preserve">
+    <value>Import von Uid {0} fehlgeschlagen.</value>
   </data>
   <data name="UIGFGachaService_0FieldIsMissingInAGachaRecord" xml:space="preserve">
     <value>Das Feld "{0}" fehlt in einer Gacha-Aufzeichnung.</value>
@@ -2526,6 +2569,18 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="Common_Clear" xml:space="preserve">
     <value>Löschen</value>
   </data>
+  <data name="Common_SelectAll" xml:space="preserve">
+    <value>Alle auswählen</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>Zurücksetzen</value>
+  </data>
+  <data name="Common_InvertSelection" xml:space="preserve">
+    <value>Auswahl umkehren</value>
+  </data>
+  <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
+    <value>Bannerfilter</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Ausgabeordner</value>
   </data>
@@ -2703,6 +2758,12 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="NoPermissionWindow_RestartAsAdministrator" xml:space="preserve">
     <value>Als Administrator neu starten</value>
   </data>
+  <data name="GameLauncherPage_PinToolbar" xml:space="preserve">
+    <value>Symbolleiste anheften</value>
+  </data>
+  <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
+    <value>Symbolleiste lösen</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>Farbverwaltung</value>
   </data>
@@ -2729,5 +2790,59 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   </data>
   <data name="DX12IntroDialog_DX12EnhancedGraphics" xml:space="preserve">
     <value>DX12 Verbesserte Grafik</value>
+  </data>
+  <data name="SignInButton_Title" xml:space="preserve">
+    <value>Täglicher Check-in</value>
+  </data>
+  <data name="SignInButton_SignIn" xml:space="preserve">
+    <value>Einchecken</value>
+  </data>
+  <data name="SignInButton_ReSign" xml:space="preserve">
+    <value>Nacherfassen</value>
+  </data>
+  <data name="SignInButton_SignedToday" xml:space="preserve">
+    <value>Heute eingecheckt</value>
+  </data>
+  <data name="SignInButton_NotSignedToday" xml:space="preserve">
+    <value>Heute nicht eingecheckt</value>
+  </data>
+  <data name="SignInButton_SignedInForDays" xml:space="preserve">
+    <value>Diesen Monat {0} Tag(e) eingecheckt</value>
+  </data>
+  <data name="SignInButton_AutoSignIn" xml:space="preserve">
+    <value>Automatischer Check-in</value>
+  </data>
+  <data name="SignInButton_AutoSignInHint" xml:space="preserve">
+    <value>Der automatische Check-in ist für jedes Spiel unabhängig. Starward führt den automatischen Check-in 10 Sekunden nach dem Start stapelweise aus, in Benutzerreihenfolge, mit einer zufälligen Verzögerung von 3–8 Sekunden zwischen Anfragen, um echte Nutzung zu simulieren. Bei Verifizierung und Fehlschlag wird bis zum nächsten Start nicht erneut versucht.</value>
+  </data>
+  <data name="SignInButton_SignInSucceeded" xml:space="preserve">
+    <value>Check-in erfolgreich, Belohnung erhalten</value>
+  </data>
+  <data name="SignInButton_AlreadySignedToday" xml:space="preserve">
+    <value>Sie haben heute bereits eingecheckt</value>
+  </data>
+  <data name="SignInButton_LoginExpired" xml:space="preserve">
+    <value>Anmeldung abgelaufen, bitte erneut anmelden</value>
+  </data>
+  <data name="SignInButton_RiskControl" xml:space="preserve">
+    <value>Verifizierung erforderlich, bitte in der App oder auf der Website einchecken</value>
+  </data>
+  <data name="SignInButton_NotEnoughCoin" xml:space="preserve">
+    <value>Nicht genug Münzen zum Nacherfassen</value>
+  </data>
+  <data name="SignInButton_ResignQuotaUsedUp" xml:space="preserve">
+    <value>Nacherfassungskontingent aufgebraucht</value>
+  </data>
+  <data name="SignInButton_NoResignDate" xml:space="preserve">
+    <value>Kein verpasster Tag zum Nacherfassen verfügbar</value>
+  </data>
+  <data name="SignInButton_PleaseSignInFirst" xml:space="preserve">
+    <value>Bitte schließen Sie zuerst den heutigen Check-in ab</value>
+  </data>
+  <data name="SignInButton_SignInFailed" xml:space="preserve">
+    <value>Check-in fehlgeschlagen</value>
+  </data>
+  <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
+    <value>Nacherfassen kostet {0} Münze(n). Sie haben derzeit {1}. Fortfahren?</value>
   </data>
 </root>

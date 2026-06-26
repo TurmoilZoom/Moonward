@@ -1,110 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -159,8 +100,14 @@
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>Trung bình</value>
   </data>
+  <data name="GachaStatsCard_Draggable" xml:space="preserve">
+    <value>Có thể kéo</value>
+  </data>
   <data name="GachaStatsCard_Stats" xml:space="preserve">
     <value>Chỉ số</value>
+  </data>
+  <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
+    <value>Tỷ lệ trúng</value>
   </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>Rất vui được gặp bạn ~</value>
@@ -309,6 +256,9 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
     <value>Cập nhật bản ghi</value>
+  </data>
+  <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
+    <value>Đang cập nhật tên vật phẩm…</value>
   </data>
   <data name="GachaLogPage_UpdateSavedURL" xml:space="preserve">
     <value>Cập nhật (URL đã lưu)</value>
@@ -1180,6 +1130,12 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="SettingPage_TestURLProtocol" xml:space="preserve">
     <value>Kiểm tra giao thức URL</value>
   </data>
+  <data name="SettingPage_URLProtocolHelpDoc" xml:space="preserve">
+    <value>Tài liệu trợ giúp</value>
+  </data>
+  <data name="UrlProtocolDocWindow_Title" xml:space="preserve">
+    <value>Giao thức URL</value>
+  </data>
   <data name="LauncherPage_OpenInBrowser" xml:space="preserve">
     <value>Mở trong Trình duyệt</value>
   </data>
@@ -1309,6 +1265,15 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="FileSettingPage_ClearCache" xml:space="preserve">
     <value>Dọn bộ nhớ đệm</value>
+  </data>
+  <data name="FileSettingPage_Uninstall" xml:space="preserve">
+    <value>Gỡ cài đặt</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstall" xml:space="preserve">
+    <value>Xóa dữ liệu của tôi khi gỡ cài đặt</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstallDesc" xml:space="preserve">
+    <value>Khi gỡ cài đặt từ Bảng điều khiển, thư mục dữ liệu và mục registry cũng sẽ bị xóa. Bản ghi gacha, thời gian chơi và dữ liệu cục bộ khác không thể khôi phục. Tắt để giữ dữ liệu khi cài đặt lại.</value>
   </data>
   <data name="DownloadGamePage_TheDownloadTaskOfGameIsAlreadyRunning" xml:space="preserve">
     <value>Tác vụ tải xuống của {0} đang chạy.</value>
@@ -1684,8 +1649,65 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
     <value>Gói Trò chơi</value>
   </data>
+  <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
+    <value>Khởi chạy nhanh</value>
+  </data>
+  <data name="StartGameMenu_LaunchProfileConfig" xml:space="preserve">
+    <value>Hồ sơ tham số khởi chạy</value>
+  </data>
+  <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
+    <value>Chọn cách khởi chạy</value>
+  </data>
+  <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
+    <value>Tạo lối tắt game</value>
+  </data>
+  <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
+    <value>Theo cài đặt ứng dụng</value>
+  </data>
+  <data name="StartGameMenu_Generate" xml:space="preserve">
+    <value>Tạo</value>
+  </data>
+  <data name="StartGameMenu_ShortcutIcon" xml:space="preserve">
+    <value>Biểu tượng lối tắt</value>
+  </data>
+  <data name="StartGameMenu_UploadIcon" xml:space="preserve">
+    <value>Tải lên .ico</value>
+  </data>
+  <data name="StartGameMenu_ShortcutCreated" xml:space="preserve">
+    <value>Đã tạo lối tắt trên màn hình nền</value>
+  </data>
+  <data name="StartGameMenu_RegisterProtocolForUrlShortcutHint" xml:space="preserve">
+    <value>Thao tác này tạo lối tắt định dạng URL, cần hỗ trợ registry để hệ thống nhận diện. Đăng ký URL protocol và tiếp tục?</value>
+  </data>
+  <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
+    <value>Hồ sơ tham số khởi chạy</value>
+  </data>
   <data name="GameLauncherSettingDialog_CommandLineArgument" xml:space="preserve">
     <value>Tham số dòng lệnh</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LaunchProfile" xml:space="preserve">
+    <value>Hồ sơ khởi chạy</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NewProfile" xml:space="preserve">
+    <value>Hồ sơ mới</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
+    <value>Tên</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
+    <value>Lệnh xem trước URL</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
+    <value>Mặc định</value>
+  </data>
+  <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
+    <value>Hiện chỉ hồ sơ đầu tiên có hiệu lực khi khởi chạy game</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DiscardUnsavedProfileChanges" xml:space="preserve">
+    <value>Hồ sơ hiện tại có thay đổi chưa lưu. Bỏ chúng?</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ThirdPartyToolTip" xml:space="preserve">
+    <value>Bạn có thể khởi chạy game qua chương trình khác. Sau khi chọn, tham số khởi chạy sẽ được thêm phía sau</value>
   </data>
   <data name="GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument" xml:space="preserve">
     <value>Xem thêm thông tin về tham số dòng lệnh.</value>
@@ -1845,6 +1867,24 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Starward, Bắt đầu thôi!</value>
   </data>
+  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
+    <value>Di chuyển và khởi động</value>
+  </data>
+  <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
+    <value>Phát hiện dữ liệu phiên bản cũ. Cần di chuyển sang thư mục dữ liệu mới trước khi tiếp tục. Vị trí dữ liệu hiện tại:</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectDataFolder" xml:space="preserve">
+    <value>Vui lòng chọn thư mục dữ liệu.</value>
+  </data>
+  <data name="WelcomeView_FolderNeedsAdminPermission" xml:space="preserve">
+    <value>Thư mục này cần quyền quản trị; sẽ yêu cầu nâng quyền khi di chuyển</value>
+  </data>
+  <data name="WelcomeView_AdminPermissionRequiredToMigrate" xml:space="preserve">
+    <value>Cần quyền quản trị để hoàn tất di chuyển dữ liệu</value>
+  </data>
+  <data name="SettingPage_TheSoftwareWillRestartToMigrateData" xml:space="preserve">
+    <value>Phần mềm sẽ khởi động lại để di chuyển dữ liệu đến vị trí mới.</value>
+  </data>
   <data name="GameSelector_ClickToSelectOrSwitchGame" xml:space="preserve">
     <value>Nhấp để chọn hoặc chuyển trò chơi.</value>
   </data>
@@ -1898,6 +1938,9 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="UIGFGachaService_ImportSuccessful" xml:space="preserve">
     <value>Nhập vào thành công.</value>
+  </data>
+  <data name="UIGF4GachaWindow_Uid0ImportFailed" xml:space="preserve">
+    <value>Nhập Uid {0} thất bại.</value>
   </data>
   <data name="UIGFGachaService_0FieldIsMissingInAGachaRecord" xml:space="preserve">
     <value>"{0}" dòng bị mất trong lịch sử gacha.</value>
@@ -2525,6 +2568,18 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="Common_Clear" xml:space="preserve">
     <value>Xoá</value>
   </data>
+  <data name="Common_SelectAll" xml:space="preserve">
+    <value>Chọn tất cả</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>Đặt lại</value>
+  </data>
+  <data name="Common_InvertSelection" xml:space="preserve">
+    <value>Đảo ngược lựa chọn</value>
+  </data>
+  <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
+    <value>Bộ lọc banner</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Thư mục xuất ra</value>
   </data>
@@ -2702,6 +2757,12 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="NoPermissionWindow_RestartAsAdministrator" xml:space="preserve">
     <value>Khởi Động Lại Với Quyền Quản Trị Viên</value>
   </data>
+  <data name="GameLauncherPage_PinToolbar" xml:space="preserve">
+    <value>Ghim thanh công cụ</value>
+  </data>
+  <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
+    <value>Bỏ ghim thanh công cụ</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>Quản lý màu sắc</value>
   </data>
@@ -2728,5 +2789,59 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="DX12IntroDialog_DX12EnhancedGraphics" xml:space="preserve">
     <value>DX12 Đồ họa nâng cao</value>
+  </data>
+  <data name="SignInButton_Title" xml:space="preserve">
+    <value>Điểm danh hàng ngày</value>
+  </data>
+  <data name="SignInButton_SignIn" xml:space="preserve">
+    <value>Điểm danh</value>
+  </data>
+  <data name="SignInButton_ReSign" xml:space="preserve">
+    <value>Điểm danh bù</value>
+  </data>
+  <data name="SignInButton_SignedToday" xml:space="preserve">
+    <value>Đã điểm danh hôm nay</value>
+  </data>
+  <data name="SignInButton_NotSignedToday" xml:space="preserve">
+    <value>Chưa điểm danh hôm nay</value>
+  </data>
+  <data name="SignInButton_SignedInForDays" xml:space="preserve">
+    <value>Đã điểm danh {0} ngày trong tháng này</value>
+  </data>
+  <data name="SignInButton_AutoSignIn" xml:space="preserve">
+    <value>Tự động điểm danh</value>
+  </data>
+  <data name="SignInButton_AutoSignInHint" xml:space="preserve">
+    <value>Tự động điểm danh độc lập cho từng game. Starward chỉ chạy điểm danh tự động 10 giây sau khi khởi động, xử lý theo thứ tự người dùng với độ trễ ngẫu nhiên 3–8 giây giữa các yêu cầu. Nếu xác minh thất bại, sẽ không thử lại đến lần khởi động tiếp theo.</value>
+  </data>
+  <data name="SignInButton_SignInSucceeded" xml:space="preserve">
+    <value>Điểm danh thành công, đã nhận thưởng</value>
+  </data>
+  <data name="SignInButton_AlreadySignedToday" xml:space="preserve">
+    <value>Bạn đã điểm danh hôm nay</value>
+  </data>
+  <data name="SignInButton_LoginExpired" xml:space="preserve">
+    <value>Đăng nhập hết hạn, vui lòng đăng nhập lại</value>
+  </data>
+  <data name="SignInButton_RiskControl" xml:space="preserve">
+    <value>Cần xác minh, vui lòng điểm danh thủ công trên app hoặc website</value>
+  </data>
+  <data name="SignInButton_NotEnoughCoin" xml:space="preserve">
+    <value>Không đủ xu để điểm danh bù</value>
+  </data>
+  <data name="SignInButton_ResignQuotaUsedUp" xml:space="preserve">
+    <value>Đã hết lượt điểm danh bù</value>
+  </data>
+  <data name="SignInButton_NoResignDate" xml:space="preserve">
+    <value>Không có ngày bỏ lỡ để điểm danh bù</value>
+  </data>
+  <data name="SignInButton_PleaseSignInFirst" xml:space="preserve">
+    <value>Vui lòng hoàn thành điểm danh hôm nay trước</value>
+  </data>
+  <data name="SignInButton_SignInFailed" xml:space="preserve">
+    <value>Điểm danh thất bại</value>
+  </data>
+  <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
+    <value>Điểm danh bù sẽ tiêu tốn {0} xu. Hiện bạn có {1}. Tiếp tục?</value>
   </data>
 </root>

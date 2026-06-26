@@ -1,110 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -159,8 +100,14 @@
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>平均</value>
   </data>
+  <data name="GachaStatsCard_Draggable" xml:space="preserve">
+    <value>可拖曳</value>
+  </data>
   <data name="GachaStatsCard_Stats" xml:space="preserve">
     <value>統計</value>
+  </data>
+  <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
+    <value>不歪機率</value>
   </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>很高興遇見你~</value>
@@ -309,6 +256,9 @@
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
     <value>更新記錄</value>
+  </data>
+  <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
+    <value>正在更新物品名稱…</value>
   </data>
   <data name="GachaLogPage_UpdateSavedURL" xml:space="preserve">
     <value>更新 (保存的 URL)</value>
@@ -1180,6 +1130,12 @@
   <data name="SettingPage_TestURLProtocol" xml:space="preserve">
     <value>測試 URL 協議</value>
   </data>
+  <data name="SettingPage_URLProtocolHelpDoc" xml:space="preserve">
+    <value>說明文件</value>
+  </data>
+  <data name="UrlProtocolDocWindow_Title" xml:space="preserve">
+    <value>URL 協定</value>
+  </data>
   <data name="LauncherPage_OpenInBrowser" xml:space="preserve">
     <value>在瀏覽器中開啟</value>
   </data>
@@ -1309,6 +1265,15 @@
   </data>
   <data name="FileSettingPage_ClearCache" xml:space="preserve">
     <value>清除快取</value>
+  </data>
+  <data name="FileSettingPage_Uninstall" xml:space="preserve">
+    <value>解除安裝</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstall" xml:space="preserve">
+    <value>解除安裝時刪除我的資料</value>
+  </data>
+  <data name="FileSettingPage_DeleteDataOnUninstallDesc" xml:space="preserve">
+    <value>從控制台解除安裝時，一併刪除資料資料夾與登錄項目。抽卡記錄、遊戲時長等僅存於本機的資料將無法復原。關閉後解除安裝將保留資料，便於重新安裝後續使用。</value>
   </data>
   <data name="DownloadGamePage_TheDownloadTaskOfGameIsAlreadyRunning" xml:space="preserve">
     <value>{0} 的下載排程已在執行。</value>
@@ -1684,8 +1649,65 @@
   <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
     <value>遊戲資源包</value>
   </data>
+  <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
+    <value>快速啟動</value>
+  </data>
+  <data name="StartGameMenu_LaunchProfileConfig" xml:space="preserve">
+    <value>啟動參數設定</value>
+  </data>
+  <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
+    <value>選擇啟動方式</value>
+  </data>
+  <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
+    <value>建立遊戲捷徑</value>
+  </data>
+  <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
+    <value>跟隨軟體設定</value>
+  </data>
+  <data name="StartGameMenu_Generate" xml:space="preserve">
+    <value>產生</value>
+  </data>
+  <data name="StartGameMenu_ShortcutIcon" xml:space="preserve">
+    <value>捷徑圖示</value>
+  </data>
+  <data name="StartGameMenu_UploadIcon" xml:space="preserve">
+    <value>上傳 .ico</value>
+  </data>
+  <data name="StartGameMenu_ShortcutCreated" xml:space="preserve">
+    <value>已在桌面建立捷徑</value>
+  </data>
+  <data name="StartGameMenu_RegisterProtocolForUrlShortcutHint" xml:space="preserve">
+    <value>此操作會建立 URL 格式的捷徑，需要登錄項目支援以便系統識別。是否註冊並繼續？</value>
+  </data>
+  <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
+    <value>啟動參數設定</value>
+  </data>
   <data name="GameLauncherSettingDialog_CommandLineArgument" xml:space="preserve">
     <value>指令行參數</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LaunchProfile" xml:space="preserve">
+    <value>設定檔</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NewProfile" xml:space="preserve">
+    <value>新增設定檔</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
+    <value>名稱</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
+    <value>URL 指令預覽</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
+    <value>預設設定</value>
+  </data>
+  <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
+    <value>目前僅第一個設定檔在啟動遊戲時生效</value>
+  </data>
+  <data name="GameLauncherSettingDialog_DiscardUnsavedProfileChanges" xml:space="preserve">
+    <value>目前的設定檔有未儲存的變更，是否捨棄？</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ThirdPartyToolTip" xml:space="preserve">
+    <value>可透過其他程式啟動遊戲，選擇之後會將啟動參數附加在其後</value>
   </data>
   <data name="GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument" xml:space="preserve">
     <value>檢視有關指令行參數的更多資訊。</value>
@@ -1845,6 +1867,24 @@
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Starward，啟動！</value>
   </data>
+  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
+    <value>遷移並啟動</value>
+  </data>
+  <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
+    <value>偵測到舊版本資料，升級後需要將其遷移到新的資料資料夾才能繼續使用。目前資料位置：</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectDataFolder" xml:space="preserve">
+    <value>請選擇一個資料資料夾</value>
+  </data>
+  <data name="WelcomeView_FolderNeedsAdminPermission" xml:space="preserve">
+    <value>該目錄需要系統管理員權限，遷移時將要求提升權限</value>
+  </data>
+  <data name="WelcomeView_AdminPermissionRequiredToMigrate" xml:space="preserve">
+    <value>需要系統管理員權限才能完成遷移</value>
+  </data>
+  <data name="SettingPage_TheSoftwareWillRestartToMigrateData" xml:space="preserve">
+    <value>軟體將重新啟動以把資料遷移到新位置。</value>
+  </data>
   <data name="GameSelector_ClickToSelectOrSwitchGame" xml:space="preserve">
     <value>點選此處選擇或切換遊戲。</value>
   </data>
@@ -1901,6 +1941,9 @@
   </data>
   <data name="UIGFGachaService_ImportSuccessful" xml:space="preserve">
     <value>匯入成功。</value>
+  </data>
+  <data name="UIGF4GachaWindow_Uid0ImportFailed" xml:space="preserve">
+    <value>Uid {0} 匯入失敗</value>
   </data>
   <data name="UIGFGachaService_0FieldIsMissingInAGachaRecord" xml:space="preserve">
     <value>存在沒有 {0} 資料的抽卡記錄。</value>
@@ -2528,6 +2571,18 @@
   <data name="Common_Clear" xml:space="preserve">
     <value>清除</value>
   </data>
+  <data name="Common_SelectAll" xml:space="preserve">
+    <value>全選</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>重設</value>
+  </data>
+  <data name="Common_InvertSelection" xml:space="preserve">
+    <value>反向選取</value>
+  </data>
+  <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
+    <value>卡池篩選</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>輸出資料夾</value>
   </data>
@@ -2705,6 +2760,12 @@
   <data name="NoPermissionWindow_RestartAsAdministrator" xml:space="preserve">
     <value>以系統管理員身分重新啟動</value>
   </data>
+  <data name="GameLauncherPage_PinToolbar" xml:space="preserve">
+    <value>釘選</value>
+  </data>
+  <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
+    <value>取消釘選</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>色彩管理</value>
   </data>
@@ -2731,5 +2792,59 @@
   </data>
   <data name="DX12IntroDialog_DX12EnhancedGraphics" xml:space="preserve">
     <value>DX12 增強畫質</value>
+  </data>
+  <data name="SignInButton_Title" xml:space="preserve">
+    <value>每日簽到</value>
+  </data>
+  <data name="SignInButton_SignIn" xml:space="preserve">
+    <value>簽到</value>
+  </data>
+  <data name="SignInButton_ReSign" xml:space="preserve">
+    <value>補簽</value>
+  </data>
+  <data name="SignInButton_SignedToday" xml:space="preserve">
+    <value>今日已簽到</value>
+  </data>
+  <data name="SignInButton_NotSignedToday" xml:space="preserve">
+    <value>今日待簽到</value>
+  </data>
+  <data name="SignInButton_SignedInForDays" xml:space="preserve">
+    <value>本月已累計簽到 {0} 天</value>
+  </data>
+  <data name="SignInButton_AutoSignIn" xml:space="preserve">
+    <value>自動簽到</value>
+  </data>
+  <data name="SignInButton_AutoSignInHint" xml:space="preserve">
+    <value>每個遊戲的「自動簽到」相互獨立，Starward 只在軟體啟動後十秒開始批次處理「自動簽到」，按使用者順序進行，並且在簽到請求之間會有 3~8 秒的隨機延遲，盡量模擬真實的操作。在觸發驗證導致失敗的情況下，不進行重試直至下次軟體啟動。</value>
+  </data>
+  <data name="SignInButton_SignInSucceeded" xml:space="preserve">
+    <value>簽到成功，獎勵已領取</value>
+  </data>
+  <data name="SignInButton_AlreadySignedToday" xml:space="preserve">
+    <value>今日已簽到</value>
+  </data>
+  <data name="SignInButton_LoginExpired" xml:space="preserve">
+    <value>登入已過期，請重新登入帳號</value>
+  </data>
+  <data name="SignInButton_RiskControl" xml:space="preserve">
+    <value>觸發驗證，請前往 App 或網頁手動簽到</value>
+  </data>
+  <data name="SignInButton_NotEnoughCoin" xml:space="preserve">
+    <value>補簽貨幣不足</value>
+  </data>
+  <data name="SignInButton_ResignQuotaUsedUp" xml:space="preserve">
+    <value>補簽次數已用盡</value>
+  </data>
+  <data name="SignInButton_NoResignDate" xml:space="preserve">
+    <value>沒有可補簽的日期</value>
+  </data>
+  <data name="SignInButton_PleaseSignInFirst" xml:space="preserve">
+    <value>請先完成今日簽到</value>
+  </data>
+  <data name="SignInButton_SignInFailed" xml:space="preserve">
+    <value>簽到失敗</value>
+  </data>
+  <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
+    <value>補簽將消耗 {0} 補簽貨幣，目前擁有 {1}。是否繼續？</value>
   </data>
 </root>
