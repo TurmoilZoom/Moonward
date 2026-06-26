@@ -20,7 +20,6 @@ using Starward.Features.Setting;
 using Starward.Features.Update;
 using Starward.Helpers;
 using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,7 +76,6 @@ public sealed partial class MainView : UserControl
 
     private async void MainView_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        CheckSystemProxy();
         HotkeyManager.InitializeHotkey(this.XamlRoot.GetWindowHandle());
         _ = CheckUpdateOrShowRecentUpdateContentAsync();
         // 启动时为三个游戏按当前语言确保物品名称映射缓存；首次启动/更新后会一次性迁移存量记录名称。
@@ -320,22 +318,6 @@ public sealed partial class MainView : UserControl
 
     #endregion
 
-
-
-
-    private async void CheckSystemProxy()
-    {
-        try
-        {
-            await Task.Delay(1500);
-            Uri? proxy = HttpClient.DefaultProxy.GetProxy(new Uri("https://github.com"));
-            if (proxy is not null)
-            {
-                InAppToast.MainWindow?.Information(Lang.MainView_CheckSystemProxy_SystemProxyIsEnabled, proxy.ToString(), 5000);
-            }
-        }
-        catch { }
-    }
 
 
 }
