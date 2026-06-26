@@ -25,8 +25,6 @@
                        FontSize="24"
                        FontWeight="Bold"
                        Text="Starward" />
-            <TextBlock Margin="0,4,0,0" Text="Developed by Scighost, all rights reserved." />
-
 
             <!--  当前版本  -->
             <StackPanel Margin="0,12,0,0"

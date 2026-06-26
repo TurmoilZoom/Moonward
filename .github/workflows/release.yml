@@ -58,6 +58,8 @@ jobs:
           Write-Host "::group::Publish $channel"
           dotnet publish src/Starward/Starward.csproj -c Release -r "win-$arch" -p:Platform=$arch -p:Version=$version -o $pubDir
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed for $arch" }
+          # MIT：发行包须附带完整许可与版权声明（见仓库根目录 LICENSE）。
+          Copy-Item LICENSE $pubDir/LICENSE
           Write-Host "::endgroup::"
 
           # 拉取上一版本作为增量差分基准；首个版本无历史，失败可忽略。
@@ -75,7 +77,8 @@ jobs:
             --packDir $pubDir `
             --mainExe Starward.exe `
             --packTitle Starward `
-            --packAuthors Scighost `
+            --packAuthors "Scighost,TurmoilZoom" `
+            --instLicense "$pubDir/LICENSE" `
             --icon src/logo.ico `
             --channel $channel `
             --delta BestSpeed
