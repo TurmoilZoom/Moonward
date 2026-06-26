@@ -2852,4 +2852,58 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="DX12IntroDialog_DX12EnhancedGraphics" xml:space="preserve">
     <value>DX12 Enhanced Graphics</value>
   </data>
+  <data name="SignInButton_Title" xml:space="preserve">
+    <value>Daily Check-in</value>
+  </data>
+  <data name="SignInButton_SignIn" xml:space="preserve">
+    <value>Check In</value>
+  </data>
+  <data name="SignInButton_ReSign" xml:space="preserve">
+    <value>Resign</value>
+  </data>
+  <data name="SignInButton_SignedToday" xml:space="preserve">
+    <value>Signed in today</value>
+  </data>
+  <data name="SignInButton_NotSignedToday" xml:space="preserve">
+    <value>Not signed in</value>
+  </data>
+  <data name="SignInButton_SignedInForDays" xml:space="preserve">
+    <value>Signed in for {0} day(s) this month</value>
+  </data>
+  <data name="SignInButton_AutoSignIn" xml:space="preserve">
+    <value>Auto check-in</value>
+  </data>
+  <data name="SignInButton_AutoSignInHint" xml:space="preserve">
+    <value>Auto check-in is independent for each game. Starward only runs batch auto check-in 10 seconds after startup, processing roles in order with a random 3–8 second delay between requests to mimic real usage. If verification is triggered and check-in fails, it will not retry until the next startup.</value>
+  </data>
+  <data name="SignInButton_SignInSucceeded" xml:space="preserve">
+    <value>Reward claimed successfully</value>
+  </data>
+  <data name="SignInButton_AlreadySignedToday" xml:space="preserve">
+    <value>You have already checked in today</value>
+  </data>
+  <data name="SignInButton_LoginExpired" xml:space="preserve">
+    <value>Login expired, please sign in again</value>
+  </data>
+  <data name="SignInButton_RiskControl" xml:space="preserve">
+    <value>Verification required, please check in via the app or website</value>
+  </data>
+  <data name="SignInButton_NotEnoughCoin" xml:space="preserve">
+    <value>Not enough coins to resign</value>
+  </data>
+  <data name="SignInButton_ResignQuotaUsedUp" xml:space="preserve">
+    <value>Resign quota has been used up</value>
+  </data>
+  <data name="SignInButton_NoResignDate" xml:space="preserve">
+    <value>No missed day available to resign</value>
+  </data>
+  <data name="SignInButton_PleaseSignInFirst" xml:space="preserve">
+    <value>Please complete today's check-in first</value>
+  </data>
+  <data name="SignInButton_SignInFailed" xml:space="preserve">
+    <value>Check-in failed</value>
+  </data>
+  <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
+    <value>Resigning will cost {0} coin(s). You currently have {1}. Continue?</value>
+  </data>
 </root>

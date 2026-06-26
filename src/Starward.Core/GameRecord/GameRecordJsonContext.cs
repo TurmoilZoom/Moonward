@@ -16,6 +16,7 @@ using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
 using Starward.Core.GameRecord.ZZZ.GachaRecord;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
+using Starward.Core.GameRecord.SignIn;
 using Starward.Core.GameRecord.ZZZ.ThresholdSimulation;
 using Starward.Core.GameRecord.ZZZ.UpgradeGuide;
 using Starward.Core.JsonConverter;
@@ -52,7 +53,12 @@ namespace Starward.Core.GameRecord;
 [JsonSerializable(typeof(miHoYoApiWrapper<ZZZGachaRecordData>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<BH3DailyNote>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ThresholdSimulationAbstractInfo>))]
-[JsonSerializable(typeof(miHoYoApiWrapper<ThresholdSimulationDetailInfo>))]
+// 每日签到（luna/sol）请求与响应类型
+[JsonSerializable(typeof(miHoYoApiWrapper<SignInRewardInfo>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<SignInReward>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<SignInResignInfo>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<SignInResult>))]
+[JsonSerializable(typeof(SignInPostBody))]
 [JsonSerializable(typeof(DateTimeObjectJsonConverter.DateTimeObject))]
 internal partial class GameRecordJsonContext : JsonSerializerContext
 {

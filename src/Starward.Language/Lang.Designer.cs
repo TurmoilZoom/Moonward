@@ -8164,5 +8164,167 @@ namespace Starward.Language {
                 return ResourceManager.GetString("ZZZGachaService_ImportSignalSearchRecordsSuccessfully", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Daily Check-in 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_Title {
+            get {
+                return ResourceManager.GetString("SignInButton_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Check In 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_SignIn {
+            get {
+                return ResourceManager.GetString("SignInButton_SignIn", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Resign 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_ReSign {
+            get {
+                return ResourceManager.GetString("SignInButton_ReSign", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Signed in today 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_SignedToday {
+            get {
+                return ResourceManager.GetString("SignInButton_SignedToday", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Not signed in 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_NotSignedToday {
+            get {
+                return ResourceManager.GetString("SignInButton_NotSignedToday", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Signed in for {0} day(s) this month 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_SignedInForDays {
+            get {
+                return ResourceManager.GetString("SignInButton_SignedInForDays", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Auto check-in 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_AutoSignIn {
+            get {
+                return ResourceManager.GetString("SignInButton_AutoSignIn", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Auto check-in is independent for each game. Starward only runs batch auto check-in 10 seconds after startup, processing roles in order with a random 3–8 second delay between requests to mimic real usage. If verification is triggered and check-in fails, it will not retry until the next startup. 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_AutoSignInHint {
+            get {
+                return ResourceManager.GetString("SignInButton_AutoSignInHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Reward claimed successfully 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_SignInSucceeded {
+            get {
+                return ResourceManager.GetString("SignInButton_SignInSucceeded", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 You have already checked in today 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_AlreadySignedToday {
+            get {
+                return ResourceManager.GetString("SignInButton_AlreadySignedToday", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Login expired, please sign in again 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_LoginExpired {
+            get {
+                return ResourceManager.GetString("SignInButton_LoginExpired", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Verification required 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_RiskControl {
+            get {
+                return ResourceManager.GetString("SignInButton_RiskControl", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Not enough coins to resign 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_NotEnoughCoin {
+            get {
+                return ResourceManager.GetString("SignInButton_NotEnoughCoin", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Resign quota has been used up 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_ResignQuotaUsedUp {
+            get {
+                return ResourceManager.GetString("SignInButton_ResignQuotaUsedUp", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No missed day available to resign 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_NoResignDate {
+            get {
+                return ResourceManager.GetString("SignInButton_NoResignDate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Please complete today's check-in first 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_PleaseSignInFirst {
+            get {
+                return ResourceManager.GetString("SignInButton_PleaseSignInFirst", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Check-in failed 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_SignInFailed {
+            get {
+                return ResourceManager.GetString("SignInButton_SignInFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Resigning will cost {0} coin(s). You currently have {1}. Continue? 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_ReSignConfirmContent {
+            get {
+                return ResourceManager.GetString("SignInButton_ReSignConfirmContent", resourceCulture);
+            }
+        }
     }
 }

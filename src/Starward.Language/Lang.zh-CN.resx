@@ -2852,4 +2852,58 @@
   <data name="DX12IntroDialog_DX12EnhancedGraphics" xml:space="preserve">
     <value>DX12 增强画质</value>
   </data>
+  <data name="SignInButton_Title" xml:space="preserve">
+    <value>每日签到</value>
+  </data>
+  <data name="SignInButton_SignIn" xml:space="preserve">
+    <value>签到</value>
+  </data>
+  <data name="SignInButton_ReSign" xml:space="preserve">
+    <value>补签</value>
+  </data>
+  <data name="SignInButton_SignedToday" xml:space="preserve">
+    <value>今日已签到</value>
+  </data>
+  <data name="SignInButton_NotSignedToday" xml:space="preserve">
+    <value>今日待签到</value>
+  </data>
+  <data name="SignInButton_SignedInForDays" xml:space="preserve">
+    <value>本月已累计签到 {0} 天</value>
+  </data>
+  <data name="SignInButton_AutoSignIn" xml:space="preserve">
+    <value>自动签到</value>
+  </data>
+  <data name="SignInButton_AutoSignInHint" xml:space="preserve">
+    <value>每个游戏的「自动签到」相互独立，Starward只在软件启动后十秒开始批量处理「自动签到」，按用户顺序进行，并且在签到请求之间会有3~8秒的随机延时，尽量模拟真实的操作。在触发验证导致失败的情况下，不作重试直至下次软件启动。</value>
+  </data>
+  <data name="SignInButton_SignInSucceeded" xml:space="preserve">
+    <value>签到成功，奖励已领取</value>
+  </data>
+  <data name="SignInButton_AlreadySignedToday" xml:space="preserve">
+    <value>今日已签到</value>
+  </data>
+  <data name="SignInButton_LoginExpired" xml:space="preserve">
+    <value>登录已过期，请重新登录账号</value>
+  </data>
+  <data name="SignInButton_RiskControl" xml:space="preserve">
+    <value>触发验证，请前往 App 或网页手动签到</value>
+  </data>
+  <data name="SignInButton_NotEnoughCoin" xml:space="preserve">
+    <value>补签货币不足</value>
+  </data>
+  <data name="SignInButton_ResignQuotaUsedUp" xml:space="preserve">
+    <value>补签次数已用尽</value>
+  </data>
+  <data name="SignInButton_NoResignDate" xml:space="preserve">
+    <value>没有可补签的日期</value>
+  </data>
+  <data name="SignInButton_PleaseSignInFirst" xml:space="preserve">
+    <value>请先完成今日签到</value>
+  </data>
+  <data name="SignInButton_SignInFailed" xml:space="preserve">
+    <value>签到失败</value>
+  </data>
+  <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
+    <value>补签将消耗 {0} 补签货币，当前拥有 {1}。是否继续？</value>
+  </data>
 </root>

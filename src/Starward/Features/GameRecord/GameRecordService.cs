@@ -19,6 +19,7 @@ using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
 using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
 using Starward.Core.GameRecord.ZZZ.GachaRecord;
+using Starward.Core.GameRecord.SignIn;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Features.Database;
@@ -159,6 +160,18 @@ internal class GameRecordService
     {
         using var dapper = DatabaseService.CreateConnection();
         var list = dapper.Query<GameRecordRole>("SELECT * FROM GameRecordRole WHERE GameBiz = @gameBiz;", new { gameBiz });
+        return list.ToList();
+    }
+
+
+
+    /// <summary>
+    /// 数据库中全部游戏角色（跨所有账号 cookie 与游戏），按账号(cookie)再按游戏排序，供自动签到批量遍历。
+    /// </summary>
+    public List<GameRecordRole> GetAllGameRoles()
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        var list = dapper.Query<GameRecordRole>("SELECT * FROM GameRecordRole ORDER BY Cookie, GameBiz;");
         return list.ToList();
     }
 
@@ -1414,6 +1427,94 @@ internal class GameRecordService
     }
 
 
+
+
+    #endregion
+
+
+
+
+    #region Sign In
+
+
+    /// <summary>
+    /// 签到前准备：按角色区服切换 CN/OS Client，国服同步设备指纹。
+    /// </summary>
+    /// <param name="role">游戏角色，用于判断 global / cn。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    private async Task PrepareSignInClientAsync(GameRecordRole role, CancellationToken cancellationToken)
+    {
+        IsHoyolab = role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false;
+        if (!IsHoyolab)
+        {
+            await UpdateDeviceFpAsync(cancellationToken: cancellationToken);
+        }
+    }
+
+
+    /// <summary>
+    /// 本月签到奖励列表。
+    /// </summary>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>当月每日奖励。</returns>
+    public async Task<SignInReward> GetSignInRewardAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    {
+        await PrepareSignInClientAsync(role, cancellationToken);
+        return await _gameRecordClient.GetSignInRewardAsync(role, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 当前签到状态。
+    /// </summary>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>已签天数、今日是否已签等。</returns>
+    public async Task<SignInRewardInfo> GetSignInInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    {
+        await PrepareSignInClientAsync(role, cancellationToken);
+        return await _gameRecordClient.GetSignInInfoAsync(role, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 补签信息。
+    /// </summary>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>补签次数与货币消耗。</returns>
+    public async Task<SignInResignInfo> GetSignInResignInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    {
+        await PrepareSignInClientAsync(role, cancellationToken);
+        return await _gameRecordClient.GetSignInResignInfoAsync(role, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 执行今日签到。
+    /// </summary>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>签到结果。</returns>
+    public async Task<SignInResult> SignInAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    {
+        await PrepareSignInClientAsync(role, cancellationToken);
+        return await _gameRecordClient.SignInAsync(role, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 执行补签。
+    /// </summary>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>补签结果。</returns>
+    public async Task<SignInResult> ReSignInAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    {
+        await PrepareSignInClientAsync(role, cancellationToken);
+        return await _gameRecordClient.ReSignInAsync(role, cancellationToken);
+    }
 
 
     #endregion

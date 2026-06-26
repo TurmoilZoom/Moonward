@@ -77,12 +77,8 @@
 		<Content Update="Assets\**">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
-		<!--  游戏快捷方式图标：src 目录下的 .ico 复制到输出 Assets\Image，供 GameShortcutService 给 .url 快捷方式设置图标  -->
-		<Content Include="..\bh3.ico;..\hk4e.ico;..\hkrpg.ico;..\nap.ico">
-			<Link>Assets\Image\%(Filename)%(Extension)</Link>
+		<!--  签到图标、游戏快捷方式 .ico 等本地静态资源，输出到 static\  -->
+		<Content Include="static\**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>

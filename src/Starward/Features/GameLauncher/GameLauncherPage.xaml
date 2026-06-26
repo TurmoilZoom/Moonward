@@ -12,6 +12,7 @@
              xmlns:sfc="using:Starward.Features.CloudGame"
              xmlns:sfg="using:Starward.Features.GameInstall"
              xmlns:sfgd="using:Starward.Features.GameRecord.DailyNote"
+             xmlns:sfgs="using:Starward.Features.GameRecord.SignIn"
              xmlns:sfp="using:Starward.Features.PlayTime"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -709,6 +710,10 @@
             <sfgd:DailyNoteButton Width="40"
                                   Height="40"
                                   CurrentGameId="{x:Bind CurrentGameId}" />
+            <!--  每日签到：图标按钮 + Flyout 卡片（手动签到 / 补签 / 自动签到开关）  -->
+            <sfgs:SignInButton Width="40"
+                               Height="40"
+                               CurrentGameId="{x:Bind CurrentGameId}" />
             <!--  通行证授权登录  -->
             <local:GameAuthLoginButton Width="40"
                                        Height="40"

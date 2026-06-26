@@ -11,6 +11,7 @@ using Starward.Features.Gacha;
 using Starward.Features.GameLauncher;
 using Starward.Features.GamepadControl;
 using Starward.Features.GameRecord;
+using Starward.Features.GameRecord.SignIn;
 using Starward.Features.GameSetting;
 using Starward.Features.RPC;
 using Starward.Features.Screenshot;
@@ -81,6 +82,8 @@ public sealed partial class MainView : UserControl
         _ = CheckUpdateOrShowRecentUpdateContentAsync();
         // 启动时为三个游戏按当前语言确保物品名称映射缓存；首次启动/更新后会一次性迁移存量记录名称。
         _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().EnsureCurrentLanguageOnStartupAsync());
+        // 启动后批量为所有账号的每个游戏静默签到（逐个请求、请求间随机延时，模拟真人节奏）。
+        _ = Task.Run(() => AppConfig.GetService<AutoSignInService>().RunStartupBatchAsync());
         AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
         if (AppConfig.EnableGamepadController)
         {

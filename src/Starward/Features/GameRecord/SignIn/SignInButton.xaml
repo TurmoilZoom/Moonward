@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--  每日签到入口：
+      - 外层 Button 按游戏显示不同图标（x:Load 按需加载，绝区零为动图）
+      - Flyout 卡片：角色信息、签到天数、7 列奖励日历、错误提示、自动签到开关、签到/补签按钮  -->
+<UserControl x:Class="Starward.Features.GameRecord.SignIn.SignInButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
+             xmlns:local="using:Starward.Features.GameRecord.SignIn"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <!--  图标按钮：点击展开签到 Flyout  -->
+    <Button x:Name="Button_SignIn"
+            Padding="0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            BorderThickness="0"
+            CornerRadius="8"
+            Loaded="SignInButton_Loaded"
+            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+            ToolTipService.ToolTip="{x:Bind lang:Lang.SignInButton_Title}"
+            Unloaded="SignInButton_Unloaded">
+
+        <!--  按 CurrentGameId 仅加载对应游戏的签到图标  -->
+        <Grid>
+            <Image x:Name="Image_Genshin"
+                   Margin="6"
+                   x:Load="{x:Bind IsGenshinEnabled}"
+                   Source="ms-appx:///static/hk4e_signin.webp" />
+            <Image x:Name="Image_StarRail"
+                   Margin="6"
+                   x:Load="{x:Bind IsStarRailEnabled}"
+                   Source="ms-appx:///static/hkrpg_signin.webp" />
+            <Image x:Name="Image_ZZZ"
+                   Margin="6"
+                   x:Load="{x:Bind IsZZZEnabled}"
+                   Source="ms-appx:///static/nap_signin.gif" />
+            <Image x:Name="Image_BH3"
+                   Margin="6"
+                   x:Load="{x:Bind IsBH3Enabled}"
+                   Source="ms-appx:///static/bh3_signin.webp" />
+        </Grid>
+
+        <Button.Flyout>
+            <!--  签到详情卡片，左侧对齐展开  -->
+            <Flyout Opened="Flyout_SignIn_Opened" Placement="LeftEdgeAlignedTop">
+                <Grid Width="320" RowSpacing="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  角色信息 + 刷新  -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <sc:CachedImage Width="40"
+                                        Height="40"
+                                        CornerRadius="40"
+                                        Source="{x:Bind GameRecordRole.HeadIcon}" />
+                        <StackPanel Grid.Column="1"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind GameRecordRole.Nickname}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                <Run Text="{x:Bind GameRecordRole.RegionName}" />
+                                <Run Text="" />
+                                <Run Text="{x:Bind GameRecordRole.Uid}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <Button Grid.Column="2"
+                                Padding="6"
+                                VerticalAlignment="Top"
+                                BorderThickness="0"
+                                Command="{x:Bind RefreshSignInStatusCommand}"
+                                CornerRadius="4"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Refresh}">
+                            <FontIcon FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE72C;" />
+                        </Button>
+                    </Grid>
+
+
+                    <!--  签到天数 + 今日状态  -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="13"
+                                   Text="{x:Bind TotalSignDaysHint}" />
+
+                        <!--  今日已签  -->
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Spacing="4"
+                                    Visibility="{x:Bind IsTodaySigned, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <FontIcon VerticalAlignment="Center"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                      Glyph="&#xE930;" />
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                       Text="{x:Bind lang:Lang.SignInButton_SignedToday}" />
+                        </StackPanel>
+
+                        <!--  今日待签  -->
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                   Text="{x:Bind lang:Lang.SignInButton_NotSignedToday}"
+                                   Visibility="{x:Bind IsTodaySigned, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                    </Grid>
+
+
+                    <!--  奖励日历  -->
+                    <ScrollViewer Grid.Row="2"
+                                  MaxHeight="240"
+                                  HorizontalScrollMode="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsRepeater ItemsSource="{x:Bind Awards}">
+                            <ItemsRepeater.Layout>
+                                <UniformGridLayout MaximumRowsOrColumns="7"
+                                                   MinColumnSpacing="2"
+                                                   MinRowSpacing="2"
+                                                   Orientation="Horizontal" />
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="local:SignInAwardView">
+                                    <Grid Padding="2"
+                                          RowSpacing="2"
+                                          ToolTipService.ToolTip="{x:Bind Name}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Grid Width="36" Height="36">
+                                            <sc:CachedImage Width="32"
+                                                            Height="32"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Source="{x:Bind Icon}" />
+                                            <StackPanel HorizontalAlignment="Right"
+                                                        VerticalAlignment="Bottom"
+                                                        Orientation="Horizontal">
+                                                <TextBlock FontSize="9" Text="×" />
+                                                <TextBlock FontSize="9" Text="{x:Bind Count}" />
+                                            </StackPanel>
+                                            <!--  已领取遮罩  -->
+                                            <Border Background="#99000000"
+                                                    CornerRadius="4"
+                                                    Visibility="{x:Bind IsClaimed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <FontIcon HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      FontSize="16"
+                                                      Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                      Glyph="&#xE930;"
+                                                      Visibility="{x:Bind IsClaimed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="1"
+                                                   HorizontalAlignment="Center"
+                                                   FontSize="10"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   Text="{x:Bind Day}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+
+
+                    <!--  错误信息  -->
+                    <TextBlock Grid.Row="3"
+                               HorizontalAlignment="Center"
+                               FontSize="12"
+                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                               Text="{x:Bind ErrorMessage}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind ErrorMessage, Converter={StaticResource WhiteSpaceStringToVisibilityConverter}}" />
+
+
+                    <!--  自动签到开关  -->
+                    <StackPanel Grid.Row="4"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon VerticalAlignment="Center"
+                                      FontSize="12"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE9CE;">
+                                <ToolTipService.ToolTip>
+                                    <ToolTip MaxWidth="320">
+                                        <TextBlock Text="{x:Bind lang:Lang.SignInButton_AutoSignInHint}"
+                                                   TextWrapping="Wrap" />
+                                    </ToolTip>
+                                </ToolTipService.ToolTip>
+                            </FontIcon>
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="13"
+                                       Text="{x:Bind lang:Lang.SignInButton_AutoSignIn}" />
+                        </StackPanel>
+                        <ToggleSwitch MinWidth="0"
+                                      IsOn="{x:Bind AutoSignInEnabled, Mode=TwoWay}"
+                                      OffContent=""
+                                      OnContent="" />
+                    </StackPanel>
+
+
+                    <!--  签到 / 补签按钮  -->
+                    <Grid Grid.Row="5" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Button HorizontalAlignment="Stretch"
+                                Command="{x:Bind SignInCommand}"
+                                Content="{x:Bind lang:Lang.SignInButton_SignIn}"
+                                IsEnabled="{x:Bind IsTodaySigned, Converter={StaticResource BoolReversedConverter}}"
+                                Style="{ThemeResource AccentButtonStyle}" />
+                        <Button Grid.Column="1"
+                                HorizontalAlignment="Stretch"
+                                Command="{x:Bind ReSignInCommand}"
+                                Content="{x:Bind lang:Lang.SignInButton_ReSign}" />
+                    </Grid>
+
+                </Grid>
+            </Flyout>
+        </Button.Flyout>
+
+    </Button>
+
+</UserControl>

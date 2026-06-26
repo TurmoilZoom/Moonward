@@ -85,7 +85,7 @@ public static class GameShortcutService
 
 
     /// <summary>
-    /// 该游戏快捷方式使用的 .ico 图标（src 目录下的 bh3/hk4e/hkrpg/nap.ico，随程序部署在 exe 同目录 Assets\Image 下）。
+    /// 该游戏快捷方式使用的 .ico 图标（<c>static\bh3/hk4e/hkrpg/nap.ico</c>，随程序部署在 exe 同目录 <c>static\</c> 下）。
     /// 仅四个主要游戏有对应 .ico，其它返回 null（快捷方式回退到 Starward 程序图标）。
     /// </summary>
     public static IconSource? GetGameIconSource(GameBiz biz)
@@ -107,7 +107,7 @@ public static class GameShortcutService
         {
             return null;
         }
-        string path = Path.Combine(dir, "Assets", "Image", fileName);
+        string path = Path.Combine(dir, "static", fileName);
         return File.Exists(path) ? new IconSource { Path = path, Index = 0 } : null;
     }
 

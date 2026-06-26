@@ -455,6 +455,27 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 每日自动签到（软件启动后静默批量签到），按游戏区分，默认关闭。
+    /// </summary>
+    /// <param name="biz">游戏业务线，如 hk4e_cn。</param>
+    /// <returns>该游戏是否已开启自动签到。</returns>
+    public static bool GetAutoSignInEnabled(GameBiz biz)
+    {
+        return GetValue<bool>(default, $"auto_sign_in_enabled_{biz}");
+    }
+
+    /// <summary>
+    /// 设置指定游戏的自动签到开关。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">是否开启。</param>
+    public static void SetAutoSignInEnabled(GameBiz biz, bool value)
+    {
+        SetValue(value, $"auto_sign_in_enabled_{biz}");
+    }
+
+
+    /// <summary>
     /// 获取指定游戏的安装路径。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>

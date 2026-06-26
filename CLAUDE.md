@@ -60,17 +60,20 @@ dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeI
 
 | 层 | 位置 | 职责 |
 |----|------|------|
-| DTO | `Core/GameRecord/<功能>/*.cs` | API 请求/响应模型、返回码枚举 |
+| DTO | `Core/GameRecord/<功能>/*.cs` | API 请求/响应模型、返回码枚举（如 `SignInReturnCode`） |
+| 活动配置 | `Core/GameRecord/<功能>/*ActivityConfig.cs`（按需） | 按 `GameBiz.Game` + 是否国际服映射 `act_id`/接口主机/请求头等随版本轮换的常量；**给某游戏开此功能 = 在 `FromGame(...)` 加一条** |
 | JsonContext | `Core/GameRecord/GameRecordJsonContext.cs` | **新 DTO 类型必须在此注册**（源生成序列化） |
-| Client | `GameRecordClient` 基类 + `HyperionClient`(CN) / `HoyolabClient`(OS) | HTTP、签名、序列化；**CN/OS 平台差异放在各自子类**，不要散落到 UI |
-| Service 门面 | `Features/GameRecord/GameRecordService.cs` | 按区服选 CN/OS Client |
+| Client | `GameRecordClient` 基类 + `HyperionClient`(CN) / `HoyolabClient`(OS) | HTTP、签名、序列化；**CN/OS 平台差异放在各自子类**（如 `AddSignInPlatformHeaders` 抽象方法），不要散落到 UI |
+| Service 门面 | `Features/GameRecord/GameRecordService.cs` | 按区服选 CN/OS Client（如 `PrepareSignInClientAsync`） |
 | 业务服务 | `Features/GameRecord/<功能>/<功能>Service.cs` | 缓存、错误映射、结构化结果 |
+| 后台任务 | `Features/GameRecord/<功能>/Auto<功能>Service.cs`（按需） | 自动执行（如自动签到，按游戏开关 + 失败冷却去重） |
 | UI | `Features/.../<功能>Button.xaml` 等，挂到 `GameLauncherPage` | 用户交互 |
 | 开关 | `GameFeatureConfig.Support<功能>` | 按 `GameBiz` 启用 |
+| 设置 | `AppConfig.Setting.cs` | 按游戏区分用 `Get<功能>(biz)`/`Set<功能>(biz)`（如 `GetAutoSignInEnabled(biz)`） |
 | DI | `AppConfig.ServiceProvider.cs` | 注册服务 |
 | 文案 | `Lang.resx` | 见“本地化” |
 
-API 客户端要点：走 `GameRecordClient.CommonSendAsync`；签名用 `CreateSecret()`（Gen1/LK2）；JSON 一律用 `*JsonContext.Default`，**不要无 context 反序列化**。
+API 客户端要点：走 `GameRecordClient.CommonSendAsync`；签名用 `CreateSecret()`（Gen1/LK2）；JSON 一律用 `*JsonContext.Default`，**不要无 context 反序列化**。`SignInActivityConfig` 里 **nap（绝区零）/ bh3（崩坏3）的 `act_id` 为最佳猜测**，可能需上线后用真实账号核对（仅改该文件即可）。
 
 ### 数据库 —— SQLite + Dapper，追加式迁移
 `Features/Database/DatabaseService.cs`：
@@ -103,6 +106,15 @@ API 客户端要点：走 `GameRecordClient.CommonSendAsync`；签名用 `Create
 - 跨组件通信用 `CommunityToolkit.Mvvm.Messaging`；日志用 `ILogger<T>`。
 - **x:Bind 绑定的 `ObservableObject` 属性必须在 UI 线程赋值**；在 `ConfigureAwait(false)` / `Task.Run` 内赋值会抛 `COMException 0x8001010E` 且从 catch 逃逸（典型坑：服务里 `Task.Run` 包 DB 工作返回值，`await` 后再回 UI 线程赋值）。
 - **不要升级 `CommunityToolkit.WinUI.Controls.Segmented`**（csproj 有注释说明，新版有回归）。
+
+## 代码注释规范
+
+撰写代码时按规范**适量**添加注释（与现有风格一致，不给一目了然的代码堆砌冗余注释）：
+
+- **每个方法都要有方法注释**：公开/私有一律用 XML 文档注释 `/// <summary>` 说明用途；有参数用 `<param name="xxx">` 逐个说明输入含义、约束（可空、单位、取值范围等）；有返回值用 `<returns>` 说明输出含义；会抛异常的用 `<exception>`。
+- **把输入输出参数说明清楚**：参数和返回值的语义、边界、null/default 行为要写明，调用方不必读实现就能正确使用。
+- **方法内部关键位置加行内注释**：不显然的分支、平台差异、风控/签名、线程切换、易踩的坑（如「必须在 UI 线程赋值」）等关键步骤要用 `//` 注释说明**为什么**这么做，而非复述代码做了什么。
+- 注释语言与文件现有注释保持一致（多为中文）；注释只解释意图与约束，**用户可见字符串仍走 `Lang.resx`，不要硬编码到注释或代码里**。
 
 ## 硬性约束（禁止）
 

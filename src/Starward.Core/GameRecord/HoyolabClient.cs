@@ -10,6 +10,7 @@ using Starward.Core.GameRecord.StarRail.DailyNote;
 using Starward.Core.GameRecord.StarRail.ForgottenHall;
 using Starward.Core.GameRecord.StarRail.PureFiction;
 using Starward.Core.GameRecord.StarRail.SimulatedUniverse;
+using Starward.Core.GameRecord.SignIn;
 using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
 using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
@@ -82,6 +83,24 @@ public class HoyolabClient : GameRecordClient
         data.User.IsHoyolab = true;
         data.User.Cookie = cookie;
         return data.User;
+    }
+
+
+
+
+    /// <summary>
+    /// HoYoLAB 签到请求头：不需要 DS / signgame，仅设备指纹；语言由 CommonSendAsync 统一附加。
+    /// </summary>
+    /// <param name="request">待发送的 HTTP 请求。</param>
+    /// <param name="config">签到活动配置（OS 侧不使用 signgame）。</param>
+    /// <param name="signData">保留参数，OS 侧始终不附加 DS。</param>
+    protected override void AddSignInPlatformHeaders(HttpRequestMessage request, SignInActivityConfig config, bool signData)
+    {
+        request.Headers.Add(Referer, "https://act.hoyolab.com/");
+        request.Headers.Add(x_rpc_app_version, AppVersion);
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add(x_rpc_device_id, DeviceId);
+        request.Headers.Add(x_rpc_device_fp, DeviceFp);
     }
 
 

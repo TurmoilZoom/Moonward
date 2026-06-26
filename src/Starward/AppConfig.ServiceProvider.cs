@@ -17,6 +17,7 @@ using Starward.Features.GameAccount;
 using Starward.Features.GameInstall;
 using Starward.Features.GameLauncher;
 using Starward.Features.GameRecord;
+using Starward.Features.GameRecord.SignIn;
 using Starward.Features.HoYoPlay;
 using Starward.Features.PlayTime;
 using Starward.Features.RPC;
@@ -82,6 +83,9 @@ public static partial class AppConfig
             sc.AddSingleton<HoyolabClient>();
             sc.AddSingleton<HyperionClient>();
             sc.AddSingleton<GameRecordService>();
+            // 每日签到：业务编排 + 启动批量自动签到
+            sc.AddSingleton<SignInService>();
+            sc.AddSingleton<AutoSignInService>();
 
             sc.AddSingleton<SelfQueryClient>();
             sc.AddSingleton<SelfQueryService>();

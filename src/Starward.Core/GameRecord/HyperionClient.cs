@@ -10,6 +10,7 @@ using Starward.Core.GameRecord.StarRail.DailyNote;
 using Starward.Core.GameRecord.StarRail.ForgottenHall;
 using Starward.Core.GameRecord.StarRail.PureFiction;
 using Starward.Core.GameRecord.StarRail.SimulatedUniverse;
+using Starward.Core.GameRecord.SignIn;
 using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
 using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
@@ -230,6 +231,34 @@ public class HyperionClient : GameRecordClient
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         char[] name = Random.Shared.GetItems<char>(chars, 6);
         return new string(name);
+    }
+
+
+
+
+    /// <summary>
+    /// 米游社签到请求头：DS(Gen1/LK2) + x-rpc-signgame + 设备指纹。
+    /// </summary>
+    /// <param name="request">待发送的 HTTP 请求。</param>
+    /// <param name="config">签到活动配置，提供 signgame / origin。</param>
+    /// <param name="signData">true 时附加 DS 签名（info / sign / resign 需要）。</param>
+    protected override void AddSignInPlatformHeaders(HttpRequestMessage request, SignInActivityConfig config, bool signData)
+    {
+        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
+        request.Headers.Add("x-rpc-signgame", config.SignGame);
+        if (!string.IsNullOrEmpty(config.Origin))
+        {
+            // 绝区零 CN 的 act-nap-api 主机需要 Origin 头，否则会被风控拒绝
+            request.Headers.Add("Origin", config.Origin);
+        }
+        request.Headers.Add(x_rpc_app_version, AppVersion);
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add(x_rpc_device_id, DeviceId);
+        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        if (signData)
+        {
+            request.Headers.Add(DS, CreateSecret());
+        }
     }
 
 
