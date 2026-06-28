@@ -31,7 +31,9 @@ namespace Starward.Features.Background;
 [INotifyPropertyChanged]
 public sealed partial class AppBackground : UserControl
 {
-
+    /// <summary>
+    /// 当前 AppBackground 实例（全局单例访问点）。
+    /// </summary>
     public static AppBackground Current { get; private set; }
 
 
@@ -44,6 +46,7 @@ public sealed partial class AppBackground : UserControl
     {
         Current = this;
         this.InitializeComponent();
+        // 通过 Messenger 监听背景变更、主窗口状态变化、视频音量变化
         WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, OnBackgroundChanged);
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, OnMainWindowStateChanged);
         WeakReferenceMessenger.Default.Register<VideoBgVolumeChangedMessage>(this, OnVideoBgVolumeChanged);
@@ -61,11 +64,15 @@ public sealed partial class AppBackground : UserControl
 
     private void AppBackground_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        // 控件卸载时必须释放视频资源，否则 MediaPlayer 和 Win2D 资源会泄漏
         DisposeVideoResource();
         this.XamlRoot?.Changed -= XamlRoot_Changed;
         WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 
+    /// <summary>
+    /// XamlRoot 变化（例如 DPI 缩放改变、窗口移动到不同显示器）时重新加载背景，以匹配新分辨率。
+    /// </summary>
     private void XamlRoot_Changed(Microsoft.UI.Xaml.XamlRoot sender, Microsoft.UI.Xaml.XamlRootChangedEventArgs args)
     {
         if (_lastScale != sender.RasterizationScale)
@@ -76,6 +83,9 @@ public sealed partial class AppBackground : UserControl
 
 
 
+    /// <summary>
+    /// 当前关联的游戏 ID。设置时会触发背景初始化或更新。
+    /// </summary>
     public GameId CurrentGameId
     {
         get; set
@@ -109,11 +119,19 @@ public sealed partial class AppBackground : UserControl
 
     public GameBackground? CurrentGameBackground { get; private set; }
 
+    /// <summary>上一次成功显示的背景文件路径，用于避免重复加载。</summary>
     private string? _lastBackgroundFile;
 
     private double _lastScale = 1;
 
+    /// <summary>标记是否因为缺少 VP9 扩展而触发过失败提示。</summary>
+    private bool _needToInstallVp9VideoExtension;
 
+
+    /// <summary>
+    /// 初始化背景图片（首次设置 CurrentGameId 时调用）。
+    /// 仅处理非视频的缓存背景；视频背景延迟到 UpdateBackgroundAsync 处理。
+    /// </summary>
     private void InitializeBackgroundImage()
     {
         try
@@ -150,9 +168,15 @@ public sealed partial class AppBackground : UserControl
 
 
 
+    /// <summary>用于取消正在进行的背景更新任务。</summary>
     private CancellationTokenSource? updateBackgroundCts;
 
 
+    /// <summary>
+    /// 更新当前游戏的背景（图片或视频）。
+    /// 支持传入指定 background 用于外部直接指定；内部实现两轮尝试（快速超时 + 完整下载）。
+    /// </summary>
+    /// <param name="background">可选的指定背景。传入时优先使用，否则通过 BackgroundService 获取推荐背景。</param>
     public async Task UpdateBackgroundAsync(GameBackground? background = null)
     {
         string? imageFilePath = null;
@@ -173,6 +197,7 @@ public sealed partial class AppBackground : UserControl
                 return;
             }
 
+            // 两轮策略：第一轮对网络请求设置短超时（快速回退），第二轮允许完整等待
             for (int i = 0; i < 2; i++)
             {
                 bool apiCancelled = false;
@@ -266,7 +291,7 @@ public sealed partial class AppBackground : UserControl
         catch (OperationCanceledException) { }
         catch (COMException ex) when (ex.HResult == -2003292277)
         {
-            // 0x88982F8B
+            // 0x88982F8B：WebP 解码失败（常见于未安装 WebP 图像扩展）
             if (Path.GetExtension(imageFilePath)?.Equals(".webp", StringComparison.OrdinalIgnoreCase) ?? false)
             {
                 InAppToast.MainWindow?.ShowWithButton(InfoBarSeverity.Warning,
@@ -292,6 +317,12 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    /// <summary>
+    /// 加载并显示静态背景图片，同时提取强调色。
+    /// 根据窗口大小决定是否缩放解码，避免内存浪费。
+    /// </summary>
+    /// <param name="file">图片文件完整路径。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
     private async Task ChangeBackgroundImageAsync(string file, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -305,6 +336,7 @@ public sealed partial class AppBackground : UserControl
 
         if (decoder.PixelWidth <= windowWidth || decoder.PixelHeight <= windowHeight)
         {
+            // 原图小于等于窗口尺寸，直接加载
             decodeWidth = (int)decoder.PixelWidth;
             decodeHeight = (int)decoder.PixelHeight;
             var writeableBitmap = new WriteableBitmap(decodeWidth, decodeHeight);
@@ -318,6 +350,7 @@ public sealed partial class AppBackground : UserControl
         }
         else
         {
+            // 按窗口比例缩放解码（使用 Fant 插值）
             if (windowWidth * decoder.PixelHeight > windowHeight * decoder.PixelWidth)
             {
                 decodeWidth = (int)windowWidth;
@@ -343,6 +376,7 @@ public sealed partial class AppBackground : UserControl
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            // 从 SoftwareBitmap 直接读取原始像素用于提取强调色（避免二次拷贝）
             using BitmapBuffer bitmapBuffer = soft.LockBuffer(BitmapBufferAccessMode.Read);
             using IMemoryBufferReference memoryBufferReference = bitmapBuffer.CreateReference();
             memoryBufferReference.As<AccentColorHelper.IMemoryBufferByteAccess>().GetBuffer(out nint bufferPtr, out uint capacity);
@@ -357,21 +391,25 @@ public sealed partial class AppBackground : UserControl
 
     #region Video
 
-
-
+    /// <summary>当前正在播放视频背景的 MediaPlayer 实例（帧服务器模式）。</summary>
     private MediaPlayer? _mediaPlayer;
 
+    /// <summary>用于接收视频帧的 Win2D 渲染目标。</summary>
     private CanvasRenderTarget? _videoSurface;
 
+    /// <summary>视频背景上层叠加的主题图片（CanvasBitmap）。</summary>
     private CanvasBitmap? _videoOverlayImage;
 
+    /// <summary>最终作为背景显示的 CanvasImageSource（每帧更新）。</summary>
     private CanvasImageSource? _videoImageSource;
 
+    /// <summary>用于限制同时处理视频帧的信号量，避免 Win2D 绘制冲突。</summary>
     private SemaphoreSlim _videoSemaphore = new SemaphoreSlim(1, 1);
 
 
     /// <summary>
-    /// 背景视频的实际音量（0-100）。每个游戏区服独立设置，关闭自定义背景时静音。
+    /// 计算背景视频实际使用的音量（0-100）。
+    /// 规则：仅当启用“自定义背景”时才使用按游戏保存的音量值，否则强制为 0（静音）。
     /// </summary>
     private int GetEffectiveVideoVolume()
     {
@@ -384,6 +422,11 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    /// <summary>
+    /// 为指定的视频文件启动 MediaPlayer（使用帧服务器模式）。
+    /// .webm 文件会根据检测结果注册 VP9/Vorbis 本地解码器。
+    /// </summary>
+    /// <param name="file">视频文件完整路径（支持 mp4/mkv/webm）。</param>
     private void StartMediaPlayer(string file)
     {
         if (Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
@@ -400,6 +443,7 @@ public sealed partial class AppBackground : UserControl
             else
             {
                 bool highProfileOrRgb = VP9Helper.IsVP9HighProfileOrRGB(file);
+                // 高 Profile 或 RGB 格式官方扩展不支持，必须使用我们提供的 libvpx 软件解码器
                 if (!decoderInstalled || highProfileOrRgb)
                 {
                     VP9Helper.RegisterVP9Decoder(true);
@@ -410,12 +454,14 @@ public sealed partial class AppBackground : UserControl
                 }
             }
         }
+        // 无论是否 webm，只要是视频背景都注册 Vorbis（部分 mkv/webm 可能包含 Vorbis 音频）
         VP9Helper.RegisterVorbisDecoder();
         _mediaPlayer = new MediaPlayer
         {
             IsLoopingEnabled = true,
             Volume = GetEffectiveVideoVolume() / 100.0,
             IsMuted = false,
+            // 关键：启用帧服务器模式，后续通过 VideoFrameAvailable + CopyFrameToVideoSurface 手动获取帧
             IsVideoFrameServerEnabled = true,
             Source = MediaSource.CreateFromUri(new Uri(file))
         };
@@ -427,17 +473,26 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    /// <summary>
+    /// 设置官方视频类型背景（GameBackground.BACKGROUND_TYPE_VIDEO）。
+    /// 启动播放器后异步加载主题叠加层（overlay）和强调色来源图片。
+    /// </summary>
+    /// <param name="gameBackground">包含视频和主题 overlay 信息的背景对象。</param>
+    /// <param name="filePath">已下载的视频文件路径。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
     private async Task SetVideoBackgroundAsync(GameBackground gameBackground, string filePath, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (BackgroundService.FileIsSupportedVideo(filePath))
         {
             StartMediaPlayer(filePath);
+            // overlay 和强调色可以异步加载，不阻塞主流程
             _ = PrepareVideoOverlayImageAsync(gameBackground.Theme.Url, cancellationToken);
             _ = ChangeAccentColorToImageFileAsync(gameBackground.Background.Url, cancellationToken);
         }
         else
         {
+            // 极少数情况官方返回的“视频背景”实际是图片，降级处理
             string overlayPath = await _backgroundService.GetBackgroundFileAsync(gameBackground.Theme.Url, cancellationToken);
             using var fs1 = File.OpenRead(filePath);
             using var bitmap = await CanvasBitmap.LoadAsync(CanvasDevice.GetSharedDevice(), fs1.AsRandomAccessStream(), 96);
@@ -474,8 +529,6 @@ public sealed partial class AppBackground : UserControl
     }
 
 
-    private bool _needToInstallVp9VideoExtension;
-
     private void MediaPlayer_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
     {
         _logger.LogError(args.ExtendedErrorCode, "Media player failed.");
@@ -491,8 +544,14 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    /// <summary>
+    /// 视频帧可用回调（帧服务器模式）。
+    /// 把解码后的帧拷贝到 Win2D 表面，再合成 overlay 后作为背景源。
+    /// 注意：必须通过 DispatcherQueue 切回 UI 线程操作 Win2D 对象。
+    /// </summary>
     private void MediaPlayer_VideoFrameAvailable(MediaPlayer sender, object args)
     {
+        // 避免同一时刻多个帧重叠处理
         if (_videoSemaphore.CurrentCount == 0)
         {
             return;
@@ -511,6 +570,7 @@ public sealed partial class AppBackground : UserControl
                     _videoImageSource = new CanvasImageSource(CanvasDevice.GetSharedDevice(), width, height, 96);
                     BackgroundImageSource = _videoImageSource;
                 }
+                // 将 MF 解码帧拷贝到 Direct2D 表面
                 sender.CopyFrameToVideoSurface(_videoSurface);
                 using var ds = _videoImageSource.CreateDrawingSession(Microsoft.UI.Colors.Transparent);
                 ds.DrawImage(_videoSurface);
@@ -530,6 +590,11 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    /// <summary>
+    /// 异步准备视频背景的主题叠加图片（通常是半透明主题图层）。
+    /// </summary>
+    /// <param name="url">叠加图片的网络地址。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
     private async Task PrepareVideoOverlayImageAsync(string url, CancellationToken cancellationToken = default)
     {
         try
@@ -551,6 +616,9 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    /// <summary>
+    /// 从视频背景对应的强调色来源图片中提取并应用强调色（异步后台线程读取像素）。
+    /// </summary>
     private async Task ChangeAccentColorToImageFileAsync(string url, CancellationToken cancellationToken = default)
     {
         try
@@ -582,6 +650,10 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    /// <summary>
+    /// 释放所有视频相关资源（MediaPlayer、Win2D 表面、叠加图、已注册的解码器 MFT）。
+    /// 必须在切换背景、窗口隐藏过久、控件卸载时调用。
+    /// </summary>
     private void DisposeVideoResource()
     {
         _mediaPlayer?.Dispose();
@@ -591,6 +663,7 @@ public sealed partial class AppBackground : UserControl
         _videoImageSource = null;
         _videoOverlayImage?.Dispose();
         _videoOverlayImage = null;
+        // 主动注销我们注册的本地解码器
         VP9Helper.UnregisterVP9Decoder(true);
         VP9Helper.UnregisterVorbisDecoder();
     }
@@ -645,6 +718,9 @@ public sealed partial class AppBackground : UserControl
     }
 
 
+    /// <summary>
+    /// 响应用户修改视频背景音量设置。
+    /// </summary>
     private void OnVideoBgVolumeChanged(object _, VideoBgVolumeChangedMessage message)
     {
         try
@@ -662,6 +738,10 @@ public sealed partial class AppBackground : UserControl
     private bool _vp9DecoderSuggested;
 
 
+    /// <summary>
+    /// 向用户建议安装微软官方 VP9 扩展（仅提示一次）。
+    /// 该扩展可提供更优的解码性能（降低 CPU 占用）。
+    /// </summary>
     private void SuggestToInstallVP9Decoder()
     {
         if (!_vp9DecoderSuggested)
