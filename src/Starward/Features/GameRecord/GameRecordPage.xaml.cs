@@ -89,6 +89,9 @@ public sealed partial class GameRecordPage : PageBase
             LoadGameRoles();
             await UpdateDeviceInfoAsync();
             await RefreshGameRoleHeadIconSilentlyAsync();
+            // 各游戏默认进入对应的月报页面（旅行者札记 / 开拓月历 / 绳网月报）。
+            // 必须在 LoadGameRoles 之后执行，确保 CurrentRole 已就绪并作为导航参数传入页面。
+            NavigateToDefaultMonthlyReportPage();
         }
     }
 
@@ -486,6 +489,40 @@ public sealed partial class GameRecordPage : PageBase
             return;
         }
         frame.Navigate(page, parameter ?? CurrentRole);
+    }
+
+
+    /// <summary>
+    /// 进入米游社工具箱时，按游戏选中默认月报导航项并跳转对应页面。
+    /// 原神 → 旅行者札记；星铁 → 开拓月历；绝区零 → 绳网月报。
+    /// </summary>
+    private void NavigateToDefaultMonthlyReportPage()
+    {
+        if (CurrentRole is null)
+        {
+            return;
+        }
+        NavigationViewItem? navItem = null;
+        Type? pageType = CurrentGameBiz.Game switch
+        {
+            GameBiz.hk4e => typeof(TravelersDiaryPage),
+            GameBiz.hkrpg => typeof(TrailblazeCalendarPage),
+            GameBiz.nap => typeof(InterKnotMonthlyReportPage),
+            _ => null,
+        };
+        navItem = CurrentGameBiz.Game switch
+        {
+            GameBiz.hk4e => NavigationViewItem_TravelersDiary,
+            GameBiz.hkrpg => NavigationViewItem_TrailblazeMonthlyCalendar,
+            GameBiz.nap => NavigationViewItem_InterKnotMonthlyReport,
+            _ => null,
+        };
+        if (navItem is null || pageType is null)
+        {
+            return;
+        }
+        NavigationView_Toolbox.SelectedItem = navItem;
+        NavigateTo(pageType);
     }
 
 

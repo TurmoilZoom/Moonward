@@ -1,13 +1,16 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.Genshin.TravelersDiary;
+using Starward.Features.Setting;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -20,6 +23,11 @@ using Windows.UI;
 
 namespace Starward.Features.GameRecord.Genshin;
 
+/// <summary>
+/// 原神「旅行者札记」页面。左侧为已缓存月份列表与「获取详情」按钮，右侧展示选中月的统计数据（资源总量 + 原石收入构成）及按日聚合的明细。
+/// 数据流：进入页面时拉取当前月汇总写入 SQLite 并默认选中当月；「获取详情」按月份拉汇总 + 原石/摩拉明细分页并写入 SQLite；
+/// 点击月份仅从本地缓存读取，不再发起网络请求。
+/// </summary>
 public sealed partial class TravelersDiaryPage : PageBase
 {
 
@@ -29,16 +37,21 @@ public sealed partial class TravelersDiaryPage : PageBase
 
     private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
 
+    /// <summary>本会话内已通过「获取详情」拉取过明细的月份键（<c>yyyy-MM</c>）。</summary>
+    private readonly HashSet<string> _detailFetchedMonths = new();
+
 
 
     public TravelersDiaryPage()
     {
         this.InitializeComponent();
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
     }
 
 
 
     private GameRecordRole gameRole;
+
 
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -49,6 +62,7 @@ public sealed partial class TravelersDiaryPage : PageBase
         }
     }
 
+
     protected override async void OnLoaded()
     {
         await Task.Delay(16);
@@ -58,38 +72,42 @@ public sealed partial class TravelersDiaryPage : PageBase
 
     protected override void OnUnloaded()
     {
+        base.OnUnloaded();
+        WeakReferenceMessenger.Default.Unregister<LanguageChangedMessage>(this);
         CurrentSummary = null!;
         SelectMonthData = null;
         MonthDataList = null!;
-        CurrentSeries = null;
-        SelectSeries = null;
+        SelectSeries = null!;
+        SelectMonthAwards = null!;
         DayDataList = null!;
     }
 
 
 
+    #region 绑定属性
+
     [ObservableProperty]
     private TravelersDiarySummary currentSummary;
-
 
     [ObservableProperty]
     private TravelersDiaryMonthData? selectMonthData;
 
-
     [ObservableProperty]
-    private List<TravelersDiaryMonthData> monthDataList;
-
-
-    [ObservableProperty]
-    private List<ColorRectChart.ChartLegend>? currentSeries;
-
+    private List<TravelersDiarySummaryMonth> monthDataList;
 
     [ObservableProperty]
     private List<ColorRectChart.ChartLegend>? selectSeries;
 
+    [ObservableProperty]
+    private List<MonthResourceAward>? selectMonthAwards;
 
     [ObservableProperty]
     private List<DiaryDayData> dayDataList;
+
+    [ObservableProperty]
+    private bool selectMonthHasDetail;
+
+    #endregion
 
 
 
@@ -107,12 +125,11 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
-    [RelayCommand]
     private async Task InitializeDataAsync()
     {
-        await Task.Delay(16);
         await GetCurrentSummaryAsync();
         GetMonthDataList();
+        SelectCurrentMonth();
     }
 
 
@@ -137,38 +154,79 @@ public sealed partial class TravelersDiaryPage : PageBase
                     CommandParameter = month,
                 });
             }
-            CurrentSeries = CurrentSummary.MonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(x.ActionName, x.Percent, actionColorMap.GetValueOrDefault(x.ActionId))).ToList();
         }
         catch (miHoYoApiException ex)
         {
-            _logger.LogError(ex, "Get realtime traveler's diary data details ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
+            _logger.LogError(ex, "Get realtime traveler's diary data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
             InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Get realtime traveler's diary data details ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
+            _logger.LogError(ex, "Get realtime traveler's diary data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
             InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Get realtime traveler's diary data details ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
+            _logger.LogError(ex, "Get realtime traveler's diary data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
             InAppToast.MainWindow?.Error(ex);
         }
     }
 
 
 
-    private void GetMonthDataList()
+    private void GetMonthDataList(bool preserveSelectedMonth = false)
     {
         try
         {
-            SelectMonthData = null;
-            MonthDataList = _gameRecordService.GetTravelersDiaryMonthDataList(gameRole);
-            Image_Emoji.Visibility = MonthDataList.Any() ? Visibility.Collapsed : Visibility.Visible;
+            int? selectedYear = preserveSelectedMonth ? SelectMonthData?.Year : null;
+            int? selectedMonth = preserveSelectedMonth ? SelectMonthData?.Month : null;
+            if (!preserveSelectedMonth)
+            {
+                SelectMonthData = null;
+                SelectMonthHasDetail = false;
+            }
+            MonthDataList = _gameRecordService.GetTravelersDiarySummaryMonthList(gameRole);
+            Image_Emoji.Visibility = MonthDataList.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (selectedYear is not null && selectedMonth is not null)
+            {
+                ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.Year == selectedYear && x.Month == selectedMonth);
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Load traveler's diary month data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
+        }
+    }
+
+
+
+
+    private void SelectCurrentMonth()
+    {
+        try
+        {
+            if (MonthDataList is null || MonthDataList.Count == 0)
+            {
+                return;
+            }
+            int year;
+            int month;
+            if (CurrentSummary?.MonthData is not null)
+            {
+                year = CurrentSummary.MonthData.Year;
+                month = CurrentSummary.MonthData.Month;
+            }
+            else
+            {
+                var serverNow = DateTimeOffset.UtcNow.ToOffset(GetServerUtcOffset(gameRole));
+                year = serverNow.Year;
+                month = serverNow.Month;
+            }
+            ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.Year == year && x.Month == month);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Select current month ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
         }
     }
 
@@ -185,10 +243,12 @@ public sealed partial class TravelersDiaryPage : PageBase
             {
                 return;
             }
-            await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole, month);
-            await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 1);
-            await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 2);
-            GetMonthDataList();
+            var monthData = await FetchMonthDataAsync(month);
+            GetMonthDataList(preserveSelectedMonth: true);
+            if (monthData is not null)
+            {
+                ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.Year == monthData.Year && x.Month == monthData.Month);
+            }
         }
         catch (miHoYoApiException ex)
         {
@@ -210,16 +270,111 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
+    [RelayCommand]
+    private async Task RefreshMonthDataAsync()
+    {
+        try
+        {
+            if (gameRole is null || SelectMonthData is null)
+            {
+                return;
+            }
+            await FetchMonthDataAsync(SelectMonthData.Month, SelectMonthData.Year);
+            GetMonthDataList(preserveSelectedMonth: true);
+        }
+        catch (miHoYoApiException ex)
+        {
+            _logger.LogError(ex, "Refresh traveler's diary month data ({gameBiz}, {uid}, {year}-{month}).", gameRole?.GameBiz, gameRole?.Uid, SelectMonthData?.Year, SelectMonthData?.Month);
+            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Refresh traveler's diary month data ({gameBiz}, {uid}, {year}-{month}).", gameRole?.GameBiz, gameRole?.Uid, SelectMonthData?.Year, SelectMonthData?.Month);
+            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Refresh traveler's diary month data ({gameBiz}, {uid}, {year}-{month}).", gameRole?.GameBiz, gameRole?.Uid, SelectMonthData?.Year, SelectMonthData?.Month);
+            InAppToast.MainWindow?.Error(ex);
+        }
+    }
+
+
+
+    private async Task<TravelersDiaryMonthData?> FetchMonthDataAsync(int month, int year = 0)
+    {
+        if (gameRole is null)
+        {
+            return null;
+        }
+        var summary = await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole, month);
+        var monthData = summary.MonthData;
+        if (monthData is null)
+        {
+            return null;
+        }
+        if (year > 0)
+        {
+            monthData.Year = year;
+        }
+        await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 1);
+        await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 2);
+        ApplySelectMonthSummary(monthData);
+        _detailFetchedMonths.Add($"{monthData.Year}-{monthData.Month:D2}");
+        return monthData;
+    }
+
+
+
+    private void ApplySelectMonthSummary(TravelersDiaryMonthData data)
+    {
+        SelectMonthData = data;
+        SelectMonthAwards =
+        [
+            new MonthResourceAward
+            {
+                Image = new BitmapImage(new("ms-appx:///Assets/Image/UI_ItemIcon_201.png")),
+                Name = Lang.TravelersDiaryPage_Primogems,
+                Count = data.CurrentPrimogems,
+            },
+            new MonthResourceAward
+            {
+                Image = new BitmapImage(new("ms-appx:///Assets/Image/UI_ItemIcon_202.png")),
+                Name = Lang.TravelersDiaryPage_Mora,
+                Count = data.CurrentMora,
+            },
+        ];
+        SelectSeries = data.PrimogemsGroupBy
+            .Select(x => new ColorRectChart.ChartLegend(ActionName(x.ActionId), x.Percent, actionColorMap.GetValueOrDefault(x.ActionId)))
+            .ToList();
+        RefreshDailyDataPlot(data);
+        UpdateSelectMonthHasDetail(data.Uid, data.Year, data.Month);
+    }
+
+
+
+    private void UpdateSelectMonthHasDetail(long uid, int year, int month)
+    {
+        string key = $"{year}-{month:D2}";
+        SelectMonthHasDetail = _detailFetchedMonths.Contains(key)
+            || _gameRecordService.HasTravelersDiaryDetail(uid, year, month);
+    }
+
+
+
 
     private void ListView_MonthDataList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
         {
-            if (e.AddedItems.FirstOrDefault() is TravelersDiaryMonthData data)
+            if (e.AddedItems.FirstOrDefault() is TravelersDiarySummaryMonth item)
             {
-                SelectMonthData = data;
-                SelectSeries = SelectMonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(x.ActionName, x.Percent, actionColorMap.GetValueOrDefault(x.ActionId))).ToList();
-                RefreshDailyDataPlot(data);
+                var data = _gameRecordService.GetTravelersDiaryMonthData(item.Uid, item.Year, item.Month);
+                if (data is null)
+                {
+                    return;
+                }
+                ApplySelectMonthSummary(data);
             }
         }
         catch (Exception ex)
@@ -235,28 +390,28 @@ public sealed partial class TravelersDiaryPage : PageBase
     {
         try
         {
-            var items_primogems = _gameRecordService.GetTravelersDiaryDetailItems(data.Uid, data.Year, data.Month, 1);
-            var items_mora = _gameRecordService.GetTravelersDiaryDetailItems(data.Uid, data.Year, data.Month, 2);
+            var items = _gameRecordService.GetTravelersDiaryDetailItems(data.Uid, data.Year, data.Month);
             int days = DateTime.DaysInMonth(data.Year, data.Month);
-            var x = Enumerable.Range(1, days).ToArray();
+            TimeSpan serverOffset = GetServerUtcOffset(gameRole);
 
             var stats_primogems = new int[days];
-            foreach (var item in items_primogems)
-            {
-                var day = item.Time.Day;
-                if (day <= days)
-                {
-                    stats_primogems[day - 1] += item.Number;
-                }
-            }
-
             var stats_mora = new int[days];
-            foreach (var item in items_mora)
+            foreach (var item in items)
             {
-                var day = item.Time.Day;
-                if (day <= days)
+                var day = new DateTimeOffset(item.Time, TimeSpan.Zero).ToOffset(serverOffset).Day;
+                if (day > days)
                 {
-                    stats_mora[day - 1] += item.Number;
+                    continue;
+                }
+                int index = day - 1;
+                switch (item.Type)
+                {
+                    case 1:
+                        stats_primogems[index] += item.Number;
+                        break;
+                    case 2:
+                        stats_mora[index] += item.Number;
+                        break;
                 }
             }
 
@@ -282,6 +437,70 @@ public sealed partial class TravelersDiaryPage : PageBase
         {
             _logger.LogError(ex, "Refresh daily data plot");
         }
+    }
+
+
+
+    private static TimeSpan GetServerUtcOffset(GameRecordRole role)
+    {
+        return role?.Region switch
+        {
+            "prod_gf_us" => TimeSpan.FromHours(-5),
+            "prod_gf_eu" => TimeSpan.FromHours(1),
+            _ => TimeSpan.FromHours(8),
+        };
+    }
+
+
+
+    /// <summary>
+    /// 语言切换时刷新饼图图例等已物化的本地化文案，并更新 x:Bind 绑定。
+    /// </summary>
+    private void OnLanguageChanged(object _, LanguageChangedMessage __)
+    {
+        if (SelectMonthData?.PrimogemsGroupBy is { } components)
+        {
+            SelectSeries = components
+                .Select(x => new ColorRectChart.ChartLegend(ActionName(x.ActionId), x.Percent, actionColorMap.GetValueOrDefault(x.ActionId)))
+                .ToList();
+        }
+        this.Bindings.Update();
+    }
+
+
+
+    /// <summary>
+    /// 将 API <c>group_by[].action_id</c> 映射为本地化显示名，供饼图图例使用。
+    /// </summary>
+    /// <param name="actionId">API 返回的 action_id。</param>
+    /// <returns>本地化文案；未知 id 时回退为数字字符串。</returns>
+    public static string ActionName(int actionId)
+    {
+        return actionId switch
+        {
+            0 => Lang.TravelersDiaryPage_DailyCommission,
+            1 => Lang.TravelersDiaryPage_SpiralAbyss,
+            2 => Lang.TravelersDiaryPage_BattlePass,
+            3 => Lang.TravelersDiaryPage_Event,
+            4 => Lang.TravelersDiaryPage_Quest,
+            5 => Lang.TravelersDiaryPage_Mail,
+            6 => Lang.TravelersDiaryPage_Achievement,
+            7 => Lang.TravelersDiaryPage_Other,
+            _ => actionId.ToString(),
+        };
+    }
+
+
+
+    public class MonthResourceAward
+    {
+
+        public BitmapImage Image { get; set; }
+
+        public string Name { get; set; }
+
+        public int Count { get; set; }
+
     }
 
 

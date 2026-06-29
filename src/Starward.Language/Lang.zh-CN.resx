@@ -1012,11 +1012,56 @@
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>星轨通票 &amp; 星轨专票</value>
   </data>
+  <data name="TrailblazeCalendarPage_DailyReward" xml:space="preserve">
+    <value>每日实训</value>
+  </data>
+  <data name="TrailblazeCalendarPage_SpaceReward" xml:space="preserve">
+    <value>模拟宇宙</value>
+  </data>
+  <data name="TrailblazeCalendarPage_EventReward" xml:space="preserve">
+    <value>活动奖励</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AdventureReward" xml:space="preserve">
+    <value>冒险奖励</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AbyssReward" xml:space="preserve">
+    <value>忘却之庭</value>
+  </data>
+  <data name="TrailblazeCalendarPage_MailReward" xml:space="preserve">
+    <value>邮件奖励</value>
+  </data>
+  <data name="TrailblazeCalendarPage_OtherReward" xml:space="preserve">
+    <value>其他</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>原石</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>摩拉</value>
+  </data>
+  <data name="TravelersDiaryPage_DailyCommission" xml:space="preserve">
+    <value>每日委托</value>
+  </data>
+  <data name="TravelersDiaryPage_SpiralAbyss" xml:space="preserve">
+    <value>深境螺旋</value>
+  </data>
+  <data name="TravelersDiaryPage_BattlePass" xml:space="preserve">
+    <value>纪行</value>
+  </data>
+  <data name="TravelersDiaryPage_Event" xml:space="preserve">
+    <value>限时活动</value>
+  </data>
+  <data name="TravelersDiaryPage_Quest" xml:space="preserve">
+    <value>任务系统</value>
+  </data>
+  <data name="TravelersDiaryPage_Mail" xml:space="preserve">
+    <value>邮件</value>
+  </data>
+  <data name="TravelersDiaryPage_Achievement" xml:space="preserve">
+    <value>成就奖励</value>
+  </data>
+  <data name="TravelersDiaryPage_Other" xml:space="preserve">
+    <value>其他</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>第 {X} 层</value>
@@ -1630,8 +1675,20 @@
   <data name="GameLauncherPage_RemovableStorageDeviceNotConnected" xml:space="preserve">
     <value>可移动存储设备未连接。</value>
   </data>
+  <data name="InterKnotMonthlyReportPage_Boopon" xml:space="preserve">
+    <value>邦布券</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>加密母带&amp;原装母带</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychrome" xml:space="preserve">
+    <value>菲林</value>
+  </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>菲林收入组成</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_StatisticalData" xml:space="preserve">
+    <value>统计数据</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>绳网月报</value>

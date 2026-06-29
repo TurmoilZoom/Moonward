@@ -23,7 +23,7 @@ public class InterKnotReportSummaryAward
 
 /// <summary>
 /// 绳网月报月度汇总，对应米游社工具箱「绳网月报」<c>month_info</c> 接口响应体。
-/// 包含当月/历史月的资源总量、收入构成及可查询月份列表；完整 JSON 序列化后存入 SQLite <c>ZZZInterKnotReportSummary</c>。
+/// 包含当月/历史月的资源总量、收入构成及可查询月份列表；本地缓存以结构化表存储（<c>ZZZInterKnotReportMonthData</c>、<c>ZZZInterKnotReportIncomeComponent</c>）。
 /// </summary>
 public class InterKnotReportSummary
 {

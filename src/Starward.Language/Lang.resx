@@ -1012,11 +1012,56 @@ Do you accept the risk and continue to use it?</value>
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>Pass &amp; Special Pass</value>
   </data>
+  <data name="TrailblazeCalendarPage_DailyReward" xml:space="preserve">
+    <value>Daily Training</value>
+  </data>
+  <data name="TrailblazeCalendarPage_SpaceReward" xml:space="preserve">
+    <value>Simulated Universe</value>
+  </data>
+  <data name="TrailblazeCalendarPage_EventReward" xml:space="preserve">
+    <value>Event Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AdventureReward" xml:space="preserve">
+    <value>Adventure Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AbyssReward" xml:space="preserve">
+    <value>Forgotten Hall</value>
+  </data>
+  <data name="TrailblazeCalendarPage_MailReward" xml:space="preserve">
+    <value>Mail Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_OtherReward" xml:space="preserve">
+    <value>Other</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>Primogems</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>Mora</value>
+  </data>
+  <data name="TravelersDiaryPage_DailyCommission" xml:space="preserve">
+    <value>Daily Commission</value>
+  </data>
+  <data name="TravelersDiaryPage_SpiralAbyss" xml:space="preserve">
+    <value>Spiral Abyss</value>
+  </data>
+  <data name="TravelersDiaryPage_BattlePass" xml:space="preserve">
+    <value>Battle Pass</value>
+  </data>
+  <data name="TravelersDiaryPage_Event" xml:space="preserve">
+    <value>Event</value>
+  </data>
+  <data name="TravelersDiaryPage_Quest" xml:space="preserve">
+    <value>Quest</value>
+  </data>
+  <data name="TravelersDiaryPage_Mail" xml:space="preserve">
+    <value>Mail</value>
+  </data>
+  <data name="TravelersDiaryPage_Achievement" xml:space="preserve">
+    <value>Achievement</value>
+  </data>
+  <data name="TravelersDiaryPage_Other" xml:space="preserve">
+    <value>Other</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>Floor {X}</value>
@@ -1630,8 +1675,20 @@ Do you accept the risk and continue to use it?</value>
   <data name="GameLauncherPage_RemovableStorageDeviceNotConnected" xml:space="preserve">
     <value>Removable storage device not connected.</value>
   </data>
+  <data name="InterKnotMonthlyReportPage_Boopon" xml:space="preserve">
+    <value>Boopons</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>Encrypted &amp; Original Master Tape</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychrome" xml:space="preserve">
+    <value>Polychrome</value>
+  </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>Polychrome Revenue Streams</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_StatisticalData" xml:space="preserve">
+    <value>Statistical Data</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>Inter-Knot Monthly Report</value>

@@ -261,7 +261,11 @@ internal static class DatabaseService
         Sql_v16,
         Sql_v17,
         Sql_v18,
-        Sql_v19
+        Sql_v19,
+        Sql_v20,
+        Sql_v21,
+        Sql_v22,
+        Sql_v23
     ];
 
 
@@ -1043,7 +1047,147 @@ internal static class DatabaseService
         ALTER TABLE StarRailPureFictionInfo ADD COLUMN ExtraStarNum INTEGER DEFAULT 0 NOT NULL;
         ALTER TABLE StarRailForgottenHallInfo ADD COLUMN ExtraStarNum INTEGER DEFAULT 0 NOT NULL;
 
-        PRAGMA USER_VERSION = 19;
+        PRAGMA USER_VERSION = 20;
+        COMMIT TRANSACTION;
+        """;
+
+    private const string Sql_v21 = """
+        BEGIN TRANSACTION;
+
+        CREATE TABLE IF NOT EXISTS ZZZInterKnotReportMonthData
+        (
+            Uid              INTEGER NOT NULL,
+            DataMonth        TEXT    NOT NULL,
+            PolychromeCount  INTEGER NOT NULL DEFAULT 0,
+            MasterTapeCount  INTEGER NOT NULL DEFAULT 0,
+            BooponCount      INTEGER NOT NULL DEFAULT 0,
+            PolychromeName   TEXT,
+            MasterTapeName   TEXT,
+            BooponName       TEXT,
+            PRIMARY KEY (Uid, DataMonth)
+        );
+
+        CREATE TABLE IF NOT EXISTS ZZZInterKnotReportIncomeComponent
+        (
+            Uid       INTEGER NOT NULL,
+            DataMonth TEXT    NOT NULL,
+            Action    TEXT    NOT NULL,
+            Num       INTEGER NOT NULL,
+            Percent   INTEGER NOT NULL,
+            PRIMARY KEY (Uid, DataMonth, Action)
+        );
+
+        INSERT OR REPLACE INTO ZZZInterKnotReportMonthData
+            (Uid, DataMonth, PolychromeCount, MasterTapeCount, BooponCount, PolychromeName, MasterTapeName, BooponName)
+        SELECT
+            t.Uid,
+            t.DataMonth,
+            IFNULL((SELECT json_extract(item.value, '$.count')
+                    FROM json_each(t.Value, '$.month_data.list') AS item
+                    WHERE json_extract(item.value, '$.data_type') = 'PolychromesData'
+                    LIMIT 1), 0),
+            IFNULL((SELECT json_extract(item.value, '$.count')
+                    FROM json_each(t.Value, '$.month_data.list') AS item
+                    WHERE json_extract(item.value, '$.data_type') = 'MatserTapeData'
+                    LIMIT 1), 0),
+            IFNULL((SELECT json_extract(item.value, '$.count')
+                    FROM json_each(t.Value, '$.month_data.list') AS item
+                    WHERE json_extract(item.value, '$.data_type') = 'BooponsData'
+                    LIMIT 1), 0),
+            (SELECT json_extract(item.value, '$.data_name')
+             FROM json_each(t.Value, '$.month_data.list') AS item
+             WHERE json_extract(item.value, '$.data_type') = 'PolychromesData'
+             LIMIT 1),
+            (SELECT json_extract(item.value, '$.data_name')
+             FROM json_each(t.Value, '$.month_data.list') AS item
+             WHERE json_extract(item.value, '$.data_type') = 'MatserTapeData'
+             LIMIT 1),
+            (SELECT json_extract(item.value, '$.data_name')
+             FROM json_each(t.Value, '$.month_data.list') AS item
+             WHERE json_extract(item.value, '$.data_type') = 'BooponsData'
+             LIMIT 1)
+        FROM ZZZInterKnotReportSummary AS t
+        WHERE t.Value IS NOT NULL;
+
+        INSERT OR REPLACE INTO ZZZInterKnotReportIncomeComponent (Uid, DataMonth, Action, Num, Percent)
+        SELECT
+            t.Uid,
+            t.DataMonth,
+            json_extract(comp.value, '$.action'),
+            json_extract(comp.value, '$.num'),
+            json_extract(comp.value, '$.percent')
+        FROM ZZZInterKnotReportSummary AS t,
+             json_each(t.Value, '$.month_data.income_components') AS comp
+        WHERE t.Value IS NOT NULL
+          AND json_extract(comp.value, '$.action') IS NOT NULL;
+
+        PRAGMA USER_VERSION = 21;
+        COMMIT TRANSACTION;
+        """;
+
+    private const string Sql_v22 = """
+        BEGIN TRANSACTION;
+
+        DROP TABLE IF EXISTS ZZZInterKnotReportSummary;
+
+        PRAGMA USER_VERSION = 22;
+        COMMIT TRANSACTION;
+        """;
+
+    private const string Sql_v23 = """
+        BEGIN TRANSACTION;
+
+        CREATE TABLE IF NOT EXISTS GenshinTravelersDiaryIncomeComponent
+        (
+            Uid      INTEGER NOT NULL,
+            Year     INTEGER NOT NULL,
+            Month    INTEGER NOT NULL,
+            ActionId INTEGER NOT NULL,
+            Num      INTEGER NOT NULL,
+            Percent  INTEGER NOT NULL,
+            PRIMARY KEY (Uid, Year, Month, ActionId)
+        );
+
+        INSERT OR REPLACE INTO GenshinTravelersDiaryIncomeComponent (Uid, Year, Month, ActionId, Num, Percent)
+        SELECT
+            m.Uid,
+            m.Year,
+            m.Month,
+            json_extract(comp.value, '$.action_id'),
+            json_extract(comp.value, '$.num'),
+            json_extract(comp.value, '$.percent')
+        FROM GenshinTravelersDiaryMonthData AS m,
+             json_each(m.PrimogemsGroupBy) AS comp
+        WHERE m.PrimogemsGroupBy IS NOT NULL
+          AND m.PrimogemsGroupBy != ''
+          AND m.PrimogemsGroupBy != '[]'
+          AND json_extract(comp.value, '$.action_id') IS NOT NULL;
+
+        CREATE TABLE IF NOT EXISTS StarRailTrailblazeCalendarIncomeComponent
+        (
+            Uid       INTEGER NOT NULL,
+            DataMonth TEXT    NOT NULL,
+            Action    TEXT    NOT NULL,
+            Num       INTEGER NOT NULL,
+            Percent   INTEGER NOT NULL,
+            PRIMARY KEY (Uid, DataMonth, Action)
+        );
+
+        INSERT OR REPLACE INTO StarRailTrailblazeCalendarIncomeComponent (Uid, DataMonth, Action, Num, Percent)
+        SELECT
+            m.Uid,
+            m.Month,
+            json_extract(comp.value, '$.action'),
+            json_extract(comp.value, '$.num'),
+            json_extract(comp.value, '$.percent')
+        FROM StarRailTrailblazeCalendarMonthData AS m,
+             json_each(m.GroupBy) AS comp
+        WHERE m.GroupBy IS NOT NULL
+          AND m.GroupBy != ''
+          AND m.GroupBy != '[]'
+          AND json_extract(comp.value, '$.action') IS NOT NULL;
+
+        PRAGMA USER_VERSION = 23;
         COMMIT TRANSACTION;
         """;
 

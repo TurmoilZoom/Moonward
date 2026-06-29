@@ -12,6 +12,11 @@ public class TravelersDiaryDetail : TravelersDiaryBase, IJsonOnDeserialized
     public int Page { get; set; }
 
 
+    /// <summary>该月该类型收入记录总数，用于增量同步明细缓存。</summary>
+    [JsonPropertyName("total")]
+    public int Total { get; set; }
+
+
     [JsonPropertyName("list")]
     public List<TravelersDiaryAwardItem> List { get; set; }
 

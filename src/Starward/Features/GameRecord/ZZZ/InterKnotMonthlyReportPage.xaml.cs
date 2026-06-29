@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -9,6 +10,7 @@ using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
+using Starward.Features.Setting;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -22,8 +24,8 @@ using Windows.UI;
 namespace Starward.Features.GameRecord.ZZZ;
 
 /// <summary>
-/// 绝区零「绳网月报」页面。布局与旅行者札记类似：左侧为已缓存月份列表与操作按钮，右侧展示实时汇总、选中月历史汇总及按日聚合的明细。
-/// 数据流：刷新仅拉当前月汇总（<c>month_info</c>）；「获取详情」按月份拉汇总 + 三类资源明细分页（<c>month_detail</c>）并写入 SQLite；
+/// 绝区零「绳网月报」页面。左侧为已缓存月份列表与「获取详情」按钮，右侧展示选中月的统计数据（资源总量 + 菲林收入构成）及按日聚合的明细。
+/// 数据流：进入页面时拉取当前月汇总（<c>month_info</c>）写入结构化缓存表并默认选中当月；「获取详情」按月份拉汇总 + 三类资源明细分页（<c>month_detail</c>）并写入 SQLite；
 /// 点击月份仅从本地缓存读取，不再发起网络请求。
 /// </summary>
 public sealed partial class InterKnotMonthlyReportPage : PageBase
@@ -33,6 +35,9 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
     private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
 
+    /// <summary>本会话内已通过「获取详情」拉取过明细的月份（<c>yyyyMM</c>），用于 API 三类资源均为空时仍能显示刷新按钮。</summary>
+    private readonly HashSet<string> _detailFetchedMonths = new();
+
 
     /// <summary>
     /// 初始化页面 XAML 组件。
@@ -40,6 +45,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     public InterKnotMonthlyReportPage()
     {
         this.InitializeComponent();
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
     }
 
 
@@ -79,10 +85,10 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     protected override void OnUnloaded()
     {
         base.OnUnloaded();
+        WeakReferenceMessenger.Default.Unregister<LanguageChangedMessage>(this);
         CurrentSummary = null!;
         SelectMonthData = null;
         MonthDataList = null!;
-        CurrentSeries = null!;
         SelectSeries = null!;
         DayDataList = null!;
     }
@@ -90,21 +96,17 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
     #region 绑定属性
 
-    /// <summary>当前月实时汇总（刷新时从 API 拉取并缓存）。</summary>
+    /// <summary>当前月汇总（进入页面时从 API 拉取并缓存，用于确定当月并填充「获取详情」菜单，不再单独展示）。</summary>
     [ObservableProperty]
     private InterKnotReportSummary currentSummary;
 
-    /// <summary>左侧列表选中的历史月份汇总；为 null 时隐藏历史区与每日数据区。</summary>
+    /// <summary>左侧列表选中月份的汇总（默认当月）；为 null 时隐藏统计区与每日数据区。</summary>
     [ObservableProperty]
     private InterKnotReportSummary? selectMonthData;
 
-    /// <summary>本地 SQLite 中已缓存的各月汇总列表，按 <c>DataMonth</c> 降序。</summary>
+    /// <summary>左侧月份列表的轻量投影（仅月份 + 当月菲林总量），按 <c>DataMonth</c> 降序；点击某项后才查询该月完整数据。</summary>
     [ObservableProperty]
-    private List<InterKnotReportSummary> monthDataList;
-
-    /// <summary>当前月菲林收入构成的饼图图例（<see cref="ColorRectChart.ChartLegend"/>）。</summary>
-    [ObservableProperty]
-    private List<ColorRectChart.ChartLegend>? currentSeries;
+    private List<InterKnotReportSummaryMonth> monthDataList;
 
     /// <summary>选中历史月的菲林收入构成饼图图例。</summary>
     [ObservableProperty]
@@ -113,6 +115,10 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     /// <summary>选中月按日聚合后的菲林 / 母带 / 邦布券数据，供右侧「每日数据」列表绑定。</summary>
     [ObservableProperty]
     private List<CalendarDayData> dayDataList;
+
+    /// <summary>选中月是否已「获取详情」；为 true 时在「统计数据」行右侧显示刷新按钮。</summary>
+    [ObservableProperty]
+    private bool selectMonthHasDetail;
 
     #endregion
 
@@ -134,25 +140,24 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
     /// <summary>
-    /// 刷新按钮命令：拉取当前月汇总并重新加载本地月份列表。
+    /// 页面加载时初始化数据：拉取当前月汇总、重新加载本地月份列表，并默认选中当月以直接展示当月统计数据。
     /// </summary>
     /// <returns>完成初始化的异步任务。</returns>
-    [RelayCommand]
     private async Task InitializeDataAsync()
     {
-        await Task.Delay(16);
         await GetCurrentSummaryAsync();
         GetMonthDataList();
+        SelectCurrentMonth();
     }
 
 
 
 
     /// <summary>
-    /// 从 API 拉取当前月汇总（<c>month_info</c>，不传 <c>month</c> 参数），更新实时数据区与「获取详情」月份菜单。
-    /// 成功后将汇总写入 <c>ZZZInterKnotReportSummary</c>（<see cref="GameRecordService.GetInterKnotReportSummaryAsync"/> 内部处理）。
+    /// 从 API 拉取当前月汇总（<c>month_info</c>，不传 <c>month</c> 参数），用于确定当月并填充「获取详情」可选月份菜单。
+    /// 成功后将汇总写入结构化缓存表（<see cref="GameRecordService.GetInterKnotReportSummaryAsync"/> 内部处理），当月随后会出现在月份列表并被默认选中。
     /// </summary>
-    /// <returns>拉取并刷新 UI 的异步任务。</returns>
+    /// <returns>拉取并刷新月份菜单的异步任务。</returns>
     private async Task GetCurrentSummaryAsync()
     {
         try
@@ -185,7 +190,6 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
                     });
                 }
             }
-            CurrentSeries = CurrentSummary.MonthData.IncomeComponents.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action), x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
         }
         catch (miHoYoApiException ex)
         {
@@ -209,13 +213,23 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     /// <summary>
     /// 从本地 SQLite 读取该角色所有已缓存月份汇总，填充左侧列表；无数据时显示空状态插图。
     /// </summary>
-    private void GetMonthDataList()
+    /// <param name="preserveSelectedMonth">为 true 时刷新列表后保持当前选中月份不变（用于获取/刷新详情后更新左侧菲林总量）。</param>
+    private void GetMonthDataList(bool preserveSelectedMonth = false)
     {
         try
         {
-            SelectMonthData = null;
-            MonthDataList = _gameRecordService.GetInterKnotReportSummaryList(gameRole);
+            string? selectedMonth = preserveSelectedMonth ? SelectMonthData?.DataMonth : null;
+            if (!preserveSelectedMonth)
+            {
+                SelectMonthData = null;
+                SelectMonthHasDetail = false;
+            }
+            MonthDataList = _gameRecordService.GetInterKnotReportSummaryMonthList(gameRole);
             Image_Emoji.Visibility = MonthDataList.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (!string.IsNullOrEmpty(selectedMonth))
+            {
+                ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.DataMonth == selectedMonth);
+            }
         }
         catch (Exception ex)
         {
@@ -226,10 +240,41 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 默认选中当月：在已加载的月份列表中找到当前自然月并选中，从而进入页面即直接展示当月统计数据与每日数据。
+    /// 当月优先取自刚拉取的实时汇总（<see cref="InterKnotReportSummary.DataMonth"/>，API 权威）；汇总缺失（如网络失败）时按账号所在服务器时区推算，
+    /// 避免本机时区与服务器跨月时选错月份。列表中不存在当月（如无任何缓存）时不选中任何项。
+    /// </summary>
+    private void SelectCurrentMonth()
+    {
+        try
+        {
+            if (MonthDataList is null || MonthDataList.Count == 0)
+            {
+                return;
+            }
+            // 优先用 API 返回的当月；失败时按服务器本地日历推算当前自然月（与每日数据的分天口径一致）。
+            string? currentMonth = CurrentSummary?.DataMonth;
+            if (string.IsNullOrEmpty(currentMonth))
+            {
+                currentMonth = DateTimeOffset.UtcNow.ToOffset(GetServerUtcOffset(gameRole)).ToString("yyyyMM");
+            }
+            // 选中后触发 ListView_MonthDataList_SelectionChanged，从本地缓存填充右侧统计数据与每日数据；找不到当月则保持无选中。
+            ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.DataMonth == currentMonth);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Select current month ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
+        }
+    }
+
+
+
+
 
     /// <summary>
     /// 「获取详情」命令：对指定月份拉取汇总及三类资源（菲林 / 母带 / 邦布券）的逐条明细分页，写入本地后刷新月份列表。
-    /// 若本地明细条数已与 API <c>total</c> 一致则跳过该类型的网络请求（见 <see cref="GameRecordService.GetInterKnotReportDetailAsync"/>）。
+    /// 若本地明细条数已与 API <c>total</c> 一致则仅更新该类型最后一条记录（见 <see cref="GameRecordService.GetInterKnotReportDetailAsync"/>）。
     /// </summary>
     /// <param name="month">目标月份，格式 <c>yyyyMM</c>（如 <c>202506</c>）。</param>
     /// <returns>拉取明细并刷新列表的异步任务。</returns>
@@ -242,13 +287,10 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             {
                 return;
             }
-            var summary = await _gameRecordService.GetInterKnotReportSummaryAsync(gameRole, month);
-            // MonthData.List 含 PolychromesData / MatserTapeData / BooponsData 三种 data_type。
-            foreach (var item in summary.MonthData.List)
-            {
-                await _gameRecordService.GetInterKnotReportDetailAsync(gameRole, month, item.DataType);
-            }
-            GetMonthDataList();
+            await FetchMonthDataAsync(month);
+            _detailFetchedMonths.Add(month);
+            GetMonthDataList(preserveSelectedMonth: true);
+            ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.DataMonth == month);
         }
         catch (miHoYoApiException ex)
         {
@@ -272,7 +314,96 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
     /// <summary>
-    /// 左侧月份列表选中变更：从本地缓存读取完整汇总，更新历史数据区饼图，并按日聚合明细生成 <see cref="DayDataList"/>。
+    /// 刷新当前选中月的统计数据与每日数据：重新拉取汇总及三类资源明细分页并更新右侧展示。
+    /// 仅对已「获取详情」的月份可用（由 <see cref="SelectMonthHasDetail"/> 控制按钮可见性）。
+    /// </summary>
+    /// <returns>刷新数据的异步任务。</returns>
+    [RelayCommand]
+    private async Task RefreshMonthDataAsync()
+    {
+        try
+        {
+            if (gameRole is null || SelectMonthData is null)
+            {
+                return;
+            }
+            string month = SelectMonthData.DataMonth;
+            await FetchMonthDataAsync(month);
+            GetMonthDataList(preserveSelectedMonth: true);
+        }
+        catch (miHoYoApiException ex)
+        {
+            _logger.LogError(ex, "Refresh inter knot report month data ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, SelectMonthData?.DataMonth);
+            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Refresh inter knot report month data ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, SelectMonthData?.DataMonth);
+            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Refresh inter knot report month data ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, SelectMonthData?.DataMonth);
+            InAppToast.MainWindow?.Error(ex);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 从 API 拉取指定月份的汇总与三类资源明细，并刷新右侧统计数据与每日数据展示。
+    /// </summary>
+    /// <param name="month">目标月份，格式 <c>yyyyMM</c>。</param>
+    /// <returns>拉取并更新展示的异步任务。</returns>
+    private async Task FetchMonthDataAsync(string month)
+    {
+        if (gameRole is null)
+        {
+            return;
+        }
+        var summary = await _gameRecordService.GetInterKnotReportSummaryAsync(gameRole, month);
+        // MonthData.List 含 PolychromesData / MatserTapeData / BooponsData 三种 data_type。
+        foreach (var item in summary.MonthData.List)
+        {
+            await _gameRecordService.GetInterKnotReportDetailAsync(gameRole, month, item.DataType);
+        }
+        ApplySelectMonthSummary(summary);
+        _detailFetchedMonths.Add(month);
+    }
+
+
+
+    /// <summary>
+    /// 将选中月汇总应用到右侧绑定属性（统计数据、饼图、每日数据），并更新刷新按钮可见性。
+    /// </summary>
+    /// <param name="summary">该月完整汇总；为 null 时不更新。</param>
+    private void ApplySelectMonthSummary(InterKnotReportSummary summary)
+    {
+        SelectMonthData = summary;
+        SelectSeries = summary.MonthData.IncomeComponents
+            .Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action), x.Percent, actionColorMap.GetValueOrDefault(x.Action)))
+            .ToList();
+        RefreshDailyDataPlot(summary.Uid, summary.DataMonth);
+        UpdateSelectMonthHasDetail(summary.Uid, summary.DataMonth);
+    }
+
+
+
+    /// <summary>
+    /// 根据本地明细缓存与会话内「获取详情」记录，更新刷新按钮是否可见。
+    /// </summary>
+    /// <param name="uid">游戏 UID。</param>
+    /// <param name="dataMonth">月份，格式 <c>yyyyMM</c>。</param>
+    private void UpdateSelectMonthHasDetail(long uid, string dataMonth)
+    {
+        SelectMonthHasDetail = _detailFetchedMonths.Contains(dataMonth)
+            || _gameRecordService.HasInterKnotReportDetail(uid, dataMonth);
+    }
+
+
+
+    /// <summary>
+    /// 左侧月份列表选中变更：按所选项的 UID + 月份从本地缓存读取该月完整汇总，更新统计数据区饼图，并按日聚合明细生成 <see cref="DayDataList"/>。
     /// 不发起网络请求；若该月尚未「获取详情」，每日数据可能全为 0。
     /// </summary>
     /// <param name="sender">月份列表 <see cref="ListView"/>。</param>
@@ -281,11 +412,15 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     {
         try
         {
-            if (e.AddedItems.FirstOrDefault() is InterKnotReportSummary data)
+            // 列表项仅为轻量投影，选中时才按 UID + 月份查询该月完整汇总（含收入构成）。
+            if (e.AddedItems.FirstOrDefault() is InterKnotReportSummaryMonth item)
             {
-                SelectMonthData = _gameRecordService.GetInterKnotReportSummary(data)!;
-                SelectSeries = SelectMonthData.MonthData.IncomeComponents.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action), x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
-                RefreshDailyDataPlot(data);
+                var summary = _gameRecordService.GetInterKnotReportSummary(item.Uid, item.DataMonth);
+                if (summary is null)
+                {
+                    return;
+                }
+                ApplySelectMonthSummary(summary);
             }
         }
         catch (Exception ex)
@@ -299,15 +434,14 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     /// <summary>
     /// 从本地 SQLite 读取选中月三类资源明细，按游戏服务器时区的日历日累加数量，生成每日数据列表与进度条比例。
     /// </summary>
-    /// <param name="data">选中月份的汇总对象，提供 <see cref="InterKnotReportSummary.Uid"/> 与 <see cref="InterKnotReportSummary.DataMonth"/>。</param>
-    private void RefreshDailyDataPlot(InterKnotReportSummary data)
+    /// <param name="uid">游戏 UID。</param>
+    /// <param name="dataMonth">选中月份，格式 <c>yyyyMM</c>（如 <c>202506</c>）。</param>
+    private void RefreshDailyDataPlot(long uid, string dataMonth)
     {
         try
         {
-            var items_poly = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.PolychromesData);
-            var items_tape = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.MatserTapeData);
-            var items_boopon = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.BooponsData);
-            int days = DateTime.DaysInMonth(int.Parse(data.DataMonth[..4]), int.Parse(data.DataMonth[4..]));
+            var items = _gameRecordService.GetInterKnotReportDetailItems(uid, dataMonth);
+            int days = DateTime.DaysInMonth(int.Parse(dataMonth[..4]), int.Parse(dataMonth[4..]));
 
             // 接口返回的 time 是 Unix 时间戳（经 TimestampStringJsonConverter 转成 UTC 的 DateTimeOffset）。
             // 官方绳网月报按“游戏服务器本地日历日”分天，因此这里必须按账号所在服务器的时区取日，
@@ -316,32 +450,27 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             TimeSpan serverOffset = GetServerUtcOffset(gameRole);
 
             var stats_poly = new int[days];
-            foreach (var item in items_poly)
-            {
-                var day = item.Time.ToOffset(serverOffset).Day;
-                if (day <= days)
-                {
-                    stats_poly[day - 1] += item.Number;
-                }
-            }
-
             var stats_tape = new int[days];
-            foreach (var item in items_tape)
-            {
-                var day = item.Time.ToOffset(serverOffset).Day;
-                if (day <= days)
-                {
-                    stats_tape[day - 1] += item.Number;
-                }
-            }
-
             var stats_boopon = new int[days];
-            foreach (var item in items_boopon)
+            foreach (var item in items)
             {
                 var day = item.Time.ToOffset(serverOffset).Day;
-                if (day <= days)
+                if (day > days)
                 {
-                    stats_boopon[day - 1] += item.Number;
+                    continue;
+                }
+                int index = day - 1;
+                switch (item.DataType)
+                {
+                    case InterKnotReportDataType.PolychromesData:
+                        stats_poly[index] += item.Number;
+                        break;
+                    case InterKnotReportDataType.MatserTapeData:
+                        stats_tape[index] += item.Number;
+                        break;
+                    case InterKnotReportDataType.BooponsData:
+                        stats_boopon[index] += item.Number;
+                        break;
                 }
             }
 
@@ -357,7 +486,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             {
                 list.Add(new CalendarDayData
                 {
-                    Day = $"{data.DataMonth[4..]}-{i + 1:D2}",
+                    Day = $"{dataMonth[4..]}-{i + 1:D2}",
                     Poly = stats_poly[i],
                     Tape = stats_tape[i],
                     Boopon = stats_boopon[i],
@@ -431,6 +560,42 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
     /// <summary>
+    /// 语言切换时刷新饼图图例等已物化的本地化文案，并更新 x:Bind 绑定。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="__">语言变更消息（未使用）。</param>
+    private void OnLanguageChanged(object _, LanguageChangedMessage __)
+    {
+        if (SelectMonthData?.MonthData?.IncomeComponents is { } components)
+        {
+            SelectSeries = components
+                .Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action), x.Percent, actionColorMap.GetValueOrDefault(x.Action)))
+                .ToList();
+        }
+        this.Bindings.Update();
+    }
+
+
+
+    /// <summary>
+    /// 将 API <c>data_type</c> 映射为本地化资源名称，供「统计数据」展示；不依赖 API <c>data_name</c> 或本地缓存名称。
+    /// </summary>
+    /// <param name="type"><see cref="InterKnotReportDataType"/> 常量或 API 返回的同类字符串。</param>
+    /// <returns>本地化文案；未知类型原样返回。</returns>
+    public static string DataTypeName(string type)
+    {
+        return type switch
+        {
+            InterKnotReportDataType.PolychromesData => Lang.InterKnotMonthlyReportPage_Polychrome,
+            InterKnotReportDataType.MatserTapeData => Lang.InterKnotMonthlyReportPage_MasterTape,
+            InterKnotReportDataType.BooponsData => Lang.InterKnotMonthlyReportPage_Boopon,
+            _ => type,
+        };
+    }
+
+
+
+    /// <summary>
     /// 将 API <c>data_type</c> 映射为资源图标，供 XAML <c>x:Bind</c> 使用。
     /// </summary>
     /// <param name="type"><see cref="InterKnotReportDataType"/> 常量或 API 返回的同类字符串。</param>
@@ -467,19 +632,6 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             "other_rewards" => Lang.InterKnotMonthlyReportPage_OtherRewards,
             _ => action,
         };
-    }
-
-
-
-
-    /// <summary>
-    /// 从月度汇总中提取菲林（Polychrome）总量，供左侧月份列表项显示。
-    /// </summary>
-    /// <param name="monthData">月份汇总中的 <see cref="InterKnotReportSummary.MonthData"/>。</param>
-    /// <returns>菲林数量；无数据时返回 0。</returns>
-    public static int GetPolychromeCount(InterKnotReportMonthData monthData)
-    {
-        return monthData?.List?.FirstOrDefault(a => a.DataType == InterKnotReportDataType.PolychromesData)?.Count ?? 0;
     }
 
 
