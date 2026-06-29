@@ -953,6 +953,51 @@
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>Звёздные и Особые пропуска</value>
   </data>
+  <data name="TrailblazeCalendarPage_DailyReward" xml:space="preserve">
+    <value>Ежедневная тренировка</value>
+  </data>
+  <data name="TrailblazeCalendarPage_SpaceReward" xml:space="preserve">
+    <value>Виртуальная вселенная</value>
+  </data>
+  <data name="TrailblazeCalendarPage_EventReward" xml:space="preserve">
+    <value>Награды событий</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AdventureReward" xml:space="preserve">
+    <value>Награды за приключения</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AbyssReward" xml:space="preserve">
+    <value>Зал забвения</value>
+  </data>
+  <data name="TrailblazeCalendarPage_MailReward" xml:space="preserve">
+    <value>Награды за почту</value>
+  </data>
+  <data name="TrailblazeCalendarPage_OtherReward" xml:space="preserve">
+    <value>Другое</value>
+  </data>
+  <data name="TravelersDiaryPage_DailyCommission" xml:space="preserve">
+    <value>Ежедневные Поручения</value>
+  </data>
+  <data name="TravelersDiaryPage_SpiralAbyss" xml:space="preserve">
+    <value>Витая Бездна</value>
+  </data>
+  <data name="TravelersDiaryPage_BattlePass" xml:space="preserve">
+    <value>Боевой пропуск</value>
+  </data>
+  <data name="TravelersDiaryPage_Event" xml:space="preserve">
+    <value>Событие</value>
+  </data>
+  <data name="TravelersDiaryPage_Quest" xml:space="preserve">
+    <value>Задание</value>
+  </data>
+  <data name="TravelersDiaryPage_Mail" xml:space="preserve">
+    <value>Почта</value>
+  </data>
+  <data name="TravelersDiaryPage_Achievement" xml:space="preserve">
+    <value>Достижения</value>
+  </data>
+  <data name="TravelersDiaryPage_Other" xml:space="preserve">
+    <value>Другое</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>Камень Истока</value>
   </data>
@@ -1571,6 +1616,18 @@
   </data>
   <data name="GameLauncherPage_RemovableStorageDeviceNotConnected" xml:space="preserve">
     <value>Съемное устройство хранения не подключено.</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopon" xml:space="preserve">
+    <value>Купоны банбу</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>Зашифрованная и оригинальная мастер-лента</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychrome" xml:space="preserve">
+    <value>Полихром</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_StatisticalData" xml:space="preserve">
+    <value>Статистические данные</value>
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>Поток доходов от полихром</value>

@@ -952,6 +952,51 @@
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>星軌チケット＆星軌専用チケット</value>
   </data>
+  <data name="TrailblazeCalendarPage_DailyReward" xml:space="preserve">
+    <value>日常訓練</value>
+  </data>
+  <data name="TrailblazeCalendarPage_SpaceReward" xml:space="preserve">
+    <value>模擬宇宙</value>
+  </data>
+  <data name="TrailblazeCalendarPage_EventReward" xml:space="preserve">
+    <value>イベント報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AdventureReward" xml:space="preserve">
+    <value>冒険報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AbyssReward" xml:space="preserve">
+    <value>忘却の庭</value>
+  </data>
+  <data name="TrailblazeCalendarPage_MailReward" xml:space="preserve">
+    <value>メール報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_OtherReward" xml:space="preserve">
+    <value>その他</value>
+  </data>
+  <data name="TravelersDiaryPage_DailyCommission" xml:space="preserve">
+    <value>デイリー依頼</value>
+  </data>
+  <data name="TravelersDiaryPage_SpiralAbyss" xml:space="preserve">
+    <value>深境螺旋</value>
+  </data>
+  <data name="TravelersDiaryPage_BattlePass" xml:space="preserve">
+    <value>紀行</value>
+  </data>
+  <data name="TravelersDiaryPage_Event" xml:space="preserve">
+    <value>期間限定イベント</value>
+  </data>
+  <data name="TravelersDiaryPage_Quest" xml:space="preserve">
+    <value>任務</value>
+  </data>
+  <data name="TravelersDiaryPage_Mail" xml:space="preserve">
+    <value>メール</value>
+  </data>
+  <data name="TravelersDiaryPage_Achievement" xml:space="preserve">
+    <value>実績報酬</value>
+  </data>
+  <data name="TravelersDiaryPage_Other" xml:space="preserve">
+    <value>その他</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>原石</value>
   </data>
@@ -1569,6 +1614,18 @@
   </data>
   <data name="GameLauncherPage_RemovableStorageDeviceNotConnected" xml:space="preserve">
     <value>リムーバブルストレージデバイスが接続されていません。</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopon" xml:space="preserve">
+    <value>ボンプ券</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>暗号化マスターテープ&amp;原盤マスターテープ</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychrome" xml:space="preserve">
+    <value>ポリクローム</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_StatisticalData" xml:space="preserve">
+    <value>統計データ</value>
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>映画の収益構成</value>

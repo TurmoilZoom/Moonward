@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DownloadGameDialog_PackageSize" xml:space="preserve">
-    <value>ขนาดของ Package</value>
+    <value>ขนาดแพ็กเกจ</value>
   </data>
   <data name="DownloadGameDialog_Downloaded" xml:space="preserve">
     <value>ดาวน์โหลดแล้ว:</value>
@@ -134,7 +134,7 @@
     <value>ไม่มีสิทธิในการเขียน</value>
   </data>
   <data name="SelectDirectoryPage_OK" xml:space="preserve">
-    <value>OK</value>
+    <value>ตกลง</value>
   </data>
   <data name="SelectDirectoryPage_ChooseAnother" xml:space="preserve">
     <value>เลือกเพิ่มเติม</value>
@@ -146,13 +146,13 @@
     <value>เหมือนจะเป็นครั้งแรกที่คุณใช้ {Starward} นะ</value>
   </data>
   <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
-    <value>ไปที่ Launcher</value>
+    <value>ไปที่ตัวเรียกใช้งาน</value>
   </data>
   <data name="SelectGamePage_SelectFolder" xml:space="preserve">
     <value>เลือกโฟลเดอร์</value>
   </data>
   <data name="SelectGamePage_SomeGame" xml:space="preserve">
-    <value>{Starward} รองรับเกมของ {miHoYo/HoYoverse} แค่บางเกมเท่านั้น โปรดเลือกเกมที่ต้องการจากด้านล่าง - สามารถเปลี่ยนเมื่อไหร่ก็ได้หลังจากเข้า Launcher</value>
+    <value>{Starward} รองรับเกมของ {miHoYo/HoYoverse} แค่บางเกมเท่านั้น โปรดเลือกเกมที่ต้องการจากด้านล่าง - สามารถเปลี่ยนเมื่อไหร่ก็ได้หลังจากเข้าตัวเรียกใช้งาน</value>
   </data>
   <data name="SelectGamePage_TheLastStep" xml:space="preserve">
     <value>ขั้นตอนสุดท้ายแล้ว ~</value>
@@ -185,7 +185,7 @@
     <value>ไม่มีสิทธิ</value>
   </data>
   <data name="DownloadGamePage_PleaseStartAsAdministrator" xml:space="preserve">
-    <value>กรุณาเปิดโปรแกรมด้วยสิทธิ Administrator</value>
+    <value>กรุณาเปิดโปรแกรมด้วยสิทธิผู้ดูแลระบบ</value>
   </data>
   <data name="DownloadGamePage_Start" xml:space="preserve">
     <value>เริ่ม</value>
@@ -269,7 +269,7 @@
     <value>ซิงค์จาก Miyoushe (ทดลอง)</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Sync All from Miyoushe (Experimental)</value>
+    <value>ซิงค์ทั้งหมดจาก Miyoushe (ทดลอง)</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>ใส่ URL บันทึกการสุ่ม</value>
@@ -345,7 +345,7 @@
     <value>ลบ</value>
   </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
-    <value>ลบประวัติการสุ่ม {0} ครั้งของ UID {1}</value>
+    <value>ลบบันทึกการอธิษฐาน {0} รายการของ UID {1}</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
   </data>
   <data name="GachaLogPage_DeleteGachaRecordsWarning" xml:space="preserve">
@@ -432,10 +432,10 @@
     <value>ความละเอียดการเรนเดอร์</value>
   </data>
   <data name="GameSettingPage_FPS" xml:space="preserve">
-    <value>FPS</value>
+    <value>อัตราเฟรม</value>
   </data>
   <data name="GameSettingPage_VSync" xml:space="preserve">
-    <value>V-Sync</value>
+    <value>ซิงโครไนซ์แนวตั้ง</value>
   </data>
   <data name="GameSettingPage_AntiAliasing" xml:space="preserve">
     <value>เทคโนโลยีลบรอยหยัก</value>
@@ -650,7 +650,7 @@
     <value>เวอร์ชันปัจจุบัน:</value>
   </data>
   <data name="SettingPage_JoinPreviewReleaseChannel" xml:space="preserve">
-    <value>เข้าร่วม Preview Release Channel</value>
+    <value>เข้าร่วมช่องอัปเดตพรีวิว</value>
   </data>
   <data name="SettingPage_FileManager" xml:space="preserve">
     <value>ตัวจัดการไฟล์</value>
@@ -793,16 +793,16 @@
     <value>ลบบทบาทในเกม</value>
   </data>
   <data name="HoyolabToolboxPage_SpiralAbyss" xml:space="preserve">
-    <value>Spiral Abyss</value>
+    <value>วิหารแห่งห้วงลึก</value>
   </data>
   <data name="HoyolabToolboxPage_TravelersDiary" xml:space="preserve">
     <value>บันทึกของนักเดินทาง</value>
   </data>
   <data name="HoyolabToolboxPage_SimulatedUniverse" xml:space="preserve">
-    <value>Simulated Universe</value>
+    <value>จักรวาลจำลอง</value>
   </data>
   <data name="HoyolabToolboxPage_ForgottenHall" xml:space="preserve">
-    <value>Forgotten Hall</value>
+    <value>ห้องโถงที่ถูกลืม</value>
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>ปฏิทินการบุกเบิก</value>
@@ -844,7 +844,7 @@
     <comment>get primogems and mora details</comment>
   </data>
   <data name="TravelersDiaryPage_RealTimeData" xml:space="preserve">
-    <value>ข้อมูล Real-Time</value>
+    <value>ข้อมูลแบบเรียลไทม์</value>
   </data>
   <data name="TravelersDiaryPage_HistoricalData" xml:space="preserve">
     <value>ข้อมูลในอดีต</value>
@@ -856,7 +856,7 @@
     <value>ได้รับวันนี้</value>
   </data>
   <data name="TravelersDiaryPage_PrimogemsObtained" xml:space="preserve">
-    <value>Primogems ทีได้รับ</value>
+    <value>ไพรมอเจมที่ได้รับ</value>
   </data>
   <data name="SpiralAbyssPage_DeepestDescent" xml:space="preserve">
     <value>ชั่นลึกที่สุดที่ไปถึง</value>
@@ -886,7 +886,7 @@
 คุณยอมรับความเสี่ยงและยืนยันที่จะใช้ฟีเจอร์นี้หรือไม่</value>
   </data>
   <data name="TrailblazeCalendarPage_StellarJadeSources" xml:space="preserve">
-    <value>ผลรวม Stellar Jade ที่ได้รับ</value>
+    <value>แหล่งที่มาของหยกแสงดาว</value>
   </data>
   <data name="ForgottenHallPage_Period" xml:space="preserve">
     <value>รอบ</value>
@@ -914,7 +914,7 @@
     <value>จะใช้พื้นที่เพิ่มเติมเมื่อแตกไฟล์</value>
   </data>
   <data name="SimulatedUniversePage_AbilityTreeBuffsActivated" xml:space="preserve">
-    <value>Ability Tree ที่เปิดใช้งานแล้ว</value>
+    <value>ต้นไม้ความสามารถที่เปิดใช้งานแล้ว</value>
   </data>
   <data name="SimulatedUniversePage_UnlockedCurios" xml:space="preserve">
     <value>วัตถุหายากที่ปลดล็อกแล้ว</value>
@@ -947,16 +947,61 @@
     <value>ข้อมูลรายวัน</value>
   </data>
   <data name="TrailblazeCalendarPage_StellarJade" xml:space="preserve">
-    <value>Stellar Jade</value>
+    <value>หยกแสงดาว</value>
   </data>
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
-    <value>Pass และ Special Pass</value>
+    <value>ตั๋วรางดาว &amp; ตั๋วรางดาวพิเศษ</value>
+  </data>
+  <data name="TrailblazeCalendarPage_DailyReward" xml:space="preserve">
+    <value>การฝึกฝนรายวัน</value>
+  </data>
+  <data name="TrailblazeCalendarPage_SpaceReward" xml:space="preserve">
+    <value>จักรวาลจำลอง</value>
+  </data>
+  <data name="TrailblazeCalendarPage_EventReward" xml:space="preserve">
+    <value>รางวัลกิจกรรม</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AdventureReward" xml:space="preserve">
+    <value>รางวัลการผจญภัย</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AbyssReward" xml:space="preserve">
+    <value>ห้องโถงที่ถูกลืม</value>
+  </data>
+  <data name="TrailblazeCalendarPage_MailReward" xml:space="preserve">
+    <value>รางวัลทางจดหมาย</value>
+  </data>
+  <data name="TrailblazeCalendarPage_OtherReward" xml:space="preserve">
+    <value>อื่น ๆ</value>
+  </data>
+  <data name="TravelersDiaryPage_DailyCommission" xml:space="preserve">
+    <value>คำสั่งรายวัน</value>
+  </data>
+  <data name="TravelersDiaryPage_SpiralAbyss" xml:space="preserve">
+    <value>วิหารแห่งห้วงลึก</value>
+  </data>
+  <data name="TravelersDiaryPage_BattlePass" xml:space="preserve">
+    <value>บันทึกการเดินทาง</value>
+  </data>
+  <data name="TravelersDiaryPage_Event" xml:space="preserve">
+    <value>กิจกรรม</value>
+  </data>
+  <data name="TravelersDiaryPage_Quest" xml:space="preserve">
+    <value>ภารกิจ</value>
+  </data>
+  <data name="TravelersDiaryPage_Mail" xml:space="preserve">
+    <value>จดหมาย</value>
+  </data>
+  <data name="TravelersDiaryPage_Achievement" xml:space="preserve">
+    <value>ความสำเร็จ</value>
+  </data>
+  <data name="TravelersDiaryPage_Other" xml:space="preserve">
+    <value>อื่น ๆ</value>
   </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
-    <value>Primogems</value>
+    <value>ไพรมอเจม</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
-    <value>Mora</value>
+    <value>โมรา</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>ชั้นที่ {X}</value>
@@ -986,10 +1031,10 @@
     <value>เลือกเซิฟเวอร์</value>
   </data>
   <data name="SettingPage_EnableSystemTrayIcon" xml:space="preserve">
-    <value>ไอคอนบน System Tray</value>
+    <value>ไอคอนแถบระบบ</value>
   </data>
   <data name="SettingPage_ExitLauncherWhenClosingWindow" xml:space="preserve">
-    <value>ออกจาก Launcher เมื่อปิดวินโดวส์</value>
+    <value>ออกจากตัวเรียกใช้งานเมื่อปิดหน้าต่าง</value>
   </data>
   <data name="Common_Exit" xml:space="preserve">
     <value>ออก</value>
@@ -1057,10 +1102,10 @@
     <value>บัญชีที่มีรหัสผู้ใช้ {0} มีอยู่แล้ว, ต้องการแทนที่หรือบันทึกใหม่?</value>
   </data>
   <data name="SettingPage_RepairSystemTray" xml:space="preserve">
-    <value>ซ่อมแซม System Tray</value>
+    <value>ซ่อมแซมแถบระบบ</value>
   </data>
   <data name="SettingPage_RepairSystemTrayContent" xml:space="preserve">
-    <value>แก้ไขปัญหาที่ไม่สามารถสร้างไอคอน System Tray ได้ วิธีนี้จะเริ่มทำงาน Windows Explorer​ ใหม่</value>
+    <value>แก้ไขปัญหาที่ไม่สามารถสร้างไอคอนแถบระบบได้ วิธีนี้จะเริ่มทำงานตัวจัดการไฟล์ Windows ใหม่</value>
   </data>
   <data name="SelfQueryPage_AccountRecords" xml:space="preserve">
     <value>ประวัติบัญชี</value>
@@ -1133,7 +1178,7 @@
     <value>เอกสารช่วยเหลือ</value>
   </data>
   <data name="UrlProtocolDocWindow_Title" xml:space="preserve">
-    <value>URL Protocol</value>
+    <value>โปรโทคอล URL</value>
   </data>
   <data name="LauncherPage_OpenInBrowser" xml:space="preserve">
     <value>เปิดในบราวเซอร์</value>
@@ -1372,7 +1417,7 @@
     <value>โฟลเดอร์ YuanShen_Data และ GenshinImpact_Data ไม่สามารถมีอยู่พร้อมกันได้</value>
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
-    <value>แสดง Chronicled Wish</value>
+    <value>แสดงการอธิษฐานบันทึกรวม</value>
   </data>
   <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
     <value>อัปเดตลายนิ้วมืออุปกรณ์</value>
@@ -1570,6 +1615,18 @@
   <data name="GameLauncherPage_RemovableStorageDeviceNotConnected" xml:space="preserve">
     <value>ไม่ได้เชื่อมต่ออุปกรณ์จัดเก็บข้อมูลแบบถอดได้</value>
   </data>
+  <data name="InterKnotMonthlyReportPage_Boopon" xml:space="preserve">
+    <value>คูปองแบงบู</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>เทปมาสเตอร์ที่เข้ารหัส &amp; เทปมาสเตอร์ต้นฉบับ</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychrome" xml:space="preserve">
+    <value>โพลีโครม</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_StatisticalData" xml:space="preserve">
+    <value>ข้อมูลสถิติ</value>
+  </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>รายได้โพลีโครม</value>
   </data>
@@ -1586,10 +1643,10 @@
     <value>รางวัลกิจกรรม</value>
   </data>
   <data name="InterKnotMonthlyReportPage_HollowZeroRewards" xml:space="preserve">
-    <value>รางวัล Hollow Zero</value>
+    <value>รางวัลศูนย์ฮอลโลว์</value>
   </data>
   <data name="InterKnotMonthlyReportPage_ShiyuDefenseRewards" xml:space="preserve">
-    <value>รางวัล Shiyu Defense</value>
+    <value>รางวัลการป้องกันชิยู</value>
   </data>
   <data name="InterKnotMonthlyReportPage_MailRewards" xml:space="preserve">
     <value>รางวัลทางจดหมาย</value>
@@ -1610,7 +1667,7 @@
     <value>คำเตือน: ช่วงเวลาที่เลือกมีบันทึกการอธิษฐานที่เก่ากว่า 6 เดือน ซึ่งไม่สามารถเรียกคืนได้หลังจากลบ</value>
   </data>
   <data name="DeleteGachaLogDialog_ThisAccountHas0GachaRecordS" xml:space="preserve">
-    <value>บัญชีนี้มี {0} รายการบันทึกการอธิษฐาน(s).</value>
+    <value>บัญชีนี้มี {0} รายการบันทึกการอธิษฐาน</value>
   </data>
   <data name="DeleteGachaLogDialog_TheSelectedTimePeriodIncludes0GachaRecords" xml:space="preserve">
     <value>ช่วงเวลาที่เลือกมีบันทึกการอธิษฐาน {0} รายการ</value>
@@ -1768,7 +1825,7 @@
     <value>ตรวจพบว่าแอปพลิเคชันอยู่ในอุปกรณ์จัดเก็บข้อมูลแบบถอดได้ ไม่แนะนำให้ให้บริการ RPC ทำงานในพื้นหลัง</value>
   </data>
   <data name="ZZZGachaService_ImportSignalSearchRecordsSuccessfully" xml:space="preserve">
-    <value>นำเข้า {0} รายการบันทึกการค้นหาสัญญาณ(s) สำเร็จ</value>
+    <value>นำเข้าบันทึกการค้นหาสัญญาณ {0} รายการสำเร็จ</value>
   </data>
   <data name="InstallGameDialog_HardLinkDesc" xml:space="preserve">
     <value>หากเส้นทางที่เลือกอยู่ในไดรฟ์เดียวกับไคลเอนต์ของเซิร์ฟเวอร์อื่นที่ติดตั้งไว้ สามารถติดตั้งไคลเอนต์หลายตัวสำหรับเซิร์ฟเวอร์ต่างๆ โดยใช้ฮาร์ดลิงก์ ซึ่งใช้พื้นที่จัดเก็บเพิ่มเติมเพียงเล็กน้อย</value>
@@ -1987,7 +2044,7 @@
     <value>เวลาที่ต้องใช้ในการฟื้นฟู</value>
   </data>
   <data name="DailyNoteButton_BH3_DailyBP" xml:space="preserve">
-    <value>ค่า BP รายวัน</value>
+    <value>ค่าฝึกฝนรายวัน</value>
   </data>
   <data name="DailyNoteButton_Genshin_DailyCommissionRewards" xml:space="preserve">
     <value>รางวัลคำสั่งรายวัน</value>
@@ -2071,7 +2128,7 @@
     <value>เวลารีเฟรชที่เหลือ</value>
   </data>
   <data name="DailyNoteButton_ZZZ_RiduWeeklyPoints" xml:space="preserve">
-    <value>คะแนน Ridu รายสัปดาห์</value>
+    <value>คะแนนสัปดาห์ลิดู</value>
   </data>
   <data name="Common_Disabled" xml:space="preserve">
     <value>ปิดใช้งาน</value>
@@ -2080,10 +2137,10 @@
     <value>เปิดใช้งาน</value>
   </data>
   <data name="HoyolabToolboxPage_ShiyuDefense" xml:space="preserve">
-    <value>Shiyu Defense</value>
+    <value>การป้องกันชิยู</value>
   </data>
   <data name="HoyolabToolboxPage_DeadlyAssault" xml:space="preserve">
-    <value>Deadly Assault</value>
+    <value>ศึกจู่โจมวิกฤต</value>
   </data>
   <data name="ShiyuDefensePage_HighestStageCleared" xml:space="preserve">
     <value>ด่านที่ผ่านสูงสุด</value>
@@ -2212,7 +2269,7 @@
     <value>โพลีโครมที่ได้รับแล้ว</value>
   </data>
   <data name="DailyNoteButton_0DaySRemaining" xml:space="preserve">
-    <value>เหลือ {0} วัน(s)</value>
+    <value>เหลือ {0} วัน</value>
   </data>
   <data name="InstallGameDialog_MappedNetworkDrivesAreNotSupportedPleaseUseANetworkSharePathStartingWithDoubleBackslashes" xml:space="preserve">
     <value>ไม่รองรับไดรฟ์เครือข่ายแบบแมป โปรดใช้พาธการแชร์เครือข่ายที่ขึ้นต้นด้วยเครื่องหมายแบ็กสแลชคู่ (\\)</value>
@@ -2248,7 +2305,7 @@
     <value>รูปภาพจากโฟลเดอร์ต่อไปนี้จะแสดงในแกลเลอรี</value>
   </data>
   <data name="ImageViewWindow2_OpenInExplorer" xml:space="preserve">
-    <value>เปิดใน Explorer</value>
+    <value>เปิดในตัวจัดการไฟล์</value>
   </data>
   <data name="ImageViewWindow2_OpenWith" xml:space="preserve">
     <value>เปิดด้วย</value>
@@ -2353,10 +2410,10 @@
     <value>ลงทะเบียนแป้นพิมพ์ลัด ({0}) ไม่สำเร็จ</value>
   </data>
   <data name="HotkeyManager_TheShortcutKeys0IsAlreadyInUsePleaseModifyItInSettingsPage" xml:space="preserve">
-    <value>แป้นพิมพ์ลัด ({0}) ถูกใช้งานอยู่แล้ว โปรดแก้ไขในหน้า Settings</value>
+    <value>แป้นพิมพ์ลัด ({0}) ถูกใช้งานอยู่แล้ว โปรดแก้ไขในหน้าการตั้งค่า</value>
   </data>
   <data name="HotkeyManager_FailedToRegisterTheShortcutKeys0PleaseRetryInSettingsPage" xml:space="preserve">
-    <value>ลงทะเบียนแป้นพิมพ์ลัด ({0}) ไม่สำเร็จ โปรดลองอีกครั้งในหน้า Settings</value>
+    <value>ลงทะเบียนแป้นพิมพ์ลัด ({0}) ไม่สำเร็จ โปรดลองอีกครั้งในหน้าการตั้งค่า</value>
   </data>
   <data name="ScreenshotSetting_ScreenshotShortcut" xml:space="preserve">
     <value>แป้นพิมพ์ลัดภาพหน้าจอ</value>
@@ -2668,7 +2725,7 @@
     <value>จำนวนครั้งที่ท้าทาย</value>
   </data>
   <data name="ChallengePeakPage_KingInCheckStageRecords" xml:space="preserve">
-    <value>บันทึกด่าน King in Check</value>
+    <value>บันทึกด่านกษัตริกซ์</value>
   </data>
   <data name="ChallengePeakPage_Cleared" xml:space="preserve">
     <value>ผ่านแล้ว</value>
@@ -2695,7 +2752,7 @@
     <value>ลบไฟล์ที่ซ้ำกัน</value>
   </data>
   <data name="BackgroundViewPage_0DuplicateFileSHasBeenDeleted" xml:space="preserve">
-    <value>{0} ไฟล์ที่ซ้ำกัน(s) ถูกลบแล้ว</value>
+    <value>ลบไฟล์ที่ซ้ำกัน {0} ไฟล์แล้ว</value>
   </data>
   <data name="Common_All" xml:space="preserve">
     <value>ทั้งหมด</value>
@@ -2731,10 +2788,10 @@
     <value>การถอดรหัสวิดีโอล้มเหลว</value>
   </data>
   <data name="DailyNoteButton_StarRail_SimulatedUniversePoints" xml:space="preserve">
-    <value>คะแนน Simulated Universe</value>
+    <value>คะแนนจักรวาลจำลอง</value>
   </data>
   <data name="DailyNoteButton_StarRail_CurrencyWarsPoints" xml:space="preserve">
-    <value>คะแนน Currency Wars</value>
+    <value>คะแนนสงครามเงินตรา</value>
   </data>
   <data name="AppBackground_VideoDecodingFailedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>การถอดรหัสวิดีโอล้มเหลว โปรดติดตั้ง VP9 Video Extensions</value>

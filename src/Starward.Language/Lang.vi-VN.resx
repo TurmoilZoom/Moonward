@@ -953,6 +953,51 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>Vé tinh cầu &amp; Vé tinh cầu đặc biệt</value>
   </data>
+  <data name="TrailblazeCalendarPage_DailyReward" xml:space="preserve">
+    <value>Huấn Luyện Mỗi Ngày</value>
+  </data>
+  <data name="TrailblazeCalendarPage_SpaceReward" xml:space="preserve">
+    <value>Vũ trụ mô phỏng</value>
+  </data>
+  <data name="TrailblazeCalendarPage_EventReward" xml:space="preserve">
+    <value>Phần quà sự kiện</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AdventureReward" xml:space="preserve">
+    <value>Phần thưởng phiêu lưu</value>
+  </data>
+  <data name="TrailblazeCalendarPage_AbyssReward" xml:space="preserve">
+    <value>Sãnh đường lãng quên</value>
+  </data>
+  <data name="TrailblazeCalendarPage_MailReward" xml:space="preserve">
+    <value>Phần quà qua thư</value>
+  </data>
+  <data name="TrailblazeCalendarPage_OtherReward" xml:space="preserve">
+    <value>Khác</value>
+  </data>
+  <data name="TravelersDiaryPage_DailyCommission" xml:space="preserve">
+    <value>Uỷ Thác Hằng Ngày</value>
+  </data>
+  <data name="TravelersDiaryPage_SpiralAbyss" xml:space="preserve">
+    <value>La hoàn thâm cảnh</value>
+  </data>
+  <data name="TravelersDiaryPage_BattlePass" xml:space="preserve">
+    <value>Kỳ Hành</value>
+  </data>
+  <data name="TravelersDiaryPage_Event" xml:space="preserve">
+    <value>Sự kiện</value>
+  </data>
+  <data name="TravelersDiaryPage_Quest" xml:space="preserve">
+    <value>Nhiệm vụ</value>
+  </data>
+  <data name="TravelersDiaryPage_Mail" xml:space="preserve">
+    <value>Thư</value>
+  </data>
+  <data name="TravelersDiaryPage_Achievement" xml:space="preserve">
+    <value>Thành tựu</value>
+  </data>
+  <data name="TravelersDiaryPage_Other" xml:space="preserve">
+    <value>Khác</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>Nguyên thạch</value>
   </data>
@@ -1571,6 +1616,18 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="GameLauncherPage_RemovableStorageDeviceNotConnected" xml:space="preserve">
     <value>Thiết bị lưu trữ di động không được kết nối.</value>
   </data>
+  <data name="InterKnotMonthlyReportPage_Boopon" xml:space="preserve">
+    <value>Phiếu Bangboo</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>Băng gốc mã hóa &amp; băng gốc nguyên bản</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychrome" xml:space="preserve">
+    <value>Film Màu</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_StatisticalData" xml:space="preserve">
+    <value>Dữ liệu thống kê</value>
+  </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>Các nguồn thu đa dạng</value>
   </data>
@@ -2168,7 +2225,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Cường độ sáng toàn màn hình tối đa</value>
   </data>
   <data name="GenshinHDRLuminanceSettingDialog_SDRWhiteLuminance" xml:space="preserve">
-    <value />
+    <value>Độ sáng trắng SDR</value>
   </data>
   <data name="GenshinHDRLuminanceSettingDialog_StandardDynamicRange" xml:space="preserve">
     <value>Dải tương phản tiêu chuẩn (SDR)</value>
