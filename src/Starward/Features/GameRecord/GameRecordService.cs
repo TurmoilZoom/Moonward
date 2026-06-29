@@ -495,11 +495,12 @@ internal class GameRecordService
     /// 本地条数较少时，增量拉取「原末条 + 新增条」；本地条数较多时先按时间删除末尾多余记录再更新末条。
     /// </summary>
     /// <param name="role">游戏角色。</param>
+    /// <param name="year">目标年份；须与汇总缓存 <c>GenshinTravelersDiaryMonthData.Year</c> 一致。</param>
     /// <param name="month">目标月份（1–12）。</param>
     /// <param name="type">资源类型：1 原石，2 摩拉。</param>
     /// <param name="limit">分页大小，最大 100。</param>
     /// <returns>本次新增写入的明细条数；仅更新已有记录或 API 无数据时返回 0。</returns>
-    public async Task<int> GetTravelersDiaryDetailAsync(GameRecordRole role, int month, int type, int limit = 100)
+    public async Task<int> GetTravelersDiaryDetailAsync(GameRecordRole role, int year, int month, int type, int limit = 100)
     {
         int total = (await _gameRecordClient.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, 1)).Total;
         if (total == 0)
@@ -507,15 +508,6 @@ internal class GameRecordService
             return 0;
         }
         using var dapper = DatabaseService.CreateConnection();
-        // 明细行的 Year 取自该月汇总缓存；汇总尚未写入时由 API 明细首条时间推断。
-        int year = dapper.QuerySingleOrDefault<int>(
-            "SELECT Year FROM GenshinTravelersDiaryMonthData WHERE Uid = @Uid AND Month = @month ORDER BY Year DESC LIMIT 1;",
-            new { role.Uid, month });
-        if (year == 0)
-        {
-            var probe = await _gameRecordClient.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, 1);
-            year = probe.List?.FirstOrDefault()?.Time.Year ?? DateTime.UtcNow.Year;
-        }
 
         int existCount = dapper.QuerySingleOrDefault<int>(
             "SELECT COUNT(*) FROM GenshinTravelersDiaryAwardItem WHERE Uid = @Uid AND Year = @year AND Month = @month AND Type = @type;",
@@ -1566,6 +1558,18 @@ internal class GameRecordService
         // existCount < total：从 API 第 existCount 条（原末条）拉到第 total 条，补全新增并刷新原末条。
         int startRecord = existCount > 0 ? existCount : 1;
         var items = await FetchInterKnotReportDetailRangeAsync(role, month, type, startRecord, total);
+        if (existCount > 0)
+        {
+            dapper.Execute("""
+                DELETE FROM ZZZInterKnotReportDetailItem
+                WHERE rowid IN (
+                    SELECT rowid FROM ZZZInterKnotReportDetailItem
+                    WHERE Uid = @Uid AND DataMonth = @month AND DataType = @type
+                    ORDER BY Time ASC
+                    LIMIT 1 OFFSET @offset
+                );
+                """, new { role.Uid, month, type, offset = existCount - 1 });
+        }
         if (items.Count > 0)
         {
             dapper.Execute("""
@@ -1621,12 +1625,21 @@ internal class GameRecordService
     /// <param name="dapper">已打开的数据库连接。</param>
     private async Task UpsertInterKnotReportDetailLastItemAsync(GameRecordRole role, string month, string type, int total, System.Data.IDbConnection dapper)
     {
-        var lastPage = await _gameRecordClient.GetInterKnotReportDetailByPageAsync(role, month, type, total, 1);
-        var lastItem = lastPage.List.FirstOrDefault();
+        var items = await FetchInterKnotReportDetailRangeAsync(role, month, type, total, total);
+        var lastItem = items.FirstOrDefault();
         if (lastItem is null)
         {
             return;
         }
+        dapper.Execute("""
+            DELETE FROM ZZZInterKnotReportDetailItem
+            WHERE rowid IN (
+                SELECT rowid FROM ZZZInterKnotReportDetailItem
+                WHERE Uid = @Uid AND DataMonth = @month AND DataType = @type
+                ORDER BY Time DESC
+                LIMIT 1
+            );
+            """, new { role.Uid, month, type });
         dapper.Execute("""
             INSERT OR REPLACE INTO ZZZInterKnotReportDetailItem (Uid, Id, DataMonth, DataType, Action, Time, Number)
             VALUES (@Uid, @Id, @DataMonth, @DataType, @Action, @Time, @Number);

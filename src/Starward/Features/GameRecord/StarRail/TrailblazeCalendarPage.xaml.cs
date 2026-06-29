@@ -223,7 +223,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
             string? currentMonth = CurrentSummary?.DataMonth;
             if (string.IsNullOrEmpty(currentMonth))
             {
-                currentMonth = DateTimeOffset.UtcNow.ToOffset(GetServerUtcOffset(gameRole)).ToString("yyyyMM");
+                currentMonth = DateTimeOffset.UtcNow.ToOffset(MonthlyReportHelpers.GetServerUtcOffset(gameRole)).ToString("yyyyMM");
             }
             ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.DataMonth == currentMonth);
         }
@@ -389,13 +389,13 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         {
             var items = _gameRecordService.GetTrailblazeCalendarDetailItems(data.Uid, data.Month);
             int days = DateTime.DaysInMonth(int.Parse(data.Month[..4]), int.Parse(data.Month[4..]));
-            TimeSpan serverOffset = GetServerUtcOffset(gameRole);
+            TimeSpan serverOffset = MonthlyReportHelpers.GetServerUtcOffset(gameRole);
 
             var stats_jade = new int[days];
             var stats_pass = new int[days];
             foreach (var item in items)
             {
-                var day = new DateTimeOffset(item.Time, TimeSpan.Zero).ToOffset(serverOffset).Day;
+                var day = MonthlyReportHelpers.GetServerLocalDay(item.Time, serverOffset);
                 if (day > days)
                 {
                     continue;
@@ -434,18 +434,6 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         {
             _logger.LogError(ex, "Refresh daily data plot");
         }
-    }
-
-
-
-    private static TimeSpan GetServerUtcOffset(GameRecordRole role)
-    {
-        return role?.Region switch
-        {
-            "prod_gf_us" => TimeSpan.FromHours(-5),
-            "prod_gf_eu" => TimeSpan.FromHours(1),
-            _ => TimeSpan.FromHours(8),
-        };
     }
 
 

@@ -257,7 +257,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             string? currentMonth = CurrentSummary?.DataMonth;
             if (string.IsNullOrEmpty(currentMonth))
             {
-                currentMonth = DateTimeOffset.UtcNow.ToOffset(GetServerUtcOffset(gameRole)).ToString("yyyyMM");
+                currentMonth = DateTimeOffset.UtcNow.ToOffset(MonthlyReportHelpers.GetServerUtcOffset(gameRole)).ToString("yyyyMM");
             }
             // 选中后触发 ListView_MonthDataList_SelectionChanged，从本地缓存填充右侧统计数据与每日数据；找不到当月则保持无选中。
             ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.DataMonth == currentMonth);
@@ -330,6 +330,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             string month = SelectMonthData.DataMonth;
             await FetchMonthDataAsync(month);
             GetMonthDataList(preserveSelectedMonth: true);
+            ListView_MonthDataList.SelectedItem = MonthDataList.FirstOrDefault(x => x.DataMonth == month);
         }
         catch (miHoYoApiException ex)
         {
@@ -447,14 +448,14 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             // 官方绳网月报按“游戏服务器本地日历日”分天，因此这里必须按账号所在服务器的时区取日，
             // 不能用 LocalDateTime（本机时区）——当本机时区不是服务器时区时，跨午夜的记录会被算到相邻的一天，
             // 导致个别日期的菲林/母带/邦布券数量与官方工具对不上（月总不受影响，因为月总直接取自接口）。
-            TimeSpan serverOffset = GetServerUtcOffset(gameRole);
+            TimeSpan serverOffset = MonthlyReportHelpers.GetServerUtcOffset(gameRole);
 
             var stats_poly = new int[days];
             var stats_tape = new int[days];
             var stats_boopon = new int[days];
             foreach (var item in items)
             {
-                var day = item.Time.ToOffset(serverOffset).Day;
+                var day = MonthlyReportHelpers.GetServerLocalDay(item.Time, serverOffset);
                 if (day > days)
                 {
                     continue;
@@ -501,26 +502,6 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         {
             _logger.LogError(ex, "Refresh daily data plot");
         }
-    }
-
-
-
-
-    /// <summary>
-    /// 根据账号所在游戏服务器返回其相对 UTC 的时区偏移。
-    /// 绳网月报的每日数据按“服务器本地日历日”分天，必须用该偏移把记录时间戳换算到服务器时间后再取日，才能与官方工具一致。
-    /// </summary>
-    /// <param name="role">当前游戏角色；其 <see cref="GameRecordRole.Region"/> 标识所在服务器。为 null 时按国服（+8）处理。</param>
-    /// <returns>服务器相对 UTC 的偏移：美服 -5、欧服 +1，其余（国服 / 亚服 / 港澳台 等）均为 +8。</returns>
-    private static TimeSpan GetServerUtcOffset(GameRecordRole role)
-    {
-        // 国际服按 region 区分服务器时区；国服 / 亚服 / 港澳台 等统一 +8（与原神、星铁抽卡导出里的时区映射一致）。
-        return role?.Region switch
-        {
-            "prod_gf_us" => TimeSpan.FromHours(-5), // 美服
-            "prod_gf_eu" => TimeSpan.FromHours(1),  // 欧服
-            _ => TimeSpan.FromHours(8),             // 国服 / 亚服 / 港澳台 等
-        };
     }
 
 

@@ -218,7 +218,7 @@ public sealed partial class TravelersDiaryPage : PageBase
             }
             else
             {
-                var serverNow = DateTimeOffset.UtcNow.ToOffset(GetServerUtcOffset(gameRole));
+                var serverNow = DateTimeOffset.UtcNow.ToOffset(MonthlyReportHelpers.GetServerUtcOffset(gameRole));
                 year = serverNow.Year;
                 month = serverNow.Month;
             }
@@ -317,8 +317,8 @@ public sealed partial class TravelersDiaryPage : PageBase
         {
             monthData.Year = year;
         }
-        await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 1);
-        await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 2);
+        await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, monthData.Year, month, 1);
+        await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, monthData.Year, month, 2);
         ApplySelectMonthSummary(monthData);
         _detailFetchedMonths.Add($"{monthData.Year}-{monthData.Month:D2}");
         return monthData;
@@ -392,13 +392,13 @@ public sealed partial class TravelersDiaryPage : PageBase
         {
             var items = _gameRecordService.GetTravelersDiaryDetailItems(data.Uid, data.Year, data.Month);
             int days = DateTime.DaysInMonth(data.Year, data.Month);
-            TimeSpan serverOffset = GetServerUtcOffset(gameRole);
+            TimeSpan serverOffset = MonthlyReportHelpers.GetServerUtcOffset(gameRole);
 
             var stats_primogems = new int[days];
             var stats_mora = new int[days];
             foreach (var item in items)
             {
-                var day = new DateTimeOffset(item.Time, TimeSpan.Zero).ToOffset(serverOffset).Day;
+                var day = MonthlyReportHelpers.GetServerLocalDay(item.Time, serverOffset);
                 if (day > days)
                 {
                     continue;
@@ -437,18 +437,6 @@ public sealed partial class TravelersDiaryPage : PageBase
         {
             _logger.LogError(ex, "Refresh daily data plot");
         }
-    }
-
-
-
-    private static TimeSpan GetServerUtcOffset(GameRecordRole role)
-    {
-        return role?.Region switch
-        {
-            "prod_gf_us" => TimeSpan.FromHours(-5),
-            "prod_gf_eu" => TimeSpan.FromHours(1),
-            _ => TimeSpan.FromHours(8),
-        };
     }
 
 
