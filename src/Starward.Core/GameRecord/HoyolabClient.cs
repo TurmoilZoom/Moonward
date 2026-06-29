@@ -835,15 +835,10 @@ public class HoyolabClient : GameRecordClient
     }
 
 
-    /// <summary>
-    /// 绳网月报总结
-    /// </summary>
-    /// <param name="role"></param>
-    /// <param name="month">202409</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public override async Task<InterKnotReportSummary> GetInterKnotReportSummaryAsync(GameRecordRole role, string month = "", CancellationToken cancellationToken = default)
     {
+        // 国际服：sg-public-api + HoYoLAB Cookie；无需国服设备指纹头。
         var url = $"https://sg-public-api.hoyolab.com/event/nap_ledger/month_info?uid={role.Uid}&region={role.Region}&month={month}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
@@ -852,16 +847,7 @@ public class HoyolabClient : GameRecordClient
         return await CommonSendAsync<InterKnotReportSummary>(request, cancellationToken);
     }
 
-    /// <summary>
-    /// 绳网月报收入详情
-    /// </summary>
-    /// <param name="role"></param>
-    /// <param name="month">202409</param>
-    /// <param name="type"></param>
-    /// <param name="page">从1开始</param>
-    /// <param name="page_size">最大100</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>返回一页收入记录</returns>
+    /// <inheritdoc/>
     public override async Task<InterKnotReportDetail> GetInterKnotReportDetailByPageAsync(GameRecordRole role, string month, string type, int page, int page_size = 100, CancellationToken cancellationToken = default)
     {
         var url = $"https://sg-public-api.hoyolab.com/event/nap_ledger/month_detail?uid={role.Uid}&region={role.Region}&month={month}&type={type}&current_page={page}&page_size={page_size}";
@@ -873,15 +859,7 @@ public class HoyolabClient : GameRecordClient
     }
 
 
-    /// <summary>
-    /// 绳网月报收入详情
-    /// </summary>
-    /// <param name="role"></param>
-    /// <param name="month">202409</param>
-    /// <param name="type"></param>
-    /// <param name="page_size">最大100</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>返回该月所有收入记录</returns>
+    /// <inheritdoc/>
     public override async Task<InterKnotReportDetail> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type, int page_size = 100, CancellationToken cancellationToken = default)
     {
         page_size = Math.Clamp(page_size, 20, 100);
@@ -890,6 +868,7 @@ public class HoyolabClient : GameRecordClient
         {
             return data;
         }
+        // 末页不足 page_size 时停止，避免多余请求。
         for (int i = 2; ; i++)
         {
             var addData = await GetInterKnotReportDetailByPageAsync(role, month, type, i, page_size, cancellationToken);

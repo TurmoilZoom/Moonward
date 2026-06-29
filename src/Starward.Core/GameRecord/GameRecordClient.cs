@@ -539,37 +539,37 @@ public abstract class GameRecordClient
 
 
     /// <summary>
-    /// 绳网月报总结
+    /// 获取绝区零绳网月报月度汇总（<c>nap_ledger/month_info</c>）。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="month">202409</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="role">游戏角色，需提供 <see cref="GameRecordRole.Uid"/>、<see cref="GameRecordRole.Region"/> 与 Cookie。</param>
+    /// <param name="month">查询月份，格式 <c>yyyyMM</c>（如 <c>202409</c>）；为空时返回当前月汇总。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>含资源总量、收入构成及 <c>optional_month</c> 的汇总对象。</returns>
     public abstract Task<InterKnotReportSummary> GetInterKnotReportSummaryAsync(GameRecordRole role, string month = "", CancellationToken cancellationToken = default);
 
 
     /// <summary>
-    /// 绳网月报收入详情
+    /// 获取绳网月报收入明细分页（<c>nap_ledger/month_detail</c>）。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="month">202409</param>
-    /// <param name="type"></param>
-    /// <param name="page">从1开始</param>
-    /// <param name="page_size">最大100</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>返回一页收入记录</returns>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="month">查询月份，格式 <c>yyyyMM</c>。</param>
+    /// <param name="type">资源类型，取值见 <see cref="InterKnotReportDataType"/>。</param>
+    /// <param name="page">页码，从 1 开始。</param>
+    /// <param name="page_size">每页条数，最大 100。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>单页明细及 <see cref="InterKnotReportDetail.Total"/>。</returns>
     public abstract Task<InterKnotReportDetail> GetInterKnotReportDetailByPageAsync(GameRecordRole role, string month, string type, int page, int page_size = 100, CancellationToken cancellationToken = default);
 
 
     /// <summary>
-    /// 绳网月报收入详情
+    /// 获取绳网月报某月某类资源的全部收入明细，自动翻页合并。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="month">202409</param>
-    /// <param name="type"></param>
-    /// <param name="page_size">最大100</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>返回该月所有收入记录</returns>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="month">查询月份，格式 <c>yyyyMM</c>。</param>
+    /// <param name="type">资源类型，取值见 <see cref="InterKnotReportDataType"/>。</param>
+    /// <param name="page_size">每页条数，会被限制在 20–100 之间。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>合并后的完整明细列表。</returns>
     public abstract Task<InterKnotReportDetail> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type, int page_size = 100, CancellationToken cancellationToken = default);
 
 

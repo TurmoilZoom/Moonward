@@ -887,10 +887,17 @@ internal class GameRecordService
 
 
 
+    // 绝区零绳网月报：汇总 JSON 存 ZZZInterKnotReportSummary，明细分条存 ZZZInterKnotReportDetailItem。
     #region Inter Knot Report
 
 
 
+    /// <summary>
+    /// 从 API 拉取绳网月报汇总并写入本地缓存 <c>ZZZInterKnotReportSummary</c>。
+    /// </summary>
+    /// <param name="role">游戏角色；为 null 时由调用方自行处理。</param>
+    /// <param name="month">查询月份，格式 <c>yyyyMM</c>；为空时拉取当前月。</param>
+    /// <returns>API 返回的汇总对象（已持久化）。</returns>
     public async Task<InterKnotReportSummary> GetInterKnotReportSummaryAsync(GameRecordRole role, string month = "")
     {
         var summary = await _gameRecordClient.GetInterKnotReportSummaryAsync(role, month);
@@ -908,6 +915,11 @@ internal class GameRecordService
     }
 
 
+    /// <summary>
+    /// 读取指定角色所有已缓存的绳网月报汇总，按 <c>DataMonth</c> 降序。
+    /// </summary>
+    /// <param name="role">游戏角色；为 null 时返回空列表。</param>
+    /// <returns>反序列化后的汇总列表。</returns>
     public List<InterKnotReportSummary> GetInterKnotReportSummaryList(GameRecordRole role)
     {
         if (role is null)
@@ -920,6 +932,11 @@ internal class GameRecordService
     }
 
 
+    /// <summary>
+    /// 从本地缓存读取单条绳网月报汇总的完整 JSON（含 <c>income_components</c> 等详情）。
+    /// </summary>
+    /// <param name="summary">至少需提供 <see cref="InterKnotReportSummary.Uid"/> 与 <see cref="InterKnotReportSummary.DataMonth"/>。</param>
+    /// <returns>完整汇总对象；本地无缓存时返回 null。</returns>
     public InterKnotReportSummary? GetInterKnotReportSummary(InterKnotReportSummary summary)
     {
         if (summary is null)
@@ -937,6 +954,14 @@ internal class GameRecordService
 
 
 
+    /// <summary>
+    /// 拉取并缓存指定月份、指定资源类型的绳网月报明细。
+    /// 若本地条数已与 API <c>total</c> 一致则跳过网络请求。
+    /// </summary>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="month">目标月份，格式 <c>yyyyMM</c>。</param>
+    /// <param name="type">资源类型，取值见 <see cref="InterKnotReportDataType"/>。</param>
+    /// <returns>本次新增写入的明细条数；已完整缓存或 API 无数据时返回 0。</returns>
     public async Task<int> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type)
     {
         int total = (await _gameRecordClient.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1)).Total;
@@ -953,6 +978,7 @@ internal class GameRecordService
         var detail = await _gameRecordClient.GetInterKnotReportDetailAsync(role, month, type);
         var list = detail.List;
         using var t = dapper.BeginTransaction();
+        // 全量替换该月该类型明细，避免残留已删除记录。
         dapper.Execute($"DELETE FROM ZZZInterKnotReportDetailItem WHERE Uid = @Uid AND DataMonth = @DataMonth AND DataType = @DataType;", list.FirstOrDefault(), t);
         dapper.Execute("""
                 INSERT OR REPLACE INTO ZZZInterKnotReportDetailItem (Uid, Id, DataMonth, DataType, Action, Time, Number)
@@ -964,6 +990,13 @@ internal class GameRecordService
 
 
 
+    /// <summary>
+    /// 从本地 SQLite 读取指定月份、指定资源类型的绳网月报明细，按时间升序。
+    /// </summary>
+    /// <param name="uid">游戏 UID。</param>
+    /// <param name="month">目标月份，格式 <c>yyyyMM</c>。</param>
+    /// <param name="type">资源类型，取值见 <see cref="InterKnotReportDataType"/>。</param>
+    /// <returns>明细列表；未拉取过详情时为空列表。</returns>
     public List<InterKnotReportDetailItem> GetInterKnotReportDetailItems(long uid, string month, string type)
     {
         using var dapper = DatabaseService.CreateConnection();

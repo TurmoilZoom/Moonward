@@ -16,9 +16,14 @@
              mc:Ignorable="d">
 
     <Page.Resources>
+        <!--  饼图图例色块：ChartLegend.Color → SolidColorBrush  -->
         <sfg:ColorToSolidColorBrushConverter x:Key="ColorToSolidColorBrushConverter" />
     </Page.Resources>
 
+    <!--
+        布局：左列 = 操作按钮 + 已缓存月份列表；右列 = 滚动内容区（实时 / 历史 / 每日数据）。
+        数据绑定见 InterKnotMonthlyReportPage.xaml.cs；点击月份仅读本地 SQLite，不联网。
+    -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -31,6 +36,7 @@
 
 
 
+        <!--  无本地缓存月份时的空状态（邦布插图 + 无数据文案）  -->
         <StackPanel Name="Image_Emoji"
                     Grid.RowSpan="2"
                     Grid.Column="1"
@@ -47,10 +53,12 @@
                        Text="{x:Bind lang:Lang.HoyolabToolboxPage_NoData}" />
         </StackPanel>
 
+        <!--  左侧操作区：刷新当前月汇总；获取详情（Flyout 月份由 API optional_month 动态填充）  -->
         <StackPanel Margin="0,24,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     Spacing="12">
+            <!--  刷新：仅请求 month_info（当前月），INSERT OR REPLACE 覆盖当月汇总，不拉明细  -->
             <Button Height="36"
                     BorderThickness="0"
                     Command="{x:Bind InitializeDataCommand}"
@@ -70,6 +78,7 @@
                     <TextBlock Text="{x:Bind lang:Lang.Common_Refresh}" />
                 </StackPanel>
             </Button>
+            <!--  获取详情：选月后拉 month_info + 三类 month_detail 分页，写入本地明细表  -->
             <Button Height="36"
                     BorderThickness="0"
                     CornerRadius="0,18,18,0"
@@ -95,6 +104,7 @@
         </StackPanel>
 
 
+        <!--  已缓存历史月份列表；选中后展示右侧历史汇总与每日数据（数据来自本地）  -->
         <ListView Name="ListView_MonthDataList"
                   Grid.Row="1"
                   Margin="0,12,0,0"
@@ -136,10 +146,11 @@
 
 
 
+        <!--  右侧滚动内容区  -->
         <ScrollViewer Grid.RowSpan="2" Grid.Column="1">
             <StackPanel Margin="24" Spacing="8">
 
-                <!--  Real-Time Data  -->
+                <!--  实时数据：CurrentSummary，刷新时从 API 拉取的当前月汇总  -->
                 <TextBlock FontSize="16"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            Text="{x:Bind lang:Lang.TravelersDiaryPage_RealTimeData}"
@@ -158,6 +169,7 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
+                    <!--  三类资源月度总量：菲林 / 母带 / 邦布券  -->
                     <ItemsControl ItemsSource="{x:Bind CurrentSummary.MonthData.List}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -187,6 +199,7 @@
                     <TextBlock Grid.Row="2"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                Text="{x:Bind lang:Lang.InterKnotMonthlyReportPage_PolychromeRevenueStreams}" />
+                    <!--  菲林收入来源饼图（income_components）  -->
                     <sc:ColorRectChart Grid.Row="3"
                                        Grid.ColumnSpan="3"
                                        Height="20"
@@ -222,7 +235,7 @@
                     </ItemsControl>
                 </Grid>
 
-                <!--  Historical Data  -->
+                <!--  历史数据：SelectMonthData，左侧选中月份后从 SQLite 反序列化的汇总  -->
                 <TextBlock Margin="0,8,0,0"
                            FontSize="16"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -309,7 +322,7 @@
                     </ItemsControl>
                 </Grid>
 
-                <!--  Daily Data  -->
+                <!--  每日数据：DayDataList，由本地明细分条按服务器时区日历日聚合；每行 = 菲林 + 母带 + 邦布券  -->
                 <TextBlock Margin="0,8,0,0"
                            FontSize="16"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -327,6 +340,7 @@
                     <ItemsRepeater ItemsSource="{x:Bind DayDataList}">
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate>
+                                <!--  列：日期 | 菲林(数+条) | 母带(数+条) | 邦布券(数+条)  -->
                                 <Grid ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="60" />
