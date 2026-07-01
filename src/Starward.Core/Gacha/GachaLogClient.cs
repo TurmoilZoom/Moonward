@@ -42,9 +42,9 @@ public abstract class GachaLogClient
     protected const string API_PREFIX_YS_OS = "https://public-operation-hk4e-sg.hoyoverse.com/gacha_info/api/getGachaLog";
 
     /// <summary>用于从网页缓存二进制文件中匹配原神国服抽卡记录 URL 的前缀字节序列（LastIndexOf 匹配）。</summary>
-    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_YS_CN => "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha-v3/index.html"u8;
+    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_YS_CN => "https://webstatic.mihoyo.com/hk4e/event/e20190909gacha"u8;
     /// <summary>用于从网页缓存二进制文件中匹配原神国际服抽卡记录 URL 的前缀字节序列。</summary>
-    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_YS_OS => "https://gs.hoyoverse.com/genshin/event/e20190909gacha-v3/index.html"u8;
+    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_YS_OS => "https://gs.hoyoverse.com/genshin/event/e20190909gacha"u8;
 
     #endregion
 
@@ -61,9 +61,9 @@ public abstract class GachaLogClient
     protected const string API_PREFIX_SR_OS = "https://public-operation-hkrpg-sg.hoyoverse.com/common/gacha_record/api/getGachaLog";
 
     /// <summary>用于从网页缓存匹配星穹铁道国服跃迁记录 URL 的前缀。</summary>
-    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_SR_CN => "https://webstatic.mihoyo.com/hkrpg/event/e20211215gacha-v2/index.html"u8;
+    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_SR_CN => "https://webstatic.mihoyo.com/hkrpg/event/e20211215gacha"u8;
     /// <summary>用于从网页缓存匹配星穹铁道国际服跃迁记录 URL 的前缀。</summary>
-    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_SR_OS => "https://gs.hoyoverse.com/hkrpg/event/e20211215gacha-v2/index.html"u8;
+    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_SR_OS => "https://gs.hoyoverse.com/hkrpg/event/e20211215gacha"u8;
 
     #endregion
 
@@ -79,9 +79,9 @@ public abstract class GachaLogClient
     protected const string API_PREFIX_ZZZ_OS = "https://public-operation-nap-sg.hoyoverse.com/common/gacha_record/api/getGachaLog";
 
     /// <summary>用于从网页缓存匹配绝区零国服频段记录 URL 的前缀。</summary>
-    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_ZZZ_CN => "https://webstatic.mihoyo.com/nap/event/e20230424gacha-v2/index.html"u8;
+    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_ZZZ_CN => "https://webstatic.mihoyo.com/nap/event/e20230424gacha"u8;
     /// <summary>用于从网页缓存匹配绝区零国际服频段记录 URL 的前缀。</summary>
-    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_ZZZ_OS => "https://gs.hoyoverse.com/nap/event/e20230424gacha-v2/index.html"u8;
+    protected static ReadOnlySpan<byte> SPAN_WEB_PREFIX_ZZZ_OS => "https://gs.hoyoverse.com/nap/event/e20230424gacha"u8;
 
     #endregion
 
