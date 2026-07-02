@@ -16,12 +16,12 @@ using Windows.UI;
 namespace Starward.Features.GameLauncher;
 
 /// <summary>
-/// 为「开始游戏」按钮提供一套可复用的酷炫 Composition 动效（仅在 <see cref="GameState.StartGame"/> 即“可开始游戏”时启用）：
+/// 为「开始游戏」按钮提供 Composition 动效（呼吸光晕 / 流光 / 聚光灯 / 点击光爆）。
 /// <list type="bullet">
-/// <item>呼吸光晕：胶囊外圈的强调色辉光，模糊半径 + 不透明度做正弦呼吸（DropShadow + 圆角遮罩）。</item>
-/// <item>流光扫过：一道斜向高光每隔数秒从左扫到右（SpriteVisual + 线性渐变，整体被胶囊裁剪）。</item>
-/// <item>指针跟随聚光灯：悬停时柔光跟随鼠标在按钮表面移动（CompositionRadialGradientBrush）。</item>
-/// <item>点击光爆：按下瞬间从点击点扩散一圈光波（SpriteVisual + 径向渐变，缩放 + 淡出）。</item>
+/// <item>呼吸光晕：胶囊外圈强调色辉光，<see cref="DropShadow.BlurRadius"/> 与 <see cref="DropShadow.Opacity"/> 循环变化（仅 <see cref="GameState.StartGame"/>）。</item>
+/// <item>流光扫过：斜向高光周期性从左扫到右（所有强调色 CTA 状态）。</item>
+/// <item>指针跟随聚光灯：悬停时柔光跟随鼠标（<see cref="CompositionRadialGradientBrush"/>）。</item>
+/// <item>点击光爆：按下瞬间从点击点扩散光波并淡出。</item>
 /// </list>
 ///
 /// 设计要点（与 <see cref="Starward.Controls.FluidNavigationViewHoverEffect"/> 保持一致）：
@@ -43,12 +43,16 @@ public sealed class StartGameButtonEffects
     /// <summary>胶囊圆角半径，与 StartGameButton 的 CornerRadius 一致。</summary>
     private const float CornerRadius = 22f;
 
-    /// <summary>呼吸光晕模糊半径范围（像素）。</summary>
+    /// <summary>呼吸光晕模糊半径下限（像素）。</summary>
     private const float GlowBlurMin = 10f;
+
+    /// <summary>呼吸光晕模糊半径上限（像素）。</summary>
     private const float GlowBlurMax = 24f;
 
-    /// <summary>呼吸光晕不透明度范围。</summary>
+    /// <summary>呼吸光晕不透明度下限。</summary>
     private const float GlowOpacityMin = 0.35f;
+
+    /// <summary>呼吸光晕不透明度上限。</summary>
     private const float GlowOpacityMax = 0.85f;
 
     /// <summary>一次呼吸（明→暗→明）的周期。</summary>
@@ -72,44 +76,71 @@ public sealed class StartGameButtonEffects
     /// <summary>点击光爆基准直径（像素）。</summary>
     private const float RippleBaseSize = 28f;
 
-    /// <summary>点击光爆时长。</summary>
+    /// <summary>点击光爆动画时长。</summary>
     private static readonly TimeSpan RippleDuration = TimeSpan.FromMilliseconds(560);
 
 
+    /// <summary>从胶囊根元素取得的 Composition 合成器。</summary>
     private Compositor? _compositor;
 
+    /// <summary>胶囊根 Grid（<c>Grid_Root</c>），用于量尺寸与指针事件。</summary>
     private Grid? _root;
 
+    /// <summary>呼吸光晕宿主（<c>Grid_GlowHost</c>），位于胶囊外、不裁剪溢出辉光。</summary>
     private Grid? _glowHost;
 
+    /// <summary>胶囊内动效宿主（<c>Grid_EffectHost</c>），承载流光 / 聚光 / 光爆。</summary>
     private Grid? _effectHost;
 
+    /// <summary>主操作按钮，用于监听按下以触发点击光爆。</summary>
     private Button? _actionButton;
 
+    /// <summary>缓出贝塞尔，用于流光扫掠与光爆扩散。</summary>
     private CompositionEasingFunction? _easeOut;
 
+    /// <summary>缓入缓出贝塞尔，用于呼吸光晕循环。</summary>
     private CompositionEasingFunction? _easeInOut;
 
-    // —— 呼吸光晕 ——
+    /// <summary>承载 <see cref="DropShadow"/> 的精灵视觉，挂于 <see cref="_glowHost"/>。</summary>
     private SpriteVisual? _glowVisual;
+
+    /// <summary>圆角胶囊形强调色辉光阴影。</summary>
     private DropShadow? _glowShadow;
+
+    /// <summary>离屏圆角矩形，作为阴影遮罩的绘制来源。</summary>
     private ShapeVisual? _glowMaskSource;
+
+    /// <summary>阴影遮罩的圆角矩形几何。</summary>
     private CompositionRoundedRectangleGeometry? _glowMaskGeometry;
+
+    /// <summary>将 <see cref="_glowMaskSource"/> 光栅化为 <see cref="CompositionSurfaceBrush"/> 的中间表面。</summary>
     private CompositionVisualSurface? _glowSurface;
 
-    // —— 流光 / 聚光 / 光爆 共用容器（带胶囊裁剪） ——
+    /// <summary>流光 / 聚光 / 光爆的共用容器，带胶囊圆角裁剪。</summary>
     private ContainerVisual? _overlayRoot;
+
+    /// <summary>Win2D 生成的圆角路径，用于 <see cref="_overlayRoot"/> 的几何裁剪。</summary>
     private CompositionPathGeometry? _clipGeometry;
 
+    /// <summary>斜向线性渐变高光带，周期性横向扫掠。</summary>
     private SpriteVisual? _shineVisual;
+
+    /// <summary>流光高光带的线性渐变画刷（两端透明、中间亮）。</summary>
     private CompositionLinearGradientBrush? _shineBrush;
 
+    /// <summary>指针跟随的径向渐变柔光层。</summary>
     private SpriteVisual? _spotlightVisual;
+
+    /// <summary>聚光灯径向渐变画刷，<see cref="CompositionRadialGradientBrush.EllipseCenter"/> 随指针更新。</summary>
     private CompositionRadialGradientBrush? _spotlightBrush;
 
+    /// <summary>胶囊当前宽度（像素），与 <see cref="_root"/> 同步。</summary>
     private float _width;
+
+    /// <summary>胶囊当前高度（像素），与 <see cref="_root"/> 同步。</summary>
     private float _height;
 
+    /// <summary>是否已通过 <see cref="Attach"/> 挂接且尚未 <see cref="Detach"/>。</summary>
     private bool _attached;
 
     /// <summary>是否启用呼吸光晕：仅「可开始游戏」(GameState.StartGame) 状态，作为“游戏就绪”的专属信号。</summary>
@@ -121,10 +152,18 @@ public sealed class StartGameButtonEffects
     /// <summary>主窗口当前是否可见（最小化 / 隐藏 / 锁屏时为 false）。</summary>
     private bool _windowVisible = true;
 
-    /// <summary>指针是否位于按钮范围内。</summary>
+    /// <summary>指针是否位于胶囊范围内。</summary>
     private bool _pointerInside;
 
 
+    /// <summary>
+    /// 挂接动效宿主与事件：惰性构建 Composition 视觉树，订阅尺寸变化、指针与窗口可见性。
+    /// </summary>
+    /// <param name="root">胶囊根 Grid（<c>Grid_Root</c>），不可为 <see langword="null"/>。</param>
+    /// <param name="glowHost">呼吸光晕宿主（<c>Grid_GlowHost</c>），不可为 <see langword="null"/>。</param>
+    /// <param name="effectHost">胶囊内动效宿主（<c>Grid_EffectHost</c>），不可为 <see langword="null"/>。</param>
+    /// <param name="actionButton">主操作按钮，不可为 <see langword="null"/>。</param>
+    /// <exception cref="ArgumentNullException">任一参数为 <see langword="null"/> 时抛出。</exception>
     public void Attach(Grid root, Grid glowHost, Grid effectHost, Button actionButton)
     {
         if (_attached)
@@ -154,6 +193,9 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 卸载动效：取消事件与消息订阅、移除子视觉、释放 Composition 对象并重置状态。
+    /// </summary>
     public void Detach()
     {
         if (!_attached)
@@ -203,6 +245,8 @@ public sealed class StartGameButtonEffects
     /// <paramref name="ctaActive"/> 控制流光 / 聚光灯 / 点击光爆（所有显示强调色背景的可操作状态）。
     /// 其余状态（运行中 / 安装中等）保持安静，避免喧宾夺主。
     /// </summary>
+    /// <param name="glowActive">是否启用呼吸光晕（<see cref="GameState.StartGame"/>）。</param>
+    /// <param name="ctaActive">是否启用 CTA 动效（强调色底可见且按钮可操作）。</param>
     public void SetState(bool glowActive, bool ctaActive)
     {
         if (_glowActive == glowActive && _ctaActive == ctaActive)
@@ -219,7 +263,7 @@ public sealed class StartGameButtonEffects
     }
 
 
-    /// <summary>明暗主题切换时刷新各效果颜色。</summary>
+    /// <summary>明暗主题切换时刷新辉光、流光与聚光灯的颜色。</summary>
     public void OnThemeChanged()
     {
         if (_glowShadow is not null)
@@ -242,6 +286,11 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 胶囊尺寸变化：视觉尚未创建则惰性构建，否则仅更新各视觉对象的尺寸与裁剪路径。
+    /// </summary>
+    /// <param name="sender">胶囊根 Grid。</param>
+    /// <param name="e">尺寸变更参数。</param>
     private void OnRootSizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (_overlayRoot is null)
@@ -255,7 +304,11 @@ public sealed class StartGameButtonEffects
     }
 
 
-    /// <summary>窗口状态变化：最小化 / 隐藏 / 锁屏时暂停循环动画，激活时恢复。</summary>
+    /// <summary>
+    /// 响应 <see cref="MainWindowStateChangedMessage"/>：最小化 / 隐藏 / 锁屏时暂停循环动画，激活时恢复。
+    /// </summary>
+    /// <param name="recipient">消息接收者（本类实例）。</param>
+    /// <param name="message">窗口状态变更消息。</param>
     private void OnMainWindowStateChanged(object recipient, MainWindowStateChangedMessage message)
     {
         bool? visible = message switch
@@ -274,6 +327,10 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 在 <see cref="_root"/> 已有有效尺寸时惰性创建光晕与 overlay 视觉树，并启动待机循环。
+    /// 若视觉已存在则仅调用 <see cref="ResizeVisuals"/>。
+    /// </summary>
     private void TryBuildVisuals()
     {
         if (!_attached || _compositor is null || _root is null || _glowHost is null || _effectHost is null)
@@ -298,6 +355,9 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 构建呼吸光晕：离屏圆角矩形 → VisualSurface 遮罩 → 强调色 <see cref="DropShadow"/> → 挂到 <see cref="_glowHost"/>。
+    /// </summary>
     private void BuildGlow()
     {
         Compositor c = _compositor!;
@@ -328,6 +388,9 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 构建胶囊内 overlay：Win2D 圆角裁剪 + 流光带 + 聚光灯层，挂到 <see cref="_effectHost"/>。
+    /// </summary>
     private void BuildOverlay()
     {
         Compositor c = _compositor!;
@@ -367,6 +430,10 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 将光晕、遮罩、裁剪路径与 overlay 子视觉的尺寸同步到 <see cref="_root"/> 当前实际大小；
+    /// 光晕通过 <c>TransformToVisual</c> 对齐到胶囊坐标，外溢部分不被父级圆角裁剪。
+    /// </summary>
     private void ResizeVisuals()
     {
         if (_compositor is null || _root is null)
@@ -434,6 +501,7 @@ public sealed class StartGameButtonEffects
 
 
     /// <summary>呼吸光晕是否应运行：可开始游戏 + 窗口可见 + 视觉已就绪。</summary>
+    /// <returns>满足全部条件时为 <see langword="true"/>。</returns>
     private bool IsGlowRunning()
     {
         return _attached && _glowActive && _windowVisible && _glowVisual is not null;
@@ -441,13 +509,14 @@ public sealed class StartGameButtonEffects
 
 
     /// <summary>流光是否应运行：处于强调色 CTA 状态 + 窗口可见 + 视觉已就绪。</summary>
+    /// <returns>满足全部条件时为 <see langword="true"/>。</returns>
     private bool IsShineRunning()
     {
         return _attached && _ctaActive && _windowVisible && _shineVisual is not null;
     }
 
 
-    /// <summary>根据当前状态分别启停呼吸光晕与流光两条待机循环。</summary>
+    /// <summary>根据 <see cref="_glowActive"/> / <see cref="_ctaActive"/> 与窗口可见性，启停呼吸光晕与流光并淡入淡出。</summary>
     private void UpdateIdleAnimations()
     {
         if (_compositor is null)
@@ -485,6 +554,10 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 启动呼吸光晕循环：在 <see cref="GlowBlurMin"/>↔<see cref="GlowBlurMax"/> 与
+    /// <see cref="GlowOpacityMin"/>↔<see cref="GlowOpacityMax"/> 之间以 <see cref="GlowPeriod"/> 周期往复。
+    /// </summary>
     private void StartGlowBreathing()
     {
         if (_compositor is null || _glowShadow is null)
@@ -509,6 +582,9 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 启动流光扫掠：高光带从胶囊左侧外移动到右侧外，扫掠占 <see cref="ShineSweepRatio"/>，整周期 <see cref="ShineCycle"/>。
+    /// </summary>
     private void StartShineSweep()
     {
         if (_compositor is null || _shineVisual is null)
@@ -530,6 +606,7 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>停止呼吸光晕的模糊半径与不透明度动画。</summary>
     private void StopGlow()
     {
         try { _glowShadow?.StopAnimation(nameof(DropShadow.BlurRadius)); } catch { }
@@ -537,12 +614,16 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>停止流光扫掠的位移动画。</summary>
     private void StopShine()
     {
         try { _shineVisual?.StopAnimation(nameof(Visual.Offset)); } catch { }
     }
 
 
+    /// <summary>指针进入胶囊：标记在内并淡入聚光灯（仅 CTA 状态）。</summary>
+    /// <param name="sender">胶囊根 Grid。</param>
+    /// <param name="e">指针路由事件参数。</param>
     private void OnPointerEntered(object sender, PointerRoutedEventArgs e)
     {
         _pointerInside = true;
@@ -555,6 +636,9 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>指针离开胶囊：标记在外并淡出聚光灯。</summary>
+    /// <param name="sender">胶囊根 Grid。</param>
+    /// <param name="e">指针路由事件参数。</param>
     private void OnPointerExited(object sender, PointerRoutedEventArgs e)
     {
         _pointerInside = false;
@@ -562,6 +646,9 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>指针在胶囊内移动时更新聚光灯中心（仅 CTA 状态）。</summary>
+    /// <param name="sender">胶囊根 Grid。</param>
+    /// <param name="e">指针路由事件参数。</param>
     private void OnPointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_ctaActive || !_pointerInside)
@@ -572,6 +659,10 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>
+    /// 将聚光灯径向渐变中心设为指针在 <see cref="_effectHost"/> 坐标系中的位置。
+    /// </summary>
+    /// <param name="e">指针路由事件参数。</param>
     private void UpdateSpotlightPosition(PointerRoutedEventArgs e)
     {
         if (_spotlightBrush is null || _effectHost is null)
@@ -583,6 +674,7 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>淡出聚光灯（220ms）。</summary>
     private void HideSpotlight()
     {
         if (_spotlightVisual is not null)
@@ -592,6 +684,9 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>主按钮按下时在点击位置生成点击光爆（仅 CTA 状态）。</summary>
+    /// <param name="sender">主操作按钮。</param>
+    /// <param name="e">指针路由事件参数。</param>
     private void OnActionPointerPressed(object sender, PointerRoutedEventArgs e)
     {
         if (!_ctaActive || _compositor is null || _overlayRoot is null || _effectHost is null)
@@ -603,7 +698,8 @@ public sealed class StartGameButtonEffects
     }
 
 
-    /// <summary>在点击点生成一圈向外扩散并淡出的光波，动画结束后自动回收。</summary>
+    /// <summary>在点击点生成一圈向外扩散并淡出的光波，动画结束后自动从视觉树移除并释放资源。</summary>
+    /// <param name="center">光波中心，相对于 <see cref="_effectHost"/> 的坐标（像素）。</param>
     private void SpawnRipple(Vector2 center)
     {
         Compositor c = _compositor!;
@@ -653,6 +749,10 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>对指定视觉播放不透明度渐变动画。</summary>
+    /// <param name="visual">目标 Composition 视觉。</param>
+    /// <param name="to">目标不透明度，范围 0–1。</param>
+    /// <param name="milliseconds">动画时长（毫秒）。</param>
     private void FadeOpacity(Visual visual, float to, double milliseconds)
     {
         if (_compositor is null)
@@ -666,6 +766,7 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>停止循环动画并释放所有 Composition 视觉、画刷与几何对象。</summary>
     private void DisposeVisuals()
     {
         StopGlow();
@@ -698,6 +799,8 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>从主题资源读取系统强调色；资源不可用时回退为默认蓝色。</summary>
+    /// <returns>强调色 <see cref="Color"/>。</returns>
     private static Color GetAccentColor()
     {
         if (Application.Current.Resources["AccentFillColorDefaultBrush"] is SolidColorBrush brush)
@@ -708,6 +811,8 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>流光高光颜色：白色，明暗主题下使用不同 alpha。</summary>
+    /// <returns>带透明度的白色。</returns>
     private Color GetShineColor()
     {
         byte alpha = (byte)(IsDark() ? 0x96 : 0x6E);
@@ -715,6 +820,8 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>聚光灯柔光颜色：白色，明暗主题下使用不同 alpha。</summary>
+    /// <returns>带透明度的白色。</returns>
     private Color GetSpotlightColor()
     {
         byte alpha = (byte)(IsDark() ? 0x70 : 0x55);
@@ -722,6 +829,8 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>点击光波颜色：白色，明暗主题下使用不同 alpha。</summary>
+    /// <returns>带透明度的白色。</returns>
     private Color GetRippleColor()
     {
         byte alpha = (byte)(IsDark() ? 0xB0 : 0x90);
@@ -729,12 +838,18 @@ public sealed class StartGameButtonEffects
     }
 
 
+    /// <summary>当前胶囊是否处于深色主题。</summary>
+    /// <returns>深色主题为 <see langword="true"/>。</returns>
     private bool IsDark()
     {
         return (_root?.ActualTheme ?? ElementTheme.Default) == ElementTheme.Dark;
     }
 
 
+    /// <summary>替换颜色的 alpha 通道，保留 RGB。</summary>
+    /// <param name="color">原始颜色。</param>
+    /// <param name="alpha">新的 alpha 值（0–255）。</param>
+    /// <returns>仅 alpha 不同的新颜色。</returns>
     private static Color WithAlpha(Color color, byte alpha)
     {
         return Color.FromArgb(alpha, color.R, color.G, color.B);

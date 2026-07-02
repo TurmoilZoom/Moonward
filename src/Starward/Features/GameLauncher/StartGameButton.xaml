@@ -97,7 +97,7 @@
         <!--  呼吸光晕宿主：位于胶囊之外、之下，辉光向外溢出且不被圆角裁剪  -->
         <Grid x:Name="Grid_GlowHost" IsHitTestVisible="False" />
 
-    <Grid x:Name="Grid_Root"
+        <Grid x:Name="Grid_Root"
           Height="44"
           MinWidth="180"
           Background="{ThemeResource CustomAcrylicBrush}"
@@ -107,17 +107,17 @@
           Shadow="{ThemeResource ThemeShadow}"
           Translation="0,0,16">
 
-        <!--  Accent Color 背景  -->
-        <Rectangle x:Name="Rect_AccentBackground"
+            <!--  Accent Color 背景  -->
+            <Rectangle x:Name="Rect_AccentBackground"
                    Fill="{ThemeResource AccentFillColorDefaultBrush}"
                    IsHitTestVisible="False"
                    Visibility="{x:Bind IsAccentColorBackgroundVisible}" />
 
-        <!--  流光 / 聚光灯 / 点击光爆宿主：位于强调色之上、文字之下，被胶囊圆角裁剪  -->
-        <Grid x:Name="Grid_EffectHost" IsHitTestVisible="False" />
+            <!--  流光 / 聚光灯 / 点击光爆宿主：位于强调色之上、文字之下，被胶囊圆角裁剪  -->
+            <Grid x:Name="Grid_EffectHost" IsHitTestVisible="False" />
 
-        <!--  主要按键  -->
-        <Button x:Name="Button_GameAction"
+            <!--  主要按键  -->
+            <Button x:Name="Button_GameAction"
                 Padding="0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
@@ -132,95 +132,95 @@
                 PointerEntered="Control_PointerEntered"
                 PointerExited="Control_PointerExited"
                 Style="{ThemeResource GameButtonStyle}">
-            <Grid>
-                <!--  非安装状态  -->
-                <Grid Visibility="{x:Bind GameStateIsInstalling, Converter={StaticResource BoolToVisibilityReversedConverter}}">
-                    <!--  转圈圈  -->
-                    <ProgressRing Width="20"
+                <Grid>
+                    <!--  非安装状态  -->
+                    <Grid Visibility="{x:Bind GameStateIsInstalling, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                        <!--  转圈圈  -->
+                        <ProgressRing Width="20"
                                   Height="20"
                                   Margin="14,0,0,0"
                                   HorizontalAlignment="Left"
                                   IsHitTestVisible="False"
                                   Visibility="{x:Bind IsGameActionCommandRunning}" />
-                    <!--  按键文本： 开始游戏 / 游戏正在运行 / 安装游戏 / 更新游戏 / 更新插件 / 继续下载  -->
-                    <TextBlock x:Name="TextBlock_StartGame"
+                        <!--  按键文本： 开始游戏 / 游戏正在运行 / 安装游戏 / 更新游戏 / 更新插件 / 继续下载  -->
+                        <TextBlock x:Name="TextBlock_StartGame"
                                Margin="41,5,53,6"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
                                Text="{x:Bind StartGameButtonText}" />
-                </Grid>
+                    </Grid>
 
-                <!--  安装中信息  -->
-                <Grid Margin="0,0,48,0"
+                    <!--  安装中信息  -->
+                    <Grid Margin="0,0,48,0"
                       ColumnSpacing="10"
                       IsHitTestVisible="False"
                       Visibility="{x:Bind GameStateIsInstalling}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
 
-                    <!--  进度圈  -->
-                    <Grid Margin="10,0,0,0" HorizontalAlignment="Left">
-                        <ProgressRing Width="28"
+                        <!--  进度圈  -->
+                        <Grid Margin="10,0,0,0" HorizontalAlignment="Left">
+                            <ProgressRing Width="28"
                                       Height="28"
                                       Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
                                       IsIndeterminate="{x:Bind InstallStateIsPending}"
                                       Value="{x:Bind ProgressRingValue}" />
-                        <TextBlock HorizontalAlignment="Center"
+                            <TextBlock HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind ProgressRingValue}" />
-                    </Grid>
+                        </Grid>
 
 
-                    <!--  下载中 & 剩余时间  -->
-                    <Grid x:Name="Button_GameAction_DownloadingRemainTime"
+                        <!--  下载中 & 剩余时间  -->
+                        <Grid x:Name="Button_GameAction_DownloadingRemainTime"
                           Grid.Column="1"
                           VerticalAlignment="Center"
                           ColumnSpacing="4"
                           Opacity="{x:Bind Button_GameAction_DownloadingRemainTime_Opacity}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <!--  下载中  -->
-                        <FontIcon Grid.Row="0"
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <!--  下载中  -->
+                            <FontIcon Grid.Row="0"
                                   Grid.Column="0"
                                   FontSize="12"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                   Glyph="&#xE896;"
                                   IsTextScaleFactorEnabled="False" />
-                        <TextBlock Grid.Row="0"
+                            <TextBlock Grid.Row="0"
                                    Grid.Column="1"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind InstallStateText}" />
-                        <!--  剩余时间  -->
-                        <FontIcon Grid.Row="1"
+                            <!--  剩余时间  -->
+                            <FontIcon Grid.Row="1"
                                   Grid.Column="0"
                                   FontSize="12"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                   Glyph="&#xE917;"
                                   IsTextScaleFactorEnabled="False" />
-                        <TextBlock Grid.Row="1"
+                            <TextBlock Grid.Row="1"
                                    Grid.Column="1"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind RemainTimeText}" />
-                    </Grid>
+                        </Grid>
 
 
-                    <!--  已暂停 / 出错了 / 队列中  -->
-                    <TextBlock x:Name="TextBlock_GameAction_InstallState"
+                        <!--  已暂停 / 出错了 / 队列中  -->
+                        <TextBlock x:Name="TextBlock_GameAction_InstallState"
                                Grid.Column="1"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
@@ -228,8 +228,8 @@
                                Text="{x:Bind TextBlock_GameAction_InstallState_Text}" />
 
 
-                    <!--  暂停 / 继续  -->
-                    <TextBlock x:Name="TextBlock_GameAction_PointerOver"
+                        <!--  暂停 / 继续  -->
+                        <TextBlock x:Name="TextBlock_GameAction_PointerOver"
                                Grid.Column="1"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
@@ -237,14 +237,14 @@
                                Text="{x:Bind TextBlock_GameAction_PointerOver_Text}" />
 
 
+                    </Grid>
+
                 </Grid>
-
-            </Grid>
-        </Button>
+            </Button>
 
 
-        <!--  汉堡菜单（替换原游戏设置齿轮）：悬停弹出快速启动菜单  -->
-        <Button x:Name="Button_Menu"
+            <!--  汉堡菜单（替换原游戏设置齿轮）：悬停弹出快速启动菜单  -->
+            <Button x:Name="Button_Menu"
                 Width="44"
                 Height="44"
                 Padding="12"
@@ -259,141 +259,141 @@
                 PointerExited="Button_Menu_PointerExited"
                 Style="{ThemeResource GameButtonStyle}"
                 Visibility="Visible">
-            <FontIcon FontSize="16" Glyph="&#xE700;" />
-        </Button>
+                <FontIcon FontSize="16" Glyph="&#xE700;" />
+            </Button>
 
 
 
-        <!--  游戏信息 / 下载进度  -->
-        <Popup x:Name="Popup_GameInfoOrDownloadProgress"
+            <!--  游戏信息 / 下载进度  -->
+            <Popup x:Name="Popup_GameInfoOrDownloadProgress"
                DesiredPlacement="Top"
                PlacementTarget="{x:Bind Grid_Root}"
                VerticalOffset="-4">
-            <Grid MinWidth="200"
+                <Grid MinWidth="200"
                   MaxWidth="260"
                   Padding="20,12,20,12"
                   Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
                   CornerRadius="8">
-                <!--  游戏信息  -->
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    <!--  游戏信息  -->
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            IsTextScaleFactorEnabled="False"
                            Text="{x:Bind RunningGameInfo}"
                            Visibility="{x:Bind GameStateIsInstalling, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
 
-                <StackPanel Visibility="{x:Bind GameStateIsInstalling, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <!--  下载状态  -->
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontSize="14"
+                    <StackPanel Visibility="{x:Bind GameStateIsInstalling, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <!--  下载状态  -->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="14"
                                    FontWeight="Bold"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind InstallStateText}" />
-                        <!--  下载进度百分比  -->
-                        <TextBlock Margin="8,0,0,0"
+                            <!--  下载进度百分比  -->
+                            <TextBlock Margin="8,0,0,0"
                                    VerticalAlignment="Bottom"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind ProgressPercentText}" />
-                        <!--  剩余时间  -->
-                        <FontIcon Margin="8,0,0,0"
+                            <!--  剩余时间  -->
+                            <FontIcon Margin="8,0,0,0"
                                   VerticalAlignment="Bottom"
                                   FontSize="14"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                   Glyph="&#xE917;"
                                   IsTextScaleFactorEnabled="False"
                                   Visibility="{x:Bind RemainTimeText, Converter={StaticResource ObjectToVisibilityConverter}}" />
-                        <TextBlock Margin="4,0,0,0"
+                            <TextBlock Margin="4,0,0,0"
                                    VerticalAlignment="Bottom"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind RemainTimeText}"
                                    Visibility="{x:Bind RemainTimeText, Converter={StaticResource ObjectToVisibilityConverter}}" />
-                    </StackPanel>
+                        </StackPanel>
 
-                    <MenuFlyoutSeparator Margin="0,8,0,0" />
+                        <MenuFlyoutSeparator Margin="0,8,0,0" />
 
-                    <!--  下载进度  -->
-                    <StackPanel Margin="0,8,0,0"
+                        <!--  下载进度  -->
+                        <StackPanel Margin="0,8,0,0"
                                 Orientation="Horizontal"
                                 Spacing="4"
                                 Visibility="{x:Bind DownloadBytesText, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <FontIcon FontSize="12"
+                            <FontIcon FontSize="12"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                   Glyph="&#xE896;"
                                   IsTextScaleFactorEnabled="False" />
-                        <TextBlock FontSize="12"
+                            <TextBlock FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind lang:Lang.SettingPage_Download}" />
-                    </StackPanel>
-                    <Grid Width="200"
+                        </StackPanel>
+                        <Grid Width="200"
                           Margin="0,2,0,0"
                           Visibility="{x:Bind DownloadBytesText, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <TextBlock FontSize="12"
+                            <TextBlock FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind DownloadBytesText}" />
-                        <TextBlock HorizontalAlignment="Right"
+                            <TextBlock HorizontalAlignment="Right"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind DownloadSpeedText}"
                                    Visibility="{x:Bind DownloadSpeedText, Converter={StaticResource ObjectToVisibilityConverter}}" />
-                    </Grid>
+                        </Grid>
 
-                    <!--  安装进度  -->
-                    <StackPanel Margin="0,8,0,0"
+                        <!--  安装进度  -->
+                        <StackPanel Margin="0,8,0,0"
                                 Orientation="Horizontal"
                                 Spacing="4"
                                 Visibility="{x:Bind InstallBytesText, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <FontIcon FontSize="12"
+                            <FontIcon FontSize="12"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                   Glyph="&#xF012;"
                                   IsTextScaleFactorEnabled="False" />
-                        <TextBlock FontSize="12"
+                            <TextBlock FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind lang:Lang.StartGameButton_Install}" />
-                    </StackPanel>
-                    <Grid Width="200"
+                        </StackPanel>
+                        <Grid Width="200"
                           Margin="0,2,0,0"
                           Visibility="{x:Bind InstallBytesText, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <TextBlock FontSize="12"
+                            <TextBlock FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind InstallBytesText}" />
-                        <TextBlock HorizontalAlignment="Right"
+                            <TextBlock HorizontalAlignment="Right"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind InstallSpeedText}"
                                    Visibility="{x:Bind InstallSpeedText, Converter={StaticResource ObjectToVisibilityConverter}}" />
-                    </Grid>
+                        </Grid>
 
-                    <!--  校验进度  -->
-                    <Grid Width="200"
+                        <!--  校验进度  -->
+                        <Grid Width="200"
                           Margin="0,12,0,0"
                           Visibility="{x:Bind VerifySpeedText, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <FontIcon FontSize="12"
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon FontSize="12"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                       Glyph="&#xE945;"
                                       IsTextScaleFactorEnabled="False" />
-                            <TextBlock FontSize="12"
+                                <TextBlock FontSize="12"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        IsTextScaleFactorEnabled="False"
                                        Text="{x:Bind lang:Lang.StartGameButton_Verify}" />
-                        </StackPanel>
-                        <TextBlock HorizontalAlignment="Right"
+                            </StackPanel>
+                            <TextBlock HorizontalAlignment="Right"
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind VerifySpeedText}" />
-                    </Grid>
+                        </Grid>
 
-                    <!--  错误信息  -->
-                    <TextBlock Margin="0,8,0,0"
+                        <!--  错误信息  -->
+                        <TextBlock Margin="0,8,0,0"
                                FontSize="12"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                IsTextScaleFactorEnabled="False"
@@ -403,19 +403,19 @@
                                TextWrapping="Wrap"
                                Visibility="{x:Bind ErrorMessage, Converter={StaticResource ObjectToVisibilityConverter}}" />
 
-                </StackPanel>
-            </Grid>
+                    </StackPanel>
+                </Grid>
 
-        </Popup>
+            </Popup>
 
 
-        <!--  快速启动菜单：悬停汉堡按钮时在其上方弹出，右对齐并约束在窗口内  -->
-        <Popup x:Name="Popup_QuickMenu"
+            <!--  快速启动菜单：悬停汉堡按钮时在其上方弹出，右对齐并约束在窗口内  -->
+            <Popup x:Name="Popup_QuickMenu"
                DesiredPlacement="TopEdgeAlignedRight"
                PlacementTarget="{x:Bind Button_Menu}"
                ShouldConstrainToRootBounds="True"
                VerticalOffset="-8">
-            <Border x:Name="QuickMenuRoot"
+                <Border x:Name="QuickMenuRoot"
                     Background="{ThemeResource CustomOverlayAcrylicBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
@@ -423,18 +423,18 @@
                     Opacity="0"
                     PointerEntered="QuickMenu_PointerEntered"
                     PointerExited="QuickMenu_PointerExited">
-                <!--  开合动效改为「从一点放大 / 收缩」(Composition)，与抽卡筛选浮层一致，见 StartGameButton.xaml.cs  -->
-                <ScrollViewer x:Name="ScrollViewer_QuickMenu"
+                    <!--  开合动效改为「从一点放大 / 收缩」(Composition)，与抽卡筛选浮层一致，见 StartGameButton.xaml.cs  -->
+                    <ScrollViewer x:Name="ScrollViewer_QuickMenu"
                               Background="Transparent"
                               VerticalScrollBarVisibility="Auto"
                               ZoomMode="Disabled">
-                    <local:StartGameMenu x:Name="QuickMenu" CurrentGameId="{x:Bind CurrentGameId}" />
-                </ScrollViewer>
-            </Border>
-        </Popup>
+                        <local:StartGameMenu x:Name="QuickMenu" CurrentGameId="{x:Bind CurrentGameId}" />
+                    </ScrollViewer>
+                </Border>
+            </Popup>
 
 
-    </Grid>
+        </Grid>
 
     </Grid>
 

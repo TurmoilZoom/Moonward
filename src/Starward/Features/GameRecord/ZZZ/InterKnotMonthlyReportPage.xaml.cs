@@ -14,6 +14,7 @@ using Starward.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Windows.UI;
@@ -104,6 +105,16 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         ["shiyu_rewards"] = Color.FromArgb(0xFF, 0x57, 0xBF, 0xF7),
         ["mail_rewards"] = Color.FromArgb(0xFF, 0xC9, 0x2A, 0xDE),
         ["other_rewards"] = Color.FromArgb(0xFF, 0xF1, 0xAD, 0x3D),
+    };
+
+
+    private static readonly Dictionary<string, TimeSpan> interKnotServerOffsetMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["prod_gf_cn"] = TimeSpan.FromHours(8),
+        ["prod_gf_jp"] = TimeSpan.FromHours(8),
+        ["prod_gf_sg"] = TimeSpan.FromHours(8),
+        ["prod_gf_eu"] = TimeSpan.FromHours(1),
+        ["prod_gf_usa"] = TimeSpan.FromHours(-5),
     };
 
 
@@ -252,37 +263,19 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             var items_poly = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.PolychromesData);
             var items_tape = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.MatserTapeData);
             var items_boopon = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.BooponsData);
-            int days = DateTime.DaysInMonth(int.Parse(data.DataMonth[..4]), int.Parse(data.DataMonth[4..]));
+            int year = int.Parse(data.DataMonth[..4], CultureInfo.InvariantCulture);
+            int month = int.Parse(data.DataMonth[4..], CultureInfo.InvariantCulture);
+            int days = DateTime.DaysInMonth(year, month);
+            TimeSpan serverOffset = GetInterKnotReportServerOffset(data.Region);
 
             var stats_poly = new int[days];
-            foreach (var item in items_poly)
-            {
-                var day = item.Time.LocalDateTime.Day;
-                if (day <= days)
-                {
-                    stats_poly[day - 1] += item.Number;
-                }
-            }
+            AggregateDailyStats(stats_poly, items_poly, year, month, serverOffset);
 
             var stats_tape = new int[days];
-            foreach (var item in items_tape)
-            {
-                var day = item.Time.LocalDateTime.Day;
-                if (day <= days)
-                {
-                    stats_tape[day - 1] += item.Number;
-                }
-            }
+            AggregateDailyStats(stats_tape, items_tape, year, month, serverOffset);
 
             var stats_boopon = new int[days];
-            foreach (var item in items_boopon)
-            {
-                var day = item.Time.LocalDateTime.Day;
-                if (day <= days)
-                {
-                    stats_boopon[day - 1] += item.Number;
-                }
-            }
+            AggregateDailyStats(stats_boopon, items_boopon, year, month, serverOffset);
 
             double max_poly = stats_poly.Max();
             double max_tape = stats_tape.Max();
@@ -309,6 +302,48 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Refresh daily data plot");
+        }
+    }
+
+
+
+    private static TimeSpan GetInterKnotReportServerOffset(string? region)
+    {
+        if (string.IsNullOrWhiteSpace(region))
+        {
+            return TimeSpan.FromHours(8);
+        }
+        if (interKnotServerOffsetMap.TryGetValue(region, out var offset))
+        {
+            return offset;
+        }
+        if (region.Contains("usa", StringComparison.OrdinalIgnoreCase))
+        {
+            return TimeSpan.FromHours(-5);
+        }
+        if (region.Contains("eu", StringComparison.OrdinalIgnoreCase))
+        {
+            return TimeSpan.FromHours(1);
+        }
+        return TimeSpan.FromHours(8);
+    }
+
+
+
+    private static void AggregateDailyStats(int[] target, IEnumerable<InterKnotReportDetailItem> source, int year, int month, TimeSpan serverOffset)
+    {
+        foreach (var item in source)
+        {
+            var serverTime = item.Time.ToOffset(serverOffset);
+            if (serverTime.Year != year || serverTime.Month != month)
+            {
+                continue;
+            }
+            int day = serverTime.Day;
+            if ((uint)(day - 1) < (uint)target.Length)
+            {
+                target[day - 1] += item.Number;
+            }
         }
     }
 
