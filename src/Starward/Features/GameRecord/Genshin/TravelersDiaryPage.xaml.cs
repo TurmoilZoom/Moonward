@@ -193,6 +193,12 @@ public sealed partial class TravelersDiaryPage : PageBase
             await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 1);
             await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 2);
             GetMonthDataList();
+            // 获取完成后自动选中对应月份，触发右侧内容区展示
+            var selected = MonthDataList?.FirstOrDefault(x => x.Month == month);
+            if (selected != null)
+            {
+                ListView_MonthDataList.SelectedItem = selected;
+            }
         }
         catch (miHoYoApiException ex)
         {
@@ -239,8 +245,10 @@ public sealed partial class TravelersDiaryPage : PageBase
     {
         try
         {
-            var items_primogems = _gameRecordService.GetTravelersDiaryDetailItems(data.Uid, data.Year, data.Month, 1);
-            var items_mora = _gameRecordService.GetTravelersDiaryDetailItems(data.Uid, data.Year, data.Month, 2);
+            // 一次查询所有类型的明细，再按 Type 分组，避免多次 DB 请求
+            var allItems = _gameRecordService.GetTravelersDiaryDetailItems(data.Uid, data.Year, data.Month);
+            var items_primogems = allItems.Where(x => x.Type == 1);
+            var items_mora = allItems.Where(x => x.Type == 2);
             int days = DateTime.DaysInMonth(data.Year, data.Month);
             var x = Enumerable.Range(1, days).ToArray();
 

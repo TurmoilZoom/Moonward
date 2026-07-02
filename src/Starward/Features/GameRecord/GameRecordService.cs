@@ -443,6 +443,20 @@ internal class GameRecordService
     }
 
 
+    /// <summary>
+    /// 一次查询旅行札记某月所有类型的明细记录，由调用方按 <see cref="TravelersDiaryAwardItem.Type"/> 分组汇总。
+    /// </summary>
+    /// <param name="uid">玩家 uid。</param>
+    /// <param name="year">年份。</param>
+    /// <param name="month">月份（1-12）。</param>
+    /// <returns>该月全部类型的明细记录，按时间升序排列。</returns>
+    public List<TravelersDiaryAwardItem> GetTravelersDiaryDetailItems(long uid, int year, int month)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.Query<TravelersDiaryAwardItem>("SELECT * FROM GenshinTravelersDiaryAwardItem WHERE Uid=@uid AND Year=@year AND Month=@month ORDER BY Time;", new { uid, year, month }).ToList();
+    }
+
+
 
 
 
@@ -880,6 +894,19 @@ internal class GameRecordService
     }
 
 
+    /// <summary>
+    /// 一次查询开拓月历某月所有类型的明细记录，由调用方按 <see cref="TrailblazeCalendarDetailItem.Type"/> 分组汇总。
+    /// </summary>
+    /// <param name="uid">玩家 uid。</param>
+    /// <param name="month">月份字符串，格式 yyyyMM（如 202506）。</param>
+    /// <returns>该月全部类型的明细记录，按时间升序排列。</returns>
+    public List<TrailblazeCalendarDetailItem> GetTrailblazeCalendarDetailItems(long uid, string month)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.Query<TrailblazeCalendarDetailItem>("SELECT * FROM StarRailTrailblazeCalendarDetailItem WHERE Uid=@uid AND Month=@month ORDER BY Time;", new { uid, month }).ToList();
+    }
+
+
 
 
     #endregion
@@ -968,6 +995,19 @@ internal class GameRecordService
     {
         using var dapper = DatabaseService.CreateConnection();
         return dapper.Query<InterKnotReportDetailItem>("SELECT * FROM ZZZInterKnotReportDetailItem WHERE Uid=@uid AND DataMonth=@month AND DataType=@type ORDER BY Time;", new { uid, month, type }).ToList();
+    }
+
+
+    /// <summary>
+    /// 一次查询绳网月报某月所有类型的明细记录，由调用方按 <see cref="InterKnotReportDetailItem.DataType"/> 分组汇总。
+    /// </summary>
+    /// <param name="uid">玩家 uid。</param>
+    /// <param name="month">月份字符串，格式 yyyyMM（如 202506）。</param>
+    /// <returns>该月全部类型的明细记录，按时间升序排列。</returns>
+    public List<InterKnotReportDetailItem> GetInterKnotReportDetailItems(long uid, string month)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.Query<InterKnotReportDetailItem>("SELECT * FROM ZZZInterKnotReportDetailItem WHERE Uid=@uid AND DataMonth=@month ORDER BY Time;", new { uid, month }).ToList();
     }
 
 

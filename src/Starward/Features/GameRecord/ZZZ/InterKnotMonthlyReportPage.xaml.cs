@@ -217,6 +217,12 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
                 await _gameRecordService.GetInterKnotReportDetailAsync(gameRole, month, item.DataType);
             }
             GetMonthDataList();
+            // 获取完成后自动选中对应月份，触发右侧内容区展示
+            var selected = MonthDataList?.FirstOrDefault(x => x.DataMonth == month);
+            if (selected != null)
+            {
+                ListView_MonthDataList.SelectedItem = selected;
+            }
         }
         catch (miHoYoApiException ex)
         {
@@ -262,9 +268,11 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     {
         try
         {
-            var items_poly = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.PolychromesData);
-            var items_tape = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.MatserTapeData);
-            var items_boopon = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth, InterKnotReportDataType.BooponsData);
+            // 一次查询所有类型的明细，再按 DataType 分组，避免多次 DB 请求
+            var allItems = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth);
+            var items_poly = allItems.Where(x => x.DataType == InterKnotReportDataType.PolychromesData);
+            var items_tape = allItems.Where(x => x.DataType == InterKnotReportDataType.MatserTapeData);
+            var items_boopon = allItems.Where(x => x.DataType == InterKnotReportDataType.BooponsData);
             int year = int.Parse(data.DataMonth[..4], CultureInfo.InvariantCulture);
             int month = int.Parse(data.DataMonth[4..], CultureInfo.InvariantCulture);
             int days = DateTime.DaysInMonth(year, month);

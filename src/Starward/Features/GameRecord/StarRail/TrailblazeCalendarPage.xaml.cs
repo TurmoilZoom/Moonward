@@ -205,6 +205,12 @@ public sealed partial class TrailblazeCalendarPage : PageBase
             await _gameRecordService.GetTrailblazeCalendarDetailAsync(gameRole, month, 1);
             await _gameRecordService.GetTrailblazeCalendarDetailAsync(gameRole, month, 2);
             GetMonthDataList();
+            // 获取完成后自动选中对应月份，触发右侧内容区展示
+            var selected = MonthDataList?.FirstOrDefault(x => x.Month == month);
+            if (selected != null)
+            {
+                ListView_MonthDataList.SelectedItem = selected;
+            }
         }
         catch (miHoYoApiException ex)
         {
@@ -250,8 +256,10 @@ public sealed partial class TrailblazeCalendarPage : PageBase
     {
         try
         {
-            var items_jade = _gameRecordService.GetTrailblazeCalendarDetailItems(data.Uid, data.Month, 1);
-            var items_pass = _gameRecordService.GetTrailblazeCalendarDetailItems(data.Uid, data.Month, 2);
+            // 一次查询所有类型的明细，再按 Type 分组，避免多次 DB 请求
+            var allItems = _gameRecordService.GetTrailblazeCalendarDetailItems(data.Uid, data.Month);
+            var items_jade = allItems.Where(x => x.Type == 1);
+            var items_pass = allItems.Where(x => x.Type == 2);
             int days = DateTime.DaysInMonth(int.Parse(data.Month[..4]), int.Parse(data.Month[4..]));
             var x = Enumerable.Range(1, days).ToArray();
 
