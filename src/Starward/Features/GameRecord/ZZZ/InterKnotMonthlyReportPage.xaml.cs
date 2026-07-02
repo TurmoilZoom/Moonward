@@ -209,7 +209,9 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             {
                 return;
             }
-            var summary = await _gameRecordService.GetInterKnotReportSummaryAsync(gameRole, month);
+            // 若本地列表中已有该月摘要，直接复用，避免多余的网络请求
+            var summary = MonthDataList?.FirstOrDefault(x => x.DataMonth == month)
+                ?? await _gameRecordService.GetInterKnotReportSummaryAsync(gameRole, month);
             foreach (var item in summary.MonthData.List)
             {
                 await _gameRecordService.GetInterKnotReportDetailAsync(gameRole, month, item.DataType);
@@ -243,7 +245,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         {
             if (e.AddedItems.FirstOrDefault() is InterKnotReportSummary data)
             {
-                SelectMonthData = _gameRecordService.GetInterKnotReportSummary(data)!;
+                SelectMonthData = data;
                 SelectSeries = SelectMonthData.MonthData.IncomeComponents.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action), x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
                 RefreshDailyDataPlot(data);
             }

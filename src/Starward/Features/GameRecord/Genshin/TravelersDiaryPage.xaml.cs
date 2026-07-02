@@ -185,7 +185,11 @@ public sealed partial class TravelersDiaryPage : PageBase
             {
                 return;
             }
-            await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole, month);
+            // 若本地列表中已有该月摘要，跳过网络请求直接拉取明细
+            if (MonthDataList?.Any(x => x.Month == month) != true)
+            {
+                await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole, month);
+            }
             await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 1);
             await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 2);
             GetMonthDataList();

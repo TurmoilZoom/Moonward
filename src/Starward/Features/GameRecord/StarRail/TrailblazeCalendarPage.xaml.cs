@@ -197,7 +197,11 @@ public sealed partial class TrailblazeCalendarPage : PageBase
             {
                 return;
             }
-            await _gameRecordService.GetTrailblazeCalendarSummaryAsync(gameRole, month);
+            // 若本地列表中已有该月摘要，跳过网络请求直接拉取明细
+            if (MonthDataList?.Any(x => x.Month == month) != true)
+            {
+                await _gameRecordService.GetTrailblazeCalendarSummaryAsync(gameRole, month);
+            }
             await _gameRecordService.GetTrailblazeCalendarDetailAsync(gameRole, month, 1);
             await _gameRecordService.GetTrailblazeCalendarDetailAsync(gameRole, month, 2);
             GetMonthDataList();
