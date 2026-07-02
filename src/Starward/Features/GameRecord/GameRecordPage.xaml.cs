@@ -89,6 +89,7 @@ public sealed partial class GameRecordPage : PageBase
             LoadGameRoles();
             await UpdateDeviceInfoAsync();
             await RefreshGameRoleHeadIconSilentlyAsync();
+            NavigateToDefaultPage();
         }
     }
 
@@ -486,6 +487,39 @@ public sealed partial class GameRecordPage : PageBase
             return;
         }
         frame.Navigate(page, parameter ?? CurrentRole);
+    }
+
+
+
+    /// <summary>
+    /// 根据当前游戏导航到默认统计页面：绝区零→绳网月报，原神→旅行者札记，铁道→开拓月历。
+    /// </summary>
+    private void NavigateToDefaultPage()
+    {
+        Type? type = CurrentGameBiz.Game switch
+        {
+            GameBiz.nap => typeof(InterKnotMonthlyReportPage),
+            GameBiz.hk4e => typeof(TravelersDiaryPage),
+            GameBiz.hkrpg => typeof(TrailblazeCalendarPage),
+            _ => null,
+        };
+        if (type is null)
+        {
+            return;
+        }
+        NavigateTo(type);
+        // 同步更新左侧导航栏选中状态
+        NavigationViewItem? navItem = CurrentGameBiz.Game switch
+        {
+            GameBiz.nap => NavigationViewItem_InterKnotMonthlyReport,
+            GameBiz.hk4e => NavigationViewItem_TravelersDiary,
+            GameBiz.hkrpg => NavigationViewItem_TrailblazeMonthlyCalendar,
+            _ => null,
+        };
+        if (navItem is not null)
+        {
+            NavigationView_Toolbox.SelectedItem = navItem;
+        }
     }
 
 

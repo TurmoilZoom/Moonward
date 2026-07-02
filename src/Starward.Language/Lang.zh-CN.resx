@@ -907,7 +907,7 @@
     <value>实时数据</value>
   </data>
   <data name="TravelersDiaryPage_HistoricalData" xml:space="preserve">
-    <value>历史数据</value>
+    <value>统计数据</value>
   </data>
   <data name="TravelersDiaryPage_AcquiredThisMonth" xml:space="preserve">
     <value>当月共获取</value>

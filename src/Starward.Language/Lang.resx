@@ -907,7 +907,7 @@ closing the program during decompression will cause game file corruption.</value
     <value>Real-Time Data</value>
   </data>
   <data name="TravelersDiaryPage_HistoricalData" xml:space="preserve">
-    <value>Historical Data</value>
+    <value>Statistics</value>
   </data>
   <data name="TravelersDiaryPage_AcquiredThisMonth" xml:space="preserve">
     <value>Acquired this month</value>

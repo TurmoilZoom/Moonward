@@ -419,19 +419,65 @@ internal class GameRecordService
         }
         var list = detail.List;
         using var dapper = DatabaseService.CreateConnection();
-        var existCount = dapper.QuerySingleOrDefault<int>("SELECT COUNT(*) FROM GenshinTravelersDiaryAwardItem WHERE Uid=@Uid AND Year=@Year AND Month=@Month AND Type=@Type;", list.FirstOrDefault());
-        if (existCount == list.Count)
+        var firstItem = list.FirstOrDefault();
+        var existCount = dapper.QuerySingleOrDefault<int>("SELECT COUNT(*) FROM GenshinTravelersDiaryAwardItem WHERE Uid=@Uid AND Year=@Year AND Month=@Month AND Type=@Type;", firstItem);
+        if (existCount == list.Count && existCount > 0)
+        {
+            // 总数未变，仅刷新最新一条记录（API 按时间降序，list[0] 为最新记录）
+            var lastItem = list[0];
+            using var t = dapper.BeginTransaction();
+            dapper.Execute("""
+                DELETE FROM GenshinTravelersDiaryAwardItem
+                WHERE Id = (
+                    SELECT Id FROM GenshinTravelersDiaryAwardItem
+                    WHERE Uid = @Uid AND Year = @Year AND Month = @Month AND Type = @Type
+                    ORDER BY Time DESC LIMIT 1
+                );
+                """, firstItem, t);
+            dapper.Execute("""
+                INSERT INTO GenshinTravelersDiaryAwardItem (Uid, Year, Month, Type, ActionId, ActionName, Time, Number)
+                VALUES (@Uid, @Year, @Month, @Type, @ActionId, @ActionName, @Time, @Number);
+                """, lastItem, t);
+            t.Commit();
+            return 0;
+        }
+        if (existCount >= list.Count)
         {
             return 0;
         }
-        using var t = dapper.BeginTransaction();
-        dapper.Execute($"DELETE FROM GenshinTravelersDiaryAwardItem WHERE Uid=@Uid AND Year=@Year AND Month=@Month AND Type=@Type;", list.FirstOrDefault(), t);
-        dapper.Execute("""
+        // 增量插入：仅插入 Time 不重复的新记录；同时刷新原有记录中最新的一条
+        var existTimes = new HashSet<DateTime>(dapper.Query<DateTime>(
+            "SELECT Time FROM GenshinTravelersDiaryAwardItem WHERE Uid=@Uid AND Year=@Year AND Month=@Month AND Type=@Type;",
+            firstItem));
+        var newItems = list.Where(x => !existTimes.Contains(x.Time)).ToList();
+        if (newItems.Count > 0)
+        {
+            dapper.Execute("""
                 INSERT INTO GenshinTravelersDiaryAwardItem (Uid, Year, Month, Type, ActionId, ActionName, Time, Number)
                 VALUES (@Uid, @Year, @Month, @Type, @ActionId, @ActionName, @Time, @Number);
-                """, list, t);
-        t.Commit();
-        return list.Count - existCount;
+                """, newItems);
+        }
+        // 刷新原有记录中最新的一条（API 按时间降序，新记录之后的第一条即为原最新记录）
+        int newCount = newItems.Count;
+        if (newCount < list.Count)
+        {
+            var lastExistingItem = list[newCount];
+            using var updateTx = dapper.BeginTransaction();
+            dapper.Execute("""
+                DELETE FROM GenshinTravelersDiaryAwardItem
+                WHERE Id = (
+                    SELECT Id FROM GenshinTravelersDiaryAwardItem
+                    WHERE Uid = @Uid AND Year = @Year AND Month = @Month AND Type = @Type AND Time = @Time
+                    LIMIT 1
+                );
+                """, lastExistingItem, updateTx);
+            dapper.Execute("""
+                INSERT INTO GenshinTravelersDiaryAwardItem (Uid, Year, Month, Type, ActionId, ActionName, Time, Number)
+                VALUES (@Uid, @Year, @Month, @Type, @ActionId, @ActionName, @Time, @Number);
+                """, lastExistingItem, updateTx);
+            updateTx.Commit();
+        }
+        return newCount;
     }
 
 
@@ -862,27 +908,77 @@ internal class GameRecordService
 
     public async Task<int> GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type)
     {
-        int total = (await _gameRecordClient.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1)).Total;
+        // 先获取第一页（page_size=1）以同时得到总数和最新一条记录
+        var firstPage = await _gameRecordClient.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1);
+        int total = firstPage.Total;
         if (total == 0)
         {
             return 0;
         }
         using var dapper = DatabaseService.CreateConnection();
         var existCount = dapper.QuerySingleOrDefault<int>("SELECT COUNT(*) FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @Uid AND Month = @month AND Type = @type;", new { role.Uid, month, type });
-        if (existCount == total)
+        if (existCount == total && existCount > 0)
+        {
+            // 总数未变，仅刷新最新一条记录
+            var lastItem = firstPage.List.FirstOrDefault();
+            if (lastItem != null)
+            {
+                using var t = dapper.BeginTransaction();
+                dapper.Execute("""
+                    DELETE FROM StarRailTrailblazeCalendarDetailItem
+                    WHERE Id = (
+                        SELECT Id FROM StarRailTrailblazeCalendarDetailItem
+                        WHERE Uid = @Uid AND Month = @Month AND Type = @Type
+                        ORDER BY Time DESC LIMIT 1
+                    );
+                    """, lastItem, t);
+                dapper.Execute("""
+                    INSERT INTO StarRailTrailblazeCalendarDetailItem (Uid, Month, Type, Action, ActionName, Time, Number)
+                    VALUES (@Uid, @Month, @Type, @Action, @ActionName, @Time, @Number);
+                    """, lastItem, t);
+                t.Commit();
+            }
+            return 0;
+        }
+        if (existCount >= total)
         {
             return 0;
         }
+        // 增量插入：仅插入 Time 不重复的新记录；同时刷新原有记录中最新的一条
         var detail = await _gameRecordClient.GetTrailblazeCalendarDetailAsync(role, month, type);
         var list = detail.List;
-        using var t = dapper.BeginTransaction();
-        dapper.Execute($"DELETE FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @Uid AND Month = @Month AND Type = @Type;", list.FirstOrDefault(), t);
-        dapper.Execute("""
+        var existTimes = new HashSet<DateTime>(dapper.Query<DateTime>(
+            "SELECT Time FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @uid AND Month = @month AND Type = @type;",
+            new { uid = role.Uid, month, type }));
+        var newItems = list.Where(x => !existTimes.Contains(x.Time)).ToList();
+        if (newItems.Count > 0)
+        {
+            dapper.Execute("""
                 INSERT INTO StarRailTrailblazeCalendarDetailItem (Uid, Month, Type, Action, ActionName, Time, Number)
                 VALUES (@Uid, @Month, @Type, @Action, @ActionName, @Time, @Number);
-                """, list, t);
-        t.Commit();
-        return total - existCount;
+                """, newItems);
+        }
+        // 刷新原有记录中最新的一条（API 按时间降序，新记录之后的第一条即为原最新记录）
+        int newCount = newItems.Count;
+        if (newCount < list.Count)
+        {
+            var lastExistingItem = list[newCount];
+            using var updateTx = dapper.BeginTransaction();
+            dapper.Execute("""
+                DELETE FROM StarRailTrailblazeCalendarDetailItem
+                WHERE Id = (
+                    SELECT Id FROM StarRailTrailblazeCalendarDetailItem
+                    WHERE Uid = @Uid AND Month = @Month AND Type = @Type AND Time = @Time
+                    LIMIT 1
+                );
+                """, lastExistingItem, updateTx);
+            dapper.Execute("""
+                INSERT INTO StarRailTrailblazeCalendarDetailItem (Uid, Month, Type, Action, ActionName, Time, Number)
+                VALUES (@Uid, @Month, @Type, @Action, @ActionName, @Time, @Number);
+                """, lastExistingItem, updateTx);
+            updateTx.Commit();
+        }
+        return newCount;
     }
 
 
@@ -966,27 +1062,48 @@ internal class GameRecordService
 
     public async Task<int> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type)
     {
-        int total = (await _gameRecordClient.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1)).Total;
+        // 先获取第一页（page_size=1）以同时得到总数和最新一条记录，避免后续重复请求
+        var firstPage = await _gameRecordClient.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1);
+        int total = firstPage.Total;
         if (total == 0)
         {
             return 0;
         }
         using var dapper = DatabaseService.CreateConnection();
         var existCount = dapper.QuerySingleOrDefault<int>("SELECT COUNT(*) FROM ZZZInterKnotReportDetailItem WHERE Uid = @Uid AND DataMonth = @month AND DataType = @type;", new { role.Uid, month, type });
-        if (existCount == total)
+        if (existCount == total && existCount > 0)
+        {
+            // 总数未变，仅刷新最新一条记录（复用首页请求结果，无需额外网络请求）
+            var lastItem = firstPage.List.FirstOrDefault();
+            if (lastItem != null)
+            {
+                dapper.Execute("""
+                    INSERT OR REPLACE INTO ZZZInterKnotReportDetailItem (Uid, Id, DataMonth, DataType, Action, Time, Number)
+                    VALUES (@Uid, @Id, @DataMonth, @DataType, @Action, @Time, @Number);
+                    """, lastItem);
+            }
+            return 0;
+        }
+        if (existCount >= total)
         {
             return 0;
         }
+        // 增量插入：INSERT OR IGNORE 跳过已存在记录（主键为 (Uid, Id)），仅写入新记录；
+        // 同时刷新原有记录中最新的一条（INSERT OR REPLACE 利用主键做 upsert）
         var detail = await _gameRecordClient.GetInterKnotReportDetailAsync(role, month, type);
-        var list = detail.List;
-        using var t = dapper.BeginTransaction();
-        dapper.Execute($"DELETE FROM ZZZInterKnotReportDetailItem WHERE Uid = @Uid AND DataMonth = @DataMonth AND DataType = @DataType;", list.FirstOrDefault(), t);
+        int newCount = total - existCount;
         dapper.Execute("""
+            INSERT OR IGNORE INTO ZZZInterKnotReportDetailItem (Uid, Id, DataMonth, DataType, Action, Time, Number)
+            VALUES (@Uid, @Id, @DataMonth, @DataType, @Action, @Time, @Number);
+            """, detail.List);
+        if (newCount < detail.List.Count)
+        {
+            dapper.Execute("""
                 INSERT OR REPLACE INTO ZZZInterKnotReportDetailItem (Uid, Id, DataMonth, DataType, Action, Time, Number)
                 VALUES (@Uid, @Id, @DataMonth, @DataType, @Action, @Time, @Number);
-                """, list, t);
-        t.Commit();
-        return total - existCount;
+                """, detail.List[newCount]);
+        }
+        return newCount;
     }
 
 

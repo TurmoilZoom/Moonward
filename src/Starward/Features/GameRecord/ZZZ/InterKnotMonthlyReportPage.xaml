@@ -53,25 +53,6 @@
                     Spacing="12">
             <Button Height="36"
                     BorderThickness="0"
-                    Command="{x:Bind InitializeDataCommand}"
-                    CornerRadius="0,18,18,0"
-                    Style="{ThemeResource AccentButtonStyle}">
-                <StackPanel Margin="4,0,4,0"
-                            Orientation="Horizontal"
-                            Spacing="8">
-                    <Grid>
-                        <ProgressRing Width="16"
-                                      Height="16"
-                                      IsActive="{x:Bind InitializeDataCommand.IsRunning}" />
-                        <FontIcon FontSize="16"
-                                  Glyph="&#xE72C;"
-                                  Visibility="{x:Bind InitializeDataCommand.IsRunning, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                    </Grid>
-                    <TextBlock Text="{x:Bind lang:Lang.Common_Refresh}" />
-                </StackPanel>
-            </Button>
-            <Button Height="36"
-                    BorderThickness="0"
                     CornerRadius="0,18,18,0"
                     IsEnabled="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}"
                     Style="{ThemeResource AccentButtonStyle}">
@@ -139,98 +120,36 @@
         <ScrollViewer Grid.RowSpan="2" Grid.Column="1">
             <StackPanel Margin="24" Spacing="8">
 
-                <!--  Real-Time Data  -->
-                <TextBlock FontSize="16"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="{x:Bind lang:Lang.TravelersDiaryPage_RealTimeData}"
-                           Visibility="{x:Bind CurrentSummary, Converter={StaticResource ObjectToVisibilityConverter}}" />
-                <Grid Padding="24,8,24,8"
-                      Background="{ThemeResource CustomOverlayAcrylicBrush}"
-                      CornerRadius="8"
-                      Shadow="{ThemeResource ThemeShadow}"
-                      Translation="0,0,16"
-                      Visibility="{x:Bind CurrentSummary, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <ItemsControl ItemsSource="{x:Bind CurrentSummary.MonthData.List}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="24" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="report:InterKnotReportSummaryAward">
-                                <StackPanel Spacing="4">
-                                    <Image Width="32"
-                                           Height="32"
-                                           Source="{x:Bind local:InterKnotMonthlyReportPage.DataTypeToImage(DataType)}" />
-                                    <TextBlock HorizontalAlignment="Center"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               HorizontalTextAlignment="Center"
-                                               Text="{x:Bind DataName}" />
-                                    <TextBlock HorizontalAlignment="Center"
-                                               HorizontalTextAlignment="Center"
-                                               Text="{x:Bind Count}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <MenuFlyoutSeparator Grid.Row="1" Margin="0,8,0,8" />
-
-                    <TextBlock Grid.Row="2"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind lang:Lang.InterKnotMonthlyReportPage_PolychromeRevenueStreams}" />
-                    <sc:ColorRectChart Grid.Row="3"
-                                       Grid.ColumnSpan="3"
-                                       Height="20"
-                                       Margin="0,8,0,0"
-                                       HorizontalAlignment="Stretch"
-                                       CornerRadius="4"
-                                       Series="{x:Bind CurrentSeries}" />
-                    <ItemsControl Grid.Row="4"
-                                  Grid.ColumnSpan="3"
-                                  Margin="0,8,-4,0"
-                                  ItemsSource="{x:Bind CurrentSeries}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <cc:WrapPanel HorizontalSpacing="12"
-                                              Orientation="Horizontal"
-                                              VerticalSpacing="4" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <Border Width="16"
-                                            Height="16"
-                                            Background="{Binding Color, Converter={StaticResource ColorToSolidColorBrushConverter}}"
-                                            CornerRadius="4" />
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding Legend}" />
-                                    <TextBlock VerticalAlignment="Center">
-                                        <Run Text="{Binding Percent}" /><Run Text="%" />
-                                    </TextBlock>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                <!--  Statistics Data  -->
+                <Grid Margin="0,8,0,0"
+                      Visibility="{x:Bind SelectMonthData, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontSize="16"
+                               VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        <Run Text="{x:Bind lang:Lang.TravelersDiaryPage_HistoricalData}" />
+                        <Run Text="" />
+                        <Run Text="{x:Bind SelectMonthData.DataMonth}" />
+                    </TextBlock>
+                    <Button Grid.Column="1"
+                            Padding="8,4,8,4"
+                            VerticalAlignment="Center"
+                            Command="{x:Bind GetDataDetailsCommand}"
+                            CommandParameter="{x:Bind SelectMonthData.DataMonth}"
+                            IsEnabled="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}">
+                        <Grid>
+                            <ProgressRing Width="16"
+                                          Height="16"
+                                          IsActive="{x:Bind GetDataDetailsCommand.IsRunning}" />
+                            <FontIcon FontSize="14"
+                                      Glyph="&#xE72C;"
+                                      Visibility="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                        </Grid>
+                    </Button>
                 </Grid>
-
-                <!--  Historical Data  -->
-                <TextBlock Margin="0,8,0,0"
-                           FontSize="16"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Visibility="{x:Bind SelectMonthData, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <Run Text="{x:Bind lang:Lang.TravelersDiaryPage_HistoricalData}" />
-                    <Run Text="" />
-                    <Run Text="{x:Bind SelectMonthData.DataMonth}" />
-                </TextBlock>
                 <Grid Padding="24,8,24,8"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"

@@ -59,18 +59,12 @@ public sealed partial class TrailblazeCalendarPage : PageBase
 
     protected override void OnUnloaded()
     {
-        CurrentSummary = null!;
         SelectMonthData = null;
         MonthDataList = null!;
-        CurrentSeries = null;
         SelectSeries = null;
         DayDataList = null!;
     }
 
-
-
-    [ObservableProperty]
-    private TrailblazeCalendarSummary currentSummary;
 
 
     [ObservableProperty]
@@ -79,10 +73,6 @@ public sealed partial class TrailblazeCalendarPage : PageBase
 
     [ObservableProperty]
     private List<TrailblazeCalendarMonthData> monthDataList;
-
-
-    [ObservableProperty]
-    private List<ColorRectChart.ChartLegend>? currentSeries;
 
 
     [ObservableProperty]
@@ -113,6 +103,11 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         await Task.Delay(16);
         await GetCurrentSummaryAsync();
         GetMonthDataList();
+        // 若本地有统计数据，自动选中最新月份（列表已按 Month DESC 排序，首项即最新）
+        if (MonthDataList?.Count > 0)
+        {
+            ListView_MonthDataList.SelectedItem = MonthDataList[0];
+        }
     }
 
 
@@ -126,9 +121,9 @@ public sealed partial class TrailblazeCalendarPage : PageBase
             {
                 return;
             }
-            CurrentSummary = await _gameRecordService.GetTrailblazeCalendarSummaryAsync(gameRole);
+            var summary = await _gameRecordService.GetTrailblazeCalendarSummaryAsync(gameRole);
             MenuFlyout_GetDetails.Items.Clear();
-            foreach (string monthStr in CurrentSummary.OptionalMonth)
+            foreach (string monthStr in summary.OptionalMonth)
             {
                 if (DateTime.TryParseExact(monthStr, "yyyyMM", null, System.Globalization.DateTimeStyles.None, out DateTime time))
                 {
@@ -149,7 +144,6 @@ public sealed partial class TrailblazeCalendarPage : PageBase
                     });
                 }
             }
-            CurrentSeries = CurrentSummary.MonthData.GroupBy.Select(x => new ColorRectChart.ChartLegend(x.ActionName, x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
         }
         catch (miHoYoApiException ex)
         {

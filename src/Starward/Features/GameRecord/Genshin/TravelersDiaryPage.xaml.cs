@@ -58,18 +58,12 @@ public sealed partial class TravelersDiaryPage : PageBase
 
     protected override void OnUnloaded()
     {
-        CurrentSummary = null!;
         SelectMonthData = null;
         MonthDataList = null!;
-        CurrentSeries = null;
         SelectSeries = null;
         DayDataList = null!;
     }
 
-
-
-    [ObservableProperty]
-    private TravelersDiarySummary currentSummary;
 
 
     [ObservableProperty]
@@ -78,10 +72,6 @@ public sealed partial class TravelersDiaryPage : PageBase
 
     [ObservableProperty]
     private List<TravelersDiaryMonthData> monthDataList;
-
-
-    [ObservableProperty]
-    private List<ColorRectChart.ChartLegend>? currentSeries;
 
 
     [ObservableProperty]
@@ -113,6 +103,11 @@ public sealed partial class TravelersDiaryPage : PageBase
         await Task.Delay(16);
         await GetCurrentSummaryAsync();
         GetMonthDataList();
+        // 若本地有统计数据，自动选中最新月份（列表已按 Year DESC, Month DESC 排序，首项即最新）
+        if (MonthDataList?.Count > 0)
+        {
+            ListView_MonthDataList.SelectedItem = MonthDataList[0];
+        }
     }
 
 
@@ -126,9 +121,9 @@ public sealed partial class TravelersDiaryPage : PageBase
             {
                 return;
             }
-            CurrentSummary = await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole);
+            var summary = await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole);
             MenuFlyout_GetDetails.Items.Clear();
-            foreach (int month in Enumerable.Reverse(CurrentSummary.OptionalMonth))
+            foreach (int month in Enumerable.Reverse(summary.OptionalMonth))
             {
                 MenuFlyout_GetDetails.Items.Add(new MenuFlyoutItem
                 {
@@ -137,7 +132,6 @@ public sealed partial class TravelersDiaryPage : PageBase
                     CommandParameter = month,
                 });
             }
-            CurrentSeries = CurrentSummary.MonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(x.ActionName, x.Percent, actionColorMap.GetValueOrDefault(x.ActionId))).ToList();
         }
         catch (miHoYoApiException ex)
         {
