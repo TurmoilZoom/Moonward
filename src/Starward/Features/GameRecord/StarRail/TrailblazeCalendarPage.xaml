@@ -20,6 +20,7 @@
     </Page.Resources>
 
     <Grid>
+        <!-- 星穹铁道开拓月历布局：左侧月份列表，右侧汇总卡片 + 每日收入图表 -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />

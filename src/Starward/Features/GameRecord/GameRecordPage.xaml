@@ -15,6 +15,7 @@
 
     <Grid>
 
+        <!-- 左侧功能导航面板（角色头像 + 米游社各功能入口：战绩、月报等） -->
         <NavigationView Name="NavigationView_Toolbox"
                         IsBackButtonVisible="Collapsed"
                         IsPaneToggleButtonVisible="False"
@@ -27,6 +28,7 @@
             </NavigationView.Resources>
 
             <NavigationView.PaneCustomContent>
+                <!-- 面板顶部：头像 + 角色信息 / 登录按钮（点击头像可展开收起） -->
                 <Grid Height="56"
                       HorizontalAlignment="Stretch"
                       ColumnSpacing="8">
@@ -36,7 +38,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <!--  头像  -->
+                    <!-- 展开状态下的宽头像（点击收起） -->
                     <Grid Name="Grid_Avatar_1"
                           Width="56"
                           Height="56"
@@ -51,7 +53,7 @@
                                         Source="{x:Bind AvatarUrl}" />
                     </Grid>
 
-                    <!--  窄边框头像  -->
+                    <!-- 收起状态下的窄头像（点击展开） -->
                     <Border Name="Border_Avatar_2"
                             Width="48"
                             Height="48"
@@ -71,7 +73,7 @@
                                         Source="{x:Bind AvatarUrl}" />
                     </Border>
 
-                    <!--  角色信息  -->
+                    <!-- 当前角色昵称 + 服务器 + 等级 -->
                     <StackPanel Grid.Column="1"
                                 VerticalAlignment="Center"
                                 Spacing="2"
@@ -84,7 +86,7 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <!--  登录  -->
+                    <!-- 未登录状态显示的登录按钮（支持网页登录或手动输入 Cookie） -->
                     <Button Grid.Column="1"
                             Grid.ColumnSpan="2"
                             Margin="0,0,12,0"

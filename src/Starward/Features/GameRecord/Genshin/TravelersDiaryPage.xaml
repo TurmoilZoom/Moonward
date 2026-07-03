@@ -29,8 +29,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-
-
+        <!-- 无数据时的占位表情 + 提示（当没有任何月数据时显示） -->
         <StackPanel Name="Image_Emoji"
                     Grid.RowSpan="2"
                     Grid.Column="1"
@@ -77,6 +76,7 @@
         </StackPanel>
 
 
+        <!-- 左侧月份列表：历史旅行者札记月份 -->
         <ListView Name="ListView_MonthDataList"
                   Grid.Row="1"
                   Margin="0,12,0,0"

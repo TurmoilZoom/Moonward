@@ -20,6 +20,7 @@
     </Page.Resources>
 
     <Grid>
+        <!-- 绝区零绳网月报布局：左侧月份列表，右侧汇总卡片 + 每日收入图表（多类型） -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />

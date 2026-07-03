@@ -22,7 +22,10 @@ namespace Starward.Features.GameRecord.Genshin;
 
 public sealed partial class TravelersDiaryPage : PageBase
 {
-
+    /// <summary>
+    /// 原神旅行者札记页面（月报数据）。显示当月/历史原石、摩拉收入及每日明细图表。
+    /// 打开时会刷新当前月数据，即使本地已有缓存。
+    /// </summary>
 
     private readonly ILogger<TravelersDiaryPage> _logger = AppConfig.GetLogger<TravelersDiaryPage>();
 
@@ -38,6 +41,9 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
+    /// <summary>
+    /// 当前游戏角色，从导航参数传入。
+    /// </summary>
     private GameRecordRole gameRole;
 
 
@@ -67,10 +73,16 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
+    /// <summary>
+    /// 当前选中的月份数据（用于右侧展示）。
+    /// </summary>
     [ObservableProperty]
     private TravelersDiaryMonthData? selectMonthData;
 
 
+    /// <summary>
+    /// 历史月份数据列表（从本地数据库加载）。
+    /// </summary>
     [ObservableProperty]
     private List<TravelersDiaryMonthData> monthDataList;
 
@@ -109,12 +121,16 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
+    /// <summary>
+    /// 初始化页面数据。
+    /// 注意：即使本地数据库已有缓存，也会先调用 GetCurrentSummaryAsync 刷新当前月数据。
+    /// </summary>
     [RelayCommand]
     private async Task InitializeDataAsync()
     {
         await Task.Delay(16);
-        await GetCurrentSummaryAsync();
-        GetMonthDataList();
+        await GetCurrentSummaryAsync();   // 总是请求当前月最新数据（含 OptionalMonth）
+        GetMonthDataList();               // 从本地 DB 加载历史月份列表
         // 若本地有统计数据，自动选中最新月份（列表已按 Year DESC, Month DESC 排序，首项即最新）
         if (MonthDataList?.Count > 0)
         {
@@ -125,6 +141,10 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
+    /// <summary>
+    /// 获取当前月旅行者札记汇总数据。
+    /// 同时填充可查询月份列表（用于顶部“获取详情”菜单和刷新按钮可见性判断）。
+    /// </summary>
     private async Task GetCurrentSummaryAsync()
     {
         try
@@ -166,6 +186,9 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
+    /// <summary>
+    /// 从本地数据库加载该角色的历史月份数据列表（Summary 级别）。
+    /// </summary>
     private void GetMonthDataList()
     {
         try
@@ -184,6 +207,11 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
+    /// <summary>
+    /// 获取指定月份的详细数据。
+    /// 如果本地已存在该月摘要，则跳过 summary 请求，直接拉明细。
+    /// 拉取完成后刷新列表并选中该月。
+    /// </summary>
     [RelayCommand]
     private async Task GetDataDetailsAsync(int month)
     {
@@ -229,6 +257,9 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
+    /// <summary>
+    /// 月份列表选中变化：更新右侧展示数据，决定是否显示“刷新”按钮（仅服务器可选月份可刷新）。
+    /// </summary>
     private void ListView_MonthDataList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
@@ -236,7 +267,7 @@ public sealed partial class TravelersDiaryPage : PageBase
             if (e.AddedItems.FirstOrDefault() is TravelersDiaryMonthData data)
             {
                 SelectMonthData = data;
-                // 当月存在于 API 可选列表中时显示刷新按钮
+                // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新（避免无效请求）。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.Month) ?? false;
                 SelectSeries = SelectMonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(x.ActionName, x.Percent, actionColorMap.GetValueOrDefault(x.ActionId))).ToList();
                 RefreshDailyDataPlot(data);

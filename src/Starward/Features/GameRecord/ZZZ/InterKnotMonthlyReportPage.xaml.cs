@@ -24,6 +24,10 @@ namespace Starward.Features.GameRecord.ZZZ;
 
 public sealed partial class InterKnotMonthlyReportPage : PageBase
 {
+    /// <summary>
+    /// 绝区零绳网月报页面（月报数据）。显示当月/历史聚货、音像带、博识等收入及每日明细图表。
+    /// 打开时会刷新当前月数据，即使本地已有缓存。
+    /// </summary>
 
     private readonly ILogger<InterKnotMonthlyReportPage> _logger = AppConfig.GetLogger<InterKnotMonthlyReportPage>();
 
@@ -38,6 +42,9 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 当前游戏角色，从导航参数传入。
+    /// </summary>
     private GameRecordRole gameRole;
 
 
@@ -70,10 +77,16 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     }
 
 
+    /// <summary>
+    /// 当前选中的月份数据（用于右侧展示）。
+    /// </summary>
     [ObservableProperty]
     private InterKnotReportSummary? selectMonthData;
 
 
+    /// <summary>
+    /// 历史月份数据列表（从本地数据库加载，存储为序列化 JSON）。
+    /// </summary>
     [ObservableProperty]
     private List<InterKnotReportSummary> monthDataList;
 
@@ -121,12 +134,16 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 初始化页面数据。
+    /// 注意：即使本地数据库已有缓存，也会先调用 GetCurrentSummaryAsync 刷新当前月数据。
+    /// </summary>
     [RelayCommand]
     private async Task InitializeDataAsync()
     {
         await Task.Delay(16);
-        await GetCurrentSummaryAsync();
-        GetMonthDataList();
+        await GetCurrentSummaryAsync();   // 总是请求当前月最新数据（含 OptionalMonth）
+        GetMonthDataList();               // 从本地 DB 加载历史月份列表
         // 若本地有统计数据，自动选中最新月份（列表已按 DataMonth DESC 排序，首项即最新）
         if (MonthDataList?.Count > 0)
         {
@@ -137,6 +154,10 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 获取当前月绳网月报汇总数据。
+    /// 同时填充可查询月份列表（用于顶部“获取详情”菜单和刷新按钮可见性）。
+    /// </summary>
     private async Task GetCurrentSummaryAsync()
     {
         try
@@ -190,6 +211,9 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 从本地数据库加载该角色的历史月份数据列表（Summary 级别，存储为序列化对象）。
+    /// </summary>
     private void GetMonthDataList()
     {
         try
@@ -208,6 +232,10 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 获取指定月份的详细数据。
+    /// 优先从当前内存列表复用摘要（避免重复 summary 请求），然后为每个数据类型拉取明细。
+    /// </summary>
     [RelayCommand]
     private async Task GetDataDetailsAsync(string month)
     {
@@ -253,6 +281,9 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 月份列表选中变化：更新右侧展示数据，决定是否显示“刷新”按钮（仅服务器可选月份可刷新）。
+    /// </summary>
     private void ListView_MonthDataList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
@@ -260,7 +291,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             if (e.AddedItems.FirstOrDefault() is InterKnotReportSummary data)
             {
                 SelectMonthData = data;
-                // 当月存在于 API 可选列表中时显示刷新按钮
+                // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.DataMonth) ?? false;
                 SelectSeries = SelectMonthData.MonthData.IncomeComponents.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action), x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
                 RefreshDailyDataPlot(data);
