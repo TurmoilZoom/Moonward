@@ -410,8 +410,33 @@ internal class GameRecordService
 
 
     //原数据库使用的是自增id，在做增量更新时，逻辑判断比较复杂
-    public async Task<int> GetTravelersDiaryDetailAsync(GameRecordRole role, int month, int type, int limit = 100)
+    /// <param name="forceOverwrite">为 true 时先删除该 (uid, year, month, type) 的全部旧记录，再全量写入 API 返回值；false 时走增量逻辑。</param>
+    public async Task<int> GetTravelersDiaryDetailAsync(GameRecordRole role, int month, int type, int limit = 100, bool forceOverwrite = false)
     {
+        if (forceOverwrite)
+        {
+            // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
+            var fwDetail = await _gameRecordClient.GetTravelsDiaryDetailAsync(role, month, type, limit);
+            var fwList = fwDetail.List;
+            if (fwList.Count == 0)
+            {
+                return 0;
+            }
+            var fwFirstItem = fwList[0];
+            using var fwDapper = DatabaseService.CreateConnection();
+            using var fwTx = fwDapper.BeginTransaction();
+            fwDapper.Execute("""
+                DELETE FROM GenshinTravelersDiaryAwardItem
+                WHERE Uid = @Uid AND Year = @Year AND Month = @Month AND Type = @Type;
+                """, fwFirstItem, fwTx);
+            fwDapper.Execute("""
+                INSERT INTO GenshinTravelersDiaryAwardItem (Uid, Year, Month, Type, ActionId, ActionName, Time, Number)
+                VALUES (@Uid, @Year, @Month, @Type, @ActionId, @ActionName, @Time, @Number);
+                """, fwList, fwTx);
+            fwTx.Commit();
+            return fwList.Count;
+        }
+
         // 探针请求：先获取第1页（limit=1）以同时得到总数和最新一条记录，避免冗余的全量查询
         var firstPage = await _gameRecordClient.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, 1);
         int total = firstPage.Total;
@@ -913,8 +938,32 @@ internal class GameRecordService
 
 
     //原数据库使用的是自增id，在做增量更新时，逻辑判断比较复杂
-    public async Task<int> GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type)
+    /// <param name="forceOverwrite">为 true 时先删除该 (uid, month, type) 的全部旧记录，再全量写入 API 返回值；false 时走增量逻辑。</param>
+    public async Task<int> GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type, bool forceOverwrite = false)
     {
+        if (forceOverwrite)
+        {
+            // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
+            var fwDetail = await _gameRecordClient.GetTrailblazeCalendarDetailAsync(role, month, type);
+            var fwList = fwDetail.List;
+            if (fwList.Count == 0)
+            {
+                return 0;
+            }
+            using var fwDapper = DatabaseService.CreateConnection();
+            using var fwTx = fwDapper.BeginTransaction();
+            fwDapper.Execute("""
+                DELETE FROM StarRailTrailblazeCalendarDetailItem
+                WHERE Uid = @Uid AND Month = @Month AND Type = @Type;
+                """, new { role.Uid, month, type }, fwTx);
+            fwDapper.Execute("""
+                INSERT INTO StarRailTrailblazeCalendarDetailItem (Uid, Month, Type, Action, ActionName, Time, Number)
+                VALUES (@Uid, @Month, @Type, @Action, @ActionName, @Time, @Number);
+                """, fwList, fwTx);
+            fwTx.Commit();
+            return fwList.Count;
+        }
+
         // 先获取第一页（page_size=1）以同时得到总数和最新一条记录
         var firstPage = await _gameRecordClient.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1);
         int total = firstPage.Total;
@@ -1067,8 +1116,32 @@ internal class GameRecordService
 
 
 
-    public async Task<int> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type)
+    /// <param name="forceOverwrite">为 true 时先删除该 (uid, month, type) 的全部旧记录，再全量写入 API 返回值；false 时走增量逻辑。</param>
+    public async Task<int> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type, bool forceOverwrite = false)
     {
+        if (forceOverwrite)
+        {
+            // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
+            var fwDetail = await _gameRecordClient.GetInterKnotReportDetailAsync(role, month, type);
+            var fwList = fwDetail.List;
+            if (fwList.Count == 0)
+            {
+                return 0;
+            }
+            using var fwDapper = DatabaseService.CreateConnection();
+            using var fwTx = fwDapper.BeginTransaction();
+            fwDapper.Execute("""
+                DELETE FROM ZZZInterKnotReportDetailItem
+                WHERE Uid = @Uid AND DataMonth = @DataMonth AND DataType = @DataType;
+                """, new { role.Uid, DataMonth = month, DataType = type }, fwTx);
+            fwDapper.Execute("""
+                INSERT OR REPLACE INTO ZZZInterKnotReportDetailItem (Uid, Id, DataMonth, DataType, Action, Time, Number)
+                VALUES (@Uid, @Id, @DataMonth, @DataType, @Action, @Time, @Number);
+                """, fwList, fwTx);
+            fwTx.Commit();
+            return fwList.Count;
+        }
+
         // 先获取第一页（page_size=1）以同时得到总数和最新一条记录，避免后续重复请求
         var firstPage = await _gameRecordClient.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1);
         int total = firstPage.Total;

@@ -177,7 +177,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
                     MenuFlyout_GetDetails.Items.Add(new MenuFlyoutItem
                     {
                         Text = time.ToString("MMM"),
-                        Command = GetDataDetailsCommand,
+                        Command = GetFullDataDetailsCommand,
                         CommandParameter = monthStr,
                     });
                 }
@@ -186,7 +186,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
                     MenuFlyout_GetDetails.Items.Add(new MenuFlyoutItem
                     {
                         Text = monthStr,
-                        Command = GetDataDetailsCommand,
+                        Command = GetFullDataDetailsCommand,
                         CommandParameter = monthStr,
                     });
                 }
@@ -233,8 +233,9 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
     /// <summary>
-    /// 获取指定月份的详细数据。
-    /// 优先从当前内存列表复用摘要（避免重复 summary 请求），然后为每个数据类型拉取明细。
+    /// 获取指定月份的详细数据（增量更新）。
+    /// 始终从服务器拉取最新的统计摘要（覆盖本地），再增量拉取每日明细。
+    /// 拉取完成后刷新列表并选中该月。
     /// </summary>
     [RelayCommand]
     private async Task GetDataDetailsAsync(string month)
@@ -245,9 +246,8 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
             {
                 return;
             }
-            // 若本地列表中已有该月摘要，直接复用，避免多余的网络请求
-            var summary = MonthDataList?.FirstOrDefault(x => x.DataMonth == month)
-                ?? await _gameRecordService.GetInterKnotReportSummaryAsync(gameRole, month);
+            // 始终请求统计摘要（覆盖本地数据），不再复用本地缓存的摘要
+            var summary = await _gameRecordService.GetInterKnotReportSummaryAsync(gameRole, month);
             foreach (var item in summary.MonthData.List)
             {
                 await _gameRecordService.GetInterKnotReportDetailAsync(gameRole, month, item.DataType);
@@ -273,6 +273,53 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Get inter knot report data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
+            InAppToast.MainWindow?.Error(ex);
+        }
+    }
+
+
+    /// <summary>
+    /// 获取指定月份的全部详细数据（全量覆盖）。
+    /// 始终从服务器拉取最新的统计摘要（覆盖本地），再全量拉取每日明细（先删后写）。
+    /// 与 <see cref="GetDataDetailsAsync"/> 的区别在于每日明细使用全量覆盖而非增量更新。
+    /// 拉取完成后刷新列表并选中该月。
+    /// </summary>
+    [RelayCommand]
+    private async Task GetFullDataDetailsAsync(string month)
+    {
+        try
+        {
+            if (gameRole is null)
+            {
+                return;
+            }
+            // 始终请求统计摘要（覆盖本地数据）
+            var summary = await _gameRecordService.GetInterKnotReportSummaryAsync(gameRole, month);
+            // 全量覆盖每日明细（forceOverwrite: true）
+            foreach (var item in summary.MonthData.List)
+            {
+                await _gameRecordService.GetInterKnotReportDetailAsync(gameRole, month, item.DataType, forceOverwrite: true);
+            }
+            GetMonthDataList();
+            var selected = MonthDataList?.FirstOrDefault(x => x.DataMonth == month);
+            if (selected != null)
+            {
+                ListView_MonthDataList.SelectedItem = selected;
+            }
+        }
+        catch (miHoYoApiException ex)
+        {
+            _logger.LogError(ex, "Get inter knot report full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
+            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Get inter knot report full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
+            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Get inter knot report full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
             InAppToast.MainWindow?.Error(ex);
         }
     }

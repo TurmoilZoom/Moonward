@@ -162,7 +162,7 @@ public sealed partial class TravelersDiaryPage : PageBase
                 MenuFlyout_GetDetails.Items.Add(new MenuFlyoutItem
                 {
                     Text = new DateTime(2023, month, 1).ToString("MMM"),
-                    Command = GetDataDetailsCommand,
+                    Command = GetFullDataDetailsCommand,
                     CommandParameter = month,
                 });
             }
@@ -208,8 +208,8 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
     /// <summary>
-    /// 获取指定月份的详细数据。
-    /// 如果本地已存在该月摘要，则跳过 summary 请求，直接拉明细。
+    /// 获取指定月份的详细数据（增量更新）。
+    /// 始终从服务器拉取最新的统计摘要（覆盖本地），再增量拉取每日明细。
     /// 拉取完成后刷新列表并选中该月。
     /// </summary>
     [RelayCommand]
@@ -221,11 +221,8 @@ public sealed partial class TravelersDiaryPage : PageBase
             {
                 return;
             }
-            // 若本地列表中已有该月摘要，跳过网络请求直接拉取明细
-            if (MonthDataList?.Any(x => x.Month == month) != true)
-            {
-                await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole, month);
-            }
+            // 始终请求统计摘要（覆盖本地数据），不再跳过已有月份的 summary 请求
+            await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole, month);
             await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 1);
             await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 2);
             GetMonthDataList();
@@ -249,6 +246,51 @@ public sealed partial class TravelersDiaryPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Get traveler's diary data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
+            InAppToast.MainWindow?.Error(ex);
+        }
+    }
+
+
+    /// <summary>
+    /// 获取指定月份的全部详细数据（全量覆盖）。
+    /// 始终从服务器拉取最新的统计摘要（覆盖本地），再全量拉取每日明细（先删后写）。
+    /// 与 <see cref="GetDataDetailsAsync"/> 的区别在于每日明细使用全量覆盖而非增量更新。
+    /// 拉取完成后刷新列表并选中该月。
+    /// </summary>
+    [RelayCommand]
+    private async Task GetFullDataDetailsAsync(int month)
+    {
+        try
+        {
+            if (gameRole is null)
+            {
+                return;
+            }
+            // 始终请求统计摘要（覆盖本地数据）
+            await _gameRecordService.GetTravelersDiarySummaryAsync(gameRole, month);
+            // 全量覆盖每日明细（forceOverwrite: true）
+            await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 1, forceOverwrite: true);
+            await _gameRecordService.GetTravelersDiaryDetailAsync(gameRole, month, 2, forceOverwrite: true);
+            GetMonthDataList();
+            var selected = MonthDataList?.FirstOrDefault(x => x.Month == month);
+            if (selected != null)
+            {
+                ListView_MonthDataList.SelectedItem = selected;
+            }
+        }
+        catch (miHoYoApiException ex)
+        {
+            _logger.LogError(ex, "Get traveler's diary full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
+            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Get traveler's diary full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
+            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Get traveler's diary full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
             InAppToast.MainWindow?.Error(ex);
         }
     }
