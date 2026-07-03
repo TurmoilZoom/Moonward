@@ -270,7 +270,7 @@
     <value>米游社から同期（実験）</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Sync All from Miyoushe (Experimental)</value>
+    <value>ミヤホスからすべて同期（実験的）</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>URLを入力</value>
@@ -433,7 +433,7 @@
     <value>レンダリング精度</value>
   </data>
   <data name="GameSettingPage_FPS" xml:space="preserve">
-    <value>FPS</value>
+    <value>フレームレート</value>
   </data>
   <data name="GameSettingPage_VSync" xml:space="preserve">
     <value>垂直同期</value>
@@ -952,11 +952,56 @@
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>星軌チケット＆星軌専用チケット</value>
   </data>
+  <data name="TrailblazeCalendarPage_ActionDailyReward" xml:space="preserve">
+    <value>デイリー報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionSpaceReward" xml:space="preserve">
+    <value>模擬宇宙報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionEventReward" xml:space="preserve">
+    <value>イベント報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAdventureReward" xml:space="preserve">
+    <value>冒険報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAbyssReward" xml:space="preserve">
+    <value>忘却の庭報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionMailReward" xml:space="preserve">
+    <value>メール報酬</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionOther" xml:space="preserve">
+    <value>その他</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>原石</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>モラ</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyActivity" xml:space="preserve">
+    <value>デイリー活躍</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionSpiralAbyss" xml:space="preserve">
+    <value>深境螺旋</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionImaginariumTheater" xml:space="preserve">
+    <value>幻想シアター</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionEventRewards" xml:space="preserve">
+    <value>イベント報酬</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyCommission" xml:space="preserve">
+    <value>デイリー任務</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionExploration" xml:space="preserve">
+    <value>探索</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionMailRewards" xml:space="preserve">
+    <value>メール報酬</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionOther" xml:space="preserve">
+    <value>その他</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>第 {X} 層</value>
@@ -1389,6 +1434,9 @@
   <data name="CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight" xml:space="preserve">
     <value>ゲーム内のガチャの記録ページを開き、右側のボタンをクリックします。</value>
   </data>
+  <data name="CloudGameGachaWindow_GetGachaRecords" xml:space="preserve">
+    <value>ガチャ記録を取得</value>
+  </data>
   <data name="GachaLogPage_ViaCloudGame" xml:space="preserve">
     <value>クラウドゲーム経由</value>
   </data>
@@ -1572,6 +1620,15 @@
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>映画の収益構成</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychromes" xml:space="preserve">
+    <value>ポリクローム</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>マスターテープ</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopons" xml:space="preserve">
+    <value>ブープン券</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>インターノット月次レポート</value>
@@ -1898,6 +1955,18 @@
   </data>
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>現在ログインしているアカウントは保存されません。</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
+    <value>認証ログイン無効</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
+    <value>認証ログイン有効</value>
+  </data>
+  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
+    <value>パスポート ID: </value>
+  </data>
+  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
+    <value>再認証</value>
   </data>
   <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
     <value>レジストリベースのゲームアカウント切り替え機能</value>

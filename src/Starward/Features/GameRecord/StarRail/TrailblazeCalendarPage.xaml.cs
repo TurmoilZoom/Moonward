@@ -323,7 +323,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
                 SelectMonthData = data;
                 // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.Month) ?? false;
-                SelectSeries = SelectMonthData.GroupBy.Select(x => new ColorRectChart.ChartLegend(x.ActionName, x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
+                SelectSeries = SelectMonthData.GroupBy.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action, x.ActionName), x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
                 RefreshDailyDataPlot(data);
             }
         }
@@ -390,6 +390,29 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         }
     }
 
+
+
+
+    /// <summary>
+    /// 将开拓月历收入类型映射为本地化名称（按 <paramref name="action"/> 常量，不直接使用 API 的 action_name）。
+    /// </summary>
+    /// <param name="action">收入类型常量（如 daily_reward）。</param>
+    /// <param name="fallbackName">API 返回的原始名称，未知类型时回退使用。</param>
+    /// <returns>本地化名称。</returns>
+    public static string ActionName(string action, string? fallbackName)
+    {
+        return action switch
+        {
+            "daily_reward" => Lang.TrailblazeCalendarPage_ActionDailyReward,
+            "space_reward" => Lang.TrailblazeCalendarPage_ActionSpaceReward,
+            "event_reward" => Lang.TrailblazeCalendarPage_ActionEventReward,
+            "adventure_reward" => Lang.TrailblazeCalendarPage_ActionAdventureReward,
+            "abyss_reward" => Lang.TrailblazeCalendarPage_ActionAbyssReward,
+            "mail_reward" => Lang.TrailblazeCalendarPage_ActionMailReward,
+            "other" => Lang.TrailblazeCalendarPage_ActionOther,
+            _ => fallbackName ?? action,
+        };
+    }
 
 
 

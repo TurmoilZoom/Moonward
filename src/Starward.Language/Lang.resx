@@ -1012,11 +1012,56 @@ Do you accept the risk and continue to use it?</value>
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>Pass &amp; Special Pass</value>
   </data>
+  <data name="TrailblazeCalendarPage_ActionDailyReward" xml:space="preserve">
+    <value>Daily Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionSpaceReward" xml:space="preserve">
+    <value>Simulated Universe Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionEventReward" xml:space="preserve">
+    <value>Event Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAdventureReward" xml:space="preserve">
+    <value>Adventure Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAbyssReward" xml:space="preserve">
+    <value>Forgotten Hall Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionMailReward" xml:space="preserve">
+    <value>Mail Rewards</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionOther" xml:space="preserve">
+    <value>Other</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>Primogems</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>Mora</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyActivity" xml:space="preserve">
+    <value>Daily Activity</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionSpiralAbyss" xml:space="preserve">
+    <value>Spiral Abyss</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionImaginariumTheater" xml:space="preserve">
+    <value>Imaginarium Theater</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionEventRewards" xml:space="preserve">
+    <value>Event Rewards</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyCommission" xml:space="preserve">
+    <value>Daily Commissions</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionExploration" xml:space="preserve">
+    <value>Exploration</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionMailRewards" xml:space="preserve">
+    <value>Mail Rewards</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionOther" xml:space="preserve">
+    <value>Other</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>Floor {X}</value>
@@ -1449,6 +1494,9 @@ Do you accept the risk and continue to use it?</value>
   <data name="CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight" xml:space="preserve">
     <value>Open the gacha records page in game, and then click the button on the right.</value>
   </data>
+  <data name="CloudGameGachaWindow_GetGachaRecords" xml:space="preserve">
+    <value>Get Gacha Records</value>
+  </data>
   <data name="GachaLogPage_ViaCloudGame" xml:space="preserve">
     <value>via Cloud Game</value>
   </data>
@@ -1632,6 +1680,15 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>Polychrome Revenue Streams</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychromes" xml:space="preserve">
+    <value>Polychromes</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>Master Tape</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopons" xml:space="preserve">
+    <value>Boopons</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>Inter-Knot Monthly Report</value>
@@ -1958,6 +2015,18 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>The currently logged-in account is not saved.</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
+    <value>Auth login disabled</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
+    <value>Auth login enabled</value>
+  </data>
+  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
+    <value>Passport ID: </value>
+  </data>
+  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
+    <value>Re-authenticate</value>
   </data>
   <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
     <value>Registry-based Game Account Switching Feature</value>

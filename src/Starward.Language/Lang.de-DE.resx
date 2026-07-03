@@ -270,7 +270,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Sync von Miyoushe (Experimentell)</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Sync All from Miyoushe (Experimental)</value>
+    <value>Alle von Miyoushe synchronisieren (Experimentell)</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>URL eingeben</value>
@@ -433,13 +433,13 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Renderskala</value>
   </data>
   <data name="GameSettingPage_FPS" xml:space="preserve">
-    <value>FPS</value>
+    <value>Bildwiederholrate</value>
   </data>
   <data name="GameSettingPage_VSync" xml:space="preserve">
-    <value>V-Sync</value>
+    <value>Vertikale Synchronisation</value>
   </data>
   <data name="GameSettingPage_AntiAliasing" xml:space="preserve">
-    <value>Anti-Aliasing</value>
+    <value>Kantenglättung</value>
   </data>
   <data name="GameSettingPage_ShadowQuality" xml:space="preserve">
     <value>Schattenqualität</value>
@@ -595,10 +595,10 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Übersicht</value>
   </data>
   <data name="MainPage_GameScreenshot" xml:space="preserve">
-    <value>Screenshot</value>
+    <value>Spielscreenshot</value>
   </data>
   <data name="ScreenshotPage_GameScreenshot" xml:space="preserve">
-    <value>Screenshot</value>
+    <value>Spielscreenshot</value>
   </data>
   <data name="ScreenshotPage_OpenFolder" xml:space="preserve">
     <value>Ordner öffnen</value>
@@ -705,7 +705,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Neue Version!</value>
   </data>
   <data name="UpdatePage_Links" xml:space="preserve">
-    <value>Links:</value>
+    <value>Verknüpfungen</value>
   </data>
   <data name="UpdatePage_BuiltTime" xml:space="preserve">
     <value>Bauzeit:</value>
@@ -794,7 +794,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Spielrolle löschen</value>
   </data>
   <data name="HoyolabToolboxPage_SpiralAbyss" xml:space="preserve">
-    <value>Spiral Abyss</value>
+    <value>Spiralabyss</value>
   </data>
   <data name="HoyolabToolboxPage_TravelersDiary" xml:space="preserve">
     <value>Tagebuch des Reisenden</value>
@@ -951,11 +951,56 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>Pass &amp; Spezialpass</value>
   </data>
+  <data name="TrailblazeCalendarPage_ActionDailyReward" xml:space="preserve">
+    <value>Tägliche Belohnungen</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionSpaceReward" xml:space="preserve">
+    <value>Belohnungen im Simulierten Universum</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionEventReward" xml:space="preserve">
+    <value>Event-Belohnungen</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAdventureReward" xml:space="preserve">
+    <value>Abenteuer-Belohnungen</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAbyssReward" xml:space="preserve">
+    <value>Belohnungen im Vergessenen Saal</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionMailReward" xml:space="preserve">
+    <value>Post-Belohnungen</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionOther" xml:space="preserve">
+    <value>Sonstiges</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>Primogems</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>Mora</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyActivity" xml:space="preserve">
+    <value>Tägliche Aktivität</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionSpiralAbyss" xml:space="preserve">
+    <value>Spiralabyss</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionImaginariumTheater" xml:space="preserve">
+    <value>Imaginarium-Theater</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionEventRewards" xml:space="preserve">
+    <value>Event-Belohnungen</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyCommission" xml:space="preserve">
+    <value>Tägliche Aufträge</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionExploration" xml:space="preserve">
+    <value>Erkundung</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionMailRewards" xml:space="preserve">
+    <value>Post-Belohnungen</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionOther" xml:space="preserve">
+    <value>Sonstiges</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>Aktuelle Etage {X}</value>
@@ -985,7 +1030,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Wähle einen Server</value>
   </data>
   <data name="SettingPage_EnableSystemTrayIcon" xml:space="preserve">
-    <value>System Tray Icon</value>
+    <value>Taskleistensymbol aktivieren</value>
   </data>
   <data name="SettingPage_ExitLauncherWhenClosingWindow" xml:space="preserve">
     <value>Launcher beim Schließen beenden</value>
@@ -1126,7 +1171,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>URL-Protokoll registrieren</value>
   </data>
   <data name="SettingPage_TestURLProtocol" xml:space="preserve">
-    <value>Test URL Protocol</value>
+    <value>URL-Protokoll testen</value>
   </data>
   <data name="SettingPage_URLProtocolHelpDoc" xml:space="preserve">
     <value>Hilfedokumentation</value>
@@ -1171,7 +1216,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Fertig</value>
   </data>
   <data name="AboutSettingPage_Links" xml:space="preserve">
-    <value>Links</value>
+    <value>Verknüpfungen</value>
   </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>Fortgeschritten</value>
@@ -1388,6 +1433,9 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight" xml:space="preserve">
     <value>Öffnen Sie die Gacha-Aufzeichnungsseite im Spiel und klicken Sie dann auf den Button auf der rechten Seite.</value>
   </data>
+  <data name="CloudGameGachaWindow_GetGachaRecords" xml:space="preserve">
+    <value>Gacha-Aufzeichnungen abrufen</value>
+  </data>
   <data name="GachaLogPage_ViaCloudGame" xml:space="preserve">
     <value>via Cloud</value>
   </data>
@@ -1509,7 +1557,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Alle Daten abrufen</value>
   </data>
   <data name="HoyolabToolboxPage_ImaginariumTheater" xml:space="preserve">
-    <value>Imaginarium Theater</value>
+    <value>Imaginarium-Theater</value>
   </data>
   <data name="ImaginariumTheaterPage_EasyMode" xml:space="preserve">
     <value>Einfacher Modus</value>
@@ -1571,6 +1619,15 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>Polychrome Umsatzströme</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychromes" xml:space="preserve">
+    <value>Polychrome</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>Masterband</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopons" xml:space="preserve">
+    <value>Boopon-Tickets</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>Monatlicher Inter-Knoten-Bericht</value>
@@ -1690,7 +1747,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Neues Profil</value>
   </data>
   <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
-    <value>Name</value>
+    <value>Profilname</value>
   </data>
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>URL-Vorschau-Befehl</value>
@@ -1898,6 +1955,18 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>Das derzeit angemeldete Konto ist nicht gespeichert.</value>
   </data>
+  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
+    <value>Auth-Login deaktiviert</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
+    <value>Auth-Login aktiviert</value>
+  </data>
+  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
+    <value>Pass-ID: </value>
+  </data>
+  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
+    <value>Erneut authentifizieren</value>
+  </data>
   <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
     <value>Registrierungsbasierte Funktion zum Wechseln von Spielkonten</value>
   </data>
@@ -2082,7 +2151,7 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
     <value>Shiyu-Verteidigung</value>
   </data>
   <data name="HoyolabToolboxPage_DeadlyAssault" xml:space="preserve">
-    <value>Deadly Assault</value>
+    <value>Tödlicher Überfall</value>
   </data>
   <data name="ShiyuDefensePage_HighestStageCleared" xml:space="preserve">
     <value>Höchste Stufe abgeschlossen</value>
@@ -2097,7 +2166,7 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
     <value>Gesamtpunktzahl:</value>
   </data>
   <data name="DeadlyAssaultPage_GlobalTopPercent" xml:space="preserve">
-    <value>Global Top</value>
+    <value>Weltweite Rangliste</value>
   </data>
   <data name="ShiyuDefensePage_FastestStateTime" xml:space="preserve">
     <value>Schnellste Durchgangszeit</value>
@@ -2124,7 +2193,7 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
     <value>Punktzahl:</value>
   </data>
   <data name="GachaLogPage_ImportAndExport" xml:space="preserve">
-    <value>Import &amp; Export</value>
+    <value>Importieren &amp;amp; Exportieren</value>
   </data>
   <data name="GachaLogPage_HideGachaBanners" xml:space="preserve">
     <value>Gacha-Banner ausblenden</value>
@@ -2295,7 +2364,7 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
     <value>SDR-zugeordnete Leuchtdichte</value>
   </data>
   <data name="ImageViewWindow2_Auto" xml:space="preserve">
-    <value>Auto</value>
+    <value>Automatisch</value>
   </data>
   <data name="ImageViewWindow2_ExportImage" xml:space="preserve">
     <value>Bild exportieren</value>
@@ -2531,7 +2600,7 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
     <value>Tastatur-Eingabetaste</value>
   </data>
   <data name="HoyolabToolboxPage_StygianOnslaught" xml:space="preserve">
-    <value>Stygian Onslaught</value>
+    <value>Stygischer Ansturm</value>
   </data>
   <data name="StygianOnslaughtPage_SinglePlayer" xml:space="preserve">
     <value>Einzelspieler</value>
@@ -2714,7 +2783,7 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
     <value>Dateigröße</value>
   </data>
   <data name="Common_Filter" xml:space="preserve">
-    <value>Filter</value>
+    <value>Filtern</value>
   </data>
   <data name="Common_Sort" xml:space="preserve">
     <value>Sortieren</value>
@@ -2780,7 +2849,7 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
     <value>Mit DX12 starten</value>
   </data>
   <data name="GameLauncherPage_DetailsGt" xml:space="preserve">
-    <value>Details &gt;</value>
+    <value>Details &amp;gt;</value>
   </data>
   <data name="DX12IntroDialog_DX12EffectDetails" xml:space="preserve">
     <value>DX12 Effektdetails</value>

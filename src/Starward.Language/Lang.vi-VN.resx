@@ -134,7 +134,7 @@
     <value>Không có quyền ghi</value>
   </data>
   <data name="SelectDirectoryPage_OK" xml:space="preserve">
-    <value>OK</value>
+    <value>Đồng ý</value>
   </data>
   <data name="SelectDirectoryPage_ChooseAnother" xml:space="preserve">
     <value>Chọn thư mục khác</value>
@@ -433,7 +433,7 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
     <value>Tỷ lệ kết xuất</value>
   </data>
   <data name="GameSettingPage_FPS" xml:space="preserve">
-    <value>FPS</value>
+    <value>Tốc độ khung hình</value>
   </data>
   <data name="GameSettingPage_VSync" xml:space="preserve">
     <value>Đồng bộ dọc</value>
@@ -953,11 +953,56 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>Vé tinh cầu &amp; Vé tinh cầu đặc biệt</value>
   </data>
+  <data name="TrailblazeCalendarPage_ActionDailyReward" xml:space="preserve">
+    <value>Phần thưởng hàng ngày</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionSpaceReward" xml:space="preserve">
+    <value>Phần thưởng Vũ trụ mô phỏng</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionEventReward" xml:space="preserve">
+    <value>Phần thưởng sự kiện</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAdventureReward" xml:space="preserve">
+    <value>Phần thưởng phiêu lưu</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAbyssReward" xml:space="preserve">
+    <value>Phần thưởng Sãnh đường lãng quên</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionMailReward" xml:space="preserve">
+    <value>Phần thưởng thư</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionOther" xml:space="preserve">
+    <value>Khác</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>Nguyên thạch</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>Mora</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyActivity" xml:space="preserve">
+    <value>Hoạt động hàng ngày</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionSpiralAbyss" xml:space="preserve">
+    <value>La hoàn thâm cảnh</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionImaginariumTheater" xml:space="preserve">
+    <value>Nhà Hát Giả Tưởng</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionEventRewards" xml:space="preserve">
+    <value>Phần thưởng sự kiện</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyCommission" xml:space="preserve">
+    <value>Ủy thác hàng ngày</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionExploration" xml:space="preserve">
+    <value>Khám phá</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionMailRewards" xml:space="preserve">
+    <value>Phần thưởng thư</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionOther" xml:space="preserve">
+    <value>Khác</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>Tầng {X}</value>
@@ -1390,6 +1435,9 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight" xml:space="preserve">
     <value>Mở trang lịch sử Gacha trong trò chơi, sau đó nhấn vào nút ở bên phải.</value>
   </data>
+  <data name="CloudGameGachaWindow_GetGachaRecords" xml:space="preserve">
+    <value>Lấy bản ghi gacha</value>
+  </data>
   <data name="GachaLogPage_ViaCloudGame" xml:space="preserve">
     <value>bằng Trò chơi đám mây</value>
   </data>
@@ -1439,7 +1487,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Nhấn để khởi động lại</value>
   </data>
   <data name="InstallGameDialog_DesktopShortcut" xml:space="preserve">
-    <value>Desktop Shortcut</value>
+    <value>Lối tắt trên màn hình nền</value>
   </data>
   <data name="InstallGameDialog_Installed" xml:space="preserve">
     <value>Đã cài đặt?</value>
@@ -1573,6 +1621,15 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>Các nguồn thu đa dạng</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychromes" xml:space="preserve">
+    <value>Polychrome</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>Băng gốc</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopons" xml:space="preserve">
+    <value>Phiếu Boopon</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>Báo cáo tháng Inter-Knot</value>
@@ -1900,6 +1957,18 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>Thông tin đăng nhập của tài khoản hiện tại chưa được lưu.</value>
   </data>
+  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
+    <value>Đã tắt đăng nhập ủy quyền</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
+    <value>Đã bật đăng nhập ủy quyền</value>
+  </data>
+  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
+    <value>ID hộ chiếu: </value>
+  </data>
+  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
+    <value>Xác thực lại</value>
+  </data>
   <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
     <value>Tính năng chuyển tại khoản dựa trên Registry</value>
   </data>
@@ -2168,7 +2237,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Cường độ sáng toàn màn hình tối đa</value>
   </data>
   <data name="GenshinHDRLuminanceSettingDialog_SDRWhiteLuminance" xml:space="preserve">
-    <value />
+    <value>Độ sáng trắng SDR</value>
   </data>
   <data name="GenshinHDRLuminanceSettingDialog_StandardDynamicRange" xml:space="preserve">
     <value>Dải tương phản tiêu chuẩn (SDR)</value>
@@ -2536,7 +2605,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Người Chơi Đơn</value>
   </data>
   <data name="StygianOnslaughtPage_CoOp" xml:space="preserve">
-    <value>Co-Op</value>
+    <value>Chơi cùng</value>
   </data>
   <data name="StygianOnslaughtPage_BattleTime" xml:space="preserve">
     <value>Thời gian khiêu chiến</value>

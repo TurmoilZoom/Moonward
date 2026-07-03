@@ -95,7 +95,7 @@
     <value>Lo spazio disponibile non è sufficiente</value>
   </data>
   <data name="GachaStatsCard_Pity" xml:space="preserve">
-    <value>Pity</value>
+    <value>Pietà</value>
   </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>Medio</value>
@@ -270,7 +270,7 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Sincronizza da Miyoushe (Sperimentale)</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Sync All from Miyoushe (Experimental)</value>
+    <value>Sincronizza tutto da Miyoushe (Sperimentale)</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>Ingresso URL</value>
@@ -433,13 +433,13 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Scala di rendering</value>
   </data>
   <data name="GameSettingPage_FPS" xml:space="preserve">
-    <value>FPS</value>
+    <value>Frequenza fotogrammi</value>
   </data>
   <data name="GameSettingPage_VSync" xml:space="preserve">
-    <value>V-Sync</value>
+    <value>Sincronizzazione verticale</value>
   </data>
   <data name="GameSettingPage_AntiAliasing" xml:space="preserve">
-    <value>Anti-aliasing</value>
+    <value>Antialiasing</value>
   </data>
   <data name="GameSettingPage_ShadowQuality" xml:space="preserve">
     <value>Qualità delle ombre</value>
@@ -675,7 +675,7 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Pagina iniziale</value>
   </data>
   <data name="SettingPage_ReportIssue" xml:space="preserve">
-    <value>Report Issue</value>
+    <value>Segnala problema</value>
   </data>
   <data name="SettingPage_ReleaseHistroy" xml:space="preserve">
     <value>Cronologia Rilasci</value>
@@ -791,54 +791,54 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Copia Cookie</value>
   </data>
   <data name="HoyolabToolboxPage_DeleteGameRole" xml:space="preserve">
-    <value>Delete Game Role</value>
+    <value>Elimina personaggio</value>
   </data>
   <data name="HoyolabToolboxPage_SpiralAbyss" xml:space="preserve">
-    <value>Spiral Abyss</value>
+    <value>Abisso a spirale</value>
   </data>
   <data name="HoyolabToolboxPage_TravelersDiary" xml:space="preserve">
-    <value>Traveler's Diary</value>
+    <value>Diario del viaggiatore</value>
   </data>
   <data name="HoyolabToolboxPage_SimulatedUniverse" xml:space="preserve">
-    <value>Simulated Universe</value>
+    <value>Universo Simulato</value>
   </data>
   <data name="HoyolabToolboxPage_ForgottenHall" xml:space="preserve">
-    <value>Forgotten Hall</value>
+    <value>Sala dimenticata</value>
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
-    <value>Trailblaze Monthly Calendar</value>
+    <value>Calendario mensile dell'esplorazione</value>
   </data>
   <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
-    <value>Click this button after logging in.</value>
+    <value>Clicca questo pulsante dopo aver effettuato l'accesso.</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
-    <value>Already added {0} game roles:
+    <value>Già aggiunti {0} personaggi di gioco:
 {1}</value>
   </data>
   <data name="Common_Summary" xml:space="preserve">
-    <value>Summary</value>
+    <value>Riepilogo</value>
   </data>
   <data name="SpiralAbyssPage_Picked" xml:space="preserve">
-    <value>Picked</value>
+    <value>Raccolto</value>
     <comment>avatar battle count stats</comment>
   </data>
   <data name="SpiralAbyssPage_CombatStats" xml:space="preserve">
-    <value>Combat Stats</value>
+    <value>Statistiche di combattimento</value>
   </data>
   <data name="SpiralAbyssPage_MostDefeats" xml:space="preserve">
     <value>Più Sconfitte</value>
   </data>
   <data name="SpiralAbyssPage_StrongestSingleStrike" xml:space="preserve">
-    <value>Strongest Single Strike</value>
+    <value>Colpo singolo più forte</value>
   </data>
   <data name="SpiralAbyssPage_MostDamageTaken" xml:space="preserve">
-    <value>Most Damage Taken</value>
+    <value>Danno massimo subito</value>
   </data>
   <data name="SpiralAbyssPage_ElementalSkillsUnleashed" xml:space="preserve">
-    <value>Elemental Skills Unleashed</value>
+    <value>Abilità elementali scatenate</value>
   </data>
   <data name="SpiralAbyssPage_ElementalBrustsUnleashed" xml:space="preserve">
-    <value>Elemental Brusts Unleashed</value>
+    <value>Tripudi elementali scatenati</value>
   </data>
   <data name="TravelersDiaryPage_GetDetails" xml:space="preserve">
     <value>Dettagli</value>
@@ -854,161 +854,206 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Acquisito questo mese</value>
   </data>
   <data name="TravelersDiaryPage_AcquiredThisDay" xml:space="preserve">
-    <value>Acquired this day</value>
+    <value>Ottenuto in questo giorno</value>
   </data>
   <data name="TravelersDiaryPage_PrimogemsObtained" xml:space="preserve">
-    <value>Primogems obtained</value>
+    <value>Primogemme ottenute</value>
   </data>
   <data name="SpiralAbyssPage_DeepestDescent" xml:space="preserve">
-    <value>Deepest Descent</value>
+    <value>Discesa più profonda</value>
   </data>
   <data name="SpiralAbyssPage_BattlesFought" xml:space="preserve">
-    <value>Battles Fought</value>
+    <value>Battaglie combattute</value>
   </data>
   <data name="SpiralAbyssPage_Times" xml:space="preserve">
-    <value>times</value>
+    <value>volte</value>
     <comment>battle count 12 times</comment>
   </data>
   <data name="Common_Accept" xml:space="preserve">
-    <value>Accept</value>
+    <value>Accetta</value>
   </data>
   <data name="Common_Reject" xml:space="preserve">
-    <value>Reject</value>
+    <value>Rifiuta</value>
   </data>
   <data name="HoyolabToolboxPage_WarningAgain" xml:space="preserve">
-    <value>Warning Again</value>
+    <value>Avviso</value>
   </data>
   <data name="Common_Disclaimer" xml:space="preserve">
-    <value>Disclaimer</value>
+    <value>Avvertenza</value>
   </data>
   <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
-    <value>The features of this page requires you to log in to your Hyperion/HoYoLAB account, and Starward will save your login credentials (Cookie) and impersonate you to send requests to miHoYo's server. This method is risky and we are not responsible if your account is abnormal or banned as a result.
+    <value>Le funzioni di questa pagina richiedono l'accesso al tuo account Hyperion/HoYoLAB. Starward salverà le tue credenziali di accesso (Cookie) e invierà richieste al server di miHoYo per tuo conto. Questo metodo è rischioso e non siamo responsabili se il tuo account dovesse risultare anomalo o essere bannato.
 
-Do you accept the risk and continue to use it?</value>
+Accetti il rischio e desideri continuare?</value>
   </data>
   <data name="TrailblazeCalendarPage_StellarJadeSources" xml:space="preserve">
-    <value>Stellar Jade Sources</value>
+    <value>Fonti di Giada Stellare</value>
   </data>
   <data name="ForgottenHallPage_Period" xml:space="preserve">
-    <value>Period</value>
+    <value>Periodo</value>
   </data>
   <data name="ForgottenHallPage_CyclesUsed" xml:space="preserve">
-    <value>Cycles used:</value>
+    <value>Cicli usati:</value>
   </data>
   <data name="ForgottenHallPage_TeamSetup" xml:space="preserve">
-    <value>Team Setup</value>
+    <value>Formazione squadra</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
   <data name="Common_AccountError" xml:space="preserve">
-    <value>Account Error</value>
+    <value>Errore account</value>
   </data>
   <data name="Common_NetworkError" xml:space="preserve">
-    <value>Network Error</value>
+    <value>Errore di rete</value>
   </data>
   <data name="HoyolabToolboxPage_VerifyAccount" xml:space="preserve">
-    <value>Verify Account</value>
+    <value>Verifica account</value>
   </data>
   <data name="DownloadGameService_RepairMode" xml:space="preserve">
-    <value>Repair Mode</value>
+    <value>Modalità riparazione</value>
   </data>
   <data name="DownloadGameDialog_ItTakesAdditionalDiskSpaceWhenUnzip" xml:space="preserve">
-    <value>It takes additional storage space when unzip.</value>
+    <value>L'estrazione richiede spazio di archiviazione aggiuntivo.</value>
   </data>
   <data name="SimulatedUniversePage_AbilityTreeBuffsActivated" xml:space="preserve">
-    <value>Ability Tree Buffs Activated</value>
+    <value>Potenziamenti albero abilità attivati</value>
   </data>
   <data name="SimulatedUniversePage_UnlockedCurios" xml:space="preserve">
-    <value>Unlocked Curios</value>
+    <value>Curiosità sbloccate</value>
   </data>
   <data name="SimulatedUniversePage_UnlockedBlessings" xml:space="preserve">
-    <value>Unlocked Blessings</value>
+    <value>Benedizioni sbloccate</value>
   </data>
   <data name="SimulatedUniversePage_NumberOfClears" xml:space="preserve">
-    <value>Number of Clears</value>
+    <value>Numero di completamenti</value>
   </data>
   <data name="SimulatedUniversePage_HighestScore" xml:space="preserve">
-    <value>Highest Score</value>
+    <value>Punteggio più alto</value>
   </data>
   <data name="SimulatedUniversePage_ChallengedOn" xml:space="preserve">
-    <value>Challenged On</value>
+    <value>Affrontato il</value>
   </data>
   <data name="SimulatedUniversePage_CharactersUsed" xml:space="preserve">
-    <value>Characters Used</value>
+    <value>Personaggi usati</value>
   </data>
   <data name="SimulatedUniversePage_CachedCharacters" xml:space="preserve">
-    <value>Cached Characters</value>
+    <value>Personaggi in cache</value>
   </data>
   <data name="SimulatedUniversePage_CuriosObtained" xml:space="preserve">
-    <value>Curios Obtained</value>
+    <value>Curiosità ottenute</value>
   </data>
   <data name="SimulatedUniversePage_BlessingsObtained" xml:space="preserve">
-    <value>Blessings Obtained</value>
+    <value>Benedizioni ottenute</value>
   </data>
   <data name="HoyolabToolboxPage_DailyData" xml:space="preserve">
-    <value>Daily Data</value>
+    <value>Dati giornalieri</value>
   </data>
   <data name="TrailblazeCalendarPage_StellarJade" xml:space="preserve">
-    <value>Stellar Jade</value>
+    <value>Giada Stellare</value>
   </data>
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
-    <value>Pass &amp; Special Pass</value>
+    <value>Pass &amp; Pass speciale</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionDailyReward" xml:space="preserve">
+    <value>Ricompense giornaliere</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionSpaceReward" xml:space="preserve">
+    <value>Ricompense Universo Simulato</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionEventReward" xml:space="preserve">
+    <value>Ricompense evento</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAdventureReward" xml:space="preserve">
+    <value>Ricompense avventura</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAbyssReward" xml:space="preserve">
+    <value>Ricompense Sala dimenticata</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionMailReward" xml:space="preserve">
+    <value>Ricompense posta</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionOther" xml:space="preserve">
+    <value>Altro</value>
   </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
-    <value>Primogems</value>
+    <value>Primogemme</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>Mora</value>
   </data>
+  <data name="TravelersDiaryPage_ActionDailyActivity" xml:space="preserve">
+    <value>Attività giornaliera</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionSpiralAbyss" xml:space="preserve">
+    <value>Abisso a spirale</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionImaginariumTheater" xml:space="preserve">
+    <value>Teatro dell'Immaginario</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionEventRewards" xml:space="preserve">
+    <value>Ricompense evento</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyCommission" xml:space="preserve">
+    <value>Commissioni giornaliere</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionExploration" xml:space="preserve">
+    <value>Esplorazione</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionMailRewards" xml:space="preserve">
+    <value>Ricompense posta</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionOther" xml:space="preserve">
+    <value>Altro</value>
+  </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
-    <value>Floor {X}</value>
+    <value>Piano {X}</value>
     <comment>Spiral Abyss Floor {X}</comment>
   </data>
   <data name="SpiralAbyssPage_ChamberX" xml:space="preserve">
-    <value>Chamber {X}</value>
+    <value>Camera {X}</value>
     <comment>Spiral Abyss Chamber {X}</comment>
   </data>
   <data name="ScreenshotPage_ScreenshotFolderDoesNotExist" xml:space="preserve">
-    <value>Screenshot folder does not exist</value>
+    <value>La cartella degli screenshot non esiste</value>
   </data>
   <data name="GachaLogPage_0GachaItemsHaveBeenChangedToLanguage1" xml:space="preserve">
-    <value>The language of {0} gacha records has been changed to ({1}).</value>
+    <value>La lingua di {0} record gacha è stata cambiata in ({1}).</value>
     <comment>The language of 123 gacha records has been changed to (en-us).</comment>
   </data>
   <data name="SettingPage_PrivacyPolicy" xml:space="preserve">
-    <value>Privacy Policy</value>
+    <value>Informativa sulla privacy</value>
   </data>
   <data name="MainPage_Tips" xml:space="preserve">
-    <value>Tips</value>
+    <value>Suggerimenti</value>
   </data>
   <data name="SettingPage_CDNTips" xml:space="preserve">
-    <value>Users in some areas may encounter network anomalies. You could solve this problem by switching CDNs.</value>
+    <value>Gli utenti in alcune aree potrebbero riscontrare anomalie di rete. Puoi risolvere il problema cambiando CDN.</value>
   </data>
   <data name="SelectGamePage_SelectGameServer" xml:space="preserve">
-    <value>Select Server</value>
+    <value>Seleziona server</value>
   </data>
   <data name="SettingPage_EnableSystemTrayIcon" xml:space="preserve">
-    <value>System Tray Icon</value>
+    <value>Icona area di notifica</value>
   </data>
   <data name="SettingPage_ExitLauncherWhenClosingWindow" xml:space="preserve">
-    <value>Exit Launcher When Closing Window</value>
+    <value>Esci dal launcher alla chiusura della finestra</value>
   </data>
   <data name="Common_Exit" xml:space="preserve">
-    <value>Exit</value>
+    <value>Esci</value>
   </data>
   <data name="SettingPage_SystemTray" xml:space="preserve">
-    <value>System Tray</value>
+    <value>Area di notifica</value>
   </data>
   <data name="InstallGameSystemTrayPage_Installer" xml:space="preserve">
-    <value>Installer</value>
+    <value>Installatore</value>
   </data>
   <data name="DownloadGamePage_CloseSoftwareContentSystemTray" xml:space="preserve">
-    <value>You could choose to exit or hide window and minimize to system tray.</value>
+    <value>Puoi scegliere di uscire o nascondere la finestra e ridurre a icona nell'area di notifica.</value>
   </data>
   <data name="Common_Hide" xml:space="preserve">
-    <value>Hide</value>
+    <value>Nascondi</value>
   </data>
   <data name="ScreenshotPage_BackupScreenshots" xml:space="preserve">
-    <value>Backup Screenshots</value>
+    <value>Backup screenshot</value>
   </data>
   <data name="ScreenshotPage_OpenBackupFolder" xml:space="preserve">
     <value>Apri Cartella Backup</value>
@@ -1029,7 +1074,7 @@ Do you accept the risk and continue to use it?</value>
     <value>Avvisi Di Gioco</value>
   </data>
   <data name="DownloadGamePage_Merging" xml:space="preserve">
-    <value>Merging</value>
+    <value>Unione in corso</value>
   </data>
   <data name="LauncherPage_Required" xml:space="preserve">
     <value>Richiesto</value>
@@ -1243,7 +1288,7 @@ Do you accept the risk and continue to use it?</value>
     <value>Dopo L'Avvio Del Gioco</value>
   </data>
   <data name="ForgottenHallPage_QuickCleared" xml:space="preserve">
-    <value>Quick Cleared</value>
+    <value>Completamento rapido</value>
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>Pura Finzione</value>
@@ -1334,7 +1379,7 @@ Do you accept the risk and continue to use it?</value>
     <value>Cambia Client</value>
   </data>
   <data name="FileSettingPage_GameResource" xml:space="preserve">
-    <value>Game Resource</value>
+    <value>Risorse di gioco</value>
   </data>
   <data name="SwitchClientPage_SelectTargetGameServer" xml:space="preserve">
     <value>Seleziona il server di gioco</value>
@@ -1389,6 +1434,9 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight" xml:space="preserve">
     <value>Apri la pagina dei registri gacha nel gioco, quindi fai clic sul pulsante a destra.</value>
+  </data>
+  <data name="CloudGameGachaWindow_GetGachaRecords" xml:space="preserve">
+    <value>Ottieni registri gacha</value>
   </data>
   <data name="GachaLogPage_ViaCloudGame" xml:space="preserve">
     <value>tramite Cloud Game</value>
@@ -1573,6 +1621,15 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>Flussi di entrate policrome</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychromes" xml:space="preserve">
+    <value>Policromi</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>Nastro master</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopons" xml:space="preserve">
+    <value>Coupon Boopon</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>Report mensile di Inter-Knot</value>
@@ -1899,6 +1956,18 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>L'account attualmente connesso non è salvato.</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
+    <value>Accesso con autorizzazione disattivato</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
+    <value>Accesso con autorizzazione attivato</value>
+  </data>
+  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
+    <value>ID passaporto: </value>
+  </data>
+  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
+    <value>Ri-autentica</value>
   </data>
   <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
     <value>Funzione di cambio account di gioco basata sul registro</value>
@@ -2297,7 +2366,7 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
     <value>Luminanza mappata SDR</value>
   </data>
   <data name="ImageViewWindow2_Auto" xml:space="preserve">
-    <value>Auto</value>
+    <value>Automatico</value>
   </data>
   <data name="ImageViewWindow2_ExportImage" xml:space="preserve">
     <value>Esporta immagine</value>
@@ -2533,7 +2602,7 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
     <value>Tasto Enter della tastiera</value>
   </data>
   <data name="HoyolabToolboxPage_StygianOnslaught" xml:space="preserve">
-    <value>Stygian Onslaught</value>
+    <value>Assalto Stigio</value>
   </data>
   <data name="StygianOnslaughtPage_SinglePlayer" xml:space="preserve">
     <value>Singolo</value>

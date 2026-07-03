@@ -181,7 +181,7 @@
                                     <TextBlock HorizontalAlignment="Center"
                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                HorizontalTextAlignment="Center"
-                                               Text="{x:Bind DataName}" />
+                                               Text="{x:Bind local:InterKnotMonthlyReportPage.DataTypeToName(DataType)}" />
                                     <TextBlock HorizontalAlignment="Center"
                                                HorizontalTextAlignment="Center"
                                                Text="{x:Bind Count}" />

@@ -471,6 +471,24 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 将绳网月报数据类型映射为本地化显示名称（不直接使用 API 返回的 <c>data_name</c>，避免非中文界面仍显示中文）。
+    /// </summary>
+    /// <param name="dataType">数据类型常量，见 <see cref="InterKnotReportDataType"/>。</param>
+    /// <returns>本地化名称；未知类型时原样返回 <paramref name="dataType"/>。</returns>
+    public static string DataTypeToName(string dataType)
+    {
+        return dataType switch
+        {
+            InterKnotReportDataType.PolychromesData => Lang.InterKnotMonthlyReportPage_Polychromes,
+            InterKnotReportDataType.MatserTapeData => Lang.InterKnotMonthlyReportPage_MasterTape,
+            InterKnotReportDataType.BooponsData => Lang.InterKnotMonthlyReportPage_Boopons,
+            _ => dataType,
+        };
+    }
+
+
+
     public static BitmapImage? DataTypeToImage(string type)
     {
         return type switch

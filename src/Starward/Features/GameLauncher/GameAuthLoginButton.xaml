@@ -3,6 +3,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameLauncher"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:DefaultBindMode="OneWay"
@@ -49,7 +50,7 @@
                         <Image Source="ms-appx:///Assets/Image/icon_hyperion.png" Stretch="UniformToFill" />
                     </Border>
                     <TextBlock HorizontalAlignment="Center">
-                        <Run Text="通行证 ID: " />
+                        <Run Text="{x:Bind lang:Lang.GameAuthLoginButton_PassportId}" />
                         <Run Text="{x:Bind HyperionAid}" />
                     </TextBlock>
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -59,12 +60,12 @@
                     <Button MinWidth="120"
                             HorizontalAlignment="Center"
                             Command="{x:Bind InitializeGameAuthLoginCommand}"
-                            Content="重新认证"
+                            Content="{x:Bind lang:Lang.GameAuthLoginButton_ReAuthenticate}"
                             Visibility="{x:Bind ErrorMessage, Converter={StaticResource ObjectToVisibilityConverter}}" />
                     <ToggleSwitch HorizontalAlignment="Center"
                                   IsOn="{x:Bind EnableLoginAuthTicket, Mode=TwoWay}"
-                                  OffContent="已禁用授权登录"
-                                  OnContent="已启用授权登录" />
+                                  OffContent="{x:Bind lang:Lang.GameAuthLoginButton_AuthLoginDisabled}"
+                                  OnContent="{x:Bind lang:Lang.GameAuthLoginButton_AuthLoginEnabled}" />
                 </StackPanel>
             </Flyout>
         </Button.Flyout>

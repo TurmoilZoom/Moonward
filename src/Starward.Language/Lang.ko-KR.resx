@@ -180,7 +180,7 @@
     <value>확인</value>
   </data>
   <data name="DownloadGamePage_ParameterError" xml:space="preserve">
-    <value>Parameter Error</value>
+    <value>매개변수 오류</value>
   </data>
   <data name="DownloadGamePage_NoPermission" xml:space="preserve">
     <value>권한부족</value>
@@ -270,7 +270,7 @@
     <value>미유시에서 동기화 (실험)</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Sync All from Miyoushe (Experimental)</value>
+    <value>미호요에서 모두 동기화 (실험적)</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>URL 입력</value>
@@ -433,7 +433,7 @@
     <value>렌더링 스케일</value>
   </data>
   <data name="GameSettingPage_FPS" xml:space="preserve">
-    <value>FPS</value>
+    <value>프레임 레이트</value>
   </data>
   <data name="GameSettingPage_VSync" xml:space="preserve">
     <value>수직동기화</value>
@@ -487,7 +487,7 @@
     <value>업데이트</value>
   </data>
   <data name="LauncherPage_PlayTime" xml:space="preserve">
-    <value>Play Time</value>
+    <value>플레이 시간</value>
   </data>
   <data name="Common_Refresh" xml:space="preserve">
     <value>새로고침</value>
@@ -696,7 +696,7 @@
     <value>변경하시겠습니까? (미리 수동으로 파일을 이동한 수 변경헤주세요.)</value>
   </data>
   <data name="Common_Yes" xml:space="preserve">
-    <value>Yes</value>
+    <value>예</value>
   </data>
   <data name="SettingPage_AfterDeletingTheSoftwareWillBeRestartedAutomatically" xml:space="preserve">
     <value>제거완료 후 프로그램이 자동으로 다시시작 됩니다.</value>
@@ -953,11 +953,56 @@
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>티켓 &amp; 전용티켓</value>
   </data>
+  <data name="TrailblazeCalendarPage_ActionDailyReward" xml:space="preserve">
+    <value>일일 보상</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionSpaceReward" xml:space="preserve">
+    <value>시뮬레이션 우주 보상</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionEventReward" xml:space="preserve">
+    <value>이벤트 보상</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAdventureReward" xml:space="preserve">
+    <value>모험 보상</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAbyssReward" xml:space="preserve">
+    <value>망각의 광야 보상</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionMailReward" xml:space="preserve">
+    <value>우편 보상</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionOther" xml:space="preserve">
+    <value>기타</value>
+  </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>원석</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>모라</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyActivity" xml:space="preserve">
+    <value>일일 활약</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionSpiralAbyss" xml:space="preserve">
+    <value>나선 비경</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionImaginariumTheater" xml:space="preserve">
+    <value>환상 시어터</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionEventRewards" xml:space="preserve">
+    <value>이벤트 보상</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyCommission" xml:space="preserve">
+    <value>의뢰 보상</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionExploration" xml:space="preserve">
+    <value>탐색 보상</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionMailRewards" xml:space="preserve">
+    <value>우편 보상</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionOther" xml:space="preserve">
+    <value>기타</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>제 {X} 층</value>
@@ -1390,6 +1435,9 @@
   <data name="CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight" xml:space="preserve">
     <value>게임에서 뽑기기록 페이지를 열고 왼쪽의 버튼을 클릭하세요.</value>
   </data>
+  <data name="CloudGameGachaWindow_GetGachaRecords" xml:space="preserve">
+    <value>가챠 기록 가져오기</value>
+  </data>
   <data name="GachaLogPage_ViaCloudGame" xml:space="preserve">
     <value>클라우드에서 받기</value>
   </data>
@@ -1573,6 +1621,15 @@
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>폴리크롬 수익 구성</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychromes" xml:space="preserve">
+    <value>폴리크롬</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>마스터 테이프</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopons" xml:space="preserve">
+    <value>부푼 티켓</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>월간 로프넷</value>
@@ -1900,6 +1957,18 @@
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>현재 로그인 된 계정이 저장되지 않음.</value>
   </data>
+  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
+    <value>인증 로그인 비활성화</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
+    <value>인증 로그인 활성화</value>
+  </data>
+  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
+    <value>패스 ID: </value>
+  </data>
+  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
+    <value>재인증</value>
+  </data>
   <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
     <value>레지스트리 기반 계정전환 기능</value>
   </data>
@@ -1910,7 +1979,7 @@
     <value>젠레스 존 제로 뽑기기록 페이지에서 아이템 이미지 표시.</value>
   </data>
   <data name="ZZZGachaInfoWindow_Miyoushe" xml:space="preserve">
-    <value>Miyoushe</value>
+    <value>미호요</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchDataForAllLanguages" xml:space="preserve">
     <value>모든 언어 받기</value>

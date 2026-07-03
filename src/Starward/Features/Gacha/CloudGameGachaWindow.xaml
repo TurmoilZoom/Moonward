@@ -36,7 +36,7 @@
                    Visibility="Collapsed" />
         <Button Grid.Column="1"
                 Click="Button_Click"
-                Content="获取抽卡记录" />
+                Content="{x:Bind lang:Lang.CloudGameGachaWindow_GetGachaRecords}" />
 
         <WebView2 x:Name="webview"
                   Grid.Row="1"

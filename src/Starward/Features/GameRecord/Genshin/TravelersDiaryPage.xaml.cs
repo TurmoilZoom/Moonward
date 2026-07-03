@@ -311,7 +311,7 @@ public sealed partial class TravelersDiaryPage : PageBase
                 SelectMonthData = data;
                 // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新（避免无效请求）。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.Month) ?? false;
-                SelectSeries = SelectMonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(x.ActionName, x.Percent, actionColorMap.GetValueOrDefault(x.ActionId))).ToList();
+                SelectSeries = SelectMonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(ActionName(x.ActionId, x.ActionName), x.Percent, actionColorMap.GetValueOrDefault(x.ActionId))).ToList();
                 RefreshDailyDataPlot(data);
             }
         }
@@ -377,6 +377,30 @@ public sealed partial class TravelersDiaryPage : PageBase
         {
             _logger.LogError(ex, "Refresh daily data plot");
         }
+    }
+
+
+
+    /// <summary>
+    /// 将旅行者札记收入类型映射为本地化名称（优先按 <paramref name="actionId"/>，不直接使用 API 的 action_name）。
+    /// </summary>
+    /// <param name="actionId">收入类型 ID（0–7）。</param>
+    /// <param name="fallbackName">API 返回的原始名称，未知 ID 时回退使用。</param>
+    /// <returns>本地化名称。</returns>
+    public static string ActionName(int actionId, string? fallbackName)
+    {
+        return actionId switch
+        {
+            0 => Lang.TravelersDiaryPage_ActionDailyActivity,
+            1 => Lang.TravelersDiaryPage_ActionSpiralAbyss,
+            2 => Lang.TravelersDiaryPage_ActionImaginariumTheater,
+            3 => Lang.TravelersDiaryPage_ActionEventRewards,
+            4 => Lang.TravelersDiaryPage_ActionDailyCommission,
+            5 => Lang.TravelersDiaryPage_ActionExploration,
+            6 => Lang.TravelersDiaryPage_ActionMailRewards,
+            7 => Lang.TravelersDiaryPage_ActionOther,
+            _ => fallbackName ?? actionId.ToString(),
+        };
     }
 
 

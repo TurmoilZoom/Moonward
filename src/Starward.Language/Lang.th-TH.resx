@@ -134,7 +134,7 @@
     <value>ไม่มีสิทธิในการเขียน</value>
   </data>
   <data name="SelectDirectoryPage_OK" xml:space="preserve">
-    <value>OK</value>
+    <value>ตกลง</value>
   </data>
   <data name="SelectDirectoryPage_ChooseAnother" xml:space="preserve">
     <value>เลือกเพิ่มเติม</value>
@@ -269,7 +269,7 @@
     <value>ซิงค์จาก Miyoushe (ทดลอง)</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Sync All from Miyoushe (Experimental)</value>
+    <value>ซิงค์ทั้งหมดจาก Miyoushe (ทดลอง)</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>ใส่ URL บันทึกการสุ่ม</value>
@@ -432,10 +432,10 @@
     <value>ความละเอียดการเรนเดอร์</value>
   </data>
   <data name="GameSettingPage_FPS" xml:space="preserve">
-    <value>FPS</value>
+    <value>อัตราเฟรม</value>
   </data>
   <data name="GameSettingPage_VSync" xml:space="preserve">
-    <value>V-Sync</value>
+    <value>ซิงค์แนวตั้ง</value>
   </data>
   <data name="GameSettingPage_AntiAliasing" xml:space="preserve">
     <value>เทคโนโลยีลบรอยหยัก</value>
@@ -793,16 +793,16 @@
     <value>ลบบทบาทในเกม</value>
   </data>
   <data name="HoyolabToolboxPage_SpiralAbyss" xml:space="preserve">
-    <value>Spiral Abyss</value>
+    <value>ห้วงลึกวังวน</value>
   </data>
   <data name="HoyolabToolboxPage_TravelersDiary" xml:space="preserve">
     <value>บันทึกของนักเดินทาง</value>
   </data>
   <data name="HoyolabToolboxPage_SimulatedUniverse" xml:space="preserve">
-    <value>Simulated Universe</value>
+    <value>จักรวาลจำลอง</value>
   </data>
   <data name="HoyolabToolboxPage_ForgottenHall" xml:space="preserve">
-    <value>Forgotten Hall</value>
+    <value>โถงลืมเลือน</value>
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>ปฏิทินการบุกเบิก</value>
@@ -947,16 +947,61 @@
     <value>ข้อมูลรายวัน</value>
   </data>
   <data name="TrailblazeCalendarPage_StellarJade" xml:space="preserve">
-    <value>Stellar Jade</value>
+    <value>สตาร์เจด</value>
   </data>
   <data name="TrailblazeCalendarPage_PassAndSpecialPass" xml:space="preserve">
     <value>Pass และ Special Pass</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionDailyReward" xml:space="preserve">
+    <value>รางวัลรายวัน</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionSpaceReward" xml:space="preserve">
+    <value>รางวัลจักรวาลจำลอง</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionEventReward" xml:space="preserve">
+    <value>รางวัลกิจกรรม</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAdventureReward" xml:space="preserve">
+    <value>รางวัลการผจญภัย</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionAbyssReward" xml:space="preserve">
+    <value>รางวัลโถงลืมเลือน</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionMailReward" xml:space="preserve">
+    <value>รางวัลจดหมาย</value>
+  </data>
+  <data name="TrailblazeCalendarPage_ActionOther" xml:space="preserve">
+    <value>อื่นๆ</value>
   </data>
   <data name="TravelersDiaryPage_Primogems" xml:space="preserve">
     <value>Primogems</value>
   </data>
   <data name="TravelersDiaryPage_Mora" xml:space="preserve">
     <value>Mora</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyActivity" xml:space="preserve">
+    <value>กิจกรรมรายวัน</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionSpiralAbyss" xml:space="preserve">
+    <value>ห้วงลึกวังวน</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionImaginariumTheater" xml:space="preserve">
+    <value>โรงละครจินตนาการ</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionEventRewards" xml:space="preserve">
+    <value>รางวัลกิจกรรม</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionDailyCommission" xml:space="preserve">
+    <value>ภารกิจรายวัน</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionExploration" xml:space="preserve">
+    <value>การสำรวจ</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionMailRewards" xml:space="preserve">
+    <value>รางวัลจดหมาย</value>
+  </data>
+  <data name="TravelersDiaryPage_ActionOther" xml:space="preserve">
+    <value>อื่นๆ</value>
   </data>
   <data name="SpiralAbyssPage_FloorX" xml:space="preserve">
     <value>ชั้นที่ {X}</value>
@@ -1133,7 +1178,7 @@
     <value>เอกสารช่วยเหลือ</value>
   </data>
   <data name="UrlProtocolDocWindow_Title" xml:space="preserve">
-    <value>URL Protocol</value>
+    <value>เอกสาร URL Protocol</value>
   </data>
   <data name="LauncherPage_OpenInBrowser" xml:space="preserve">
     <value>เปิดในบราวเซอร์</value>
@@ -1389,6 +1434,9 @@
   <data name="CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight" xml:space="preserve">
     <value>เปิดหน้าบันทึกการอธิษฐานในเกม จากนั้นคลิกปุ่มทางด้านขวา</value>
   </data>
+  <data name="CloudGameGachaWindow_GetGachaRecords" xml:space="preserve">
+    <value>ดึงบันทึกกาชา</value>
+  </data>
   <data name="GachaLogPage_ViaCloudGame" xml:space="preserve">
     <value>ผ่านคลาวด์เกม</value>
   </data>
@@ -1572,6 +1620,15 @@
   </data>
   <data name="InterKnotMonthlyReportPage_PolychromeRevenueStreams" xml:space="preserve">
     <value>รายได้โพลีโครม</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Polychromes" xml:space="preserve">
+    <value>โพลีโครม</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_MasterTape" xml:space="preserve">
+    <value>มาสเตอร์เทป</value>
+  </data>
+  <data name="InterKnotMonthlyReportPage_Boopons" xml:space="preserve">
+    <value>คูปอง Boopon</value>
   </data>
   <data name="HoyolabToolboxPage_InterKnotMonthlyReport" xml:space="preserve">
     <value>รายงานประจำเดือน Inter-Knot</value>
@@ -1899,6 +1956,18 @@
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>บัญชีที่เข้าสู่ระบบอยู่ในขณะนี้ไม่ได้ถูกบันทึก</value>
   </data>
+  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
+    <value>ปิดใช้งานการเข้าสู่ระบบแบบอนุญาต</value>
+  </data>
+  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
+    <value>เปิดใช้งานการเข้าสู่ระบบแบบอนุญาต</value>
+  </data>
+  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
+    <value>รหัสพาสปอร์ต: </value>
+  </data>
+  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
+    <value>ยืนยันตัวตนอีกครั้ง</value>
+  </data>
   <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
     <value>คุณสมบัติการสลับบัญชีเกมตามรีจิสทรี</value>
   </data>
@@ -2080,10 +2149,10 @@
     <value>เปิดใช้งาน</value>
   </data>
   <data name="HoyolabToolboxPage_ShiyuDefense" xml:space="preserve">
-    <value>Shiyu Defense</value>
+    <value>การป้องกัน Shiyu</value>
   </data>
   <data name="HoyolabToolboxPage_DeadlyAssault" xml:space="preserve">
-    <value>Deadly Assault</value>
+    <value>การโจมตีอันตราย</value>
   </data>
   <data name="ShiyuDefensePage_HighestStageCleared" xml:space="preserve">
     <value>ด่านที่ผ่านสูงสุด</value>

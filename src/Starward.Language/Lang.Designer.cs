@@ -404,6 +404,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Get Gacha Records 的本地化字符串。
+        /// </summary>
+        public static string CloudGameGachaWindow_GetGachaRecords {
+            get {
+                return ResourceManager.GetString("CloudGameGachaWindow_GetGachaRecords", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Accept 的本地化字符串。
         /// </summary>
         public static string Common_Accept {
@@ -2588,6 +2597,42 @@ namespace Starward.Language {
         public static string GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved {
             get {
                 return ResourceManager.GetString("GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Auth login disabled 的本地化字符串。
+        /// </summary>
+        public static string GameAuthLoginButton_AuthLoginDisabled {
+            get {
+                return ResourceManager.GetString("GameAuthLoginButton_AuthLoginDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Auth login enabled 的本地化字符串。
+        /// </summary>
+        public static string GameAuthLoginButton_AuthLoginEnabled {
+            get {
+                return ResourceManager.GetString("GameAuthLoginButton_AuthLoginEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Passport ID:  的本地化字符串。
+        /// </summary>
+        public static string GameAuthLoginButton_PassportId {
+            get {
+                return ResourceManager.GetString("GameAuthLoginButton_PassportId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Re-authenticate 的本地化字符串。
+        /// </summary>
+        public static string GameAuthLoginButton_ReAuthenticate {
+            get {
+                return ResourceManager.GetString("GameAuthLoginButton_ReAuthenticate", resourceCulture);
             }
         }
         
@@ -5006,6 +5051,33 @@ namespace Starward.Language {
         public static string InterKnotMonthlyReportPage_PolychromeRevenueStreams {
             get {
                 return ResourceManager.GetString("InterKnotMonthlyReportPage_PolychromeRevenueStreams", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Polychromes 的本地化字符串。
+        /// </summary>
+        public static string InterKnotMonthlyReportPage_Polychromes {
+            get {
+                return ResourceManager.GetString("InterKnotMonthlyReportPage_Polychromes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Master Tape 的本地化字符串。
+        /// </summary>
+        public static string InterKnotMonthlyReportPage_MasterTape {
+            get {
+                return ResourceManager.GetString("InterKnotMonthlyReportPage_MasterTape", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Boopons 的本地化字符串。
+        /// </summary>
+        public static string InterKnotMonthlyReportPage_Boopons {
+            get {
+                return ResourceManager.GetString("InterKnotMonthlyReportPage_Boopons", resourceCulture);
             }
         }
         
@@ -7549,6 +7621,69 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Forgotten Hall Rewards 的本地化字符串。
+        /// </summary>
+        public static string TrailblazeCalendarPage_ActionAbyssReward {
+            get {
+                return ResourceManager.GetString("TrailblazeCalendarPage_ActionAbyssReward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Adventure Rewards 的本地化字符串。
+        /// </summary>
+        public static string TrailblazeCalendarPage_ActionAdventureReward {
+            get {
+                return ResourceManager.GetString("TrailblazeCalendarPage_ActionAdventureReward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Daily Rewards 的本地化字符串。
+        /// </summary>
+        public static string TrailblazeCalendarPage_ActionDailyReward {
+            get {
+                return ResourceManager.GetString("TrailblazeCalendarPage_ActionDailyReward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Event Rewards 的本地化字符串。
+        /// </summary>
+        public static string TrailblazeCalendarPage_ActionEventReward {
+            get {
+                return ResourceManager.GetString("TrailblazeCalendarPage_ActionEventReward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Mail Rewards 的本地化字符串。
+        /// </summary>
+        public static string TrailblazeCalendarPage_ActionMailReward {
+            get {
+                return ResourceManager.GetString("TrailblazeCalendarPage_ActionMailReward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Other 的本地化字符串。
+        /// </summary>
+        public static string TrailblazeCalendarPage_ActionOther {
+            get {
+                return ResourceManager.GetString("TrailblazeCalendarPage_ActionOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Simulated Universe Rewards 的本地化字符串。
+        /// </summary>
+        public static string TrailblazeCalendarPage_ActionSpaceReward {
+            get {
+                return ResourceManager.GetString("TrailblazeCalendarPage_ActionSpaceReward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Pass &amp; Special Pass 的本地化字符串。
         /// </summary>
         public static string TrailblazeCalendarPage_PassAndSpecialPass {
@@ -7572,6 +7707,78 @@ namespace Starward.Language {
         public static string TrailblazeCalendarPage_StellarJadeSources {
             get {
                 return ResourceManager.GetString("TrailblazeCalendarPage_StellarJadeSources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Daily Activity 的本地化字符串。
+        /// </summary>
+        public static string TravelersDiaryPage_ActionDailyActivity {
+            get {
+                return ResourceManager.GetString("TravelersDiaryPage_ActionDailyActivity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Daily Commissions 的本地化字符串。
+        /// </summary>
+        public static string TravelersDiaryPage_ActionDailyCommission {
+            get {
+                return ResourceManager.GetString("TravelersDiaryPage_ActionDailyCommission", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Event Rewards 的本地化字符串。
+        /// </summary>
+        public static string TravelersDiaryPage_ActionEventRewards {
+            get {
+                return ResourceManager.GetString("TravelersDiaryPage_ActionEventRewards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Exploration 的本地化字符串。
+        /// </summary>
+        public static string TravelersDiaryPage_ActionExploration {
+            get {
+                return ResourceManager.GetString("TravelersDiaryPage_ActionExploration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Imaginarium Theater 的本地化字符串。
+        /// </summary>
+        public static string TravelersDiaryPage_ActionImaginariumTheater {
+            get {
+                return ResourceManager.GetString("TravelersDiaryPage_ActionImaginariumTheater", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Mail Rewards 的本地化字符串。
+        /// </summary>
+        public static string TravelersDiaryPage_ActionMailRewards {
+            get {
+                return ResourceManager.GetString("TravelersDiaryPage_ActionMailRewards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Other 的本地化字符串。
+        /// </summary>
+        public static string TravelersDiaryPage_ActionOther {
+            get {
+                return ResourceManager.GetString("TravelersDiaryPage_ActionOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Spiral Abyss 的本地化字符串。
+        /// </summary>
+        public static string TravelersDiaryPage_ActionSpiralAbyss {
+            get {
+                return ResourceManager.GetString("TravelersDiaryPage_ActionSpiralAbyss", resourceCulture);
             }
         }
         
