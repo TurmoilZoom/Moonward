@@ -11,6 +11,11 @@ public class TravelersDiaryDetail : TravelersDiaryBase, IJsonOnDeserialized
     [JsonPropertyName("page")]
     public int Page { get; set; }
 
+    /// <summary>
+    /// 当月该类别记录总数
+    /// </summary>
+    [JsonPropertyName("total")]
+    public int Total { get; set; }
 
     [JsonPropertyName("list")]
     public List<TravelersDiaryAwardItem> List { get; set; }

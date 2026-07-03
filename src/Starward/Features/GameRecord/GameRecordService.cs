@@ -409,43 +409,50 @@ internal class GameRecordService
     }
 
 
-
+    //原数据库使用的是自增id，在做增量更新时，逻辑判断比较复杂
     public async Task<int> GetTravelersDiaryDetailAsync(GameRecordRole role, int month, int type, int limit = 100)
     {
-        var detail = await _gameRecordClient.GetTravelsDiaryDetailAsync(role, month, type, limit);
-        if (detail.List is null || detail.List.Count == 0)
+        // 探针请求：先获取第1页（limit=1）以同时得到总数和最新一条记录，避免冗余的全量查询
+        var firstPage = await _gameRecordClient.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, 1);
+        int total = firstPage.Total;
+        if (total == 0)
         {
             return 0;
         }
-        var list = detail.List;
         using var dapper = DatabaseService.CreateConnection();
-        var firstItem = list.FirstOrDefault();
+        // 用 firstPage 第一条记录的元信息查询 DB 现有条数
+        var firstItem = firstPage.List.FirstOrDefault();
         var existCount = dapper.QuerySingleOrDefault<int>("SELECT COUNT(*) FROM GenshinTravelersDiaryAwardItem WHERE Uid=@Uid AND Year=@Year AND Month=@Month AND Type=@Type;", firstItem);
-        if (existCount == list.Count && existCount > 0)
+        if (existCount == total && existCount > 0)
         {
-            // 总数未变，仅刷新最新一条记录（API 按时间降序，list[0] 为最新记录）
-            var lastItem = list[0];
-            using var t = dapper.BeginTransaction();
-            dapper.Execute("""
-                DELETE FROM GenshinTravelersDiaryAwardItem
-                WHERE Id = (
-                    SELECT Id FROM GenshinTravelersDiaryAwardItem
-                    WHERE Uid = @Uid AND Year = @Year AND Month = @Month AND Type = @Type
-                    ORDER BY Time DESC LIMIT 1
-                );
-                """, firstItem, t);
-            dapper.Execute("""
-                INSERT INTO GenshinTravelersDiaryAwardItem (Uid, Year, Month, Type, ActionId, ActionName, Time, Number)
-                VALUES (@Uid, @Year, @Month, @Type, @ActionId, @ActionName, @Time, @Number);
-                """, lastItem, t);
-            t.Commit();
+            // 总数未变，仅刷新最新一条记录（复用探针请求结果，无需额外网络请求）
+            var lastItem = firstPage.List.FirstOrDefault();
+            if (lastItem != null)
+            {
+                using var t = dapper.BeginTransaction();
+                dapper.Execute("""
+                    DELETE FROM GenshinTravelersDiaryAwardItem
+                    WHERE Id = (
+                        SELECT Id FROM GenshinTravelersDiaryAwardItem
+                        WHERE Uid = @Uid AND Year = @Year AND Month = @Month AND Type = @Type
+                        ORDER BY Time DESC LIMIT 1
+                    );
+                    """, firstItem, t);
+                dapper.Execute("""
+                    INSERT INTO GenshinTravelersDiaryAwardItem (Uid, Year, Month, Type, ActionId, ActionName, Time, Number)
+                    VALUES (@Uid, @Year, @Month, @Type, @ActionId, @ActionName, @Time, @Number);
+                    """, lastItem, t);
+                t.Commit();
+            }
             return 0;
         }
-        if (existCount >= list.Count)
+        if (existCount >= total)
         {
             return 0;
         }
-        // 增量插入：仅插入 Time 不重复的新记录；同时刷新原有记录中最新的一条
+        // 增量插入：仅在有新数据时才发起全量请求
+        var detail = await _gameRecordClient.GetTravelsDiaryDetailAsync(role, month, type, limit);
+        var list = detail.List;
         var existTimes = new HashSet<DateTime>(dapper.Query<DateTime>(
             "SELECT Time FROM GenshinTravelersDiaryAwardItem WHERE Uid=@Uid AND Year=@Year AND Month=@Month AND Type=@Type;",
             firstItem));
@@ -905,7 +912,7 @@ internal class GameRecordService
     }
 
 
-
+    //原数据库使用的是自增id，在做增量更新时，逻辑判断比较复杂
     public async Task<int> GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type)
     {
         // 先获取第一页（page_size=1）以同时得到总数和最新一条记录
