@@ -139,7 +139,8 @@
                             VerticalAlignment="Center"
                             Command="{x:Bind GetDataDetailsCommand}"
                             CommandParameter="{x:Bind SelectMonthData.DataMonth}"
-                            IsEnabled="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}">
+                            IsEnabled="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}"
+                            Visibility="{x:Bind IsRefreshButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <ProgressRing Width="16"
                                           Height="16"

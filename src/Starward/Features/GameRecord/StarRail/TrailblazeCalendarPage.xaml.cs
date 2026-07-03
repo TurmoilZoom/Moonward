@@ -63,6 +63,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         MonthDataList = null!;
         SelectSeries = null;
         DayDataList = null!;
+        _optionalMonths = null;
     }
 
 
@@ -82,6 +83,17 @@ public sealed partial class TrailblazeCalendarPage : PageBase
     [ObservableProperty]
     private List<CalendarDayData> dayDataList;
 
+
+    /// <summary>
+    /// API 返回的可查询月份列表（格式 yyyyMM），用于判断刷新按钮是否应显示。
+    /// </summary>
+    private List<string>? _optionalMonths;
+
+    /// <summary>
+    /// 当前选中的「统计数据」月份是否在服务器可查询列表中，控制刷新按钮可见性。
+    /// </summary>
+    [ObservableProperty]
+    private bool isRefreshButtonVisible;
 
 
     private static readonly Dictionary<string, Color> actionColorMap = new Dictionary<string, Color>()
@@ -122,6 +134,8 @@ public sealed partial class TrailblazeCalendarPage : PageBase
                 return;
             }
             var summary = await _gameRecordService.GetTrailblazeCalendarSummaryAsync(gameRole);
+            // 缓存可查询月份列表，供刷新按钮可见性判断使用
+            _optionalMonths = summary.OptionalMonth?.ToList();
             MenuFlyout_GetDetails.Items.Clear();
             foreach (string monthStr in summary.OptionalMonth)
             {
@@ -234,6 +248,8 @@ public sealed partial class TrailblazeCalendarPage : PageBase
             if (e.AddedItems.FirstOrDefault() is TrailblazeCalendarMonthData data)
             {
                 SelectMonthData = data;
+                // 当月存在于 API 可选列表中时显示刷新按钮
+                IsRefreshButtonVisible = _optionalMonths?.Contains(data.Month) ?? false;
                 SelectSeries = SelectMonthData.GroupBy.Select(x => new ColorRectChart.ChartLegend(x.ActionName, x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
                 RefreshDailyDataPlot(data);
             }
