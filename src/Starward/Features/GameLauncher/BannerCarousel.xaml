@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+    游戏启动页 Banner 轮播控件（PanelSlideshow 模式）。
+    呈现区单槽 + Storyboard 推拉切页、PipsPager 圆点指示器、悬停淡入翻页按钮、5 秒自动轮播。
+    数据经 Banners 依赖属性由 GameBannerAndPost 绑定；PauseAutoPlay / ResumeAutoPlay 由父控件在窗口状态变化时调用。
+-->
 <UserControl x:Class="Starward.Features.GameLauncher.BannerCarousel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -109,6 +114,7 @@
         </Style>
     </UserControl.Resources>
 
+    <!--  根容器：承接指针进入/离开（控制翻页按钮显隐与自动轮播暂停）、滚轮翻页  -->
     <Grid x:Name="RootGrid"
           Background="Transparent"
           PointerEntered="RootGrid_PointerEntered"

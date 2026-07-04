@@ -27,29 +27,40 @@ namespace Starward.Features.GameLauncher;
 public sealed partial class BannerCarousel : UserControl
 {
 
-    private const double SlideDurationMs = 350;
+    /// <summary>切页 Storyboard 动画时长（毫秒）。</summary>
+    private const double SlideDurationMs = 600;
 
+    /// <summary>呈现区尚未完成布局量测时的回退宽度，用于计算推拉位移。</summary>
     private const double DefaultPresenterWidth = 380;
 
 
+    /// <summary>5 秒间隔的自动轮播定时器。</summary>
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _timer;
 
+    /// <summary>与 <see cref="Banners"/> 一一对应的预创建图片元素，切页时复用避免重复下载解码。</summary>
     private readonly List<CachedImage> _imageElements = new();
 
+    /// <summary>当前显示的下标；-1 表示尚未初始化。</summary>
     private int _currentIndex = -1;
 
+    /// <summary>指针是否悬停在控件上；悬停时暂停自动轮播并显示翻页按钮。</summary>
     private bool _isPointerOver;
 
+    /// <summary>主窗口是否处于可交互状态；隐藏或锁屏时由父控件置 false 以暂停轮播。</summary>
     private bool _isWindowActive = true;
 
+    /// <summary>程序性更新 <see cref="PipsPager.SelectedPageIndex"/> 时抑制回调，避免与 <see cref="NavigateTo"/> 互相触发。</summary>
     private bool _suppressPipsCallback;
 
+    /// <summary>进行中的切页 Storyboard；快速连续翻页时需先 Stop 再归位。</summary>
     private Storyboard? _runningStoryboard;
 
+    /// <summary>动画结束后待从呈现区移除的旧图元素。</summary>
     private UIElement? _pendingOldElement;
 
 
 
+    /// <summary>初始化控件、创建自动轮播定时器并订阅 Loaded / Unloaded。</summary>
     public BannerCarousel()
     {
         this.InitializeComponent();
@@ -72,9 +83,15 @@ public sealed partial class BannerCarousel : UserControl
         set => SetValue(BannersProperty, value);
     }
 
+    /// <summary><see cref="Banners"/> 依赖属性；值变化时触发 <see cref="BuildItems"/> 重建呈现区。</summary>
     public static readonly DependencyProperty BannersProperty =
         DependencyProperty.Register(nameof(Banners), typeof(List<GameBanner>), typeof(BannerCarousel), new PropertyMetadata(null, OnBannersChanged));
 
+    /// <summary>
+    /// <see cref="BannersProperty"/> 变更回调。
+    /// </summary>
+    /// <param name="d">目标 <see cref="BannerCarousel"/> 实例。</param>
+    /// <param name="e">新旧值；新值为 null 或空列表时清空呈现区并隐藏指示器。</param>
     private static void OnBannersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         ((BannerCarousel)d).BuildItems();
@@ -102,12 +119,14 @@ public sealed partial class BannerCarousel : UserControl
 
 
 
+    /// <summary>控件加载完成后尝试启动自动轮播（需满足窗口激活、无悬停、多张图等条件）。</summary>
     private void BannerCarousel_Loaded(object sender, RoutedEventArgs e)
     {
         MaybeStartAutoPlay();
     }
 
 
+    /// <summary>卸载时停止定时器并收敛进行中的切页动画，避免 Storyboard 持有已卸载元素。</summary>
     private void BannerCarousel_Unloaded(object sender, RoutedEventArgs e)
     {
         _timer.Stop();
@@ -175,6 +194,8 @@ public sealed partial class BannerCarousel : UserControl
     /// 切换到指定下标。下标自动按首尾循环取模；切页方向由新旧下标推算（含首↔尾的环绕方向），
     /// 使「最后一张 → 第一张」与普通前进方向一致，实现首尾连续播放。
     /// </summary>
+    /// <param name="requestedIndex">目标下标，可为任意整数（内部取模）。</param>
+    /// <param name="animate">为 true 且存在旧图且系统动画开启时执行推拉 Storyboard；否则直接切换。</param>
     private void NavigateTo(int requestedIndex, bool animate)
     {
         int count = _imageElements.Count;
@@ -235,10 +256,10 @@ public sealed partial class BannerCarousel : UserControl
 
 
 
+    /// <summary>切页 Storyboard 完成回调；必须经 <see cref="FinalizeRunningTransition"/> 释放 HoldEnd 锁定的变换值。</summary>
     private void Storyboard_Completed(object? sender, object e)
     {
-        // 走 FinalizeRunningTransition 的「Stop + 归位」逻辑：Storyboard 默认 HoldEnd 会锁住
-        // 变换值，必须 Stop 后再直接赋值才生效，否则复用的图片下次会卡在屏幕外。
+        // Storyboard 默认 HoldEnd 会锁住变换值，必须 Stop 后再直接赋值才生效，否则复用的图片下次会卡在屏幕外
         FinalizeRunningTransition();
     }
 
@@ -260,6 +281,7 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>从呈现区移除动画结束后的旧图，并将其平移归零以便下次复用。</summary>
     private void RemovePendingOldElement()
     {
         if (_pendingOldElement is not null)
@@ -271,6 +293,7 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>将当前显示的图片平移归零，确保呈现区收敛到单槽中心状态。</summary>
     private void SnapCurrentToCenter()
     {
         if (_currentIndex >= 0 && _currentIndex < _imageElements.Count)
@@ -281,6 +304,7 @@ public sealed partial class BannerCarousel : UserControl
 
 
 
+    /// <summary>自动轮播定时器 Tick：前进到下一张（带动画）。</summary>
     private void Timer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
     {
         if (_imageElements.Count > 1)
@@ -290,18 +314,21 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>上一张按钮点击：后退一页。</summary>
     private void PreviousButton_Click(object sender, RoutedEventArgs e)
     {
         NavigateTo(_currentIndex - 1, animate: true);
     }
 
 
+    /// <summary>下一张按钮点击：前进一页。</summary>
     private void NextButton_Click(object sender, RoutedEventArgs e)
     {
         NavigateTo(_currentIndex + 1, animate: true);
     }
 
 
+    /// <summary>圆点指示器选中项变化：跳转到对应页（用户点击圆点时触发，非程序性同步）。</summary>
     private void BannerPipsPager_SelectedIndexChanged(PipsPager sender, PipsPagerSelectedIndexChangedEventArgs args)
     {
         if (_suppressPipsCallback)
@@ -312,6 +339,7 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>点击 Banner 图片：在系统默认浏览器中打开 <see cref="GameBanner.Image"/> 配置的跳转链接。</summary>
     private async void Image_Tapped(object sender, TappedRoutedEventArgs e)
     {
         try
@@ -325,6 +353,7 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>指针进入：暂停自动轮播，切换到 PointerOver 视觉状态以淡入翻页按钮。</summary>
     private void RootGrid_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
         _isPointerOver = true;
@@ -333,6 +362,7 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>指针离开：恢复 Normal 视觉状态，并在条件允许时重启自动轮播。</summary>
     private void RootGrid_PointerExited(object sender, PointerRoutedEventArgs e)
     {
         _isPointerOver = false;
@@ -362,14 +392,18 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>呈现区尺寸变化时更新裁剪矩形，隐藏切页动画滑出视口的部分。</summary>
     private void PresenterGrid_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        // 裁剪掉切页时滑出视口的部分（圆角由外层 Border 负责）
+        // 圆角由外层 Border 负责，此处仅做矩形裁剪
         PresenterGrid.Clip = new RectangleGeometry { Rect = new Rect(0, 0, e.NewSize.Width, e.NewSize.Height) };
     }
 
 
 
+    /// <summary>
+    /// 在已加载、窗口激活、无指针悬停且多于一张图时启动自动轮播；否则停止定时器。
+    /// </summary>
     private void MaybeStartAutoPlay()
     {
         if (IsLoaded && _isWindowActive && !_isPointerOver && _imageElements.Count > 1)
@@ -383,6 +417,8 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>将 <see cref="PipsPager"/> 选中项与当前下标同步，期间抑制 <see cref="BannerPipsPager_SelectedIndexChanged"/> 回调。</summary>
+    /// <param name="index">当前页下标。</param>
     private void SyncPipsSelection(int index)
     {
         _suppressPipsCallback = true;
@@ -394,6 +430,7 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>仅多张图时显示左右翻页按钮；单张或空列表时折叠。</summary>
     private void UpdateNavButtonsState()
     {
         Visibility visibility = _imageElements.Count > 1 ? Visibility.Visible : Visibility.Collapsed;
@@ -403,6 +440,14 @@ public sealed partial class BannerCarousel : UserControl
 
 
 
+    /// <summary>
+    /// 根据新旧下标推算切页方向（+1 新图从右滑入，-1 从左滑入）。
+    /// 首尾环绕时「最后→第一」视为前进，「第一→最后」视为后退，保证方向与自动轮播一致。
+    /// </summary>
+    /// <param name="oldIndex">切换前的下标。</param>
+    /// <param name="newIndex">切换后的下标。</param>
+    /// <param name="count">图片总数。</param>
+    /// <returns>+1 或 -1，作为推拉位移的符号。</returns>
     private static int ComputeDirection(int oldIndex, int newIndex, int count)
     {
         bool isBackward = (newIndex < oldIndex && !(newIndex == 0 && oldIndex == count - 1))
@@ -411,20 +456,41 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
-    private static DoubleAnimation CreateSlideAnimation(TranslateTransform target, double to)
+    /// <summary>创建沿 X 轴平移的切页动画。</summary>
+    /// <param name="target">目标 <see cref="TranslateTransform"/>。</param>
+    /// <param name="to">动画终点 X 值。</param>
+    /// <returns>已绑定目标与属性的 <see cref="DoubleAnimation"/>。</returns>
+    private static DoubleAnimationUsingKeyFrames CreateSlideAnimation(TranslateTransform target, double to)
     {
-        DoubleAnimation animation = new()
+        // https://easings.net/#easeInQuint
+        KeySpline customEase = new()
         {
-            To = to,
-            Duration = new Duration(TimeSpan.FromMilliseconds(SlideDurationMs)),
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+            ControlPoint1 = new Point(0.64, 0),
+            ControlPoint2 = new Point(0.78, 1),
         };
+
+        var animation = new DoubleAnimationUsingKeyFrames
+        {
+            Duration = new Duration(TimeSpan.FromMilliseconds(SlideDurationMs)),
+        };
+
+        // 关键帧，KeyTime 就是动画总时长，Value 就是目标位置
+        animation.KeyFrames.Add(new SplineDoubleKeyFrame
+        {
+            KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(SlideDurationMs)),
+            Value = to,
+            KeySpline = customEase   
+        });
+
         Storyboard.SetTarget(animation, target);
         Storyboard.SetTargetProperty(animation, "X");
         return animation;
     }
 
 
+    /// <summary>获取元素的 <see cref="TranslateTransform"/>；不存在时创建并挂到 <see cref="UIElement.RenderTransform"/>。</summary>
+    /// <param name="element">目标 UI 元素。</param>
+    /// <returns>可用于读写 X 的变换对象。</returns>
     private static TranslateTransform GetTranslate(UIElement element)
     {
         if (element.RenderTransform is TranslateTransform transform)
@@ -437,6 +503,9 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
+    /// <summary>设置元素水平平移量。</summary>
+    /// <param name="element">目标 UI 元素。</param>
+    /// <param name="x">TranslateTransform.X 值。</param>
     private static void SetTranslateX(UIElement element, double x)
     {
         GetTranslate(element).X = x;

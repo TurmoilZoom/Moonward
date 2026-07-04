@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+    游戏启动页「Banner + 资讯」面板：上 176px 为 BannerCarousel 轮播，下 124px 为 Pivot 分类帖子。
+    默认 Opacity=0 且不可命中，由 ShowBannerAndPost 在数据就绪后淡入；Banner 数据经 x:Bind 传入子控件。
+-->
 <UserControl x:Class="Starward.Features.GameLauncher.GameBannerAndPost"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
