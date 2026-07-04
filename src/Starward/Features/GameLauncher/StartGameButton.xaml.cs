@@ -239,18 +239,18 @@ public sealed partial class StartGameButton : UserControl
 
 
     // 「从一个点放大 / 收缩」开合动效，与抽卡记录页筛选卡池浮层一致（1:1 复刻 FluentAnimations.ExpandContractFlyout 的曲线与时长）。
-    // 区别：本菜单在按钮上方向上生长，缩放原点取「底部中心」（浮层版取顶部中心）。
+    // 区别：本菜单向左上角展开，缩放原点取「右下角」（浮层版取顶部中心）。
 
     /// <summary>缩放到约 20px 且不超过原尺寸 1%，等效于「一个点」的 Composition 表达式。</summary>
     private const string QuickMenuSeedScaleExpression =
         "Vector3(Min(0.01, 20.0 / this.Target.Size.X), Min(0.01, 20.0 / this.Target.Size.Y), 1.0)";
 
-    /// <summary>缩放原点固定在底部中心，使菜单从汉堡按钮处向上生长。</summary>
-    private const string QuickMenuBottomCenterExpression = "Vector3(this.Target.Size.X * 0.5, this.Target.Size.Y, 0)";
+    /// <summary>缩放原点固定在右下角，使菜单从汉堡按钮处向左上角展开。</summary>
+    private const string QuickMenuBottomRightExpression = "Vector3(this.Target.Size.X, this.Target.Size.Y, 0)";
 
 
     /// <summary>
-    /// 展开：从底部中心的一个「点」放大到原始大小（300ms 缓出，(0.1,0.9)(0.2,1)）。
+    /// 展开：从右下角的一个「点」放大到原始大小（300ms 缓出，(0.1,0.9)(0.2,1)）。
     /// </summary>
     /// <param name="fromSeed">
     /// 为 <see langword="true"/> 时从「点」起播；为 <see langword="false"/> 时从当前缩放展开（收起途中重新悬停）。
@@ -260,7 +260,7 @@ public sealed partial class StartGameButton : UserControl
         Visual v = ElementCompositionPreview.GetElementVisual(QuickMenuRoot);
 
         v.StopAnimation(nameof(Visual.CenterPoint));
-        ExpressionAnimation center = v.Compositor.CreateExpressionAnimation(QuickMenuBottomCenterExpression);
+        ExpressionAnimation center = v.Compositor.CreateExpressionAnimation(QuickMenuBottomRightExpression);
         v.StartAnimation(nameof(Visual.CenterPoint), center);
 
         // 停掉可能仍在进行的收起透明度动画（其末帧会把透明度瞬置 0），否则取消收起后菜单仍会消失。
@@ -287,7 +287,7 @@ public sealed partial class StartGameButton : UserControl
 
 
     /// <summary>
-    /// 收起：收缩回底部中心的那个「点」（150ms 缓入，(0.7,0)(1,0.5)），透明度仅末帧瞬间归零，结束后真正关闭 Popup。
+    /// 收起：收缩回右下角的那个「点」（150ms 缓入，(0.7,0)(1,0.5)），透明度仅末帧瞬间归零，结束后真正关闭 Popup。
     /// </summary>
     private void PlayQuickMenuCloseAnimation()
     {
