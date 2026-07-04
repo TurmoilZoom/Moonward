@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
 using Starward.Controls;
 using Starward.Core.HoYoPlay;
 using Starward.Helpers;
@@ -18,16 +17,17 @@ namespace Starward.Features.GameLauncher;
 /// <summary>
 /// 软件首页的游戏轮播图控件，PanelSlideshow：
 /// <list type="bullet">
-/// <item>单槽呈现：呈现区始终只放当前一张图，切页时新旧两张各自做 Storyboard 平移（推拉效果），首尾连续无回滚。</item>
+/// <item>单槽呈现：呈现区始终只放当前一张图，切页时新旧两张各自做平移推拉（逐帧插值），首尾连续无回滚。</item>
 /// <item>可点击的 <see cref="PipsPager"/> 圆点指示器（替代原右下角「页数/总数」文字）。</item>
 /// <item>悬停时淡入并放大的左右翻页按钮（VisualState Storyboard 动画）。</item>
 /// <item>5 秒自动轮播，鼠标悬停或窗口隐藏时暂停。</item>
+/// <item>滚轮/按钮/自动轮播共用同一过渡驱动；过渡中同向输入忽略，反向输入从当前视觉位置无缝反转。</item>
 /// </list>
 /// </summary>
 public sealed partial class BannerCarousel : UserControl
 {
 
-    /// <summary>切页 Storyboard 动画时长（毫秒）。</summary>
+    /// <summary>切页动画时长（毫秒）。</summary>
     private const double SlideDurationMs = 600;
 
     /// <summary>呈现区尚未完成布局量测时的回退宽度，用于计算推拉位移。</summary>
@@ -52,11 +52,35 @@ public sealed partial class BannerCarousel : UserControl
     /// <summary>程序性更新 <see cref="PipsPager.SelectedPageIndex"/> 时抑制回调，避免与 <see cref="NavigateTo"/> 互相触发。</summary>
     private bool _suppressPipsCallback;
 
-    /// <summary>进行中的切页 Storyboard；快速连续翻页时需先 Stop 再归位。</summary>
-    private Storyboard? _runningStoryboard;
+    /// <summary>是否正在进行切页过渡（逐帧插值驱动）。</summary>
+    private bool _transitionActive;
 
-    /// <summary>动画结束后待从呈现区移除的旧图元素。</summary>
-    private UIElement? _pendingOldElement;
+    /// <summary>过渡起点下标（A 图）。</summary>
+    private int _fromIndex;
+
+    /// <summary>过渡终点下标（B 图）。</summary>
+    private int _toIndex;
+
+    /// <summary>推拉位移符号（+1 新图从右滑入，-1 从左滑入），由 <see cref="ComputeDirection"/> 推算。</summary>
+    private int _direction;
+
+    /// <summary>过渡进度 p∈[0,1]；0 停在 A，1 停在 B。</summary>
+    private double _progress;
+
+    /// <summary>过渡目标：1 朝 B 推进，0 朝 A 回退。</summary>
+    private int _target = 1;
+
+    /// <summary>当前过渡的逻辑朝向（+1 前进，-1 后退），用于判断同向输入是否应忽略。</summary>
+    private int _scrollDir = 1;
+
+    /// <summary>呈现区宽度缓存，过渡期间用于计算位移。</summary>
+    private double _width;
+
+    /// <summary>上一帧 <see cref="CompositionTarget.Rendering"/> 时间戳，用于计算 dt。</summary>
+    private TimeSpan _lastRenderTime;
+
+    /// <summary>是否已订阅 <see cref="CompositionTarget.Rendering"/>。</summary>
+    private bool _renderingHooked;
 
 
 
@@ -126,11 +150,11 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
-    /// <summary>卸载时停止定时器并收敛进行中的切页动画，避免 Storyboard 持有已卸载元素。</summary>
+    /// <summary>卸载时停止定时器并取消渲染订阅，避免回调持有已卸载元素。</summary>
     private void BannerCarousel_Unloaded(object sender, RoutedEventArgs e)
     {
         _timer.Stop();
-        FinalizeRunningTransition();
+        CancelTransition();
     }
 
 
@@ -142,7 +166,7 @@ public sealed partial class BannerCarousel : UserControl
     private void BuildItems()
     {
         _timer.Stop();
-        FinalizeRunningTransition();
+        CancelTransition();
         PresenterGrid.Children.Clear();
         foreach (CachedImage image in _imageElements)
         {
@@ -191,11 +215,79 @@ public sealed partial class BannerCarousel : UserControl
 
 
     /// <summary>
-    /// 切换到指定下标。下标自动按首尾循环取模；切页方向由新旧下标推算（含首↔尾的环绕方向），
-    /// 使「最后一张 → 第一张」与普通前进方向一致，实现首尾连续播放。
+    /// 请求前进一步（+1）或后退一步（-1）。过渡中同向输入忽略；反向输入翻转 target 从当前视觉位置无缝反转。
+    /// </summary>
+    /// <param name="delta">+1 下一张，-1 上一张。</param>
+    private void RequestStep(int delta)
+    {
+        int count = _imageElements.Count;
+        if (count <= 1 || delta is not (1 or -1))
+        {
+            return;
+        }
+
+        if (_transitionActive)
+        {
+            // 当前逻辑朝向：target=1 朝 B（_scrollDir），target=0 朝 A（-_scrollDir）
+            int logicalDir = _target == 1 ? _scrollDir : -_scrollDir;
+            if (delta == logicalDir)
+            {
+                return;
+            }
+            _target = _target == 1 ? 0 : 1;
+            return;
+        }
+
+        int toIndex = ((_currentIndex + delta) % count + count) % count;
+        BeginTransition(_currentIndex, toIndex);
+    }
+
+
+    /// <summary>
+    /// 开始从 <paramref name="from"/> 到 <paramref name="to"/> 的切页过渡；系统动画关闭时直接瞬切。
+    /// </summary>
+    /// <param name="from">起点下标。</param>
+    /// <param name="to">终点下标。</param>
+    private void BeginTransition(int from, int to)
+    {
+        int count = _imageElements.Count;
+        if (count == 0 || from < 0 || from >= count || to < 0 || to >= count || from == to)
+        {
+            return;
+        }
+
+        if (!EntranceAnimation.AnimationsEnabled())
+        {
+            SnapToIndex(to);
+            return;
+        }
+
+        _fromIndex = from;
+        _toIndex = to;
+        _direction = ComputeDirection(from, to, count);
+        _scrollDir = _direction;
+        _progress = 0;
+        _target = 1;
+        _width = GetPresenterWidth();
+        _transitionActive = true;
+
+        CachedImage fromElement = _imageElements[from];
+        CachedImage toElement = _imageElements[to];
+
+        PresenterGrid.Children.Clear();
+        PresenterGrid.Children.Add(fromElement);
+        PresenterGrid.Children.Add(toElement);
+        ApplyTransitionPositions(_progress);
+        HookRendering();
+    }
+
+
+    /// <summary>
+    /// 切换到指定下标。下标自动按首尾循环取模；<paramref name="animate"/> 为 false 时瞬切，
+    /// 为 true 时启动推拉过渡（圆点跳转等场景）。
     /// </summary>
     /// <param name="requestedIndex">目标下标，可为任意整数（内部取模）。</param>
-    /// <param name="animate">为 true 且存在旧图且系统动画开启时执行推拉 Storyboard；否则直接切换。</param>
+    /// <param name="animate">为 true 且系统动画开启时执行推拉过渡；否则直接切换。</param>
     private void NavigateTo(int requestedIndex, bool animate)
     {
         int count = _imageElements.Count;
@@ -205,111 +297,204 @@ public sealed partial class BannerCarousel : UserControl
         }
 
         int newIndex = ((requestedIndex % count) + count) % count;
-        if (newIndex == _currentIndex)
+        if (newIndex == _currentIndex && !_transitionActive)
         {
             return;
         }
 
-        // 打断进行中的切页动画，把呈现区收敛到当前单张
-        FinalizeRunningTransition();
-
-        int oldIndex = _currentIndex;
-        UIElement? oldElement = oldIndex >= 0 && oldIndex < count ? _imageElements[oldIndex] : null;
-        CachedImage newElement = _imageElements[newIndex];
-
-        _currentIndex = newIndex;
-        SyncPipsSelection(newIndex);
-
-        bool doAnimate = animate && oldElement is not null && EntranceAnimation.AnimationsEnabled();
-        if (!doAnimate)
+        if (_transitionActive)
         {
-            PresenterGrid.Children.Clear();
-            SetTranslateX(newElement, 0);
-            PresenterGrid.Children.Add(newElement);
+            CompleteTransition(_target == 1 ? _toIndex : _fromIndex);
+            if (newIndex == _currentIndex)
+            {
+                return;
+            }
+        }
+
+        if (!animate || _currentIndex < 0 || !EntranceAnimation.AnimationsEnabled())
+        {
+            SnapToIndex(newIndex);
             return;
         }
 
-        double width = PresenterGrid.ActualWidth;
-        if (width <= 0)
-        {
-            width = DefaultPresenterWidth;
-        }
-        int direction = ComputeDirection(oldIndex, newIndex, count);
-
-        // 推拉：新图从 direction*width 滑到 0，旧图从 0 滑到 -direction*width，二者始终铺满视口，无背景缝隙
-        SetTranslateX(newElement, direction * width);
-        if (!PresenterGrid.Children.Contains(newElement))
-        {
-            PresenterGrid.Children.Add(newElement);
-        }
-        SetTranslateX(oldElement!, 0);
-
-        Storyboard storyboard = new();
-        storyboard.Children.Add(CreateSlideAnimation(GetTranslate(newElement), 0));
-        storyboard.Children.Add(CreateSlideAnimation(GetTranslate(oldElement!), -direction * width));
-
-        _runningStoryboard = storyboard;
-        _pendingOldElement = oldElement;
-        storyboard.Completed += Storyboard_Completed;
-        storyboard.Begin();
+        BeginTransition(_currentIndex, newIndex);
     }
 
 
 
-    /// <summary>切页 Storyboard 完成回调；必须经 <see cref="FinalizeRunningTransition"/> 释放 HoldEnd 锁定的变换值。</summary>
-    private void Storyboard_Completed(object? sender, object e)
+    /// <summary>订阅每帧渲染回调，推进切页过渡进度。</summary>
+    private void HookRendering()
     {
-        // Storyboard 默认 HoldEnd 会锁住变换值，必须 Stop 后再直接赋值才生效，否则复用的图片下次会卡在屏幕外
-        FinalizeRunningTransition();
+        if (_renderingHooked)
+        {
+            return;
+        }
+        _renderingHooked = true;
+        _lastRenderTime = TimeSpan.Zero;
+        CompositionTarget.Rendering += OnRendering;
+    }
+
+
+    /// <summary>取消每帧渲染回调。</summary>
+    private void UnhookRendering()
+    {
+        if (!_renderingHooked)
+        {
+            return;
+        }
+        _renderingHooked = false;
+        CompositionTarget.Rendering -= OnRendering;
     }
 
 
     /// <summary>
-    /// 立即结束进行中的切页动画：停止 Storyboard、移除待移除的旧图、把当前图归位到中心。
-    /// 用于快速连续翻页或重建数据时收敛状态。
+    /// 每帧按 dt 推进过渡进度；到达 0 或 1 时完成过渡。
     /// </summary>
-    private void FinalizeRunningTransition()
+    private void OnRendering(object? sender, object e)
     {
-        if (_runningStoryboard is not null)
+        if (!_transitionActive)
         {
-            _runningStoryboard.Completed -= Storyboard_Completed;
-            _runningStoryboard.Stop();
-            _runningStoryboard = null;
+            return;
         }
-        RemovePendingOldElement();
-        SnapCurrentToCenter();
+
+        double dt = 1.0 / 60;
+        if (e is RenderingEventArgs args)
+        {
+            if (_lastRenderTime > TimeSpan.Zero)
+            {
+                dt = (args.RenderingTime - _lastRenderTime).TotalSeconds;
+            }
+            _lastRenderTime = args.RenderingTime;
+        }
+        if (dt <= 0 || dt > 0.1)
+        {
+            dt = 1.0 / 60;
+        }
+
+        double dp = dt / (SlideDurationMs / 1000.0);
+        if (_target == 1)
+        {
+            _progress += dp;
+        }
+        else
+        {
+            _progress -= dp;
+        }
+
+        ApplyTransitionPositions(_progress);
+
+        if (_progress >= 1)
+        {
+            CompleteTransition(_toIndex);
+        }
+        else if (_progress <= 0)
+        {
+            CompleteTransition(_fromIndex);
+        }
     }
 
 
-    /// <summary>从呈现区移除动画结束后的旧图，并将其平移归零以便下次复用。</summary>
-    private void RemovePendingOldElement()
+    /// <summary>过渡完成：收敛到 <paramref name="finalIndex"/> 单槽中心，移除另一张图。</summary>
+    /// <param name="finalIndex">最终停留的下标。</param>
+    private void CompleteTransition(int finalIndex)
     {
-        if (_pendingOldElement is not null)
+        UnhookRendering();
+        _transitionActive = false;
+
+        int otherIndex = finalIndex == _toIndex ? _fromIndex : _toIndex;
+        if (otherIndex >= 0 && otherIndex < _imageElements.Count)
         {
-            PresenterGrid.Children.Remove(_pendingOldElement);
-            SetTranslateX(_pendingOldElement, 0);
-            _pendingOldElement = null;
+            CachedImage other = _imageElements[otherIndex];
+            PresenterGrid.Children.Remove(other);
+            SetTranslateX(other, 0);
+        }
+
+        _currentIndex = finalIndex;
+        SyncPipsSelection(finalIndex);
+
+        CachedImage current = _imageElements[finalIndex];
+        if (!PresenterGrid.Children.Contains(current))
+        {
+            PresenterGrid.Children.Clear();
+            PresenterGrid.Children.Add(current);
+        }
+        SetTranslateX(current, 0);
+    }
+
+
+    /// <summary>取消进行中的过渡并卸载渲染订阅（不更新 <see cref="_currentIndex"/>）。</summary>
+    private void CancelTransition()
+    {
+        UnhookRendering();
+        if (!_transitionActive)
+        {
+            return;
+        }
+        _transitionActive = false;
+
+        foreach (UIElement child in PresenterGrid.Children)
+        {
+            SetTranslateX(child, 0);
         }
     }
 
 
-    /// <summary>将当前显示的图片平移归零，确保呈现区收敛到单槽中心状态。</summary>
-    private void SnapCurrentToCenter()
+    /// <summary>瞬切到指定下标，呈现区只保留该图。</summary>
+    /// <param name="index">目标下标。</param>
+    private void SnapToIndex(int index)
     {
-        if (_currentIndex >= 0 && _currentIndex < _imageElements.Count)
+        CancelTransition();
+        if (index < 0 || index >= _imageElements.Count)
         {
-            SetTranslateX(_imageElements[_currentIndex], 0);
+            return;
         }
+
+        CachedImage element = _imageElements[index];
+        PresenterGrid.Children.Clear();
+        SetTranslateX(element, 0);
+        PresenterGrid.Children.Add(element);
+        _currentIndex = index;
+        SyncPipsSelection(index);
+    }
+
+
+    /// <summary>按当前进度 p 更新 A/B 两张图的水平位移。</summary>
+    /// <param name="p">过渡进度，0 为起点 A，1 为终点 B。</param>
+    private void ApplyTransitionPositions(double p)
+    {
+        double eased = Ease(Math.Clamp(p, 0, 1));
+        CachedImage fromElement = _imageElements[_fromIndex];
+        CachedImage toElement = _imageElements[_toIndex];
+        // B 从 d*w 外滑到 0，A 从 0 滑到 -d*w 外
+        SetTranslateX(toElement, _direction * _width * (1 - eased));
+        SetTranslateX(fromElement, -_direction * _width * eased);
+    }
+
+
+    /// <summary>smootherstep 缓动：反转时位置连续，速度在反转瞬间反号。</summary>
+    /// <param name="t">归一化进度，期望在 [0,1]。</param>
+    /// <returns>缓动后的 [0,1] 值。</returns>
+    private static double Ease(double t)
+    {
+        return t * t * t * (t * (t * 6 - 15) + 10);
+    }
+
+
+    /// <summary>获取呈现区宽度；尚未量测完成时回退到默认值。</summary>
+    private double GetPresenterWidth()
+    {
+        double width = PresenterGrid.ActualWidth;
+        return width > 0 ? width : DefaultPresenterWidth;
     }
 
 
 
-    /// <summary>自动轮播定时器 Tick：前进到下一张（带动画）。</summary>
+    /// <summary>自动轮播定时器 Tick：前进到下一张。</summary>
     private void Timer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
     {
         if (_imageElements.Count > 1)
         {
-            NavigateTo(_currentIndex + 1, animate: true);
+            RequestStep(+1);
         }
     }
 
@@ -317,14 +502,14 @@ public sealed partial class BannerCarousel : UserControl
     /// <summary>上一张按钮点击：后退一页。</summary>
     private void PreviousButton_Click(object sender, RoutedEventArgs e)
     {
-        NavigateTo(_currentIndex - 1, animate: true);
+        RequestStep(-1);
     }
 
 
     /// <summary>下一张按钮点击：前进一页。</summary>
     private void NextButton_Click(object sender, RoutedEventArgs e)
     {
-        NavigateTo(_currentIndex + 1, animate: true);
+        RequestStep(+1);
     }
 
 
@@ -386,7 +571,7 @@ public sealed partial class BannerCarousel : UserControl
         {
             return;
         }
-        NavigateTo(_currentIndex + (delta < 0 ? 1 : -1), animate: true);
+        RequestStep(delta < 0 ? +1 : -1);
         // 标记已处理，避免滚轮事件冒泡到祖先 ScrollViewer 同时滚动页面
         e.Handled = true;
     }
@@ -397,6 +582,11 @@ public sealed partial class BannerCarousel : UserControl
     {
         // 圆角由外层 Border 负责，此处仅做矩形裁剪
         PresenterGrid.Clip = new RectangleGeometry { Rect = new Rect(0, 0, e.NewSize.Width, e.NewSize.Height) };
+        if (_transitionActive)
+        {
+            _width = e.NewSize.Width > 0 ? e.NewSize.Width : DefaultPresenterWidth;
+            ApplyTransitionPositions(_progress);
+        }
     }
 
 
@@ -453,38 +643,6 @@ public sealed partial class BannerCarousel : UserControl
         bool isBackward = (newIndex < oldIndex && !(newIndex == 0 && oldIndex == count - 1))
                           || (newIndex == count - 1 && oldIndex == 0);
         return isBackward ? -1 : 1;
-    }
-
-
-    /// <summary>创建沿 X 轴平移的切页动画。</summary>
-    /// <param name="target">目标 <see cref="TranslateTransform"/>。</param>
-    /// <param name="to">动画终点 X 值。</param>
-    /// <returns>已绑定目标与属性的 <see cref="DoubleAnimation"/>。</returns>
-    private static DoubleAnimationUsingKeyFrames CreateSlideAnimation(TranslateTransform target, double to)
-    {
-        // https://easings.net/#easeInQuint
-        KeySpline customEase = new()
-        {
-            ControlPoint1 = new Point(0.64, 0),
-            ControlPoint2 = new Point(0.78, 1),
-        };
-
-        var animation = new DoubleAnimationUsingKeyFrames
-        {
-            Duration = new Duration(TimeSpan.FromMilliseconds(SlideDurationMs)),
-        };
-
-        // 关键帧，KeyTime 就是动画总时长，Value 就是目标位置
-        animation.KeyFrames.Add(new SplineDoubleKeyFrame
-        {
-            KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(SlideDurationMs)),
-            Value = to,
-            KeySpline = customEase   
-        });
-
-        Storyboard.SetTarget(animation, target);
-        Storyboard.SetTargetProperty(animation, "X");
-        return animation;
     }
 
 
