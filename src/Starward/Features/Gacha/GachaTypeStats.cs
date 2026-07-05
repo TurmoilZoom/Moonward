@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Starward.Language;
 
 namespace Starward.Features.Gacha;
 
@@ -197,5 +198,30 @@ public class GachaTypeStats
     /// 「不歪概率」展示文本：有样本时形如「54.55% (6/11)」，无样本时为「—」。
     /// </summary>
     public string FiftyFiftyNoUpText => FiftyFiftyCount == 0 ? "—" : $"{FiftyFiftyNoUpRate:P2} ({FiftyFiftyNoUpCount}/{FiftyFiftyCount})";
+
+    /// <summary>
+    /// 小保底（50/50）最多连续不歪（抽到 UP）次数。
+    /// </summary>
+    public int MaxFiftyFiftyUpStreak { get; set; }
+
+    /// <summary>
+    /// 小保底（50/50）最多连续歪（未抽到 UP）次数。
+    /// </summary>
+    public int MaxFiftyFiftyMissStreak { get; set; }
+
+    /// <summary>
+    /// 是否显示「几连UP / 几连歪」胶囊标签：仅 UP 卡池且已有出金时显示。
+    /// </summary>
+    public bool ShowFiftyFiftyStreakCapsules => HasUpItem && Count_5 > 0;
+
+    /// <summary>
+    /// 「几连UP」胶囊展示文本，形如「3连UP」。
+    /// </summary>
+    public string MaxFiftyFiftyUpStreakText => string.Format(Lang.GachaStatsCard_UpStreak, MaxFiftyFiftyUpStreak);
+
+    /// <summary>
+    /// 「几连歪」胶囊展示文本，形如「2连歪」。
+    /// </summary>
+    public string MaxFiftyFiftyMissStreakText => string.Format(Lang.GachaStatsCard_MissStreak, MaxFiftyFiftyMissStreak);
 
 }

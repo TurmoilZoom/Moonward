@@ -168,6 +168,12 @@
   <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
     <value>Win Rate</value>
   </data>
+  <data name="GachaStatsCard_UpStreak" xml:space="preserve">
+    <value>UP×{0}</value>
+  </data>
+  <data name="GachaStatsCard_MissStreak" xml:space="preserve">
+    <value>Miss×{0}</value>
+  </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>Nice to Meet You ~</value>
   </data>

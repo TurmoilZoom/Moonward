@@ -2599,6 +2599,24 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GachaStatsCard_NoUpProbability", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 UP×{0} 的本地化字符串。
+        /// </summary>
+        public static string GachaStatsCard_UpStreak {
+            get {
+                return ResourceManager.GetString("GachaStatsCard_UpStreak", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Miss×{0} 的本地化字符串。
+        /// </summary>
+        public static string GachaStatsCard_MissStreak {
+            get {
+                return ResourceManager.GetString("GachaStatsCard_MissStreak", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 The currently logged-in account is not saved. 的本地化字符串。

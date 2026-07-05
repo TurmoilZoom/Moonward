@@ -373,7 +373,7 @@ internal class ZZZGachaService : GachaLogService
                 stats.HasUpItem = GachaNoUp.Dictionary.ContainsKey($"{CurrentGameBiz}{type.Value}");
                 if (stats.HasUpItem)
                 {
-                    (stats.FiftyFiftyCount, stats.FiftyFiftyNoUpCount) = CountFiftyFiftyNoUp(list, 4);
+                    (stats.FiftyFiftyCount, stats.FiftyFiftyNoUpCount, stats.MaxFiftyFiftyUpStreak, stats.MaxFiftyFiftyMissStreak) = CountFiftyFiftyNoUp(list, 4);
                 }
 
                 // 重新为列表中的每条 A 级记录计算“距离上次 A 级”的 pity 值（用于详情列表展示）
