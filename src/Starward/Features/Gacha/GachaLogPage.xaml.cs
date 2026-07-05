@@ -14,9 +14,12 @@ using Starward.Core;
 using Starward.Core.Gacha;
 using Starward.Core.GameRecord;
 using Starward.Features.Gacha.UIGF;
+using Starward.Features.Background;
 using Starward.Features.GameLauncher;
 using Starward.Features.GameRecord;
+using Starward.Features.Screenshot;
 using Starward.Features.ViewHost;
+using Starward.Language;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -30,6 +33,7 @@ using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Windows.Storage;
 using Windows.System;
+using Windows.UI;
 
 
 namespace Starward.Features.Gacha;
@@ -132,7 +136,14 @@ public sealed partial class GachaLogPage : PageBase
     {
         AppConfig.SetLastUidInGachaLogPage(CurrentGameBiz.Game, value ?? 0);
         UpdateGachaTypeStats(value);
+        ShareGachaImageCommand.NotifyCanExecuteChanged();
     }
+
+
+    /// <summary>分享图生成进行中时为 true，用于禁用分享按钮。</summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareGachaImageCommand))]
+    public partial bool IsSharingGachaImage { get; set; }
 
 
 
@@ -514,17 +525,15 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 根据当前卡池筛选（GachaBanners 勾选状态）和用户拖拽保存的次序，刷新统计卡片的显示。
-    /// <para>从 gachaTypeStats 中筛选已选卡池 → ApplySavedCardOrder 稳定排序 → ReconcileGachaCards。</para>
-    /// <para>playEntranceAnimation 控制是否播放入场动画（数据刷新时为 true，筛选切换时通常为 false）。</para>
+    /// 获取当前筛选并排序后的卡池统计列表（与 <see cref="UpdateDisplayGachaTypeStats"/> 展示数据一致）。
     /// </summary>
-    private void UpdateDisplayGachaTypeStats(bool playEntranceAnimation = true)
+    /// <returns>已选卡池的统计数据；无数据或未选卡池时返回空列表。</returns>
+    private List<GachaTypeStats> GetDisplayedGachaTypeStats()
     {
         if (gachaTypeStats is null)
         {
-            return;
+            return [];
         }
-        // 勾选=显示；按卡池固有次序取所选项，未勾选任何卡池即不显示。
         var stats = new List<GachaTypeStats>();
         if (GachaBanners is not null)
         {
@@ -537,8 +546,85 @@ public sealed partial class GachaLogPage : PageBase
                 }
             }
         }
-        // 应用用户拖拽保存的卡片次序（按游戏持久化），刷新数据后仍保持卡片之间的相对位置；交给卡片池对齐。
-        ReconcileGachaCards(ApplySavedCardOrder(stats), playEntranceAnimation);
+        return ApplySavedCardOrder(stats);
+    }
+
+
+    /// <summary>
+    /// 根据当前卡池筛选（GachaBanners 勾选状态）和用户拖拽保存的次序，刷新统计卡片的显示。
+    /// <para>从 gachaTypeStats 中筛选已选卡池 → ApplySavedCardOrder 稳定排序 → ReconcileGachaCards。</para>
+    /// <para>playEntranceAnimation 控制是否播放入场动画（数据刷新时为 true，筛选切换时通常为 false）。</para>
+    /// </summary>
+    private void UpdateDisplayGachaTypeStats(bool playEntranceAnimation = true)
+    {
+        if (gachaTypeStats is null)
+        {
+            return;
+        }
+        ReconcileGachaCards(GetDisplayedGachaTypeStats(), playEntranceAnimation);
+        ShareGachaImageCommand.NotifyCanExecuteChanged();
+    }
+
+
+    /// <summary>
+    /// 将当前所选卡池统计渲染为分享图并打开内置图片查看器。
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanShareGachaImage))]
+    private async Task ShareGachaImageAsync()
+    {
+        try
+        {
+            if (SelectUid is not long uid || uid == 0)
+            {
+                return;
+            }
+            var stats = GetDisplayedGachaTypeStats();
+            if (stats.Count == 0)
+            {
+                return;
+            }
+
+            IsSharingGachaImage = true;
+            string? backgroundFile = BackgroundService.GetCachedBackgroundFile(CurrentGameId);
+            if (backgroundFile is not null && BackgroundService.FileIsSupportedVideo(backgroundFile))
+            {
+                backgroundFile = null;
+            }
+
+            // 强调色须在 UI 线程读取；Win2D 离屏渲染放到后台线程，避免 Application.Current 跨线程 COM 异常。
+            Color accentColor = GetShareImageAccentColor();
+            string file = await Task.Run(async () =>
+                await GachaShareImageRenderer.RenderAndSaveAsync(stats, CurrentGameBiz, backgroundFile, uid, accentColor));
+            await new ImageViewWindow2().ShowWindowAsync(this.XamlRoot.ContentIslandEnvironment.AppWindowId, file, false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Share gacha image");
+            InAppToast.MainWindow?.Error(ex);
+        }
+        finally
+        {
+            IsSharingGachaImage = false;
+        }
+    }
+
+
+    /// <summary>是否允许触发分享图生成。</summary>
+    private bool CanShareGachaImage()
+        => !IsSharingGachaImage
+           && SelectUid is > 0
+           && gachaTypeStats is { Count: > 0 }
+           && GachaBanners?.Any(x => x.IsSelected) == true;
+
+
+    /// <summary>在 UI 线程读取主题强调色，供离屏分享图渲染使用。</summary>
+    private static Color GetShareImageAccentColor()
+    {
+        if (Application.Current.Resources["AccentFillColorDefaultBrush"] is SolidColorBrush brush)
+        {
+            return brush.Color;
+        }
+        return Color.FromArgb(0xFF, 0x4C, 0x8B, 0xF5);
     }
 
 

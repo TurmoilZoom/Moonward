@@ -539,6 +539,15 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Share Image 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_ShareImage {
+            get {
+                return ResourceManager.GetString("GachaLogPage_ShareImage", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Confirm 的本地化字符串。
         /// </summary>
         public static string Common_Confirm {

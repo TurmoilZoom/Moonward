@@ -95,6 +95,13 @@
                     </Flyout>
                 </DropDownButton.Flyout>
             </DropDownButton>
+            <Button Height="34"
+                    VerticalAlignment="Center"
+                    helpers:FluentAnimations.PressScale="0.94"
+                    Command="{x:Bind ShareGachaImageCommand}"
+                    ToolTipService.ToolTip="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
+                <FontIcon FontSize="16" Glyph="&#xE72D;" />
+            </Button>
         </StackPanel>
 
 
