@@ -109,6 +109,12 @@
   <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
     <value>当たり率</value>
   </data>
+  <data name="GachaStatsCard_UpStreak" xml:space="preserve">
+    <value>UP×{0}</value>
+  </data>
+  <data name="GachaStatsCard_MissStreak" xml:space="preserve">
+    <value>外れ×{0}</value>
+  </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>はじめまして〜</value>
   </data>
@@ -2657,6 +2663,9 @@
   </data>
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>バナーフィルター</value>
+  </data>
+  <data name="GachaLogPage_ShareImage" xml:space="preserve">
+    <value>画像を共有</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>出力先</value>

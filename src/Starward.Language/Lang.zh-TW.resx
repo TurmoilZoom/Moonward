@@ -109,6 +109,12 @@
   <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
     <value>不歪機率</value>
   </data>
+  <data name="GachaStatsCard_UpStreak" xml:space="preserve">
+    <value>{0}連UP</value>
+  </data>
+  <data name="GachaStatsCard_MissStreak" xml:space="preserve">
+    <value>{0}連歪</value>
+  </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>很高興遇見你~</value>
   </data>
@@ -2658,6 +2664,9 @@
   </data>
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>卡池篩選</value>
+  </data>
+  <data name="GachaLogPage_ShareImage" xml:space="preserve">
+    <value>分享圖片</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>輸出資料夾</value>

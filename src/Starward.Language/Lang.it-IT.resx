@@ -109,6 +109,12 @@
   <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
     <value>Probabilità di vincita</value>
   </data>
+  <data name="GachaStatsCard_UpStreak" xml:space="preserve">
+    <value>UP×{0}</value>
+  </data>
+  <data name="GachaStatsCard_MissStreak" xml:space="preserve">
+    <value>Miss×{0}</value>
+  </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>Piacere di vederti ~</value>
   </data>
@@ -2658,6 +2664,9 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
   </data>
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>Filtro banner</value>
+  </data>
+  <data name="GachaLogPage_ShareImage" xml:space="preserve">
+    <value>Condividi immagine</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Cartella di output</value>

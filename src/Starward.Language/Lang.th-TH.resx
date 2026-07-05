@@ -109,6 +109,12 @@
   <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
     <value>อัตราชนะ</value>
   </data>
+  <data name="GachaStatsCard_UpStreak" xml:space="preserve">
+    <value>UP×{0}</value>
+  </data>
+  <data name="GachaStatsCard_MissStreak" xml:space="preserve">
+    <value>พลาด×{0}</value>
+  </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>ยินดีที่ได้รู้จัก ~</value>
   </data>
@@ -2652,6 +2658,9 @@
   </data>
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>ตัวกรองแบนเนอร์</value>
+  </data>
+  <data name="GachaLogPage_ShareImage" xml:space="preserve">
+    <value>แชร์รูปภาพ</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>โฟลเดอร์เอาต์พุต</value>

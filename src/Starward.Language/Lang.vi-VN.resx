@@ -109,6 +109,12 @@
   <data name="GachaStatsCard_NoUpProbability" xml:space="preserve">
     <value>Tỷ lệ trúng</value>
   </data>
+  <data name="GachaStatsCard_UpStreak" xml:space="preserve">
+    <value>UP×{0}</value>
+  </data>
+  <data name="GachaStatsCard_MissStreak" xml:space="preserve">
+    <value>Trượt×{0}</value>
+  </data>
   <data name="SelectDirectoryPage_NiceToMeetYou" xml:space="preserve">
     <value>Rất vui được gặp bạn ~</value>
   </data>
@@ -2655,6 +2661,9 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>Bộ lọc banner</value>
+  </data>
+  <data name="GachaLogPage_ShareImage" xml:space="preserve">
+    <value>Chia sẻ ảnh</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Thư mục xuất ra</value>
