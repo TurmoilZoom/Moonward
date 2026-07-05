@@ -597,6 +597,9 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="MainPage_GameScreenshot" xml:space="preserve">
     <value>Foto salvate</value>
   </data>
+  <data name="MainPage_DisplaySetting" xml:space="preserve">
+    <value>Impostazione schermo</value>
+  </data>
   <data name="ScreenshotPage_GameScreenshot" xml:space="preserve">
     <value>Foto salvate</value>
   </data>

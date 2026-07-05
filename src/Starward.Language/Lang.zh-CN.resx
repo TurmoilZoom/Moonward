@@ -656,6 +656,9 @@
   <data name="MainPage_GameScreenshot" xml:space="preserve">
     <value>游戏截图</value>
   </data>
+  <data name="MainPage_DisplaySetting" xml:space="preserve">
+    <value>显示设置</value>
+  </data>
   <data name="ScreenshotPage_GameScreenshot" xml:space="preserve">
     <value>游戏截图</value>
   </data>
@@ -2012,6 +2015,9 @@
   </data>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>云游戏</value>
+  </data>
+  <data name="DailyNoteButton_Title" xml:space="preserve">
+    <value>实时便笺</value>
   </data>
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>当前登录的账号未保存</value>

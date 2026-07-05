@@ -19,6 +19,8 @@
             BorderThickness="0"
             CornerRadius="8"
             Loaded="Button_DailyNote_Loaded"
+            sc:InstantTooltip.Placement="Left"
+            sc:InstantTooltip.Text="{x:Bind lang:Lang.DailyNoteButton_Title}"
             Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
             Unloaded="Button_DailyNote_Unloaded">
 

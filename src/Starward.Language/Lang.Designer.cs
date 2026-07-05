@@ -394,6 +394,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Real-time Note 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteButton_Title {
+            get {
+                return ResourceManager.GetString("DailyNoteButton_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Open the gacha records page in game, and then click the button on the right. 的本地化字符串。
         /// </summary>
         public static string CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight {
@@ -5610,6 +5619,15 @@ namespace Starward.Language {
         public static string MainPage_GameScreenshot {
             get {
                 return ResourceManager.GetString("MainPage_GameScreenshot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Display Setting 的本地化字符串。
+        /// </summary>
+        public static string MainPage_DisplaySetting {
+            get {
+                return ResourceManager.GetString("MainPage_DisplaySetting", resourceCulture);
             }
         }
         

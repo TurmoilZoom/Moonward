@@ -597,6 +597,9 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="MainPage_GameScreenshot" xml:space="preserve">
     <value>Captura de pantalla</value>
   </data>
+  <data name="MainPage_DisplaySetting" xml:space="preserve">
+    <value>Ajuste de pantalla</value>
+  </data>
   <data name="ScreenshotPage_GameScreenshot" xml:space="preserve">
     <value>Captura de pantalla</value>
   </data>

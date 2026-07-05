@@ -597,6 +597,9 @@
   <data name="MainPage_GameScreenshot" xml:space="preserve">
     <value>스크린샷</value>
   </data>
+  <data name="MainPage_DisplaySetting" xml:space="preserve">
+    <value>화면 설정</value>
+  </data>
   <data name="ScreenshotPage_GameScreenshot" xml:space="preserve">
     <value>스크린샷</value>
   </data>

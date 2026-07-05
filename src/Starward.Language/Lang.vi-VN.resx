@@ -597,6 +597,9 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="MainPage_GameScreenshot" xml:space="preserve">
     <value>Ảnh chụp màn hình</value>
   </data>
+  <data name="MainPage_DisplaySetting" xml:space="preserve">
+    <value>Cài đặt hiển thị</value>
+  </data>
   <data name="ScreenshotPage_GameScreenshot" xml:space="preserve">
     <value>Ảnh chụp màn hình</value>
   </data>

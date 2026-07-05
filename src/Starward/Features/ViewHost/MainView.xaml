@@ -6,6 +6,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.ViewHost"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
              xmlns:sfb="using:Starward.Features.Background"
              xmlns:sfg="using:Starward.Features.GameSelector"
              x:DefaultBindMode="OneWay"
@@ -34,6 +35,7 @@
                         CompactPaneLength="56"
                         IsBackButtonVisible="Collapsed"
                         IsPaneToggleButtonVisible="False"
+                        IsSettingsVisible="False"
                         ItemInvoked="NavigationView_ItemInvoked"
                         PaneDisplayMode="LeftCompact">
             <NavigationView.Resources>
@@ -51,8 +53,8 @@
                 <!--  启动器  -->
                 <NavigationViewItem Name="NavigationViewItem_Launcher"
                                     IsSelected="True"
-                                    Tag="GameLauncherPage"
-                                    ToolTipService.ToolTip="{x:Bind lang:Lang.MainPage_Launcer}">
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.MainPage_Launcer}"
+                                    Tag="GameLauncherPage">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE80F;" />
                     </NavigationViewItem.Icon>
@@ -62,23 +64,23 @@
                         </Border>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
-                <!--  游戏设置  -->
+                <!--  显示设置  -->
                 <NavigationViewItem Name="NavigationViewItem_GameSetting"
-                                    Tag="GameSettingPage"
-                                    ToolTipService.ToolTip="{x:Bind lang:Lang.LauncherPage_GameSetting}">
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.MainPage_DisplaySetting}"
+                                    Tag="GameSettingPage">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE7FC;" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.Content>
                         <Border Height="40">
-                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.LauncherPage_GameSetting}" />
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.MainPage_DisplaySetting}" />
                         </Border>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
                 <!--  游戏截图  -->
                 <NavigationViewItem Name="NavigationViewItem_Screenshot"
-                                    Tag="ScreenshotPage"
-                                    ToolTipService.ToolTip="{x:Bind lang:Lang.MainPage_GameScreenshot}">
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.MainPage_GameScreenshot}"
+                                    Tag="ScreenshotPage">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE91B;" />
                     </NavigationViewItem.Icon>
@@ -112,8 +114,8 @@
                 </NavigationViewItem>
                 <!--  账号记录  -->
                 <NavigationViewItem Name="NavigationViewItem_SelfQuery"
-                                    Tag="SelfQueryPage"
-                                    ToolTipService.ToolTip="{x:Bind lang:Lang.SelfQueryPage_AccountRecords}">
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.SelfQueryPage_AccountRecords}"
+                                    Tag="SelfQueryPage">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8C7;" />
                     </NavigationViewItem.Icon>
@@ -125,8 +127,8 @@
                 </NavigationViewItem>
                 <!--  千星奇域颂愿  -->
                 <NavigationViewItem Name="NavigationViewItem_GenshinBeyondGacha"
-                                    Tag="GenshinBeyondGachaPage"
-                                    ToolTipService.ToolTip="{x:Bind lang:Lang.GenshinBeyondGachaPage_MiliastraWonderlandOde}">
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.GenshinBeyondGachaPage_MiliastraWonderlandOde}"
+                                    Tag="GenshinBeyondGachaPage">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE776;" />
                     </NavigationViewItem.Icon>
@@ -137,6 +139,21 @@
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Name="NavigationViewItem_Setting"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Setting}"
+                                    Tag="SettingPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.Content>
+                        <Border Height="40">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.Common_Setting}" />
+                        </Border>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
 
             <Frame Name="MainView_Frame" Margin="0,48,0,0" />
 

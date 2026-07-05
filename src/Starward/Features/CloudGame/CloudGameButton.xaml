@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.CloudGame"
+             xmlns:sc="using:Starward.Controls"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -15,6 +16,8 @@
             VerticalAlignment="Stretch"
             BorderThickness="0"
             CornerRadius="8"
+            sc:InstantTooltip.Placement="Left"
+            sc:InstantTooltip.Text="{x:Bind lang:Lang.CloudGameButton_CloudGame}"
             Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
         <Image Width="28"
                Height="28"

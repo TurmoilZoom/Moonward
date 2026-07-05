@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using NuGet.Versioning;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Gacha;
@@ -68,7 +69,10 @@ public sealed partial class MainView : UserControl
         WeakReferenceMessenger.Default.Register<BH3GlobalGameServerChangedMessage>(this, OnBH3GlobalGameServerChanged);
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, (_, _) => _ = CheckUpdateOrShowRecentUpdateContentAsync());
         // 切换软件语言后，异步把三个游戏的抽卡物品名称回写为新语言
-        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().ChangeLanguageAsync()));
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) =>
+        {
+            _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().ChangeLanguageAsync());
+        });
     }
 
 
@@ -152,15 +156,18 @@ public sealed partial class MainView : UserControl
             _ => "",
         };
 
+        TextBlock_GachaLog.Text = gachalogText;
+        InstantTooltip.SetText(NavigationViewItem_GachaLog, gachalogText);
+
         if (CurrentGameId?.GameBiz.IsChinaServer() ?? false)
         {
-            ToolTipService.SetToolTip(NavigationViewItem_HoyolabToolbox, Lang.HyperionToolbox);
             TextBlock_HoyolabToolbox.Text = Lang.HyperionToolbox;
+            InstantTooltip.SetText(NavigationViewItem_HoyolabToolbox, Lang.HyperionToolbox);
         }
         if (CurrentGameId?.GameBiz.IsGlobalServer() ?? false)
         {
-            ToolTipService.SetToolTip(NavigationViewItem_HoyolabToolbox, Lang.HoYoLABToolbox);
             TextBlock_HoyolabToolbox.Text = Lang.HoYoLABToolbox;
+            InstantTooltip.SetText(NavigationViewItem_HoyolabToolbox, Lang.HoYoLABToolbox);
         }
 
         if (CurrentGameId is null)
@@ -200,6 +207,7 @@ public sealed partial class MainView : UserControl
                         nameof(GameRecordPage) => typeof(GameRecordPage),
                         nameof(SelfQueryPage) => typeof(SelfQueryPage),
                         nameof(GenshinBeyondGachaPage) => typeof(GenshinBeyondGachaPage),
+                        nameof(SettingPage) => typeof(SettingPage),
                         _ => null,
                     };
                     NavigateTo(type);
@@ -225,6 +233,10 @@ public sealed partial class MainView : UserControl
         if (page.Name is nameof(GameLauncherPage))
         {
             MainView_NavigationView.SelectedItem = NavigationViewItem_Launcher;
+        }
+        else if (page.Name is nameof(SettingPage))
+        {
+            MainView_NavigationView.SelectedItem = NavigationViewItem_Setting;
         }
         MainView_Frame.Navigate(page, param ?? CurrentGameId, infoOverride);
         if (page.Name is nameof(BlankPage) or nameof(GameLauncherPage))

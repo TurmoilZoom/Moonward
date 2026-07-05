@@ -21,8 +21,9 @@
             BorderThickness="0"
             CornerRadius="8"
             Loaded="SignInButton_Loaded"
+            sc:InstantTooltip.Placement="Left"
+            sc:InstantTooltip.Text="{x:Bind lang:Lang.SignInButton_Title}"
             Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-            ToolTipService.ToolTip="{x:Bind lang:Lang.SignInButton_Title}"
             Unloaded="SignInButton_Unloaded">
 
         <!--  按 CurrentGameId 仅加载对应游戏的签到图标  -->
