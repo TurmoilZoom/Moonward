@@ -47,7 +47,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Name="TextBlock_GachaTypeText"
                        FontSize="16"
@@ -55,20 +54,7 @@
                        IsTextTrimmedChanged="TextBlock_GachaTypeText_IsTextTrimmedChanged"
                        Text="{x:Bind WarpTypeStats.GachaTypeText}"
                        TextTrimming="CharacterEllipsis" />
-            <!--  「可拖拽」胶囊提示：指针进入拖拽区域时显示，位于卡池类型右侧、总抽数左侧；离开即隐藏。  -->
-            <Border x:Name="DragHintBorder"
-                    Grid.Column="1"
-                    Padding="6,1,6,1"
-                    VerticalAlignment="Center"
-                    Background="{ThemeResource AccentFillColorDefaultBrush}"
-                    CornerRadius="9"
-                    Visibility="Collapsed">
-                <TextBlock FontSize="11"
-                           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                           IsTextScaleFactorEnabled="False"
-                           Text="{x:Bind lang:Lang.GachaStatsCard_Draggable}" />
-            </Border>
-            <TextBlock Grid.Column="2"
+            <TextBlock Grid.Column="1"
                        FontSize="16"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        Text="{x:Bind WarpTypeStats.Count}" />
@@ -148,14 +134,12 @@
                    Text="{x:Bind WarpTypeStats.FiftyFiftyNoUpText}"
                    Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-        <!--  拖拽手柄：覆盖 tab 标签上方的卡池统计信息区域（第 0~4 行），按住此处可拖动整张卡片换位；指针进入显示「可拖拽」提示并切换手型光标。  -->
+        <!--  拖拽手柄：覆盖 tab 标签上方的卡池统计信息区域（第 0~4 行），按住此处可拖动整张卡片换位。  -->
         <Border x:Name="DragHandleBorder"
                 Grid.Row="0"
                 Grid.RowSpan="5"
                 Background="Transparent"
-                helpers:PointerCursor.CursorShape="Hand"
-                PointerEntered="DragHandle_PointerEntered"
-                PointerExited="DragHandle_PointerExited" />
+                helpers:PointerCursor.CursorShape="Hand" />
 
         <Grid Grid.Row="5"
               RowSpacing="8">
@@ -176,13 +160,12 @@
                 </cwc:SegmentedItem>
             </cwc:Segmented>
 
-            <!--  记录列表：独立竖直滚动条（右侧留 14px 装订线，避免遮挡每行右侧的保底数字）。统计信息与 Segmented 选项卡在其上方、不随列表滚动。  -->
+            <!--  记录列表：竖直滚动条隐藏（VerticalScrollMode 仍为 Enabled，保留鼠标滚轮与拖拽滚动）。统计信息与 Segmented 选项卡在其上方、不随列表滚动。  -->
             <ScrollViewer x:Name="ScrollViewer_GachaItemList"
                           Grid.Row="1"
-                          Padding="0,0,14,0"
                           HorizontalScrollBarVisibility="Disabled"
                           HorizontalScrollMode="Disabled"
-                          VerticalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Hidden"
                           VerticalScrollMode="Enabled">
                 <Grid>
             <ItemsRepeater x:Name="ItemsRepeater_List_5"

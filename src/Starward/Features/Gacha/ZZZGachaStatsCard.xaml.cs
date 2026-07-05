@@ -41,18 +41,6 @@ public sealed partial class ZZZGachaStatsCard : UserControl, IGachaStatsDragCard
     public FrameworkElement DragHandle => DragHandleBorder;
 
 
-    private void DragHandle_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-    {
-        DragHintBorder.Visibility = Visibility.Visible;
-    }
-
-
-    private void DragHandle_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-    {
-        DragHintBorder.Visibility = Visibility.Collapsed;
-    }
-
-
     public GachaTypeStats WarpTypeStats
     {
         get { return (GachaTypeStats)GetValue(WarpTypeStatsProperty); }
