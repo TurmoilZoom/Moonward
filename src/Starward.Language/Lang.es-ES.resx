@@ -2666,7 +2666,7 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
     <value>Filtro de banner</value>
   </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
-    <value>Compartir imagen</value>
+    <value>Compartir</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Carpeta de salida</value>

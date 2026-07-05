@@ -2686,7 +2686,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Фильтр баннеров</value>
   </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
-    <value>Поделиться изображением</value>
+    <value>Поделиться</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Папка для сохранения</value>

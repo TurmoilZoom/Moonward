@@ -2660,7 +2660,7 @@
     <value>ตัวกรองแบนเนอร์</value>
   </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
-    <value>แชร์รูปภาพ</value>
+    <value>แชร์</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>โฟลเดอร์เอาต์พุต</value>

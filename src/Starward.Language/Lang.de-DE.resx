@@ -2664,7 +2664,7 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
     <value>Bannerfilter</value>
   </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
-    <value>Bild teilen</value>
+    <value>Teilen</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Ausgabeordner</value>

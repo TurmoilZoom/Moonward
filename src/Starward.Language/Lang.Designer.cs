@@ -539,7 +539,7 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Share Image 的本地化字符串。
+        ///   查找类似 Share 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_ShareImage {
             get {

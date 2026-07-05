@@ -2665,7 +2665,7 @@
     <value>バナーフィルター</value>
   </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
-    <value>画像を共有</value>
+    <value>共有</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>出力先</value>

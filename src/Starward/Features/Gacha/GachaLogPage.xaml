@@ -39,7 +39,8 @@
                             Height="34"
                             VerticalAlignment="Center"
                             helpers:FluentAnimations.PressScale="0.94"
-                            ToolTipService.ToolTip="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}">
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}">
                 <FontIcon x:Name="FontIcon_GachaBannerFilter"
                           FontSize="16"
                           Glyph="&#xE71C;" />
@@ -99,7 +100,8 @@
                     VerticalAlignment="Center"
                     helpers:FluentAnimations.PressScale="0.94"
                     Command="{x:Bind ShareGachaImageCommand}"
-                    ToolTipService.ToolTip="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
+                    sc:InstantTooltip.Placement="Top"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
                 <FontIcon FontSize="16" Glyph="&#xE72D;" />
             </Button>
         </StackPanel>

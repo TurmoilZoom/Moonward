@@ -2663,7 +2663,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Bộ lọc banner</value>
   </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
-    <value>Chia sẻ ảnh</value>
+    <value>Chia sẻ</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Thư mục xuất ra</value>

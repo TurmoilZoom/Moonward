@@ -2666,7 +2666,7 @@
     <value>배너 필터</value>
   </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
-    <value>이미지 공유</value>
+    <value>공유</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>출력 폴더</value>

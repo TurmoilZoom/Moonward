@@ -2665,7 +2665,7 @@
     <value>卡池篩選</value>
   </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
-    <value>分享圖片</value>
+    <value>分享</value>
   </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>輸出資料夾</value>
