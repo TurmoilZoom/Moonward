@@ -68,11 +68,8 @@ public sealed partial class MainView : UserControl
         WeakReferenceMessenger.Default.Register<MainViewNavigateMessage>(this, OnMainViewNavigateMessageReceived);
         WeakReferenceMessenger.Default.Register<BH3GlobalGameServerChangedMessage>(this, OnBH3GlobalGameServerChanged);
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, (_, _) => _ = CheckUpdateOrShowRecentUpdateContentAsync());
-        // 切换软件语言后，异步把三个游戏的抽卡物品名称回写为新语言
-        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) =>
-        {
-            _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().ChangeLanguageAsync());
-        });
+        // 切换软件语言后刷新导航文案/Tooltip，并异步把三个游戏的抽卡物品名称回写为新语言
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
     }
 
 
@@ -137,6 +134,19 @@ public sealed partial class MainView : UserControl
 
 
 
+    /// <summary>
+    /// 语言切换后刷新导航栏 x:Bind 绑定与代码赋值的文案/Tooltip。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="__">语言变更消息（未使用）。</param>
+    private void OnLanguageChanged(object _, LanguageChangedMessage __)
+    {
+        this.Bindings.Update();
+        UpdateNavigationLabels();
+        _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().ChangeLanguageAsync());
+    }
+
+
     private void UpdateNavigationView()
     {
         NavigationViewItem_Launcher.Visibility = CurrentGameFeatureConfig.SupportedPages.Contains(nameof(GameLauncherPage)).ToVisibility();
@@ -147,6 +157,24 @@ public sealed partial class MainView : UserControl
         NavigationViewItem_SelfQuery.Visibility = CurrentGameFeatureConfig.SupportedPages.Contains(nameof(SelfQueryPage)).ToVisibility();
         NavigationViewItem_GenshinBeyondGacha.Visibility = CurrentGameFeatureConfig.SupportedPages.Contains(nameof(GenshinBeyondGachaPage)).ToVisibility();
 
+        UpdateNavigationLabels();
+
+        if (CurrentGameId is null)
+        {
+            NavigateTo(typeof(BlankPage));
+        }
+        else if (MainView_Frame.SourcePageType?.Name is not nameof(SettingPage))
+        {
+            NavigateTo(MainView_Frame.SourcePageType);
+        }
+    }
+
+
+    /// <summary>
+    /// 更新导航项中由代码赋值的展开文案与 Tooltip（抽卡记录、工具箱等随游戏/区服变化的项）。
+    /// </summary>
+    private void UpdateNavigationLabels()
+    {
         // 抽卡记录名称
         string gachalogText = CurrentGameId?.GameBiz.Game switch
         {
@@ -168,15 +196,6 @@ public sealed partial class MainView : UserControl
         {
             TextBlock_HoyolabToolbox.Text = Lang.HoYoLABToolbox;
             InstantTooltip.SetText(NavigationViewItem_HoyolabToolbox, Lang.HoYoLABToolbox);
-        }
-
-        if (CurrentGameId is null)
-        {
-            NavigateTo(typeof(BlankPage));
-        }
-        else if (MainView_Frame.SourcePageType?.Name is not nameof(SettingPage))
-        {
-            NavigateTo(MainView_Frame.SourcePageType);
         }
     }
 

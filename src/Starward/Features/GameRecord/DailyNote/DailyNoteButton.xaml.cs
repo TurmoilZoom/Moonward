@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -10,6 +11,7 @@ using Starward.Core.GameRecord.Genshin.DailyNote;
 using Starward.Core.GameRecord.StarRail.DailyNote;
 using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.HoYoPlay;
+using Starward.Features.Setting;
 using System;
 using System.Threading.Tasks;
 
@@ -30,6 +32,18 @@ public sealed partial class DailyNoteButton : UserControl
     {
         this.InitializeComponent();
         this.Visibility = Visibility.Collapsed;
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
+    }
+
+
+    /// <summary>
+    /// 语言切换后刷新 x:Bind 绑定的 Tooltip 与 Flyout 文案。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="__">语言变更消息（未使用）。</param>
+    private void OnLanguageChanged(object _, LanguageChangedMessage __)
+    {
+        this.Bindings.Update();
     }
 
 

@@ -1957,6 +1957,10 @@
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>클라우드 게임</value>
   </data>
+  <data name="DailyNoteButton_Title" xml:space="preserve">
+    <value>실시간 메모</value>
+  </data>
+
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>현재 로그인 된 계정이 저장되지 않음.</value>
   </data>

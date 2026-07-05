@@ -1957,6 +1957,10 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Trò Chơi Đám Mây</value>
   </data>
+  <data name="DailyNoteButton_Title" xml:space="preserve">
+    <value>Ghi chú thời gian thực</value>
+  </data>
+
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>Thông tin đăng nhập của tài khoản hiện tại chưa được lưu.</value>
   </data>

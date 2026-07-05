@@ -1955,6 +1955,10 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Cloud-Spiel</value>
   </data>
+  <data name="DailyNoteButton_Title" xml:space="preserve">
+    <value>Echtzeit-Notiz</value>
+  </data>
+
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>Das derzeit angemeldete Konto ist nicht gespeichert.</value>
   </data>

@@ -1956,6 +1956,10 @@
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>เกมคลาวด์</value>
   </data>
+  <data name="DailyNoteButton_Title" xml:space="preserve">
+    <value>บันทึกเรียลไทม์</value>
+  </data>
+
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>บัญชีที่เข้าสู่ระบบอยู่ในขณะนี้ไม่ได้ถูกบันทึก</value>
   </data>

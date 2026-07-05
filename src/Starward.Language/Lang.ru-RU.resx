@@ -1958,6 +1958,10 @@
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Облачный гейминг</value>
   </data>
+  <data name="DailyNoteButton_Title" xml:space="preserve">
+    <value>Заметка в реальном времени</value>
+  </data>
+
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>Текущий вход в аккаунт не сохранен.</value>
   </data>

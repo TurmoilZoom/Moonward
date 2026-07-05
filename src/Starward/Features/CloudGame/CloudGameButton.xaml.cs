@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
+using Starward.Features.Setting;
 using Starward.Features.Overlay;
 using System;
 using System.Diagnostics;
@@ -31,6 +32,7 @@ public sealed partial class CloudGameButton : UserControl
     public CloudGameButton()
     {
         this.InitializeComponent();
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
     }
 
 

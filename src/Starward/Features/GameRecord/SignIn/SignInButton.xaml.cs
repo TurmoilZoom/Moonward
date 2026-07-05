@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -7,6 +8,7 @@ using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.SignIn;
 using Starward.Core.HoYoPlay;
+using Starward.Features.Setting;
 using Starward.Helpers;
 using Starward.Language;
 using System;
@@ -38,12 +40,31 @@ public sealed partial class SignInButton : UserControl
     /// <summary>Flyout 是否已加载过签到状态，避免重复请求。</summary>
     private bool _statusLoaded;
 
+    /// <summary>最近一次拉取的累计签到天数，语言切换时用于重算 <see cref="TotalSignDaysHint"/>。</summary>
+    private int _totalSignDay;
+
 
     /// <summary>初始化控件，默认隐藏，待解析到有效角色后再显示。</summary>
     public SignInButton()
     {
         this.InitializeComponent();
         this.Visibility = Visibility.Collapsed;
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
+    }
+
+
+    /// <summary>
+    /// 语言切换后刷新 x:Bind 绑定与代码格式化的签到文案。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="__">语言变更消息（未使用）。</param>
+    private void OnLanguageChanged(object _, LanguageChangedMessage __)
+    {
+        this.Bindings.Update();
+        if (_statusLoaded)
+        {
+            TotalSignDaysHint = string.Format(Lang.SignInButton_SignedInForDays, _totalSignDay);
+        }
     }
 
 
@@ -221,7 +242,8 @@ public sealed partial class SignInButton : UserControl
             SignInStatus status = await _signInService.GetSignInStatusAsync(GameRecordRole);
             _resignInfo = status.ResignInfo;
             IsTodaySigned = status.Info.IsSign;
-            TotalSignDaysHint = string.Format(Lang.SignInButton_SignedInForDays, status.Info.TotalSignDay);
+            _totalSignDay = status.Info.TotalSignDay;
+            TotalSignDaysHint = string.Format(Lang.SignInButton_SignedInForDays, _totalSignDay);
 
             Awards.Clear();
             int day = 0;

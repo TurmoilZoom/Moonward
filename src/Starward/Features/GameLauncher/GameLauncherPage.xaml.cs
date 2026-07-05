@@ -11,6 +11,7 @@ using Starward.Features.CloudGame;
 using Starward.Features.GameInstall;
 using Starward.Features.HoYoPlay;
 using Starward.Features.Overlay;
+using Starward.Features.Setting;
 using Starward.Features.ViewHost;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -66,6 +67,21 @@ public sealed partial class GameLauncherPage : PageBase
             IsToolbarPinned = false;
             ToolbarPinTooltip = Lang.GameLauncherPage_PinToolbar;
         }
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
+    }
+
+
+    /// <summary>
+    /// 语言切换后刷新启动页 x:Bind 绑定与工具栏 Tooltip。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="__">语言变更消息（未使用）。</param>
+    private void OnLanguageChanged(object _, LanguageChangedMessage __)
+    {
+        this.Bindings.Update();
+        ToolbarPinTooltip = IsToolbarPinned
+            ? Lang.GameLauncherPage_UnpinToolbar
+            : Lang.GameLauncherPage_PinToolbar;
     }
 
 
