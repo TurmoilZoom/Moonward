@@ -61,7 +61,7 @@
                     VerticalAlignment="Center"
                     Background="{ThemeResource AccentFillColorDefaultBrush}"
                     CornerRadius="9"
-                    Visibility="{x:Bind WarpTypeStats.ShowFiftyFiftyStreakCapsules, Converter={StaticResource BoolToVisibilityConverter}}">
+                    Visibility="{x:Bind WarpTypeStats.ShowFiftyFiftyUpStreakCapsule, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock FontSize="11"
                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                            IsTextScaleFactorEnabled="False"
@@ -72,7 +72,7 @@
                     VerticalAlignment="Center"
                     Background="{ThemeResource AccentFillColorDefaultBrush}"
                     CornerRadius="9"
-                    Visibility="{x:Bind WarpTypeStats.ShowFiftyFiftyStreakCapsules, Converter={StaticResource BoolToVisibilityConverter}}">
+                    Visibility="{x:Bind WarpTypeStats.ShowFiftyFiftyMissStreakCapsule, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock FontSize="11"
                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                            IsTextScaleFactorEnabled="False"

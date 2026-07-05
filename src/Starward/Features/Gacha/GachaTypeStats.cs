@@ -210,9 +210,19 @@ public class GachaTypeStats
     public int MaxFiftyFiftyMissStreak { get; set; }
 
     /// <summary>
-    /// 是否显示「几连UP / 几连歪」胶囊标签：仅 UP 卡池且已有出金时显示。
+    /// 是否显示「几连UP」胶囊标签：仅 UP 卡池、已有出金且最多连续不歪次数大于 0 时显示。
     /// </summary>
-    public bool ShowFiftyFiftyStreakCapsules => HasUpItem && Count_5 > 0;
+    public bool ShowFiftyFiftyUpStreakCapsule => HasUpItem && Count_5 > 0 && MaxFiftyFiftyUpStreak > 0;
+
+    /// <summary>
+    /// 是否显示「几连歪」胶囊标签：仅 UP 卡池、已有出金且最多连续歪次数大于 0 时显示。
+    /// </summary>
+    public bool ShowFiftyFiftyMissStreakCapsule => HasUpItem && Count_5 > 0 && MaxFiftyFiftyMissStreak > 0;
+
+    /// <summary>
+    /// 是否显示「几连UP / 几连歪」胶囊标签区域：任一胶囊可见时为 true。
+    /// </summary>
+    public bool ShowFiftyFiftyStreakCapsules => ShowFiftyFiftyUpStreakCapsule || ShowFiftyFiftyMissStreakCapsule;
 
     /// <summary>
     /// 「几连UP」胶囊展示文本，形如「3连UP」。

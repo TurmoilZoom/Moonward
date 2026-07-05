@@ -228,8 +228,16 @@ internal static class GachaShareImageRenderer
         if (stats.ShowFiftyFiftyStreakCapsules)
         {
             float capsuleRight = titleBlockRight;
-            capsuleRight = DrawCapsule(ds, device, stats.MaxFiftyFiftyMissStreakText, capsuleRight, y, capsuleFormat, accentColor) - 6f;
-            DrawCapsule(ds, device, stats.MaxFiftyFiftyUpStreakText, capsuleRight, y, capsuleFormat, accentColor);
+            if (stats.ShowFiftyFiftyMissStreakCapsule)
+            {
+                capsuleRight = DrawCapsule(ds, device, stats.MaxFiftyFiftyMissStreakText, capsuleRight, y, capsuleFormat, accentColor) - 6f;
+            }
+
+            if (stats.ShowFiftyFiftyUpStreakCapsule)
+            {
+                DrawCapsule(ds, device, stats.MaxFiftyFiftyUpStreakText, capsuleRight, y, capsuleFormat, accentColor);
+            }
+
             titleBlockRight = Math.Min(titleBlockRight, capsuleRight - 120f);
         }
 
