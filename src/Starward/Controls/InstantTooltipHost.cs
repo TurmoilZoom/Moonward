@@ -221,14 +221,26 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
+    /// 测量提示内容尺寸。Popup 已打开时 <see cref="FrameworkElement.ActualWidth"/> 可能仍是上一段文案的布局结果，故只取 <see cref="FrameworkElement.DesiredSize"/>。
+    /// </summary>
+    /// <returns>当前文案对应的测量尺寸。</returns>
+    private Size MeasureTooltipContent()
+    {
+        _content.InvalidateMeasure();
+        _content.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        return _content.DesiredSize;
+    }
+
+
+    /// <summary>
     /// 按当前方位将 Popup 定位到锚点附近（窗口坐标系）。
     /// </summary>
     /// <param name="element">锚点元素。</param>
     private void UpdatePosition(FrameworkElement element)
     {
-        _content.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        double tipWidth = Math.Max(_content.DesiredSize.Width, _content.ActualWidth);
-        double tipHeight = Math.Max(_content.DesiredSize.Height, _content.ActualHeight);
+        Size tipSize = MeasureTooltipContent();
+        double tipWidth = tipSize.Width;
+        double tipHeight = tipSize.Height;
 
         GeneralTransform transform = element.TransformToVisual(null);
         Rect bounds = transform.TransformBounds(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
@@ -379,9 +391,9 @@ internal sealed class InstantTooltipHost
     /// <returns>Border 局部坐标系下的 Composition 中心点。</returns>
     private Vector3 GetScaleCenterPoint()
     {
-        _content.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        double width = Math.Max(_content.ActualWidth, _content.DesiredSize.Width);
-        double height = Math.Max(_content.ActualHeight, _content.DesiredSize.Height);
+        Size tipSize = MeasureTooltipContent();
+        double width = tipSize.Width;
+        double height = tipSize.Height;
 
         return _currentPlacement switch
         {
