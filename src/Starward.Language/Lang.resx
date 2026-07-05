@@ -2418,6 +2418,9 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="ImageViewWindow2_CopyImage" xml:space="preserve">
     <value>Copy Image</value>
   </data>
+  <data name="ImageViewWindow2_Share" xml:space="preserve">
+    <value>Share</value>
+  </data>
   <data name="Common_Edit" xml:space="preserve">
     <value>Edit</value>
   </data>

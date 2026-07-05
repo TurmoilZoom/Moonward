@@ -24,6 +24,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
+using WinRT.Interop;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Graphics;
@@ -47,6 +48,8 @@ public sealed partial class ImageViewWindow2 : Window
     private const float MAX_ZOOM_FACTOR = 5f;
 
     private readonly ILogger<ImageViewWindow2> _logger = AppConfig.GetLogger<ImageViewWindow2>();
+
+    private DataTransferManager? _dataTransferManager;
 
 
 
@@ -77,6 +80,26 @@ public sealed partial class ImageViewWindow2 : Window
     {
         _lastUIScale = Content.XamlRoot.RasterizationScale;
         Content.XamlRoot.Changed += XamlRoot_Changed;
+        InitializeShare();
+    }
+
+
+    /// <summary>
+    /// 初始化窗口级 DataTransferManager，须在窗口句柄就绪后调用。
+    /// </summary>
+    private void InitializeShare()
+    {
+        try
+        {
+            IntPtr hwnd = WindowNative.GetWindowHandle(this);
+            _dataTransferManager = ShareHelper.GetForWindow(hwnd);
+            _dataTransferManager.DataRequested -= DataTransferManager_DataRequested;
+            _dataTransferManager.DataRequested += DataTransferManager_DataRequested;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to initialize share");
+        }
     }
 
 
@@ -134,6 +157,12 @@ public sealed partial class ImageViewWindow2 : Window
             MenuFlyoutItem_CopyFile.Click -= MenuFlyoutItem_CopyFile_Click;
             MenuFlyoutItem_CopyPath.Click -= MenuFlyoutItem_CopyPath_Click;
             MenuFlyoutItem_CopyImage.Click -= MenuFlyoutItem_CopyImage_Click;
+            Button_Share.Click -= Button_Share_Click;
+            if (_dataTransferManager is not null)
+            {
+                _dataTransferManager.DataRequested -= DataTransferManager_DataRequested;
+                _dataTransferManager = null;
+            }
             Button_DeleteImage.Click -= Button_DeleteImage_Click;
             Button_OpenFullScreen.Click -= Button_OpenFullScreen_Click;
             Button_PreviousImage.Click -= Button_PreviousImage_Click;
@@ -1143,6 +1172,59 @@ public sealed partial class ImageViewWindow2 : Window
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to copy image to clipboard");
+        }
+    }
+
+
+    /// <summary>
+    /// 调起 Windows 原生分享面板，分享当前图片文件。
+    /// </summary>
+    private void Button_Share_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (!File.Exists(CurrentFilePath))
+            {
+                ShowInfo(InfoBarSeverity.Warning, Lang.ImageViewWindow2_FileDoesNotExist, "", 5000);
+                return;
+            }
+
+            _dataTransferManager ??= ShareHelper.GetForWindow(WindowNative.GetWindowHandle(this));
+            IntPtr hwnd = WindowNative.GetWindowHandle(this);
+            ShareHelper.ShowShareUIForWindow(hwnd);
+        }
+        catch (Exception ex)
+        {
+            ShowInfo(InfoBarSeverity.Error, Lang.ImageViewWindow2_Share, ex.Message, 5000);
+            _logger.LogError(ex, "Failed to show share UI");
+        }
+    }
+
+
+    /// <summary>
+    /// 响应分享请求，将当前图片作为 StorageFile 提供给目标应用。
+    /// </summary>
+    private async void DataTransferManager_DataRequested(DataTransferManager sender, DataRequestedEventArgs e)
+    {
+        var deferral = e.Request.GetDeferral();
+        try
+        {
+            if (!File.Exists(CurrentFilePath))
+            {
+                return;
+            }
+
+            var file = await StorageFile.GetFileFromPathAsync(CurrentFilePath);
+            e.Request.Data.Properties.Title = CurrentFileName;
+            e.Request.Data.SetStorageItems([file]);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to prepare share data");
+        }
+        finally
+        {
+            deferral.Complete();
         }
     }
 

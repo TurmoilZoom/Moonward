@@ -168,6 +168,19 @@
                     </MenuFlyout>
                 </Button.Flyout>
             </Button>
+            <!--  分享  -->
+            <Button x:Name="Button_Share"
+                    Width="40"
+                    Height="36"
+                    Padding="0"
+                    Click="Button_Share_Click"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                    ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewWindow2_Share}">
+                <FontIcon FontSize="16"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE72D;"
+                          IsTextScaleFactorEnabled="False" />
+            </Button>
             <!--  删除  -->
             <Button Width="40"
                     Height="36"

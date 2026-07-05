@@ -4433,6 +4433,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Share 的本地化字符串。
+        /// </summary>
+        public static string ImageViewWindow2_Share {
+            get {
+                return ResourceManager.GetString("ImageViewWindow2_Share", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Copy Path 的本地化字符串。
         /// </summary>
         public static string ImageViewWindow2_CopyPath {
