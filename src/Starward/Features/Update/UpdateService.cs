@@ -9,17 +9,22 @@ using Velopack.Sources;
 namespace Starward.Features.Update;
 
 /// <summary>
-/// 基于 Velopack 的应用自更新服务，更新源为 GitHub Releases（<see cref="RepoUrl"/>）。
-/// 「加入预览更新」对应 GitHub 的 pre-release（<see cref="AppConfig.EnablePreviewRelease"/> → GithubSource 的 prerelease 标志）。
-/// 增量(delta)更新由 Velopack 自动处理。
+/// 基于 Velopack 的应用自更新服务，更新包下载源为 CNB Releases（<see cref="RepoUrl"/>）。
+/// 「加入预览更新」对应 CNB 的 pre-release（<see cref="AppConfig.EnablePreviewRelease"/> → <see cref="CnbSource"/> 的 prerelease 标志）。
+/// 发行说明仍由 <c>ReleaseClient</c> 从 GitHub 拉取。增量(delta)更新由 Velopack 自动处理。
 /// </summary>
 internal class UpdateService
 {
 
     /// <summary>
-    /// 更新源仓库地址。
+    /// CNB 更新源仓库地址。
     /// </summary>
-    public const string RepoUrl = "https://github.com/TurmoilZoom/Starward";
+    public const string RepoUrl = "https://cnb.cool/TurmoilZoom/Starward";
+
+    /// <summary>
+    /// GitHub 更新源仓库地址（Velopack <see cref="GithubSource"/>）。
+    /// </summary>
+    public const string GitHubRepoUrl = "https://github.com/TurmoilZoom/Starward";
 
 
     private readonly ILogger<UpdateService> _logger;
@@ -32,9 +37,13 @@ internal class UpdateService
 
 
 
-    private UpdateManager? _manager;
+    private UpdateManager? _cnbManager;
+
+    private UpdateManager? _githubManager;
 
     private bool _managerPrerelease;
+
+    private UpdateDownloadSource _lastDownloadSource = UpdateDownloadSource.Cnb;
 
     private UpdateInfo? _downloadedUpdate;
 
@@ -80,15 +89,29 @@ internal class UpdateService
 
 
 
-    private UpdateManager GetManager()
+    /// <summary>
+    /// 获取指定下载源的 <see cref="UpdateManager"/>；检查更新始终使用 CNB。
+    /// </summary>
+    /// <param name="source">下载源；默认 CNB。</param>
+    /// <returns>与 <paramref name="source"/> 及当前预览开关绑定的管理器实例。</returns>
+    private UpdateManager GetManager(UpdateDownloadSource source = UpdateDownloadSource.Cnb)
     {
         bool prerelease = AppConfig.EnablePreviewRelease;
-        if (_manager is null || _managerPrerelease != prerelease)
+        if (_managerPrerelease != prerelease)
         {
-            _manager = new UpdateManager(new GithubSource(RepoUrl, null, prerelease));
+            _cnbManager = null;
+            _githubManager = null;
             _managerPrerelease = prerelease;
         }
-        return _manager;
+
+        if (source is UpdateDownloadSource.GitHub)
+        {
+            _githubManager ??= new UpdateManager(new GithubSource(GitHubRepoUrl, null, prerelease));
+            return _githubManager;
+        }
+
+        _cnbManager ??= new UpdateManager(new CnbSource(RepoUrl, null, prerelease));
+        return _cnbManager;
     }
 
 
@@ -138,7 +161,9 @@ internal class UpdateService
     /// <summary>
     /// 下载更新包（含增量），完成后置 <see cref="UpdateState.Finish"/>，等待调用 <see cref="ApplyAndRestart"/>。
     /// </summary>
-    public async Task StartUpdateAsync(UpdateInfo release)
+    /// <param name="release">检查更新阶段得到的版本信息（CNB 源）；GitHub 源时会重新拉取与该源绑定的 <see cref="UpdateInfo"/>。</param>
+    /// <param name="source">下载源，默认 CNB。</param>
+    public async Task StartUpdateAsync(UpdateInfo release, UpdateDownloadSource source = UpdateDownloadSource.Cnb)
     {
         if (_isUpdating || UpdateFinished)
         {
@@ -153,7 +178,7 @@ internal class UpdateService
             _cancellationTokenSource = new CancellationTokenSource();
             State = UpdateState.Pending;
 
-            var manager = GetManager();
+            var manager = GetManager(source);
             if (!manager.IsInstalled)
             {
                 // 非 Velopack 部署，无法自动更新（需手动下载安装包）。
@@ -162,17 +187,30 @@ internal class UpdateService
                 return;
             }
 
-            Progress_TotalBytes = release.TargetFullRelease?.Size ?? 0;
+            // UpdateInfo 与 IUpdateSource 绑定；切换 GitHub 时需重新 CheckForUpdatesAsync。
+            _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+            var updateInfo = source is UpdateDownloadSource.GitHub
+                ? await manager.CheckForUpdatesAsync()
+                : release;
+            if (updateInfo is null)
+            {
+                ErrorMessage = Lang.UpdateService_CannotUpdateAutomatically;
+                State = UpdateState.Error;
+                return;
+            }
+
+            Progress_TotalBytes = updateInfo.TargetFullRelease?.Size ?? 0;
             _progress_DownloadBytes = 0;
             Progress_Percent = 0;
             State = UpdateState.Downloading;
-            await manager.DownloadUpdatesAsync(release, OnDownloadProgress, _cancellationTokenSource.Token);
-            _downloadedUpdate = release;
+            await manager.DownloadUpdatesAsync(updateInfo, OnDownloadProgress, _cancellationTokenSource.Token);
+            _downloadedUpdate = updateInfo;
+            _lastDownloadSource = source;
 
             await Task.Delay(500, _cancellationTokenSource.Token);
             State = UpdateState.Finish;
             UpdateFinished = true;
-            _logger.LogInformation("Update downloaded: {version}", release.TargetFullRelease?.Version);
+            _logger.LogInformation("Update downloaded from {source}: {version}", source, updateInfo.TargetFullRelease?.Version);
         }
         catch (OperationCanceledException)
         {
@@ -210,7 +248,7 @@ internal class UpdateService
     /// </summary>
     public void ApplyAndRestart()
     {
-        var manager = GetManager();
+        var manager = GetManager(_lastDownloadSource);
         if (!manager.IsInstalled)
         {
             return;

@@ -70,6 +70,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Push update notifications 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_PushUpdate {
+            get {
+                return ResourceManager.GetString("AboutSetting_PushUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Click button to repair files. 的本地化字符串。
         /// </summary>
         public static string AboutSettingPage_ClickButtonToRepairFiles {
@@ -8098,11 +8107,20 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Release Channel: 的本地化字符串。
+        ///   查找类似 Release Type: 的本地化字符串。
         /// </summary>
         public static string UpdatePage_ReleaseChannel {
             get {
                 return ResourceManager.GetString("UpdatePage_ReleaseChannel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Update Source: 的本地化字符串。
+        /// </summary>
+        public static string UpdatePage_UpdateSource {
+            get {
+                return ResourceManager.GetString("UpdatePage_UpdateSource", resourceCulture);
             }
         }
         

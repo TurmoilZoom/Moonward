@@ -719,7 +719,10 @@
     <value>เวลาบิวด์:</value>
   </data>
   <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
-    <value>ช่องอัพเดต:</value>
+    <value>ประเภทอัปเดต:</value>
+  </data>
+  <data name="UpdatePage_UpdateSource" xml:space="preserve">
+    <value>แหล่งอัปเดต:</value>
   </data>
   <data name="UpdatePage_Architecture" xml:space="preserve">
     <value>สถาปัตยกรรม:</value>

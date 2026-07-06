@@ -91,12 +91,19 @@
 
                 <MenuFlyoutSeparator />
 
+                <!--  更新渠道  -->
+                <StackPanel Spacing="4">
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.UpdatePage_UpdateSource}" />
+                    <ComboBox MinWidth="160"
+                              SelectedIndex="{x:Bind SelectedUpdateSourceIndex, Mode=TwoWay}">
+                        <ComboBoxItem Content="GitHub" />
+                        <ComboBoxItem Content="CNB" />
+                    </ComboBox>
+                </StackPanel>
+
                 <!--  更新后自动重启  -->
                 <CheckBox Content="{x:Bind lang:Lang.UpdateWindow_AutoRestartAfterUpdate}" IsChecked="{x:Bind AutoRestartWhenUpdateFinished, Mode=TwoWay}" />
-                <!--  重启后显示更新内容  -->
-                <CheckBox Margin="0,-4,0,0"
-                          Content="{x:Bind lang:Lang.UpdateWindow_DisplayUpdateContentAfterRestart}"
-                          IsChecked="{x:Bind ShowUpdateContentAfterUpdateRestart, Mode=TwoWay}" />
             </StackPanel>
 
 

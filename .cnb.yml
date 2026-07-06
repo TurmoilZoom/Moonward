@@ -1,0 +1,103 @@
+# GitHub release.yml 在发布完成后通过 api_trigger 触发本流水线，
+# 将 GitHub Release 资产镜像到 CNB Release（供 Velopack 客户端下载）。
+# 亦可通过 CNB 网页手动触发（web_trigger_mirror，见 .cnb/web_trigger.yml）。
+# GitHub API 元数据请求经 PAT 认证（5000 次/小时）；资产下载保持匿名（公开 URL，不占核心限流）。
+
+.mirror_pipeline: &mirror_pipeline
+  imports:
+    - https://cnb.cool/TurmoilZoom/starward-secrets/-/blob/main/github-pat.yml
+  docker:
+    image: python:3.11
+  stages:
+    - name: Prepare release metadata
+      script: |
+        bash -euo pipefail <<'SCRIPT'
+        TAG="${RELEASE_TAG:?RELEASE_TAG is required}"
+        if [[ "$TAG" == *-* ]]; then
+          echo "true"
+        else
+          echo "false"
+        fi
+        SCRIPT
+      exports:
+        IS_PRERELEASE: IS_PRERELEASE
+
+    - name: Download GitHub release assets
+      script: |
+        bash -euo pipefail <<'SCRIPT'
+        MIRROR_BASE="${MIRROR_BASE:-https://mirror.ghproxy.com/}"
+
+        fetch() {
+          local url="$1"
+          shift
+          local curl_args=(--retry 5 --retry-delay 3 --retry-all-errors --connect-timeout 15 --max-time 300 -fsSL)
+          if curl "${curl_args[@]}" "$@" "$url"; then
+            return 0
+          fi
+          echo "Direct request failed, trying mirror: ${MIRROR_BASE}${url}" >&2
+          curl "${curl_args[@]}" "$@" "${MIRROR_BASE}${url}"
+        }
+
+        TAG="${RELEASE_TAG:?RELEASE_TAG is required}"
+        GH_REPO="${GITHUB_REPOSITORY:-TurmoilZoom/Starward}"
+        mkdir -p Releases
+
+        api_url="https://api.github.com/repos/${GH_REPO}/releases/tags/${TAG}"
+        api_headers=(-H "Accept: application/vnd.github+json" -H "User-Agent: Starward-CNB-Mirror")
+        if [ -n "${GITHUB_TOKEN:-}" ]; then
+          api_headers+=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+        fi
+
+        release_json="$(fetch "$api_url" "${api_headers[@]}")"
+        asset_count="$(printf '%s' "$release_json" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('assets', [])))")"
+        if [ "$asset_count" -eq 0 ]; then
+          if printf '%s' "$release_json" | grep -q '"message"'; then
+            echo "GitHub API error for ${GH_REPO} tag ${TAG}: ${release_json}" >&2
+          else
+            echo "No assets found in GitHub release ${GH_REPO} tag ${TAG}" >&2
+          fi
+          exit 1
+        fi
+
+        printf '%s' "$release_json" | python3 -c "
+        import json, sys
+        for asset in json.load(sys.stdin).get('assets', []):
+            print(asset['browser_download_url'])
+        " | while IFS= read -r url; do
+          filename="$(basename "$url")"
+          echo "Downloading ${filename}"
+          fetch "$url" -L -o "Releases/${filename}"
+        done
+
+        ls -la Releases/
+        SCRIPT
+
+    - name: Create CNB release
+      type: git:release
+      options:
+        tag: ${RELEASE_TAG}
+        title: ${RELEASE_TAG}
+        description: "Release notes: https://github.com/${GITHUB_REPOSITORY:-TurmoilZoom/Starward}/releases/tag/${RELEASE_TAG}"
+        preRelease: ${IS_PRERELEASE}
+        latest: true
+
+    - name: Upload release attachments
+      image: cnbcool/attachments:latest
+      settings:
+        tag: ${RELEASE_TAG}
+        attachments:
+          - "./Releases/*"
+
+$:
+  api_trigger:
+    - <<: *mirror_pipeline
+  web_trigger_mirror:
+    - <<: *mirror_pipeline
+
+rebase/develop:
+  web_trigger_mirror:
+    - <<: *mirror_pipeline
+
+"**":
+  web_trigger_mirror:
+    - <<: *mirror_pipeline

@@ -779,7 +779,10 @@ closing the program during decompression will cause game file corruption.</value
     <value>Build Time:</value>
   </data>
   <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
-    <value>Release Channel:</value>
+    <value>Release Type:</value>
+  </data>
+  <data name="UpdatePage_UpdateSource" xml:space="preserve">
+    <value>Update Source:</value>
   </data>
   <data name="UpdatePage_Architecture" xml:space="preserve">
     <value>Architecture:</value>
@@ -2836,6 +2839,9 @@ You are welcome to submit the exported data to the following repository:</value>
   </data>
   <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
     <value>Updated to the latest version.</value>
+  </data>
+  <data name="AboutSetting_PushUpdate" xml:space="preserve">
+    <value>Push update notifications</value>
   </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Play / Pause</value>

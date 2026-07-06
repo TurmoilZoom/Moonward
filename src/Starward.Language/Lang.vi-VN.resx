@@ -720,7 +720,10 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
     <value>Thời gian xây dựng:</value>
   </data>
   <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
-    <value>Kênh phát hành:</value>
+    <value>Loại phát hành:</value>
+  </data>
+  <data name="UpdatePage_UpdateSource" xml:space="preserve">
+    <value>Nguồn cập nhật:</value>
   </data>
   <data name="UpdatePage_Architecture" xml:space="preserve">
     <value>Kiến trúc:</value>

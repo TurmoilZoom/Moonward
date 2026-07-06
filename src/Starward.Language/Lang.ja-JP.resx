@@ -720,7 +720,10 @@
     <value>ビルド日時:</value>
   </data>
   <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
-    <value>リリースチャンネル:</value>
+    <value>リリースタイプ:</value>
+  </data>
+  <data name="UpdatePage_UpdateSource" xml:space="preserve">
+    <value>更新ソース:</value>
   </data>
   <data name="UpdatePage_Architecture" xml:space="preserve">
     <value>アーキテクチャ:</value>

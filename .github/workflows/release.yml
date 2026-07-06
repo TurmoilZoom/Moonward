@@ -113,3 +113,27 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "vpk upload failed for $arch" }
           Write-Host "::endgroup::"
         }
+
+    - name: Trigger CNB build
+      shell: pwsh
+      env:
+        CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
+      run: |
+        $ErrorActionPreference = "Stop"
+        $version = $env:Version
+        $pre = $version.Contains("-")
+        $body = @{
+          event = "api_trigger"
+          tag = $version
+          env = @{
+            RELEASE_TAG = $version
+            IS_PRERELEASE = if ($pre) { "true" } else { "false" }
+            GITHUB_REPOSITORY = "${{ github.repository }}"
+          }
+        } | ConvertTo-Json -Depth 4 -Compress
+        $headers = @{
+          Authorization = "Bearer $env:CNB_TOKEN"
+          "Content-Type" = "application/json"
+        }
+        Write-Host "Triggering CNB api_trigger for release $version"
+        Invoke-RestMethod -Uri "https://api.cnb.cool/TurmoilZoom/Starward/-/build/start" -Method Post -Headers $headers -Body $body

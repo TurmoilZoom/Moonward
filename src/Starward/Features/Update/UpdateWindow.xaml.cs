@@ -74,39 +74,22 @@ public sealed partial class UpdateWindow : WindowEx
     private void CenterInScreen()
     {
         RectInt32 workArea = DisplayArea.GetFromWindowId(MainWindowId, DisplayAreaFallback.Nearest).WorkArea;
-        if (NewVersion is null)
+        Button_RemindLatter.Visibility = Visibility.Collapsed;
+        int w = (int)(1000 * UIScale);
+        int h = (int)(w / 4.0 * 3.0);
+        if (w > workArea.Width || h > workArea.Height)
         {
-            Grid_Update.Visibility = Visibility.Collapsed;
-            int h = (int)(workArea.Height * 0.95);
-            int w = (int)(h / 4.0 * 3.0);
+            h = (int)(workArea.Height * 0.9);
+            w = (int)(h / 4.0 * 3.0);
             if (w > workArea.Width)
             {
-                w = (int)(workArea.Width * 0.95);
+                w = (int)(workArea.Width * 0.9);
                 h = (int)(w * 4.0 / 3.0);
             }
-            int x = workArea.X + (workArea.Width - w) / 2;
-            int y = workArea.Y + (workArea.Height - h) / 2;
-            AppWindow.MoveAndResize(new RectInt32(x, y, w, h));
         }
-        else
-        {
-            Button_RemindLatter.Visibility = Visibility.Collapsed;
-            int w = (int)(1000 * UIScale);
-            int h = (int)(w / 4.0 * 3.0);
-            if (w > workArea.Width || h > workArea.Height)
-            {
-                h = (int)(workArea.Height * 0.9);
-                w = (int)(h / 4.0 * 3.0);
-                if (w > workArea.Width)
-                {
-                    w = (int)(workArea.Width * 0.9);
-                    h = (int)(w * 4.0 / 3.0);
-                }
-            }
-            int x = workArea.X + (workArea.Width - w) / 2;
-            int y = workArea.Y + (workArea.Height - h) / 2;
-            AppWindow.MoveAndResize(new RectInt32(x, y, w, h));
-        }
+        int x = workArea.X + (workArea.Width - w) / 2;
+        int y = workArea.Y + (workArea.Height - h) / 2;
+        AppWindow.MoveAndResize(new RectInt32(x, y, w, h));
     }
 
 
@@ -239,18 +222,17 @@ public sealed partial class UpdateWindow : WindowEx
     } = AppConfig.AutoRestartWhenUpdateFinished;
 
 
+    /// <summary>
+    /// 更新渠道下拉框选中索引（0=GitHub，1=CNB）；仅本会话有效，默认 CNB。
+    /// </summary>
+    public int SelectedUpdateSourceIndex { get; set => SetProperty(ref field, value); } = 1;
 
-    public bool ShowUpdateContentAfterUpdateRestart
-    {
-        get;
-        set
-        {
-            if (SetProperty(ref field, value))
-            {
-                AppConfig.ShowUpdateContentAfterUpdateRestart = value;
-            }
-        }
-    } = AppConfig.ShowUpdateContentAfterUpdateRestart;
+
+    /// <summary>
+    /// 当前选中的更新下载源。
+    /// </summary>
+    private UpdateDownloadSource SelectedUpdateSource =>
+        SelectedUpdateSourceIndex == 0 ? UpdateDownloadSource.GitHub : UpdateDownloadSource.Cnb;
 
 
 
@@ -268,7 +250,7 @@ public sealed partial class UpdateWindow : WindowEx
             {
                 // 统一走 Velopack：下载更新包（含增量），由 _timer 轮询进度/状态。
                 _timer.Start();
-                await _updateService.StartUpdateAsync(NewVersion);
+                await _updateService.StartUpdateAsync(NewVersion, SelectedUpdateSource);
             }
         }
         catch (OperationCanceledException)
@@ -432,14 +414,7 @@ public sealed partial class UpdateWindow : WindowEx
     [RelayCommand]
     private void IgnoreThisVersion()
     {
-        if (NewVersion is null)
-        {
-            AppConfig.LastAppVersion = AppConfig.AppVersion;
-        }
-        else
-        {
-            AppConfig.IgnoreVersion = NewVersionText;
-        }
+        AppConfig.IgnoreVersion = NewVersionText;
         this.Close();
     }
 
@@ -493,7 +468,6 @@ public sealed partial class UpdateWindow : WindowEx
             string markdown = await GetReleaseContentMarkdownAsync();
             string html = await RenderMarkdownAsync(markdown);
             webview.NavigateToString(html);
-            AppConfig.LastAppVersion = AppConfig.AppVersion;
         }
         catch (COMException ex)
         {
@@ -510,7 +484,6 @@ public sealed partial class UpdateWindow : WindowEx
             webview.Visibility = Visibility.Visible;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             StackPanel_Error.Visibility = Visibility.Collapsed;
-            AppConfig.LastAppVersion = AppConfig.AppVersion;
         }
         catch (Exception ex)
         {
@@ -527,16 +500,8 @@ public sealed partial class UpdateWindow : WindowEx
     {
         bool showPrerelease = false;
         NuGetVersion? startVersion, endVersion;
-        if (NewVersion is null)
-        {
-            _ = NuGetVersion.TryParse(AppConfig.LastAppVersion, out startVersion);
-            _ = NuGetVersion.TryParse(AppConfig.AppVersion, out endVersion);
-        }
-        else
-        {
-            _ = NuGetVersion.TryParse(AppConfig.AppVersion, out startVersion);
-            _ = NuGetVersion.TryParse(NewVersionText, out endVersion);
-        }
+        _ = NuGetVersion.TryParse(AppConfig.AppVersion, out startVersion);
+        _ = NuGetVersion.TryParse(NewVersionText, out endVersion);
         startVersion ??= new NuGetVersion(0, 0, 0);
         endVersion ??= new NuGetVersion(int.MaxValue, int.MaxValue, int.MaxValue);
         if (endVersion.IsPrerelease)

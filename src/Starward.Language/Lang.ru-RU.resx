@@ -720,7 +720,10 @@
     <value>Время сборки:</value>
   </data>
   <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
-    <value>Канал релиза:</value>
+    <value>Тип релиза:</value>
+  </data>
+  <data name="UpdatePage_UpdateSource" xml:space="preserve">
+    <value>Источник обновления:</value>
   </data>
   <data name="UpdatePage_Architecture" xml:space="preserve">
     <value>Архитектура:</value>

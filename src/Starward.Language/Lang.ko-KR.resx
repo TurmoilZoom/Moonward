@@ -720,7 +720,10 @@
     <value>빌드시간:</value>
   </data>
   <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
-    <value>릴리즈 채널:</value>
+    <value>릴리즈 유형:</value>
+  </data>
+  <data name="UpdatePage_UpdateSource" xml:space="preserve">
+    <value>업데이트 소스:</value>
   </data>
   <data name="UpdatePage_Architecture" xml:space="preserve">
     <value>아키텍쳐:</value>

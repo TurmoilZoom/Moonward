@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
-using NuGet.Versioning;
 using Starward.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
@@ -307,22 +306,9 @@ public sealed partial class MainView : UserControl
 #pragma warning restore CS0162 // 检测到无法访问的代码
         try
         {
-            if (_lastCheckUpdateTime == default && NuGetVersion.TryParse(AppConfig.AppVersion, out var appVersion))
+            if (!AppConfig.EnableUpdateNotification)
             {
-                _ = NuGetVersion.TryParse(AppConfig.LastAppVersion, out var lastVersion);
-                if (appVersion != lastVersion)
-                {
-                    if (AppConfig.ShowUpdateContentAfterUpdateRestart)
-                    {
-                        new UpdateWindow().Activate();
-                    }
-                    else
-                    {
-                        AppConfig.LastAppVersion = AppConfig.AppVersion;
-                    }
-                    _lastCheckUpdateTime = DateTimeOffset.Now - TimeSpan.FromMinutes(55);
-                    return;
-                }
+                return;
             }
             DateTimeOffset now = DateTimeOffset.Now;
             if (now - _lastCheckUpdateTime > TimeSpan.FromHours(1))

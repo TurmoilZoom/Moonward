@@ -37,11 +37,18 @@
             </StackPanel>
 
 
-            <!--  预览版更新  -->
-            <ToggleSwitch Margin="0,12,0,0"
-                          IsOn="{x:Bind EnablePreviewRelease, Mode=TwoWay}"
-                          OffContent="{x:Bind lang:Lang.SettingPage_JoinPreviewReleaseChannel}"
-                          OnContent="{x:Bind lang:Lang.SettingPage_JoinPreviewReleaseChannel}" />
+            <StackPanel Margin="0,12,0,0"
+                        Orientation="Horizontal"
+                        Spacing="24">
+                <!--  预览版更新  -->
+                <ToggleSwitch IsOn="{x:Bind EnablePreviewRelease, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.SettingPage_JoinPreviewReleaseChannel}"
+                              OnContent="{x:Bind lang:Lang.SettingPage_JoinPreviewReleaseChannel}" />
+                <!--  推送更新  -->
+                <ToggleSwitch IsOn="{x:Bind EnableUpdateNotification, Mode=TwoWay}"
+                              OffContent="{x:Bind lang:Lang.AboutSetting_PushUpdate}"
+                              OnContent="{x:Bind lang:Lang.AboutSetting_PushUpdate}" />
+            </StackPanel>
             <Grid Margin="0,4,0,0" ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />

@@ -720,7 +720,10 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Hora de compilación:</value>
   </data>
   <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
-    <value>Canal de versiones:</value>
+    <value>Tipo de versión:</value>
+  </data>
+  <data name="UpdatePage_UpdateSource" xml:space="preserve">
+    <value>Fuente de actualización:</value>
   </data>
   <data name="UpdatePage_Architecture" xml:space="preserve">
     <value>Arquitectura:</value>

@@ -719,6 +719,9 @@
     <value>編譯時間：</value>
   </data>
   <data name="UpdatePage_ReleaseChannel" xml:space="preserve">
+    <value>更新類型：</value>
+  </data>
+  <data name="UpdatePage_UpdateSource" xml:space="preserve">
     <value>更新渠道：</value>
   </data>
   <data name="UpdatePage_Architecture" xml:space="preserve">

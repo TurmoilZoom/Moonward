@@ -1,0 +1,11 @@
+branch:
+  - reg: ".*"
+    buttons:
+      - name: Mirror GitHub Release to CNB
+        description: Mirror GitHub release assets to CNB Release (Velopack)
+        event: web_trigger_mirror
+        inputs:
+          RELEASE_TAG:
+            name: Release Tag
+            type: input
+            required: true

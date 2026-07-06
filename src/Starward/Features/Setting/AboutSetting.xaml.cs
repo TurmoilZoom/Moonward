@@ -39,6 +39,21 @@ public sealed partial class AboutSetting : PageBase
 
 
     /// <summary>
+    /// 是否在启动时自动推送新版本可用弹窗。
+    /// </summary>
+    public bool EnableUpdateNotification
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.EnableUpdateNotification = value;
+            }
+        }
+    } = AppConfig.EnableUpdateNotification;
+
+
+    /// <summary>
     /// 是最新版
     /// </summary>
     public string? LatestVersion { get; set => SetProperty(ref field, value); }

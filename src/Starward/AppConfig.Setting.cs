@@ -28,6 +28,15 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 是否在启动时自动检查并推送新版本可用弹窗；手动「检查更新」不受此开关影响。
+    /// </summary>
+    public static bool EnableUpdateNotification
+    {
+        get => GetValue<bool>();
+        set => SetValue(value);
+    }
+
     public static string? IgnoreVersion
     {
         get => GetValue<string>();
@@ -157,12 +166,6 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
-    public static string? LastAppVersion
-    {
-        get => GetValue<string>();
-        set => SetValue(value);
-    }
-
     /// <summary>
     /// 当前选择的游戏区服
     /// </summary>
@@ -212,15 +215,6 @@ public static partial class AppConfig
     /// 更新完成后自动重启
     /// </summary>
     public static bool AutoRestartWhenUpdateFinished
-    {
-        get => GetValue(true);
-        set => SetValue(value);
-    }
-
-    /// <summary>
-    /// 更新完成后显示更新内容
-    /// </summary>
-    public static bool ShowUpdateContentAfterUpdateRestart
     {
         get => GetValue(true);
         set => SetValue(value);
