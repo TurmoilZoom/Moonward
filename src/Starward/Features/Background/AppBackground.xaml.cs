@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Codec;
+using Starward.Codec.ICC;
 using Starward.Features.ViewHost;
 using Starward.Helpers;
 using System;
@@ -666,6 +667,121 @@ public sealed partial class AppBackground : UserControl
         // 主动注销我们注册的本地解码器
         VP9Helper.UnregisterVP9Decoder(true);
         VP9Helper.UnregisterVorbisDecoder();
+    }
+
+    /// <summary>
+    /// 捕获当前实际渲染的背景快照（用于抽卡分享图等）。
+    /// 静态图片直接返回原始文件路径。
+    /// 视频背景：
+    ///   - 官方背景视频 (CurrentGameBackground.Type == BACKGROUND_TYPE_VIDEO)：仅抓取纯视频帧，**移除 theme overlay 叠加图片**。
+    ///   - 自定义视频：正常抓取（通常无 overlay）。
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>可被 ImageLoader / CanvasBitmap 加载的本地图片路径；失败或无背景时返回 null。</returns>
+    public async Task<string?> CaptureCurrentBackgroundSnapshotAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_lastBackgroundFile) || !File.Exists(_lastBackgroundFile))
+            {
+                return null;
+            }
+
+            if (!BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
+            {
+                // 静态图片直接复用原始文件（与渲染器中“按实际样子”一致）
+                return _lastBackgroundFile;
+            }
+
+            // 视频：需要抓取当前合成帧，必须在 UI 线程操作 Win2D 资源
+            if (DispatcherQueue is null || _videoSurface is null)
+            {
+                return null;
+            }
+
+            string folder = Path.Combine(AppConfig.CacheFolder, "cache", "share");
+            Directory.CreateDirectory(folder);
+            string tempPath = Path.Combine(folder, $"bg_snapshot_{DateTime.Now:yyyyMMddHHmmssfff}.png");
+
+            var tcs = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // 匹配现有帧处理风格：Win2D 绘制必须在 Dispatcher (UI) 线程执行。
+            // 仅将文件保存（IO）放到后台线程。
+            bool dispatched = DispatcherQueue.TryEnqueue(() =>
+            {
+                CanvasRenderTarget? snapshot = null;
+                try
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        tcs.TrySetResult(null);
+                        return;
+                    }
+
+                    snapshot = new CanvasRenderTarget(
+                        CanvasDevice.GetSharedDevice(),
+                        _videoSurface.SizeInPixels.Width,
+                        _videoSurface.SizeInPixels.Height,
+                        96);
+
+                    using (var ds = snapshot.CreateDrawingSession())
+                    {
+                        ds.Clear(Microsoft.UI.Colors.Transparent);
+                        ds.DrawImage(_videoSurface);
+
+                        // 仅当不是官方背景视频时才叠加 overlay
+                        // 官方视频 (Type == BACKGROUND_TYPE_VIDEO) 需要移除主题叠加图片
+                        bool isOfficialVideoBg = CurrentGameBackground?.Type == GameBackground.BACKGROUND_TYPE_VIDEO;
+                        if (_videoOverlayImage is not null && !isOfficialVideoBg)
+                        {
+                            Rect src = new Rect(0, 0, _videoOverlayImage.SizeInPixels.Width, _videoOverlayImage.SizeInPixels.Height);
+                            Rect dst = new Rect(0, 0, snapshot.SizeInPixels.Width, snapshot.SizeInPixels.Height);
+                            ds.DrawImage(_videoOverlayImage, dst, src, 1f, CanvasImageInterpolation.HighQualityCubic);
+                        }
+                    }
+
+                    // 将保存放到后台，snapshot 所有权转移到任务
+                    var snapForSave = snapshot;
+                    snapshot = null; // 防止外层 finally 误释放
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await using var fs = File.Create(tempPath);
+                            await ImageSaver.SaveAsPngAsync(snapForSave, fs, ColorPrimaries.BT709);
+                            tcs.TrySetResult(tempPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Save captured background snapshot");
+                            tcs.TrySetResult(null);
+                        }
+                        finally
+                        {
+                            snapForSave?.Dispose();
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Capture video background snapshot frame");
+                    snapshot?.Dispose();
+                    tcs.TrySetResult(null);
+                }
+            });
+
+            if (!dispatched)
+            {
+                tcs.TrySetResult(null);
+            }
+
+            return await tcs.Task;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "CaptureCurrentBackgroundSnapshotAsync");
+            return null;
+        }
     }
 
 

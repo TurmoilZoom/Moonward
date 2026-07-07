@@ -568,6 +568,7 @@ public sealed partial class GachaLogPage : PageBase
 
     /// <summary>
     /// 将当前所选卡池统计渲染为分享图并打开内置图片查看器。
+    /// 视频背景通过 AppBackground 捕获当前帧快照（官方视频移除 overlay），渲染器对整个大背景应用浅亚克力 + 卡片亚克力。
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanShareGachaImage))]
     private async Task ShareGachaImageAsync()
@@ -585,10 +586,14 @@ public sealed partial class GachaLogPage : PageBase
             }
 
             IsSharingGachaImage = true;
+
+            // 获取当前背景文件路径；视频需捕获快照（返回临时 PNG），图片直接使用原路径。
             string? backgroundFile = BackgroundService.GetCachedBackgroundFile(CurrentGameId);
             if (backgroundFile is not null && BackgroundService.FileIsSupportedVideo(backgroundFile))
             {
-                backgroundFile = null;
+                backgroundFile = AppBackground.Current is not null
+                    ? await AppBackground.Current.CaptureCurrentBackgroundSnapshotAsync()
+                    : null;
             }
 
             // 强调色须在 UI 线程读取；Win2D 离屏渲染放到后台线程，避免 Application.Current 跨线程 COM 异常。

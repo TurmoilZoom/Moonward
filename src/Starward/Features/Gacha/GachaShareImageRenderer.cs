@@ -28,6 +28,7 @@ namespace Starward.Features.Gacha;
 
 /// <summary>
 /// 使用 Win2D 离屏绘制抽卡统计分享图（统计头 + 完整 5★/S 列表），保存为 PNG。
+/// 快照提供“实际样子”（官方视频无 overlay）；整个大背景应用浅亚克力（轻模糊+浅tint），卡片使用较强亚克力；名称默认用未选中时的次要白色。
 /// </summary>
 internal static class GachaShareImageRenderer
 {
@@ -54,16 +55,30 @@ internal static class GachaShareImageRenderer
     private static readonly Color PityGreen = Color.FromArgb(0xFF, 0x00, 0xE0, 0x79);
     private static readonly Color PityRed = Color.FromArgb(0xFF, 0xC8, 0x3C, 0x23);
     private static readonly Color SeparatorColor = Color.FromArgb(0x66, 0xFF, 0xFF, 0xFF);
+
+    // 预暗化叠加层，统一原始背景亮度基线，避免浅色背景在亚克力仿真中泛白
+    private static readonly Color BgPreDarkenOverlay = Color.FromArgb(0x40, 0x00, 0x00, 0x00);
+
+    // 卡片亚克力效果参数（模拟 CustomOverlayAcrylicBrush 风格，较强）
+    private const float CardAcrylicBlurAmount = 22f;
+    private static readonly Color CardAcrylicTint = Color.FromArgb(0x99, 0x24, 0x24, 0x24);
+    private static readonly Color CardBorderColor = Color.FromArgb(0x33, 0xFF, 0xFF, 0xFF);
+
+    // 大背景亚克力参数（较深的磨砂，区别于卡片；中等模糊 + 较高不透明度 tint）
+    private const float BgLightAcrylicBlurAmount = 18f;
+    private static readonly Color BgLightAcrylicTint = Color.FromArgb(0x80, 0x1A, 0x1A, 0x1A);
+
     private static readonly FontWeight NormalFontWeight = new() { Weight = 400 };
     private static readonly FontWeight SemiBoldFontWeight = new() { Weight = 600 };
 
 
     /// <summary>
     /// 离屏渲染当前所选卡池统计卡片并保存 PNG。
+    /// 使用原始快照绘制整个大背景的浅亚克力效果，卡片叠加较强亚克力。
     /// </summary>
     /// <param name="stats">要绘制的卡池统计列表（横向排列，顺序由调用方决定）。</param>
     /// <param name="gameBiz">当前游戏区服，用于 5★/S 文案与 pity 规则分支。</param>
-    /// <param name="backgroundFile">背景图本地路径；为 null、不存在或为视频时改用纯色背景。</param>
+    /// <param name="backgroundFile">背景图/快照本地路径（由调用方确保视频已转为当前帧快照 PNG）；为 null 或不存在时使用纯色背景。</param>
     /// <param name="uid">玩家 UID，用于输出文件名。</param>
     /// <param name="accentColor">主题强调色（须在 UI 线程读取后传入，渲染在后台线程执行）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -110,7 +125,25 @@ internal static class GachaShareImageRenderer
             using (CanvasDrawingSession ds = renderTarget.CreateDrawingSession())
             {
                 ds.Clear(Colors.Transparent);
-                await DrawBackgroundAsync(ds, device, canvasWidth, canvasHeight, backgroundFile, accentColor, cancellationToken);
+
+                // 先生成原始背景层（raw snapshot 内容，用于采样和“实际样子”）
+                using var bgLayer = new CanvasRenderTarget(device, canvasWidth, canvasHeight, Dpi);
+                using (CanvasDrawingSession bgDs = bgLayer.CreateDrawingSession())
+                {
+                    await DrawRawBackgroundAsync(bgDs, device, canvasWidth, canvasHeight, backgroundFile, accentColor, cancellationToken);
+                    // 预暗化原始背景，统一亮度基线，避免浅色背景导致亚克力仿真泛白
+                    bgDs.FillRectangle(0, 0, canvasWidth, canvasHeight, BgPreDarkenOverlay);
+                }
+
+                // 绘制整个大背景的浅亚克力效果（轻模糊 + 浅 tint），卡片会覆盖其区域
+                using var bgLightBlur = new GaussianBlurEffect
+                {
+                    Source = bgLayer,
+                    BlurAmount = BgLightAcrylicBlurAmount,
+                    BorderMode = EffectBorderMode.Soft,
+                };
+                ds.DrawImage(bgLightBlur);
+                ds.FillRectangle(0, 0, canvasWidth, canvasHeight, BgLightAcrylicTint);
 
                 float cardTop = OuterMargin;
                 float cardLeft = OuterMargin;
@@ -118,7 +151,7 @@ internal static class GachaShareImageRenderer
                 {
                     GachaTypeStats stat = stats[i];
                     DrawCard(ds, device, stat, cardLeft, cardTop, cardHeights[i], rarityLabel, accentColor,
-                             titleFormat, bodyFormat, smallFormat, capsuleFormat, upFormat, iconBitmaps);
+                             titleFormat, bodyFormat, smallFormat, capsuleFormat, upFormat, iconBitmaps, bgLayer);
                     cardLeft += CardWidth + CardSpacing;
                 }
             }
@@ -190,7 +223,8 @@ internal static class GachaShareImageRenderer
 
 
     /// <summary>
-    /// 绘制单张统计卡片（圆角底 + 头部 + 5★ 列表）。
+    /// 绘制单张统计卡片（先绘制亚克力卡片背景，再绘制头部 + 5★ 列表文字）。
+    /// 背景层 bgLayer 用于对卡片区域做局部高斯模糊 + 磨砂着色，实现“对卡片本身做亚克力”。
     /// </summary>
     private static void DrawCard(
         CanvasDrawingSession ds,
@@ -206,10 +240,11 @@ internal static class GachaShareImageRenderer
         CanvasTextFormat smallFormat,
         CanvasTextFormat capsuleFormat,
         CanvasTextFormat upFormat,
-        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps)
+        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps,
+        CanvasBitmap bgLayer)
     {
-        using var cardGeometry = CanvasGeometry.CreateRoundedRectangle(device, left, top, CardWidth, height, CardCornerRadius, CardCornerRadius);
-        ds.FillGeometry(cardGeometry, CardBackground);
+        // 先绘制本卡片的亚克力磨砂背景（基于原始 bgLayer 的局部模糊 + 着色）
+        DrawAcrylicCardBackground(ds, device, bgLayer, left, top, CardWidth, height, CardCornerRadius);
 
         float x = left + CardPaddingH;
         float y = top + CardPaddingV;
@@ -287,6 +322,43 @@ internal static class GachaShareImageRenderer
         }
     }
 
+    /// <summary>
+    /// 绘制卡片的亚克力背景：从 raw bgLayer 局部采样 → 高斯模糊（CreateLayer 限制到圆角）→ 着色 tint → 轻边框。
+    /// 实现“对卡片本身做亚克力”（较强），大背景已单独应用浅亚克力。
+    /// </summary>
+    private static void DrawAcrylicCardBackground(
+        CanvasDrawingSession ds,
+        CanvasDevice device,
+        CanvasBitmap bgLayer,
+        float left,
+        float top,
+        float width,
+        float height,
+        float cornerRadius)
+    {
+        using var cardGeometry = CanvasGeometry.CreateRoundedRectangle(device, left, top, width, height, cornerRadius, cornerRadius);
+
+        // 局部模糊背景内容（只影响卡片区域）
+        using var blur = new GaussianBlurEffect
+        {
+            Source = bgLayer,
+            BlurAmount = CardAcrylicBlurAmount,
+            BorderMode = EffectBorderMode.Soft,
+        };
+
+        using (var layer = ds.CreateLayer(1f, cardGeometry))
+        {
+            // 仅绘制卡片矩形对应的模糊区域
+            ds.DrawImage(blur, left, top, new Rect(left, top, width, height));
+        }
+
+        // 亚克力着色层（半透明深色磨砂）
+        ds.FillGeometry(cardGeometry, CardAcrylicTint);
+
+        // 轻微边框增强玻璃质感（可选，极低不透明度）
+        ds.DrawGeometry(cardGeometry, CardBorderColor, 1f);
+    }
+
 
     /// <summary>
     /// 绘制单行 5★ 记录：保底色条、图标、名称、pity、up! 标记。
@@ -315,7 +387,9 @@ internal static class GachaShareImageRenderer
 
         string name = item.Name ?? string.Empty;
         string pityText = item.Pity.ToString();
-        DrawText(ds, name, nameX, rowTop + 4f, bodyFormat, Rarity5, nameWidth);
+        // 名称默认使用未选中时的白色（SecondaryText），与 UI 中非 hover 状态一致。
+        // pity 数字也使用次要色；up! 保留金色以突出。
+        DrawText(ds, name, nameX, rowTop + 4f, bodyFormat, SecondaryText, nameWidth);
 
         if (item.HasUpItem && item.IsUp)
         {
@@ -324,7 +398,7 @@ internal static class GachaShareImageRenderer
             DrawText(ds, upText, rightX - upWidth - 28f, rowTop + 6f, upFormat, Rarity5);
         }
 
-        DrawText(ds, pityText, rightX - MeasureTextWidth(ds, pityText, bodyFormat), rowTop + 4f, bodyFormat, Rarity5);
+        DrawText(ds, pityText, rightX - MeasureTextWidth(ds, pityText, bodyFormat), rowTop + 4f, bodyFormat, SecondaryText);
     }
 
 
@@ -405,9 +479,11 @@ internal static class GachaShareImageRenderer
 
 
     /// <summary>
-    /// 绘制背景：图片模糊压暗，或纯色强调色背景。
+    /// 将快照绘制为原始背景内容层（raw，用于后续浅亚克力可见背景 + 卡片采样）。
+    /// 由调用方保证若为视频则已提前快照为静态图片路径（官方视频已移除 overlay）。
+    /// 图片使用 cover 填充；无背景时使用强调色深色变体。
     /// </summary>
-    private static async Task DrawBackgroundAsync(
+    private static async Task DrawRawBackgroundAsync(
         CanvasDrawingSession ds,
         CanvasDevice device,
         float width,
@@ -417,27 +493,15 @@ internal static class GachaShareImageRenderer
         CancellationToken cancellationToken)
     {
         bool useImage = !string.IsNullOrWhiteSpace(backgroundFile)
-                        && File.Exists(backgroundFile)
-                        && !BackgroundService.FileIsSupportedVideo(backgroundFile);
+                        && File.Exists(backgroundFile);
 
         if (useImage)
         {
             ImageInfo info = await ImageLoader.LoadImageAsync(backgroundFile!, cancellationToken);
             using CanvasBitmap source = info.CanvasBitmap;
-            using var backgroundLayer = new CanvasRenderTarget(device, width, height, Dpi);
-            using (CanvasDrawingSession bgDs = backgroundLayer.CreateDrawingSession())
-            {
-                DrawCoverImage(bgDs, source, width, height);
-            }
-
-            using var blur = new GaussianBlurEffect
-            {
-                Source = backgroundLayer,
-                BlurAmount = 16f,
-                BorderMode = EffectBorderMode.Hard,
-            };
-            ds.DrawImage(blur, 0, 0, new Rect(0, 0, width, height));
-            ds.FillRectangle(0, 0, width, height, Color.FromArgb(0xA0, 0, 0, 0));
+            DrawCoverImage(ds, source, width, height);
+            // 按需可在此加极轻微 overlay 提升文字可读性，但保持“实际样子”优先，不做明显压暗。
+            // ds.FillRectangle(0, 0, width, height, Color.FromArgb(0x10, 0, 0, 0));
             return;
         }
 
