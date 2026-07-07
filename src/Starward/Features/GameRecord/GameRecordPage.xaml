@@ -25,6 +25,9 @@
                         PaneDisplayMode="Left">
             <NavigationView.Resources>
                 <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+                <!--  悬停 / 按下的内置背景由流体高亮条 + 悬停文字右移 + 整体按压缩放 + Z轴按压下沉动画接管，故置为透明（与设置页保持一致）  -->
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="Transparent" />
             </NavigationView.Resources>
 
             <NavigationView.PaneCustomContent>
@@ -523,6 +526,11 @@
 
         </NavigationView>
 
+        <!--  流体悬停指示器宿主：覆盖在导航栏窗格之上，承载 Composition 高亮条。IsHitTestVisible=False 以便指针事件穿透到导航项（与设置页保持一致）  -->
+        <Grid x:Name="NavIndicatorHost"
+              Width="248"
+              HorizontalAlignment="Left"
+              IsHitTestVisible="False" />
 
     </Grid>
 

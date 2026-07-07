@@ -81,6 +81,11 @@ public sealed class FluidNavigationViewHoverEffect
     /// </summary>
     private readonly Dictionary<NavigationViewItem, UIElement> _pressRoots = new();
 
+    /// <summary>
+    /// 记录已附加事件处理程序的 NavigationViewItem，避免重复订阅（支持 MenuItems + FooterMenuItems + PaneFooter）。
+    /// </summary>
+    private readonly HashSet<NavigationViewItem> _wiredItems = new();
+
     private bool _attached;
 
 
@@ -141,6 +146,7 @@ public sealed class FluidNavigationViewHoverEffect
         _hoverPositioned = false;
         _contentPresenters.Clear();
         _pressRoots.Clear();
+        _wiredItems.Clear();
 
         _navView = null;
         _host = null;
@@ -157,16 +163,42 @@ public sealed class FluidNavigationViewHoverEffect
             return;
         }
 
+        // 菜单项 + 页脚菜单项（设置页使用 MenuItems）
         foreach (NavigationViewItem item in _navView.MenuItems.OfType<NavigationViewItem>())
         {
-            item.PointerEntered += NavigationViewItem_PointerEntered;
-            item.PointerExited += NavigationViewItem_PointerExited;
-            // 按下 / 抬起会被 NavigationViewItem 内部标记为已处理，需用 AddHandler(..., handledEventsToo: true) 才能收到
-            item.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(NavigationViewItem_PointerPressed), true);
-            item.AddHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(NavigationViewItem_PointerReleased), true);
-            item.AddHandler(UIElement.PointerCanceledEvent, new PointerEventHandler(NavigationViewItem_PointerReleased), true);
-            item.AddHandler(UIElement.PointerCaptureLostEvent, new PointerEventHandler(NavigationViewItem_PointerReleased), true);
+            WireHandlers(item);
         }
+        foreach (NavigationViewItem item in _navView.FooterMenuItems.OfType<NavigationViewItem>())
+        {
+            WireHandlers(item);
+        }
+
+        // PaneFooter 支持：米游社工具箱将「更新设备指纹」放在 PaneFooter（而非 FooterMenuItems）
+        if (_navView.FindDescendant("PaneFooter") is FrameworkElement footer)
+        {
+            if (footer.FindDescendant<NavigationViewItem>() is NavigationViewItem fi)
+            {
+                WireHandlers(fi);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 附加单个导航项的事件处理器（使用 _wiredItems 避免重复）。
+    /// </summary>
+    private void WireHandlers(NavigationViewItem item)
+    {
+        if (!_wiredItems.Add(item))
+        {
+            return;
+        }
+        item.PointerEntered += NavigationViewItem_PointerEntered;
+        item.PointerExited += NavigationViewItem_PointerExited;
+        // 按下 / 抬起会被 NavigationViewItem 内部标记为已处理，需用 AddHandler(..., handledEventsToo: true) 才能收到
+        item.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(NavigationViewItem_PointerPressed), true);
+        item.AddHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(NavigationViewItem_PointerReleased), true);
+        item.AddHandler(UIElement.PointerCanceledEvent, new PointerEventHandler(NavigationViewItem_PointerReleased), true);
+        item.AddHandler(UIElement.PointerCaptureLostEvent, new PointerEventHandler(NavigationViewItem_PointerReleased), true);
     }
 
 
@@ -177,15 +209,26 @@ public sealed class FluidNavigationViewHoverEffect
             return;
         }
 
-        foreach (NavigationViewItem item in _navView.MenuItems.OfType<NavigationViewItem>())
+        // 仅注销我们跟踪的项（Attach/Detach 配对管理，来源在 Attach 时已收集）
+        foreach (NavigationViewItem item in _wiredItems.ToList())
         {
-            item.PointerEntered -= NavigationViewItem_PointerEntered;
-            item.PointerExited -= NavigationViewItem_PointerExited;
-            item.RemoveHandler(UIElement.PointerPressedEvent, new PointerEventHandler(NavigationViewItem_PointerPressed));
-            item.RemoveHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(NavigationViewItem_PointerReleased));
-            item.RemoveHandler(UIElement.PointerCanceledEvent, new PointerEventHandler(NavigationViewItem_PointerReleased));
-            item.RemoveHandler(UIElement.PointerCaptureLostEvent, new PointerEventHandler(NavigationViewItem_PointerReleased));
+            UnwireHandlers(item);
         }
+        _wiredItems.Clear();
+    }
+
+    /// <summary>
+    /// 移除单个导航项的事件处理器。
+    /// </summary>
+    private void UnwireHandlers(NavigationViewItem item)
+    {
+        _wiredItems.Remove(item);
+        item.PointerEntered -= NavigationViewItem_PointerEntered;
+        item.PointerExited -= NavigationViewItem_PointerExited;
+        item.RemoveHandler(UIElement.PointerPressedEvent, new PointerEventHandler(NavigationViewItem_PointerPressed));
+        item.RemoveHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(NavigationViewItem_PointerReleased));
+        item.RemoveHandler(UIElement.PointerCanceledEvent, new PointerEventHandler(NavigationViewItem_PointerReleased));
+        item.RemoveHandler(UIElement.PointerCaptureLostEvent, new PointerEventHandler(NavigationViewItem_PointerReleased));
     }
 
 

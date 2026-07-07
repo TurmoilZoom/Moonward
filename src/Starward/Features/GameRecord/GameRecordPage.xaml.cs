@@ -11,6 +11,7 @@ using Starward.Features.GameLauncher;
 using Starward.Features.GameRecord.Genshin;
 using Starward.Features.GameRecord.StarRail;
 using Starward.Features.GameRecord.ZZZ;
+using Starward.Controls;
 using Starward.Features.ViewHost;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -31,8 +32,12 @@ public sealed partial class GameRecordPage : PageBase
 
     private readonly ILogger<GameRecordPage> _logger = AppConfig.GetLogger<GameRecordPage>();
 
-
     private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
+
+    /// <summary>
+    /// 提供与设置页相同的流体导航悬停/按压动画效果（高亮条弹簧跟随、文字偏移、物理按压反馈）。
+    /// </summary>
+    private readonly FluidNavigationViewHoverEffect _navHoverEffect = new();
 
 
 
@@ -75,6 +80,9 @@ public sealed partial class GameRecordPage : PageBase
 
     protected override async void OnLoaded()
     {
+        // 附加与「设置」页一致的流体导航动画效果（必须在 Loaded 后，视觉树就绪）。
+        _navHoverEffect.Attach(NavigationView_Toolbox, NavIndicatorHost, _logger);
+
         // 恢复上次工具箱左侧面板（角色列表+功能菜单）的展开状态。
         if (AppConfig.HoyolabToolboxPaneOpen)
         {
@@ -115,6 +123,7 @@ public sealed partial class GameRecordPage : PageBase
         WeakReferenceMessenger.Default.UnregisterAll(this);
         NavigationViewItem_BattleChronicle.Tapped -= NavigationViewItem_BattleChronicle_Tapped;
         NavigationViewItem_UpdateDeviceInfo.Tapped -= NavigationViewItem_UpdateDeviceInfo_Tapped;
+        _navHoverEffect.Detach();
         CurrentRole = null;
         GameRoleList = null!;
         _battleChronicleWindow = null;
