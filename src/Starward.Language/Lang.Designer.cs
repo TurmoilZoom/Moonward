@@ -8605,5 +8605,14 @@ namespace Starward.Language {
                 return ResourceManager.GetString("SignInButton_ReSignConfirmContent", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Effective on next software startup 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_AutoSignInEffectiveAtNextStartup {
+            get {
+                return ResourceManager.GetString("SignInButton_AutoSignInEffectiveAtNextStartup", resourceCulture);
+            }
+        }
     }
 }

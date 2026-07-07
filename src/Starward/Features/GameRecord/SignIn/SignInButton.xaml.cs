@@ -145,6 +145,11 @@ public sealed partial class SignInButton : UserControl
             if (SetProperty(ref _autoSignInEnabled, value) && !string.IsNullOrEmpty(_signInGameBiz.Value))
             {
                 _autoSignInService.SetEnabled(_signInGameBiz, value);
+                if (value)
+                {
+                    // 自动签到在下次启动的批量任务（AutoSignInService.RunStartupBatchAsync）中生效，立即给用户明确提示（使用主窗口底部 InAppToast / InfoBar）
+                    InAppToast.MainWindow?.Information(Lang.SignInButton_AutoSignInEffectiveAtNextStartup);
+                }
             }
         }
     }

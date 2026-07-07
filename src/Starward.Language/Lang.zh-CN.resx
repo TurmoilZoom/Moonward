@@ -2999,4 +2999,7 @@
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>补签将消耗 {0} 补签货币，当前拥有 {1}。是否继续？</value>
   </data>
+  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
+    <value>软件下次启动生效</value>
+  </data>
 </root>
