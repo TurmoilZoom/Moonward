@@ -139,6 +139,7 @@ public sealed partial class UpdateWindow : WindowEx
             if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(NewVersionText));
+                OnPropertyChanged(nameof(ChannelText));
             }
         }
     }
@@ -156,10 +157,25 @@ public sealed partial class UpdateWindow : WindowEx
     public string ArchitectureText => RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 
 
+    /// <summary>
+    /// 更新渠道/类型文本（稳定版 / 预览版）。优先根据 NewVersion 的实际版本号判断（NuGet 语义化版本的 IsPrerelease），
+    /// 这样当「加入预览更新」开启但最新可用仍是正式版时，弹窗不会把正式版误判为预览版。
+    /// 仅在无 NewVersion 时回退到 AppConfig 设置。
+    /// </summary>
 #if DEBUG
     public string ChannelText => Lang.UpdatePage_DevChannel;
 #else
-    public string ChannelText => AppConfig.EnablePreviewRelease ? Lang.UpdatePage_PreviewChannel : Lang.UpdatePage_StableChannel;
+    public string ChannelText
+    {
+        get
+        {
+            if (NuGetVersion.TryParse(NewVersionText, out var v))
+            {
+                return v.IsPrerelease ? Lang.UpdatePage_PreviewChannel : Lang.UpdatePage_StableChannel;
+            }
+            return AppConfig.EnablePreviewRelease ? Lang.UpdatePage_PreviewChannel : Lang.UpdatePage_StableChannel;
+        }
+    }
 #endif
 
 
