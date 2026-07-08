@@ -316,4 +316,7 @@
   <data name="GachaType_WEngineReverberation" xml:space="preserve">
     <value>W-Engine-Nachhall</value>
   </data>
+  <data name="miHoYoApi_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>Bitte melden Sie sich in der Miyoushe-Toolbox mit diesem Konto erneut an ({0})</value>
+  </data>
 </root>

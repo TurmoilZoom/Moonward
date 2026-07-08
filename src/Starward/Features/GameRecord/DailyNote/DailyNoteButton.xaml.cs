@@ -159,7 +159,7 @@ public sealed partial class DailyNoteButton : UserControl
         {
             if (ex is miHoYoApiException)
             {
-                ErrorMessage = $"Error Code: {ex.Message}";
+                ErrorMessage = ex.Message;
             }
             _logger.LogError(ex, "Refresh daily note failed (Biz: {GameBiz}, Server: {GameServer}, Uid: {Uid})", CurrentGameId?.GameBiz, GameRecordRole?.Region, GameRecordRole?.Uid);
         }

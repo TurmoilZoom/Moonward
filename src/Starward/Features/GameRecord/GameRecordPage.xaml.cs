@@ -723,6 +723,10 @@ public sealed partial class GameRecordPage : PageBase
 
 
 
+    /// <summary>
+    /// 统一处理战绩相关的 <see cref="miHoYoApiException"/>（风控验证 / 账号异常 toast）。
+    /// </summary>
+    /// <param name="ex">米哈游 API 异常。</param>
     public static void HandleMiHoYoApiException(miHoYoApiException ex)
     {
         if (ex.ReturnCode is 1034 or 5003 or 10035 or 10041 or 10053)

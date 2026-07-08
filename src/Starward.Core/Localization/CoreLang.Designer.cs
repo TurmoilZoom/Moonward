@@ -653,5 +653,14 @@ namespace Starward.Core.Localization {
                 return ResourceManager.GetString("ZZZQueryType_WEngine", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Please re-login this account in Miyoushe toolbox ({0}) 的本地化字符串。
+        /// </summary>
+        public static string miHoYoApi_PleaseReloginInMiyousheToolbox {
+            get {
+                return ResourceManager.GetString("miHoYoApi_PleaseReloginInMiyousheToolbox", resourceCulture);
+            }
+        }
     }
 }

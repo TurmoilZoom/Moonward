@@ -264,7 +264,7 @@ public sealed partial class SignInButton : UserControl
         }
         catch (miHoYoApiException ex)
         {
-            ErrorMessage = $"Error Code: {ex.ReturnCode}";
+            ErrorMessage = ex.Message;
             _logger.LogError(ex, "Refresh sign-in status failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
         }
         catch (Exception ex)

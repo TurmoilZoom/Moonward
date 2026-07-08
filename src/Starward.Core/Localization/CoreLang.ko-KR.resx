@@ -316,4 +316,7 @@
   <data name="GachaType_WEngineReverberation" xml:space="preserve">
     <value>W-엔진 반향</value>
   </data>
+  <data name="miHoYoApi_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>미유셰 도구상자에서 해당 계정에 다시 로그인해 주세요({0})</value>
+  </data>
 </root>
