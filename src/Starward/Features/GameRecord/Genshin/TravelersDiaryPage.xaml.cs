@@ -311,7 +311,7 @@ public sealed partial class TravelersDiaryPage : PageBase
                 SelectMonthData = data;
                 // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新（避免无效请求）。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.Month) ?? false;
-                SelectSeries = SelectMonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(ActionName(x.ActionId, x.ActionName), x.Percent, actionColorMap.GetValueOrDefault(x.ActionId))).ToList();
+                SelectSeries = SelectMonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(ActionName(x.ActionId, x.ActionName), x.Percent, actionColorMap.GetValueOrDefault(x.ActionId), x.Number)).ToList();
                 RefreshDailyDataPlot(data);
             }
         }

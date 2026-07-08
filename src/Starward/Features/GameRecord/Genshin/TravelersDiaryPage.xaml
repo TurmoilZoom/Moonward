@@ -8,7 +8,6 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameRecord.Genshin"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:sc="using:Starward.Controls"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.GameRecord"
              xmlns:sp="using:Starward.Pages"
@@ -165,67 +164,83 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*" />
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="2*" />
-                    </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="1"
-                               Grid.Column="0"
-                               VerticalAlignment="Center"
-                               Text="{x:Bind lang:Lang.TravelersDiaryPage_AcquiredThisMonth}" />
-                    <StackPanel Grid.Row="1"
-                                Grid.Column="1"
+                    <!-- 收入统计：图标 + 名称 + 数字，居中（与 ZZZ 统一） -->
+                    <StackPanel Grid.Row="0"
+                                HorizontalAlignment="Center"
                                 Orientation="Horizontal"
-                                Spacing="8">
-                        <Image Width="24" Source="ms-appx:///Assets/Image/UI_ItemIcon_201.png" />
-                        <TextBlock VerticalAlignment="Center" Text="{x:Bind SelectMonthData.CurrentPrimogems}" />
+                                Spacing="48">
+                        <StackPanel Spacing="4">
+                            <Image Width="32"
+                                   Height="32"
+                                   Source="ms-appx:///Assets/Image/UI_ItemIcon_201.png" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind lang:Lang.TravelersDiaryPage_Primogems}" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       Text="{x:Bind SelectMonthData.CurrentPrimogems}" />
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <Image Width="32"
+                                   Height="32"
+                                   Source="ms-appx:///Assets/Image/UI_ItemIcon_202.png" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind lang:Lang.TravelersDiaryPage_Mora}" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       Text="{x:Bind SelectMonthData.CurrentMora}" />
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel Grid.Row="1"
-                                Grid.Column="2"
-                                Orientation="Horizontal"
-                                Spacing="8">
-                        <Image Width="24" Source="ms-appx:///Assets/Image/UI_ItemIcon_202.png" />
-                        <TextBlock VerticalAlignment="Center" Text="{x:Bind SelectMonthData.CurrentMora}" />
-                    </StackPanel>
+
+                    <MenuFlyoutSeparator Grid.Row="1" Margin="0,8,0,8" />
 
                     <TextBlock Grid.Row="2"
-                               Margin="0,8,0,0"
+                               Margin="0,0,0,0"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                Text="{x:Bind lang:Lang.TravelersDiaryPage_PrimogemsObtained}" />
-                    <sc:ColorRectChart Grid.Row="3"
-                                       Grid.ColumnSpan="3"
-                                       Height="20"
-                                       Margin="0,8,0,0"
-                                       HorizontalAlignment="Stretch"
-                                       CornerRadius="4"
-                                       Series="{x:Bind SelectSeries}" />
-                    <ItemsControl Grid.Row="4"
-                                  Grid.ColumnSpan="3"
-                                  Margin="0,8,-4,0"
-                                  ItemsSource="{x:Bind SelectSeries}">
+                    <!-- 每项横向条形图：名称+百分比+数字；ProgressBar 满宽，浅色轨道 -->
+                    <ItemsControl Grid.Row="3"
+                                  ItemsSource="{x:Bind SelectSeries}"
+                                  Margin="0,4,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <cc:WrapPanel HorizontalSpacing="12"
-                                              Orientation="Horizontal"
-                                              VerticalSpacing="4" />
+                                <StackPanel />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <Border Width="16"
-                                            Height="16"
-                                            Background="{Binding Color, Converter={StaticResource ColorToSolidColorBrushConverter}}"
-                                            CornerRadius="4" />
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding Legend}" />
-                                    <TextBlock VerticalAlignment="Center">
-                                        <Run Text="{Binding Percent}" /><Run Text="%" />
-                                    </TextBlock>
-                                </StackPanel>
+                                <Grid Margin="0,2,0,2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="4"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Legend}" />
+                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                                <Run Text="{Binding Percent}" /><Run Text="%" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Number}" />
+                                    </Grid>
+                                    <ProgressBar Grid.Row="1"
+                                                 Margin="0,3,0,0"
+                                                 Height="6"
+                                                 HorizontalAlignment="Stretch"
+                                                 Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                                 Foreground="{Binding Color, Converter={StaticResource ColorToSolidColorBrushConverter}}"
+                                                 Maximum="100"
+                                                 Value="{Binding Percent}" />
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

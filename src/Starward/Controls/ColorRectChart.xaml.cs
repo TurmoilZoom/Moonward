@@ -16,7 +16,7 @@ public sealed partial class ColorRectChart : UserControl
 
 
 
-    public record struct ChartLegend(string? Legend, int Percent, Color Color);
+    public record struct ChartLegend(string? Legend, int Percent, Color Color, int Number = 0);
 
 
 

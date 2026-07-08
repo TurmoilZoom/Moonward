@@ -323,7 +323,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
                 SelectMonthData = data;
                 // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.Month) ?? false;
-                SelectSeries = SelectMonthData.GroupBy.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action, x.ActionName), x.Percent, actionColorMap.GetValueOrDefault(x.Action))).ToList();
+                SelectSeries = SelectMonthData.GroupBy.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action, x.ActionName), x.Percent, actionColorMap.GetValueOrDefault(x.Action), x.Num)).ToList();
                 RefreshDailyDataPlot(data);
             }
         }
