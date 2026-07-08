@@ -8,6 +8,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameRecord.StarRail"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wdd="using:Starward.Features.GameRecord.WeeklyDailyData"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.GameRecord"
              xmlns:sp="using:Starward.Pages"
@@ -256,80 +257,148 @@
                     </ItemsControl>
                 </Grid>
 
-                <!--  Daily Data  -->
+                <!--  Daily Data (周表格)  -->
                 <TextBlock Margin="0,8,0,0"
                            FontSize="16"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           HorizontalAlignment="Left"
                            Visibility="{x:Bind SelectMonthData, Converter={StaticResource ObjectToVisibilityConverter}}">
                     <Run Text="{x:Bind lang:Lang.HoyolabToolboxPage_DailyData}" />
-                    <Run Text="" />
-                    <Run Text="{x:Bind SelectMonthData.Month}" />
+                    <Run Text=" " />
+                    <Run Text="{x:Bind WeekRangeText}" />
                 </TextBlock>
-                <Border Padding="12,8,12,8"
+                <Border Padding="24,8,24,8"
                         Background="{ThemeResource CustomOverlayAcrylicBrush}"
                         CornerRadius="8"
                         Shadow="{ThemeResource ThemeShadow}"
                         Translation="0,0,16"
-                        Visibility="{x:Bind SelectMonthData, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <ItemsRepeater ItemsSource="{x:Bind DayDataList}">
-                        <ItemsRepeater.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="60" />
-                                        <ColumnDefinition Width="24" />
-                                        <ColumnDefinition Width="48" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="24" />
-                                        <ColumnDefinition Width="28" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0"
-                                               VerticalAlignment="Center"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               Text="{Binding Day}" />
-                                    <Image Grid.Column="1"
-                                           Width="24"
-                                           Height="24"
-                                           Source="ms-appx:///Assets/Image/900001.png" />
-                                    <TextBlock Grid.Column="2"
-                                               VerticalAlignment="Center"
-                                               Text="{Binding Jade}" />
-                                    <ProgressBar Grid.Column="3"
-                                                 MinHeight="20"
-                                                 HorizontalAlignment="Stretch"
-                                                 Background="Transparent"
-                                                 Foreground="#A066BCF2"
-                                                 Maximum="1"
-                                                 Value="{Binding JadeProgress}" />
-                                    <Grid Grid.Column="4"
-                                          Width="24"
-                                          Height="24">
-                                        <Image Width="24" Source="ms-appx:///Assets/Image/101.png" />
-                                        <Image Width="24"
-                                               RenderTransformOrigin="0.25,0.75"
-                                               Source="ms-appx:///Assets/Image/102.png"
-                                               Translation="1,-2,0"
-                                               Visibility="Visible">
-                                            <Image.RenderTransform>
-                                                <RotateTransform Angle="30" />
-                                            </Image.RenderTransform>
-                                        </Image>
+                        Visibility="{x:Bind SelectMonthData, Converter={StaticResource ObjectToVisibilityConverter}}"
+                        PointerPressed="DailyTable_PointerPressed"
+                        PointerReleased="DailyTable_PointerReleased"
+                        PointerCanceled="DailyTable_PointerCanceled">
+                    <StackPanel Spacing="6" HorizontalAlignment="Center">
+                        <!-- 日期表头：拆分为两行，箭头放在日期圆圈所在行，与日期数字垂直居中对齐 -->
+                        <!-- 左侧 100px 保持与资源标签列对齐，日期单元格从同一位置开始 -->
+                        <Grid RowSpacing="4">
+                            <!-- RowSpacing 让星期文字和下方日期圆圈之间有少量间距 -->
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- 星期文字行（仅文本） -->
+                            <ItemsRepeater Grid.Column="1" Grid.Row="0" ItemsSource="{x:Bind WeekDateList}">
+                                <ItemsRepeater.Layout>
+                                    <StackLayout Orientation="Horizontal" Spacing="2" />
+                                </ItemsRepeater.Layout>
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="wdd:WeekDateCell">
+                                        <StackPanel Width="72" HorizontalAlignment="Center">
+                                            <TextBlock Text="{x:Bind WeekdayText}"
+                                                       FontSize="11"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+
+                            <!-- 左箭头：放在圆圈行，与日期数字对齐 -->
+                            <Button Grid.Column="0" Grid.Row="1"
+                                    Padding="6,2,6,2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Command="{x:Bind PreviousWeekCommand}"
+                                    Visibility="{x:Bind CanGoPreviousWeek, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <FontIcon Glyph="&#xE76B;" FontSize="12" />
+                            </Button>
+
+                            <!-- 日期圆圈行（数字 + 圆形） -->
+                            <ItemsRepeater Grid.Column="1" Grid.Row="1" ItemsSource="{x:Bind WeekDateList}">
+                                <ItemsRepeater.Layout>
+                                    <StackLayout Orientation="Horizontal" Spacing="2" />
+                                </ItemsRepeater.Layout>
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="wdd:WeekDateCell">
+                                        <StackPanel Width="72" HorizontalAlignment="Center">
+                                            <Grid Width="24"
+                                                  Height="24">
+                                                <Ellipse Width="24"
+                                                         Height="24"
+                                                         Fill="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellBackground(State)}"
+                                                         Stroke="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellBorderBrush(State)}"
+                                                         StrokeThickness="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellStrokeThickness(State)}" />
+                                                <TextBlock Text="{x:Bind DayText}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="12"
+                                                           Foreground="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellForeground(State)}" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+
+                            <!-- 右箭头：放在圆圈行，与日期数字对齐 -->
+                            <Button Grid.Column="2" Grid.Row="1"
+                                    Padding="6,2,6,2"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Command="{x:Bind NextWeekCommand}"
+                                    Visibility="{x:Bind CanGoNextWeek, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <FontIcon Glyph="&#xE76C;" FontSize="12" />
+                            </Button>
+                        </Grid>
+
+                        <!-- 资源行：每行左侧名称+图标，右侧 7 个数据单元格（内容宽度，不拉伸） -->
+                        <ItemsRepeater ItemsSource="{x:Bind WeeklyResourceRows}">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="wdd:WeeklyResourceRow">
+                                    <Grid ColumnSpacing="2" Margin="0,1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <!-- 资源名称 -->
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="4"
+                                                    VerticalAlignment="Center">
+                                            <Image Width="16"
+                                                   Height="16"
+                                                   Source="{x:Bind Icon}" />
+                                            <TextBlock Text="{x:Bind Name}"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                        <!-- 7 个数据单元格 -->
+                                        <ItemsRepeater Grid.Column="1" ItemsSource="{x:Bind Cells}">
+                                            <ItemsRepeater.Layout>
+                                                <StackLayout Orientation="Horizontal" Spacing="2" />
+                                            </ItemsRepeater.Layout>
+                                            <ItemsRepeater.ItemTemplate>
+                                                <DataTemplate x:DataType="wdd:WeeklyResourceCell">
+                                                    <Border Width="72"
+                                                            Height="30"
+                                                            Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                                            CornerRadius="3">
+                                                        <TextBlock Text="{x:Bind DisplayText}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   FontSize="14" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsRepeater.ItemTemplate>
+                                        </ItemsRepeater>
                                     </Grid>
-                                    <TextBlock Grid.Column="5"
-                                               VerticalAlignment="Center"
-                                               Text="{Binding Pass}" />
-                                    <ProgressBar Grid.Column="6"
-                                                 MinHeight="20"
-                                                 HorizontalAlignment="Stretch"
-                                                 Background="Transparent"
-                                                 Foreground="#A0F2DE77"
-                                                 Maximum="1"
-                                                 Value="{Binding PassProgress}" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </StackPanel>
                 </Border>
 
 

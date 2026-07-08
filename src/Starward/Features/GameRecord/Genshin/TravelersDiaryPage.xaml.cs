@@ -3,15 +3,19 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.Genshin.TravelersDiary;
+using Starward.Features.GameRecord.WeeklyDailyData;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -67,7 +71,8 @@ public sealed partial class TravelersDiaryPage : PageBase
         SelectMonthData = null;
         MonthDataList = null!;
         SelectSeries = null;
-        DayDataList = null!;
+        WeekDateList = null!;
+        WeeklyResourceRows = null!;
         _optionalMonths = null;
     }
 
@@ -91,8 +96,49 @@ public sealed partial class TravelersDiaryPage : PageBase
     private List<ColorRectChart.ChartLegend>? selectSeries;
 
 
+    // ===== 周表格相关状态（共享模型） =====
+
+    /// <summary>
+    /// 当前选中的周起始日期（周一）。
+    /// </summary>
     [ObservableProperty]
-    private List<DiaryDayData> dayDataList;
+    private DateOnly selectedWeekStart;
+
+    /// <summary>
+    /// 日期表头 7 列数据。
+    /// </summary>
+    [ObservableProperty]
+    private List<WeekDateCell> weekDateList = [];
+
+    /// <summary>
+    /// 2 行资源数据（原石、摩拉）。
+    /// </summary>
+    [ObservableProperty]
+    private List<WeeklyResourceRow> weeklyResourceRows = [];
+
+    /// <summary>
+    /// 当前周的日期范围显示文本。
+    /// </summary>
+    [ObservableProperty]
+    private string weekRangeText = "";
+
+    /// <summary>
+    /// 是否可以切换到上一周。
+    /// </summary>
+    [ObservableProperty]
+    private bool canGoPreviousWeek;
+
+    /// <summary>
+    /// 是否可以切换到下一周。
+    /// </summary>
+    [ObservableProperty]
+    private bool canGoNextWeek;
+
+
+    partial void OnSelectedWeekStartChanged(DateOnly value)
+    {
+        RefreshWeeklyDailyDataTable();
+    }
 
 
     /// <summary>
@@ -130,6 +176,7 @@ public sealed partial class TravelersDiaryPage : PageBase
     {
         await Task.Delay(16);
         await GetCurrentSummaryAsync();   // 总是请求当前月最新数据（含 OptionalMonth）
+        InitializeSelectedWeek();         // 设置默认周为今天所在周
         GetMonthDataList();               // 从本地 DB 加载历史月份列表
         // 若本地有统计数据，自动选中最新月份（列表已按 Year DESC, Month DESC 排序，首项即最新）
         if (MonthDataList?.Count > 0)
@@ -301,6 +348,7 @@ public sealed partial class TravelersDiaryPage : PageBase
 
     /// <summary>
     /// 月份列表选中变化：更新右侧展示数据，决定是否显示“刷新”按钮（仅服务器可选月份可刷新）。
+    /// 同时设置选中月的默认周起始。
     /// </summary>
     private void ListView_MonthDataList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -312,7 +360,19 @@ public sealed partial class TravelersDiaryPage : PageBase
                 // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新（避免无效请求）。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.Month) ?? false;
                 SelectSeries = SelectMonthData.PrimogemsGroupBy.Select(x => new ColorRectChart.ChartLegend(ActionName(x.ActionId, x.ActionName), x.Percent, actionColorMap.GetValueOrDefault(x.ActionId), x.Number)).ToList();
-                RefreshDailyDataPlot(data);
+
+                // 切月重置默认周：当月用今天所在周，历史月用该月1号所在周。
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var defaultWeek = WeeklyDailyDataHelper.ComputeDefaultWeekStart(data.Year, data.Month, today);
+
+                if (SelectedWeekStart == defaultWeek)
+                {
+                    RefreshWeeklyDailyDataTable();
+                }
+                else
+                {
+                    SelectedWeekStart = defaultWeek;
+                }
             }
         }
         catch (Exception ex)
@@ -324,61 +384,184 @@ public sealed partial class TravelersDiaryPage : PageBase
 
 
 
-    private void RefreshDailyDataPlot(TravelersDiaryMonthData data)
+    // ===== 周切换命令 =====
+
+    /// <summary>
+    /// 切换到上一周（守卫不可切换时）。
+    /// </summary>
+    [RelayCommand]
+    private void PreviousWeek()
     {
-        try
+        if (!CanGoPreviousWeek) return;
+        SelectedWeekStart = SelectedWeekStart.AddDays(-7);
+    }
+
+    /// <summary>
+    /// 切换到下一周（守卫不可切换时）。
+    /// </summary>
+    [RelayCommand]
+    private void NextWeek()
+    {
+        if (!CanGoNextWeek) return;
+        SelectedWeekStart = SelectedWeekStart.AddDays(7);
+    }
+
+
+    // ===== 拖拽切周 =====
+
+    private double _pointerPressX;
+    private bool _isPointerDragging;
+
+    private void DailyTable_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is UIElement el)
         {
-            // 一次查询所有类型的明细，再按 Type 分组，避免多次 DB 请求
-            var allItems = _gameRecordService.GetTravelersDiaryDetailItems(data.Uid, data.Year, data.Month);
-            var items_primogems = allItems.Where(x => x.Type == 1);
-            var items_mora = allItems.Where(x => x.Type == 2);
-            int days = DateTime.DaysInMonth(data.Year, data.Month);
-            var x = Enumerable.Range(1, days).ToArray();
-
-            var stats_primogems = new int[days];
-            foreach (var item in items_primogems)
-            {
-                var day = item.Time.Day;
-                if (day <= days)
-                {
-                    stats_primogems[day - 1] += item.Number;
-                }
-            }
-
-            var stats_mora = new int[days];
-            foreach (var item in items_mora)
-            {
-                var day = item.Time.Day;
-                if (day <= days)
-                {
-                    stats_mora[day - 1] += item.Number;
-                }
-            }
-
-            double max_primogems = stats_primogems.Max();
-            double max_mora = stats_mora.Max();
-            max_primogems = max_primogems == 0 ? double.MaxValue : max_primogems;
-            max_mora = max_mora == 0 ? double.MaxValue : max_mora;
-            var list = new List<DiaryDayData>(days);
-            for (int i = 0; i < days; i++)
-            {
-                list.Add(new DiaryDayData
-                {
-                    Day = $"{data.Month:D2}-{i + 1:D2}",
-                    Primogems = stats_primogems[i],
-                    Mora = stats_mora[i],
-                    PrimogemsProgress = stats_primogems[i] / max_primogems,
-                    MoraProgress = stats_mora[i] / max_mora,
-                });
-            }
-            DayDataList = list;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Refresh daily data plot");
+            var point = e.GetCurrentPoint(el);
+            _pointerPressX = point.Position.X;
+            _isPointerDragging = true;
+            el.CapturePointer(e.Pointer);
         }
     }
 
+    private void DailyTable_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_isPointerDragging) return;
+        _isPointerDragging = false;
+
+        if (sender is UIElement el)
+        {
+            el.ReleasePointerCapture(e.Pointer);
+        }
+
+        var point = e.GetCurrentPoint(sender as UIElement);
+        double delta = point.Position.X - _pointerPressX;
+
+        const double threshold = 80.0;
+        if (Math.Abs(delta) > threshold)
+        {
+            if (delta > 0)
+            {
+                PreviousWeek();
+            }
+            else
+            {
+                NextWeek();
+            }
+        }
+    }
+
+    private void DailyTable_PointerCanceled(object sender, PointerRoutedEventArgs e)
+    {
+        _isPointerDragging = false;
+        if (sender is UIElement el)
+        {
+            el.ReleasePointerCapture(e.Pointer);
+        }
+    }
+
+
+    /// <summary>
+    /// 刷新周表格每日数据。
+    /// </summary>
+    private void RefreshWeeklyDailyDataTable()
+    {
+        try
+        {
+            if (SelectMonthData is null)
+            {
+                WeekDateList = [];
+                WeeklyResourceRows = [];
+                WeekRangeText = "";
+                CanGoPreviousWeek = false;
+                CanGoNextWeek = false;
+                return;
+            }
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var dates = WeeklyDailyDataHelper.GetWeekDates(SelectedWeekStart);
+
+            WeekDateList = WeeklyDailyDataHelper.BuildWeekDateCells(dates, today);
+            WeeklyResourceRows = BuildWeeklyResourceRows(SelectMonthData, dates, today);
+
+            if (dates.Count > 0)
+            {
+                var start = dates[0];
+                var end = dates[^1];
+                WeekRangeText = $"{start:yyyy/MM/dd} - {end:yyyy/MM/dd}";
+            }
+
+            // 箭头：上一/下一周是否至少含选中月一天
+            var firstDay = new DateOnly(SelectMonthData.Year, SelectMonthData.Month, 1);
+            var lastDay = new DateOnly(SelectMonthData.Year, SelectMonthData.Month, DateTime.DaysInMonth(SelectMonthData.Year, SelectMonthData.Month));
+            CanGoPreviousWeek = WeeklyDailyDataHelper.ComputeCanGoPrevious(SelectedWeekStart, firstDay);
+            CanGoNextWeek = WeeklyDailyDataHelper.ComputeCanGoNext(SelectedWeekStart, lastDay);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Refresh weekly daily data table");
+        }
+    }
+
+    /// <summary>
+    /// 构建原神周资源表格（原石/摩拉 2 行）。
+    /// 按 item.Time 本地日期聚合，不使用区服偏移。
+    /// </summary>
+    private List<WeeklyResourceRow> BuildWeeklyResourceRows(TravelersDiaryMonthData summary, IReadOnlyList<DateOnly> dates, DateOnly today)
+    {
+        // 可能跨月，但按现有月数据加载；为简单起见只查当前选中月明细（与旧逻辑一致）
+        var allItems = _gameRecordService.GetTravelersDiaryDetailItems(summary.Uid, summary.Year, summary.Month);
+
+        var dateSet = dates.ToHashSet();
+        var map = allItems
+            .Select(item => new
+            {
+                item.Type,
+                Date = DateOnly.FromDateTime(item.Time.Date),  // 本地日期
+                item.Number,
+            })
+            .Where(x => dateSet.Contains(x.Date))
+            .GroupBy(x => (x.Type, x.Date))
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Number));
+
+        // 类型 1=原石，2=摩拉
+        return new List<WeeklyResourceRow>
+        {
+            new WeeklyResourceRow
+            {
+                DataType = "1",
+                Name = Lang.TravelersDiaryPage_Primogems,
+                Icon = new BitmapImage(new Uri("ms-appx:///Assets/Image/UI_ItemIcon_201.png")),
+                Cells = dates.Select(d => new WeeklyResourceCell
+                {
+                    Date = d,
+                    Count = map.GetValueOrDefault((1, d)),
+                    IsFuture = d > today,
+                }).ToList(),
+            },
+            new WeeklyResourceRow
+            {
+                DataType = "2",
+                Name = Lang.TravelersDiaryPage_Mora,
+                Icon = new BitmapImage(new Uri("ms-appx:///Assets/Image/UI_ItemIcon_202.png")),
+                Cells = dates.Select(d => new WeeklyResourceCell
+                {
+                    Date = d,
+                    Count = map.GetValueOrDefault((2, d)),
+                    IsFuture = d > today,
+                }).ToList(),
+            },
+        };
+    }
+
+
+    /// <summary>
+    /// 初始化选中周为今天所在周的周一。
+    /// </summary>
+    private void InitializeSelectedWeek()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        SelectedWeekStart = WeeklyDailyDataHelper.GetMonday(today);
+    }
 
 
     /// <summary>
@@ -401,23 +584,6 @@ public sealed partial class TravelersDiaryPage : PageBase
             7 => Lang.TravelersDiaryPage_ActionOther,
             _ => fallbackName ?? actionId.ToString(),
         };
-    }
-
-
-
-    public class DiaryDayData
-    {
-
-        public string Day { get; set; }
-
-        public int Primogems { get; set; }
-
-        public int Mora { get; set; }
-
-        public double PrimogemsProgress { get; set; }
-
-        public double MoraProgress { get; set; }
-
     }
 
 

@@ -3,15 +3,19 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
+using Starward.Features.GameRecord.WeeklyDailyData;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -68,7 +72,8 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         SelectMonthData = null;
         MonthDataList = null!;
         SelectSeries = null;
-        DayDataList = null!;
+        WeekDateList = null!;
+        WeeklyResourceRows = null!;
         _optionalMonths = null;
     }
 
@@ -92,8 +97,49 @@ public sealed partial class TrailblazeCalendarPage : PageBase
     private List<ColorRectChart.ChartLegend>? selectSeries;
 
 
+    // ===== 周表格相关状态（共享模型） =====
+
+    /// <summary>
+    /// 当前选中的周起始日期（周一）。
+    /// </summary>
     [ObservableProperty]
-    private List<CalendarDayData> dayDataList;
+    private DateOnly selectedWeekStart;
+
+    /// <summary>
+    /// 日期表头 7 列数据。
+    /// </summary>
+    [ObservableProperty]
+    private List<WeekDateCell> weekDateList = [];
+
+    /// <summary>
+    /// 2 行资源数据（星琼、星轨通票）。
+    /// </summary>
+    [ObservableProperty]
+    private List<WeeklyResourceRow> weeklyResourceRows = [];
+
+    /// <summary>
+    /// 当前周的日期范围显示文本。
+    /// </summary>
+    [ObservableProperty]
+    private string weekRangeText = "";
+
+    /// <summary>
+    /// 是否可以切换到上一周。
+    /// </summary>
+    [ObservableProperty]
+    private bool canGoPreviousWeek;
+
+    /// <summary>
+    /// 是否可以切换到下一周。
+    /// </summary>
+    [ObservableProperty]
+    private bool canGoNextWeek;
+
+
+    partial void OnSelectedWeekStartChanged(DateOnly value)
+    {
+        RefreshWeeklyDailyDataTable();
+    }
 
 
     /// <summary>
@@ -130,6 +176,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
     {
         await Task.Delay(16);
         await GetCurrentSummaryAsync();   // 总是请求当前月最新数据（含 OptionalMonth）
+        InitializeSelectedWeek();         // 设置默认周为今天所在周
         GetMonthDataList();               // 从本地 DB 加载历史月份列表
         // 若本地有统计数据，自动选中最新月份（列表已按 Month DESC 排序，首项即最新）
         if (MonthDataList?.Count > 0)
@@ -313,6 +360,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
 
     /// <summary>
     /// 月份列表选中变化：更新右侧展示数据，决定是否显示“刷新”按钮（仅服务器可选月份可刷新）。
+    /// 同时设置选中月的默认周起始。
     /// </summary>
     private void ListView_MonthDataList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -324,7 +372,21 @@ public sealed partial class TrailblazeCalendarPage : PageBase
                 // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.Month) ?? false;
                 SelectSeries = SelectMonthData.GroupBy.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action, x.ActionName), x.Percent, actionColorMap.GetValueOrDefault(x.Action), x.Num)).ToList();
-                RefreshDailyDataPlot(data);
+
+                // 切月默认周：解析 yyyyMM，当月用今天所在周，历史月用1号所在周。
+                int y = int.Parse(data.Month.AsSpan(0, 4));
+                int m = int.Parse(data.Month.AsSpan(4, 2));
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var defaultWeek = WeeklyDailyDataHelper.ComputeDefaultWeekStart(y, m, today);
+
+                if (SelectedWeekStart == defaultWeek)
+                {
+                    RefreshWeeklyDailyDataTable();
+                }
+                else
+                {
+                    SelectedWeekStart = defaultWeek;
+                }
             }
         }
         catch (Exception ex)
@@ -335,62 +397,184 @@ public sealed partial class TrailblazeCalendarPage : PageBase
 
 
 
-    private void RefreshDailyDataPlot(TrailblazeCalendarMonthData data)
+    // ===== 周切换命令 =====
+
+    /// <summary>
+    /// 切换到上一周（守卫不可切换时）。
+    /// </summary>
+    [RelayCommand]
+    private void PreviousWeek()
     {
-        try
+        if (!CanGoPreviousWeek) return;
+        SelectedWeekStart = SelectedWeekStart.AddDays(-7);
+    }
+
+    /// <summary>
+    /// 切换到下一周（守卫不可切换时）。
+    /// </summary>
+    [RelayCommand]
+    private void NextWeek()
+    {
+        if (!CanGoNextWeek) return;
+        SelectedWeekStart = SelectedWeekStart.AddDays(7);
+    }
+
+
+    // ===== 拖拽切周 =====
+
+    private double _pointerPressX;
+    private bool _isPointerDragging;
+
+    private void DailyTable_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is UIElement el)
         {
-            // 一次查询所有类型的明细，再按 Type 分组，避免多次 DB 请求
-            var allItems = _gameRecordService.GetTrailblazeCalendarDetailItems(data.Uid, data.Month);
-            var items_jade = allItems.Where(x => x.Type == 1);
-            var items_pass = allItems.Where(x => x.Type == 2);
-            int days = DateTime.DaysInMonth(int.Parse(data.Month[..4]), int.Parse(data.Month[4..]));
-            var x = Enumerable.Range(1, days).ToArray();
-
-            var stats_jade = new int[days];
-            foreach (var item in items_jade)
-            {
-                var day = item.Time.Day;
-                if (day <= days)
-                {
-                    stats_jade[day - 1] += item.Number;
-                }
-            }
-
-            var stats_pass = new int[days];
-            foreach (var item in items_pass)
-            {
-                var day = item.Time.Day;
-                if (day <= days)
-                {
-                    stats_pass[day - 1] += item.Number;
-                }
-            }
-
-            double max_jade = stats_jade.Max();
-            double max_pass = stats_pass.Max();
-            max_jade = max_jade == 0 ? double.MaxValue : max_jade;
-            max_pass = max_pass == 0 ? double.MaxValue : max_pass;
-            var list = new List<CalendarDayData>(days);
-            for (int i = 0; i < days; i++)
-            {
-                list.Add(new CalendarDayData
-                {
-                    Day = $"{data.Month[4..]}-{i + 1:D2}",
-                    Jade = stats_jade[i],
-                    Pass = stats_pass[i],
-                    JadeProgress = stats_jade[i] / max_jade,
-                    PassProgress = stats_pass[i] / max_pass,
-                });
-            }
-            DayDataList = list;
+            var point = e.GetCurrentPoint(el);
+            _pointerPressX = point.Position.X;
+            _isPointerDragging = true;
+            el.CapturePointer(e.Pointer);
         }
-        catch (Exception ex)
+    }
+
+    private void DailyTable_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_isPointerDragging) return;
+        _isPointerDragging = false;
+
+        if (sender is UIElement el)
         {
-            _logger.LogError(ex, "Refresh daily data plot");
+            el.ReleasePointerCapture(e.Pointer);
+        }
+
+        var point = e.GetCurrentPoint(sender as UIElement);
+        double delta = point.Position.X - _pointerPressX;
+
+        const double threshold = 80.0;
+        if (Math.Abs(delta) > threshold)
+        {
+            if (delta > 0)
+            {
+                PreviousWeek();
+            }
+            else
+            {
+                NextWeek();
+            }
+        }
+    }
+
+    private void DailyTable_PointerCanceled(object sender, PointerRoutedEventArgs e)
+    {
+        _isPointerDragging = false;
+        if (sender is UIElement el)
+        {
+            el.ReleasePointerCapture(e.Pointer);
         }
     }
 
 
+    /// <summary>
+    /// 刷新周表格每日数据。
+    /// </summary>
+    private void RefreshWeeklyDailyDataTable()
+    {
+        try
+        {
+            if (SelectMonthData is null)
+            {
+                WeekDateList = [];
+                WeeklyResourceRows = [];
+                WeekRangeText = "";
+                CanGoPreviousWeek = false;
+                CanGoNextWeek = false;
+                return;
+            }
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var dates = WeeklyDailyDataHelper.GetWeekDates(SelectedWeekStart);
+
+            WeekDateList = WeeklyDailyDataHelper.BuildWeekDateCells(dates, today);
+            WeeklyResourceRows = BuildWeeklyResourceRows(SelectMonthData, dates, today);
+
+            if (dates.Count > 0)
+            {
+                var start = dates[0];
+                var end = dates[^1];
+                WeekRangeText = $"{start:yyyy/MM/dd} - {end:yyyy/MM/dd}";
+            }
+
+            // 箭头约束基于选中月
+            int y = int.Parse(SelectMonthData.Month.AsSpan(0, 4));
+            int m = int.Parse(SelectMonthData.Month.AsSpan(4, 2));
+            var firstDay = new DateOnly(y, m, 1);
+            var lastDay = new DateOnly(y, m, DateTime.DaysInMonth(y, m));
+            CanGoPreviousWeek = WeeklyDailyDataHelper.ComputeCanGoPrevious(SelectedWeekStart, firstDay);
+            CanGoNextWeek = WeeklyDailyDataHelper.ComputeCanGoNext(SelectedWeekStart, lastDay);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Refresh weekly daily data table");
+        }
+    }
+
+    /// <summary>
+    /// 构建星铁周资源表格（星琼 / 通行证 2 行）。
+    /// 按 item.Time 本地日期聚合。
+    /// </summary>
+    private List<WeeklyResourceRow> BuildWeeklyResourceRows(TrailblazeCalendarMonthData summary, IReadOnlyList<DateOnly> dates, DateOnly today)
+    {
+        var allItems = _gameRecordService.GetTrailblazeCalendarDetailItems(summary.Uid, summary.Month);
+
+        var dateSet = dates.ToHashSet();
+        var map = allItems
+            .Select(item => new
+            {
+                item.Type,
+                Date = DateOnly.FromDateTime(item.Time.Date),
+                item.Number,
+            })
+            .Where(x => dateSet.Contains(x.Date))
+            .GroupBy(x => (x.Type, x.Date))
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Number));
+
+        return new List<WeeklyResourceRow>
+        {
+            new WeeklyResourceRow
+            {
+                DataType = "1",
+                Name = Lang.TrailblazeCalendarPage_StellarJade,
+                Icon = new BitmapImage(new Uri("ms-appx:///Assets/Image/900001.png")),
+                Cells = dates.Select(d => new WeeklyResourceCell
+                {
+                    Date = d,
+                    Count = map.GetValueOrDefault((1, d)),
+                    IsFuture = d > today,
+                }).ToList(),
+            },
+            new WeeklyResourceRow
+            {
+                DataType = "2",
+                Name = Lang.TrailblazeCalendarPage_PassAndSpecialPass,
+                Icon = new BitmapImage(new Uri("ms-appx:///Assets/Image/101.png")),
+                Cells = dates.Select(d => new WeeklyResourceCell
+                {
+                    Date = d,
+                    Count = map.GetValueOrDefault((2, d)),
+                    IsFuture = d > today,
+                }).ToList(),
+            },
+        };
+    }
+
+
+    /// <summary>
+    /// 初始化选中周为今天所在周的周一。
+    /// </summary>
+    private void InitializeSelectedWeek()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        SelectedWeekStart = WeeklyDailyDataHelper.GetMonday(today);
+    }
 
 
     /// <summary>
@@ -412,23 +596,6 @@ public sealed partial class TrailblazeCalendarPage : PageBase
             "other" => Lang.TrailblazeCalendarPage_ActionOther,
             _ => fallbackName ?? action,
         };
-    }
-
-
-
-    public class CalendarDayData
-    {
-
-        public string Day { get; set; }
-
-        public int Jade { get; set; }
-
-        public int Pass { get; set; }
-
-        public double JadeProgress { get; set; }
-
-        public double PassProgress { get; set; }
-
     }
 
 

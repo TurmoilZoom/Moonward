@@ -3,18 +3,21 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
+using Starward.Features.GameRecord.WeeklyDailyData;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Windows.UI;
@@ -72,7 +75,8 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         SelectMonthData = null;
         MonthDataList = null!;
         SelectSeries = null!;
-        DayDataList = null!;
+        WeekDateList = null!;
+        WeeklyResourceRows = null!;
         _optionalMonths = null;
     }
 
@@ -95,14 +99,59 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     private List<ColorRectChart.ChartLegend>? selectSeries;
 
 
+    // ===== 新增：周表格相关状态 =====
+
+    /// <summary>
+    /// 当前选中的周起始日期（固定为周一）。
+    /// </summary>
     [ObservableProperty]
-    private List<CalendarDayData> dayDataList;
+    private DateOnly selectedWeekStart;
+
+    /// <summary>
+    /// 日期表头 7 列数据。
+    /// </summary>
+    [ObservableProperty]
+    private List<WeekDateCell> weekDateList = [];
+
+    /// <summary>
+    /// 3 行资源数据（菲林、加密母带、邦布券）。
+    /// </summary>
+    [ObservableProperty]
+    private List<WeeklyResourceRow> weeklyResourceRows = [];
+
+    /// <summary>
+    /// 当前周的日期范围显示文本（例如 2026/07/06 - 2026/07/12）。
+    /// </summary>
+    [ObservableProperty]
+    private string weekRangeText = "";
+
+    /// <summary>
+    /// 是否可以切换到上一周（上一周至少包含选中月一天时为 true）。
+    /// </summary>
+    [ObservableProperty]
+    private bool canGoPreviousWeek;
+
+    /// <summary>
+    /// 是否可以切换到下一周（下一周至少包含选中月一天时为 true）。
+    /// </summary>
+    [ObservableProperty]
+    private bool canGoNextWeek;
+
+
+    partial void OnSelectedWeekStartChanged(DateOnly value)
+    {
+        RefreshWeeklyDailyDataTable();
+    }
 
 
     /// <summary>
     /// API 返回的可查询月份列表（格式 yyyyMM），用于判断刷新按钮是否应显示。
     /// </summary>
     private List<string>? _optionalMonths;
+
+    // 拖拽切周状态
+    private double _pointerPressX;
+    private bool _isPointerDragging;
 
     /// <summary>
     /// 当前选中的「统计数据」月份是否在服务器可查询列表中，控制刷新按钮可见性。
@@ -143,6 +192,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     {
         await Task.Delay(16);
         await GetCurrentSummaryAsync();   // 总是请求当前月最新数据（含 OptionalMonth）
+        InitializeSelectedWeek();         // 设置默认周为服务器今天所在周（周一）
         GetMonthDataList();               // 从本地 DB 加载历史月份列表
         // 若本地有统计数据，自动选中最新月份（列表已按 DataMonth DESC 排序，首项即最新）
         if (MonthDataList?.Count > 0)
@@ -331,6 +381,85 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     /// <summary>
     /// 月份列表选中变化：更新右侧展示数据，决定是否显示“刷新”按钮（仅服务器可选月份可刷新）。
     /// </summary>
+    // ===== 周切换命令 =====
+
+    /// <summary>
+    /// 切换到上一周（若不可切换则忽略）。
+    /// </summary>
+    [RelayCommand]
+    private void PreviousWeek()
+    {
+        if (!CanGoPreviousWeek) return;
+        SelectedWeekStart = SelectedWeekStart.AddDays(-7);
+        // OnSelectedWeekStartChanged 会自动调用 Refresh
+    }
+
+    /// <summary>
+    /// 切换到下一周（若不可切换则忽略）。
+    /// </summary>
+    [RelayCommand]
+    private void NextWeek()
+    {
+        if (!CanGoNextWeek) return;
+        SelectedWeekStart = SelectedWeekStart.AddDays(7);
+    }
+
+
+
+    // ===== 拖拽切周 =====
+
+    private void DailyTable_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is UIElement el)
+        {
+            var point = e.GetCurrentPoint(el);
+            _pointerPressX = point.Position.X;
+            _isPointerDragging = true;
+            el.CapturePointer(e.Pointer);
+        }
+    }
+
+    private void DailyTable_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_isPointerDragging) return;
+        _isPointerDragging = false;
+
+        if (sender is UIElement el)
+        {
+            el.ReleasePointerCapture(e.Pointer);
+        }
+
+        var point = e.GetCurrentPoint(sender as UIElement);
+        double delta = point.Position.X - _pointerPressX;
+
+        const double threshold = 80.0;
+        if (Math.Abs(delta) > threshold)
+        {
+            if (delta > 0)
+            {
+                // 向右拖 → 上一周
+                PreviousWeek();
+            }
+            else
+            {
+                // 向左拖 → 下一周
+                NextWeek();
+            }
+        }
+    }
+
+    private void DailyTable_PointerCanceled(object sender, PointerRoutedEventArgs e)
+    {
+        _isPointerDragging = false;
+        if (sender is UIElement el)
+        {
+            el.ReleasePointerCapture(e.Pointer);
+        }
+    }
+
+
+
+
     private void ListView_MonthDataList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
@@ -341,7 +470,31 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
                 // 仅当该月在 API 返回的 OptionalMonth 中时才允许用户刷新。
                 IsRefreshButtonVisible = _optionalMonths?.Contains(data.DataMonth) ?? false;
                 SelectSeries = SelectMonthData.MonthData.IncomeComponents.Select(x => new ColorRectChart.ChartLegend(ActionName(x.Action), x.Percent, actionColorMap.GetValueOrDefault(x.Action), x.Num)).ToList();
-                RefreshDailyDataPlot(data);
+
+                // 切月时重置为选中月的默认周：
+                // 当前服务器月 → 今天所在周；历史月 → 该月第一天所在周。
+                // 赋值后若未变化则显式刷新（避免 OnChanged 不触发）。
+                var serverToday = GetServerToday(data.Region);
+                DateOnly defaultWeek;
+                if (DateTime.TryParseExact(data.DataMonth, "yyyyMM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+                {
+                    int y = dt.Year;
+                    int m = dt.Month;
+                    defaultWeek = WeeklyDailyDataHelper.ComputeDefaultWeekStart(y, m, serverToday);
+                }
+                else
+                {
+                    defaultWeek = WeeklyDailyDataHelper.GetMonday(serverToday);
+                }
+
+                if (SelectedWeekStart == defaultWeek)
+                {
+                    RefreshWeeklyDailyDataTable();
+                }
+                else
+                {
+                    SelectedWeekStart = defaultWeek;
+                }
             }
         }
         catch (Exception ex)
@@ -352,55 +505,119 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
-    private void RefreshDailyDataPlot(InterKnotReportSummary data)
+    /// <summary>
+    /// 刷新周表格每日数据（仅使用数据库缓存，不发起网络请求）。
+    /// 根据 SelectedWeekStart + 当前选中月份的 region 重新计算 7 天表头和 3 行资源。
+    /// 同时根据选中月计算箭头是否可切换。
+    /// </summary>
+    private void RefreshWeeklyDailyDataTable()
     {
         try
         {
-            // 一次查询所有类型的明细，再按 DataType 分组，避免多次 DB 请求
-            var allItems = _gameRecordService.GetInterKnotReportDetailItems(data.Uid, data.DataMonth);
-            var items_poly = allItems.Where(x => x.DataType == InterKnotReportDataType.PolychromesData);
-            var items_tape = allItems.Where(x => x.DataType == InterKnotReportDataType.MatserTapeData);
-            var items_boopon = allItems.Where(x => x.DataType == InterKnotReportDataType.BooponsData);
-            int year = int.Parse(data.DataMonth[..4], CultureInfo.InvariantCulture);
-            int month = int.Parse(data.DataMonth[4..], CultureInfo.InvariantCulture);
-            int days = DateTime.DaysInMonth(year, month);
-            TimeSpan serverOffset = GetInterKnotReportServerOffset(data.Region);
-
-            var stats_poly = new int[days];
-            AggregateDailyStats(stats_poly, items_poly, year, month, serverOffset);
-
-            var stats_tape = new int[days];
-            AggregateDailyStats(stats_tape, items_tape, year, month, serverOffset);
-
-            var stats_boopon = new int[days];
-            AggregateDailyStats(stats_boopon, items_boopon, year, month, serverOffset);
-
-            double max_poly = stats_poly.Max();
-            double max_tape = stats_tape.Max();
-            double max_boopon = stats_boopon.Max();
-            max_poly = max_poly == 0 ? double.MaxValue : max_poly;
-            max_tape = max_tape == 0 ? double.MaxValue : max_tape;
-            max_boopon = max_boopon == 0 ? double.MaxValue : max_boopon;
-            var list = new List<CalendarDayData>(days);
-            for (int i = 0; i < days; i++)
+            if (SelectMonthData is null)
             {
-                list.Add(new CalendarDayData
-                {
-                    Day = $"{data.DataMonth[4..]}-{i + 1:D2}",
-                    Poly = stats_poly[i],
-                    Tape = stats_tape[i],
-                    Boopon = stats_boopon[i],
-                    PolyProgress = stats_poly[i] / max_poly,
-                    TapeProgress = stats_tape[i] / max_tape,
-                    BooponProgress = stats_boopon[i] / max_boopon,
-                });
+                WeekDateList = [];
+                WeeklyResourceRows = [];
+                WeekRangeText = "";
+                CanGoPreviousWeek = false;
+                CanGoNextWeek = false;
+                return;
             }
-            DayDataList = list;
+
+            var serverOffset = GetInterKnotReportServerOffset(SelectMonthData.Region);
+            var serverToday = GetServerToday(SelectMonthData.Region);
+            var dates = WeeklyDailyDataHelper.GetWeekDates(SelectedWeekStart);
+
+            WeekDateList = WeeklyDailyDataHelper.BuildWeekDateCells(dates, serverToday);
+            WeeklyResourceRows = BuildWeeklyResourceRows(SelectMonthData, dates, serverOffset, serverToday);
+
+            // 设置周范围显示（使用短横线分隔）
+            if (dates.Count > 0)
+            {
+                var start = dates[0];
+                var end = dates[^1];
+                WeekRangeText = $"{start:yyyy/MM/dd} - {end:yyyy/MM/dd}";
+            }
+
+            // 计算箭头可见性：上一周/下一周至少包含选中月一天
+            if (DateTime.TryParseExact(SelectMonthData.DataMonth, "yyyyMM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+            {
+                int y = dt.Year;
+                int m = dt.Month;
+                var firstDay = new DateOnly(y, m, 1);
+                var lastDay = new DateOnly(y, m, DateTime.DaysInMonth(y, m));
+                CanGoPreviousWeek = WeeklyDailyDataHelper.ComputeCanGoPrevious(SelectedWeekStart, firstDay);
+                CanGoNextWeek = WeeklyDailyDataHelper.ComputeCanGoNext(SelectedWeekStart, lastDay);
+            }
+            else
+            {
+                CanGoPreviousWeek = false;
+                CanGoNextWeek = false;
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Refresh daily data plot");
+            _logger.LogError(ex, "Refresh weekly daily data table");
         }
+    }
+
+    /// <summary>
+    /// 构建周资源表格的 3 行数据。
+    /// 跨月周会查询涉及的多个月份的 DB 缓存。
+    /// 未来日期 Count 显示为空白。
+    /// </summary>
+    private List<WeeklyResourceRow> BuildWeeklyResourceRows(
+        InterKnotReportSummary summary,
+        IReadOnlyList<DateOnly> dates,
+        TimeSpan serverOffset,
+        DateOnly serverToday)
+    {
+        // 计算该周涉及的月份（yyyyMM）
+        var months = dates
+            .Select(d => d.ToString("yyyyMM", CultureInfo.InvariantCulture))
+            .Distinct()
+            .ToList();
+
+        // 从 DB 读取这些月份的所有明细（不触发网络）
+        var allItems = new List<InterKnotReportDetailItem>();
+        foreach (var month in months)
+        {
+            allItems.AddRange(_gameRecordService.GetInterKnotReportDetailItems(summary.Uid, month));
+        }
+
+        // 仅保留落在本周日期范围内的项，按 (DataType, Date) 聚合 Number
+        var dateSet = dates.ToHashSet();
+        var map = allItems
+            .Select(item => new
+            {
+                item.DataType,
+                Date = DateOnly.FromDateTime(item.Time.ToOffset(serverOffset).Date),
+                item.Number,
+            })
+            .Where(x => dateSet.Contains(x.Date))
+            .GroupBy(x => (x.DataType, x.Date))
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Number));
+
+        // 固定顺序：菲林、加密母带、邦布券（注意保持 MatserTapeData 拼写）
+        string[] resourceTypes =
+        [
+            InterKnotReportDataType.PolychromesData,
+            InterKnotReportDataType.MatserTapeData,
+            InterKnotReportDataType.BooponsData,
+        ];
+
+        return resourceTypes.Select(type => new WeeklyResourceRow
+        {
+            DataType = type,
+            Name = DataTypeToName(type),
+            Icon = DataTypeToImage(type),
+            Cells = dates.Select(date => new WeeklyResourceCell
+            {
+                Date = date,
+                Count = map.GetValueOrDefault((type, date)),
+                IsFuture = date > serverToday,
+            }).ToList(),
+        }).ToList();
     }
 
 
@@ -447,29 +664,37 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
-
-    public class CalendarDayData
+    /// <summary>
+    /// 根据 region 获取服务器“今天”的本地日期（DateOnly）。
+    /// </summary>
+    private static DateOnly GetServerToday(string? region)
     {
+        var offset = GetInterKnotReportServerOffset(region);
+        return DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(offset).Date);
+    }
 
-        public string Day { get; set; }
-
-        public int Poly { get; set; }
-
-        public int Tape { get; set; }
-
-        public int Boopon { get; set; }
-
-        public double PolyProgress { get; set; }
-
-        public double TapeProgress { get; set; }
-
-        public double BooponProgress { get; set; }
-
+    /// <summary>
+    /// 初始化为服务器今天所在周的周一（初始加载时使用；切月逻辑由 SelectionChanged 负责重置）。
+    /// </summary>
+    private void InitializeSelectedWeek()
+    {
+        if (gameRole is null)
+        {
+            SelectedWeekStart = DateOnly.FromDateTime(DateTime.Today);
+            return;
+        }
+        var serverToday = GetServerToday(gameRole.Region);
+        SelectedWeekStart = WeeklyDailyDataHelper.GetMonday(serverToday);
     }
 
 
 
 
+    // CalendarDayData 已移除（不再使用）
+
+
+
+    // 模型已移至 Starward.Features.GameRecord.WeeklyDailyData（共享）
 
     /// <summary>
     /// 将绳网月报数据类型映射为本地化显示名称（不直接使用 API 返回的 <c>data_name</c>，避免非中文界面仍显示中文）。
@@ -525,6 +750,10 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     {
         return monthData?.List?.FirstOrDefault(a => a.DataType == InterKnotReportDataType.PolychromesData)?.Count ?? 0;
     }
+
+
+
+    // 日期单元格视觉样式已移至 WeeklyDailyDataHelper（XAML 直接引用 wdd:WeeklyDailyDataHelper.GetDateCell*）
 
 
 
