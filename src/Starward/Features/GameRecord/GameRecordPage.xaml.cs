@@ -563,6 +563,34 @@ public sealed partial class GameRecordPage : PageBase
 
 
     /// <summary>
+    /// 右侧 Frame 每次导航到子页后，对其内容根面板的直接子元素播放「从右滑入 + 淡入」错峰级联入场。
+    /// 已 Loaded 则立即播放；否则挂一次性 Loaded 回调，与设置页 <c>Frame_Setting_Navigated</c> 对齐。
+    /// </summary>
+    /// <param name="sender">触发导航的 Frame。</param>
+    /// <param name="e">导航事件参数；从 <see cref="NavigationEventArgs.Content"/> 取新页面。</param>
+    private void frame_Navigated(object sender, NavigationEventArgs e)
+    {
+        if (e.Content is Page page)
+        {
+            if (page.IsLoaded)
+            {
+                EntranceAnimation.PlayFromRight(page);
+            }
+            else
+            {
+                void OnPageLoaded(object s, RoutedEventArgs args)
+                {
+                    page.Loaded -= OnPageLoaded;
+                    EntranceAnimation.PlayFromRight(page);
+                }
+                page.Loaded += OnPageLoaded;
+            }
+        }
+    }
+
+
+
+    /// <summary>
     /// 根据当前游戏导航到默认统计页面：绝区零→绳网月报，原神→旅行者札记，铁道→开拓月历。
     /// 并同步选中左侧工具箱菜单项。
     /// </summary>

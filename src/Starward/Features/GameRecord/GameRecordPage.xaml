@@ -521,7 +521,7 @@
             </NavigationView.PaneFooter>
 
 
-            <Frame Name="frame" />
+            <Frame Name="frame" Navigated="frame_Navigated" />
 
 
         </NavigationView>

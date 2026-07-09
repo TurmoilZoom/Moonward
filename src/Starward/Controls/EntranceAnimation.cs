@@ -10,6 +10,7 @@ namespace Starward.Controls;
 
 /// <summary>
 /// <see cref="Play(Panel)"/> 对面板的直接子元素逐个播放「上滑 + 淡入」（设置页内容区使用）；
+/// <see cref="PlayFromRight(Panel)"/> 对面板的直接子元素逐个播放「从右滑入 + 淡入」（米游社工具箱右侧内容区使用）；
 /// <see cref="PlayItem"/> 对单个元素播放「从右滑入 + 淡入」并按索引错峰（ItemsControl 卡片逐个加载时使用）。
 /// </summary>
 public static class EntranceAnimation
@@ -107,6 +108,74 @@ public static class EntranceAnimation
                 continue;
             }
             Animate(compositor, child, new Vector3(0, fromOffsetY, 0), start, durationMs, fadeDurationMs, ease);
+            start += staggerMs;
+        }
+    }
+
+
+    /// <summary>
+    /// 对页面内容根面板播放「从右滑入 + 淡入」级联入场动画。
+    /// 会自动定位 <c>ScrollViewer &gt; Panel</c> 或直接的 <c>Panel</c> 内容根。
+    /// </summary>
+    /// <param name="page">目标页面；为 null 或内容非 Panel 时直接返回。</param>
+    public static void PlayFromRight(Page page)
+    {
+        if (page is null)
+        {
+            return;
+        }
+        Panel? panel = page.Content switch
+        {
+            ScrollViewer { Content: Panel p } => p,
+            Panel p => p,
+            _ => null,
+        };
+        if (panel is not null)
+        {
+            PlayFromRight(panel);
+        }
+    }
+
+
+    /// <summary>
+    /// 对面板的直接子元素逐个播放「从右滑入 + 淡入」的错峰级联动画。
+    /// 与 <see cref="Play(Panel)"/> 对称，仅将位移方向由 Y 改为 X。
+    /// </summary>
+    /// <param name="panel">内容根面板；为 null 或无子元素时直接返回。</param>
+    /// <param name="delayMs">首个子项的起始延迟（毫秒）。</param>
+    /// <param name="fromOffsetX">由右侧滑入的初始位移量（像素）。</param>
+    /// <param name="durationMs">位移动画时长（毫秒）。</param>
+    /// <param name="staggerMs">相邻子项之间的错峰间隔（毫秒）。</param>
+    public static void PlayFromRight(Panel panel,
+                                     int delayMs = DefaultDelayMs,
+                                     float fromOffsetX = DefaultFromOffsetX,
+                                     int durationMs = DefaultDurationMs,
+                                     int staggerMs = DefaultStaggerMs)
+    {
+        if (panel is null || panel.Children.Count == 0)
+        {
+            return;
+        }
+
+        // 关闭系统动画时直接返回，保持内容默认可见。
+        if (!AnimationsEnabled())
+        {
+            return;
+        }
+
+        Compositor compositor = ElementCompositionPreview.GetElementVisual(panel).Compositor;
+        // Fluent 减速曲线
+        CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0f, 0f), new Vector2(0f, 1f));
+        int fadeDurationMs = Math.Max(1, (int)(durationMs * FadeFraction));
+        int start = delayMs;
+
+        foreach (UIElement child in panel.Children)
+        {
+            if (child is null)
+            {
+                continue;
+            }
+            Animate(compositor, child, new Vector3(fromOffsetX, 0, 0), start, durationMs, fadeDurationMs, ease);
             start += staggerMs;
         }
     }
