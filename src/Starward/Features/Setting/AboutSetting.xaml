@@ -3,6 +3,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:animatedvisuals="using:Starward.AnimatedVisuals"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.Setting"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,12 +15,15 @@
     <ScrollViewer>
         <StackPanel>
 
-            <!--  Logo  -->
-            <Image Width="160"
-                   Height="160"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
-                   Source="ms-appx:///Assets/logo.png" />
+            <!--  Logo：LottieGen 生成的 C# 动画源（源 JSON：static/cat_playing_animation.json）  -->
+            <AnimatedVisualPlayer Width="376"
+                                  Height="160"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  AutoPlay="True"
+                                  Stretch="Uniform">
+                <animatedvisuals:Cat_playing_animation />
+            </AnimatedVisualPlayer>
 
             <TextBlock Margin="0,12,0,0"
                        FontSize="24"

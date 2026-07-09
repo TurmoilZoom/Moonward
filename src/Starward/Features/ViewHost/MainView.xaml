@@ -6,6 +6,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.ViewHost"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:muxca="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
              xmlns:sc="using:Starward.Controls"
              xmlns:sfb="using:Starward.Features.Background"
              xmlns:sfg="using:Starward.Features.GameSelector"
@@ -145,7 +146,15 @@
                                     sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Setting}"
                                     Tag="SettingPage">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE713;" />
+                        <AnimatedIcon>
+                            <AnimatedIcon.Source>
+                                <muxca:AnimatedSettingsVisualSource />
+                            </AnimatedIcon.Source>
+                            <AnimatedIcon.FallbackIconSource>
+                                <FontIconSource FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                                Glyph="&#xE713;" />
+                            </AnimatedIcon.FallbackIconSource>
+                        </AnimatedIcon>
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.Content>
                         <Border Height="40">
