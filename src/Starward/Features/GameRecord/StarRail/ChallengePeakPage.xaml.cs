@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.StarRail.ChallengePeak;
@@ -145,6 +146,8 @@ public sealed partial class ChallengePeakPage : PageBase
                     Image_Emoji.Visibility = Visibility.Visible;
                     CurrentChallengePeakRecord = null;
                 }
+                // 右侧详情就绪后同步播放从右入场，避免跨帧闪烁。
+                EntranceAnimation.PlayFromRight(StackPanel_RightContent);
             }
         }
         catch (Exception ex)

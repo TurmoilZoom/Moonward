@@ -123,7 +123,8 @@
         <ScrollViewer Grid.RowSpan="2"
                       Grid.Column="1"
                       Visibility="{x:Bind CurrentInfo, Converter={StaticResource ObjectToVisibilityConverter}}">
-            <StackPanel Width="700"
+            <StackPanel Name="StackPanel_RightContent"
+                        Width="700"
                         Margin="24"
                         Spacing="8">
 

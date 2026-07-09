@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
@@ -144,10 +145,14 @@ public sealed partial class ShiyuDefensePage : PageBase
                 if (detail is ShiyuDefenseInfo infoV1)
                 {
                     CurrentShiyuDefense = infoV1;
+                    // v1 右侧详情就绪后同步播放从右入场。
+                    EntranceAnimation.PlayFromRight(StackPanel_RightContent_V1);
                 }
                 else if (detail is ShiyuDefenseInfoV2 infov2)
                 {
                     CurrentShiyuDefenseV2 = infov2;
+                    // v2 右侧详情就绪后同步播放从右入场。
+                    EntranceAnimation.PlayFromRight(StackPanel_RightContent_V2);
                 }
                 Image_Emoji.Visibility = (info?.HasData ?? false) ? Visibility.Collapsed : Visibility.Visible;
             }

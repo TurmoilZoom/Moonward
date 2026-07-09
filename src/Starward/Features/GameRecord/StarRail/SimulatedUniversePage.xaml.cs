@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.StarRail.SimulatedUniverse;
@@ -166,6 +167,8 @@ public sealed partial class SimulatedUniversePage : PageBase
             }
             CurrentRecord = _gameRecordService.GetSimulatedUniverseRecord(gameRole, data.ScheduleId);
             Image_Emoji.Visibility = (CurrentRecord?.HasData ?? false) ? Visibility.Collapsed : Visibility.Visible;
+            // 右侧详情就绪后同步播放从右入场，避免跨帧闪烁。
+            EntranceAnimation.PlayFromRight(StackPanel_RightContent);
         }
         catch (Exception ex)
         {
