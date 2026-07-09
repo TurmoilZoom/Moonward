@@ -141,7 +141,7 @@
         <ScrollViewer Grid.RowSpan="2"
                       Grid.Column="1"
                       Visibility="{x:Bind CurrentPureFiction, Converter={StaticResource ObjectToVisibilityConverter}}">
-            <StackPanel Name="StackPanel_RightContent" Margin="24" Spacing="8">
+            <StackPanel Margin="24" Spacing="8">
 
                 <Grid>
                     <!--  统计周期  -->

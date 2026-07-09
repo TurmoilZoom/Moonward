@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
-using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.Genshin.ImaginariumTheater;
@@ -142,8 +141,6 @@ public sealed partial class ImaginariumTheaterPage : PageBase
                 CurrentTheater = _gameRecordService.GetImaginariumTheaterInfo(gameRole, info.ScheduleId);
                 HasData = CurrentTheater?.HasData ?? false;
                 Image_Emoji.Visibility = HasData ? Visibility.Collapsed : Visibility.Visible;
-                // 右侧详情就绪后同步播放从右入场，避免跨帧闪烁。
-                EntranceAnimation.PlayFromRight(StackPanel_RightContent);
             }
         }
         catch (Exception ex)

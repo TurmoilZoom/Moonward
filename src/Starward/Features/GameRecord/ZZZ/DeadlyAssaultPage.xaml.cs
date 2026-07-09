@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
@@ -136,8 +135,6 @@ public sealed partial class DeadlyAssaultPage : PageBase
             {
                 CurrentDeadlyAssault = _gameRecordService.GetDeadlyAssaultInfo(gameRole, info.ZoneId);
                 Image_Emoji.Visibility = (CurrentDeadlyAssault?.HasData ?? false) ? Visibility.Collapsed : Visibility.Visible;
-                // 右侧详情就绪后同步播放从右入场，避免跨帧闪烁。
-                EntranceAnimation.PlayFromRight(StackPanel_RightContent);
             }
         }
         catch (Exception ex)

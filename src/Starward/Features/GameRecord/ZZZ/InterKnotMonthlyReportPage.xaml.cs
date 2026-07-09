@@ -495,9 +495,6 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
                 {
                     SelectedWeekStart = defaultWeek;
                 }
-
-                // 与设置页一致：在本帧同步预置 Opacity/Offset 再开启动画，避免 Low 优先级导致「先完整显示再隐藏」的闪烁。
-                EntranceAnimation.PlayFromRight(StackPanel_RightContent);
             }
         }
         catch (Exception ex)

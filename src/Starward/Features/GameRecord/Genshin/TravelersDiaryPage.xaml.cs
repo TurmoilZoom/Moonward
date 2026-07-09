@@ -61,7 +61,7 @@ public sealed partial class TravelersDiaryPage : PageBase
 
     protected override async void OnLoaded()
     {
-        //await Task.Delay(16);
+        await Task.Delay(16);
         await InitializeDataAsync();
     }
 
@@ -174,7 +174,7 @@ public sealed partial class TravelersDiaryPage : PageBase
     [RelayCommand]
     private async Task InitializeDataAsync()
     {
-        //await Task.Delay(16);
+        await Task.Delay(16);
         await GetCurrentSummaryAsync();   // 总是请求当前月最新数据（含 OptionalMonth）
         InitializeSelectedWeek();         // 设置默认周为今天所在周
         GetMonthDataList();               // 从本地 DB 加载历史月份列表
@@ -373,9 +373,6 @@ public sealed partial class TravelersDiaryPage : PageBase
                 {
                     SelectedWeekStart = defaultWeek;
                 }
-
-                // 与设置页一致：在本帧同步预置 Opacity/Offset 再开启动画，避免 Low 优先级导致「先完整显示再隐藏」的闪烁。
-                EntranceAnimation.PlayFromRight(StackPanel_RightContent);
             }
         }
         catch (Exception ex)

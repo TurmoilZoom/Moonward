@@ -114,7 +114,7 @@
 
 
         <ScrollViewer Grid.RowSpan="2" Grid.Column="1">
-            <StackPanel Name="StackPanel_RightContent" Margin="24">
+            <StackPanel Margin="24">
 
 
                 <!--  数据总览  -->

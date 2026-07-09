@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.Genshin.SpiralAbyss;
@@ -148,8 +147,6 @@ public sealed partial class SpiralAbyssPage : PageBase
                 CurrentAbyss = _gameRecordService.GetSpiralAbyssInfo(gameRole, info.ScheduleId);
                 HasData = CurrentAbyss?.TotalBattleCount > 0;
                 Image_Emoji.Visibility = HasData ? Visibility.Collapsed : Visibility.Visible;
-                // 右侧详情就绪后同步播放从右入场，避免跨帧闪烁。
-                EntranceAnimation.PlayFromRight(StackPanel_RightContent);
             }
         }
         catch (Exception ex)
