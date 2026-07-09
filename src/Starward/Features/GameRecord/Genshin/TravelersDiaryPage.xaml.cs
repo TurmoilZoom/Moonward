@@ -153,6 +153,16 @@ public sealed partial class TravelersDiaryPage : PageBase
     private bool isRefreshButtonVisible;
 
 
+    /// <summary>
+    /// 原石图标缓存；切周重建表格时复用同一实例，避免 Image 重新解码导致闪烁。
+    /// </summary>
+    private static readonly BitmapImage PrimogemsIcon = new(new Uri("ms-appx:///Assets/Image/UI_ItemIcon_201.png"));
+
+    /// <summary>
+    /// 摩拉图标缓存；切周重建表格时复用同一实例，避免 Image 重新解码导致闪烁。
+    /// </summary>
+    private static readonly BitmapImage MoraIcon = new(new Uri("ms-appx:///Assets/Image/UI_ItemIcon_202.png"));
+
     private static readonly Dictionary<int, Color> actionColorMap = new Dictionary<int, Color>()
     {
         [0] = Color.FromArgb(0xFF, 0x72, 0xA7, 0xC6),
@@ -523,14 +533,14 @@ public sealed partial class TravelersDiaryPage : PageBase
             .GroupBy(x => (x.Type, x.Date))
             .ToDictionary(g => g.Key, g => g.Sum(x => x.Number));
 
-        // 类型 1=原石，2=摩拉
+        // 类型 1=原石，2=摩拉；图标用缓存实例，避免切周闪烁
         return new List<WeeklyResourceRow>
         {
             new WeeklyResourceRow
             {
                 DataType = "1",
                 Name = Lang.TravelersDiaryPage_Primogems,
-                Icon = new BitmapImage(new Uri("ms-appx:///Assets/Image/UI_ItemIcon_201.png")),
+                Icon = PrimogemsIcon,
                 Cells = dates.Select(d => new WeeklyResourceCell
                 {
                     Date = d,
@@ -542,7 +552,7 @@ public sealed partial class TravelersDiaryPage : PageBase
             {
                 DataType = "2",
                 Name = Lang.TravelersDiaryPage_Mora,
-                Icon = new BitmapImage(new Uri("ms-appx:///Assets/Image/UI_ItemIcon_202.png")),
+                Icon = MoraIcon,
                 Cells = dates.Select(d => new WeeklyResourceCell
                 {
                     Date = d,

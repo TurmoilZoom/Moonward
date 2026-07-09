@@ -195,4 +195,12 @@ public static class WeeklyDailyDataHelper
         }
         return 0;
     }
+
+    /// <summary>
+    /// 周切换箭头的不透明度。不可切换时仍占位（Opacity=0），避免 Collapsed 导致表头列宽塌陷、整表偏移。
+    /// 配合 <c>IsHitTestVisible</c> 禁用点击；命令侧仍有 <c>CanGo*</c> 守卫。
+    /// </summary>
+    /// <param name="canGo">是否可向该方向切换周。</param>
+    /// <returns>可切换时为 1，否则为 0。</returns>
+    public static double GetArrowOpacity(bool canGo) => canGo ? 1.0 : 0.0;
 }

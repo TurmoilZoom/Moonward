@@ -43,6 +43,21 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         this.InitializeComponent();
     }
 
+    /// <summary>
+    /// 菲林图标缓存；切周重建表格时复用同一实例，避免 Image 重新解码导致闪烁。
+    /// </summary>
+    private static readonly BitmapImage PolychromesIcon = new(new Uri("ms-appx:///Assets/Image/IconCurrency.png"));
+
+    /// <summary>
+    /// 加密母带图标缓存；切周重建表格时复用同一实例，避免 Image 重新解码导致闪烁。
+    /// </summary>
+    private static readonly BitmapImage MasterTapeIcon = new(new Uri("ms-appx:///Assets/Image/GachaTicket2Big.png"));
+
+    /// <summary>
+    /// 邦布券图标缓存；切周重建表格时复用同一实例，避免 Image 重新解码导致闪烁。
+    /// </summary>
+    private static readonly BitmapImage BooponsIcon = new(new Uri("ms-appx:///Assets/Image/GachaTicket3Big.png"));
+
 
 
     /// <summary>
@@ -714,13 +729,18 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
 
 
+    /// <summary>
+    /// 将绳网月报数据类型映射为缓存的图标实例（复用 BitmapImage，避免切周闪烁）。
+    /// </summary>
+    /// <param name="type">数据类型常量，见 <see cref="InterKnotReportDataType"/>。</param>
+    /// <returns>对应图标；未知类型时返回 null。</returns>
     public static BitmapImage? DataTypeToImage(string type)
     {
         return type switch
         {
-            InterKnotReportDataType.PolychromesData => new BitmapImage(new("ms-appx:///Assets/Image/IconCurrency.png")),
-            InterKnotReportDataType.MatserTapeData => new BitmapImage(new("ms-appx:///Assets/Image/GachaTicket2Big.png")),
-            InterKnotReportDataType.BooponsData => new BitmapImage(new("ms-appx:///Assets/Image/GachaTicket3Big.png")),
+            InterKnotReportDataType.PolychromesData => PolychromesIcon,
+            InterKnotReportDataType.MatserTapeData => MasterTapeIcon,
+            InterKnotReportDataType.BooponsData => BooponsIcon,
             _ => null,
         };
     }

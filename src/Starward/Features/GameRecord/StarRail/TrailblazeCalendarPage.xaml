@@ -308,13 +308,14 @@
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
 
-                            <!-- 左箭头：放在圆圈行，与日期数字对齐 -->
+                            <!-- 左箭头：放在圆圈行，与日期数字对齐；不可切换时隐藏但占位，避免表头列宽塌陷 -->
                             <Button Grid.Column="0" Grid.Row="1"
                                     Padding="6,2,6,2"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     Command="{x:Bind PreviousWeekCommand}"
-                                    Visibility="{x:Bind CanGoPreviousWeek, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    Opacity="{x:Bind wdd:WeeklyDailyDataHelper.GetArrowOpacity(CanGoPreviousWeek)}"
+                                    IsHitTestVisible="{x:Bind CanGoPreviousWeek}">
                                 <FontIcon Glyph="&#xE76B;" FontSize="12" />
                             </Button>
 
@@ -344,13 +345,14 @@
                                 </ItemsRepeater.ItemTemplate>
                             </ItemsRepeater>
 
-                            <!-- 右箭头：放在圆圈行，与日期数字对齐 -->
+                            <!-- 右箭头：放在圆圈行，与日期数字对齐；不可切换时隐藏但占位，避免表头列宽塌陷 -->
                             <Button Grid.Column="2" Grid.Row="1"
                                     Padding="6,2,6,2"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     Command="{x:Bind NextWeekCommand}"
-                                    Visibility="{x:Bind CanGoNextWeek, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    Opacity="{x:Bind wdd:WeeklyDailyDataHelper.GetArrowOpacity(CanGoNextWeek)}"
+                                    IsHitTestVisible="{x:Bind CanGoNextWeek}">
                                 <FontIcon Glyph="&#xE76C;" FontSize="12" />
                             </Button>
                         </Grid>

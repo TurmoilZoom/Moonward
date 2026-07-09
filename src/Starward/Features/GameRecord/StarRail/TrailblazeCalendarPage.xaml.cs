@@ -42,6 +42,16 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         this.InitializeComponent();
     }
 
+    /// <summary>
+    /// 星琼图标缓存；切周重建表格时复用同一实例，避免 Image 重新解码导致闪烁。
+    /// </summary>
+    private static readonly BitmapImage StellarJadeIcon = new(new Uri("ms-appx:///Assets/Image/900001.png"));
+
+    /// <summary>
+    /// 星轨票图标缓存；切周重建表格时复用同一实例，避免 Image 重新解码导致闪烁。
+    /// </summary>
+    private static readonly BitmapImage PassIcon = new(new Uri("ms-appx:///Assets/Image/101.png"));
+
 
     /// <summary>
     /// 当前游戏角色，从导航参数传入。
@@ -537,13 +547,14 @@ public sealed partial class TrailblazeCalendarPage : PageBase
             .GroupBy(x => (x.Type, x.Date))
             .ToDictionary(g => g.Key, g => g.Sum(x => x.Number));
 
+        // 图标用缓存实例，避免切周闪烁
         return new List<WeeklyResourceRow>
         {
             new WeeklyResourceRow
             {
                 DataType = "1",
                 Name = Lang.TrailblazeCalendarPage_StellarJade,
-                Icon = new BitmapImage(new Uri("ms-appx:///Assets/Image/900001.png")),
+                Icon = StellarJadeIcon,
                 Cells = dates.Select(d => new WeeklyResourceCell
                 {
                     Date = d,
@@ -555,7 +566,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
             {
                 DataType = "2",
                 Name = Lang.TrailblazeCalendarPage_PassAndSpecialPass,
-                Icon = new BitmapImage(new Uri("ms-appx:///Assets/Image/101.png")),
+                Icon = PassIcon,
                 Cells = dates.Select(d => new WeeklyResourceCell
                 {
                     Date = d,
