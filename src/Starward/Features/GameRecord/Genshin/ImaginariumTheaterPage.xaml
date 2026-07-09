@@ -88,6 +88,7 @@
 
         <ListView Name="ListView_TheaterList"
                   Grid.Row="1"
+                  Margin="0,12,0,0"
                   Padding="12,0,12,0"
                   ItemsSource="{x:Bind TheaterList}"
                   SelectionChanged="ListView_TheaterList_SelectionChanged"
@@ -141,8 +142,9 @@
 
         <ScrollViewer Grid.RowSpan="2"
                       Grid.Column="1"
+                      Margin="0,24,0,0"
                       Visibility="{x:Bind CurrentTheater, Converter={StaticResource ObjectToVisibilityConverter}}">
-            <StackPanel Margin="12,24,24,24" Spacing="8">
+            <StackPanel Margin="12,0,24,24" Spacing="8">
                 <Grid>
                     <!--  统计周期  -->
                     <TextBlock HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}">

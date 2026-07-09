@@ -81,6 +81,7 @@
 
         <ListView Name="ListView_StygianOnslaughtPageList"
                   Grid.Row="1"
+                  Margin="0,12,0,0"
                   Padding="12,0,12,0"
                   ItemsSource="{x:Bind SOList}"
                   SelectionChanged="ListView_StygianOnslaughtPageList_SelectionChanged"
@@ -122,9 +123,10 @@
 
         <ScrollViewer Grid.RowSpan="2"
                       Grid.Column="1"
+                      Margin="0,24,0,0"
                       Visibility="{x:Bind CurrentInfo, Converter={StaticResource ObjectToVisibilityConverter}}">
             <StackPanel Width="700"
-                        Margin="24"
+                        Margin="24,0,24,24"
                         Spacing="8">
 
                 <Grid>

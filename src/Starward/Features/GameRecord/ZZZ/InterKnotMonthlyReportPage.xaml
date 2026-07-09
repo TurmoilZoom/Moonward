@@ -55,7 +55,7 @@
             <Button Height="36"
                     BorderThickness="0"
                     CornerRadius="0,18,18,0"
-                    IsEnabled="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}"
+                    IsEnabled="{x:Bind GetFullDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}"
                     Style="{ThemeResource AccentButtonStyle}">
                 <StackPanel Margin="4,0,4,0"
                             Orientation="Horizontal"
@@ -63,10 +63,10 @@
                     <Grid>
                         <ProgressRing Width="16"
                                       Height="16"
-                                      IsActive="{x:Bind GetDataDetailsCommand.IsRunning}" />
+                                      IsActive="{x:Bind GetFullDataDetailsCommand.IsRunning}" />
                         <FontIcon FontSize="16"
                                   Glyph="&#xEA37;"
-                                  Visibility="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                                  Visibility="{x:Bind GetFullDataDetailsCommand.IsRunning, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
                     </Grid>
                     <TextBlock Text="{x:Bind lang:Lang.TravelersDiaryPage_GetDetails}" />
                 </StackPanel>
@@ -118,8 +118,10 @@
 
 
 
-        <ScrollViewer Grid.RowSpan="2" Grid.Column="1">
-            <StackPanel Margin="24" Spacing="8">
+        <ScrollViewer Grid.RowSpan="2"
+                      Grid.Column="1"
+                      Margin="0,24,0,0">
+            <StackPanel Margin="24,0,24,24" Spacing="8">
 
                 <!--  Statistics Data  -->
                 <Grid Margin="0,8,0,0"
@@ -138,17 +140,17 @@
                     <Button Grid.Column="1"
                             Padding="8,4,8,4"
                             VerticalAlignment="Center"
-                            Command="{x:Bind GetDataDetailsCommand}"
+                            Command="{x:Bind GetFullDataDetailsCommand}"
                             CommandParameter="{x:Bind SelectMonthData.DataMonth}"
-                            IsEnabled="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}"
+                            IsEnabled="{x:Bind GetFullDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}"
                             Visibility="{x:Bind IsRefreshButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <ProgressRing Width="16"
                                           Height="16"
-                                          IsActive="{x:Bind GetDataDetailsCommand.IsRunning}" />
+                                          IsActive="{x:Bind GetFullDataDetailsCommand.IsRunning}" />
                             <FontIcon FontSize="14"
                                       Glyph="&#xE72C;"
-                                      Visibility="{x:Bind GetDataDetailsCommand.IsRunning, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                                      Visibility="{x:Bind GetFullDataDetailsCommand.IsRunning, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
                         </Grid>
                     </Button>
                 </Grid>

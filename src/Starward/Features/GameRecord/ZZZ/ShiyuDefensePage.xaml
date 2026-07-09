@@ -79,6 +79,7 @@
 
         <ListView Name="ListView_ShiyuDefense"
                   Grid.Row="1"
+                  Margin="0,12,0,0"
                   Padding="12,0,12,0"
                   ItemsSource="{x:Bind ShiyuDefenseList}"
                   SelectionChanged="ListView_ShiyuDefense_SelectionChanged"
@@ -129,8 +130,9 @@
         <!--  v1  -->
         <ScrollViewer Grid.RowSpan="2"
                       Grid.Column="1"
+                      Margin="0,24,0,0"
                       Visibility="{x:Bind CurrentShiyuDefense, Converter={StaticResource ObjectToVisibilityConverter}}">
-            <StackPanel Margin="24" Spacing="8">
+            <StackPanel Margin="24,0,24,24" Spacing="8">
 
                 <Grid>
                     <!--  统计周期  -->
@@ -864,8 +866,9 @@
         <!--  v2  -->
         <ScrollViewer Grid.RowSpan="2"
                       Grid.Column="1"
+                      Margin="0,24,0,0"
                       Visibility="{x:Bind CurrentShiyuDefenseV2, Converter={StaticResource ObjectToVisibilityConverter}}">
-            <StackPanel Margin="24" Spacing="8">
+            <StackPanel Margin="24,0,24,24" Spacing="8">
 
                 <Grid>
                     <!--  统计周期  -->
