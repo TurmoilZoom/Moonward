@@ -64,6 +64,11 @@ public sealed partial class SettingPage : PageBase
 
 
 
+    /// <summary>
+    /// 设置侧栏导航项被点选时，切换到对应设置子页。
+    /// </summary>
+    /// <param name="sender">触发事件的 NavigationView。</param>
+    /// <param name="args">包含被点选项容器（Tag 为子页类型名）的事件参数。</param>
     private void NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         try
@@ -81,7 +86,8 @@ public sealed partial class SettingPage : PageBase
                 nameof(GamepadControlSetting) => typeof(GamepadControlSetting),
                 _ => null,
             };
-            if (type is not null)
+            // 重复点击当前项时 ItemInvoked 仍会触发；跳过同页 Navigate，避免重新入场动画
+            if (type is not null && Frame_Setting.CurrentSourcePageType != type)
             {
                 Frame_Setting.Navigate(type);
             }
