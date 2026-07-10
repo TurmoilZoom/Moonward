@@ -14,7 +14,11 @@ using Windows.Foundation;
 namespace Starward.Controls;
 
 /// <summary>
-/// 每个 <see cref="XamlRoot"/> 共享一个 Popup 实例，承载即时 Tooltip 的显示、定位与 Composition 动画。
+/// 每个 <see cref="XamlRoot"/> 共享一个 <see cref="Popup"/>，承载即时 Tooltip 的显示、定位与 Composition 动画。
+/// <para>
+/// 由 <see cref="InstantTooltip"/> 按窗口创建与释放；多锚点注册指针事件后，悬停时复用同一气泡改文案与偏移。
+/// 无 XAML 模板：UI 在构造函数中代码搭建（Border + TextBlock）。
+/// </para>
 /// </summary>
 internal sealed class InstantTooltipHost
 {
@@ -30,40 +34,55 @@ internal sealed class InstantTooltipHost
     /// <summary>提示与锚点元素的间距（像素）。</summary>
     private const double Gap = 8;
 
+    /// <summary>本宿主所属的视觉树根（Popup 挂载点）。</summary>
     private readonly XamlRoot _xamlRoot;
 
+    /// <summary>用于延后隐藏判断与动画完成后回 UI 线程关 Popup。</summary>
     private readonly DispatcherQueue _dispatcherQueue;
 
+    /// <summary>承载提示内容的轻量弹出层；全窗口唯一实例。</summary>
     private readonly Popup _popup;
 
+    /// <summary>提示气泡容器（亚克力背景、圆角、内边距）。</summary>
     private readonly Border _content;
 
+    /// <summary>提示正文。</summary>
     private readonly TextBlock _text;
 
+    /// <summary>驱动 scale / opacity 关键帧动画的 Composition 合成器。</summary>
     private readonly Compositor _compositor;
 
+    /// <summary>解析 ThemeResource 时优先查此元素的 Resources，再回退 Application.Resources。</summary>
     private readonly FrameworkElement _themeSource;
 
+    /// <summary>已注册指针事件的锚点集合；用于去重与 Dispose 时批量解绑。</summary>
     private readonly HashSet<FrameworkElement> _elements = [];
 
+    /// <summary>
+    /// 指针是否仍在任一已注册锚点内。
+    /// 相邻项切换时 Exited→Entered 之间短暂为 false，配合延后隐藏避免闪烁。
+    /// </summary>
     private bool _pointerInsideAnyElement;
 
+    /// <summary>是否已排队/正在执行隐藏流程，防止重复触发退场动画。</summary>
     private bool _hideScheduled;
 
+    /// <summary>当前正在展示 Tooltip 的锚点；注销该锚点时需立即隐藏。</summary>
     private FrameworkElement? _currentAnchor;
 
+    /// <summary>当前展示所用的方位（影响偏移与缩放中心）。</summary>
     private InstantTooltipPlacement _currentPlacement = InstantTooltipPlacement.Right;
 
 
-    /// <summary>当前是否无任何挂接元素。</summary>
+    /// <summary>当前是否无任何挂接元素（为 true 时 <see cref="InstantTooltip"/> 可释放本 Host）。</summary>
     public bool IsEmpty => _elements.Count == 0;
 
 
     /// <summary>
-    /// 为指定视觉树根创建 Tooltip 宿主。
+    /// 为指定视觉树根创建 Tooltip 宿主（搭建 Popup 视觉树，默认不打开）。
     /// </summary>
-    /// <param name="xamlRoot">用于 Popup 与主题资源的 XamlRoot。</param>
-    /// <param name="themeSource">用于解析 ThemeResource 的元素。</param>
+    /// <param name="xamlRoot">用于 Popup 挂载的 XamlRoot。</param>
+    /// <param name="themeSource">用于解析 ThemeResource 与取得 <see cref="DispatcherQueue"/> 的元素。</param>
     public InstantTooltipHost(XamlRoot xamlRoot, FrameworkElement themeSource)
     {
         _xamlRoot = xamlRoot;
@@ -72,6 +91,7 @@ internal sealed class InstantTooltipHost
 
         _text = new TextBlock
         {
+            // 跟随系统文字缩放会改变测量尺寸，定位易抖，故关闭
             IsTextScaleFactorEnabled = false,
             MaxWidth = 320,
             TextWrapping = TextWrapping.Wrap,
@@ -89,6 +109,7 @@ internal sealed class InstantTooltipHost
 
         _popup = new Popup
         {
+            // 点击其它区域不自动关闭；由指针进出锚点控制显隐
             IsLightDismissEnabled = false,
             Child = _content,
             XamlRoot = xamlRoot,
@@ -116,7 +137,7 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 解除元素注册并清理事件订阅。
+    /// 解除元素注册并清理事件订阅；若正是当前展示锚点则隐藏 Tooltip。
     /// </summary>
     /// <param name="element">待注销的锚点元素。</param>
     public void Unregister(FrameworkElement element)
@@ -139,7 +160,7 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 关闭 Popup 并清空全部挂接。
+    /// 关闭 Popup、解绑全部锚点并清空状态（Host 从字典移除前调用）。
     /// </summary>
     public void Dispose()
     {
@@ -158,6 +179,11 @@ internal sealed class InstantTooltipHost
     }
 
 
+    /// <summary>
+    /// 锚点离开视觉树时转交 <see cref="InstantTooltip.OnElementUnloaded"/> 做完整解绑。
+    /// </summary>
+    /// <param name="sender">卸载的锚点。</param>
+    /// <param name="e">路由事件参数。</param>
     private void Element_Unloaded(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement element)
@@ -167,6 +193,11 @@ internal sealed class InstantTooltipHost
     }
 
 
+    /// <summary>
+    /// 指针进入锚点：取消待隐藏并立即显示对应文案。
+    /// </summary>
+    /// <param name="sender">锚点元素。</param>
+    /// <param name="e">指针事件参数。</param>
     private void Element_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
         _pointerInsideAnyElement = true;
@@ -178,6 +209,11 @@ internal sealed class InstantTooltipHost
     }
 
 
+    /// <summary>
+    /// 指针离开锚点：延后一拍再决定是否隐藏，避免相邻项切换时气泡闪断。
+    /// </summary>
+    /// <param name="sender">锚点元素。</param>
+    /// <param name="e">指针事件参数。</param>
     private void Element_PointerExited(object sender, PointerRoutedEventArgs e)
     {
         _pointerInsideAnyElement = false;
@@ -214,6 +250,7 @@ internal sealed class InstantTooltipHost
         _currentPlacement = InstantTooltip.GetPlacement(element);
         _text.Text = label;
         UpdatePosition(element);
+        // 须在 IsOpen 前重置 visual，否则会先闪一帧完整大小
         PrepareShowVisual();
         _popup.IsOpen = true;
         PlayShowAnimation();
@@ -233,7 +270,7 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 按当前方位将 Popup 定位到锚点附近（窗口坐标系）。
+    /// 按当前方位将 Popup 定位到锚点附近（窗口坐标系，经 <see cref="UIElement.TransformToVisual"/>）。
     /// </summary>
     /// <param name="element">锚点元素。</param>
     private void UpdatePosition(FrameworkElement element)
@@ -260,6 +297,7 @@ internal sealed class InstantTooltipHost
                 _popup.VerticalOffset = bounds.Bottom + Gap;
                 break;
             default:
+                // Right：导航 LeftCompact 侧栏默认，贴在锚点右侧垂直居中
                 _popup.HorizontalOffset = bounds.Right + Gap;
                 _popup.VerticalOffset = bounds.Top + (bounds.Height - tipHeight) / 2;
                 break;
@@ -280,7 +318,8 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 播放从小到大的入场动画（scale 0.7→1 + 淡入，500ms smootherstep 缓动）。
+    /// 播放从小到大的入场动画（scale 0.7→1 + 淡入，500ms 缓动）。
+    /// 全局关闭动画时直接设为最终态。
     /// </summary>
     private void PlayShowAnimation()
     {
@@ -314,6 +353,7 @@ internal sealed class InstantTooltipHost
 
     /// <summary>
     /// 隐藏 Tooltip；有动画时先快速缩小淡出，动画结束后再关闭 Popup。
+    /// 退场期间若指针再次进入任一锚点，则不关闭 Popup（避免打断新目标的展示）。
     /// </summary>
     private void HideTooltip()
     {
@@ -345,12 +385,14 @@ internal sealed class InstantTooltipHost
         opacity.InsertKeyFrame(1f, 0f, ease);
         opacity.Duration = TimeSpan.FromMilliseconds(HideDurationMs);
 
+        // ScopedBatch：等 scale/opacity 都结束后再关 Popup，避免动画中途被拆掉
         CompositionScopedBatch batch = _compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
         batch.Completed += (_, _) =>
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
                 _hideScheduled = false;
+                // 退场过程中若已 Entered 新锚点，保留 Popup 由 ShowTooltip 接管
                 if (!_pointerInsideAnyElement)
                 {
                     _popup.IsOpen = false;
@@ -365,7 +407,7 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 从应用/页面资源字典解析主题画刷。
+    /// 从元素局部资源或应用资源字典解析主题画刷。
     /// </summary>
     /// <param name="resourceKey">ThemeResource 键名。</param>
     /// <returns>解析到的画刷；失败时返回透明画刷。</returns>
@@ -395,6 +437,7 @@ internal sealed class InstantTooltipHost
         double width = tipSize.Width;
         double height = tipSize.Height;
 
+        // Right → 左边中点；Left → 右边中点；Top/Bottom 同理取靠近锚点一侧
         return _currentPlacement switch
         {
             InstantTooltipPlacement.Left => new Vector3((float)width, (float)(height / 2), 0f),

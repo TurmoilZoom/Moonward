@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+  主界面壳层：背景 + 左侧紧凑导航 + 内容 Frame + 顶层游戏选择器。
+  导航项文案：固定项用 x:Bind 绑定 Lang；抽卡/工具箱随游戏变化，在 code-behind 赋值。
+  Compact 模式下文字被收起，悬停提示用 InstantTooltip（即时 Popup，非系统 ToolTipService）。
+-->
 <UserControl x:Class="Starward.Features.ViewHost.MainView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,14 +20,24 @@
 
     <Grid>
 
+        <!--  全窗背景（随 CurrentGameId 切换游戏背景）  -->
         <sfb:AppBackground x:Name="AppBackground" CurrentGameId="{x:Bind CurrentGameId}" />
 
 
+        <!--
+          导航栏亚克力底：LeftCompact 时 Pane 背景可能透出内容，
+          用与 CompactPaneLength 同宽的竖条兜底，避免侧栏区域露底。
+        -->
         <Border Width="56"
                 HorizontalAlignment="Left"
                 Background="{ThemeResource CustomAcrylicBrush}" />
 
 
+        <!--
+          非启动器页的半透明遮罩，减轻背景干扰阅读。
+          Opacity 在 NavigateTo 中按页面类型切换（启动器/空白=0，其余=1）；
+          ScalarTransition 提供淡入淡出，勿用动画属性绑定覆盖。
+        -->
         <Border Name="Border_OverlayMask"
                 Background="{ThemeResource CustomAcrylicBrush}"
                 Opacity="0">
@@ -32,6 +47,10 @@
         </Border>
 
 
+        <!--
+          左侧导航：固定 LeftCompact，宽度 56，无返回/汉堡/内置设置项。
+          Item Tag 为页面类型名，ItemInvoked 中映射到对应 Page 类型并导航。
+        -->
         <NavigationView Name="MainView_NavigationView"
                         CompactPaneLength="56"
                         IsBackButtonVisible="Collapsed"
@@ -40,18 +59,23 @@
                         ItemInvoked="NavigationView_ItemInvoked"
                         PaneDisplayMode="LeftCompact">
             <NavigationView.Resources>
+                <!--  内容区透明，背景由 AppBackground 承担  -->
                 <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
                 <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
                 <!--<Thickness x:Key="NavigationViewContentMargin">0,48,0,0</Thickness>-->
             </NavigationView.Resources>
 
+            <!--  为顶栏/游戏图标预留高度，避免与 Pane 菜单项重叠  -->
             <NavigationView.PaneCustomContent>
                 <Border Height="52" />
             </NavigationView.PaneCustomContent>
 
             <NavigationView.MenuItems>
                 <NavigationViewItemSeparator />
-                <!--  启动器  -->
+                <!--
+                  启动器：默认选中。Content 内 Border 固定 40 高，
+                  保证紧凑/展开图标行高一致；Tag 供 ItemInvoked 解析目标页。
+                -->
                 <NavigationViewItem Name="NavigationViewItem_Launcher"
                                     IsSelected="True"
                                     sc:InstantTooltip.Text="{x:Bind lang:Lang.MainPage_Launcer}"
@@ -65,7 +89,7 @@
                         </Border>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
-                <!--  显示设置  -->
+                <!--  显示设置（游戏画质/分辨率等）  -->
                 <NavigationViewItem Name="NavigationViewItem_GameSetting"
                                     sc:InstantTooltip.Text="{x:Bind lang:Lang.MainPage_DisplaySetting}"
                                     Tag="GameSettingPage">
@@ -91,7 +115,10 @@
                         </Border>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
-                <!--  抽卡记录  -->
+                <!--
+                  抽卡记录：展开文案与 InstantTooltip 均随游戏变化
+                  （祈愿/跃迁/信号检索），见 UpdateNavigationLabels。
+                -->
                 <NavigationViewItem Name="NavigationViewItem_GachaLog" Tag="GachaLogPage">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xF4A5;" />
@@ -102,7 +129,10 @@
                         </Border>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
-                <!--  工具箱  -->
+                <!--
+                  战绩/工具箱：国服「米游社工具箱」/ 国际服「HoYoLAB 工具箱」，
+                  文案与 Tooltip 由 UpdateNavigationLabels 按区服写入。
+                -->
                 <NavigationViewItem Name="NavigationViewItem_HoyolabToolbox" Tag="GameRecordPage">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xF133;" />
@@ -113,7 +143,7 @@
                         </Border>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
-                <!--  账号记录  -->
+                <!--  账号记录（自助查询）  -->
                 <NavigationViewItem Name="NavigationViewItem_SelfQuery"
                                     sc:InstantTooltip.Text="{x:Bind lang:Lang.SelfQueryPage_AccountRecords}"
                                     Tag="SelfQueryPage">
@@ -126,7 +156,7 @@
                         </Border>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
-                <!--  千星奇域颂愿  -->
+                <!--  千星奇域颂愿（原神玩法相关，按 GameFeatureConfig 显隐）  -->
                 <NavigationViewItem Name="NavigationViewItem_GenshinBeyondGacha"
                                     sc:InstantTooltip.Text="{x:Bind lang:Lang.GenshinBeyondGachaPage_MiliastraWonderlandOde}"
                                     Tag="GenshinBeyondGachaPage">
@@ -141,6 +171,7 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
+            <!--  底部固定：设置（自绘 Footer 项，不用 NavigationView 内置 Settings）  -->
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem Name="NavigationViewItem_Setting"
                                     sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Setting}"
@@ -164,12 +195,13 @@
                 </NavigationViewItem>
             </NavigationView.FooterMenuItems>
 
+            <!--  内容宿主：上边距避开顶栏拖动/标题区域  -->
             <Frame Name="MainView_Frame" Margin="0,48,0,0" />
 
         </NavigationView>
 
 
-
+        <!--  左上角游戏选择器（叠在 NavigationView 之上，切换 CurrentGameId）  -->
         <sfg:GameSelector x:Name="GameSelector" CurrentGameChanged="GameSelector_CurrentGameChanged" />
 
 

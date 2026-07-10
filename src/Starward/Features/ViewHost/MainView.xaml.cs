@@ -26,6 +26,10 @@ using System.Threading.Tasks;
 
 namespace Starward.Features.ViewHost;
 
+/// <summary>
+/// 主窗口内容壳：左侧导航、内容 Frame、游戏选择与启动后的后台任务（更新检查、抽卡名缓存、自动签到等）。
+/// 导航可见性由 <see cref="GameFeatureConfig"/> 按当前 <see cref="GameId"/> 决定；页面切换走 <see cref="NavigateTo"/>。
+/// </summary>
 [INotifyPropertyChanged]
 public sealed partial class MainView : UserControl
 {
@@ -34,13 +38,22 @@ public sealed partial class MainView : UserControl
     private readonly ILogger<MainView> _logger = AppConfig.GetLogger<MainView>();
 
 
+    /// <summary>
+    /// 当前选中的游戏标识（含区服）。驱动背景、导航项显隐与页面导航参数。
+    /// </summary>
     public GameId? CurrentGameId { get; private set => SetProperty(ref field, value); }
 
 
+    /// <summary>
+    /// 当前游戏对应的功能开关与支持页面列表，由 <see cref="GameFeatureConfig.FromGameId"/> 生成。
+    /// </summary>
     private GameFeatureConfig CurrentGameFeatureConfig { get; set; }
 
 
 
+    /// <summary>
+    /// 初始化主视图：加载 XAML 并注册消息、同步初始游戏与导航状态。
+    /// </summary>
     public MainView()
     {
         this.InitializeComponent();
@@ -48,11 +61,14 @@ public sealed partial class MainView : UserControl
     }
 
 
-
+    /// <summary>
+    /// 完成主视图启动配置：订阅 Loaded、从游戏选择器取当前游戏、刷新导航，并注册 Messenger。
+    /// </summary>
     private void InitializeMainView()
     {
         this.Loaded += MainView_Loaded;
         GameId? gameId = GameSelector.CurrentGameId;
+        // 崩坏3 国际服同一 GameBiz 下有多区服，用上次选择的 GameId.Id 覆盖
         if (gameId?.GameBiz == GameBiz.bh3_global)
         {
             string? id = AppConfig.LastGameIdOfBH3Global;
@@ -74,6 +90,11 @@ public sealed partial class MainView : UserControl
 
 
 
+    /// <summary>
+    /// 首次加载到视觉树后：热键、更新检查、抽卡名缓存、批量签到、RPC 环境与可选手柄支持。
+    /// </summary>
+    /// <param name="sender">事件源（本控件）。</param>
+    /// <param name="e">路由事件参数。</param>
     private async void MainView_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         HotkeyManager.InitializeHotkey(this.XamlRoot.GetWindowHandle());
@@ -85,6 +106,7 @@ public sealed partial class MainView : UserControl
         AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
         if (AppConfig.EnableGamepadController)
         {
+            // 延后初始化，避免与首屏布局/输入抢占同一时刻
             await Task.Delay(1000);
             var queue = Content.DispatcherQueue;
             _ = Task.Run(() => GamepadController.Initialize(queue));
@@ -94,6 +116,11 @@ public sealed partial class MainView : UserControl
 
 
 
+    /// <summary>
+    /// 游戏选择器切换当前游戏：更新功能配置与导航，并后台刷新该游戏抽卡物品信息。
+    /// </summary>
+    /// <param name="sender">游戏选择器。</param>
+    /// <param name="e">新游戏 Id，以及是否双击（本方法未使用 DoubleTapped）。</param>
     private void GameSelector_CurrentGameChanged(object? sender, (GameId, bool DoubleTapped) e)
     {
         if (e.Item1.GameBiz == GameBiz.bh3_global)
@@ -114,11 +141,17 @@ public sealed partial class MainView : UserControl
 
 
 
+    /// <summary>
+    /// 崩坏3 国际服区服变更：写回当前 <see cref="CurrentGameId"/> 并强制回到启动器页（无转场动画）。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="message">携带新区服对应的 GameId 字符串。</param>
     private void OnBH3GlobalGameServerChanged(object _, BH3GlobalGameServerChangedMessage message)
     {
         if (CurrentGameId?.GameBiz == GameBiz.bh3_global)
         {
             CurrentGameId.Id = message.GameId;
+            // 通知 x:Bind（如 AppBackground）刷新
             OnPropertyChanged(nameof(CurrentGameId));
             NavigateTo(typeof(GameLauncherPage), CurrentGameId, new SuppressNavigationTransitionInfo());
         }
@@ -146,6 +179,10 @@ public sealed partial class MainView : UserControl
     }
 
 
+    /// <summary>
+    /// 按当前游戏的 <see cref="GameFeatureConfig.SupportedPages"/> 显隐导航项，
+    /// 刷新动态文案，并在非设置页时按当前选中页类型重新导航（无游戏则进空白页）。
+    /// </summary>
     private void UpdateNavigationView()
     {
         NavigationViewItem_Launcher.Visibility = CurrentGameFeatureConfig.SupportedPages.Contains(nameof(GameLauncherPage)).ToVisibility();
@@ -162,6 +199,7 @@ public sealed partial class MainView : UserControl
         {
             NavigateTo(typeof(BlankPage));
         }
+        // 设置页跨游戏通用，切换游戏时保留；其余页用当前 SourcePageType 重入以带上新 GameId
         else if (MainView_Frame.SourcePageType?.Name is not nameof(SettingPage))
         {
             NavigateTo(MainView_Frame.SourcePageType);
@@ -174,7 +212,7 @@ public sealed partial class MainView : UserControl
     /// </summary>
     private void UpdateNavigationLabels()
     {
-        // 抽卡记录名称
+        // 抽卡记录名称：各游戏官方用语不同（祈愿 / 跃迁 / 信号检索）
         string gachalogText = CurrentGameId?.GameBiz.Game switch
         {
             GameBiz.hk4e => Lang.GachaLogService_WishRecords,
@@ -184,6 +222,7 @@ public sealed partial class MainView : UserControl
         };
 
         TextBlock_GachaLog.Text = gachalogText;
+        // Compact 侧栏不显示 Content 文字，需同步 InstantTooltip 供悬停展示
         InstantTooltip.SetText(NavigationViewItem_GachaLog, gachalogText);
 
         if (CurrentGameId?.GameBiz.IsChinaServer() ?? false)
@@ -200,10 +239,17 @@ public sealed partial class MainView : UserControl
 
 
 
+    /// <summary>
+    /// 导航栏项被点选：根据 <see cref="NavigationViewItem.Tag"/> 映射页面类型并导航。
+    /// 已选中项再次点击忽略；内置 Settings 调用路径保留但当前 XAML 已关闭 <c>IsSettingsVisible</c>。
+    /// </summary>
+    /// <param name="sender">导航视图。</param>
+    /// <param name="args">调用项与是否设置页等参数。</param>
     private void NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         try
         {
+            // 重复点击当前选中项不重新导航，避免无意义的页面重建
             if (args.InvokedItemContainer?.IsSelected ?? false)
             {
                 return;
@@ -237,17 +283,25 @@ public sealed partial class MainView : UserControl
 
 
 
+    /// <summary>
+    /// 导航到指定页面，并同步导航选中态与内容区遮罩。
+    /// </summary>
+    /// <param name="page">目标页类型；为 <see langword="null"/> 时回退为启动器页。</param>
+    /// <param name="param">导航参数，默认传当前 <see cref="CurrentGameId"/>。</param>
+    /// <param name="infoOverride">可选转场信息（如区服切换时的 <see cref="SuppressNavigationTransitionInfo"/>）。</param>
     private void NavigateTo(Type? page, object? param = null, NavigationTransitionInfo? infoOverride = null)
     {
         page ??= typeof(GameLauncherPage);
         if (page.Name is nameof(BlankPage) && CurrentGameId is null)
         {
-
+            // 无游戏时允许空白页，跳过 SupportedPages 校验
         }
         else if (page.Name is not nameof(SettingPage) && !CurrentGameFeatureConfig.SupportedPages.Contains(page.Name))
         {
+            // 当前游戏不支持该页时回退启动器（设置页始终可用）
             page = typeof(GameLauncherPage);
         }
+        // 仅对启动器/设置强制同步 SelectedItem；其余项由用户点击时系统维护
         if (page.Name is nameof(GameLauncherPage))
         {
             MainView_NavigationView.SelectedItem = NavigationViewItem_Launcher;
@@ -257,6 +311,7 @@ public sealed partial class MainView : UserControl
             MainView_NavigationView.SelectedItem = NavigationViewItem_Setting;
         }
         MainView_Frame.Navigate(page, param ?? CurrentGameId, infoOverride);
+        // 启动器与空白页展示完整背景；其它功能页加亚克力遮罩便于阅读
         if (page.Name is nameof(BlankPage) or nameof(GameLauncherPage))
         {
             Border_OverlayMask.Opacity = 0;
@@ -268,7 +323,11 @@ public sealed partial class MainView : UserControl
     }
 
 
-
+    /// <summary>
+    /// 响应跨模块导航请求（如其它页面通过 Messenger 要求跳转）。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="message">目标页面类型。</param>
     private void OnMainViewNavigateMessageReceived(object _, MainViewNavigateMessage message)
     {
         NavigateTo(message.Page);
@@ -285,19 +344,28 @@ public sealed partial class MainView : UserControl
     #region Update
 
 
+    /// <summary>上次成功发起更新检查的时间，用于 1 小时节流。</summary>
     private DateTimeOffset _lastCheckUpdateTime;
 
+    /// <summary>上次弹出更新窗口的时间，用于 6 小时且跨日节流。</summary>
     private DateTimeOffset _lastShowUpdateTime;
 
+    /// <summary>更新检查互斥锁，避免窗口状态变化触发的并发检查叠跑。</summary>
     private SemaphoreSlim _updateLock = new(1, 1);
 
 
+    /// <summary>
+    /// 在用户开启更新通知时检查新版本，并按节流规则弹出 <see cref="UpdateWindow"/>。
+    /// Debug / <c>DONOT_CHECK_UPDATE</c> 构建直接跳过。
+    /// </summary>
+    /// <returns>表示异步检查的任务。</returns>
     private async Task CheckUpdateOrShowRecentUpdateContentAsync()
     {
 #if DEBUG || DONOT_CHECK_UPDATE
         return;
 #endif
 #pragma warning disable CS0162 // 检测到无法访问的代码
+        // Wait(0)：已有检查在跑则立即返回，不排队
         if (!await _updateLock.WaitAsync(0))
         {
             return;
@@ -315,6 +383,7 @@ public sealed partial class MainView : UserControl
             {
                 var release = await AppConfig.GetService<UpdateService>().CheckUpdateAsync(false);
                 _lastCheckUpdateTime = now;
+                // 有新版本时：距上次弹窗超过 6 小时且不在同一天，才再弹窗
                 if (release != null && now - _lastShowUpdateTime > TimeSpan.FromHours(6) && now.Date != _lastShowUpdateTime.Date)
                 {
                     new UpdateWindow { NewVersion = release }.Activate();
@@ -340,10 +409,17 @@ public sealed partial class MainView : UserControl
 }
 
 
-
+/// <summary>
+/// 将布尔值转为 <see cref="Visibility"/>（true→Visible，false→Collapsed），供导航项显隐绑定使用。
+/// </summary>
 file static class BoolToVisibilityExtension
 {
 
+    /// <summary>
+    /// 转换可见性。
+    /// </summary>
+    /// <param name="value">为 true 时显示，否则折叠。</param>
+    /// <returns>对应的 <see cref="Visibility"/>。</returns>
     public static Visibility ToVisibility(this bool value)
     {
         return value ? Visibility.Visible : Visibility.Collapsed;
