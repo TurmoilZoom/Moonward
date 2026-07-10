@@ -55,6 +55,18 @@ public sealed partial class MainWindow : WindowEx
 
 
     /// <summary>
+    /// 上一次用于计算标题栏按钮透传区的 DPI 缩放；跨显示器时与当前值比对以触发重算。
+    /// </summary>
+    private double _lastCaptionRasterizationScale;
+
+
+    /// <summary>
+    /// 自绘标题栏按钮占用的逻辑宽度（最小化 + 关闭，各 48 DIP）。
+    /// </summary>
+    internal const double CaptionButtonsWidthDip = 96;
+
+
+    /// <summary>
     /// 配置窗口外观与行为：标题栏延伸、固定尺寸、拖动区域、会话通知注册等。
     /// </summary>
     private void InitializeMainWindow()
@@ -70,17 +82,19 @@ public sealed partial class MainWindow : WindowEx
         // 承载系统按钮的子窗口在窗口首次激活后才创建（且隐藏到托盘再显示时可能重建），
         // 故在每次激活时销毁它（幂等、自愈）
         Activated += MainWindow_Activated;
-        //销毁标题栏子窗口之后（只是隐藏），行为、消息仍然可以触发（并且优先级高于客户区），需要设置透传区域让点击落到自绘按钮上
+        // 销毁标题栏子窗口之后（只是隐藏），行为、消息仍然可以触发（并且优先级高于客户区），需要设置透传区域让点击落到自绘按钮上
         StackPanel_WindowCaption.Loaded += StackPanel_WindowCaption_Loaded;
         StackPanel_WindowCaption.SizeChanged += StackPanel_WindowCaption_SizeChanged;
+        // 跨显示器 DPI 变化时物理像素坐标会变，但按钮 DIP 尺寸不变，SizeChanged 往往不触发；
+        // 订阅 XamlRoot / AppWindow 以重算 Passthrough，否则关闭按钮会被拖动区吞掉
+        AppWindow.Changed += AppWindow_Changed_RefreshCaptionHitTest;
         // 排除右上角自绘按钮区域（两个 48px 按钮），使其可点击而非作为拖动区
-        SetDragRectangles(new RectInt32(0, 0, AppWindow.Size.Width - (int)(96 * UIScale), (int)(48 * UIScale)));
+        SetDragRectangles(new RectInt32(0, 0, AppWindow.Size.Width - (int)(CaptionButtonsWidthDip * UIScale), (int)(48 * UIScale)));
         SetIcon();
         WTSRegisterSessionNotification(WindowHandle, 0);
         if (AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsMaximizable = false;
-            presenter.IsMinimizable = false;
             presenter.IsResizable = false;
         }
     }
@@ -117,11 +131,17 @@ public sealed partial class MainWindow : WindowEx
 
 
     /// <summary>
-    /// 标题栏按钮容器加载完成后，设置右上角按钮的透传区域。
+    /// 标题栏按钮容器加载完成后，订阅 DPI 变化并设置右上角按钮的透传区域。
     /// </summary>
     private void StackPanel_WindowCaption_Loaded(object sender, RoutedEventArgs e)
     {
-        SetCaptionButtonPassthroughRegions();
+        if (StackPanel_WindowCaption.XamlRoot is { } xamlRoot)
+        {
+            xamlRoot.Changed -= XamlRoot_Changed_RefreshCaptionHitTest;
+            xamlRoot.Changed += XamlRoot_Changed_RefreshCaptionHitTest;
+            _lastCaptionRasterizationScale = xamlRoot.RasterizationScale;
+        }
+        RefreshCaptionButtonHitTest();
     }
 
 
@@ -137,29 +157,89 @@ public sealed partial class MainWindow : WindowEx
 
 
     /// <summary>
+    /// XamlRoot 变化（典型为跨显示器 DPI/RasterizationScale 改变）时，延迟重算标题栏按钮命中区。
+    /// 布局可能尚未按新 DPI 完成，故投递到队列下一拍再刷新。
+    /// </summary>
+    /// <param name="sender">发生变化的 <see cref="XamlRoot"/>。</param>
+    /// <param name="args">变化参数（本方法主要比较 <see cref="XamlRoot.RasterizationScale"/>）。</param>
+    private void XamlRoot_Changed_RefreshCaptionHitTest(XamlRoot sender, XamlRootChangedEventArgs args)
+    {
+        if (_lastCaptionRasterizationScale == sender.RasterizationScale)
+        {
+            return;
+        }
+        _lastCaptionRasterizationScale = sender.RasterizationScale;
+        // DPI 变更后一帧内 TransformToVisual / Actual* 可能仍是旧值，延后到布局更新后再取矩形
+        DispatcherQueue.TryEnqueue(RefreshCaptionButtonHitTest);
+    }
+
+
+
+    /// <summary>
+    /// 窗口尺寸变化时重算透传区（跨 DPI 显示器移动时常伴随物理像素尺寸变化）。
+    /// </summary>
+    /// <param name="sender">事件源（<see cref="AppWindow"/>）。</param>
+    /// <param name="args">变化参数；仅在 <see cref="AppWindowChangedEventArgs.DidSizeChange"/> 为 true 时处理。</param>
+    private void AppWindow_Changed_RefreshCaptionHitTest(AppWindow sender, AppWindowChangedEventArgs args)
+    {
+        if (!args.DidSizeChange)
+        {
+            return;
+        }
+        DispatcherQueue.TryEnqueue(RefreshCaptionButtonHitTest);
+    }
+
+
+
+    /// <summary>
+    /// 销毁可能重建的系统标题栏按钮子窗口，并按当前布局重算自绘按钮透传区。
+    /// </summary>
+    private void RefreshCaptionButtonHitTest()
+    {
+        DestroyCaptionControls();
+        SetCaptionButtonPassthroughRegions();
+    }
+
+
+
+    /// <summary>
     /// 将右上角自绘最小化/关闭按钮区域设为透传，使非客户区输入落到 XAML 按钮上。
+    /// 矩形为相对窗口的物理像素；跨显示器后必须用最新 <see cref="XamlRoot.RasterizationScale"/> 重算。
     /// </summary>
     private void SetCaptionButtonPassthroughRegions()
     {
-        if (AppWindow.TitleBar.ExtendsContentIntoTitleBar is not true)
+        try
         {
-            return;
+            if (AppWindow.TitleBar.ExtendsContentIntoTitleBar is not true)
+            {
+                return;
+            }
+            if (StackPanel_WindowCaption.XamlRoot is null)
+            {
+                return;
+            }
+            // 布局未完成时 ActualWidth 为 0，写入空/零矩形会破坏命中，跳过待下次刷新
+            if (Button_Minimize.ActualWidth <= 0 || Button_CloseWindow.ActualWidth <= 0)
+            {
+                return;
+            }
+
+            double scale = StackPanel_WindowCaption.XamlRoot.RasterizationScale;
+            _lastCaptionRasterizationScale = scale;
+            RectInt32[] rects =
+            [
+                GetElementRectInt32(Button_Minimize, scale),
+                GetElementRectInt32(Button_CloseWindow, scale),
+            ];
+
+            InputNonClientPointerSource nonClientInputSource =
+                InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
+            nonClientInputSource.SetRegionRects(NonClientRegionKind.Passthrough, rects);
         }
-        if (StackPanel_WindowCaption.XamlRoot is null)
+        catch
         {
-            return;
+            // 窗口销毁或 XamlRoot 尚未就绪时忽略
         }
-
-        double scale = StackPanel_WindowCaption.XamlRoot.RasterizationScale;
-        RectInt32[] rects =
-        [
-            GetElementRectInt32(Button_Minimize, scale),
-            GetElementRectInt32(Button_CloseWindow, scale),
-        ];
-
-        InputNonClientPointerSource nonClientInputSource =
-            InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
-        nonClientInputSource.SetRegionRects(NonClientRegionKind.Passthrough, rects);
     }
 
 
@@ -406,14 +486,15 @@ public sealed partial class MainWindow : WindowEx
             // 取系统命中结果后重映射为客户区，让点击落到右上角自绘按钮上。
             nint result = base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
             // 8/9/20 = HTMINBUTTON/HTMAXBUTTON/HTCLOSE：屏蔽系统标题栏按钮命中。
-            // 11/12/14/18 = HTRIGHT/HTTOP/HTTOPRIGHT/HTBORDER：自绘按钮贴在窗口右上角，
-            //   会压到右/上边框的命中区（关闭按钮尤其紧贴右边，HTBORDER 正是“无缩放边框窗口的边框”），
-            //   本窗口不可缩放故这些命中无意义；若不归为客户区，右上角的关闭按钮就点不到。
-            //   注意不动 HTCAPTION(2)，标题栏拖动区仍由 SetDragRectangles 保留。
-            //if (result is 8)
-            //{
-            //    return 1; // HTCLIENT
-            //}
+            // 注意不动 HTCAPTION(2)，标题栏拖动区仍由 SetDragRectangles 保留。
+            if (result is  9 or 20)
+            {
+                return 1; // 客户区
+            }
+            else if (result is 8)
+            {
+                return 2;//标题栏 可拖拽
+            }
             return result;
         }
         if (uMsg == (uint)User32.WindowMessage.WM_ACTIVATE || uMsg == (uint)User32.WindowMessage.WM_POINTERACTIVATE)

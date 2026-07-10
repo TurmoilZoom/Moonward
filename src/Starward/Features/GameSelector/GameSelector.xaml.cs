@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -263,18 +264,33 @@ public sealed partial class GameSelector : UserControl
 
 
     /// <summary>
-    /// 更新窗口拖拽区域
+    /// 更新窗口拖拽区域：从游戏图标右侧起，到右上角自绘最小化/关闭按钮左侧止。
+    /// 不得用超宽矩形盖住标题栏按钮；否则跨显示器后若 Passthrough 未及时刷新，关闭按钮会无法点击。
     /// </summary>
     public void UpdateDragRectangles()
     {
         try
         {
+            if (this.XamlRoot is null)
+            {
+                return;
+            }
+
             double x = Border_CurrentGameIcon.ActualWidth;
             if (GameIconsAreaVisible)
             {
                 x = Border_CurrentGameIcon.ActualWidth + Grid_GameIconsArea.ActualWidth;
             }
-            this.XamlRoot.SetWindowDragRectangles([new Rect(x, 0, 10000, 48)]);
+
+            // 窗口客户区逻辑宽度；右上角两个 48 DIP 按钮不参与拖动
+            double windowWidthDip = this.XamlRoot.Size.Width;
+            if (windowWidthDip <= 0)
+            {
+                windowWidthDip = AppWindow.GetFromWindowId(this.XamlRoot.ContentIslandEnvironment.AppWindowId).Size.Width
+                    / this.XamlRoot.RasterizationScale;
+            }
+            double dragWidth = Math.Max(0, windowWidthDip - MainWindow.CaptionButtonsWidthDip - x);
+            this.XamlRoot.SetWindowDragRectangles([new Rect(x, 0, dragWidth, 48)]);
         }
         catch { }
     }
