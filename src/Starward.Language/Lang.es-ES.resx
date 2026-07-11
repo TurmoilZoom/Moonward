@@ -2877,6 +2877,27 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>Eliminar carpeta de caché</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>¿Eliminar webCaches del juego?</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>Se eliminará la carpeta webCaches del juego usada para los authkey de la URL de gachas. Tras eliminarla, reinicie el juego, abra la página de historial de gachas e actualice los registros de nuevo. El juego debe estar cerrado primero.</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>Abrir carpeta</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>No se puede eliminar la caché mientras el juego está en ejecución. Cierre el juego primero.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>Carpeta de caché eliminada. Reinicie el juego, abra la página de historial de gachas y luego actualice los registros.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>No se encontró la carpeta de caché.</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>Validando URL de gachas…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>Mejora de calidad gráfica</value>
   </data>

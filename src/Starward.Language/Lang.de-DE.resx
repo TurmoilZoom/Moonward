@@ -2875,6 +2875,27 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>Cache-Ordner löschen</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>Spiel-webCaches löschen?</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>Dadurch wird der webCaches-Ordner des Spiels gelöscht, der für Gacha-URL-Authkeys verwendet wird. Starten Sie danach das Spiel neu, öffnen Sie die Gacha-Verlaufsseite und aktualisieren Sie die Einträge erneut. Das Spiel muss zuvor beendet sein.</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>Ordner öffnen</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>Der Cache kann nicht gelöscht werden, während das Spiel läuft. Bitte beenden Sie zuerst das Spiel.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>Cache-Ordner gelöscht. Starten Sie das Spiel neu, öffnen Sie die Gacha-Verlaufsseite und aktualisieren Sie dann die Einträge.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>Cache-Ordner nicht gefunden.</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>Gacha-URL wird überprüft…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>Grafikverbesserung</value>
   </data>

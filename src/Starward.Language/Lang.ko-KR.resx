@@ -2877,6 +2877,27 @@
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>캐시 폴더 삭제</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>게임 webCaches를 삭제할까요?</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>가챠 URL authkey에 사용되는 게임 webCaches 폴더를 삭제합니다. 삭제 후 게임을 재시작하고 게임 내 가챠 기록 페이지를 연 다음 기록을 다시 업데이트하세요. 삭제 전에 게임을 종료해야 합니다.</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>폴더 열기</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>게임이 실행 중일 때는 캐시를 삭제할 수 없습니다. 먼저 게임을 종료해 주세요.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>캐시 폴더를 삭제했습니다. 게임을 재시작하고 가챠 기록 페이지를 연 다음 업데이트하세요.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>캐시 폴더를 찾을 수 없습니다.</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>가챠 URL 확인 중…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>화질 향상</value>
   </data>

@@ -2871,6 +2871,27 @@
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>ลบโฟลเดอร์แคช</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>ลบ webCaches ของเกมหรือไม่?</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>จะลบโฟลเดอร์ webCaches ของเกมที่ใช้สำหรับ authkey ของ URL กาชา หลังลบแล้วให้รีสตาร์ทเกม เปิดหน้าระวัติกาชาในเกม แล้วอัปเดตบันทึกอีกครั้ง ต้องปิดเกมก่อนลบ</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>เปิดโฟลเดอร์</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>ไม่สามารถลบแคชขณะเกมกำลังทำงาน โปรดปิดเกมก่อน</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>ลบโฟลเดอร์แคชแล้ว โปรดรีสตาร์ทเกม เปิดหน้าระวัติกาชา แล้วอัปเดตบันทึก</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>ไม่พบโฟลเดอร์แคช</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>กำลังตรวจสอบ URL กาชา…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>เพิ่มคุณภาพกราฟิก</value>
   </data>

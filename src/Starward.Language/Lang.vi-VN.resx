@@ -2874,6 +2874,27 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>Xóa thư mục bộ nhớ đệm</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>Xóa webCaches của game?</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>Sẽ xóa thư mục webCaches của game dùng cho authkey URL gacha. Sau khi xóa, hãy khởi động lại game, mở trang lịch sử gacha trong game rồi cập nhật bản ghi lại. Phải thoát game trước khi xóa.</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>Mở thư mục</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>Không thể xóa bộ nhớ đệm khi game đang chạy. Vui lòng thoát game trước.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>Đã xóa thư mục bộ nhớ đệm. Hãy khởi động lại game, mở trang lịch sử gacha rồi cập nhật bản ghi.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>Không tìm thấy thư mục bộ nhớ đệm.</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>Đang kiểm tra URL gacha…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>Nâng cao chất lượng đồ họa</value>
   </data>

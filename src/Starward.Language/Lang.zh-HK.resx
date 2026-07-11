@@ -2876,6 +2876,27 @@
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>刪除快取資料夾</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>刪除遊戲 webCaches？</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>將刪除遊戲用於抽卡連結 authkey 嘅 webCaches 資料夾。刪除後請重新啟動遊戲並開啟遊戲內抽卡記錄頁，再點更新記錄。刪除前須先退出遊戲。</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>開啟資料夾</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>遊戲正在執行，無法刪除快取。請先退出遊戲。</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>已刪除快取資料夾。請重新啟動遊戲，開啟抽卡記錄頁後再更新。</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>未找到快取資料夾。</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>正在校驗抽卡連結…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>畫質增強</value>
   </data>

@@ -2877,6 +2877,27 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>Elimina cartella cache</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>Eliminare i webCaches del gioco?</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>Verrà eliminata la cartella webCaches del gioco usata per gli authkey dell'URL gacha. Dopo l'eliminazione, riavvia il gioco, apri la pagina della cronologia gacha e aggiorna di nuovo i record. Il gioco deve essere chiuso prima.</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>Apri cartella</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>Impossibile eliminare la cache mentre il gioco è in esecuzione. Chiudi prima il gioco.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>Cartella cache eliminata. Riavvia il gioco, apri la pagina della cronologia gacha e poi aggiorna i record.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>Cartella cache non trovata.</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>Verifica URL gacha…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>Miglioramento qualità grafica</value>
   </data>

@@ -2876,6 +2876,27 @@
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>キャッシュフォルダーを削除</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>ゲームの webCaches を削除しますか？</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>ガチャ URL の authkey に使われるゲームの webCaches フォルダーを削除します。削除後はゲームを再起動し、ゲーム内のガチャ履歴ページを開いてから、記録を更新してください。削除前にゲームを終了する必要があります。</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>フォルダーを開く</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>ゲームの実行中はキャッシュを削除できません。先にゲームを終了してください。</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>キャッシュフォルダーを削除しました。ゲームを再起動し、ガチャ履歴ページを開いてから更新してください。</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>キャッシュフォルダーが見つかりません。</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>ガチャ URL を検証中…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>画質向上</value>
   </data>

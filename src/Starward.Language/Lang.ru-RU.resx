@@ -2897,6 +2897,27 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>Удалить папку кэша</value>
   </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>Удалить webCaches игры?</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>Будет удалена папка webCaches игры, используемая для authkey URL гачи. После удаления перезапустите игру, откройте страницу истории гачи и снова обновите записи. Сначала нужно закрыть игру.</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>Открыть папку</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>Нельзя удалить кэш, пока игра запущена. Сначала закройте игру.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>Папка кэша удалена. Перезапустите игру, откройте страницу истории гачи, затем обновите записи.</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>Папка кэша не найдена.</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>Проверка URL гачи…</value>
+  </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>Улучшение качества графики</value>
   </data>
