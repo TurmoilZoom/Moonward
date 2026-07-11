@@ -156,6 +156,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>Pity</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>Current {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>Small Pity</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>Guaranteed</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>Average</value>
   </data>

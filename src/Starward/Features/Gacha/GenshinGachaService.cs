@@ -75,14 +75,8 @@ internal class GenshinGachaService : GachaLogService
                         bool isUp = true;
                         if (noUp!.Items.TryGetValue(item.ItemId, out GachaNoUpItem? noUpItem))
                         {
-                            foreach ((DateTime start, DateTime end) in noUpItem.NoUpTimes)
-                            {
-                                if (item.Time >= start && item.Time <= end)
-                                {
-                                    isUp = false;
-                                    break;
-                                }
-                            }
+                            // 常驻五星武器可能在特定历史卡池中作为当期 UP，需先应用 UP 时间例外。
+                            isUp = noUpItem.IsUpAt(item.Time);
                         }
                         item.IsUp = isUp;
                     }

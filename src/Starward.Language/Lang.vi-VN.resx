@@ -97,6 +97,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>Đảm bảo</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>Hiện tại {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>Bảo đảm nhỏ</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>Bảo đảm lớn</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>Trung bình</value>
   </data>
@@ -1969,7 +1978,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Ghi chú thời gian thực</value>
   </data>
-
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>Thông tin đăng nhập của tài khoản hiện tại chưa được lưu.</value>
   </data>
@@ -2605,6 +2613,9 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="ImageViewWindow2_CopyAsJPG" xml:space="preserve">
     <value>Sao chép dưới dạng JPG</value>
   </data>
+  <data name="ImageViewWindow2_Share" xml:space="preserve">
+    <value>Chia sẻ</value>
+  </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>Chọn nhiều</value>
   </data>
@@ -2776,6 +2787,9 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
     <value>Đã cập nhật phiên bản mới nhất.</value>
   </data>
+  <data name="AboutSetting_PushUpdate" xml:space="preserve">
+    <value>Thông báo cập nhật</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Phát / Tạm dừng</value>
   </data>
@@ -2931,5 +2945,8 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>Điểm danh bù sẽ tiêu tốn {0} xu. Hiện bạn có {1}. Tiếp tục?</value>
+  </data>
+  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
+    <value>Có hiệu lực ở lần khởi động phần mềm tiếp theo</value>
   </data>
 </root>

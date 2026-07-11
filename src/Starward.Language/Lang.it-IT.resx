@@ -97,6 +97,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>Pietà</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>Attuale {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>Soft pity</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>Garantito</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>Medio</value>
   </data>
@@ -1969,7 +1978,6 @@ Accetti il rischio e desideri continuare?</value>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Nota in tempo reale</value>
   </data>
-
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>L'account attualmente connesso non è salvato.</value>
   </data>
@@ -2608,6 +2616,9 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
   <data name="ImageViewWindow2_CopyAsJPG" xml:space="preserve">
     <value>Copia come JPG</value>
   </data>
+  <data name="ImageViewWindow2_Share" xml:space="preserve">
+    <value>Condividi</value>
+  </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>Selezione multipla</value>
   </data>
@@ -2779,6 +2790,9 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
   <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
     <value>Aggiornato all'ultima versione.</value>
   </data>
+  <data name="AboutSetting_PushUpdate" xml:space="preserve">
+    <value>Notifiche di aggiornamento</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Riproduci / Metti in pausa</value>
   </data>
@@ -2934,5 +2948,8 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>Il richeck-in costerà {0} moneta/e. Attualmente ne hai {1}. Continuare?</value>
+  </data>
+  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
+    <value>Effettivo al prossimo avvio del software</value>
   </data>
 </root>

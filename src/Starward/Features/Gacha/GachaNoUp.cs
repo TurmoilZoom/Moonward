@@ -90,6 +90,73 @@ public class GachaNoUp
             NoUpTimes = [(new DateTime(2025, 3, 25, 18, 00, 00), DateTime.MaxValue)],
         });
         Dictionary.Add("hk4e301", hk4e301);
+
+        // 武器活动祈愿：常驻五星武器默认视为非 UP；历史上作为当期概率提升武器时按 UpTimes 例外处理。
+        GachaNoUp hk4e302 = new GachaNoUp { Game = GameBiz.hk4e, GachaType = GenshinGachaType.WeaponEventWish };
+        hk4e302.Items.Add(11501, CreateGenshinStandardWeapon(11501, "风鹰剑",
+            (new DateTime(2020, 9, 28), new DateTime(2020, 10, 18)),
+            (new DateTime(2021, 5, 18), new DateTime(2021, 6, 8))));
+        hk4e302.Items.Add(11502, CreateGenshinStandardWeapon(11502, "天空之刃",
+            (new DateTime(2021, 3, 17), new DateTime(2021, 4, 6)),
+            (new DateTime(2021, 8, 10), new DateTime(2021, 8, 31))));
+        hk4e302.Items.Add(12501, CreateGenshinStandardWeapon(12501, "天空之傲",
+            (new DateTime(2021, 1, 12), new DateTime(2021, 2, 2)),
+            (new DateTime(2021, 6, 9), new DateTime(2021, 6, 29))));
+        hk4e302.Items.Add(12502, CreateGenshinStandardWeapon(12502, "狼的末路",
+            (new DateTime(2020, 10, 20), new DateTime(2020, 11, 10)),
+            (new DateTime(2021, 2, 23), new DateTime(2021, 3, 16))));
+        hk4e302.Items.Add(13502, CreateGenshinStandardWeapon(13502, "天空之脊",
+            (new DateTime(2021, 7, 21), new DateTime(2021, 8, 10))));
+        hk4e302.Items.Add(13505, CreateGenshinStandardWeapon(13505, "和璞鸢",
+            (new DateTime(2021, 2, 3), new DateTime(2021, 2, 23)),
+            (new DateTime(2022, 1, 5), new DateTime(2022, 1, 25)),
+            (new DateTime(2022, 5, 31), new DateTime(2022, 6, 21)),
+            (new DateTime(2023, 1, 18), new DateTime(2023, 2, 7)),
+            (new DateTime(2024, 2, 20), new DateTime(2024, 3, 12))));
+        hk4e302.Items.Add(14501, CreateGenshinStandardWeapon(14501, "天空之卷",
+            (new DateTime(2020, 12, 23), new DateTime(2021, 1, 12)),
+            (new DateTime(2021, 6, 29), new DateTime(2021, 7, 20))));
+        hk4e302.Items.Add(14502, CreateGenshinStandardWeapon(14502, "四风原典",
+            (new DateTime(2020, 10, 20), new DateTime(2020, 11, 10)),
+            (new DateTime(2021, 4, 6), new DateTime(2021, 4, 27)),
+            (new DateTime(2021, 6, 9), new DateTime(2021, 6, 29)),
+            (new DateTime(2022, 7, 13), new DateTime(2022, 8, 2)),
+            (new DateTime(2023, 7, 5), new DateTime(2023, 7, 25))));
+        hk4e302.Items.Add(15501, CreateGenshinStandardWeapon(15501, "天空之翼",
+            (new DateTime(2020, 11, 11), new DateTime(2020, 12, 1)),
+            (new DateTime(2021, 4, 6), new DateTime(2021, 4, 27)),
+            (new DateTime(2021, 12, 14), new DateTime(2022, 1, 4))));
+        hk4e302.Items.Add(15502, CreateGenshinStandardWeapon(15502, "阿莫斯之弓",
+            (new DateTime(2020, 9, 28), new DateTime(2020, 10, 18)),
+            (new DateTime(2021, 1, 12), new DateTime(2021, 2, 2)),
+            (new DateTime(2022, 1, 25), new DateTime(2022, 2, 15)),
+            (new DateTime(2022, 9, 9), new DateTime(2022, 9, 27)),
+            (new DateTime(2023, 5, 2), new DateTime(2023, 5, 23))));
+        Dictionary.Add("hk4e302", hk4e302);
+    }
+
+
+    /// <summary>
+    /// 创建武器活动祈愿中的常驻五星武器配置，并将历史 UP 日期扩展为全天闭区间。
+    /// </summary>
+    /// <param name="id">武器物品 ID。</param>
+    /// <param name="name">武器名称，仅用于配置可读性。</param>
+    /// <param name="upTimes">该武器曾作为武器活动祈愿 UP 的起止日期（含首尾日期）。</param>
+    /// <returns>默认非 UP、但在指定历史日期内为 UP 的武器配置。</returns>
+    private static GachaNoUpItem CreateGenshinStandardWeapon(int id, string name, params (DateTime Start, DateTime End)[] upTimes)
+    {
+        List<(DateTime Start, DateTime End)> normalizedUpTimes = new(upTimes.Length);
+        foreach ((DateTime start, DateTime end) in upTimes)
+        {
+            normalizedUpTimes.Add((start.Date, end.Date.AddDays(1).AddTicks(-1)));
+        }
+        return new GachaNoUpItem
+        {
+            Id = id,
+            Name = name,
+            NoUpTimes = [(new DateTime(2020, 9, 28), DateTime.MaxValue)],
+            UpTimes = normalizedUpTimes,
+        };
     }
 
 
@@ -452,6 +519,37 @@ public class GachaNoUpItem
 
     public string Name { get; set; }
 
-    public List<(DateTime Start, DateTime End)> NoUpTimes { get; set; }
+    public List<(DateTime Start, DateTime End)> NoUpTimes { get; set; } = [];
+
+    /// <summary>
+    /// 物品虽属于常驻池，但历史上作为当期 UP 的时间区间。
+    /// 此列表优先于 <see cref="NoUpTimes"/>，用于原神武器活动祈愿中的常驻五星武器。
+    /// </summary>
+    public List<(DateTime Start, DateTime End)> UpTimes { get; set; } = [];
+
+
+    /// <summary>
+    /// 判断该物品在指定时间是否为当期 UP。
+    /// </summary>
+    /// <param name="time">抽卡记录时间，使用记录自身的服务器时区语义。</param>
+    /// <returns>落在 UP 例外区间或不在任何非 UP 区间时返回 true，否则返回 false。</returns>
+    public bool IsUpAt(DateTime time)
+    {
+        foreach ((DateTime start, DateTime end) in UpTimes)
+        {
+            if (time >= start && time <= end)
+            {
+                return true;
+            }
+        }
+        foreach ((DateTime start, DateTime end) in NoUpTimes)
+        {
+            if (time >= start && time <= end)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

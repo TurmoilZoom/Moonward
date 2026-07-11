@@ -97,6 +97,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>จำนวนการสุ่ม</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>ปัจจุบัน {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>ซอฟต์พิตี้</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>การันตี</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>โดยเฉลี่ย</value>
   </data>
@@ -1968,7 +1977,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>บันทึกเรียลไทม์</value>
   </data>
-
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>บัญชีที่เข้าสู่ระบบอยู่ในขณะนี้ไม่ได้ถูกบันทึก</value>
   </data>
@@ -2602,6 +2610,9 @@
   <data name="ImageViewWindow2_CopyAsJPG" xml:space="preserve">
     <value>คัดลอกเป็น JPG</value>
   </data>
+  <data name="ImageViewWindow2_Share" xml:space="preserve">
+    <value>แชร์</value>
+  </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>เลือกหลายรายการ</value>
   </data>
@@ -2773,6 +2784,9 @@
   <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
     <value>อัปเดตเป็นเวอร์ชันล่าสุดแล้ว</value>
   </data>
+  <data name="AboutSetting_PushUpdate" xml:space="preserve">
+    <value>แจ้งเตือนอัปเดต</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>เล่น / หยุดชั่วคราว</value>
   </data>
@@ -2928,5 +2942,8 @@
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>เช็คอินย้อนหลังใช้เหรียญ {0} เหรียญ ขณะนี้มี {1} ต้องการดำเนินการต่อหรือไม่?</value>
+  </data>
+  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
+    <value>มีผลเมื่อเปิดซอฟต์แวร์ครั้งถัดไป</value>
   </data>
 </root>

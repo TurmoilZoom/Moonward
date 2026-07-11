@@ -97,6 +97,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>천장</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>현재 {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>소천장</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>대천장</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>평균</value>
   </data>
@@ -1969,7 +1978,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>실시간 메모</value>
   </data>
-
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>현재 로그인 된 계정이 저장되지 않음.</value>
   </data>
@@ -2608,6 +2616,9 @@
   <data name="ImageViewWindow2_CopyAsJPG" xml:space="preserve">
     <value>JPG 로 복사</value>
   </data>
+  <data name="ImageViewWindow2_Share" xml:space="preserve">
+    <value>공유</value>
+  </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>선택</value>
   </data>
@@ -2779,6 +2790,9 @@
   <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
     <value>이미 최신 버전이 설치됨.</value>
   </data>
+  <data name="AboutSetting_PushUpdate" xml:space="preserve">
+    <value>업데이트 알림 푸시</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>재생 / 일시정지</value>
   </data>
@@ -2934,5 +2948,8 @@
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>재출석에 {0} 코인이 필요합니다. 현재 {1} 보유 중입니다. 계속하시겠습니까?</value>
+  </data>
+  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
+    <value>다음 소프트웨어 시작 시 적용</value>
   </data>
 </root>

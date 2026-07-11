@@ -156,6 +156,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>已垫</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>当前 {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>小保底</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>大保底</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>平均</value>
   </data>

@@ -97,6 +97,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>天井カウント</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>現在 {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>通常天井</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>確定天井</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>平均</value>
   </data>
@@ -1968,7 +1977,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>リアルタイムメモ</value>
   </data>
-
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>現在ログインしているアカウントは保存されません。</value>
   </data>
@@ -2607,6 +2615,9 @@
   <data name="ImageViewWindow2_CopyAsJPG" xml:space="preserve">
     <value>JPG としてコピー</value>
   </data>
+  <data name="ImageViewWindow2_Share" xml:space="preserve">
+    <value>共有</value>
+  </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>複数選択</value>
   </data>
@@ -2778,6 +2789,9 @@
   <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
     <value>最新バージョンに更新済みです。</value>
   </data>
+  <data name="AboutSetting_PushUpdate" xml:space="preserve">
+    <value>更新通知をプッシュ</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>再生 / 一時停止</value>
   </data>
@@ -2933,5 +2947,8 @@
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>再チェックインには {0} コインが必要です。現在 {1} 所持しています。続行しますか？</value>
+  </data>
+  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
+    <value>次回のソフトウェア起動時に有効</value>
   </data>
 </root>

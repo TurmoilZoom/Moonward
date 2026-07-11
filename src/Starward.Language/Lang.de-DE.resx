@@ -97,6 +97,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>Mitleid ¯͒〰¯͒</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>Aktuell {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>Soft Pity</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>Garantiert</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>Durchschnitt</value>
   </data>
@@ -1967,7 +1976,6 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Echtzeit-Notiz</value>
   </data>
-
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>Das derzeit angemeldete Konto ist nicht gespeichert.</value>
   </data>
@@ -2606,6 +2614,9 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="ImageViewWindow2_CopyAsJPG" xml:space="preserve">
     <value>Als JPG kopieren</value>
   </data>
+  <data name="ImageViewWindow2_Share" xml:space="preserve">
+    <value>Teilen</value>
+  </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>Mehrfachauswahl</value>
   </data>
@@ -2777,6 +2788,9 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
     <value>Auf die neueste Version aktualisiert.</value>
   </data>
+  <data name="AboutSetting_PushUpdate" xml:space="preserve">
+    <value>Update-Benachrichtigungen senden</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Wiedergabe / Pause</value>
   </data>
@@ -2932,5 +2946,8 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>Nacherfassen kostet {0} Münze(n). Sie haben derzeit {1}. Fortfahren?</value>
+  </data>
+  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
+    <value>Gilt ab dem nächsten Softwarestart</value>
   </data>
 </root>

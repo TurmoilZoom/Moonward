@@ -97,6 +97,15 @@
   <data name="GachaStatsCard_Pity" xml:space="preserve">
     <value>Piedad</value>
   </data>
+  <data name="GachaStatsCard_CurrentPity" xml:space="preserve">
+    <value>Actual {0}/{1}</value>
+  </data>
+  <data name="GachaStatsCard_SmallPity" xml:space="preserve">
+    <value>Pity suave</value>
+  </data>
+  <data name="GachaStatsCard_GuaranteedPity" xml:space="preserve">
+    <value>Garantizado</value>
+  </data>
   <data name="GachaStatsCard_Average" xml:space="preserve">
     <value>Promedio</value>
   </data>
@@ -1969,7 +1978,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Nota en tiempo real</value>
   </data>
-
   <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
     <value>La cuenta actualmente iniciada no se ha guardado.</value>
   </data>
@@ -2608,6 +2616,9 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
   <data name="ImageViewWindow2_CopyAsJPG" xml:space="preserve">
     <value>Copiar como JPG</value>
   </data>
+  <data name="ImageViewWindow2_Share" xml:space="preserve">
+    <value>Compartir</value>
+  </data>
   <data name="ScreenshotPage_MultiSelect" xml:space="preserve">
     <value>Selección múltiple</value>
   </data>
@@ -2779,6 +2790,9 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
   <data name="AboutSetting_UpdatedToTheLatestVersion" xml:space="preserve">
     <value>Actualizado a la última versión.</value>
   </data>
+  <data name="AboutSetting_PushUpdate" xml:space="preserve">
+    <value>Notificaciones de actualización</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Reproducir / Pausa</value>
   </data>
@@ -2934,5 +2948,8 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>El re-registro costará {0} moneda(s). Actualmente tiene {1}. ¿Continuar?</value>
+  </data>
+  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
+    <value>Efectivo en el próximo inicio del software</value>
   </data>
 </root>

@@ -43,7 +43,7 @@ public class GachaTypeStats
     /// 注意：
     /// - ZZZ 的统计中，“5星”相关字段实际对应数据库 RankType==4（S级），“4星”对应 RankType==3（A级），Count_3 对应 RankType==2（B级）。
     /// - 原神 301 与 400 在统计时会被合并为同一个 GachaTypeStats（见 GenshinGachaService.GetGachaLogItemsByQueryType）。
-    /// - 新手池（原神100、星铁2）在抽满固定次数（20/50）后，UI 中通常不会为其添加当前 pity 占位项。
+    /// - 新手池（原神100、星铁2）在抽满固定次数（20/50）后，UI 不再显示当前 pity 进度。
     /// </summary>
     public int GachaType { get; set; }
 
@@ -65,6 +65,35 @@ public class GachaTypeStats
     /// ZZZ 中此字段实际统计 S 级（RankType==4）的 pity。
     /// </summary>
     public int Pity_5 { get; set; }
+
+    /// <summary>
+    /// 当前卡池最高稀有度的硬保底抽数，用作当前垫数进度条的最大值。
+    /// 武器、光锥、音擎及邦布卡池为 80，其余卡池为 90。
+    /// </summary>
+    public int Pity_5_Max { get; set; } = 90;
+
+    /// <summary>
+    /// 是否显示当前最高稀有度垫数进度。
+    /// 已抽满且不会再开放的一次性新手池为 false，其余有记录的卡池为 true。
+    /// </summary>
+    public bool ShowPityProgress { get; set; } = true;
+
+    /// <summary>
+    /// 下一个最高稀有度是否处于大保底状态（必为 UP）。
+    /// 仅在 <see cref="HasUpItem"/> 为 true 时有展示意义。
+    /// </summary>
+    public bool IsNextPityGuaranteed { get; set; }
+
+    /// <summary>
+    /// 当前最高稀有度垫数及硬保底上限的本地化展示文本。
+    /// </summary>
+    public string PityProgressText => string.Format(Lang.GachaStatsCard_CurrentPity, Pity_5, Pity_5_Max);
+
+    /// <summary>
+    /// 下一次最高稀有度对应的小保底或大保底本地化展示文本。
+    /// 非 UP 卡池由 UI 隐藏此文本。
+    /// </summary>
+    public string PityGuaranteeText => IsNextPityGuaranteed ? Lang.GachaStatsCard_GuaranteedPity : Lang.GachaStatsCard_SmallPity;
 
     /// <summary>
     /// 当前 4 星的小保底进度（pity）。
@@ -94,6 +123,7 @@ public class GachaTypeStats
     /// 仅当该卡池存在“非UP”机制（见 GachaNoUp.Dictionary）时才有值，否则为 0。
     /// 常见于：
     /// - 原神 301/400（常驻五星角色在特定时期为非UP）
+    /// - 原神 302（武器活动祈愿中的常驻五星武器，历史 UP 期间除外）
     /// - 星铁 11/12/21/22（老角色/联动常驻角色为非UP）
     /// - ZZZ 2/102（独家频段部分代理人）、3/103（音擎）
     /// 在 ZZZ 服务中实际统计 RankType==4 且 IsUp==true 的数量。
@@ -141,15 +171,13 @@ public class GachaTypeStats
     public double Average_5_Up { get; set; }
 
     /// <summary>
-    /// 该卡池所有 5 星（最高稀有度）记录的列表（已按时间正序反转，最新在后）。
-    /// 列表头部通常会插入一条特殊的“当前 pity”占位记录（Name = Lang.GachaStatsCard_Pity），
-    /// 除非是已满的新手池（原神20抽、星铁50抽）。
+    /// 该卡池所有 5 星（最高稀有度）真实记录的列表（按时间倒序，最新记录在前）。
     /// ZZZ 中列表内容为 S 级记录。
     /// </summary>
     public List<GachaLogItemEx> List_5 { get; set; }
 
     /// <summary>
-    /// 该卡池所有 4 星记录的列表（结构与 List_5 类似）。
+    /// 该卡池所有 4 星真实记录的列表（按时间倒序，最新记录在前）。
     /// ZZZ 中为 A 级记录。
     /// </summary>
     public List<GachaLogItemEx> List_4 { get; set; }
@@ -171,14 +199,15 @@ public class GachaTypeStats
 
 
     /// <summary>
-    /// 该卡池是否存在 UP（限定）机制，即是否有「小保底 50/50」。
+    /// 该卡池是否存在 UP（限定）机制，即是否有大小保底判定。
     /// 仅当卡池在 <see cref="GachaNoUp.Dictionary"/> 中存在配置时为 true。
     /// 用于决定统计卡片是否显示「不歪概率」一栏。
     /// </summary>
     public bool HasUpItem { get; set; }
 
     /// <summary>
-    /// 小保底（50/50）的总次数：即在非大保底状态下抽出的最高稀有度（5★/S 级）数量。
+    /// 小保底的总次数：即在非大保底状态下抽出的最高稀有度（5★/S 级）数量。
+    /// 角色类限定池通常为 50/50，原神武器活动祈愿为 75/25。
     /// 大保底（上次小保底歪了之后的必中 UP）不计入。
     /// </summary>
     public int FiftyFiftyCount { get; set; }
@@ -200,12 +229,12 @@ public class GachaTypeStats
     public string FiftyFiftyNoUpText => FiftyFiftyCount == 0 ? "—" : $"{FiftyFiftyNoUpRate:P2} ({FiftyFiftyNoUpCount}/{FiftyFiftyCount})";
 
     /// <summary>
-    /// 小保底（50/50）最多连续不歪（抽到 UP）次数。
+    /// 小保底最多连续不歪（抽到 UP）次数。
     /// </summary>
     public int MaxFiftyFiftyUpStreak { get; set; }
 
     /// <summary>
-    /// 小保底（50/50）最多连续歪（未抽到 UP）次数。
+    /// 小保底最多连续歪（未抽到 UP）次数。
     /// </summary>
     public int MaxFiftyFiftyMissStreak { get; set; }
 

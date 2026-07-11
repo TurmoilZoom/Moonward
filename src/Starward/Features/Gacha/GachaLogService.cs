@@ -5,6 +5,7 @@ using Starward.Core;
 using Starward.Core.Gacha;
 using Starward.Core.Gacha.Genshin;
 using Starward.Core.Gacha.StarRail;
+using Starward.Core.Gacha.ZZZ;
 using Starward.Features.Database;
 using System;
 using System.Collections.Generic;
@@ -256,9 +257,7 @@ internal abstract class GachaLogService
 
     /// <summary>
     /// 计算指定 UID 的各卡池统计数据（用于统计卡片展示）和物品汇总数据。
-    /// 统计内容包括：出货数量、5星/4星/3星数量及出率、平均出货抽数、当前 pity、5星列表、4星列表等。
-    /// 同时会为每个卡池在 List_5 / List_4 开头插入一个“保底”占位项（显示当前距离上一个5星/4星的抽数）。
-    /// 新手池/始发池达到固定次数后不会插入该占位。
+    /// 统计内容包括：出货数量、5星/4星/3星数量及出率、平均出货抽数、当前 pity、保底状态、5星列表、4星列表等。
     /// </summary>
     /// <param name="uid">玩家 UID。</param>
     /// <returns>
@@ -291,7 +290,9 @@ internal abstract class GachaLogService
                     Count_4 = list.Count(x => x.RankType == 4),
                     Count_3 = list.Count(x => x.RankType == 3),
                     StartTime = list.First().Time,
-                    EndTime = list.Last().Time
+                    EndTime = list.Last().Time,
+                    Pity_5_Max = GetPityLimit(type),
+                    ShowPityProgress = ShouldShowPityProgress(type, list.Count),
                 };
                 stats.Ratio_5 = (double)stats.Count_5 / stats.Count;
                 stats.Ratio_4 = (double)stats.Count_4 / stats.Count;
@@ -312,11 +313,11 @@ internal abstract class GachaLogService
                     stats.Average_5_Up = (double)c / stats.Count_5_Up;
                 }
 
-                // 「不歪概率」：仅 UP（限定）卡池统计小保底 50/50 的不歪情况（5★ 为最高稀有度）。
+                // 「不歪概率」：统计小保底抽到当期 UP 的情况；角色池通常为 50/50，原神武器池为 75/25。
                 stats.HasUpItem = GachaNoUp.Dictionary.ContainsKey($"{CurrentGameBiz}{type.Value}");
                 if (stats.HasUpItem)
                 {
-                    (stats.FiftyFiftyCount, stats.FiftyFiftyNoUpCount, stats.MaxFiftyFiftyUpStreak, stats.MaxFiftyFiftyMissStreak) = CountFiftyFiftyNoUp(list, 5);
+                    (stats.FiftyFiftyCount, stats.FiftyFiftyNoUpCount, stats.MaxFiftyFiftyUpStreak, stats.MaxFiftyFiftyMissStreak, stats.IsNextPityGuaranteed) = CountFiftyFiftyNoUp(list, 5);
                 }
 
                 int pity_4 = 0;
@@ -331,33 +332,6 @@ internal abstract class GachaLogService
                 }
 
                 statsList.Add(stats);
-                if (CurrentGameBiz == GameBiz.hk4e && type.Value == GenshinGachaType.NoviceWish && stats.Count == 20)
-                {
-                    continue;
-                }
-                else if (CurrentGameBiz == GameBiz.hkrpg && type.Value == StarRailGachaType.DepartureWarp && stats.Count == 50)
-                {
-                    continue;
-                }
-                else
-                {
-                    stats.List_5.Insert(0, new GachaLogItemEx
-                    {
-                        GachaType = type.Value,
-                        Name = Lang.GachaStatsCard_Pity,
-                        Pity = stats.Pity_5,
-                        Time = list.Last().Time,
-                        HasUpItem = GachaNoUp.Dictionary.TryGetValue($"{CurrentGameBiz}{type.Value}", out _),
-                    });
-                    stats.List_4.Insert(0, new GachaLogItemEx
-                    {
-                        GachaType = type.Value,
-                        Name = Lang.GachaStatsCard_Pity,
-                        Pity = stats.Pity_4,
-                        Time = list.Last().Time,
-                        HasUpItem = GachaNoUp.Dictionary.TryGetValue($"{CurrentGameBiz}{type.Value}", out _),
-                    });
-                }
             }
             groupStats = allItems.GroupBy(x => x.ItemId)
                                  .Select(x => { var item = x.First(); item.ItemCount = x.Count(); return item; })
@@ -375,15 +349,45 @@ internal abstract class GachaLogService
 
 
     /// <summary>
-    /// 统计小保底（50/50）的不歪情况。
+    /// 获取指定卡池最高稀有度的硬保底抽数。
+    /// </summary>
+    /// <param name="gachaType">当前游戏下的卡池类型。</param>
+    /// <returns>武器、光锥、音擎及邦布卡池返回 80，其余卡池返回 90。</returns>
+    protected int GetPityLimit(IGachaType gachaType)
+    {
+        if ((CurrentGameBiz == GameBiz.hk4e && gachaType.Value == GenshinGachaType.WeaponEventWish)
+            || (CurrentGameBiz == GameBiz.hkrpg && (gachaType.Value is StarRailGachaType.LightConeEventWarp or StarRailGachaType.LightConeCollaborationWarp))
+            || (CurrentGameBiz == GameBiz.nap && (gachaType.Value is ZZZGachaType.WEngineChannel or ZZZGachaType.WEngineReverberation or ZZZGachaType.BangbooChannel)))
+        {
+            return 80;
+        }
+        return 90;
+    }
+
+
+    /// <summary>
+    /// 判断指定卡池是否应显示当前最高稀有度垫数进度。
+    /// </summary>
+    /// <param name="gachaType">当前游戏下的卡池类型。</param>
+    /// <param name="count">该卡池已有的抽卡记录总数。</param>
+    /// <returns>已抽满的一次性新手池返回 false，其余卡池返回 true。</returns>
+    protected bool ShouldShowPityProgress(IGachaType gachaType, int count)
+    {
+        return !(CurrentGameBiz == GameBiz.hk4e && gachaType.Value == GenshinGachaType.NoviceWish && count == 20)
+            && !(CurrentGameBiz == GameBiz.hkrpg && gachaType.Value == StarRailGachaType.DepartureWarp && count == 50);
+    }
+
+
+    /// <summary>
+    /// 统计小保底抽到当期 UP 的情况。
     /// 按时间正序遍历卡池记录，维护「下一个最高稀有度是否为大保底」的状态：
     /// 在非大保底状态下抽出的最高稀有度记为一次小保底，其中 <see cref="GachaLogItemEx.IsUp"/> 为 true 的记为一次「不歪」；
     /// 若小保底歪了（非 UP），则下一个最高稀有度为大保底（必出 UP），不计入小保底统计。
     /// </summary>
     /// <param name="orderedList">按时间（Id）正序排列的卡池全部记录。</param>
     /// <param name="highestRankType">最高稀有度对应的 RankType（原神/星铁为 5，绝区零 S 级为 4）。</param>
-    /// <returns>(小保底次数, 小保底不歪次数, 最多连续不歪次数, 最多连续歪次数)。</returns>
-    protected static (int Count, int NoUpCount, int MaxUpStreak, int MaxMissStreak) CountFiftyFiftyNoUp(IEnumerable<GachaLogItemEx> orderedList, int highestRankType)
+    /// <returns>(小保底次数, 小保底不歪次数, 最多连续不歪次数, 最多连续歪次数, 下一次是否为大保底)。</returns>
+    protected static (int Count, int NoUpCount, int MaxUpStreak, int MaxMissStreak, bool IsNextGuaranteed) CountFiftyFiftyNoUp(IEnumerable<GachaLogItemEx> orderedList, int highestRankType)
     {
         int count = 0;
         int noUpCount = 0;
@@ -422,7 +426,7 @@ internal abstract class GachaLogService
                 }
             }
         }
-        return (count, noUpCount, maxUpStreak, maxMissStreak);
+        return (count, noUpCount, maxUpStreak, maxMissStreak, guaranteed);
     }
 
 

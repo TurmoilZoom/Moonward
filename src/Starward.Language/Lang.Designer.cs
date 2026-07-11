@@ -2599,7 +2599,34 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GachaStatsCard_Pity", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Current {0}/{1} 的本地化字符串。
+        /// </summary>
+        public static string GachaStatsCard_CurrentPity {
+            get {
+                return ResourceManager.GetString("GachaStatsCard_CurrentPity", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Small Pity 的本地化字符串。
+        /// </summary>
+        public static string GachaStatsCard_SmallPity {
+            get {
+                return ResourceManager.GetString("GachaStatsCard_SmallPity", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Guaranteed 的本地化字符串。
+        /// </summary>
+        public static string GachaStatsCard_GuaranteedPity {
+            get {
+                return ResourceManager.GetString("GachaStatsCard_GuaranteedPity", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Stats 的本地化字符串。
         /// </summary>

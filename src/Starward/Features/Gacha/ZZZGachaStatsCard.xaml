@@ -40,6 +40,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
 
@@ -96,26 +97,6 @@
 
         <MenuFlyoutSeparator Grid.Row="2" />
 
-        <!--  4★ 保底  -->
-        <!--<TextBlock Grid.Row="3" Foreground="{ThemeResource Rarity4ForegroundBrush}">
-            <Run Text="4★" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Pity}" />
-        </TextBlock>
-        <TextBlock Grid.Row="3"
-                   HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity4ForegroundBrush}"
-                   Text="{x:Bind WarpTypeStats.Pity_4}" />-->
-
-        <!--  5★ 保底  -->
-        <!--<TextBlock Grid.Row="4" Foreground="{ThemeResource Rarity5ForegroundBrush}">
-            <Run Text="5★" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Pity}" />
-        </TextBlock>
-        <TextBlock Grid.Row="4"
-                   HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
-                   Text="{x:Bind WarpTypeStats.Pity_5}" />-->
-
         <!--  5★ 平均  -->
         <TextBlock Grid.Row="3" Foreground="{ThemeResource Rarity2ForegroundBrush}">
             <Run Text="S" />
@@ -127,8 +108,6 @@
                    Foreground="{ThemeResource Rarity2ForegroundBrush}">
             <Run Text="{x:Bind WarpTypeStats.Average_5.ToString('F2', x:Null)}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Up_Text}" />
         </TextBlock>
-
-        <!--<MenuFlyoutSeparator Grid.Row="6" />-->
 
         <!--  S 统计（非 UP 频段显示）；UP 频段此行改为显示「不歪概率」，二者互斥同占第 4 行  -->
         <TextBlock Grid.Row="4"
@@ -159,14 +138,43 @@
                    Text="{x:Bind WarpTypeStats.FiftyFiftyNoUpText}"
                    Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-        <!--  拖拽手柄：覆盖 tab 标签上方的卡池统计信息区域（第 0~4 行），按住此处可拖动整张卡片换位。  -->
+        <!--  当前最高稀有度垫数：限定频段同时标明下一次为小保底还是大保底。  -->
+        <Grid Grid.Row="5"
+              Margin="0,2,0,4"
+              RowSpacing="3"
+              Visibility="{x:Bind WarpTypeStats.ShowPityProgress, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid>
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind WarpTypeStats.PityProgressText}" />
+                <TextBlock HorizontalAlignment="Right"
+                           FontSize="12"
+                           Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                           Text="{x:Bind WarpTypeStats.PityGuaranteeText}"
+                           Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </Grid>
+            <ProgressBar Grid.Row="1"
+                         Height="6"
+                         HorizontalAlignment="Stretch"
+                         Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                         CornerRadius="3"
+                         Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                         Maximum="{x:Bind WarpTypeStats.Pity_5_Max}"
+                         Value="{x:Bind WarpTypeStats.Pity_5}" />
+        </Grid>
+
+        <!--  拖拽手柄：覆盖 tab 标签上方的卡池统计信息区域（第 0~5 行），按住此处可拖动整张卡片换位。  -->
         <Border x:Name="DragHandleBorder"
                 Grid.Row="0"
-                Grid.RowSpan="5"
+                Grid.RowSpan="6"
                 Background="Transparent"
                 helpers:PointerCursor.CursorShape="Hand" />
 
-        <Grid Grid.Row="5"
+        <Grid Grid.Row="6"
               RowSpacing="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="36" />
@@ -215,7 +223,8 @@
                                     Height="24"
                                     Margin="-4,0,-4,0"
                                     VerticalAlignment="Center"
-                                    Background="{x:Bind Converter={StaticResource GachaPityProgressBackgroundBrushConverter}}" />
+                                    Background="{x:Bind Converter={StaticResource GachaPityProgressBackgroundBrushConverter}}"
+                                    CornerRadius="4" />
                             <sc:CachedImage Width="28"
                                             Height="28"
                                             DecodeWidth="28"

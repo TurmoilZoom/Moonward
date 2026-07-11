@@ -3,8 +3,6 @@ using Microsoft.Extensions.Logging;
 using MiniExcelLibs;
 using Starward.Core;
 using Starward.Core.Gacha;
-using Starward.Core.Gacha.Genshin;
-using Starward.Core.Gacha.StarRail;
 using Starward.Core.Gacha.ZZZ;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.GachaRecord;
@@ -312,8 +310,7 @@ internal class ZZZGachaService : GachaLogService
     ///   Count_5_* = RankType==4 (S), Count_4 = RankType==3 (A), Count_3 = RankType==2 (B)
     /// - List_5 / List_4 分别收集 S 级和 A 级记录。
     /// - 对 A 级（RankType==3）额外重新计算单次 pity（pity_4 变量）。
-    /// - 新手/始发池满固定次数后不插入 pity 占位项（ZZZ 当前没有对应的新手池特殊处理，但保留了原神/星铁的判断分支以防万一）。
-    /// - 仅对配置了 HasUpItem 的频段在 pity 占位项上设置 HasUpItem。
+    /// - 当前 S 级 pity 进度与大小保底状态通过 GachaTypeStats 单独提供给统计区域展示。
     /// </summary>
     /// <param name="uid">玩家 UID。</param>
     /// <returns>
@@ -347,7 +344,9 @@ internal class ZZZGachaService : GachaLogService
                     Count_4 = list.Count(x => x.RankType == 3), // A级
                     Count_3 = list.Count(x => x.RankType == 2), // B级
                     StartTime = list.First().Time,
-                    EndTime = list.Last().Time
+                    EndTime = list.Last().Time,
+                    Pity_5_Max = GetPityLimit(type),
+                    ShowPityProgress = ShouldShowPityProgress(type, list.Count),
                 };
                 stats.Ratio_5 = (double)stats.Count_5 / stats.Count;
                 stats.Ratio_4 = (double)stats.Count_4 / stats.Count;
@@ -373,7 +372,7 @@ internal class ZZZGachaService : GachaLogService
                 stats.HasUpItem = GachaNoUp.Dictionary.ContainsKey($"{CurrentGameBiz}{type.Value}");
                 if (stats.HasUpItem)
                 {
-                    (stats.FiftyFiftyCount, stats.FiftyFiftyNoUpCount, stats.MaxFiftyFiftyUpStreak, stats.MaxFiftyFiftyMissStreak) = CountFiftyFiftyNoUp(list, 4);
+                    (stats.FiftyFiftyCount, stats.FiftyFiftyNoUpCount, stats.MaxFiftyFiftyUpStreak, stats.MaxFiftyFiftyMissStreak, stats.IsNextPityGuaranteed) = CountFiftyFiftyNoUp(list, 4);
                 }
 
                 // 重新为列表中的每条 A 级记录计算“距离上次 A 级”的 pity 值（用于详情列表展示）
@@ -389,32 +388,6 @@ internal class ZZZGachaService : GachaLogService
                 }
 
                 statsList.Add(stats);
-                // 新手池（原神/星铁）满固定次数后不加 pity 占位；ZZZ 目前无对应逻辑，但保留分支
-                if (CurrentGameBiz == GameBiz.hk4e && type.Value == GenshinGachaType.NoviceWish && stats.Count == 20)
-                {
-                    continue;
-                }
-                else if (CurrentGameBiz == GameBiz.hkrpg && type.Value == StarRailGachaType.DepartureWarp && stats.Count == 50)
-                {
-                    continue;
-                }
-                else
-                {
-                    stats.List_5.Insert(0, new GachaLogItemEx
-                    {
-                        Name = Lang.GachaStatsCard_Pity,
-                        Pity = stats.Pity_5,
-                        Time = list.Last().Time,
-                        HasUpItem = GachaNoUp.Dictionary.TryGetValue($"{CurrentGameBiz}{type.Value}", out _),
-                    });
-                    stats.List_4.Insert(0, new GachaLogItemEx
-                    {
-                        Name = Lang.GachaStatsCard_Pity,
-                        Pity = stats.Pity_4,
-                        Time = list.Last().Time,
-                        HasUpItem = GachaNoUp.Dictionary.TryGetValue($"{CurrentGameBiz}{type.Value}", out _),
-                    });
-                }
             }
             groupStats = allItems.GroupBy(x => x.ItemId)
                                  .Select(x => { var item = x.First(); item.ItemCount = x.Count(); return item; })
