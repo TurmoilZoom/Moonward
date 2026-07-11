@@ -278,7 +278,7 @@
     <value>更新 (Save 咗嘅 URL)</value>
   </data>
   <data name="GachaLogPage_UpdateAll" xml:space="preserve">
-    <value>更新 (全部)</value>
+    <value>全部更新</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
     <value>從米遊社同步（實驗）</value>
