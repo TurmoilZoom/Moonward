@@ -856,14 +856,9 @@ public sealed partial class GachaLogPage : PageBase
                     };
                     InAppToast.MainWindow?.Show(validatingBar);
                     url = await _gachaLogService.GetValidatedGachaLogUrlFromWebCacheAsync(CurrentGameBiz, path);
-                    validatingBar.IsOpen = false;
                 }
                 catch (miHoYoApiException ex) when (ex.ReturnCode is -101 or -1)
                 {
-                    if (validatingBar is not null)
-                    {
-                        validatingBar.IsOpen = false;
-                    }
                     errorCount++;
                     if (errorCount > 1 && IsGachaCacheFileExists())
                     {
@@ -880,12 +875,16 @@ public sealed partial class GachaLogPage : PageBase
                     }
                     return;
                 }
-                if (string.IsNullOrWhiteSpace(url))
+                finally
                 {
+                    // 无论成功、无候选还是异常，都关掉校验条（含外层 catch 前漏关）
                     if (validatingBar is not null)
                     {
                         validatingBar.IsOpen = false;
                     }
+                }
+                if (string.IsNullOrWhiteSpace(url))
+                {
                     // 无法找到 URL，请在游戏中打开抽卡记录页面
                     errorCount++;
                     if (errorCount > 2 && IsGachaCacheFileExists())

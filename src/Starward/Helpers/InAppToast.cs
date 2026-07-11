@@ -83,29 +83,49 @@ public class InAppToast : Behavior<StackPanel>
 
 
 
+    /// <summary>
+    /// 将 InfoBar 加入 Toast 容器。已在 UI 线程时同步插入，避免「立刻 IsOpen=false」与延迟入队乱序导致条重新打开后关不掉。
+    /// </summary>
+    /// <param name="infoBar">要显示的 InfoBar。</param>
+    /// <param name="duration">自动关闭毫秒数；0 表示不自动关闭。</param>
+    /// <param name="index">插入位置；≤0 时追加到末尾。</param>
     public void Show(InfoBar infoBar, int duration = 0, int index = -1)
     {
-        DispatcherQueue.TryEnqueue(async () =>
+        // UI 线程同步展示，防止调用方在 await 前关闭后，入队回调又把 IsOpen 设回 true。
+        if (DispatcherQueue.HasThreadAccess)
         {
-            try
+            _ = ShowCoreAsync(infoBar, duration, index);
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(() => _ = ShowCoreAsync(infoBar, duration, index));
+        }
+    }
+
+
+    /// <summary>
+    /// 实际插入 InfoBar，并在 duration &gt; 0 时延时关闭。
+    /// </summary>
+    private async Task ShowCoreAsync(InfoBar infoBar, int duration, int index)
+    {
+        try
+        {
+            infoBar.IsOpen = true;
+            if (index > 0)
             {
-                infoBar.IsOpen = true;
-                if (index > 0)
-                {
-                    AssociatedObject.Children.Insert(index, infoBar);
-                }
-                else
-                {
-                    AssociatedObject.Children.Add(infoBar);
-                }
-                if (duration > 0)
-                {
-                    await Task.Delay(duration);
-                    infoBar.IsOpen = false;
-                }
+                AssociatedObject.Children.Insert(index, infoBar);
             }
-            catch { }
-        });
+            else
+            {
+                AssociatedObject.Children.Add(infoBar);
+            }
+            if (duration > 0)
+            {
+                await Task.Delay(duration);
+                infoBar.IsOpen = false;
+            }
+        }
+        catch { }
     }
 
 
