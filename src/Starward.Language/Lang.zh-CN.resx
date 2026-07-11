@@ -347,7 +347,7 @@
     <value>从米游社同步全部（实验）</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
-    <value>输入 URL</value>
+    <value>通过 URL 更新</value>
   </data>
   <data name="Common_Setting" xml:space="preserve">
     <value>设置</value>

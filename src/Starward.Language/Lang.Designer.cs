@@ -2367,7 +2367,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Input URL 的本地化字符串。
+        ///   查找类似 Update via URL 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_InputURL {
             get {

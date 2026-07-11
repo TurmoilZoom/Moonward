@@ -64,15 +64,11 @@
                 </StackPanel>
                 <SplitButton.Flyout>
                     <MenuFlyout>
-                        <!--  更新 保存的 URL  -->
-                        <MenuFlyoutItem Command="{x:Bind UpdateGachaLogCommand}"
-                                        CommandParameter="cache"
-                                        Text="{x:Bind lang:Lang.GachaLogPage_UpdateSavedURL}" />
                         <!--  更新 全部  -->
                         <MenuFlyoutItem Command="{x:Bind UpdateGachaLogCommand}"
                                         CommandParameter="all"
                                         Text="{x:Bind lang:Lang.GachaLogPage_UpdateAll}" />
-                        <!--  输入 URL  -->
+                        <!--  通过 URL 更新（预填已保存 URL，可改/粘贴后更新）  -->
                         <MenuFlyoutItem Command="{x:Bind InputUrlCommand}" Text="{x:Bind lang:Lang.GachaLogPage_InputURL}" />
                     </MenuFlyout>
                 </SplitButton.Flyout>

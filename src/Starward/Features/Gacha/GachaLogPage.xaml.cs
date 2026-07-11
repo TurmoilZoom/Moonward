@@ -1182,18 +1182,27 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 手动输入抽卡 URL 进行更新。
-    /// <para><b>副作用：</b>弹出 ContentDialog 让用户粘贴 URL，确认后调用 <see cref="UpdateGachaLogInternalAsync"/> 拉取数据。</para>
+    /// 通过 URL 更新抽卡记录：弹出对话框，预填当前 UID 已保存的 URL（若有），可直接确认或粘贴新 URL 后拉取。
+    /// <para><b>副作用：</b>弹出 ContentDialog；确认后调用 <see cref="UpdateGachaLogInternalAsync"/> 拉取数据。</para>
     /// </summary>
     [RelayCommand]
     private async Task InputUrlAsync()
     {
         try
         {
-            var textbox = new TextBox();
+            var textbox = new TextBox { MinWidth = 400 };
+            // 预填当前 UID 已保存的 URL，合并「更新保存的 URL」与「输入 URL」
+            if (SelectUid is > 0)
+            {
+                var saved = _gachaLogService.GetGachaLogUrlByUid(SelectUid.Value);
+                if (!string.IsNullOrWhiteSpace(saved))
+                {
+                    textbox.Text = saved;
+                }
+            }
             var dialog = new ContentDialog
             {
-                // 输入 URL
+                // 通过 URL 更新
                 Title = Lang.GachaLogPage_InputURL,
                 Content = textbox,
                 // 确认
