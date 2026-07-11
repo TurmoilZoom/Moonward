@@ -2931,10 +2931,31 @@
     <value>色彩管理</value>
   </data>
   <data name="GachaLogPage_RestartGameAfterDeletingTheCacheFolder" xml:space="preserve">
-    <value>删除缓存文件夹后重启游戏</value>
+    <value>删除游戏 webCaches 后重启，再打开游戏内抽卡记录页</value>
   </data>
   <data name="GachaLogPage_DeleteCacheFolder" xml:space="preserve">
     <value>删除缓存文件夹</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmTitle" xml:space="preserve">
+    <value>删除游戏 webCaches？</value>
+  </data>
+  <data name="GachaLogPage_DeleteCacheFolderConfirmContent" xml:space="preserve">
+    <value>将删除游戏用于抽卡链接 authkey 的 webCaches 文件夹。删除后请重启游戏并打开游戏内抽卡记录页，再点更新记录。删除前须先退出游戏。</value>
+  </data>
+  <data name="GachaLogPage_OpenCacheFolder" xml:space="preserve">
+    <value>打开文件夹</value>
+  </data>
+  <data name="GachaLogPage_CannotDeleteCacheWhileGameIsRunning" xml:space="preserve">
+    <value>游戏正在运行，无法删除缓存。请先退出游戏。</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderDeleted" xml:space="preserve">
+    <value>已删除缓存文件夹。请重启游戏，打开抽卡记录页后再更新。</value>
+  </data>
+  <data name="GachaLogPage_CacheFolderNotFound" xml:space="preserve">
+    <value>未找到缓存文件夹。</value>
+  </data>
+  <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
+    <value>正在校验抽卡链接…</value>
   </data>
   <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
     <value>画质增强</value>

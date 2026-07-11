@@ -45,6 +45,12 @@ internal class GenshinBeyondGachaService
 
 
 
+    /// <summary>
+    /// 从网页缓存提取 Beyond 抽卡 URL（第一个候选）。
+    /// </summary>
+    /// <param name="gameBiz">游戏业务线。</param>
+    /// <param name="path">游戏安装根目录。</param>
+    /// <returns>URL 或 null。</returns>
     public string? GetGachaLogUrlFromWebCache(GameBiz gameBiz, string path)
     {
         return GenshinBeyondGachaClient.GetGachaUrlFromWebCache(gameBiz, path);
@@ -52,6 +58,56 @@ internal class GenshinBeyondGachaService
 
 
 
+    /// <summary>
+    /// 从网页缓存提取候选 URL 并校验 authkey，返回第一个有效 URL。
+    /// </summary>
+    /// <param name="gameBiz">游戏业务线。</param>
+    /// <param name="path">游戏安装根目录。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>有效 URL；无候选时 null。</returns>
+    /// <exception cref="miHoYoApiException">全部候选 authkey 过期时抛出。</exception>
+    public async Task<string?> GetValidatedGachaLogUrlFromWebCacheAsync(GameBiz gameBiz, string path, CancellationToken cancellationToken = default)
+    {
+        var candidates = GenshinBeyondGachaClient.GetGachaUrlCandidatesFromWebCache(gameBiz, path);
+        if (candidates.Count == 0)
+        {
+            return null;
+        }
+
+        miHoYoApiException? lastAuthError = null;
+        foreach (var url in candidates)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                await _client.GetUidByGachaUrlAsync(url);
+                return url;
+            }
+            catch (miHoYoApiException ex) when (ex.ReturnCode is -101 or -1)
+            {
+                _logger.LogInformation("Beyond gacha authkey candidate expired, try next: {Message}", ex.Message);
+                lastAuthError = ex;
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogDebug(ex, "Skip unparsable beyond gacha URL candidate");
+            }
+        }
+
+        if (lastAuthError is not null)
+        {
+            throw lastAuthError;
+        }
+        return null;
+    }
+
+
+
+    /// <summary>
+    /// 通过 URL 获取 UID 并持久化到 GachaLogUrl（GameBiz=hk4eugc）。
+    /// </summary>
+    /// <param name="url">抽卡 URL。</param>
+    /// <returns>UID；无记录时为 0。</returns>
     public virtual async Task<long> GetUidFromGachaLogUrl(string url)
     {
         long uid = await _client.GetUidByGachaUrlAsync(url);
@@ -65,10 +121,34 @@ internal class GenshinBeyondGachaService
 
 
 
+    /// <summary>
+    /// 按 UID 查询已保存的 Beyond 抽卡 URL。
+    /// </summary>
+    /// <param name="uid">玩家 UID。</param>
+    /// <returns>URL 或 null。</returns>
     public virtual string? GetGachaLogUrlByUid(long uid)
     {
         using var dapper = DatabaseService.CreateConnection();
         return dapper.QueryFirstOrDefault<string>("SELECT Url FROM GachaLogUrl WHERE Uid = @uid AND GameBiz = @GameBiz LIMIT 1;", new { uid, GameBiz = "hk4eugc" });
+    }
+
+
+
+    /// <summary>
+    /// 删除本地保存的 Beyond 抽卡 URL。
+    /// </summary>
+    /// <param name="uid">可选 UID；为 null 时清除 hk4eugc 下全部 URL。</param>
+    public void DeleteSavedGachaLogUrl(long? uid = null)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        if (uid is > 0)
+        {
+            dapper.Execute("DELETE FROM GachaLogUrl WHERE Uid = @uid AND GameBiz = @GameBiz;", new { uid, GameBiz = "hk4eugc" });
+        }
+        else
+        {
+            dapper.Execute("DELETE FROM GachaLogUrl WHERE GameBiz = @GameBiz;", new { GameBiz = "hk4eugc" });
+        }
     }
 
 

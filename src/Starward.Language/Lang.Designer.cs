@@ -2214,6 +2214,69 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Delete game webCaches? 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_DeleteCacheFolderConfirmTitle {
+            get {
+                return ResourceManager.GetString("GachaLogPage_DeleteCacheFolderConfirmTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This will delete the game's webCaches folder... 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_DeleteCacheFolderConfirmContent {
+            get {
+                return ResourceManager.GetString("GachaLogPage_DeleteCacheFolderConfirmContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Open Folder 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_OpenCacheFolder {
+            get {
+                return ResourceManager.GetString("GachaLogPage_OpenCacheFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cannot delete the cache while the game is running... 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_CannotDeleteCacheWhileGameIsRunning {
+            get {
+                return ResourceManager.GetString("GachaLogPage_CannotDeleteCacheWhileGameIsRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cache folder deleted... 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_CacheFolderDeleted {
+            get {
+                return ResourceManager.GetString("GachaLogPage_CacheFolderDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cache folder not found. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_CacheFolderNotFound {
+            get {
+                return ResourceManager.GetString("GachaLogPage_CacheFolderNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Validating gacha URL… 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_ValidatingGachaUrl {
+            get {
+                return ResourceManager.GetString("GachaLogPage_ValidatingGachaUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Deleted {0} gacha record(s) of UID {1}. 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_DeletedGachaRecordsOfUid {

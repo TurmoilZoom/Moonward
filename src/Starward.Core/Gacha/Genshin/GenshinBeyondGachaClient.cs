@@ -12,11 +12,14 @@ public class GenshinBeyondGachaClient
     private const string WEB_CACHE_PATH_YS_CN = @"YuanShen_Data\webCaches\Cache\Cache_Data\data_2";
     private const string WEB_CACHE_PATH_YS_OS = @"GenshinImpact_Data\webCaches\Cache\Cache_Data\data_2";
 
-    private static ReadOnlySpan<byte> SPAN_WEB_PREFIX_YS_CN => "https://webstatic.mihoyo.com/hk4e/event/e20250716gacha/index.html"u8;
-    private static ReadOnlySpan<byte> SPAN_WEB_PREFIX_YS_OS => "https://gs.hoyoverse.com/genshin/event/e20250716gacha/index.html"u8;
+    private static ReadOnlySpan<byte> SPAN_WEB_PREFIX_YS_CN => "https://webstatic.mihoyo.com/hk4e/event/e20250716gacha"u8;
+    private static ReadOnlySpan<byte> SPAN_WEB_PREFIX_YS_OS => "https://gs.hoyoverse.com/genshin/event/e20250716gacha"u8;
 
     private const string API_PREFIX_YS_CN = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getBeyondGachaLog";
     private const string API_PREFIX_YS_OS = "https://public-operation-hk4e-sg.hoyoverse.com/gacha_info/api/getBeyondGachaLog";
+
+    /// <summary>从网页缓存提取 URL 时保留的最大候选数。</summary>
+    public const int MaxGachaUrlCandidates = 10;
 
 
     public IReadOnlyCollection<int> QueryGachaTypes { get; init; } = new int[] { 1000, 2000 }.ToList().AsReadOnly();
@@ -159,18 +162,66 @@ public class GenshinBeyondGachaClient
 
 
 
+    /// <summary>
+    /// 从网页缓存提取 Beyond 抽卡 URL（多候选中的第一个）。
+    /// </summary>
+    /// <param name="gameBiz">游戏业务线。</param>
+    /// <param name="installPath">游戏安装根目录。</param>
+    /// <returns>成功时返回 URL；未找到返回 null。</returns>
     public static string? GetGachaUrlFromWebCache(GameBiz gameBiz, string? installPath = null)
     {
-        var file = GetGachaCacheFilePath(gameBiz, installPath);
-        if (File.Exists(file))
-        {
-            return FindMatchStringFromFile(file, GetGachaUrlPattern(gameBiz));
-        }
-        return null;
+        var candidates = GetGachaUrlCandidatesFromWebCache(gameBiz, installPath);
+        return candidates.Count > 0 ? candidates[0] : null;
     }
 
 
 
+    /// <summary>
+    /// 从游戏 webCaches 下所有 data_2 中提取 Beyond 抽卡 URL 候选（mtime 新→旧，文件内靠后优先）。
+    /// 同时匹配活动页与 getBeyondGachaLog API 前缀。
+    /// </summary>
+    /// <param name="gameBiz">游戏业务线。</param>
+    /// <param name="installPath">游戏安装根目录。</param>
+    /// <param name="maxCount">最多返回的候选数。</param>
+    /// <returns>去重后的 URL 列表。</returns>
+    public static IReadOnlyList<string> GetGachaUrlCandidatesFromWebCache(GameBiz gameBiz, string? installPath = null, int maxCount = MaxGachaUrlCandidates)
+    {
+        maxCount = Math.Clamp(maxCount, 1, 50);
+        var patterns = GetGachaUrlPatterns(gameBiz);
+        var result = new List<string>(maxCount);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var file in GetAllGachaCacheFilePaths(gameBiz, installPath))
+        {
+            if (!File.Exists(file))
+            {
+                continue;
+            }
+            foreach (var url in FindAllMatchStringsFromFile(file, patterns))
+            {
+                string dedupeKey = ExtractAuthKeyDedupeKey(url);
+                if (!seen.Add(dedupeKey))
+                {
+                    continue;
+                }
+                result.Add(url);
+                if (result.Count >= maxCount)
+                {
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+
+
+
+    /// <summary>
+    /// 计算 webCaches 文件夹完整路径。
+    /// </summary>
+    /// <param name="gameBiz">游戏业务线。</param>
+    /// <param name="installPath">游戏安装根目录。</param>
+    /// <returns>webCaches 完整路径。</returns>
     public static string GetWebCachesFolderPath(GameBiz gameBiz, string? installPath)
     {
         string prefix = gameBiz.Value switch
@@ -184,18 +235,47 @@ public class GenshinBeyondGachaClient
 
 
 
+    /// <summary>
+    /// 获取 mtime 最新的 data_2 路径（不存在时返回默认路径）。
+    /// </summary>
+    /// <param name="gameBiz">游戏业务线。</param>
+    /// <param name="installPath">游戏安装根目录。</param>
+    /// <returns>data_2 完整路径。</returns>
     public static string GetGachaCacheFilePath(GameBiz gameBiz, string? installPath)
     {
-        string file = gameBiz.Value switch
+        var files = GetAllGachaCacheFilePaths(gameBiz, installPath);
+        if (files.Count > 0)
+        {
+            return files[0];
+        }
+        return gameBiz.Value switch
         {
             GameBiz.hk4e_cn or GameBiz.hk4e_bilibili => Path.Join(installPath, WEB_CACHE_PATH_YS_CN),
             GameBiz.hk4e_global => Path.Join(installPath, WEB_CACHE_PATH_YS_OS),
             _ => throw new ArgumentOutOfRangeException($"Unknown region {gameBiz}"),
         };
-        DateTime lastWriteTime = DateTime.MinValue;
-        if (File.Exists(file))
+    }
+
+
+
+    /// <summary>
+    /// 枚举所有 data_2，按 mtime 新→旧。
+    /// </summary>
+    /// <param name="gameBiz">游戏业务线。</param>
+    /// <param name="installPath">游戏安装根目录。</param>
+    /// <returns>存在的 data_2 路径列表。</returns>
+    public static IReadOnlyList<string> GetAllGachaCacheFilePaths(GameBiz gameBiz, string? installPath)
+    {
+        var candidates = new List<(string Path, DateTime Mtime)>();
+        string defaultFile = gameBiz.Value switch
         {
-            lastWriteTime = File.GetLastWriteTime(file);
+            GameBiz.hk4e_cn or GameBiz.hk4e_bilibili => Path.Join(installPath, WEB_CACHE_PATH_YS_CN),
+            GameBiz.hk4e_global => Path.Join(installPath, WEB_CACHE_PATH_YS_OS),
+            _ => throw new ArgumentOutOfRangeException($"Unknown region {gameBiz}"),
+        };
+        if (File.Exists(defaultFile))
+        {
+            candidates.Add((defaultFile, File.GetLastWriteTime(defaultFile)));
         }
         string webCache = GetWebCachesFolderPath(gameBiz, installPath);
         if (Directory.Exists(webCache))
@@ -203,43 +283,95 @@ public class GenshinBeyondGachaClient
             foreach (var item in Directory.GetDirectories(webCache))
             {
                 string target = Path.Join(item, @"Cache\Cache_Data\data_2");
-                if (File.Exists(target) && File.GetLastWriteTime(target) > lastWriteTime)
+                if (File.Exists(target)
+                    && !candidates.Any(c => string.Equals(c.Path, target, StringComparison.OrdinalIgnoreCase)))
                 {
-                    file = target;
+                    candidates.Add((target, File.GetLastWriteTime(target)));
                 }
             }
         }
-        return file;
+        return candidates
+            .OrderByDescending(c => c.Mtime)
+            .Select(c => c.Path)
+            .ToList();
     }
 
 
 
-    private static ReadOnlySpan<byte> GetGachaUrlPattern(GameBiz gameBiz)
+    private static IReadOnlyList<byte[]> GetGachaUrlPatterns(GameBiz gameBiz)
     {
         return gameBiz.Value switch
         {
-            GameBiz.hk4e_cn or GameBiz.hk4e_bilibili => SPAN_WEB_PREFIX_YS_CN,
-            GameBiz.hk4e_global => SPAN_WEB_PREFIX_YS_OS,
+            GameBiz.hk4e_cn or GameBiz.hk4e_bilibili =>
+            [
+                SPAN_WEB_PREFIX_YS_CN.ToArray(),
+                Encoding.UTF8.GetBytes(API_PREFIX_YS_CN),
+            ],
+            GameBiz.hk4e_global =>
+            [
+                SPAN_WEB_PREFIX_YS_OS.ToArray(),
+                Encoding.UTF8.GetBytes(API_PREFIX_YS_OS),
+            ],
             _ => throw new ArgumentOutOfRangeException($"Unknown region {gameBiz}"),
         };
     }
 
 
 
-    private static string? FindMatchStringFromFile(string path, ReadOnlySpan<byte> prefix)
+    private static string ExtractAuthKeyDedupeKey(string url)
     {
-        using var fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-        var ms = new MemoryStream();
-        fs.CopyTo(ms);
-        var span = ms.ToArray().AsSpan();
-        var index = span.LastIndexOf(prefix);
-        if (index >= 0)
+        var match = Regex.Match(url, @"[?&]authkey=([^&#]+)", RegexOptions.IgnoreCase);
+        if (match.Success)
         {
-            var length = span[index..].IndexOfAny("\0\""u8);
-            return Encoding.UTF8.GetString(span.Slice(index, length));
+            return match.Groups[1].Value;
         }
+        return url;
+    }
 
-        return null;
+
+
+    private static IReadOnlyList<string> FindAllMatchStringsFromFile(string path, IReadOnlyList<byte[]> prefixes)
+    {
+        if (prefixes.Count == 0)
+        {
+            return [];
+        }
+        using var fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        using var ms = new MemoryStream();
+        fs.CopyTo(ms);
+        byte[] bytes = ms.ToArray();
+        var hits = new List<(int Index, string Url)>();
+        foreach (var prefix in prefixes)
+        {
+            if (prefix.Length == 0)
+            {
+                continue;
+            }
+            int searchEnd = bytes.Length;
+            while (searchEnd >= prefix.Length)
+            {
+                int index = bytes.AsSpan(0, searchEnd).LastIndexOf(prefix);
+                if (index < 0)
+                {
+                    break;
+                }
+                var rest = bytes.AsSpan(index);
+                int endRel = rest.IndexOfAny("\0\""u8);
+                if (endRel < 0)
+                {
+                    endRel = rest.Length;
+                }
+                if (endRel > prefix.Length)
+                {
+                    hits.Add((index, Encoding.UTF8.GetString(bytes, index, endRel)));
+                }
+                searchEnd = index;
+            }
+        }
+        return hits
+            .OrderByDescending(h => h.Index)
+            .Select(h => h.Url)
+            .ToList();
     }
 
 

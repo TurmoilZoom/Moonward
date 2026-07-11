@@ -156,6 +156,52 @@ internal abstract class GachaLogService
 
 
 
+    /// <summary>
+    /// 从网页缓存提取多个候选 URL，并依次用官方接口校验 authkey，返回第一个有效的 URL。
+    /// 全部候选因 authkey 过期失败时抛出最后一次 <see cref="miHoYoApiException"/>，供 UI 引导清理缓存。
+    /// </summary>
+    /// <param name="gameBiz">游戏业务线。</param>
+    /// <param name="path">游戏安装根目录。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>校验通过的 URL；无任何候选时返回 null。</returns>
+    /// <exception cref="miHoYoApiException">所有候选均 authkey 超时（retcode -101 / -1）时抛出。</exception>
+    public virtual async Task<string?> GetValidatedGachaLogUrlFromWebCacheAsync(GameBiz gameBiz, string path, CancellationToken cancellationToken = default)
+    {
+        var candidates = GachaLogClient.GetGachaUrlCandidatesFromWebCache(gameBiz, path);
+        if (candidates.Count == 0)
+        {
+            return null;
+        }
+
+        miHoYoApiException? lastAuthError = null;
+        foreach (var url in candidates)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                // uid==0 仍表示 authkey 有效（近 6 个月无记录）；过期会抛 miHoYoApiException
+                await _client.GetUidByGachaUrlAsync(url);
+                return url;
+            }
+            catch (miHoYoApiException ex) when (ex.ReturnCode is -101 or -1)
+            {
+                _logger.LogInformation("Gacha authkey candidate expired, try next: {Message}", ex.Message);
+                lastAuthError = ex;
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogDebug(ex, "Skip unparsable gacha URL candidate");
+            }
+        }
+
+        if (lastAuthError is not null)
+        {
+            throw lastAuthError;
+        }
+        return null;
+    }
+
+
 
     /// <summary>
     /// 通过抽卡记录 URL 调用官方接口获取当前玩家 UID，并将该 URL 持久化到本地 GachaLogUrl 表（用于后续快速获取）。
@@ -184,6 +230,25 @@ internal abstract class GachaLogService
     {
         using var dapper = DatabaseService.CreateConnection();
         return dapper.QueryFirstOrDefault<string>("SELECT Url FROM GachaLogUrl WHERE Uid = @uid AND GameBiz = @GameBiz LIMIT 1;", new { uid, GameBiz = CurrentGameBiz });
+    }
+
+
+
+    /// <summary>
+    /// 删除本地保存的抽卡 URL（清理过期 authkey）。
+    /// </summary>
+    /// <param name="uid">可选 UID；为 null 时清除当前 GameBiz 下全部 URL。</param>
+    public virtual void DeleteSavedGachaLogUrl(long? uid = null)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        if (uid is > 0)
+        {
+            dapper.Execute("DELETE FROM GachaLogUrl WHERE Uid = @uid AND GameBiz = @GameBiz;", new { uid, GameBiz = CurrentGameBiz });
+        }
+        else
+        {
+            dapper.Execute("DELETE FROM GachaLogUrl WHERE GameBiz = @GameBiz;", new { GameBiz = CurrentGameBiz });
+        }
     }
 
 

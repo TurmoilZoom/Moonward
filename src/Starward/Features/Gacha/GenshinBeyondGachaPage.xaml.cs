@@ -30,6 +30,8 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
 
     private readonly GenshinBeyondGachaService _gachaLogService = AppConfig.GetService<GenshinBeyondGachaService>();
 
+    private readonly GameLauncherService _gameLauncherService = AppConfig.GetService<GameLauncherService>();
+
 
 
     private GachaStatsSegmentedListHelper.GachaStatsSegmentedListBinding? _segmentedListBinding1000;
@@ -178,6 +180,10 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
 
 
 
+    /// <summary>
+    /// 更新 Beyond 抽卡记录；默认从 webCaches 多候选校验后取有效 URL。
+    /// </summary>
+    /// <param name="param"><c>"cache"</c> 用已保存 URL；<c>"all"</c> 全量；其余从网页缓存获取。</param>
     [RelayCommand]
     private async Task UpdateGachaLogAsync(string? param = null)
     {
@@ -207,9 +213,48 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
                     InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_GameNotInstalled);
                     return;
                 }
-                url = _gachaLogService.GetGachaLogUrlFromWebCache(CurrentGameBiz, path);
+                InfoBar? validatingBar = null;
+                try
+                {
+                    validatingBar = new InfoBar
+                    {
+                        Severity = InfoBarSeverity.Informational,
+                        Message = Lang.GachaLogPage_ValidatingGachaUrl,
+                        Background = Application.Current.Resources["CustomAcrylicBrush"] as Brush,
+                        IsOpen = true,
+                    };
+                    InAppToast.MainWindow?.Show(validatingBar);
+                    url = await _gachaLogService.GetValidatedGachaLogUrlFromWebCacheAsync(CurrentGameBiz, path);
+                    validatingBar.IsOpen = false;
+                }
+                catch (miHoYoApiException ex) when (ex.ReturnCode is -101 or -1)
+                {
+                    if (validatingBar is not null)
+                    {
+                        validatingBar.IsOpen = false;
+                    }
+                    errorCount++;
+                    if (errorCount > 1 && IsGachaCacheFileExists())
+                    {
+                        errorCount = 0;
+                        InAppToast.MainWindow?.ShowWithButton(InfoBarSeverity.Warning,
+                                                              Lang.GachaLogPage_AlwaysFailedToGetGachaRecords,
+                                                              Lang.GachaLogPage_RestartGameAfterDeletingTheCacheFolder,
+                                                              Lang.GachaLogPage_DeleteCacheFolder,
+                                                              () => _ = DeleteGachaCacheFolderAsync());
+                    }
+                    else
+                    {
+                        InAppToast.MainWindow?.Warning("Authkey Timeout", Lang.GachaLogPage_PleaseOpenTheGachaRecordsPageInGameAndTryAgain);
+                    }
+                    return;
+                }
                 if (string.IsNullOrWhiteSpace(url))
                 {
+                    if (validatingBar is not null)
+                    {
+                        validatingBar.IsOpen = false;
+                    }
                     // 无法找到 URL，请在游戏中打开抽卡记录页面
                     errorCount++;
                     if (errorCount > 2 && IsGachaCacheFileExists())
@@ -382,32 +427,102 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
 
 
 
+    /// <summary>
+    /// 一键删除游戏 webCaches（确认后真正删除；游戏运行中拒绝）。
+    /// </summary>
     [RelayCommand]
     private async Task DeleteGachaCacheFolderAsync()
     {
         try
         {
             var installPath = GameLauncherService.GetGameInstallPath(CurrentGameId);
-            if (Directory.Exists(installPath))
+            if (!Directory.Exists(installPath))
             {
-                var webCachesPath = GenshinBeyondGachaClient.GetWebCachesFolderPath(CurrentGameBiz, installPath);
-                if (Directory.Exists(webCachesPath))
-                {
-                    var folder = await StorageFolder.GetFolderFromPathAsync(webCachesPath);
-                    var option = new FolderLauncherOptions();
-                    option.ItemsToSelect.Add(folder);
-                    await Launcher.LaunchFolderAsync(await folder.GetParentAsync(), option);
-                }
+                InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_GameNotInstalled);
+                return;
             }
+
+            var webCachesPath = GenshinBeyondGachaClient.GetWebCachesFolderPath(CurrentGameBiz, installPath);
+            string fullInstall = Path.GetFullPath(installPath);
+            string fullCaches = Path.GetFullPath(webCachesPath);
+            if (!fullCaches.StartsWith(fullInstall.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                || !fullCaches.EndsWith($"{Path.DirectorySeparatorChar}webCaches", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogError("Refuse to delete unexpected webCaches path: {Path}", fullCaches);
+                return;
+            }
+
+            var dialog = new ContentDialog
+            {
+                Title = Lang.GachaLogPage_DeleteCacheFolderConfirmTitle,
+                Content = Lang.GachaLogPage_DeleteCacheFolderConfirmContent,
+                PrimaryButtonText = Lang.Common_Delete,
+                SecondaryButtonText = Lang.GachaLogPage_OpenCacheFolder,
+                CloseButtonText = Lang.Common_Cancel,
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot,
+            };
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Secondary)
+            {
+                await OpenGachaCacheFolderInExplorerAsync(webCachesPath);
+                return;
+            }
+            if (result is not ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            var process = await _gameLauncherService.GetGameProcessAsync(CurrentGameId);
+            if (process is not null)
+            {
+                InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_CannotDeleteCacheWhileGameIsRunning);
+                return;
+            }
+
+            if (!Directory.Exists(webCachesPath))
+            {
+                InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_CacheFolderNotFound);
+                return;
+            }
+
+            Directory.Delete(webCachesPath, recursive: true);
+            _gachaLogService.DeleteSavedGachaLogUrl(SelectUid);
+            errorCount = 0;
+            InAppToast.MainWindow?.Success(null, Lang.GachaLogPage_CacheFolderDeleted);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Delete gacha cache file");
+            InAppToast.MainWindow?.Error(ex);
         }
     }
 
 
 
+    /// <summary>
+    /// 在资源管理器中打开并选中 webCaches。
+    /// </summary>
+    /// <param name="webCachesPath">webCaches 完整路径。</param>
+    private async Task OpenGachaCacheFolderInExplorerAsync(string webCachesPath)
+    {
+        if (!Directory.Exists(webCachesPath))
+        {
+            InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_CacheFolderNotFound);
+            return;
+        }
+        var folder = await StorageFolder.GetFolderFromPathAsync(webCachesPath);
+        var option = new FolderLauncherOptions();
+        option.ItemsToSelect.Add(folder);
+        await Launcher.LaunchFolderAsync(await folder.GetParentAsync(), option);
+    }
+
+
+
+    /// <summary>
+    /// 检查 Beyond 抽卡 data_2 缓存是否存在。
+    /// </summary>
+    /// <returns>存在返回 true。</returns>
     private bool IsGachaCacheFileExists()
     {
         try
