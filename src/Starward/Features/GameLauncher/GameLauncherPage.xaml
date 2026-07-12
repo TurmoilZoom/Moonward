@@ -7,6 +7,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameLauncher"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
              xmlns:sch="using:Starward.Core.HoYoPlay"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfc="using:Starward.Features.CloudGame"
@@ -438,12 +439,13 @@
                            Style="{ThemeResource CustomPipsPagerStyle}"
                            Visibility="{x:Bind CanSwitchBackgroundImage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <AppBarSeparator Padding="0,4,0,4" Visibility="{x:Bind CanSwitchBackgroundImage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <!--  显示 / 隐藏游戏公告（原「游戏设置-基本信息」中的开关）  -->
+                <!--  显示 / 隐藏游戏公告（原「游戏设置-基本信息」中的开关）；悬停用 InstantTooltip（亚克力气泡，非系统 ToolTip）  -->
                 <Button Padding="4"
                         VerticalAlignment="Center"
                         Command="{x:Bind ToggleBannerAndPostCommand}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.LauncherPage_ShowGameAnnouncement}">
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.LauncherPage_ShowGameAnnouncement}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="{x:Bind BannerAndPostButtonIcon, Mode=OneWay}"
@@ -453,8 +455,9 @@
                 <Button Padding="4"
                         VerticalAlignment="Center"
                         Command="{x:Bind OpenBackgroundViewWindowCommand}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.GameLauncherPage_Gallery}">
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherPage_Gallery}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="&#xE91B;"
@@ -464,8 +467,9 @@
                 <Button Padding="4"
                         VerticalAlignment="Center"
                         Command="{x:Bind OpenCustomBackgroundDialogCommand}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.GameLauncherSettingDialog_CustomBackground}">
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherSettingDialog_CustomBackground}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="&#xE794;"
@@ -475,8 +479,9 @@
                 <Button Padding="4"
                         VerticalAlignment="Center"
                         Command="{x:Bind CopyCurrentBackgroundImageCommand}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Copy}">
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Copy}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="&#xE8C8;"
@@ -485,8 +490,9 @@
                 <!--  另存为  -->
                 <Button Padding="4"
                         Command="{x:Bind SaveCurrentBackgroundImageCommand}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewWindow2_SaveAs}">
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_SaveAs}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="&#xE74E;"
@@ -496,8 +502,9 @@
                 <Button Padding="4"
                         VerticalAlignment="Center"
                         Command="{x:Bind PinToolbarCommand}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind ToolbarPinTooltip, Mode=OneWay}">
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind ToolbarPinTooltip, Mode=OneWay}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <Grid>
                         <FontIcon FontSize="16"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -513,8 +520,9 @@
                 <!--  播放/暂停  -->
                 <Button Padding="4"
                         Command="{x:Bind StartOrStopVideoBackgroundCommand}"
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherPage_PlayPause}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.GameLauncherPage_PlayPause}"
                         Visibility="{x:Bind CanStopVideo}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
