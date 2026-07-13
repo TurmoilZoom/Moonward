@@ -28,7 +28,7 @@ internal interface IGachaStatsDragCard
 /// <para>卡片由页面以「常驻卡片池 + 手动管理 <see cref="StackPanel"/> 子元素」方式承载（不再走 <see cref="ItemsControl"/>/集合绑定）
 /// <item>拖动视觉只用 XAML <see cref="CompositeTransform"/>（RenderTransform）+ <see cref="UIElement.Opacity"/> + <see cref="Canvas.ZIndex"/>，全部<b>直接赋值</b>。
 /// 受影响卡片滑向虚拟槽位的过渡用 <see cref="CompositionTarget.Rendering"/> 每帧把 <c>TranslateX</c> 朝目标平滑逼近 —— <b>仍是逐帧直接赋值 RenderTransform</b>，不是 Storyboard、也不是 Composition。
-/// <item>拖动中可用滚轮横向滚动，以够到视口外的第 5、6 个卡池。</item>
+/// <item>拖动至横向视口边缘会自动滚动；滚轮横向滚动仍可用，以够到视口外的第 5、6 个卡池。</item>
 /// 「可拖拽集合」= 面板里 <see cref="UIElement.Visibility"/> 为 Visible 的卡片（被筛选隐藏的卡片以 Collapsed 常驻面板尾部、不参与拖拽）。
 /// </summary>
 internal sealed class GachaStatsCardDragReorder
@@ -54,6 +54,18 @@ internal sealed class GachaStatsCardDragReorder
     /// <summary>滑动收敛阈值（像素）：与目标差值小于此即吸附，结束该卡的逐帧微动。</summary>
     private const double ReorderSnapEpsilon = 0.5d;
 
+    /// <summary>自动滚动热区占可视宽度的比例。</summary>
+    private const double AutoScrollEdgeZoneRatio = 0.15d;
+
+    /// <summary>自动滚动热区的最小宽度（DIP），避免窄窗口下难以触发。</summary>
+    private const double AutoScrollEdgeZoneMinWidth = 48d;
+
+    /// <summary>自动滚动热区的最大宽度（DIP），避免宽窗口下过早触发。</summary>
+    private const double AutoScrollEdgeZoneMaxWidth = 120d;
+
+    /// <summary>指针位于热区最边缘时的最大自动滚动速度（DIP/秒）。</summary>
+    private const double AutoScrollMaxSpeed = 900d;
+
 
     private readonly ScrollViewer _scrollViewer;
     private readonly FrameworkElement _content;
@@ -71,7 +83,9 @@ internal sealed class GachaStatsCardDragReorder
     private bool _dragging;
     private Point _pressContent;
     private Point _lastContent;
-    private double _lastOffsetX;
+    private Point _lastViewport;
+    // 拖拽期间不直接依赖 HorizontalOffset：ChangeView 的回写可能晚于下一帧，逻辑偏移可保证坐标连续。
+    private double _logicalOffsetX;
     private int _originalSlot = -1;
     private int _targetSlot = -1;
     private double _firstCardX;
@@ -157,7 +171,8 @@ internal sealed class GachaStatsCardDragReorder
         _pointerId = e.Pointer.PointerId;
         _pressContent = point.Position;
         _lastContent = point.Position;
-        _lastOffsetX = _scrollViewer.HorizontalOffset;
+        _lastViewport = e.GetCurrentPoint(_scrollViewer).Position;
+        _logicalOffsetX = _scrollViewer.HorizontalOffset;
         _pressed = true;
         // 提前捕获指针：即便指针移出手柄/越过其它卡片，移动与松手仍回到本手柄。
         handle.CapturePointer(e.Pointer);
@@ -170,11 +185,14 @@ internal sealed class GachaStatsCardDragReorder
         {
             return;
         }
-        Point content = e.GetCurrentPoint(_content).Position;
-        _lastContent = content;
-        _lastOffsetX = _scrollViewer.HorizontalOffset;
+        Point viewport = e.GetCurrentPoint(_scrollViewer).Position;
+        Point content;
         if (!_dragging)
         {
+            content = e.GetCurrentPoint(_content).Position;
+            _lastContent = content;
+            _lastViewport = viewport;
+            _logicalOffsetX = _scrollViewer.HorizontalOffset;
             double dx = content.X - _pressContent.X;
             double dy = content.Y - _pressContent.Y;
             if ((dx * dx) + (dy * dy) < DragThreshold * DragThreshold)
@@ -185,6 +203,15 @@ internal sealed class GachaStatsCardDragReorder
             {
                 return;
             }
+        }
+        else
+        {
+            // 自动滚动已把内容坐标补偿到 _lastContent；此处仅叠加指针在视口内的实际位移，避免读取延迟的 HorizontalOffset 导致跳动。
+            content = new Point(
+                _lastContent.X + (viewport.X - _lastViewport.X),
+                _lastContent.Y + (viewport.Y - _lastViewport.Y));
+            _lastContent = content;
+            _lastViewport = viewport;
         }
         UpdateDrag(content);
         e.Handled = true;
@@ -230,14 +257,7 @@ internal sealed class GachaStatsCardDragReorder
             return false;
         }
         int delta = e.GetCurrentPoint(_scrollViewer).Properties.MouseWheelDelta;
-        double scrollable = Math.Max(0, _scrollViewer.ScrollableWidth);
-        double newOffset = Math.Clamp(_scrollViewer.HorizontalOffset - delta, 0, scrollable);
-        _scrollViewer.ChangeView(newOffset, null, null, true);
-        // 指针在屏幕上未动，仅偏移变化：同一屏幕点的内容横坐标按偏移增量平移。
-        Point content = new(_lastContent.X + (newOffset - _lastOffsetX), _lastContent.Y);
-        _lastContent = content;
-        _lastOffsetX = newOffset;
-        UpdateDrag(content);
+        ScrollToHorizontalOffset(_logicalOffsetX - delta);
         e.Handled = true;
         return true;
     }
@@ -264,10 +284,9 @@ internal sealed class GachaStatsCardDragReorder
         _currentTx = new double[_cards.Count];
         _targetTx = new double[_cards.Count];
         _animateReorder = EntranceAnimation.AnimationsEnabled();
-        if (_animateReorder)
-        {
-            HookRendering();
-        }
+        // 自动滚动也依赖逐帧更新，因此即使系统关闭卡片换位动画也需要渲染回调。
+        _logicalOffsetX = _scrollViewer.HorizontalOffset;
+        HookRendering();
         // 「拎起」被拖卡片：直接赋值缩放/不透明度/层级，不做动画（DPI 安全）。
         CompositeTransform t = GetTransform(_dragged);
         t.CenterX = _dragged.ActualWidth / 2;
@@ -388,7 +407,7 @@ internal sealed class GachaStatsCardDragReorder
     }
 
 
-    /// <summary>订阅每帧渲染回调，用于把受影响卡片平滑滑动到虚拟槽位。</summary>
+    /// <summary>订阅每帧渲染回调，用于自动滚动视口及平滑移动受影响卡片。</summary>
     private void HookRendering()
     {
         if (_renderingHooked)
@@ -414,12 +433,15 @@ internal sealed class GachaStatsCardDragReorder
 
 
     /// <summary>
-    /// 每帧把受影响卡片的 <c>TranslateX</c> 朝目标槽位指数平滑逼近（仅<b>逐帧直接赋值 RenderTransform</b>，渲染变换、不参与 Measure、DPI 安全），
-    /// 使「换位」有可见的滑动过程而非瞬切。被拖卡片（原槽）由指针跟随单独驱动，这里跳过。
+    /// 每帧根据指针与视口边缘的距离自动滚动，再把受影响卡片的 <c>TranslateX</c> 朝目标槽位指数平滑逼近
+    /// （仅<b>逐帧直接赋值 RenderTransform</b>，渲染变换、不参与 Measure、DPI 安全），使「换位」有可见的滑动过程而非瞬切。
+    /// 被拖卡片（原槽）由指针跟随单独驱动，这里跳过。
     /// </summary>
+    /// <param name="sender">渲染事件发送者；此处不使用。</param>
+    /// <param name="e">渲染事件参数；提供本帧时间以计算滚动与换位动画步长。</param>
     private void OnRendering(object? sender, object e)
     {
-        if (!_dragging || _currentTx.Length == 0)
+        if (!_dragging)
         {
             return;
         }
@@ -435,6 +457,11 @@ internal sealed class GachaStatsCardDragReorder
         if (dt <= 0 || dt > 0.1)
         {
             dt = 1.0 / 60;
+        }
+        TryAutoScroll(dt);
+        if (!_animateReorder || _currentTx.Length == 0)
+        {
+            return;
         }
         double factor = 1.0 - Math.Exp(-dt / ReorderSmoothingTau);
         for (int s = 0; s < _cards.Count; s++)
@@ -461,6 +488,71 @@ internal sealed class GachaStatsCardDragReorder
             _currentTx[s] = cur;
             ApplyTranslate(_cards[s], cur);
         }
+    }
+
+
+    /// <summary>
+    /// 根据当前指针在横向视口左右边缘热区中的位置滚动卡池。
+    /// <para>热区宽度随视口宽度缩放并设置上下限；速度使用二次曲线，指针越接近边缘滚动越快。</para>
+    /// </summary>
+    /// <param name="elapsedSeconds">上一渲染帧到当前帧的时间间隔（秒）；必须为正数。</param>
+    private void TryAutoScroll(double elapsedSeconds)
+    {
+        double viewportWidth = _scrollViewer.ViewportWidth;
+        if (viewportWidth <= 0 || _scrollViewer.ScrollableWidth <= 0)
+        {
+            return;
+        }
+        double zoneWidth = Math.Min(
+            viewportWidth / 2d,
+            Math.Clamp(
+                viewportWidth * AutoScrollEdgeZoneRatio,
+                AutoScrollEdgeZoneMinWidth,
+                AutoScrollEdgeZoneMaxWidth));
+        double leftIntensity = Math.Clamp((zoneWidth - _lastViewport.X) / zoneWidth, 0, 1);
+        double rightIntensity = Math.Clamp((_lastViewport.X - (viewportWidth - zoneWidth)) / zoneWidth, 0, 1);
+        double intensity = rightIntensity > 0 ? rightIntensity : leftIntensity;
+        if (intensity <= 0)
+        {
+            return;
+        }
+        double direction = rightIntensity > 0 ? 1 : -1;
+        // 二次曲线让刚进入热区时较克制，靠近边缘后才快速翻页。
+        double delta = direction * AutoScrollMaxSpeed * intensity * intensity * elapsedSeconds;
+        ScrollToHorizontalOffset(_logicalOffsetX + delta);
+    }
+
+
+    /// <summary>
+    /// 将横向视口滚动到目标偏移，并同步补偿拖拽卡片的内容坐标与落点槽位。
+    /// </summary>
+    /// <param name="requestedOffset">请求的横向偏移；会被限制在当前 <see cref="ScrollViewer.ScrollableWidth"/> 范围内。</param>
+    /// <returns>成功提交了非零偏移变更时返回 <see langword="true"/>；无可滚动范围、已在目标位置或视图拒绝变更时返回 <see langword="false"/>。</returns>
+    private bool ScrollToHorizontalOffset(double requestedOffset)
+    {
+        double targetOffset = Math.Clamp(requestedOffset, 0, Math.Max(0, _scrollViewer.ScrollableWidth));
+        double delta = targetOffset - _logicalOffsetX;
+        if (Math.Abs(delta) < 0.01)
+        {
+            return false;
+        }
+        try
+        {
+            // 每帧禁用单次原生缓动，由连续小步 ChangeView 形成与指针速度一致的平滑滚动。
+            if (!_scrollViewer.ChangeView(targetOffset, null, null, disableAnimation: true))
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+        _logicalOffsetX = targetOffset;
+        // 指针在屏幕坐标不动时，视口向右移动 delta 等价于其内容坐标向右移动 delta。
+        _lastContent = new Point(_lastContent.X + delta, _lastContent.Y);
+        UpdateDrag(_lastContent);
+        return true;
     }
 
 
@@ -588,6 +680,8 @@ internal sealed class GachaStatsCardDragReorder
         _dragged = null;
         _pointer = null;
         _pointerId = 0;
+        _lastViewport = default;
+        _logicalOffsetX = 0;
         _originalSlot = -1;
         _targetSlot = -1;
         _currentTx = Array.Empty<double>();

@@ -525,6 +525,7 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
+    /// 算出「当前应该画在页面上的卡池统计列表」——先按勾选筛选，再按用户拖拽保存的顺序排序。它只算列表，不碰 UI
     /// 获取当前筛选并排序后的卡池统计列表（与 <see cref="UpdateDisplayGachaTypeStats"/> 展示数据一致）。
     /// </summary>
     /// <returns>已选卡池的统计数据；无数据或未选卡池时返回空列表。</returns>
