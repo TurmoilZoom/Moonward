@@ -14,6 +14,7 @@ using Starward.Language;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Starward.Features.GameRecord.SignIn;
@@ -264,7 +265,12 @@ public sealed partial class SignInButton : UserControl
         }
         catch (miHoYoApiException ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = GameRecordPage.GetMiHoYoApiExceptionMessage(ex);
+            _logger.LogError(ex, "Refresh sign-in status failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
+        }
+        catch (HttpRequestException ex)
+        {
+            ErrorMessage = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.SignIn).Message;
             _logger.LogError(ex, "Refresh sign-in status failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
         }
         catch (Exception ex)
@@ -286,12 +292,17 @@ public sealed partial class SignInButton : UserControl
         }
         try
         {
-            SignInActionResult result = await _signInService.ClaimSignInAsync(GameRecordRole);
+            SignInActionResponse result = await _signInService.ClaimSignInAsync(GameRecordRole);
             ShowResultToast(result, isResign: false);
-            if (result is SignInActionResult.Success or SignInActionResult.AlreadySigned)
+            if (result.Kind is SignInActionResult.Success or SignInActionResult.AlreadySigned)
             {
                 await RefreshSignInStatusAsync();
             }
+        }
+        catch (HttpRequestException ex)
+        {
+            ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.SignIn));
+            _logger.LogError(ex, "Claim sign-in failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
         }
         catch (Exception ex)
         {
@@ -325,12 +336,17 @@ public sealed partial class SignInButton : UserControl
             {
                 return;
             }
-            SignInActionResult result = await _signInService.ClaimReSignInAsync(GameRecordRole);
+            SignInActionResponse result = await _signInService.ClaimReSignInAsync(GameRecordRole);
             ShowResultToast(result, isResign: true);
-            if (result is SignInActionResult.Success)
+            if (result.Kind is SignInActionResult.Success)
             {
                 await RefreshSignInStatusAsync();
             }
+        }
+        catch (HttpRequestException ex)
+        {
+            ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.SignIn));
+            _logger.LogError(ex, "Claim re-sign-in failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
         }
         catch (Exception ex)
         {
@@ -346,7 +362,7 @@ public sealed partial class SignInButton : UserControl
     /// </summary>
     /// <param name="result">签到 / 补签操作结果。</param>
     /// <param name="isResign">是否为补签操作，影响标题文案。</param>
-    private static void ShowResultToast(SignInActionResult result, bool isResign)
+    private static void ShowResultToast(SignInActionResponse result, bool isResign)
     {
         var toast = InAppToast.MainWindow;
         if (toast is null)
@@ -354,36 +370,70 @@ public sealed partial class SignInButton : UserControl
             return;
         }
         string actionTitle = isResign ? Lang.SignInButton_ReSign : Lang.SignInButton_SignIn;
-        switch (result)
+        switch (result.Kind)
         {
             case SignInActionResult.Success:
                 toast.Success(actionTitle, Lang.SignInButton_SignInSucceeded);
                 break;
             case SignInActionResult.AlreadySigned:
-                toast.Information(Lang.SignInButton_AlreadySignedToday);
+                toast.Information(actionTitle, FormatResultMessage(Lang.SignInButton_AlreadySignedToday, result.ReturnCode));
                 break;
             case SignInActionResult.CookieExpired:
-                toast.Warning(Lang.Common_AccountError, Lang.SignInButton_LoginExpired);
+                ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(new miHoYoApiException(result.ReturnCode ?? SignInReturnCode.NotLoggedIn, result.ResponseMessage), MiHoYoApiContext.SignIn));
                 break;
             case SignInActionResult.RiskControl:
-                toast.Warning(actionTitle, Lang.SignInButton_RiskControl);
+                toast.ShowWithButton(InfoBarSeverity.Warning, actionTitle, Lang.SignInButton_RiskControl, Lang.HoyolabToolboxPage_VerifyAccount, () => WeakReferenceMessenger.Default.Send(new GameRecordVerifyAccountMessage()));
                 break;
             case SignInActionResult.NotEnoughCoin:
-                toast.Warning(actionTitle, Lang.SignInButton_NotEnoughCoin);
+                toast.Warning(actionTitle, FormatResultMessage(Lang.SignInButton_NotEnoughCoin, result.ReturnCode));
                 break;
             case SignInActionResult.ResignQuotaUsedUp:
-                toast.Warning(actionTitle, Lang.SignInButton_ResignQuotaUsedUp);
+                toast.Warning(actionTitle, FormatResultMessage(Lang.SignInButton_ResignQuotaUsedUp, result.ReturnCode));
                 break;
             case SignInActionResult.NoResignDate:
-                toast.Information(actionTitle, Lang.SignInButton_NoResignDate);
+                toast.Information(actionTitle, FormatResultMessage(Lang.SignInButton_NoResignDate, result.ReturnCode));
                 break;
             case SignInActionResult.PleaseSignInFirst:
-                toast.Warning(actionTitle, Lang.SignInButton_PleaseSignInFirst);
+                toast.Warning(actionTitle, FormatResultMessage(Lang.SignInButton_PleaseSignInFirst, result.ReturnCode));
                 break;
             default:
-                toast.Error(actionTitle, Lang.SignInButton_SignInFailed);
+                ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(new miHoYoApiException(result.ReturnCode ?? -1, result.ResponseMessage ?? Lang.SignInButton_SignInFailed), MiHoYoApiContext.SignIn));
                 break;
         }
+    }
+
+
+
+    /// <summary>
+    /// 显示签到请求的统一 API 反馈，并复用战绩登录和账号验证入口。
+    /// </summary>
+    /// <param name="feedback">已分类的 API 错误反馈。</param>
+    private static void ShowApiFeedback(MiHoYoApiErrorFeedback feedback)
+    {
+        MiHoYoApiErrorFeedbackFactory.Show(feedback, action =>
+        {
+            if (action is MiHoYoApiRecoveryAction.Relogin)
+            {
+                WeakReferenceMessenger.Default.Send(new GameRecordOpenLoginMessage());
+            }
+            else if (action is MiHoYoApiRecoveryAction.VerifyAccount)
+            {
+                WeakReferenceMessenger.Default.Send(new GameRecordVerifyAccountMessage());
+            }
+        });
+    }
+
+
+
+    /// <summary>
+    /// 将已知签到结果的本地化文案附加 retcode，便于用户反馈问题。
+    /// </summary>
+    /// <param name="message">本地化结果文案。</param>
+    /// <param name="returnCode">接口返回码；可为 null。</param>
+    /// <returns>包含状态码的显示文案。</returns>
+    private static string FormatResultMessage(string message, int? returnCode)
+    {
+        return returnCode.HasValue ? $"{message} ({returnCode.Value})" : message;
     }
 
 

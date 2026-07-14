@@ -352,7 +352,7 @@ public sealed partial class SelfQueryPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Input url");
-            InAppToast.MainWindow?.Error(ex, "Input URL");
+            ShowSelfQueryError(ex);
         }
         return false;
     }
@@ -423,7 +423,7 @@ public sealed partial class SelfQueryPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Update genshin query items");
-            InAppToast.MainWindow?.Error(ex, "Update Genshin account history.");
+            ShowSelfQueryError(ex);
         }
     }
 
@@ -455,7 +455,7 @@ public sealed partial class SelfQueryPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Update star rail query items");
-            InAppToast.MainWindow?.Error(ex, "Update Star Rail account history.");
+            ShowSelfQueryError(ex);
         }
     }
 
@@ -487,8 +487,32 @@ public sealed partial class SelfQueryPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Update zzz query items");
-            InAppToast.MainWindow?.Error(ex, "Update ZZZ account history.");
+            ShowSelfQueryError(ex);
         }
+    }
+
+
+
+    /// <summary>
+    /// 显示自助查询链接请求的错误反馈，并在链接授权失效时允许用户重新输入 URL。
+    /// </summary>
+    /// <param name="exception">更新或初始化自助查询时捕获的异常。</param>
+    private void ShowSelfQueryError(Exception exception)
+    {
+        if (exception is miHoYoApiException or System.Net.Http.HttpRequestException)
+        {
+            var feedback = MiHoYoApiErrorFeedbackFactory.Create(exception, MiHoYoApiContext.SelfQuery);
+            MiHoYoApiErrorFeedbackFactory.Show(feedback, action =>
+            {
+                if (action is MiHoYoApiRecoveryAction.RefreshUrl)
+                {
+                    _ = InputURLAsync();
+                }
+            });
+            return;
+        }
+
+        InAppToast.MainWindow?.Error(exception);
     }
 
 

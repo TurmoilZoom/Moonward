@@ -116,7 +116,7 @@ public sealed partial class DeadlyAssaultPage : PageBase
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Refresh shiyu defense data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {

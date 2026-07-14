@@ -918,9 +918,6 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Team-Setup</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
-  <data name="Common_AccountError" xml:space="preserve">
-    <value>Kontofehler</value>
-  </data>
   <data name="Common_NetworkError" xml:space="preserve">
     <value>Netzwerkfehler</value>
   </data>
@@ -1438,12 +1435,6 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
     <value>Zeige chronischen Banner</value>
-  </data>
-  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
-    <value>Gerät Fingerabdruck aktualisieren</value>
-  </data>
-  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
-    <value>Der Fingerabdruck des Geräts wurde bereits aktualisiert.</value>
   </data>
   <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
     <value>Bild wurde in Zwischenablage kopiert</value>
@@ -2970,5 +2961,59 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   </data>
   <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
     <value>Gilt ab dem nächsten Softwarestart</value>
+  </data>
+  <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>Bitte melden Sie sich in der Miyoushe-Toolbox mit diesem Konto erneut an ({0})</value>
+  </data>
+  <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
+    <value>Anmeldung abgelaufen. Bitte melde dich erneut an.</value>
+  </data>
+  <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
+    <value>Konto-, Geräte- oder Netzwerkverifizierung ist erforderlich.</value>
+  </data>
+  <data name="MiHoYoApiError_TooManyRequests" xml:space="preserve">
+    <value>Zu viele Anfragen. Bitte versuche es später erneut.</value>
+  </data>
+  <data name="MiHoYoApiError_GameRoleNotFound" xml:space="preserve">
+    <value>Die ausgewählte Spielrolle wurde für dieses Konto nicht gefunden.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountQueryLimit" xml:space="preserve">
+    <value>Das tägliche Kontenabfrage-Limit wurde erreicht.</value>
+  </data>
+  <data name="MiHoYoApiError_DataNotPublic" xml:space="preserve">
+    <value>Dieser Kampfchronik-Eintrag ist nicht öffentlich.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountServiceUnavailable" xml:space="preserve">
+    <value>Dieses Konto kann den aktuellen Kampfchronik-Dienst nicht nutzen. Prüfe Bindung und Berechtigungen.</value>
+  </data>
+  <data name="MiHoYoApiError_RealTimeNotesUnavailable" xml:space="preserve">
+    <value>Echtzeit-Notizen sind nur für das aktuell angemeldete Konto verfügbar.</value>
+  </data>
+  <data name="MiHoYoApiError_RequestRejected" xml:space="preserve">
+    <value>Die Anfrage wurde abgelehnt oder der Dienst ist vorübergehend nicht verfügbar.</value>
+  </data>
+  <data name="MiHoYoApiError_AuthkeyExpired" xml:space="preserve">
+    <value>Der Aufzeichnungslink ist abgelaufen. Öffne die Aufzeichnungsseite im Spiel und hole einen neuen Link.</value>
+  </data>
+  <data name="MiHoYoApiError_AccessDenied" xml:space="preserve">
+    <value>Der Server hat diese Anfrage abgelehnt.</value>
+  </data>
+  <data name="MiHoYoApiError_ServiceUnavailable" xml:space="preserve">
+    <value>Der miHoYo-Dienst ist vorübergehend nicht verfügbar.</value>
+  </data>
+  <data name="MiHoYoApiError_NetworkRequestFailed" xml:space="preserve">
+    <value>Netzwerkanfrage konnte nicht abgeschlossen werden. Bitte Verbindung prüfen und erneut versuchen.</value>
+  </data>
+  <data name="MiHoYoApiError_NoDetails" xml:space="preserve">
+    <value>Keine weiteren Details zurückgegeben.</value>
+  </data>
+  <data name="MiHoYoApiError_Unknown" xml:space="preserve">
+    <value>API-Anfrage fehlgeschlagen: {0}</value>
+  </data>
+  <data name="MiHoYoApiError_Relogin" xml:space="preserve">
+    <value>Erneut anmelden</value>
+  </data>
+  <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
+    <value>Neue URL eingeben</value>
   </data>
 </root>

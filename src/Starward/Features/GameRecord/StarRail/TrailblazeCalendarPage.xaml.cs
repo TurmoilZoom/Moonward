@@ -239,12 +239,12 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get realtime trailblaze calendar data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+            GameRecordPage.HandleMiHoYoApiException(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Get realtime trailblaze calendar data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {
@@ -305,12 +305,12 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get trailblaze calendar data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+            GameRecordPage.HandleMiHoYoApiException(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Get trailblaze calendar data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {
@@ -350,12 +350,12 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get trailblaze calendar full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+            GameRecordPage.HandleMiHoYoApiException(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Get trailblaze calendar full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {

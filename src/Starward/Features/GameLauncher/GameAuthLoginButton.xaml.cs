@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Starward.Core;
 using Starward.Core.HoYoPlay;
 using System;
 using System.Threading.Tasks;
@@ -74,7 +75,9 @@ public sealed partial class GameAuthLoginButton : UserControl
         catch (Exception ex)
         {
             _logger.LogError(ex, "InitializeGameAuthLogin");
-            ErrorMessage = ex.Message;
+            ErrorMessage = ex is miHoYoApiException or System.Net.Http.HttpRequestException
+                ? MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.AccountAuth).Message
+                : ex.Message;
         }
     }
 

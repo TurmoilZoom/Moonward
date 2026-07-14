@@ -316,7 +316,4 @@
   <data name="GachaType_WEngineReverberation" xml:space="preserve">
     <value>音擎迴響</value>
   </data>
-  <data name="miHoYoApi_PleaseReloginInMiyousheToolbox" xml:space="preserve">
-    <value>請在米遊社工具箱中重新登入該帳號({0})</value>
-  </data>
 </root>

@@ -246,7 +246,7 @@ public sealed class FluidNavigationViewHoverEffect
             WireHandlers(item);
         }
 
-        // PaneFooter 不在 MenuItems/FooterMenuItems 集合里（如米游社工具箱「更新设备指纹」），需从视觉树找
+        // PaneFooter 不在 MenuItems/FooterMenuItems 集合里，需从视觉树找
         if (_navView.FindDescendant("PaneFooter") is FrameworkElement footer)
         {
             if (footer.FindDescendant<NavigationViewItem>() is NavigationViewItem fi)

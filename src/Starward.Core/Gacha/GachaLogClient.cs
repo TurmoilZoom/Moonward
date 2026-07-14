@@ -519,7 +519,7 @@ public abstract class GachaLogClient
     /// <param name="gachaUrlPrefix">已解析好的 API 前缀（含 authkey）。</param>
     /// <param name="param">分页查询参数（GachaLogQuery 负责序列化为 gacha_type=...&amp;page=... 等）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>当前页的数据列表。若 retcode != 0 抛出 miHoYoApiException。</returns>
+    /// <returns>当前页的数据列表。若 retcode != 0 抛出 <see cref="GachaApiException"/>。</returns>
     protected virtual async Task<List<T>> GetGachaLogByQueryAsync<T>(string gachaUrlPrefix, GachaLogQuery param, CancellationToken cancellationToken = default) where T : GachaLogItem
     {
         await Task.Delay(Random.Shared.Next(200, 300), cancellationToken);
@@ -531,7 +531,7 @@ public abstract class GachaLogClient
         }
         else if (wrapper.Retcode != 0)
         {
-            throw new miHoYoApiException(wrapper.Retcode, wrapper.Message);
+            throw new GachaApiException(wrapper.Retcode, wrapper.Message);
         }
         else
         {

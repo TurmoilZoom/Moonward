@@ -119,7 +119,7 @@ public sealed partial class ForgottenHallPage : PageBase
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Refresh forgotten hall data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {

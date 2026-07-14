@@ -229,7 +229,4 @@
   <data name="GachaType_EventOde" xml:space="preserve">
     <value>Event Ode</value>
   </data>
-  <data name="miHoYoApi_PleaseReloginInMiyousheToolbox" xml:space="preserve">
-    <value>Please re-login this account in Miyoushe toolbox ({0})</value>
-  </data>
 </root>

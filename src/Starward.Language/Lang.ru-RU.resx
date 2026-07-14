@@ -920,9 +920,6 @@
     <value>Отряд игрока</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
-  <data name="Common_AccountError" xml:space="preserve">
-    <value>Ошибка учетной записи</value>
-  </data>
   <data name="Common_NetworkError" xml:space="preserve">
     <value>Ошибка Сети</value>
   </data>
@@ -1440,12 +1437,6 @@
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
     <value>Показать Молитва хроник</value>
-  </data>
-  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
-    <value>Обновить отпечаток устройства</value>
-  </data>
-  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
-    <value>Отпечаток устройства уже обновлён.</value>
   </data>
   <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
     <value>Изображение скопировано в буфер обмена</value>
@@ -2992,5 +2983,59 @@ ChatGPT может допускать ошибки. Проверьте важн�
   </data>
   <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
     <value>Вступит в силу при следующем запуске</value>
+  </data>
+  <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>Пожалуйста, повторно войдите в этот аккаунт через Miyoushe toolbox ({0})</value>
+  </data>
+  <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
+    <value>Срок входа истёк. Войдите снова.</value>
+  </data>
+  <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
+    <value>Требуется проверка аккаунта, устройства или сети.</value>
+  </data>
+  <data name="MiHoYoApiError_TooManyRequests" xml:space="preserve">
+    <value>Слишком много запросов. Повторите попытку позже.</value>
+  </data>
+  <data name="MiHoYoApiError_GameRoleNotFound" xml:space="preserve">
+    <value>Выбранный игровой персонаж не найден для этого аккаунта.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountQueryLimit" xml:space="preserve">
+    <value>Достигнут дневной лимит запросов аккаунтов.</value>
+  </data>
+  <data name="MiHoYoApiError_DataNotPublic" xml:space="preserve">
+    <value>Эта игровая статистика не является публичной.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountServiceUnavailable" xml:space="preserve">
+    <value>Этот аккаунт не может использовать текущий сервис игровой статистики. Проверьте привязку и разрешения.</value>
+  </data>
+  <data name="MiHoYoApiError_RealTimeNotesUnavailable" xml:space="preserve">
+    <value>Заметки в реальном времени доступны только для текущего вошедшего аккаунта.</value>
+  </data>
+  <data name="MiHoYoApiError_RequestRejected" xml:space="preserve">
+    <value>Запрос отклонён или сервис временно недоступен.</value>
+  </data>
+  <data name="MiHoYoApiError_AuthkeyExpired" xml:space="preserve">
+    <value>Ссылка на запись устарела. Откройте страницу записей в игре и получите новую ссылку.</value>
+  </data>
+  <data name="MiHoYoApiError_AccessDenied" xml:space="preserve">
+    <value>Сервер отклонил этот запрос.</value>
+  </data>
+  <data name="MiHoYoApiError_ServiceUnavailable" xml:space="preserve">
+    <value>Сервис miHoYo временно недоступен.</value>
+  </data>
+  <data name="MiHoYoApiError_NetworkRequestFailed" xml:space="preserve">
+    <value>Не удалось выполнить сетевой запрос. Проверьте подключение и повторите попытку.</value>
+  </data>
+  <data name="MiHoYoApiError_NoDetails" xml:space="preserve">
+    <value>Дополнительные сведения не возвращены.</value>
+  </data>
+  <data name="MiHoYoApiError_Unknown" xml:space="preserve">
+    <value>Ошибка API-запроса: {0}</value>
+  </data>
+  <data name="MiHoYoApiError_Relogin" xml:space="preserve">
+    <value>Войти снова</value>
+  </data>
+  <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
+    <value>Ввести новый URL</value>
   </data>
 </root>

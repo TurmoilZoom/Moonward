@@ -124,6 +124,7 @@ public sealed partial class InstallGameDialog : ContentDialog
     {
         try
         {
+            ErrorMessage = null;
             GameConfig? config = await _hoYoPlayService.GetGameConfigAsync(CurrentGameId);
             if (config is null)
             {
@@ -159,7 +160,22 @@ public sealed partial class InstallGameDialog : ContentDialog
         catch (Exception ex)
         {
             _logger.LogError(ex, "Get game package.");
+            ErrorMessage = GetMiHoYoRequestErrorMessage(ex);
         }
+    }
+
+
+
+    /// <summary>
+    /// 将启动器公开接口的 API 或 HTTP 异常转换为适合安装对话框显示的错误文案。
+    /// </summary>
+    /// <param name="exception">拉取游戏包信息时捕获的异常。</param>
+    /// <returns>本地化 API 文案或原始非 API 异常消息。</returns>
+    private static string GetMiHoYoRequestErrorMessage(Exception exception)
+    {
+        return exception is miHoYoApiException or System.Net.Http.HttpRequestException
+            ? MiHoYoApiErrorFeedbackFactory.Create(exception, MiHoYoApiContext.LauncherPublicApi).Message
+            : exception.Message;
     }
 
 

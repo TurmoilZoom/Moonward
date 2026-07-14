@@ -129,7 +129,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Refresh stygian onslaught data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {

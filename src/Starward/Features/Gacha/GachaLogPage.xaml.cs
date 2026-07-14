@@ -858,7 +858,7 @@ public sealed partial class GachaLogPage : PageBase
                     InAppToast.MainWindow?.Show(validatingBar);
                     url = await _gachaLogService.GetValidatedGachaLogUrlFromWebCacheAsync(CurrentGameBiz, path);
                 }
-                catch (miHoYoApiException ex) when (ex.ReturnCode is -101 or -1)
+                catch (GachaApiException ex) when (ex.IsAuthkeyExpired)
                 {
                     errorCount++;
                     if (errorCount > 1 && IsGachaCacheFileExists())
@@ -872,7 +872,7 @@ public sealed partial class GachaLogPage : PageBase
                     }
                     else
                     {
-                        InAppToast.MainWindow?.Warning("Authkey Timeout", Lang.GachaLogPage_PleaseOpenTheGachaRecordsPageInGameAndTryAgain);
+                        ShowGachaFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GachaLog));
                     }
                     return;
                 }
@@ -971,11 +971,10 @@ public sealed partial class GachaLogPage : PageBase
         {
             _logger.LogInformation("Get gacha log canceled");
         }
-        catch (miHoYoApiException ex)
+        catch (GachaApiException ex)
         {
             _logger.LogWarning("Request mihoyo api error: {error}", ex.Message);
-            // 原铁 -101 绝 -1
-            if (ex.ReturnCode is -101 or -1)
+            if (ex.IsAuthkeyExpired)
             {
                 // authkey timeout
                 // 请在游戏中打开抽卡记录页面后再重试
@@ -991,13 +990,18 @@ public sealed partial class GachaLogPage : PageBase
                 }
                 else
                 {
-                    InAppToast.MainWindow?.Warning("Authkey Timeout", Lang.GachaLogPage_PleaseOpenTheGachaRecordsPageInGameAndTryAgain);
+                    ShowGachaFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GachaLog));
                 }
             }
             else
             {
-                InAppToast.MainWindow?.Warning(null, ex.Message);
+                ShowGachaFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GachaLog));
             }
+        }
+        catch (System.Net.Http.HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, "Request gacha log HTTP error");
+            ShowGachaFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GachaLog));
         }
     }
 
@@ -1094,7 +1098,7 @@ public sealed partial class GachaLogPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogWarning(ex, "Sync zzz gacha record from miyoushe error ({retcode})", ex.ReturnCode);
-            InAppToast.MainWindow?.Warning(null, ex.Message);
+            GameRecordPage.HandleMiHoYoApiException(ex);
         }
         catch (NotSupportedException ex)
         {
@@ -1106,6 +1110,17 @@ public sealed partial class GachaLogPage : PageBase
             _logger.LogError(ex, "Sync zzz gacha record from miyoushe");
             InAppToast.MainWindow?.Error(ex);
         }
+    }
+
+
+
+    /// <summary>
+    /// 显示祈愿记录接口反馈。authkey 失效时仅展示错误信息，不再弹出「输入新链接」恢复按钮（可通过菜单「通过 URL 更新」手动处理）。
+    /// </summary>
+    /// <param name="feedback">已按祈愿记录场景分类的错误反馈。</param>
+    private void ShowGachaFeedback(MiHoYoApiErrorFeedback feedback)
+    {
+        MiHoYoApiErrorFeedbackFactory.Show(feedback);
     }
 
     /// <summary>

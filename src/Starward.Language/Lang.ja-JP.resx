@@ -919,9 +919,6 @@
     <value>チームのセットアップ</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
-  <data name="Common_AccountError" xml:space="preserve">
-    <value>アカウントエラー</value>
-  </data>
   <data name="Common_NetworkError" xml:space="preserve">
     <value>ネットワークエラー</value>
   </data>
@@ -1439,12 +1436,6 @@
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
     <value>集録祈願を表示</value>
-  </data>
-  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
-    <value>デバイスフィンガープリントを更新</value>
-  </data>
-  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
-    <value>デバイスフィンガープリントはすでに更新済みです。</value>
   </data>
   <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
     <value>クリップボードに画像をコピーしました</value>
@@ -2971,5 +2962,59 @@
   </data>
   <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
     <value>次回のソフトウェア起動時に有効</value>
+  </data>
+  <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>米游社ツールボックスでこのアカウントに再ログインしてください({0})</value>
+  </data>
+  <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
+    <value>ログインの有効期限が切れました。再度ログインしてください。</value>
+  </data>
+  <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
+    <value>アカウント、デバイス、またはネットワークの認証が必要です。</value>
+  </data>
+  <data name="MiHoYoApiError_TooManyRequests" xml:space="preserve">
+    <value>リクエストが多すぎます。しばらくしてから再試行してください。</value>
+  </data>
+  <data name="MiHoYoApiError_GameRoleNotFound" xml:space="preserve">
+    <value>このアカウントに選択したゲームキャラクターが見つかりません。</value>
+  </data>
+  <data name="MiHoYoApiError_AccountQueryLimit" xml:space="preserve">
+    <value>本日のアカウント照会上限に達しました。</value>
+  </data>
+  <data name="MiHoYoApiError_DataNotPublic" xml:space="preserve">
+    <value>このゲーム戦績は非公開です。</value>
+  </data>
+  <data name="MiHoYoApiError_AccountServiceUnavailable" xml:space="preserve">
+    <value>このアカウントでは現在の戦績サービスを利用できません。連携と権限を確認してください。</value>
+  </data>
+  <data name="MiHoYoApiError_RealTimeNotesUnavailable" xml:space="preserve">
+    <value>リアルタイムメモは現在ログイン中のアカウントのみ確認できます。</value>
+  </data>
+  <data name="MiHoYoApiError_RequestRejected" xml:space="preserve">
+    <value>リクエストが拒否されたか、サービスが一時的に利用できません。</value>
+  </data>
+  <data name="MiHoYoApiError_AuthkeyExpired" xml:space="preserve">
+    <value>記録リンクの有効期限が切れました。ゲーム内で記録ページを開き、新しいリンクを取得してください。</value>
+  </data>
+  <data name="MiHoYoApiError_AccessDenied" xml:space="preserve">
+    <value>サーバーがこのリクエストを拒否しました。</value>
+  </data>
+  <data name="MiHoYoApiError_ServiceUnavailable" xml:space="preserve">
+    <value>miHoYo サービスは一時的に利用できません。</value>
+  </data>
+  <data name="MiHoYoApiError_NetworkRequestFailed" xml:space="preserve">
+    <value>ネットワークリクエストを完了できませんでした。接続を確認して再試行してください。</value>
+  </data>
+  <data name="MiHoYoApiError_NoDetails" xml:space="preserve">
+    <value>追加の詳細は返されませんでした。</value>
+  </data>
+  <data name="MiHoYoApiError_Unknown" xml:space="preserve">
+    <value>API リクエストに失敗しました: {0}</value>
+  </data>
+  <data name="MiHoYoApiError_Relogin" xml:space="preserve">
+    <value>再ログイン</value>
+  </data>
+  <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
+    <value>新しい URL を入力</value>
   </data>
 </root>

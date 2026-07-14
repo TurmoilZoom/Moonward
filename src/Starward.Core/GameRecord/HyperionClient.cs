@@ -27,6 +27,9 @@ public class HyperionClient : GameRecordClient
 {
 
 
+    private const string CookieTokenBySTokenUrl = "https://passport-api.mihoyo.com/account/auth/api/getCookieAccountInfoBySToken";
+
+
     public override string UAContent => $"Mozilla/5.0 (Linux; Android 13; Pixel 5 Build/TQ3A.230901.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/118.0.0.0 Mobile Safari/537.36 miHoYoBBS/{AppVersion}";
 
     public override string AppVersion => "2.90.1";
@@ -43,6 +46,28 @@ public class HyperionClient : GameRecordClient
     }
 
 
+
+
+    /// <summary>
+    /// 使用仍有效的 SToken 换取新的 Cookie Token。
+    /// </summary>
+    /// <param name="stoken">国服 SToken V2（兼容旧版 SToken），不能为空。</param>
+    /// <param name="mid">SToken 对应的 MiHoYo ID，不能为空。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>新的 Cookie Token 与米游社通行证 UID。</returns>
+    /// <exception cref="ArgumentException"><paramref name="stoken"/> 或 <paramref name="mid"/> 为空。</exception>
+    public async Task<CookieTokenInfo> GetCookieTokenBySTokenAsync(string stoken, string mid, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(stoken);
+        ArgumentException.ThrowIfNullOrWhiteSpace(mid);
+
+        string url = $"{CookieTokenBySTokenUrl}?stoken={Uri.EscapeDataString(stoken)}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        // Passport 接口要求使用规范的 stoken/mid Cookie 名；Token 值本身可以来自 stoken_v2。
+        request.Headers.Add(Cookie, $"stoken={stoken}; mid={mid}");
+        request.Headers.Add(x_rpc_device_id, DeviceId);
+        return await CommonSendAsync<CookieTokenInfo>(request, cancellationToken);
+    }
 
     // https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?bbs_auth_required=true&act_id=e202009291139501&utm_source=bbs&utm_medium=mys&utm_campaign=icon
     // https://webstatic.mihoyo.com/ys/event/e20200709ysjournal/index.html?bbs_presentation_style=fullscreen&bbs_auth_required=true&utm_source=bbs&utm_medium=mys&utm_campaign=icon

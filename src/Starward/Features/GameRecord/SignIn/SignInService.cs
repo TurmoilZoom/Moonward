@@ -79,21 +79,25 @@ internal class SignInService
     /// <param name="role">游戏角色。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>签到操作结果（含已签、风控、Cookie 失效等）。</returns>
-    public async Task<SignInActionResult> ClaimSignInAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    public async Task<SignInActionResponse> ClaimSignInAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
         try
         {
             SignInResult result = await _gameRecordService.SignInAsync(role, cancellationToken);
-            if (result is { Success: 1 } && !string.IsNullOrEmpty(result.Gt))
+            if (IsRiskControl(result))
             {
-                // 触发风控，需要极验验证，无法在客户端自动完成
-                return SignInActionResult.RiskControl;
+                // 风控响应有多个字段组合，不能只依赖 gt；部分活动只返回 risk_code 或 is_risk。
+                return new SignInActionResponse(SignInActionResult.RiskControl, null, null);
             }
-            return SignInActionResult.Success;
+            return new SignInActionResponse(SignInActionResult.Success, SignInReturnCode.Success, null);
         }
         catch (miHoYoApiException ex)
         {
-            return MapReturnCode(ex.ReturnCode);
+            if (ex.IsLoginExpired)
+            {
+                return new SignInActionResponse(SignInActionResult.CookieExpired, ex.ReturnCode, ex.ResponseMessage);
+            }
+            return new SignInActionResponse(MapReturnCode(ex.ReturnCode), ex.ReturnCode, ex.ResponseMessage);
         }
     }
 
@@ -105,20 +109,24 @@ internal class SignInService
     /// <param name="role">游戏角色。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>补签操作结果。</returns>
-    public async Task<SignInActionResult> ClaimReSignInAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    public async Task<SignInActionResponse> ClaimReSignInAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
         try
         {
             SignInResult result = await _gameRecordService.ReSignInAsync(role, cancellationToken);
-            if (result is { Success: 1 } && !string.IsNullOrEmpty(result.Gt))
+            if (IsRiskControl(result))
             {
-                return SignInActionResult.RiskControl;
+                return new SignInActionResponse(SignInActionResult.RiskControl, null, null);
             }
-            return SignInActionResult.Success;
+            return new SignInActionResponse(SignInActionResult.Success, SignInReturnCode.Success, null);
         }
         catch (miHoYoApiException ex)
         {
-            return MapReturnCode(ex.ReturnCode);
+            if (ex.IsLoginExpired)
+            {
+                return new SignInActionResponse(SignInActionResult.CookieExpired, ex.ReturnCode, ex.ResponseMessage);
+            }
+            return new SignInActionResponse(MapReturnCode(ex.ReturnCode), ex.ReturnCode, ex.ResponseMessage);
         }
     }
 
@@ -134,13 +142,28 @@ internal class SignInService
         return returnCode switch
         {
             SignInReturnCode.AlreadySignedIn => SignInActionResult.AlreadySigned,
-            SignInReturnCode.NotLoggedIn or SignInReturnCode.LoginExpired => SignInActionResult.CookieExpired,
             SignInReturnCode.NotEnoughCoin => SignInActionResult.NotEnoughCoin,
             SignInReturnCode.ResignQuotaUsedUp => SignInActionResult.ResignQuotaUsedUp,
             SignInReturnCode.NoAvailableResignDate => SignInActionResult.NoResignDate,
             SignInReturnCode.PleaseSignInFirst => SignInActionResult.PleaseSignInFirst,
             _ => SignInActionResult.Failed,
         };
+    }
+
+
+
+    /// <summary>
+    /// 判断签到响应是否要求进行极验或其他风控验证。
+    /// </summary>
+    /// <param name="result">签到接口成功返回的数据。</param>
+    /// <returns>存在任一风控标记时返回 true。</returns>
+    private static bool IsRiskControl(SignInResult result)
+    {
+        return result.Success is 1
+            || result.RiskCode != 0
+            || result.IsRisk
+            || !string.IsNullOrWhiteSpace(result.Gt)
+            || !string.IsNullOrWhiteSpace(result.Challenge);
     }
 
 
@@ -280,3 +303,13 @@ internal enum SignInActionResult
     /// <summary>其他未知失败。</summary>
     Failed,
 }
+
+
+
+/// <summary>
+/// 表示签到操作结果及其保留的服务端诊断信息。
+/// </summary>
+/// <param name="Kind">可供业务逻辑判断的结果类型。</param>
+/// <param name="ReturnCode">接口 retcode；没有 retcode 的响应为 null。</param>
+/// <param name="ResponseMessage">接口原始消息；未知失败时由 UI 显示。</param>
+internal sealed record SignInActionResponse(SignInActionResult Kind, int? ReturnCode, string? ResponseMessage);

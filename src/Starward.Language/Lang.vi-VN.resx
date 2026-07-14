@@ -920,9 +920,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Lập đội</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
-  <data name="Common_AccountError" xml:space="preserve">
-    <value>Tài khoản bất thường</value>
-  </data>
   <data name="Common_NetworkError" xml:space="preserve">
     <value>Lỗi mạng</value>
   </data>
@@ -1440,12 +1437,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
     <value>Hiện sử ký cầu nguyện</value>
-  </data>
-  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
-    <value>Cập nhật Dấu vân tay Thiết bị</value>
-  </data>
-  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
-    <value>Dấu vân tay thiết bị đã được cập nhật.</value>
   </data>
   <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
     <value>Ảnh đã được sao chép vào Clipboard</value>
@@ -2969,5 +2960,59 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
     <value>Có hiệu lực ở lần khởi động phần mềm tiếp theo</value>
+  </data>
+  <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>Vui lòng đăng nhập lại tài khoản này trong hộp công cụ Miyoushe ({0})</value>
+  </data>
+  <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
+    <value>Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</value>
+  </data>
+  <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
+    <value>Cần xác minh tài khoản, thiết bị hoặc mạng.</value>
+  </data>
+  <data name="MiHoYoApiError_TooManyRequests" xml:space="preserve">
+    <value>Quá nhiều yêu cầu. Vui lòng thử lại sau.</value>
+  </data>
+  <data name="MiHoYoApiError_GameRoleNotFound" xml:space="preserve">
+    <value>Không tìm thấy nhân vật game đã chọn trong tài khoản này.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountQueryLimit" xml:space="preserve">
+    <value>Đã đạt giới hạn truy vấn tài khoản trong ngày.</value>
+  </data>
+  <data name="MiHoYoApiError_DataNotPublic" xml:space="preserve">
+    <value>Chiến tích game này chưa được công khai.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountServiceUnavailable" xml:space="preserve">
+    <value>Tài khoản này không thể dùng dịch vụ chiến tích hiện tại. Hãy kiểm tra liên kết và quyền.</value>
+  </data>
+  <data name="MiHoYoApiError_RealTimeNotesUnavailable" xml:space="preserve">
+    <value>Ghi chú thời gian thực chỉ hỗ trợ tài khoản đang đăng nhập.</value>
+  </data>
+  <data name="MiHoYoApiError_RequestRejected" xml:space="preserve">
+    <value>Yêu cầu bị từ chối hoặc dịch vụ tạm thời không khả dụng.</value>
+  </data>
+  <data name="MiHoYoApiError_AuthkeyExpired" xml:space="preserve">
+    <value>Liên kết bản ghi đã hết hạn. Hãy mở trang bản ghi trong game và lấy liên kết mới.</value>
+  </data>
+  <data name="MiHoYoApiError_AccessDenied" xml:space="preserve">
+    <value>Máy chủ từ chối yêu cầu này.</value>
+  </data>
+  <data name="MiHoYoApiError_ServiceUnavailable" xml:space="preserve">
+    <value>Dịch vụ miHoYo tạm thời không khả dụng.</value>
+  </data>
+  <data name="MiHoYoApiError_NetworkRequestFailed" xml:space="preserve">
+    <value>Không thể hoàn tất yêu cầu mạng. Vui lòng kiểm tra kết nối và thử lại.</value>
+  </data>
+  <data name="MiHoYoApiError_NoDetails" xml:space="preserve">
+    <value>Không có thêm chi tiết được trả về.</value>
+  </data>
+  <data name="MiHoYoApiError_Unknown" xml:space="preserve">
+    <value>Yêu cầu API thất bại: {0}</value>
+  </data>
+  <data name="MiHoYoApiError_Relogin" xml:space="preserve">
+    <value>Đăng nhập lại</value>
+  </data>
+  <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
+    <value>Nhập URL mới</value>
   </data>
 </root>

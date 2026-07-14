@@ -82,6 +82,7 @@ public static partial class AppConfig
 
             sc.AddSingleton<HoyolabClient>();
             sc.AddSingleton<HyperionClient>();
+            sc.AddSingleton<GameRecordCookieRefreshService>();
             sc.AddSingleton<GameRecordService>();
             // 每日签到：业务编排 + 启动批量自动签到
             sc.AddSingleton<SignInService>();

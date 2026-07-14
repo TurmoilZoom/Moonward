@@ -158,13 +158,13 @@ internal abstract class GachaLogService
 
     /// <summary>
     /// 从网页缓存提取多个候选 URL，并依次用官方接口校验 authkey，返回第一个有效的 URL。
-    /// 全部候选因 authkey 过期失败时抛出最后一次 <see cref="miHoYoApiException"/>，供 UI 引导清理缓存。
+    /// 全部候选因 authkey 过期失败时抛出最后一次 <see cref="GachaApiException"/>，供 UI 引导清理缓存。
     /// </summary>
     /// <param name="gameBiz">游戏业务线。</param>
     /// <param name="path">游戏安装根目录。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>校验通过的 URL；无任何候选时返回 null。</returns>
-    /// <exception cref="miHoYoApiException">所有候选均 authkey 超时（retcode -101 / -1）时抛出。</exception>
+    /// <exception cref="GachaApiException">所有候选均 authkey 超时时抛出。</exception>
     public virtual async Task<string?> GetValidatedGachaLogUrlFromWebCacheAsync(GameBiz gameBiz, string path, CancellationToken cancellationToken = default)
     {
         var candidates = GachaLogClient.GetGachaUrlCandidatesFromWebCache(gameBiz, path);
@@ -173,17 +173,17 @@ internal abstract class GachaLogService
             return null;
         }
 
-        miHoYoApiException? lastAuthError = null;
+        GachaApiException? lastAuthError = null;
         foreach (var url in candidates)
         {
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
-                // uid==0 仍表示 authkey 有效（近 6 个月无记录）；过期会抛 miHoYoApiException
+                // uid==0 仍表示 authkey 有效（近 6 个月无记录）；过期会抛 GachaApiException
                 await _client.GetUidByGachaUrlAsync(url);
                 return url;
             }
-            catch (miHoYoApiException ex) when (ex.ReturnCode is -101 or -1)
+            catch (GachaApiException ex) when (ex.IsAuthkeyExpired)
             {
                 _logger.LogInformation("Gacha authkey candidate expired, try next: {Message}", ex.Message);
                 lastAuthError = ex;

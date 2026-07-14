@@ -183,8 +183,8 @@ internal class AutoSignInService
         }
 
         await pace(cancellationToken);
-        SignInActionResult result = await _signInService.ClaimSignInAsync(role, cancellationToken);
-        if (result is SignInActionResult.Success or SignInActionResult.AlreadySigned)
+        SignInActionResponse result = await _signInService.ClaimSignInAsync(role, cancellationToken);
+        if (result.Kind is SignInActionResult.Success or SignInActionResult.AlreadySigned)
         {
             SetSettingValue(failureKey, "0");
             _logger.LogInformation("Auto sign-in succeeded (biz {biz}, uid {uid}, result {result})", role.GameBiz, role.Uid, result);

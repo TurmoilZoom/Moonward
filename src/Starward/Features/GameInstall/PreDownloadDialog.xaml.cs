@@ -95,6 +95,7 @@ public sealed partial class PreDownloadDialog : ContentDialog
     {
         try
         {
+            ErrorMessage = null;
             // 安装路径
             string? installPath = GamePackageService.GetGameInstallPath(CurrentGameId);
             if (installPath is null)
@@ -164,6 +165,7 @@ public sealed partial class PreDownloadDialog : ContentDialog
         catch (Exception ex)
         {
             _logger.LogError(ex, "Get game package.");
+            ErrorMessage = GetMiHoYoRequestErrorMessage(ex);
         }
     }
 
@@ -190,6 +192,25 @@ public sealed partial class PreDownloadDialog : ContentDialog
     public partial long AvailableSpaceBytes { get; set; }
 
     public string AvailableSpaceText => AvailableSpaceBytes == 0 ? "..." : $"{AvailableSpaceBytes / GB:F2} GB";
+
+
+
+    /// <summary>拉取预下载信息失败时显示的错误文案。</summary>
+    public string? ErrorMessage { get; set => SetProperty(ref field, value); }
+
+
+
+    /// <summary>
+    /// 将启动器公开接口的 API 或 HTTP 异常转换为预下载对话框可显示的错误文案。
+    /// </summary>
+    /// <param name="exception">拉取预下载包信息时捕获的异常。</param>
+    /// <returns>本地化 API 文案或原始非 API 异常消息。</returns>
+    private static string GetMiHoYoRequestErrorMessage(Exception exception)
+    {
+        return exception is miHoYoApiException or HttpRequestException
+            ? MiHoYoApiErrorFeedbackFactory.Create(exception, MiHoYoApiContext.LauncherPublicApi).Message
+            : exception.Message;
+    }
 
 
 

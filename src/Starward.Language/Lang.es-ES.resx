@@ -920,9 +920,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Configuración del equipo</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
-  <data name="Common_AccountError" xml:space="preserve">
-    <value>Error de cuenta</value>
-  </data>
   <data name="Common_NetworkError" xml:space="preserve">
     <value>Error de red</value>
   </data>
@@ -1440,12 +1437,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
     <value>Mostrar deseo crónico</value>
-  </data>
-  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
-    <value>Actualizar huella digital del dispositivo</value>
-  </data>
-  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
-    <value>La huella digital del dispositivo ya está actualizada.</value>
   </data>
   <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
     <value>Imagen copiada al portapapeles</value>
@@ -2972,5 +2963,59 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
   </data>
   <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
     <value>Efectivo en el próximo inicio del software</value>
+  </data>
+  <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>Vuelve a iniciar sesión con esta cuenta en la caja de herramientas de Miyoushe ({0})</value>
+  </data>
+  <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
+    <value>La sesión ha caducado. Vuelve a iniciar sesión.</value>
+  </data>
+  <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
+    <value>Se requiere verificación de la cuenta, el dispositivo o la red.</value>
+  </data>
+  <data name="MiHoYoApiError_TooManyRequests" xml:space="preserve">
+    <value>Demasiadas solicitudes. Inténtalo de nuevo más tarde.</value>
+  </data>
+  <data name="MiHoYoApiError_GameRoleNotFound" xml:space="preserve">
+    <value>No se encuentra el personaje de juego seleccionado en esta cuenta.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountQueryLimit" xml:space="preserve">
+    <value>Se ha alcanzado el límite diario de consulta de cuentas.</value>
+  </data>
+  <data name="MiHoYoApiError_DataNotPublic" xml:space="preserve">
+    <value>Este registro de juego no es público.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountServiceUnavailable" xml:space="preserve">
+    <value>Esta cuenta no puede usar el servicio de registros de juego actual. Comprueba su vinculación y permisos.</value>
+  </data>
+  <data name="MiHoYoApiError_RealTimeNotesUnavailable" xml:space="preserve">
+    <value>Las notas en tiempo real solo están disponibles para la cuenta con la que has iniciado sesión.</value>
+  </data>
+  <data name="MiHoYoApiError_RequestRejected" xml:space="preserve">
+    <value>La solicitud fue rechazada o el servicio no está disponible temporalmente.</value>
+  </data>
+  <data name="MiHoYoApiError_AuthkeyExpired" xml:space="preserve">
+    <value>El enlace del registro ha caducado. Abre la página de registros en el juego y obtén un enlace nuevo.</value>
+  </data>
+  <data name="MiHoYoApiError_AccessDenied" xml:space="preserve">
+    <value>El servidor denegó esta solicitud.</value>
+  </data>
+  <data name="MiHoYoApiError_ServiceUnavailable" xml:space="preserve">
+    <value>El servicio de miHoYo no está disponible temporalmente.</value>
+  </data>
+  <data name="MiHoYoApiError_NetworkRequestFailed" xml:space="preserve">
+    <value>No se pudo completar la solicitud de red. Comprueba la conexión e inténtalo de nuevo.</value>
+  </data>
+  <data name="MiHoYoApiError_NoDetails" xml:space="preserve">
+    <value>No se devolvieron más detalles.</value>
+  </data>
+  <data name="MiHoYoApiError_Unknown" xml:space="preserve">
+    <value>Error en la solicitud de API: {0}</value>
+  </data>
+  <data name="MiHoYoApiError_Relogin" xml:space="preserve">
+    <value>Iniciar sesión de nuevo</value>
+  </data>
+  <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
+    <value>Introducir nueva URL</value>
   </data>
 </root>

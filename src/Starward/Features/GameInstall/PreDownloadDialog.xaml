@@ -91,6 +91,14 @@
                        TextWrapping="Wrap"
                        Visibility="Collapsed" />
 
+            <TextBlock Margin="1,8,1,0"
+                       FontSize="12"
+                       Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                       IsTextScaleFactorEnabled="False"
+                       Text="{x:Bind ErrorMessage}"
+                       TextWrapping="Wrap"
+                       Visibility="{x:Bind ErrorMessage, Converter={StaticResource ObjectToVisibilityConverter}}" />
+
 
 
             <!--  Start Predownload  -->

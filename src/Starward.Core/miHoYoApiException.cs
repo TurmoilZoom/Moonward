@@ -1,5 +1,3 @@
-using Starward.Core.Localization;
-
 namespace Starward.Core;
 
 public class miHoYoApiException : Exception
@@ -9,31 +7,32 @@ public class miHoYoApiException : Exception
 
 
     /// <summary>
-    /// 创建米哈游 API 异常。
+    /// 获取接口响应中的原始消息；可为 null。
     /// </summary>
-    /// <param name="returnCode">接口 retcode。</param>
-    /// <param name="message">接口返回的原始文案；-100 / -101 时会被本地化文案覆盖。</param>
-    public miHoYoApiException(int returnCode, string? message) : base(FormatMessage(returnCode, message))
-    {
-        ReturnCode = returnCode;
-    }
+    /// <remarks>
+    /// UI 层使用该值在未知错误时保留服务端诊断信息，避免从 <see cref="Exception.Message"/> 反向解析状态码。
+    /// </remarks>
+    public string? ResponseMessage { get; }
 
 
     /// <summary>
-    /// 格式化用户可见的异常消息。
-    /// -100 / -101（未登录或登录态失效）使用 CoreLang 引导重新登录；其余为「原文案 (retcode)」。
+    /// 获取当前返回码是否表示米游社登录态失效或缺少 Cookie。
+    /// </summary>
+    /// <remarks>
+    /// 此属性只提供调用方恢复登录态的程序化判断，不包含任何用户可见文案。
+    /// </remarks>
+    public bool IsLoginExpired => ReturnCode is -100 or -111 or 10001;
+
+
+    /// <summary>
+    /// 创建米哈游 API 异常。
     /// </summary>
     /// <param name="returnCode">接口 retcode。</param>
-    /// <param name="message">接口原始文案，可空。</param>
-    /// <returns>写入 <see cref="Exception.Message"/> 的最终字符串。</returns>
-    private static string FormatMessage(int returnCode, string? message)
+    /// <param name="message">接口返回的原始文案；可为 null。</param>
+    public miHoYoApiException(int returnCode, string? message) : base($"{message} ({returnCode})")
     {
-        // Cookie 未登录 / 登录态失效：统一本地化提示（不硬编码）
-        if (returnCode is -100 or -101)
-        {
-            return string.Format(CoreLang.miHoYoApi_PleaseReloginInMiyousheToolbox, returnCode);
-        }
-        return $"{message} ({returnCode})";
+        ReturnCode = returnCode;
+        ResponseMessage = message;
     }
 
 }

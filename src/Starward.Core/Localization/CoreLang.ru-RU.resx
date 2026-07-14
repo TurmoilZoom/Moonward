@@ -316,7 +316,4 @@
   <data name="GachaType_WEngineReverberation" xml:space="preserve">
     <value>Звук на полную</value>
   </data>
-  <data name="miHoYoApi_PleaseReloginInMiyousheToolbox" xml:space="preserve">
-    <value>Пожалуйста, повторно войдите в этот аккаунт через Miyoushe toolbox ({0})</value>
-  </data>
 </root>

@@ -260,12 +260,12 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get realtime inter knot report data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+            GameRecordPage.HandleMiHoYoApiException(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Get realtime inter knot report data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {
@@ -328,12 +328,12 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get inter knot report data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+            GameRecordPage.HandleMiHoYoApiException(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Get inter knot report data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {
@@ -375,12 +375,12 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get inter knot report full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+            GameRecordPage.HandleMiHoYoApiException(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Get inter knot report full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {

@@ -979,9 +979,6 @@ Do you accept the risk and continue to use it?</value>
     <value>Team Setup</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
-  <data name="Common_AccountError" xml:space="preserve">
-    <value>Account Error</value>
-  </data>
   <data name="Common_NetworkError" xml:space="preserve">
     <value>Network Error</value>
   </data>
@@ -1499,12 +1496,6 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
     <value>Show Chronicled Wish</value>
-  </data>
-  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
-    <value>Update Device Fingerprint</value>
-  </data>
-  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
-    <value>The device fingerprint is already updated.</value>
   </data>
   <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
     <value>Image copied to clipboard</value>
@@ -3031,5 +3022,59 @@ You are welcome to submit the exported data to the following repository:</value>
   </data>
   <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
     <value>Effective on next software startup</value>
+  </data>
+  <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>Please re-login this account in Miyoushe toolbox ({0})</value>
+  </data>
+  <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
+    <value>Login has expired. Please sign in again.</value>
+  </data>
+  <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
+    <value>Account, device, or network verification is required.</value>
+  </data>
+  <data name="MiHoYoApiError_TooManyRequests" xml:space="preserve">
+    <value>Too many requests. Please try again later.</value>
+  </data>
+  <data name="MiHoYoApiError_GameRoleNotFound" xml:space="preserve">
+    <value>The selected game role cannot be found for this account.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountQueryLimit" xml:space="preserve">
+    <value>The daily account query limit has been reached.</value>
+  </data>
+  <data name="MiHoYoApiError_DataNotPublic" xml:space="preserve">
+    <value>This game record is not public.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountServiceUnavailable" xml:space="preserve">
+    <value>This account cannot use the current game record service. Check its binding and permissions.</value>
+  </data>
+  <data name="MiHoYoApiError_RealTimeNotesUnavailable" xml:space="preserve">
+    <value>Real-time notes are only available for the currently signed-in account.</value>
+  </data>
+  <data name="MiHoYoApiError_RequestRejected" xml:space="preserve">
+    <value>The request was rejected or the service is temporarily unavailable.</value>
+  </data>
+  <data name="MiHoYoApiError_AuthkeyExpired" xml:space="preserve">
+    <value>The record link has expired. Open the record page in game and get a new link.</value>
+  </data>
+  <data name="MiHoYoApiError_AccessDenied" xml:space="preserve">
+    <value>The server denied this request.</value>
+  </data>
+  <data name="MiHoYoApiError_ServiceUnavailable" xml:space="preserve">
+    <value>The miHoYo service is temporarily unavailable.</value>
+  </data>
+  <data name="MiHoYoApiError_NetworkRequestFailed" xml:space="preserve">
+    <value>Unable to complete the network request. Please check your connection and try again.</value>
+  </data>
+  <data name="MiHoYoApiError_NoDetails" xml:space="preserve">
+    <value>No additional details were returned.</value>
+  </data>
+  <data name="MiHoYoApiError_Unknown" xml:space="preserve">
+    <value>API request failed: {0}</value>
+  </data>
+  <data name="MiHoYoApiError_Relogin" xml:space="preserve">
+    <value>Sign in again</value>
+  </data>
+  <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
+    <value>Enter new URL</value>
   </data>
 </root>

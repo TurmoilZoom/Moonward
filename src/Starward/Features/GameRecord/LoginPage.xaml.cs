@@ -243,13 +243,13 @@ public sealed partial class LoginPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Log in (web mode)");
-            TextBlock_Tip.Text = $"{Lang.Common_AccountError}\r\n{ex.Message}";
+            TextBlock_Tip.Text = GameRecordPage.GetMiHoYoApiExceptionMessage(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Log in (web mode)");
-            TextBlock_Tip.Text = ex.Message;
-            TextBlock_Tip.Text = $"{Lang.Common_NetworkError}\r\n{ex.Message}";
+            var feedback = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GameRecord);
+            TextBlock_Tip.Text = $"{feedback.Title}\r\n{feedback.Message}";
         }
         catch (Exception ex)
         {

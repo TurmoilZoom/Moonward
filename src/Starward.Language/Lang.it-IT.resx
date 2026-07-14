@@ -920,9 +920,6 @@ Accetti il rischio e desideri continuare?</value>
     <value>Formazione squadra</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
-  <data name="Common_AccountError" xml:space="preserve">
-    <value>Errore account</value>
-  </data>
   <data name="Common_NetworkError" xml:space="preserve">
     <value>Errore di rete</value>
   </data>
@@ -1440,12 +1437,6 @@ Accetti il rischio e desideri continuare?</value>
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
     <value>Mostra Desiderio Cronaca</value>
-  </data>
-  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
-    <value>Aggiorna impronta del dispositivo</value>
-  </data>
-  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
-    <value>L'impronta del dispositivo è già aggiornata.</value>
   </data>
   <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
     <value>Immagine copiata negli appunti</value>
@@ -2972,5 +2963,59 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
   </data>
   <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
     <value>Effettivo al prossimo avvio del software</value>
+  </data>
+  <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>Effettua nuovamente l'accesso a questo account nella toolbox di Miyoushe ({0})</value>
+  </data>
+  <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
+    <value>Accesso scaduto. Effettua di nuovo l'accesso.</value>
+  </data>
+  <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
+    <value>È richiesta la verifica dell'account, del dispositivo o della rete.</value>
+  </data>
+  <data name="MiHoYoApiError_TooManyRequests" xml:space="preserve">
+    <value>Troppe richieste. Riprova più tardi.</value>
+  </data>
+  <data name="MiHoYoApiError_GameRoleNotFound" xml:space="preserve">
+    <value>Il personaggio di gioco selezionato non è stato trovato per questo account.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountQueryLimit" xml:space="preserve">
+    <value>È stato raggiunto il limite giornaliero di query degli account.</value>
+  </data>
+  <data name="MiHoYoApiError_DataNotPublic" xml:space="preserve">
+    <value>Questo registro di gioco non è pubblico.</value>
+  </data>
+  <data name="MiHoYoApiError_AccountServiceUnavailable" xml:space="preserve">
+    <value>Questo account non può usare l'attuale servizio di cronache di gioco. Controlla associazione e autorizzazioni.</value>
+  </data>
+  <data name="MiHoYoApiError_RealTimeNotesUnavailable" xml:space="preserve">
+    <value>Le note in tempo reale sono disponibili solo per l'account attualmente connesso.</value>
+  </data>
+  <data name="MiHoYoApiError_RequestRejected" xml:space="preserve">
+    <value>La richiesta è stata rifiutata o il servizio non è temporaneamente disponibile.</value>
+  </data>
+  <data name="MiHoYoApiError_AuthkeyExpired" xml:space="preserve">
+    <value>Il link del registro è scaduto. Apri la pagina dei registri nel gioco e ottieni un nuovo link.</value>
+  </data>
+  <data name="MiHoYoApiError_AccessDenied" xml:space="preserve">
+    <value>Il server ha negato questa richiesta.</value>
+  </data>
+  <data name="MiHoYoApiError_ServiceUnavailable" xml:space="preserve">
+    <value>Il servizio miHoYo non è temporaneamente disponibile.</value>
+  </data>
+  <data name="MiHoYoApiError_NetworkRequestFailed" xml:space="preserve">
+    <value>Impossibile completare la richiesta di rete. Controlla la connessione e riprova.</value>
+  </data>
+  <data name="MiHoYoApiError_NoDetails" xml:space="preserve">
+    <value>Non sono stati restituiti ulteriori dettagli.</value>
+  </data>
+  <data name="MiHoYoApiError_Unknown" xml:space="preserve">
+    <value>Richiesta API non riuscita: {0}</value>
+  </data>
+  <data name="MiHoYoApiError_Relogin" xml:space="preserve">
+    <value>Accedi di nuovo</value>
+  </data>
+  <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
+    <value>Inserisci nuovo URL</value>
   </data>
 </root>

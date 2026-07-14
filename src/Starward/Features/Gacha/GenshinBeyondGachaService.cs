@@ -4,6 +4,7 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using Starward.Core;
+using Starward.Core.Gacha;
 using Starward.Core.Gacha.Genshin;
 using Starward.Core.Localization;
 using Starward.Features.Database;
@@ -65,7 +66,7 @@ internal class GenshinBeyondGachaService
     /// <param name="path">游戏安装根目录。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>有效 URL；无候选时 null。</returns>
-    /// <exception cref="miHoYoApiException">全部候选 authkey 过期时抛出。</exception>
+    /// <exception cref="GachaApiException">全部候选 authkey 过期时抛出。</exception>
     public async Task<string?> GetValidatedGachaLogUrlFromWebCacheAsync(GameBiz gameBiz, string path, CancellationToken cancellationToken = default)
     {
         var candidates = GenshinBeyondGachaClient.GetGachaUrlCandidatesFromWebCache(gameBiz, path);
@@ -74,7 +75,7 @@ internal class GenshinBeyondGachaService
             return null;
         }
 
-        miHoYoApiException? lastAuthError = null;
+        GachaApiException? lastAuthError = null;
         foreach (var url in candidates)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -83,7 +84,7 @@ internal class GenshinBeyondGachaService
                 await _client.GetUidByGachaUrlAsync(url);
                 return url;
             }
-            catch (miHoYoApiException ex) when (ex.ReturnCode is -101 or -1)
+            catch (GachaApiException ex) when (ex.IsAuthkeyExpired)
             {
                 _logger.LogInformation("Beyond gacha authkey candidate expired, try next: {Message}", ex.Message);
                 lastAuthError = ex;

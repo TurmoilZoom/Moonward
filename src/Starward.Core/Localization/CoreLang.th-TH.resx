@@ -316,7 +316,4 @@
   <data name="GachaType_WEngineReverberation" xml:space="preserve">
     <value>เสียงสะท้อน W-Engine</value>
   </data>
-  <data name="miHoYoApi_PleaseReloginInMiyousheToolbox" xml:space="preserve">
-    <value>โปรดเข้าสู่ระบบบัญชีนี้อีกครั้งในกล่องเครื่องมือ Miyoushe ({0})</value>
-  </data>
 </root>

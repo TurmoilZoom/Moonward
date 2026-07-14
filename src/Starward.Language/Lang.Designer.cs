@@ -440,15 +440,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Account Error 的本地化字符串。
-        /// </summary>
-        public static string Common_AccountError {
-            get {
-                return ResourceManager.GetString("Common_AccountError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 All 的本地化字符串。
         /// </summary>
         public static string Common_All {
@@ -4271,15 +4262,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 The device fingerprint is already updated. 的本地化字符串。
-        /// </summary>
-        public static string HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated {
-            get {
-                return ResourceManager.GetString("HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Trailblaze Monthly Calendar 的本地化字符串。
         /// </summary>
         public static string HoyolabToolboxPage_TrailblazeMonthlyCalendar {
@@ -4294,15 +4276,6 @@ namespace Starward.Language {
         public static string HoyolabToolboxPage_TravelersDiary {
             get {
                 return ResourceManager.GetString("HoyolabToolboxPage_TravelersDiary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Update Device Fingerprint 的本地化字符串。
-        /// </summary>
-        public static string HoyolabToolboxPage_UpdateDeviceFingerprint {
-            get {
-                return ResourceManager.GetString("HoyolabToolboxPage_UpdateDeviceFingerprint", resourceCulture);
             }
         }
         
@@ -8702,6 +8675,15 @@ namespace Starward.Language {
         public static string SignInButton_AutoSignInEffectiveAtNextStartup {
             get {
                 return ResourceManager.GetString("SignInButton_AutoSignInEffectiveAtNextStartup", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Please re-login this account in Miyoushe toolbox ({0}) 的本地化字符串。
+        /// </summary>
+        public static string HoyolabToolboxPage_PleaseReloginInMiyousheToolbox {
+            get {
+                return ResourceManager.GetString("HoyolabToolboxPage_PleaseReloginInMiyousheToolbox", resourceCulture);
             }
         }
     }

@@ -19,38 +19,44 @@ public static class SignInReturnCode
 
 
     /// <summary>
-    /// 未登录 / 登录态失效（cookie_token 过期）
+    /// 未登录 / 登录态失效。
     /// </summary>
     public const int NotLoggedIn = -100;
 
 
     /// <summary>
-    /// 登录态失效（另一种返回码）
+    /// 登录态失效（旧接口返回码）。
     /// </summary>
-    public const int LoginExpired = -101;
+    public const int LoginExpired = -111;
+
+
+    /// <summary>
+    /// 接口需要登录 Cookie。
+    /// </summary>
+    public const int LoginRequired = 10001;
 
 
     /// <summary>
     /// 补签次数已用尽
     /// </summary>
-    public const int ResignQuotaUsedUp = -10002;
+    public const int ResignQuotaUsedUp = -5005;
 
 
     /// <summary>
     /// 没有可补签的日期
     /// </summary>
-    public const int NoAvailableResignDate = -10003;
+    public const int NoAvailableResignDate = -5008;
 
 
     /// <summary>
     /// 请先完成今日签到
     /// </summary>
-    public const int PleaseSignInFirst = -10004;
+    public const int PleaseSignInFirst = -5007;
 
 
     /// <summary>
     /// 补签货币不足
     /// </summary>
-    public const int NotEnoughCoin = -10005;
+    public const int NotEnoughCoin = -5014;
 
 }

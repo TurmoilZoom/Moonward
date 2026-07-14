@@ -35,6 +35,10 @@ namespace Starward.Features.GameRecord;
 internal class GameRecordService
 {
 
+    /// <summary>
+    /// 国服请求失败后刷新设备指纹的最小间隔，避免连续业务错误频繁请求 public-data-api。
+    /// </summary>
+    private static readonly TimeSpan DeviceFpFailureUpdateCooldown = TimeSpan.FromHours(6);
 
     private readonly ILogger<GameRecordService> _logger;
 
@@ -43,6 +47,13 @@ internal class GameRecordService
     private readonly HoyolabClient _hoyolabClient;
 
     private GameRecordClient _gameRecordClient;
+    private readonly GameRecordCookieRefreshService _cookieRefreshService;
+
+    /// <summary>
+    /// 串行化所有国服设备指纹更新，确保冷却检查与刷新请求不会并发执行。
+    /// </summary>
+    private readonly SemaphoreSlim _deviceFpUpdateLock = new(1, 1);
+
 
     private readonly IMemoryCache _memoryCache;
 
@@ -69,43 +80,244 @@ internal class GameRecordService
     }
 
 
-    public GameRecordService(ILogger<GameRecordService> logger, HyperionClient hyperionClient, HoyolabClient hoyolabClient, IMemoryCache memoryCache)
+    /// <summary>
+    /// 初始化 GameRecord 门面及 Cookie 静默刷新依赖。
+    /// </summary>
+    /// <param name="logger">日志记录器。</param>
+    /// <param name="hyperionClient">国服 GameRecord Client。</param>
+    /// <param name="hoyolabClient">国际服 GameRecord Client。</param>
+    /// <param name="memoryCache">战绩与头像等数据的内存缓存。</param>
+    /// <param name="cookieRefreshService">国服 Cookie Token 刷新协调器。</param>
+    public GameRecordService(ILogger<GameRecordService> logger, HyperionClient hyperionClient, HoyolabClient hoyolabClient, IMemoryCache memoryCache, GameRecordCookieRefreshService cookieRefreshService)
     {
         _logger = logger;
         _hyperionClient = hyperionClient;
         _hoyolabClient = hoyolabClient;
         _gameRecordClient = hyperionClient;
         _memoryCache = memoryCache;
+        _cookieRefreshService = cookieRefreshService;
     }
 
 
 
 
+    /// <summary>
+    /// 按角色区服选择固定的 GameRecord Client，避免并发请求受页面当前平台状态影响。
+    /// </summary>
+    /// <param name="role">用于判断国服或国际服的游戏角色。</param>
+    /// <returns>角色对应平台的 Client。</returns>
+    private GameRecordClient GetClient(GameRecordRole role)
+    {
+        return role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false
+            ? _hoyolabClient
+            : _hyperionClient;
+    }
+
 
     /// <summary>
-    /// 更新设备指纹信息
+    /// 执行角色 GameRecord 请求；国服接口失败时先刷新设备指纹，登录失效时再刷新 Cookie Token，并仅重试一次。
     /// </summary>
-    /// <param name="forceUpdate"></param>
-    /// <returns></returns>
+    /// <typeparam name="T">请求返回类型。</typeparam>
+    /// <param name="role">请求使用的游戏角色，刷新成功后会原地更新其 Cookie。</param>
+    /// <param name="action">使用已选平台 Client 发起请求的委托。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>首次请求或一次恢复重试后的结果。</returns>
+    private async Task<T> ExecuteWithRequestRecoveryAsync<T>(GameRecordRole role, Func<GameRecordClient, Task<T>> action, CancellationToken cancellationToken = default)
+    {
+        GameRecordClient client = GetClient(role);
+        string failedDeviceFp = _hyperionClient.DeviceFp;
+        try
+        {
+            return await action(client);
+        }
+        catch (miHoYoApiException ex) when (client is HyperionClient)
+        {
+            bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
+
+            if (ex.IsLoginExpired)
+            {
+                string? refreshedCookie = await _cookieRefreshService.RefreshCookieAsync(role, cancellationToken);
+                if (string.IsNullOrWhiteSpace(refreshedCookie))
+                {
+                    throw;
+                }
+            }
+            else if (!deviceFpUpdated)
+            {
+                // 未更新指纹时重试相同请求没有恢复条件，直接保留首次业务错误。
+                throw;
+            }
+
+            try
+            {
+                return await action(client);
+            }
+            catch (miHoYoApiException retryException) when (ex.IsLoginExpired && retryException.IsLoginExpired)
+            {
+                // 二次鉴权失败时保留首次异常的调用栈与原始接口信息。
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex).Throw();
+                throw;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 执行账号 Cookie 请求；国服接口失败时先刷新设备指纹，登录失效时再刷新 Cookie Token，并仅重试一次。
+    /// </summary>
+    /// <typeparam name="T">请求返回类型。</typeparam>
+    /// <param name="cookie">网页登录或手动输入的完整 Cookie。</param>
+    /// <param name="isHoyolab">是否为国际服；国际服不尝试 Token 交换。</param>
+    /// <param name="action">接收平台 Client 与当前 Cookie 并发起请求的委托。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>首次请求或一次恢复重试后的结果。</returns>
+    private async Task<T> ExecuteWithRequestRecoveryAsync<T>(string cookie, bool isHoyolab, Func<GameRecordClient, string, Task<T>> action, CancellationToken cancellationToken = default)
+    {
+        GameRecordClient client = isHoyolab ? _hoyolabClient : _hyperionClient;
+        string failedDeviceFp = _hyperionClient.DeviceFp;
+        try
+        {
+            return await action(client, cookie);
+        }
+        catch (miHoYoApiException ex) when (!isHoyolab)
+        {
+            bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
+
+            string currentCookie = cookie;
+            if (ex.IsLoginExpired)
+            {
+                string? refreshedCookie = await _cookieRefreshService.RefreshCookieAsync(cookie, cancellationToken);
+                if (string.IsNullOrWhiteSpace(refreshedCookie))
+                {
+                    throw;
+                }
+                currentCookie = refreshedCookie;
+            }
+            else if (!deviceFpUpdated)
+            {
+                // 未更新指纹时重试相同请求没有恢复条件，直接保留首次业务错误。
+                throw;
+            }
+
+            try
+            {
+                return await action(client, currentCookie);
+            }
+            catch (miHoYoApiException retryException) when (ex.IsLoginExpired && retryException.IsLoginExpired)
+            {
+                // 二次鉴权失败时保留首次异常的调用栈与原始接口信息。
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex).Throw();
+                throw;
+            }
+        }
+    }
+
+
+
+    /// <summary>
+    /// 在国服接口返回业务错误后按冷却策略刷新设备指纹；指纹刷新失败时保留最初的业务错误。
+    /// </summary>
+    /// <param name="failedDeviceFp">触发失败请求使用的设备指纹，用于并发去重。</param>
+    /// <param name="originalException">触发恢复流程的原始米哈游接口异常。</param>
+    /// <param name="cancellationToken">取消令牌；调用方取消时应立即停止恢复流程。</param>
+    /// <returns>设备指纹已更新或已由并发请求更新时返回 true；处于冷却期而跳过时返回 false。</returns>
+    private async Task<bool> TryUpdateDeviceFpAfterRequestFailureAsync(string failedDeviceFp, miHoYoApiException originalException, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _deviceFpUpdateLock.WaitAsync(cancellationToken);
+            try
+            {
+                // 指纹已被其他失败请求更新时直接复用，避免并发请求重复触发 public-data-api。
+                if (!string.Equals(_hyperionClient.DeviceFp, failedDeviceFp, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+                DateTimeOffset lastUpdateTime = AppConfig.HyperionDeviceFpLastUpdateTime;
+                DateTimeOffset lastFailureAttemptTime = AppConfig.HyperionDeviceFpLastFailureUpdateAttemptTime;
+                DateTimeOffset lastAttemptTime = lastUpdateTime > lastFailureAttemptTime ? lastUpdateTime : lastFailureAttemptTime;
+                if (now - lastAttemptTime < DeviceFpFailureUpdateCooldown)
+                {
+                    _logger.LogDebug(
+                        "Skipped Hyperion device fingerprint refresh after API retcode {returnCode}; the {cooldown} cooldown has not elapsed.",
+                        originalException.ReturnCode,
+                        DeviceFpFailureUpdateCooldown);
+                    return false;
+                }
+
+                // 在请求前持久化尝试时间，避免接口异常或应用重启后立即再次触发刷新。
+                AppConfig.HyperionDeviceFpLastFailureUpdateAttemptTime = now;
+                await UpdateHyperionDeviceFpAsync(true, cancellationToken);
+                return true;
+            }
+            finally
+            {
+                _deviceFpUpdateLock.Release();
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // 恢复动作失败不能覆盖用户真正遇到的 API 业务错误。
+            _logger.LogWarning(ex, "Failed to update the Hyperion device fingerprint after API retcode {returnCode}.", originalException.ReturnCode);
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(originalException).Throw();
+            throw;
+        }
+    }
+
+
+
+    /// <summary>
+    /// 更新当前米游社工具箱使用的设备指纹信息。
+    /// </summary>
+    /// <param name="forceUpdate">是否忽略三天更新间隔并强制请求新的设备指纹。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示设备指纹已载入或更新完成的任务。</returns>
     public async Task UpdateDeviceFpAsync(bool forceUpdate = false, CancellationToken cancellationToken = default)
     {
         if (IsHoyolab)
         {
             return;
         }
+        await _deviceFpUpdateLock.WaitAsync(cancellationToken);
+        try
+        {
+            await UpdateHyperionDeviceFpAsync(forceUpdate, cancellationToken);
+        }
+        finally
+        {
+            _deviceFpUpdateLock.Release();
+        }
+    }
+
+
+
+    /// <summary>
+    /// 使用国服 Hyperion Client 载入或更新设备指纹，并将最新值持久化到应用设置。
+    /// </summary>
+    /// <param name="forceUpdate">是否忽略三天更新间隔并强制请求新的设备指纹。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示设备指纹已载入或更新完成的任务。</returns>
+    private async Task UpdateHyperionDeviceFpAsync(bool forceUpdate, CancellationToken cancellationToken)
+    {
         string? id = AppConfig.HyperionDeviceId;
         string? fp = AppConfig.HyperionDeviceFp;
         DateTimeOffset lastUpdateTime = AppConfig.HyperionDeviceFpLastUpdateTime;
-        if (!forceUpdate && !string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(fp))
+        if (!string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(fp))
         {
-            _gameRecordClient.DeviceId = id;
-            _gameRecordClient.DeviceFp = fp;
+            _hyperionClient.DeviceId = id;
+            _hyperionClient.DeviceFp = fp;
         }
         if (forceUpdate || DateTimeOffset.Now - lastUpdateTime > TimeSpan.FromDays(3))
         {
-            await _gameRecordClient.GetDeviceFpAsync(cancellationToken);
-            AppConfig.HyperionDeviceId = _gameRecordClient.DeviceId;
-            AppConfig.HyperionDeviceFp = _gameRecordClient.DeviceFp;
+            await _hyperionClient.GetDeviceFpAsync(cancellationToken);
+            AppConfig.HyperionDeviceId = _hyperionClient.DeviceId;
+            AppConfig.HyperionDeviceFp = _hyperionClient.DeviceFp;
             AppConfig.HyperionDeviceFpLastUpdateTime = DateTimeOffset.Now;
         }
     }
@@ -120,7 +332,7 @@ internal class GameRecordService
 
     public async Task<GameRecordUser> AddRecordUserAsync(string cookie, CancellationToken cancellationToken = default)
     {
-        var user = await _gameRecordClient.GetGameRecordUserAsync(cookie, cancellationToken);
+        var user = await ExecuteWithRequestRecoveryAsync(cookie, IsHoyolab, (client, currentCookie) => client.GetGameRecordUserAsync(currentCookie, cancellationToken), cancellationToken);
         using var dapper = DatabaseService.CreateConnection();
         dapper.Execute("""
             INSERT OR REPLACE INTO GameRecordUser (Uid, IsHoyolab, Nickname, Avatar, Introduce, Gender, AvatarUrl, Pendant, Cookie)
@@ -142,7 +354,7 @@ internal class GameRecordService
 
     public async Task<List<GameRecordRole>> AddGameRolesAsync(string cookie, CancellationToken cancellationToken = default)
     {
-        var list = await _gameRecordClient.GetAllGameRolesAsync(cookie, cancellationToken);
+        var list = await ExecuteWithRequestRecoveryAsync(cookie, IsHoyolab, (client, currentCookie) => client.GetAllGameRolesAsync(currentCookie, cancellationToken), cancellationToken);
         using var dapper = DatabaseService.CreateConnection();
         using var t = dapper.BeginTransaction();
         dapper.Execute("""
@@ -260,7 +472,7 @@ internal class GameRecordService
         string key = $"game_record_role_head_icon_{role.GameBiz}_{role.Region}_{role.Uid}";
         if (!_memoryCache.TryGetValue(key, out bool _))
         {
-            role = await _gameRecordClient.UpdateGameRoleHeadIconAsync(role);
+            role = await ExecuteWithRequestRecoveryAsync(role, client => client.UpdateGameRoleHeadIconAsync(role));
             using var dapper = DatabaseService.CreateConnection();
             dapper.Execute("""
                 INSERT OR REPLACE INTO GameRecordRole (Uid, GameBiz, Nickname, Level, Region, RegionName, Cookie, HeadIcon)
@@ -313,7 +525,7 @@ internal class GameRecordService
     /// <returns></returns>
     public async Task<SpiralAbyssInfo> RefreshSpiralAbyssInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetSpiralAbyssInfoAsync(role, schedule);
+        var info = await ExecuteWithRequestRecoveryAsync(role, client => client.GetSpiralAbyssInfoAsync(role, schedule), cancellationToken);
         var obj = new
         {
             info.Uid,
@@ -382,7 +594,7 @@ internal class GameRecordService
 
     public async Task<TravelersDiarySummary> GetTravelersDiarySummaryAsync(GameRecordRole role, int month = 0)
     {
-        var summary = await _gameRecordClient.GetTravelsDiarySummaryAsync(role, month);
+        var summary = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiarySummaryAsync(role, month));
         if (summary.MonthData is null)
         {
             return summary;
@@ -416,7 +628,7 @@ internal class GameRecordService
         if (forceOverwrite)
         {
             // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
-            var fwDetail = await _gameRecordClient.GetTravelsDiaryDetailAsync(role, month, type, limit);
+            var fwDetail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailAsync(role, month, type, limit));
             var fwList = fwDetail.List;
             if (fwList.Count == 0)
             {
@@ -438,7 +650,7 @@ internal class GameRecordService
         }
 
         // 探针请求：先获取第1页（limit=1）以同时得到总数和最新一条记录，避免冗余的全量查询
-        var firstPage = await _gameRecordClient.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, 1);
+        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, 1));
         int total = firstPage.Total;
         if (total == 0)
         {
@@ -476,7 +688,7 @@ internal class GameRecordService
             return 0;
         }
         // 增量插入：仅在有新数据时才发起全量请求
-        var detail = await _gameRecordClient.GetTravelsDiaryDetailAsync(role, month, type, limit);
+        var detail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailAsync(role, month, type, limit));
         var list = detail.List;
         var existTimes = new HashSet<DateTime>(dapper.Query<DateTime>(
             "SELECT Time FROM GenshinTravelersDiaryAwardItem WHERE Uid=@Uid AND Year=@Year AND Month=@Month AND Type=@Type;",
@@ -555,7 +767,7 @@ internal class GameRecordService
     /// <returns></returns>
     public async Task RefreshImaginariumTheaterInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
-        var infos = await _gameRecordClient.GetImaginariumTheaterInfosAsync(role, cancellationToken);
+        var infos = await ExecuteWithRequestRecoveryAsync(role, client => client.GetImaginariumTheaterInfosAsync(role, cancellationToken), cancellationToken);
         if (infos.Count == 0)
         {
             return;
@@ -629,7 +841,7 @@ internal class GameRecordService
 
     public async Task<SimulatedUniverseInfo> GetSimulatedUniverseInfoAsync(GameRecordRole role, bool detail)
     {
-        var info = await _gameRecordClient.GetSimulatedUniverseInfoAsync(role, detail);
+        var info = await ExecuteWithRequestRecoveryAsync(role, client => client.GetSimulatedUniverseInfoAsync(role, detail));
         if (detail)
         {
             using var dapper = DatabaseService.CreateConnection();
@@ -705,7 +917,7 @@ internal class GameRecordService
 
     public async Task<ForgottenHallInfo> RefreshForgottenHallInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetForgottenHallInfoAsync(role, schedule);
+        var info = await ExecuteWithRequestRecoveryAsync(role, client => client.GetForgottenHallInfoAsync(role, schedule), cancellationToken);
         var obj = new
         {
             info.Uid,
@@ -770,7 +982,7 @@ internal class GameRecordService
 
     public async Task<PureFictionInfo> RefreshPureFictionInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetPureFictionInfoAsync(role, schedule);
+        var info = await ExecuteWithRequestRecoveryAsync(role, client => client.GetPureFictionInfoAsync(role, schedule), cancellationToken);
         if (info.ScheduleId == 0)
         {
             return info;
@@ -839,7 +1051,7 @@ internal class GameRecordService
 
     public async Task<ApocalypticShadowInfo> RefreshApocalypticShadowInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetApocalypticShadowInfoAsync(role, schedule);
+        var info = await ExecuteWithRequestRecoveryAsync(role, client => client.GetApocalypticShadowInfoAsync(role, schedule), cancellationToken);
         if (info.ScheduleId == 0)
         {
             return info;
@@ -911,7 +1123,7 @@ internal class GameRecordService
 
     public async Task<TrailblazeCalendarSummary> GetTrailblazeCalendarSummaryAsync(GameRecordRole role, string month = "")
     {
-        var summary = await _gameRecordClient.GetTrailblazeCalendarSummaryAsync(role, month);
+        var summary = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarSummaryAsync(role, month));
         if (summary.MonthData is null)
         {
             return summary;
@@ -944,7 +1156,7 @@ internal class GameRecordService
         if (forceOverwrite)
         {
             // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
-            var fwDetail = await _gameRecordClient.GetTrailblazeCalendarDetailAsync(role, month, type);
+            var fwDetail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailAsync(role, month, type));
             var fwList = fwDetail.List;
             if (fwList.Count == 0)
             {
@@ -965,7 +1177,7 @@ internal class GameRecordService
         }
 
         // 先获取第一页（page_size=1）以同时得到总数和最新一条记录
-        var firstPage = await _gameRecordClient.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1);
+        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1));
         int total = firstPage.Total;
         if (total == 0)
         {
@@ -1001,7 +1213,7 @@ internal class GameRecordService
             return 0;
         }
         // 增量插入：仅插入 Time 不重复的新记录；同时刷新原有记录中最新的一条
-        var detail = await _gameRecordClient.GetTrailblazeCalendarDetailAsync(role, month, type);
+        var detail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailAsync(role, month, type));
         var list = detail.List;
         var existTimes = new HashSet<DateTime>(dapper.Query<DateTime>(
             "SELECT Time FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @uid AND Month = @month AND Type = @type;",
@@ -1072,7 +1284,7 @@ internal class GameRecordService
 
     public async Task<InterKnotReportSummary> GetInterKnotReportSummaryAsync(GameRecordRole role, string month = "")
     {
-        var summary = await _gameRecordClient.GetInterKnotReportSummaryAsync(role, month);
+        var summary = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportSummaryAsync(role, month));
         using var dapper = DatabaseService.CreateConnection();
         var obj = new
         {
@@ -1122,7 +1334,7 @@ internal class GameRecordService
         if (forceOverwrite)
         {
             // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
-            var fwDetail = await _gameRecordClient.GetInterKnotReportDetailAsync(role, month, type);
+            var fwDetail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailAsync(role, month, type));
             var fwList = fwDetail.List;
             if (fwList.Count == 0)
             {
@@ -1143,7 +1355,7 @@ internal class GameRecordService
         }
 
         // 先获取第一页（page_size=1）以同时得到总数和最新一条记录，避免后续重复请求
-        var firstPage = await _gameRecordClient.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1);
+        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1));
         int total = firstPage.Total;
         if (total == 0)
         {
@@ -1170,7 +1382,7 @@ internal class GameRecordService
         }
         // 增量插入：INSERT OR IGNORE 跳过已存在记录（主键为 (Uid, Id)），仅写入新记录；
         // 同时刷新原有记录中最新的一条（INSERT OR REPLACE 利用主键做 upsert）
-        var detail = await _gameRecordClient.GetInterKnotReportDetailAsync(role, month, type);
+        var detail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailAsync(role, month, type));
         int newCount = total - existCount;
         dapper.Execute("""
             INSERT OR IGNORE INTO ZZZInterKnotReportDetailItem (Uid, Id, DataMonth, DataType, Action, Time, Number)
@@ -1225,7 +1437,7 @@ internal class GameRecordService
         {
             await UpdateDeviceFpAsync(cancellationToken: cancellationToken);
         }
-        return await _gameRecordClient.GetZZZGachaRecordAsync(role, gachaType, endId, language, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZGachaRecordAsync(role, gachaType, endId, language, cancellationToken), cancellationToken);
     }
 
 
@@ -1242,7 +1454,7 @@ internal class GameRecordService
 
     public async Task<ShiyuDefenseWrapper> RefreshShiyuDefenseInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var wrapper = await _gameRecordClient.GetShiyuDefenseInfoAsync(role, schedule);
+        var wrapper = await ExecuteWithRequestRecoveryAsync(role, client => client.GetShiyuDefenseInfoAsync(role, schedule), cancellationToken);
         if (wrapper.HadalVer is "v1" && wrapper.InfoV1 is not null)
         {
             var info = wrapper.InfoV1;
@@ -1349,7 +1561,7 @@ internal class GameRecordService
 
     public async Task<DeadlyAssaultInfo> RefreshDeadlyAssaultInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetDeadlyAssaultInfoAsync(role, schedule);
+        var info = await ExecuteWithRequestRecoveryAsync(role, client => client.GetDeadlyAssaultInfoAsync(role, schedule), cancellationToken);
         if (!info.HasData)
         {
             return info;
@@ -1420,7 +1632,7 @@ internal class GameRecordService
         string key = $"{nameof(BH3DailyNote)}_{role.Region}_{role.Uid}";
         if (forceUpdate || !_memoryCache.TryGetValue(key, out BH3DailyNote? note))
         {
-            note = await _gameRecordClient.GetBH3DailyNoteAsync(role, cancellationToken);
+            note = await ExecuteWithRequestRecoveryAsync(role, client => client.GetBH3DailyNoteAsync(role, cancellationToken), cancellationToken);
             _memoryCache.Set(key, note, TimeSpan.FromMinutes(5));
         }
         return note!;
@@ -1433,7 +1645,7 @@ internal class GameRecordService
         string key = $"{nameof(GenshinDailyNote)}_{role.Region}_{role.Uid}";
         if (forceUpdate || !_memoryCache.TryGetValue(key, out GenshinDailyNote? note))
         {
-            note = await _gameRecordClient.GetGenshinDailyNoteAsync(role, cancellationToken);
+            note = await ExecuteWithRequestRecoveryAsync(role, client => client.GetGenshinDailyNoteAsync(role, cancellationToken), cancellationToken);
             _memoryCache.Set(key, note, TimeSpan.FromMinutes(5));
         }
         return note!;
@@ -1446,7 +1658,7 @@ internal class GameRecordService
         string key = $"{nameof(StarRailDailyNote)}_{role.Region}_{role.Uid}";
         if (forceUpdate || !_memoryCache.TryGetValue(key, out StarRailDailyNote? note))
         {
-            note = await _gameRecordClient.GetStarRailDailyNoteAsync(role, cancellationToken);
+            note = await ExecuteWithRequestRecoveryAsync(role, client => client.GetStarRailDailyNoteAsync(role, cancellationToken), cancellationToken);
             _memoryCache.Set(key, note, TimeSpan.FromMinutes(5));
         }
         return note!;
@@ -1458,7 +1670,7 @@ internal class GameRecordService
         string key = $"{nameof(ZZZDailyNote)}_{role.Region}_{role.Uid}";
         if (forceUpdate || !_memoryCache.TryGetValue(key, out ZZZDailyNote? note))
         {
-            note = await _gameRecordClient.GetZZZDailyNoteAsync(role, cancellationToken);
+            note = await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZDailyNoteAsync(role, cancellationToken), cancellationToken);
             _memoryCache.Set(key, note, TimeSpan.FromMinutes(5));
         }
         return note!;
@@ -1477,7 +1689,7 @@ internal class GameRecordService
 
     public async Task<List<StygianOnslaughtInfo>> RefreshStygianOnslaughtInfosAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
-        var infos = await _gameRecordClient.GetStygianOnslaughtInfosAsync(role, cancellationToken);
+        var infos = await ExecuteWithRequestRecoveryAsync(role, client => client.GetStygianOnslaughtInfosAsync(role, cancellationToken), cancellationToken);
         if (infos.Count == 0)
         {
             return infos;
@@ -1562,7 +1774,7 @@ internal class GameRecordService
     {
         using var dapper = DatabaseService.CreateConnection();
 
-        var data = await _gameRecordClient.GetStarRailChallengePeakDataAsync(role, 1, cancellationToken);
+        var data = await ExecuteWithRequestRecoveryAsync(role, client => client.GetStarRailChallengePeakDataAsync(role, 1, cancellationToken), cancellationToken);
         if (data.ChallengePeakRecords?.Count == 1)
         {
             var record = data.ChallengePeakRecords[0];
@@ -1582,7 +1794,7 @@ internal class GameRecordService
                 """, obj);
         }
 
-        data = await _gameRecordClient.GetStarRailChallengePeakDataAsync(role, 3, cancellationToken);
+        data = await ExecuteWithRequestRecoveryAsync(role, client => client.GetStarRailChallengePeakDataAsync(role, 3, cancellationToken), cancellationToken);
         foreach (var record in data.ChallengePeakRecords.ToList())
         {
             data.ChallengePeakRecords.Clear();
@@ -1698,7 +1910,7 @@ internal class GameRecordService
     public async Task<SignInReward> GetSignInRewardAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
         await PrepareSignInClientAsync(role, cancellationToken);
-        return await _gameRecordClient.GetSignInRewardAsync(role, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetSignInRewardAsync(role, cancellationToken), cancellationToken);
     }
 
 
@@ -1711,7 +1923,7 @@ internal class GameRecordService
     public async Task<SignInRewardInfo> GetSignInInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
         await PrepareSignInClientAsync(role, cancellationToken);
-        return await _gameRecordClient.GetSignInInfoAsync(role, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetSignInInfoAsync(role, cancellationToken), cancellationToken);
     }
 
 
@@ -1724,7 +1936,7 @@ internal class GameRecordService
     public async Task<SignInResignInfo> GetSignInResignInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
         await PrepareSignInClientAsync(role, cancellationToken);
-        return await _gameRecordClient.GetSignInResignInfoAsync(role, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetSignInResignInfoAsync(role, cancellationToken), cancellationToken);
     }
 
 
@@ -1737,7 +1949,7 @@ internal class GameRecordService
     public async Task<SignInResult> SignInAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
         await PrepareSignInClientAsync(role, cancellationToken);
-        return await _gameRecordClient.SignInAsync(role, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.SignInAsync(role, cancellationToken), cancellationToken);
     }
 
 
@@ -1750,7 +1962,7 @@ internal class GameRecordService
     public async Task<SignInResult> ReSignInAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
         await PrepareSignInClientAsync(role, cancellationToken);
-        return await _gameRecordClient.ReSignInAsync(role, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.ReSignInAsync(role, cancellationToken), cancellationToken);
     }
 
 

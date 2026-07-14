@@ -135,7 +135,7 @@ public sealed partial class SimulatedUniversePage : PageBase
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Get simulated universe data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            GameRecordPage.HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {

@@ -140,6 +140,13 @@ public class GenshinBeyondGachaClient
 
 
 
+    /// <summary>
+    /// 查询千星奇域指定页的抽卡记录。
+    /// </summary>
+    /// <param name="gachaUrlPrefix">已解析的抽卡记录 API 前缀，包含 authkey。</param>
+    /// <param name="param">当前页的查询参数。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>当前页的抽卡记录；接口 retcode 非 0 时抛出 <see cref="GachaApiException"/>。</returns>
     protected virtual async Task<List<GenshinBeyondGachaItem>> GetGachaLogByQueryAsync(string gachaUrlPrefix, BeyondGachaLogQuery param, CancellationToken cancellationToken = default)
     {
         await Task.Delay(Random.Shared.Next(200, 300), cancellationToken);
@@ -151,7 +158,7 @@ public class GenshinBeyondGachaClient
         }
         else if (wrapper.Retcode != 0)
         {
-            throw new miHoYoApiException(wrapper.Retcode, wrapper.Message);
+            throw new GachaApiException(wrapper.Retcode, wrapper.Message);
         }
         else
         {

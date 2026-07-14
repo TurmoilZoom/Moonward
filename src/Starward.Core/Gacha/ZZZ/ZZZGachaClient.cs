@@ -179,7 +179,7 @@ public class ZZZGachaClient : GachaLogClient
     /// <param name="gachaUrlPrefix">已通过 <see cref="GetGachaUrlPrefix"/> 处理好的 API 前缀（包含认证信息）。</param>
     /// <param name="param">分页查询参数（GachaType / Page / Size / EndId）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>单页数据列表。若接口返回 retcode != 0 会抛出 <see cref="miHoYoApiException"/>。</returns>
+    /// <returns>单页数据列表。若接口返回 retcode != 0 会抛出 <see cref="GachaApiException"/>。</returns>
     protected override async Task<List<T>> GetGachaLogByQueryAsync<T>(string gachaUrlPrefix, GachaLogQuery param, CancellationToken cancellationToken = default)
     {
         await Task.Delay(Random.Shared.Next(200, 300), cancellationToken);
@@ -191,7 +191,7 @@ public class ZZZGachaClient : GachaLogClient
         }
         else if (wrapper.Retcode != 0)
         {
-            throw new miHoYoApiException(wrapper.Retcode, wrapper.Message);
+            throw new GachaApiException(wrapper.Retcode, wrapper.Message);
         }
         else
         {

@@ -65,12 +65,6 @@ public sealed partial class GameRecordPage : PageBase
         // 根据区服选择客户端：国内用 HyperionClient，国际用 HoyolabClient。
         _gameRecordService.IsHoyolab = CurrentGameBiz.IsGlobalServer();
 
-        // 国际服不需要设备指纹更新入口（Hyperion 特有）。
-        if (CurrentGameBiz.IsGlobalServer())
-        {
-            NavigationViewItem_UpdateDeviceInfo.Visibility = Visibility.Collapsed;
-        }
-
         _gameRecordService.Language = System.Globalization.CultureInfo.CurrentUICulture.Name;
         InitializeNavigationViewItemVisibility();
     }
@@ -102,6 +96,11 @@ public sealed partial class GameRecordPage : PageBase
         {
             ShowBattleChronicleWindow();
         });
+        WeakReferenceMessenger.Default.Register<GameRecordOpenLoginMessage>(this, (r, m) =>
+        {
+            // 子页面只知道接口错误，不直接依赖主页面导航；由主页面复用既有登录流程。
+            NavigateTo(typeof(LoginPage), CurrentGameBiz);
+        });
 
         await Task.Delay(16);
         NavigateTo(typeof(BlankPage));
@@ -122,7 +121,6 @@ public sealed partial class GameRecordPage : PageBase
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
         NavigationViewItem_BattleChronicle.Tapped -= NavigationViewItem_BattleChronicle_Tapped;
-        NavigationViewItem_UpdateDeviceInfo.Tapped -= NavigationViewItem_UpdateDeviceInfo_Tapped;
         _navHoverEffect.Detach();
         CurrentRole = null;
         GameRoleList = null!;
@@ -393,12 +391,12 @@ public sealed partial class GameRecordPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Refresh game role info ({gameBiz}, {uid}).", CurrentRole?.GameBiz, CurrentRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+            HandleMiHoYoApiException(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Refresh game role info ({gameBiz}, {uid}).", CurrentRole?.GameBiz, CurrentRole?.Uid);
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {
@@ -496,12 +494,12 @@ public sealed partial class GameRecordPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Input cookie");
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
+            HandleMiHoYoApiException(ex);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Input cookie");
-            InAppToast.MainWindow?.Warning(Lang.Common_NetworkError, ex.Message);
+            HandleMiHoYoHttpException(ex);
         }
         catch (Exception ex)
         {
@@ -710,34 +708,20 @@ public sealed partial class GameRecordPage : PageBase
 
 
 
-    private async void NavigationViewItem_UpdateDeviceInfo_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
-    {
-        await UpdateDeviceInfoAsync(true);
-    }
-
-
-
     /// <summary>
-    /// 更新设备指纹（仅国内服）。首次或超过 3 天会调用 public-data-api 获取新 fp。
+    /// 在工具箱加载时同步设备指纹（仅国内服）。首次或超过 3 天会调用 public-data-api 获取新 fp。
     /// 用于后续所有 Hyperion 请求的 x-rpc-device-fp 头，降低风控概率。
     /// </summary>
-    private async Task UpdateDeviceInfoAsync(bool forceUpdate = false)
+    /// <returns>表示初始化同步已完成或已记录异常的任务。</returns>
+    private async Task UpdateDeviceInfoAsync()
     {
         try
         {
-            await _gameRecordService.UpdateDeviceFpAsync(forceUpdate);
-            if (forceUpdate)
-            {
-                InAppToast.MainWindow?.Success(Lang.HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated);
-            }
+            await _gameRecordService.UpdateDeviceFpAsync();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Update device info");
-            if (forceUpdate)
-            {
-                InAppToast.MainWindow?.Error(ex);
-            }
         }
     }
 
@@ -752,22 +736,52 @@ public sealed partial class GameRecordPage : PageBase
 
 
     /// <summary>
-    /// 统一处理战绩相关的 <see cref="miHoYoApiException"/>（风控验证 / 账号异常 toast）。
+    /// 获取战绩页面应展示的米哈游 API 错误文案。
+    /// </summary>
+    /// <param name="ex">包含接口原始消息和返回码的米哈游 API 异常。</param>
+    /// <returns>按战绩接口语义分类后的本地化错误文案。</returns>
+    public static string GetMiHoYoApiExceptionMessage(miHoYoApiException ex)
+    {
+        return MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GameRecord).Message;
+    }
+
+
+    /// <summary>
+    /// 统一处理战绩相关的 <see cref="miHoYoApiException"/>，并提供站内登录或验证恢复入口。
     /// </summary>
     /// <param name="ex">米哈游 API 异常。</param>
     public static void HandleMiHoYoApiException(miHoYoApiException ex)
     {
-        if (ex.ReturnCode is 1034 or 5003 or 10035 or 10041 or 10053)
+        var feedback = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GameRecord);
+        MiHoYoApiErrorFeedbackFactory.Show(feedback, action =>
         {
-            InAppToast.MainWindow?.ShowWithButton(InfoBarSeverity.Warning, Lang.Common_AccountError, ex.Message, Lang.HoyolabToolboxPage_VerifyAccount, () =>
+            if (action is MiHoYoApiRecoveryAction.Relogin)
+            {
+                WeakReferenceMessenger.Default.Send(new GameRecordOpenLoginMessage());
+            }
+            else if (action is MiHoYoApiRecoveryAction.VerifyAccount)
             {
                 WeakReferenceMessenger.Default.Send(new GameRecordVerifyAccountMessage());
-            });
-        }
-        else
+            }
+        });
+    }
+
+
+
+    /// <summary>
+    /// 统一处理战绩相关的 HTTP 请求异常，并按状态码显示可恢复的本地化反馈。
+    /// </summary>
+    /// <param name="ex">HTTP 请求异常。</param>
+    public static void HandleMiHoYoHttpException(HttpRequestException ex)
+    {
+        var feedback = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GameRecord);
+        MiHoYoApiErrorFeedbackFactory.Show(feedback, action =>
         {
-            InAppToast.MainWindow?.Warning(Lang.Common_AccountError, ex.Message);
-        }
+            if (action is MiHoYoApiRecoveryAction.Relogin)
+            {
+                WeakReferenceMessenger.Default.Send(new GameRecordOpenLoginMessage());
+            }
+        });
     }
 
 

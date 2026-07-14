@@ -919,9 +919,6 @@
     <value>節點</value>
     <comment>example: forgotten hall team setup 1</comment>
   </data>
-  <data name="Common_AccountError" xml:space="preserve">
-    <value>Account 異常</value>
-  </data>
   <data name="Common_NetworkError" xml:space="preserve">
     <value>網路異常</value>
   </data>
@@ -1439,12 +1436,6 @@
   </data>
   <data name="GachaLogPage_ShowChronicledWish" xml:space="preserve">
     <value>顯示集錄祈願</value>
-  </data>
-  <data name="HoyolabToolboxPage_UpdateDeviceFingerprint" xml:space="preserve">
-    <value>更新裝置指紋</value>
-  </data>
-  <data name="HoyolabToolboxPage_TheDeviceFingerprintIsAlreadyUpdated" xml:space="preserve">
-    <value>裝置指紋已更新。</value>
   </data>
   <data name="BBSWebBridge_ImageCopiedToClipboard" xml:space="preserve">
     <value>圖片已複製到剪貼簿</value>
@@ -2971,5 +2962,59 @@
   </data>
   <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
     <value>軟件下次啟動生效</value>
+  </data>
+  <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
+    <value>請在米遊社工具箱中重新登入該賬號({0})</value>
+  </data>
+  <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
+    <value>登入狀態已失效，請重新登入。</value>
+  </data>
+  <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
+    <value>帳戶、裝置或網絡需要完成驗證。</value>
+  </data>
+  <data name="MiHoYoApiError_TooManyRequests" xml:space="preserve">
+    <value>請求過於頻繁，請稍後再試。</value>
+  </data>
+  <data name="MiHoYoApiError_GameRoleNotFound" xml:space="preserve">
+    <value>當前賬號中找不到所選遊戲角色。</value>
+  </data>
+  <data name="MiHoYoApiError_AccountQueryLimit" xml:space="preserve">
+    <value>今日查詢賬號數量已達到限制。</value>
+  </data>
+  <data name="MiHoYoApiError_DataNotPublic" xml:space="preserve">
+    <value>該遊戲戰績未公開。</value>
+  </data>
+  <data name="MiHoYoApiError_AccountServiceUnavailable" xml:space="preserve">
+    <value>當前賬號無法使用該戰績服務，請檢查賬號綁定和功能權限。</value>
+  </data>
+  <data name="MiHoYoApiError_RealTimeNotesUnavailable" xml:space="preserve">
+    <value>實時便箋僅支援查看當前登入賬號。</value>
+  </data>
+  <data name="MiHoYoApiError_RequestRejected" xml:space="preserve">
+    <value>請求被拒絕或服務暫時不可用。</value>
+  </data>
+  <data name="MiHoYoApiError_AuthkeyExpired" xml:space="preserve">
+    <value>記錄連結已失效，請在遊戲內打開記錄頁面後重新獲取連結。</value>
+  </data>
+  <data name="MiHoYoApiError_AccessDenied" xml:space="preserve">
+    <value>伺服器拒絕了當前請求。</value>
+  </data>
+  <data name="MiHoYoApiError_ServiceUnavailable" xml:space="preserve">
+    <value>米哈遊服務暫時不可用。</value>
+  </data>
+  <data name="MiHoYoApiError_NetworkRequestFailed" xml:space="preserve">
+    <value>網絡請求未能完成，請檢查網絡後重試。</value>
+  </data>
+  <data name="MiHoYoApiError_NoDetails" xml:space="preserve">
+    <value>伺服器未返回更多資訊。</value>
+  </data>
+  <data name="MiHoYoApiError_Unknown" xml:space="preserve">
+    <value>API 請求失敗：{0}</value>
+  </data>
+  <data name="MiHoYoApiError_Relogin" xml:space="preserve">
+    <value>重新登入</value>
+  </data>
+  <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
+    <value>輸入新連結</value>
   </data>
 </root>

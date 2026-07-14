@@ -167,6 +167,16 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 上次因国服 GameRecord 请求失败而尝试刷新设备指纹的时间。
+    /// 即使刷新请求失败也会写入，用于跨应用重启限制重复请求。
+    /// </summary>
+    public static DateTimeOffset HyperionDeviceFpLastFailureUpdateAttemptTime
+    {
+        get => GetValue<DateTimeOffset>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 当前选择的游戏区服
     /// </summary>
     public static GameBiz CurrentGameBiz
