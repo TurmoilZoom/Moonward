@@ -104,16 +104,16 @@ internal static class GachaStatsListDragScrollHelper
                 return;
             }
 
-            // 取消可能正在进行的惯性 ChangeView 动画：先钉住当前 offset。
             double seed = _scrollViewer.VerticalOffset;
             try
             {
+                // 鼠标按下时，立即停止 ScrollViewer 的原生缓动（若存在），并记录当前 offset 作为虚拟偏移的起点。
                 _scrollViewer.ChangeView(null, seed, null, disableAnimation: true);
             }
             catch { }
 
-            // 以当前真实偏移作为权威虚拟偏移的起点。
             _virtualOffset = seed;
+            //scrollViewer独占鼠标指针，避免拖拽过程中鼠标离开 ScrollViewer 导致 PointerCaptureLost。
             _scrollViewer.CapturePointer(e.Pointer);
             _lastPosition = e.GetCurrentPoint(_scrollViewer).Position;
             _lastTimestamp = Stopwatch.GetTimestamp();
@@ -137,37 +137,48 @@ internal static class GachaStatsListDragScrollHelper
             }
 
             Point pos = point.Position;
+            // 单位：像素
+            //鼠标相对上一采样点，指针在竖直方向上移动了多少（屏幕坐标：Y 向下为正）
             double deltaY = pos.Y - _lastPosition.Y;
             long now = Stopwatch.GetTimestamp();
+            //GetTimestamp是硬件/高精度计数器的 tick，所以必须除以 Frequency（每秒多少 tick）才得到秒
             double dt = (now - _lastTimestamp) * TickToSeconds;
             if (dt > 0)
             {
                 double instant = deltaY / dt;
-                // EMA 平滑速度，减少 jitter
+                // EMA 平滑速度，计算公式：v = v * (1 - α) + v_instant * α，α 越大响应越快但抖动越明显，α 越小响应越慢但平滑。
                 _velocity = _velocity * 0.7 + instant * 0.3;
             }
 
             double maxOffset = _scrollViewer.ScrollableHeight;
 
-            // 统一虚拟偏移模型：不依赖从 ScrollViewer 读回的异步 offset，
-            // 而是将手指位移直接累积到 _virtualOffset，再拆分为 clamped（ChangeView）与 overflow（Translation）。
+            //开始计算累计值
+            // 不相信 ScrollViewer 自己返回的 VerticalOffset，因为它更新是异步的，读回来经常是旧值，会导致画面抖动
+            // 鼠标移动的方向和_scrollViewer相反
+            // 可以为负数，表示本次采样点相对于上次采样点的变化过程
+            //_virtualOffset为累计采样，deltaY为瞬时变化
             _virtualOffset -= deltaY;
+            //_virtualOffset为相对偏移，相对于ScrollViewer的起点0的总偏移
             double clamped = Math.Clamp(_virtualOffset, 0, maxOffset);
-            double overflow = _virtualOffset - clamped; // >0 底部过拉，<0 顶部过拉
+            double overflow = _virtualOffset - clamped; // >0 底部过拉，<0 顶部过拉。溢出的像素点个数
 
-            // scroll：仅当 clamped 部分变动时才写 ScrollViewer，避免反复 ChangeView(disableAnimation:true) 造成自身抖动。
-            double prevScrollOffset = _virtualOffset + deltaY; // 还原上一帧的 _virtualOffset 对应的 clamped
+            // 计算上次采样点的 clamped 值
+            double prevScrollOffset = _virtualOffset + deltaY; 
             double prevClamped = Math.Clamp(prevScrollOffset, 0, maxOffset);
+
+            //鼠标光点击但不动时，无需响应
             if (Math.Abs(clamped - prevClamped) > 0.01)
             {
                 try
                 {
+                    //前提：ScrollViewer.ChangeView() 不允许传负数或超过最大值
+                    //每次采样都让 ScrollViewer 立即跳到 clamped 位置
                     _scrollViewer.ChangeView(null, clamped, null, disableAnimation: true);
                 }
                 catch { }
             }
 
-            // overscroll：overflow 连续变化 → translation 连续变化，不会在回拉越过边界时瞬间 snap。
+            // 过拉的情况下，计算阻尼之后的真实位移
             _overscrollY = -Math.Sign(overflow) * Rubber(Math.Abs(overflow), MaxOverscrollPull);
             ApplyOverscrollInstant();
 
@@ -209,26 +220,27 @@ internal static class GachaStatsListDragScrollHelper
             _isDragging = false;
             try
             {
+                //释放指针捕获
                 _scrollViewer.ReleasePointerCapture(null);
             }
             catch { }
 
+            // 存在回弹位移，忽略速度，播放回弹动画
             if (_overscrollY != 0)
             {
-                // 存在回弹位移，忽略速度，播放回弹动画
                 PlaySpringBackAnimation();
                 return;
             }
 
             // 无回弹，尝试惯性
             double absVel = Math.Abs(_velocity);
-            if (absVel > MinFlingVelocity)
+            if (absVel > MinFlingVelocity)//阈值：150 px/s
             {
                 double current = _scrollViewer.VerticalOffset;
                 double target = current - _velocity * FlingTimeConstant;
                 double max = _scrollViewer.ScrollableHeight;
                 target = Math.Clamp(target, 0, max);
-                // disableAnimation:false → 利用 ScrollViewer 原生缓动产生惯性观感
+                // 逐个采样点控制
                 try
                 {
                     _scrollViewer.ChangeView(null, target, null, disableAnimation: false);
@@ -264,6 +276,7 @@ internal static class GachaStatsListDragScrollHelper
         {
             try
             {
+                //底层视觉对象 composition api
                 _contentVisual.Properties.InsertVector3("Translation", new Vector3(0, (float)_overscrollY, 0));
             }
             catch { }
