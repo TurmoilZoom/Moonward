@@ -48,6 +48,8 @@ internal class GameRecordService
 
     private GameRecordClient _gameRecordClient;
 
+    private readonly GameRecordCookieRefreshService _cookieRefreshService;
+
     /// <summary>
     /// 串行化所有国服设备指纹更新，确保冷却检查与刷新请求不会并发执行。
     /// </summary>
@@ -80,19 +82,21 @@ internal class GameRecordService
 
 
     /// <summary>
-    /// 初始化 GameRecord 门面。
+    /// 初始化 GameRecord 门面及 Cookie 静默刷新依赖。
     /// </summary>
     /// <param name="logger">日志记录器。</param>
     /// <param name="hyperionClient">国服 GameRecord Client。</param>
     /// <param name="hoyolabClient">国际服 GameRecord Client。</param>
     /// <param name="memoryCache">战绩与头像等数据的内存缓存。</param>
-    public GameRecordService(ILogger<GameRecordService> logger, HyperionClient hyperionClient, HoyolabClient hoyolabClient, IMemoryCache memoryCache)
+    /// <param name="cookieRefreshService">国服 Cookie（stoken 换票）刷新协调器。</param>
+    public GameRecordService(ILogger<GameRecordService> logger, HyperionClient hyperionClient, HoyolabClient hoyolabClient, IMemoryCache memoryCache, GameRecordCookieRefreshService cookieRefreshService)
     {
         _logger = logger;
         _hyperionClient = hyperionClient;
         _hoyolabClient = hoyolabClient;
         _gameRecordClient = hyperionClient;
         _memoryCache = memoryCache;
+        _cookieRefreshService = cookieRefreshService;
     }
 
 
@@ -112,10 +116,10 @@ internal class GameRecordService
 
 
     /// <summary>
-    /// 执行角色 GameRecord 请求；国服接口失败且设备指纹刷新成功后仅重试一次。
+    /// 执行角色 GameRecord 请求；国服接口失败时先刷新设备指纹，登录失效时再凭 stoken 刷新 Cookie，并仅重试一次。
     /// </summary>
     /// <typeparam name="T">请求返回类型。</typeparam>
-    /// <param name="role">请求使用的游戏角色。</param>
+    /// <param name="role">请求使用的游戏角色，刷新成功后会原地更新其 Cookie。</param>
     /// <param name="action">使用已选平台 Client 发起请求的委托。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>首次请求或一次恢复重试后的结果。</returns>
@@ -130,23 +134,41 @@ internal class GameRecordService
         catch (miHoYoApiException ex) when (client is HyperionClient)
         {
             bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
-            if (!deviceFpUpdated)
+
+            if (ex.IsLoginExpired)
+            {
+                string? refreshedCookie = await _cookieRefreshService.RefreshCookieAsync(role, cancellationToken);
+                if (string.IsNullOrWhiteSpace(refreshedCookie))
+                {
+                    throw;
+                }
+            }
+            else if (!deviceFpUpdated)
             {
                 // 未更新指纹时重试相同请求没有恢复条件，直接保留首次业务错误。
                 throw;
             }
 
-            return await action(client);
+            try
+            {
+                return await action(client);
+            }
+            catch (miHoYoApiException retryException) when (ex.IsLoginExpired && retryException.IsLoginExpired)
+            {
+                // 二次鉴权失败时保留首次异常的调用栈与原始接口信息。
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex).Throw();
+                throw;
+            }
         }
     }
 
 
     /// <summary>
-    /// 执行账号 Cookie 请求；国服接口失败且设备指纹刷新成功后仅重试一次。
+    /// 执行账号 Cookie 请求；国服接口失败时先刷新设备指纹，登录失效时再凭 stoken 刷新 Cookie，并仅重试一次。
     /// </summary>
     /// <typeparam name="T">请求返回类型。</typeparam>
     /// <param name="cookie">验证码登录或手动输入的完整 Cookie。</param>
-    /// <param name="isHoyolab">是否为国际服；国际服不尝试设备指纹恢复。</param>
+    /// <param name="isHoyolab">是否为国际服；国际服不尝试 Token 交换。</param>
     /// <param name="action">接收平台 Client 与当前 Cookie 并发起请求的委托。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>首次请求或一次恢复重试后的结果。</returns>
@@ -161,13 +183,33 @@ internal class GameRecordService
         catch (miHoYoApiException ex) when (!isHoyolab)
         {
             bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
-            if (!deviceFpUpdated)
+
+            string currentCookie = cookie;
+            if (ex.IsLoginExpired)
+            {
+                string? refreshedCookie = await _cookieRefreshService.RefreshCookieAsync(cookie, cancellationToken);
+                if (string.IsNullOrWhiteSpace(refreshedCookie))
+                {
+                    throw;
+                }
+                currentCookie = refreshedCookie;
+            }
+            else if (!deviceFpUpdated)
             {
                 // 未更新指纹时重试相同请求没有恢复条件，直接保留首次业务错误。
                 throw;
             }
 
-            return await action(client, cookie);
+            try
+            {
+                return await action(client, currentCookie);
+            }
+            catch (miHoYoApiException retryException) when (ex.IsLoginExpired && retryException.IsLoginExpired)
+            {
+                // 二次鉴权失败时保留首次异常的调用栈与原始接口信息。
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(ex).Throw();
+                throw;
+            }
         }
     }
 

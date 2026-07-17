@@ -87,11 +87,12 @@ API 客户端要点：走 `GameRecordClient.CommonSendAsync`；签名用 `Create
 
 ### GameRecord 登录、设备指纹与 Cookie
 
-- 战绩工具箱**已移除 WebView 网页登录**。当前入口是手动输入 Cookie，以及仅国服可用的短信验证码登录；登录失效时应通过上述入口恢复，而非恢复 WebView 页面。
-- `GameRecordService.ExecuteGameRecordRequestAsync` 对国服失败仅尝试刷新设备指纹，并且**最多重试一次**。旧的 stoken Cookie 静默刷新已移除：持久化 Cookie 通常没有可用的长期凭据，不能重新引入 `GameRecordCookieRefreshService`、`GetCookieTokenBySTokenAsync` 或隐式替换数据库 Cookie。
+- 战绩工具箱**已移除 WebView 网页登录**。当前入口是手动输入 Cookie，以及仅国服可用的短信验证码登录；登录完全失效（无 stoken 或 stoken 换票失败）时应通过上述入口恢复，而非恢复 WebView 页面。
+- **验证码登录会保证 Cookie 含 `stoken`/`mid`**，因此国服可在登录态短期失效时静默换票：`GameRecordService.ExecuteWithRequestRecoveryAsync` 对国服失败先按冷却刷新设备指纹；若 `IsLoginExpired`，再经 `GameRecordCookieRefreshService` 用 stoken 换取并回写 `ltoken`/`ltoken_v2`、`cookie_token`/`cookie_token_v2` 及账号 uid 相关键，**整次恢复最多重试一次**。缺少 stoken/mid 或 passport 换票失败则返回 null，由上层展示登录失效反馈。
+- 换票协议放在 `MihoyoPassportClient`（对齐社区文档 TeyvatGuide / UIGF 的 `getLTokenBySToken`、`getCookieAccountInfoBySToken`），不要在 `HyperionClient` 上重复实现。`GameRecordCookieRefreshService` 负责账号级锁、DB 原子回写（`GameRecordUser` + 国服 `GameRecordRole`）与并发去重；日志只记 aid/uid，**绝不可输出 Cookie/Token 明文**。
 - 短信登录分层：`Core/GameRecord/Passport/MihoyoPassportClient.cs` 只处理 passport HTTP/RSA/DTO；`CaptchaLoginService` 编排发码、登录、aigis 极验后重试（上限 3 次）、换取 ltoken/cookie_token 并拼装 Cookie；`CaptchaLoginDialog` 与 `GeetestVerifyPopup` 处理 WinUI 交互。Core 不得引用 WinUI。
-- `CaptchaLoginService` 每次 passport 请求前通过 `GameRecordService.UpdateDeviceFpAsync` 同步设备标识；UI 以回调完成极验并返回 `x-rpc-aigis`，取消时保留 `OperationCanceledException` 让 `PassportCaptcha` 反馈处理。日志可记录流程和脱敏手机号后四位，**绝不可记录 Cookie、stoken、ltoken、cookie_token、验证码、authkey 或完整手机号**。
-- 新增 passport DTO 同样要注册 `GameRecordJsonContext`，并在 `AppConfig.ServiceProvider.cs` 注册新服务；国服/国际服差异继续停留在 Client / Service 门面，不要下沉进页面。
+- `CaptchaLoginService` 每次 passport 请求前通过 `GameRecordService.UpdateDeviceFpAsync` 同步设备标识；`GameRecordCookieRefreshService` 换票前从 `AppConfig` 同步同一套 device_id/fp。UI 以回调完成极验并返回 `x-rpc-aigis`，取消时保留 `OperationCanceledException` 让 `PassportCaptcha` 反馈处理。日志可记录流程和脱敏手机号后四位，**绝不可记录 Cookie、stoken、ltoken、cookie_token、验证码、authkey 或完整手机号**。
+- 新增 passport DTO 同样要注册 `GameRecordJsonContext`，并在 `AppConfig.ServiceProvider.cs` 注册新服务（`MihoyoPassportClient` → `GameRecordCookieRefreshService` → `GameRecordService` → `CaptchaLoginService`）；国服/国际服差异继续停留在 Client / Service 门面，不要下沉进页面。
 
 ### 数据库 —— SQLite + Dapper，追加式迁移
 `Features/Database/DatabaseService.cs`：

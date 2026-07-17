@@ -82,9 +82,10 @@ public static partial class AppConfig
 
             sc.AddSingleton<HoyolabClient>();
             sc.AddSingleton<HyperionClient>();
-            sc.AddSingleton<GameRecordService>();
-            // 国服短信验证码登录（passport）
+            // 国服 passport 换票 / 短信登录；Cookie 静默刷新依赖其 stoken 接口
             sc.AddSingleton<Starward.Core.GameRecord.Passport.MihoyoPassportClient>();
+            sc.AddSingleton<GameRecordCookieRefreshService>();
+            sc.AddSingleton<GameRecordService>();
             sc.AddSingleton<CaptchaLoginService>();
             // 每日签到：业务编排 + 启动批量自动签到
             sc.AddSingleton<SignInService>();

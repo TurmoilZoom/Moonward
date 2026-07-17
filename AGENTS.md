@@ -49,8 +49,9 @@ SDK 版本见 `global.json`，不要擅自升级。改完至少 build 通过。
 - UI 业务层处理上述异常或 `HttpRequestException` 时，必须按真实接口场景调用 `MiHoYoApiErrorFeedbackFactory.Create(exception, MiHoYoApiContext.XXX)`，不要在页面/服务中自行 `switch` retcode、硬编码 Toast 或把不同接口的同一码混用。新增场景或确认新 retcode 语义时，在 Factory 集中扩展 `MiHoYoApiContext` 与映射；未知码保留原始消息和状态码方便排查。
 - Factory 返回 `Severity`、本地化标题/正文和 `RecoveryAction`。主窗口反馈使用 `Show(feedback, onRecovery)`；调用方负责把 `Relogin` / `VerifyAccount` / `RefreshUrl` 接到本页面可执行的恢复动作（战绩使用消息通知打开登录/验证入口）。验证码对话框打开期间用 `Create` 后显示对话框内 `InfoBar`，不要抢占主窗口 Toast。
 - 同一 retcode 的含义取决于 `MiHoYoApiContext`，尤其 `PassportCaptcha` 与战绩接口必须分开映射；抽卡 URL 失效是 `RefreshUrl`，不能误提示重新登录米游社。
-- 战绩工具箱已移除 WebView 网页登录和旧的 stoken Cookie 静默刷新。登录失效应引导用户手动输入 Cookie 或（仅国服）短信验证码登录；`GameRecordService` 只可在国服请求失败后刷新设备指纹并**最多重试一次**，不应重建 Cookie 刷新逻辑。
-- 国服短信登录分层：`Core/GameRecord/Passport/MihoyoPassportClient.cs` 负责 passport 协议，`CaptchaLoginService` 负责发码、aigis 重试（最多 3 次）、换票与 Cookie 拼装，`CaptchaLoginDialog`/`GeetestVerifyPopup` 负责 UI。服务调用前须同步 `GameRecordService` 的设备指纹；UI 通过回调完成极验，不能把 WinUI 依赖带入 Core。
+- 战绩工具箱已移除 WebView 网页登录。登录入口为手动输入 Cookie，以及仅国服可用的短信验证码登录（验证码登录会写入 `stoken`/`mid`）。
+- 国服请求失败恢复（`GameRecordService.ExecuteWithRequestRecoveryAsync`，**最多重试一次**）：先按冷却刷新设备指纹；若 `miHoYoApiException.IsLoginExpired` 且 Cookie 含有效 `stoken`+`mid`，再经 `GameRecordCookieRefreshService` 用 stoken 换 `ltoken`/`cookie_token` 等键并回写 DB；缺少 stoken 或换票失败则保留原登录失效，引导用户重新登录。
+- 国服短信登录分层：`Core/GameRecord/Passport/MihoyoPassportClient.cs` 负责 passport 协议（含 `getLTokenBySToken` / `getCookieAccountInfoBySToken`），`CaptchaLoginService` 负责发码、aigis 重试（最多 3 次）、换票与 Cookie 拼装，`GameRecordCookieRefreshService` 在登录失效时复用同一换票路径，`CaptchaLoginDialog`/`GeetestVerifyPopup` 负责 UI。服务调用前须同步设备指纹；UI 通过回调完成极验，不能把 WinUI 依赖带入 Core。
 
 ## 编码要点
 

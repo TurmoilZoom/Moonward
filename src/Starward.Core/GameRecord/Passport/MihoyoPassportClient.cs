@@ -135,7 +135,27 @@ public class MihoyoPassportClient
 
 
     /// <summary>
-    /// 通过 stoken 换取 cookie_token（对齐 TeyvatGuide <c>getCookieAccountInfoBySToken</c>）。
+    /// 通过 stoken 换取 cookie_token 与账号 uid（对齐 TeyvatGuide <c>getCookieAccountInfoBySToken</c>）。
+    /// </summary>
+    /// <param name="stoken">登录得到的 stoken。</param>
+    /// <param name="mid">账号 mid。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>含 <c>cookie_token</c> 与可选 <c>uid</c> 的换票结果。</returns>
+    /// <exception cref="miHoYoApiException">retcode 非 0。</exception>
+    public async Task<CookieTokenBySTokenResult> GetCookieAccountInfoBySTokenAsync(string stoken, string mid, CancellationToken cancellationToken = default)
+    {
+        string url = $"{PassportBase}account/auth/api/getCookieAccountInfoBySToken?stoken={stoken}";
+        var request = new HttpRequestMessage(HttpMethod.Get, url)
+        {
+            VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
+        };
+        AddAuthBySTokenHeaders(request, stoken, mid, url);
+        return await SendThrowingAsync<CookieTokenBySTokenResult>(request, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 通过 stoken 换取 cookie_token 字符串（便捷包装）。
     /// </summary>
     /// <param name="stoken">登录得到的 stoken。</param>
     /// <param name="mid">账号 mid。</param>
@@ -144,13 +164,7 @@ public class MihoyoPassportClient
     /// <exception cref="miHoYoApiException">retcode 非 0。</exception>
     public async Task<string> GetCookieTokenBySTokenAsync(string stoken, string mid, CancellationToken cancellationToken = default)
     {
-        string url = $"{PassportBase}account/auth/api/getCookieAccountInfoBySToken?stoken={stoken}";
-        var request = new HttpRequestMessage(HttpMethod.Get, url)
-        {
-            VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
-        };
-        AddAuthBySTokenHeaders(request, stoken, mid, url);
-        var data = await SendThrowingAsync<CookieTokenBySTokenResult>(request, cancellationToken);
+        CookieTokenBySTokenResult data = await GetCookieAccountInfoBySTokenAsync(stoken, mid, cancellationToken);
         return data.CookieToken;
     }
 
