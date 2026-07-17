@@ -145,7 +145,7 @@ internal class GameRecordService
     /// 执行账号 Cookie 请求；国服接口失败且设备指纹刷新成功后仅重试一次。
     /// </summary>
     /// <typeparam name="T">请求返回类型。</typeparam>
-    /// <param name="cookie">网页登录或手动输入的完整 Cookie。</param>
+    /// <param name="cookie">验证码登录或手动输入的完整 Cookie。</param>
     /// <param name="isHoyolab">是否为国际服；国际服不尝试设备指纹恢复。</param>
     /// <param name="action">接收平台 Client 与当前 Cookie 并发起请求的委托。</param>
     /// <param name="cancellationToken">取消令牌。</param>

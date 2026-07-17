@@ -110,8 +110,8 @@ public sealed partial class GameRecordPage : PageBase
         });
         WeakReferenceMessenger.Default.Register<GameRecordOpenLoginMessage>(this, (r, m) =>
         {
-            // 子页面只知道接口错误，不直接依赖主页面导航；由主页面复用既有登录流程。
-            NavigateTo(typeof(LoginPage), CurrentGameBiz);
+            // 子页面只知道接口错误，不直接依赖主页面 UI；由主页面弹出登录菜单（验证码 / Cookie）。
+            OpenLoginMenu();
         });
 
         await Task.Delay(16);
@@ -376,10 +376,27 @@ public sealed partial class GameRecordPage : PageBase
 
 
 
-    [RelayCommand]
-    private void WebLogin()
+    /// <summary>
+    /// 弹出登录方式菜单，供错误恢复（重新登录）与未登录引导复用。
+    /// 无角色时锚定未登录按钮；已有角色时锚定角色列表按钮。
+    /// </summary>
+    private void OpenLoginMenu()
     {
-        NavigateTo(typeof(LoginPage), CurrentGameBiz);
+        try
+        {
+            if (CurrentRole is null)
+            {
+                Flyout_LoginMenu_1.ShowAt(Button_Login);
+            }
+            else
+            {
+                Flyout_LoginMenu_2.ShowAt(Button_GameRoles);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Open login menu");
+        }
     }
 
 
@@ -425,7 +442,7 @@ public sealed partial class GameRecordPage : PageBase
         {
             CurrentRole = role;
             _gameRecordService.SetLastSelectGameRecordRole(CurrentGameBiz, role);
-            if (frame.SourcePageType?.Name is not nameof(LoginPage))
+            if (frame.SourcePageType is not null)
             {
                 NavigateTo(frame.SourcePageType, force_navigate: true);
             }

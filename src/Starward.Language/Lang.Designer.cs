@@ -4505,15 +4505,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Web Login 的本地化字符串。
-        /// </summary>
-        public static string HoyolabToolboxPage_WebLogin {
-            get {
-                return ResourceManager.GetString("HoyolabToolboxPage_WebLogin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Hyperion Toolbox 的本地化字符串。
         /// </summary>
         public static string HyperionToolbox {
@@ -5898,15 +5889,6 @@ namespace Starward.Language {
         public static string LoginPage_AlreadyAddedGameRoles {
             get {
                 return ResourceManager.GetString("LoginPage_AlreadyAddedGameRoles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Click this button after logging in. 的本地化字符串。
-        /// </summary>
-        public static string LoginPage_ClickThisButtonAfterLoggingIn {
-            get {
-                return ResourceManager.GetString("LoginPage_ClickThisButtonAfterLoggingIn", resourceCulture);
             }
         }
         

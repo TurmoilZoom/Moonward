@@ -799,9 +799,6 @@
   <data name="HoyolabToolboxPage_LogIn" xml:space="preserve">
     <value>로그인</value>
   </data>
-  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
-    <value>웹 로그인</value>
-  </data>
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>쿠키 입력</value>
   </data>
@@ -898,9 +895,6 @@
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>개척일지</value>
-  </data>
-  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
-    <value>로그인 후 이 버튼을 클릭하세요.</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
     <value>캐릭터 불러오는중  {0} 중 :

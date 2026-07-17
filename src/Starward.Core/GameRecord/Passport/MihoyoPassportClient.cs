@@ -179,7 +179,7 @@ public class MihoyoPassportClient
     /// <returns>分号分隔的 Cookie 串。</returns>
     public static string BuildCookieString(string aid, string mid, string stoken, string ltoken, string cookieToken)
     {
-        // 同时写入 v1/v2 常见键名，兼容网页登录与 getUserGameRolesByCookieToken
+        // 同时写入 v1/v2 常见键名，兼容 Cookie 登录与 getUserGameRolesByCookieToken
         return string.Join(';',
             $"account_id={aid}",
             $"account_id_v2={aid}",

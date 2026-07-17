@@ -89,8 +89,9 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <!-- 未登录状态显示的登录按钮（支持网页登录或手动输入 Cookie） -->
-                    <Button Grid.Column="1"
+                    <!-- 未登录状态显示的登录按钮（短信验证码 / 手动输入 Cookie） -->
+                    <Button x:Name="Button_Login"
+                            Grid.Column="1"
                             Grid.ColumnSpan="2"
                             Margin="0,0,12,0"
                             BorderThickness="0"
@@ -99,11 +100,6 @@
                             Visibility="{x:Bind CurrentRole, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
                         <Button.Flyout>
                             <MenuFlyout x:Name="Flyout_LoginMenu_1" Placement="BottomEdgeAlignedLeft">
-                                <MenuFlyoutItem Command="{x:Bind WebLoginCommand}" Text="{x:Bind lang:Lang.HoyolabToolboxPage_WebLogin}">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon Glyph="&#xE774;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_CaptchaLogin_1"
                                                 Command="{x:Bind CaptchaLoginCommand}"
                                                 Text="{x:Bind lang:Lang.HoyolabToolboxPage_CaptchaLogin}">
@@ -121,7 +117,8 @@
                     </Button>
 
                     <!--  角色列表  -->
-                    <Button Grid.Column="2"
+                    <Button x:Name="Button_GameRoles"
+                            Grid.Column="2"
                             Width="28"
                             Height="44"
                             Margin="0,0,12,0"
@@ -183,11 +180,6 @@
                                         </StackPanel>
                                         <Button.Flyout>
                                             <MenuFlyout x:Name="Flyout_LoginMenu_2" Placement="RightEdgeAlignedTop">
-                                                <MenuFlyoutItem Command="{x:Bind WebLoginCommand}" Text="{x:Bind lang:Lang.HoyolabToolboxPage_WebLogin}">
-                                                    <MenuFlyoutItem.Icon>
-                                                        <FontIcon Glyph="&#xE774;" />
-                                                    </MenuFlyoutItem.Icon>
-                                                </MenuFlyoutItem>
                                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_CaptchaLogin_2"
                                                                 Command="{x:Bind CaptchaLoginCommand}"
                                                                 Text="{x:Bind lang:Lang.HoyolabToolboxPage_CaptchaLogin}">

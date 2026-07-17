@@ -799,9 +799,6 @@
   <data name="HoyolabToolboxPage_LogIn" xml:space="preserve">
     <value>登入</value>
   </data>
-  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
-    <value>網頁登入</value>
-  </data>
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>輸入Cookie</value>
   </data>
@@ -898,9 +895,6 @@
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>開拓月曆</value>
-  </data>
-  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
-    <value>登入後請點擊此按鈕</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
     <value>已經添加了{0} 個遊戲角色：

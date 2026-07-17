@@ -799,9 +799,6 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="HoyolabToolboxPage_LogIn" xml:space="preserve">
     <value>Accedi</value>
   </data>
-  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
-    <value>Accesso Web</value>
-  </data>
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>Aggiungi Cookie</value>
   </data>
@@ -898,9 +895,6 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>Calendario mensile dell'esplorazione</value>
-  </data>
-  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
-    <value>Clicca questo pulsante dopo aver effettuato l'accesso.</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
     <value>Già aggiunti {0} personaggi di gioco:

@@ -858,9 +858,6 @@
   <data name="HoyolabToolboxPage_LogIn" xml:space="preserve">
     <value>登录</value>
   </data>
-  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
-    <value>网页登录</value>
-  </data>
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>输入 Cookie</value>
   </data>
@@ -956,9 +953,6 @@
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>开拓月历</value>
-  </data>
-  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
-    <value>登录后请点击此按钮</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
     <value>已经添加了{0}个游戏角色：

@@ -799,9 +799,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="HoyolabToolboxPage_LogIn" xml:space="preserve">
     <value>Iniciar sesión</value>
   </data>
-  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
-    <value>Inicio de sesión web</value>
-  </data>
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>Colocar cookies</value>
   </data>
@@ -898,9 +895,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>Calendario mensual de exploración</value>
-  </data>
-  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
-    <value>Haga clic en este botón después de iniciar sesión.</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
     <value>Ya se agregaron {0} roles de juego:
