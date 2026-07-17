@@ -15,6 +15,7 @@ using Starward.Controls;
 using Starward.Features.ViewHost;
 using Starward.Frameworks;
 using Starward.Helpers;
+using Starward.Language;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,6 +68,17 @@ public sealed partial class GameRecordPage : PageBase
 
         _gameRecordService.Language = System.Globalization.CultureInfo.CurrentUICulture.Name;
         InitializeNavigationViewItemVisibility();
+
+        // 短信验证码登录仅国服米游社（对齐 passport ma-cn-*）
+        var captchaVisible = _gameRecordService.IsHoyolab ? Visibility.Collapsed : Visibility.Visible;
+        if (MenuFlyoutItem_CaptchaLogin_1 is not null)
+        {
+            MenuFlyoutItem_CaptchaLogin_1.Visibility = captchaVisible;
+        }
+        if (MenuFlyoutItem_CaptchaLogin_2 is not null)
+        {
+            MenuFlyoutItem_CaptchaLogin_2.Visibility = captchaVisible;
+        }
     }
 
 
@@ -505,6 +517,42 @@ public sealed partial class GameRecordPage : PageBase
         {
             _logger.LogError(ex, "Input cookie");
             InAppToast.MainWindow?.Error(ex);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 国服短信验证码登录：发码（可含独立极验弹层）→ 输入验证码 → 换票入库。
+    /// </summary>
+    [RelayCommand]
+    private async Task CaptchaLoginAsync()
+    {
+        if (_gameRecordService.IsHoyolab)
+        {
+            return;
+        }
+
+        try
+        {
+            var dialog = new CaptchaLoginDialog();
+            var result = await dialog.ShowAsync(XamlRoot);
+            if (result is not ContentDialogResult.Primary || string.IsNullOrWhiteSpace(dialog.CookieResult))
+            {
+                return;
+            }
+
+            string cookie = dialog.CookieResult;
+            var user = await _gameRecordService.AddRecordUserAsync(cookie);
+            var roles = await _gameRecordService.AddGameRolesAsync(cookie);
+            InAppToast.MainWindow?.Success(null, string.Format(Lang.LoginPage_AlreadyAddedGameRoles, roles.Count, string.Join("\r\n", roles.Select(x => $"{x.Nickname}  {x.Uid}"))), 5000);
+            LoadGameRoles(roles.FirstOrDefault(x => x.GameBiz == CurrentGameBiz.ToString()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Captcha login");
+            // 入库阶段异常：验证码登录上下文统一走 Factory（retcode 语义与战绩分离）
+            MiHoYoApiErrorFeedbackFactory.Show(ex, MiHoYoApiContext.PassportCaptcha);
         }
     }
 

@@ -805,6 +805,76 @@
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>Ввод Cookie</value>
   </data>
+  <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
+    <value>Вход по коду</value>
+  </data>
+  <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
+    <value>Номер телефона</value>
+  </data>
+  <data name="CaptchaLogin_Code" xml:space="preserve">
+    <value>Код подтверждения</value>
+  </data>
+  <data name="CaptchaLogin_SendCode" xml:space="preserve">
+    <value>Отправить код</value>
+  </data>
+  <data name="CaptchaLogin_Login" xml:space="preserve">
+    <value>Войти</value>
+  </data>
+  <data name="CaptchaLogin_InvalidPhone" xml:space="preserve">
+    <value>Введите действительный номер мобильного телефона материкового Китая.</value>
+  </data>
+  <data name="CaptchaLogin_CodeRequired" xml:space="preserve">
+    <value>Введите код подтверждения.</value>
+  </data>
+  <data name="CaptchaLogin_SendCodeFirst" xml:space="preserve">
+    <value>Сначала отправьте код подтверждения.</value>
+  </data>
+  <data name="CaptchaLogin_GeetestTitle" xml:space="preserve">
+    <value>Пройдите проверку безопасности</value>
+  </data>
+  <data name="CaptchaLogin_GeetestCancelled" xml:space="preserve">
+    <value>Проверка безопасности отменена.</value>
+  </data>
+  <data name="CaptchaLogin_ResendInSeconds" xml:space="preserve">
+    <value>Отправить снова ({0}s)</value>
+  </data>
+  <data name="CaptchaLogin_SendSuccess" xml:space="preserve">
+    <value>Код подтверждения отправлен.</value>
+  </data>
+  <data name="CaptchaLogin_ErrorTitle" xml:space="preserve">
+    <value>Не удалось войти по коду</value>
+  </data>
+  <data name="CaptchaLogin_Error_InvalidCode" xml:space="preserve">
+    <value>Неверный код подтверждения. Проверьте и повторите попытку.</value>
+  </data>
+  <data name="CaptchaLogin_Error_CodeExpired" xml:space="preserve">
+    <value>Срок действия кода подтверждения истёк. Запросите новый.</value>
+  </data>
+  <data name="CaptchaLogin_Error_TooFrequent" xml:space="preserve">
+    <value>Слишком много попыток. Подождите и повторите позже.</value>
+  </data>
+  <data name="CaptchaLogin_Error_PhoneInvalid" xml:space="preserve">
+    <value>Этот номер телефона недействителен или не привязан к аккаунту miHoYo.</value>
+  </data>
+  <data name="CaptchaLogin_Error_RiskControl" xml:space="preserve">
+    <value>Требуется дополнительная проверка. Пройдите проверку безопасности или повторите позже.</value>
+  </data>
+  <data name="CaptchaLogin_Error_SessionFailed" xml:space="preserve">
+    <value>Не удалось установить сеанс. Попробуйте войти снова.</value>
+  </data>
+  <data name="CaptchaLogin_Error_Network" xml:space="preserve">
+    <value>Сетевой запрос не выполнен. Проверьте подключение и повторите попытку.</value>
+  </data>
+  <data name="CaptchaLogin_Error_NetworkWithStatus" xml:space="preserve">
+    <value>Сетевой запрос не выполнен (HTTP {0}). Проверьте подключение и повторите попытку.</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithCode" xml:space="preserve">
+    <value>Запрос не выполнен ({0}).</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithMessage" xml:space="preserve">
+    <value>[{0}] {1}</value>
+  </data>
+
   <data name="HoyolabToolboxPage_RefreshInfo" xml:space="preserve">
     <value>Обновить информацию</value>
   </data>

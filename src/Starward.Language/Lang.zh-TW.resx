@@ -805,6 +805,76 @@
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>輸入Cookie</value>
   </data>
+  <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
+    <value>驗證碼登入</value>
+  </data>
+  <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
+    <value>手機號碼</value>
+  </data>
+  <data name="CaptchaLogin_Code" xml:space="preserve">
+    <value>驗證碼</value>
+  </data>
+  <data name="CaptchaLogin_SendCode" xml:space="preserve">
+    <value>取得驗證碼</value>
+  </data>
+  <data name="CaptchaLogin_Login" xml:space="preserve">
+    <value>登入</value>
+  </data>
+  <data name="CaptchaLogin_InvalidPhone" xml:space="preserve">
+    <value>請輸入正確的手機號碼</value>
+  </data>
+  <data name="CaptchaLogin_CodeRequired" xml:space="preserve">
+    <value>請輸入驗證碼</value>
+  </data>
+  <data name="CaptchaLogin_SendCodeFirst" xml:space="preserve">
+    <value>請先取得驗證碼</value>
+  </data>
+  <data name="CaptchaLogin_GeetestTitle" xml:space="preserve">
+    <value>請完成安全驗證</value>
+  </data>
+  <data name="CaptchaLogin_GeetestCancelled" xml:space="preserve">
+    <value>已取消安全驗證</value>
+  </data>
+  <data name="CaptchaLogin_ResendInSeconds" xml:space="preserve">
+    <value>重新傳送 ({0}s)</value>
+  </data>
+  <data name="CaptchaLogin_SendSuccess" xml:space="preserve">
+    <value>驗證碼已傳送</value>
+  </data>
+  <data name="CaptchaLogin_ErrorTitle" xml:space="preserve">
+    <value>驗證碼登入失敗</value>
+  </data>
+  <data name="CaptchaLogin_Error_InvalidCode" xml:space="preserve">
+    <value>驗證碼錯誤，請檢查後重試</value>
+  </data>
+  <data name="CaptchaLogin_Error_CodeExpired" xml:space="preserve">
+    <value>驗證碼已過期，請重新取得</value>
+  </data>
+  <data name="CaptchaLogin_Error_TooFrequent" xml:space="preserve">
+    <value>操作過於頻繁，請稍後再試</value>
+  </data>
+  <data name="CaptchaLogin_Error_PhoneInvalid" xml:space="preserve">
+    <value>手機號碼無效或未綁定米哈遊帳號</value>
+  </data>
+  <data name="CaptchaLogin_Error_RiskControl" xml:space="preserve">
+    <value>需要額外安全驗證，請完成驗證或稍後再試</value>
+  </data>
+  <data name="CaptchaLogin_Error_SessionFailed" xml:space="preserve">
+    <value>登入工作階段建立失敗，請重試</value>
+  </data>
+  <data name="CaptchaLogin_Error_Network" xml:space="preserve">
+    <value>網路請求失敗，請檢查網路後重試</value>
+  </data>
+  <data name="CaptchaLogin_Error_NetworkWithStatus" xml:space="preserve">
+    <value>網路請求失敗（HTTP {0}），請檢查網路後重試</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithCode" xml:space="preserve">
+    <value>請求失敗（{0}）</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithMessage" xml:space="preserve">
+    <value>[{0}] {1}</value>
+  </data>
+
   <data name="HoyolabToolboxPage_RefreshInfo" xml:space="preserve">
     <value>重新整理</value>
   </data>

@@ -104,6 +104,13 @@
                                         <FontIcon Glyph="&#xE774;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuFlyoutItem_CaptchaLogin_1"
+                                                Command="{x:Bind CaptchaLoginCommand}"
+                                                Text="{x:Bind lang:Lang.HoyolabToolboxPage_CaptchaLogin}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8EA;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
                                 <MenuFlyoutItem Command="{x:Bind InputCookieCommand}" Text="{x:Bind lang:Lang.HoyolabToolboxPage_InputCookie}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE70F;" />
@@ -179,6 +186,13 @@
                                                 <MenuFlyoutItem Command="{x:Bind WebLoginCommand}" Text="{x:Bind lang:Lang.HoyolabToolboxPage_WebLogin}">
                                                     <MenuFlyoutItem.Icon>
                                                         <FontIcon Glyph="&#xE774;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="MenuFlyoutItem_CaptchaLogin_2"
+                                                                Command="{x:Bind CaptchaLoginCommand}"
+                                                                Text="{x:Bind lang:Lang.HoyolabToolboxPage_CaptchaLogin}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE8EA;" />
                                                     </MenuFlyoutItem.Icon>
                                                 </MenuFlyoutItem>
                                                 <MenuFlyoutItem Command="{x:Bind InputCookieCommand}" Text="{x:Bind lang:Lang.HoyolabToolboxPage_InputCookie}">

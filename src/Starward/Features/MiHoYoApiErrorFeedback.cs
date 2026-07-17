@@ -27,6 +27,8 @@ internal enum MiHoYoApiContext
     AccountAuth,
     /// <summary>不需要玩家凭据的启动器公开接口。</summary>
     LauncherPublicApi,
+    /// <summary>国服 passport 短信验证码登录（createLoginCaptcha / loginByMobileCaptcha / 换票）。</summary>
+    PassportCaptcha,
 }
 
 /// <summary>
@@ -47,10 +49,10 @@ internal enum MiHoYoApiRecoveryAction
 /// <summary>
 /// 表示已分类的米哈游 API 错误提示。
 /// </summary>
-/// <param name="severity">InfoBar 显示严重级别。</param>
-/// <param name="title">本地化标题。</param>
-/// <param name="message">本地化消息，包含需要展示的状态码。</param>
-/// <param name="recoveryAction">可选的站内恢复操作。</param>
+/// <param name="Severity">InfoBar 显示严重级别。</param>
+/// <param name="Title">本地化标题。</param>
+/// <param name="Message">本地化消息，包含需要展示的状态码。</param>
+/// <param name="RecoveryAction">可选的站内恢复操作。</param>
 internal sealed record MiHoYoApiErrorFeedback(InfoBarSeverity Severity, string Title, string Message, MiHoYoApiRecoveryAction RecoveryAction);
 
 /// <summary>
@@ -66,6 +68,24 @@ internal static class MiHoYoApiErrorFeedbackFactory
     /// <returns>包含本地化文案、状态码和恢复动作的反馈。</returns>
     public static MiHoYoApiErrorFeedback Create(Exception exception, MiHoYoApiContext context)
     {
+        // 验证码登录：取消极验 / 客户端参数校验也统一由此产出反馈
+        if (context is MiHoYoApiContext.PassportCaptcha)
+        {
+            if (exception is OperationCanceledException)
+            {
+                return CreatePlainFeedback(InfoBarSeverity.Warning, GetResource("CaptchaLogin_GeetestCancelled"));
+            }
+
+            if (exception is ArgumentException argumentException)
+            {
+                var captchaValidation = CreatePassportCaptchaValidationFeedback(argumentException);
+                if (captchaValidation is not null)
+                {
+                    return captchaValidation;
+                }
+            }
+        }
+
         if (exception is GachaApiException gachaException)
         {
             return CreateGachaFeedback(gachaException);
@@ -82,6 +102,17 @@ internal static class MiHoYoApiErrorFeedbackFactory
         }
 
         return CreateUnknownFeedback(exception.Message, null);
+    }
+
+    /// <summary>
+    /// 创建反馈并立即以主窗口 Toast 展示（业务层统一出口）。
+    /// </summary>
+    /// <param name="exception">捕获的异常。</param>
+    /// <param name="context">业务场景。</param>
+    /// <param name="onRecovery">可选恢复动作回调。</param>
+    public static void Show(Exception exception, MiHoYoApiContext context, Action<MiHoYoApiRecoveryAction>? onRecovery = null)
+    {
+        Show(Create(exception, context), onRecovery);
     }
 
     /// <summary>
@@ -118,13 +149,18 @@ internal static class MiHoYoApiErrorFeedbackFactory
     }
 
     /// <summary>
-    /// 将战绩和签到接口的 retcode 映射到与 Cookie 语义相关的反馈。
+    /// 将各场景 retcode 映射为本地化反馈。
     /// </summary>
     /// <param name="exception">接口返回的业务异常。</param>
     /// <param name="context">调用接口的场景。</param>
     /// <returns>对应的错误反馈。</returns>
     private static MiHoYoApiErrorFeedback CreateApiFeedback(miHoYoApiException exception, MiHoYoApiContext context)
     {
+        if (context is MiHoYoApiContext.PassportCaptcha)
+        {
+            return CreatePassportCaptchaApiFeedback(exception);
+        }
+
         if (context is MiHoYoApiContext.GachaLog or MiHoYoApiContext.SelfQuery && exception.ReturnCode is -100 or -101 or -1)
         {
             return CreateKnownFeedback("MiHoYoApiError_AuthkeyExpired", exception.ReturnCode, MiHoYoApiRecoveryAction.RefreshUrl);
@@ -148,6 +184,59 @@ internal static class MiHoYoApiErrorFeedbackFactory
         }
 
         return CreateUnknownFeedback(exception.ResponseMessage, exception.ReturnCode);
+    }
+
+    /// <summary>
+    /// passport 短信验证码登录 retcode 映射（与战绩 retcode 语义分离）。
+    /// </summary>
+    /// <param name="exception">passport / 换票接口异常。</param>
+    /// <returns>验证码登录场景的反馈。</returns>
+    private static MiHoYoApiErrorFeedback CreatePassportCaptchaApiFeedback(miHoYoApiException exception)
+    {
+        // retcode 语义参考米哈游 passport 与社区文档；未知码保留服务端 message
+        return exception.ReturnCode switch
+        {
+            // 验证码错误 / 无效
+            -107 or -3202 or -3203 or -3206 => CreateCaptchaKnownFeedback("CaptchaLogin_Error_InvalidCode", exception.ReturnCode),
+            // 验证码过期
+            -3205 => CreateCaptchaKnownFeedback("CaptchaLogin_Error_CodeExpired", exception.ReturnCode),
+            // 发送或校验过于频繁
+            -110 or -3207 or -3208 or -500004 => CreateCaptchaKnownFeedback("CaptchaLogin_Error_TooFrequent", exception.ReturnCode),
+            // 手机号未绑定 / 无效 / 未注册
+            -3209 or -3210 or -3201 => CreateCaptchaKnownFeedback("CaptchaLogin_Error_PhoneInvalid", exception.ReturnCode),
+            // 风控（aigis 已由 UI 处理；此处为剩余风控失败）
+            -3101 or -3235 or 1034 or -3503 => CreateCaptchaKnownFeedback("CaptchaLogin_Error_RiskControl", exception.ReturnCode),
+            // 换票 / 会话失败
+            -100 or -111 or 10001 => CreateCaptchaKnownFeedback("CaptchaLogin_Error_SessionFailed", exception.ReturnCode),
+            _ => CreateCaptchaUnknownFeedback(exception.ResponseMessage, exception.ReturnCode),
+        };
+    }
+
+    /// <summary>
+    /// 验证码登录客户端参数校验（抛 <see cref="ArgumentException"/> 时）。
+    /// </summary>
+    /// <param name="exception">参数异常。</param>
+    /// <returns>可展示的反馈；无法识别时为 null，由上层走通用分支。</returns>
+    private static MiHoYoApiErrorFeedback? CreatePassportCaptchaValidationFeedback(ArgumentException exception)
+    {
+        if (exception.ParamName is "phone"
+            || ContainsIgnoreCase(exception.Message, "mobile")
+            || ContainsIgnoreCase(exception.Message, "phone"))
+        {
+            return CreatePlainFeedback(InfoBarSeverity.Warning, GetResource("CaptchaLogin_InvalidPhone"));
+        }
+
+        if (exception.ParamName is "captcha")
+        {
+            return CreatePlainFeedback(InfoBarSeverity.Warning, GetResource("CaptchaLogin_CodeRequired"));
+        }
+
+        if (exception.ParamName is "actionType")
+        {
+            return CreatePlainFeedback(InfoBarSeverity.Warning, GetResource("CaptchaLogin_SendCodeFirst"));
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -178,6 +267,15 @@ internal static class MiHoYoApiErrorFeedbackFactory
     /// <returns>对应的错误反馈。</returns>
     private static MiHoYoApiErrorFeedback CreateHttpFeedback(HttpRequestException exception, MiHoYoApiContext context)
     {
+        if (context is MiHoYoApiContext.PassportCaptcha)
+        {
+            // 验证码登录网络失败：固定标题 + 可带 HTTP 状态
+            string message = exception.StatusCode is { } code
+                ? string.Format(CultureInfo.CurrentCulture, GetResource("CaptchaLogin_Error_NetworkWithStatus"), (int)code)
+                : GetResource("CaptchaLogin_Error_Network");
+            return new MiHoYoApiErrorFeedback(InfoBarSeverity.Error, GetResource("CaptchaLogin_ErrorTitle"), message, MiHoYoApiRecoveryAction.None);
+        }
+
         return exception.StatusCode switch
         {
             HttpStatusCode.Unauthorized when context is MiHoYoApiContext.GameRecord or MiHoYoApiContext.SignIn or MiHoYoApiContext.AccountAuth
@@ -221,6 +319,34 @@ internal static class MiHoYoApiErrorFeedbackFactory
     }
 
     /// <summary>
+    /// 验证码登录已知业务错误：标题固定为「验证码登录失败」，正文为本地化说明 + retcode。
+    /// </summary>
+    private static MiHoYoApiErrorFeedback CreateCaptchaKnownFeedback(string resourceKey, int code)
+    {
+        string message = string.Format(CultureInfo.CurrentCulture, "{0} ({1})", GetResource(resourceKey), code);
+        return new MiHoYoApiErrorFeedback(InfoBarSeverity.Error, GetResource("CaptchaLogin_ErrorTitle"), message, MiHoYoApiRecoveryAction.None);
+    }
+
+    /// <summary>
+    /// 验证码登录未知 retcode：保留服务端文案便于排查。
+    /// </summary>
+    private static MiHoYoApiErrorFeedback CreateCaptchaUnknownFeedback(string? serverMessage, int code)
+    {
+        string message = string.IsNullOrWhiteSpace(serverMessage)
+            ? string.Format(CultureInfo.CurrentCulture, GetResource("CaptchaLogin_Error_UnknownWithCode"), code)
+            : string.Format(CultureInfo.CurrentCulture, GetResource("CaptchaLogin_Error_UnknownWithMessage"), code, serverMessage);
+        return new MiHoYoApiErrorFeedback(InfoBarSeverity.Error, GetResource("CaptchaLogin_ErrorTitle"), message, MiHoYoApiRecoveryAction.None);
+    }
+
+    /// <summary>
+    /// 仅消息、无标题的轻量反馈（校验失败、取消极验等）。
+    /// </summary>
+    private static MiHoYoApiErrorFeedback CreatePlainFeedback(InfoBarSeverity severity, string message)
+    {
+        return new MiHoYoApiErrorFeedback(severity, string.Empty, message, MiHoYoApiRecoveryAction.None);
+    }
+
+    /// <summary>
     /// 创建未知错误反馈，保留服务端原始消息和状态码以便排查。
     /// </summary>
     /// <param name="rawMessage">服务端或底层异常的原始消息；可为 null。</param>
@@ -260,5 +386,10 @@ internal static class MiHoYoApiErrorFeedbackFactory
     private static string GetResource(string key)
     {
         return Lang.ResourceManager.GetString(key, Lang.Culture) ?? key;
+    }
+
+    private static bool ContainsIgnoreCase(string? text, string value)
+    {
+        return text?.Contains(value, StringComparison.OrdinalIgnoreCase) == true;
     }
 }

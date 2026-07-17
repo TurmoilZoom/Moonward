@@ -864,6 +864,75 @@
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>输入 Cookie</value>
   </data>
+  <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
+    <value>验证码登录</value>
+  </data>
+  <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
+    <value>手机号</value>
+  </data>
+  <data name="CaptchaLogin_Code" xml:space="preserve">
+    <value>验证码</value>
+  </data>
+  <data name="CaptchaLogin_SendCode" xml:space="preserve">
+    <value>获取验证码</value>
+  </data>
+  <data name="CaptchaLogin_Login" xml:space="preserve">
+    <value>登录</value>
+  </data>
+  <data name="CaptchaLogin_InvalidPhone" xml:space="preserve">
+    <value>请输入正确的手机号</value>
+  </data>
+  <data name="CaptchaLogin_CodeRequired" xml:space="preserve">
+    <value>请输入验证码</value>
+  </data>
+  <data name="CaptchaLogin_SendCodeFirst" xml:space="preserve">
+    <value>请先获取验证码</value>
+  </data>
+  <data name="CaptchaLogin_GeetestTitle" xml:space="preserve">
+    <value>请完成安全验证</value>
+  </data>
+  <data name="CaptchaLogin_GeetestCancelled" xml:space="preserve">
+    <value>已取消安全验证</value>
+  </data>
+  <data name="CaptchaLogin_ResendInSeconds" xml:space="preserve">
+    <value>重新发送 ({0}s)</value>
+  </data>
+  <data name="CaptchaLogin_SendSuccess" xml:space="preserve">
+    <value>验证码已发送</value>
+  </data>
+  <data name="CaptchaLogin_ErrorTitle" xml:space="preserve">
+    <value>验证码登录失败</value>
+  </data>
+  <data name="CaptchaLogin_Error_InvalidCode" xml:space="preserve">
+    <value>验证码错误，请检查后重试</value>
+  </data>
+  <data name="CaptchaLogin_Error_CodeExpired" xml:space="preserve">
+    <value>验证码已过期，请重新获取</value>
+  </data>
+  <data name="CaptchaLogin_Error_TooFrequent" xml:space="preserve">
+    <value>操作过于频繁，请稍后再试</value>
+  </data>
+  <data name="CaptchaLogin_Error_PhoneInvalid" xml:space="preserve">
+    <value>手机号无效或未绑定米哈游账号</value>
+  </data>
+  <data name="CaptchaLogin_Error_RiskControl" xml:space="preserve">
+    <value>需要额外安全验证，请完成验证或稍后再试</value>
+  </data>
+  <data name="CaptchaLogin_Error_SessionFailed" xml:space="preserve">
+    <value>登录会话建立失败，请重试</value>
+  </data>
+  <data name="CaptchaLogin_Error_Network" xml:space="preserve">
+    <value>网络请求失败，请检查网络后重试</value>
+  </data>
+  <data name="CaptchaLogin_Error_NetworkWithStatus" xml:space="preserve">
+    <value>网络请求失败（HTTP {0}），请检查网络后重试</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithCode" xml:space="preserve">
+    <value>请求失败（{0}）</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithMessage" xml:space="preserve">
+    <value>[{0}] {1}</value>
+  </data>
   <data name="HoyolabToolboxPage_RefreshInfo" xml:space="preserve">
     <value>刷新信息</value>
   </data>

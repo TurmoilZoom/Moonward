@@ -805,6 +805,76 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>Aggiungi Cookie</value>
   </data>
+  <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
+    <value>Accesso con captcha</value>
+  </data>
+  <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
+    <value>Numero di telefono</value>
+  </data>
+  <data name="CaptchaLogin_Code" xml:space="preserve">
+    <value>Codice di verifica</value>
+  </data>
+  <data name="CaptchaLogin_SendCode" xml:space="preserve">
+    <value>Invia codice</value>
+  </data>
+  <data name="CaptchaLogin_Login" xml:space="preserve">
+    <value>Accedi</value>
+  </data>
+  <data name="CaptchaLogin_InvalidPhone" xml:space="preserve">
+    <value>Inserisci un numero di cellulare valido della Cina continentale.</value>
+  </data>
+  <data name="CaptchaLogin_CodeRequired" xml:space="preserve">
+    <value>Inserisci il codice di verifica.</value>
+  </data>
+  <data name="CaptchaLogin_SendCodeFirst" xml:space="preserve">
+    <value>Invia prima un codice di verifica.</value>
+  </data>
+  <data name="CaptchaLogin_GeetestTitle" xml:space="preserve">
+    <value>Completa la verifica di sicurezza</value>
+  </data>
+  <data name="CaptchaLogin_GeetestCancelled" xml:space="preserve">
+    <value>La verifica di sicurezza è stata annullata.</value>
+  </data>
+  <data name="CaptchaLogin_ResendInSeconds" xml:space="preserve">
+    <value>Reinvia ({0}s)</value>
+  </data>
+  <data name="CaptchaLogin_SendSuccess" xml:space="preserve">
+    <value>Codice di verifica inviato.</value>
+  </data>
+  <data name="CaptchaLogin_ErrorTitle" xml:space="preserve">
+    <value>Accesso con captcha non riuscito</value>
+  </data>
+  <data name="CaptchaLogin_Error_InvalidCode" xml:space="preserve">
+    <value>Codice di verifica non valido. Controlla e riprova.</value>
+  </data>
+  <data name="CaptchaLogin_Error_CodeExpired" xml:space="preserve">
+    <value>Il codice di verifica è scaduto. Richiedine uno nuovo.</value>
+  </data>
+  <data name="CaptchaLogin_Error_TooFrequent" xml:space="preserve">
+    <value>Troppi tentativi. Attendi e riprova più tardi.</value>
+  </data>
+  <data name="CaptchaLogin_Error_PhoneInvalid" xml:space="preserve">
+    <value>Questo numero di telefono non è valido o non è registrato con un account miHoYo.</value>
+  </data>
+  <data name="CaptchaLogin_Error_RiskControl" xml:space="preserve">
+    <value>È richiesta un'ulteriore verifica. Completa il controllo di sicurezza o riprova più tardi.</value>
+  </data>
+  <data name="CaptchaLogin_Error_SessionFailed" xml:space="preserve">
+    <value>Impossibile stabilire la sessione. Prova ad accedere di nuovo.</value>
+  </data>
+  <data name="CaptchaLogin_Error_Network" xml:space="preserve">
+    <value>Richiesta di rete non riuscita. Controlla la connessione e riprova.</value>
+  </data>
+  <data name="CaptchaLogin_Error_NetworkWithStatus" xml:space="preserve">
+    <value>Richiesta di rete non riuscita (HTTP {0}). Controlla la connessione e riprova.</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithCode" xml:space="preserve">
+    <value>Richiesta non riuscita ({0}).</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithMessage" xml:space="preserve">
+    <value>[{0}] {1}</value>
+  </data>
+
   <data name="HoyolabToolboxPage_RefreshInfo" xml:space="preserve">
     <value>Aggiorna Informazioni</value>
   </data>

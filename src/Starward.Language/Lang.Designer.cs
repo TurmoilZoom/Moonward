@@ -331,6 +331,204 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Phone number 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_PhoneNumber {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_PhoneNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Verification code 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Code {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Code", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Send code 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_SendCode {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_SendCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Log in 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Login {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Login", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please enter a valid mainland China mobile number. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_InvalidPhone {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_InvalidPhone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please enter the verification code. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_CodeRequired {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_CodeRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please send a verification code first. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_SendCodeFirst {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_SendCodeFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Complete captcha verification 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_GeetestTitle {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_GeetestTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Captcha verification was cancelled. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_GeetestCancelled {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_GeetestCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Resend ({0}s) 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_ResendInSeconds {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_ResendInSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Verification code sent. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_SendSuccess {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_SendSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Captcha login failed 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_ErrorTitle {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_ErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Invalid verification code. Please check and try again. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_InvalidCode {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_InvalidCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The verification code has expired. Please request a new one. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_CodeExpired {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_CodeExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Too many attempts. Please wait and try again later. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_TooFrequent {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_TooFrequent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This phone number is invalid or not registered with a miHoYo account. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_PhoneInvalid {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_PhoneInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Additional verification is required. Complete the security check or try again later. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_RiskControl {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_RiskControl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to establish a session. Please try logging in again. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_SessionFailed {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_SessionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Network request failed. Check your connection and try again. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_Network {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_Network", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Network request failed (HTTP {0}). Check your connection and try again. 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_NetworkWithStatus {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_NetworkWithStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Request failed ({0}). 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_UnknownWithCode {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_UnknownWithCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 [{0}] {1} 的本地化字符串。
+        /// </summary>
+        public static string CaptchaLogin_Error_UnknownWithMessage {
+            get {
+                return ResourceManager.GetString("CaptchaLogin_Error_UnknownWithMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Challenge Attempts 的本地化字符串。
         /// </summary>
         public static string ChallengePeakPage_ChallengeAttempts {
@@ -4177,6 +4375,15 @@ namespace Starward.Language {
         public static string HoyolabToolboxPage_InputCookie {
             get {
                 return ResourceManager.GetString("HoyolabToolboxPage_InputCookie", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Captcha Login 的本地化字符串。
+        /// </summary>
+        public static string HoyolabToolboxPage_CaptchaLogin {
+            get {
+                return ResourceManager.GetString("HoyolabToolboxPage_CaptchaLogin", resourceCulture);
             }
         }
         

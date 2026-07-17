@@ -805,6 +805,76 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>Nhập cookie</value>
   </data>
+  <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
+    <value>Đăng nhập bằng mã xác minh</value>
+  </data>
+  <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
+    <value>Số điện thoại</value>
+  </data>
+  <data name="CaptchaLogin_Code" xml:space="preserve">
+    <value>Mã xác minh</value>
+  </data>
+  <data name="CaptchaLogin_SendCode" xml:space="preserve">
+    <value>Gửi mã</value>
+  </data>
+  <data name="CaptchaLogin_Login" xml:space="preserve">
+    <value>Đăng nhập</value>
+  </data>
+  <data name="CaptchaLogin_InvalidPhone" xml:space="preserve">
+    <value>Vui lòng nhập số điện thoại di động hợp lệ của Trung Quốc đại lục.</value>
+  </data>
+  <data name="CaptchaLogin_CodeRequired" xml:space="preserve">
+    <value>Vui lòng nhập mã xác minh.</value>
+  </data>
+  <data name="CaptchaLogin_SendCodeFirst" xml:space="preserve">
+    <value>Vui lòng gửi mã xác minh trước.</value>
+  </data>
+  <data name="CaptchaLogin_GeetestTitle" xml:space="preserve">
+    <value>Hoàn tất xác minh bảo mật</value>
+  </data>
+  <data name="CaptchaLogin_GeetestCancelled" xml:space="preserve">
+    <value>Đã hủy xác minh bảo mật.</value>
+  </data>
+  <data name="CaptchaLogin_ResendInSeconds" xml:space="preserve">
+    <value>Gửi lại ({0}s)</value>
+  </data>
+  <data name="CaptchaLogin_SendSuccess" xml:space="preserve">
+    <value>Đã gửi mã xác minh.</value>
+  </data>
+  <data name="CaptchaLogin_ErrorTitle" xml:space="preserve">
+    <value>Đăng nhập bằng mã xác minh thất bại</value>
+  </data>
+  <data name="CaptchaLogin_Error_InvalidCode" xml:space="preserve">
+    <value>Mã xác minh không hợp lệ. Vui lòng kiểm tra và thử lại.</value>
+  </data>
+  <data name="CaptchaLogin_Error_CodeExpired" xml:space="preserve">
+    <value>Mã xác minh đã hết hạn. Vui lòng yêu cầu mã mới.</value>
+  </data>
+  <data name="CaptchaLogin_Error_TooFrequent" xml:space="preserve">
+    <value>Thao tác quá nhiều. Vui lòng đợi và thử lại sau.</value>
+  </data>
+  <data name="CaptchaLogin_Error_PhoneInvalid" xml:space="preserve">
+    <value>Số điện thoại này không hợp lệ hoặc chưa đăng ký với tài khoản miHoYo.</value>
+  </data>
+  <data name="CaptchaLogin_Error_RiskControl" xml:space="preserve">
+    <value>Cần xác minh bổ sung. Hoàn tất kiểm tra bảo mật hoặc thử lại sau.</value>
+  </data>
+  <data name="CaptchaLogin_Error_SessionFailed" xml:space="preserve">
+    <value>Không thể thiết lập phiên. Vui lòng thử đăng nhập lại.</value>
+  </data>
+  <data name="CaptchaLogin_Error_Network" xml:space="preserve">
+    <value>Yêu cầu mạng thất bại. Kiểm tra kết nối và thử lại.</value>
+  </data>
+  <data name="CaptchaLogin_Error_NetworkWithStatus" xml:space="preserve">
+    <value>Yêu cầu mạng thất bại (HTTP {0}). Kiểm tra kết nối và thử lại.</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithCode" xml:space="preserve">
+    <value>Yêu cầu thất bại ({0}).</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithMessage" xml:space="preserve">
+    <value>[{0}] {1}</value>
+  </data>
+
   <data name="HoyolabToolboxPage_RefreshInfo" xml:space="preserve">
     <value>Làm mới thông tin</value>
   </data>

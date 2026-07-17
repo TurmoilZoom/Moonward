@@ -805,6 +805,76 @@
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>Cookieを入力</value>
   </data>
+  <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
+    <value>認証コードでログイン</value>
+  </data>
+  <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
+    <value>電話番号</value>
+  </data>
+  <data name="CaptchaLogin_Code" xml:space="preserve">
+    <value>認証コード</value>
+  </data>
+  <data name="CaptchaLogin_SendCode" xml:space="preserve">
+    <value>コードを送信</value>
+  </data>
+  <data name="CaptchaLogin_Login" xml:space="preserve">
+    <value>ログイン</value>
+  </data>
+  <data name="CaptchaLogin_InvalidPhone" xml:space="preserve">
+    <value>有効な中国大陸の携帯電話番号を入力してください。</value>
+  </data>
+  <data name="CaptchaLogin_CodeRequired" xml:space="preserve">
+    <value>認証コードを入力してください。</value>
+  </data>
+  <data name="CaptchaLogin_SendCodeFirst" xml:space="preserve">
+    <value>先に認証コードを送信してください。</value>
+  </data>
+  <data name="CaptchaLogin_GeetestTitle" xml:space="preserve">
+    <value>セキュリティ認証を完了してください</value>
+  </data>
+  <data name="CaptchaLogin_GeetestCancelled" xml:space="preserve">
+    <value>セキュリティ認証がキャンセルされました。</value>
+  </data>
+  <data name="CaptchaLogin_ResendInSeconds" xml:space="preserve">
+    <value>再送信 ({0}s)</value>
+  </data>
+  <data name="CaptchaLogin_SendSuccess" xml:space="preserve">
+    <value>認証コードを送信しました。</value>
+  </data>
+  <data name="CaptchaLogin_ErrorTitle" xml:space="preserve">
+    <value>認証コードログインに失敗しました</value>
+  </data>
+  <data name="CaptchaLogin_Error_InvalidCode" xml:space="preserve">
+    <value>認証コードが正しくありません。確認して再試行してください。</value>
+  </data>
+  <data name="CaptchaLogin_Error_CodeExpired" xml:space="preserve">
+    <value>認証コードの有効期限が切れました。新しいコードを取得してください。</value>
+  </data>
+  <data name="CaptchaLogin_Error_TooFrequent" xml:space="preserve">
+    <value>試行回数が多すぎます。しばらくしてから再試行してください。</value>
+  </data>
+  <data name="CaptchaLogin_Error_PhoneInvalid" xml:space="preserve">
+    <value>この電話番号は無効か、miHoYo アカウントに登録されていません。</value>
+  </data>
+  <data name="CaptchaLogin_Error_RiskControl" xml:space="preserve">
+    <value>追加の認証が必要です。セキュリティチェックを完了するか、後でもう一度お試しください。</value>
+  </data>
+  <data name="CaptchaLogin_Error_SessionFailed" xml:space="preserve">
+    <value>セッションを確立できませんでした。再度ログインしてください。</value>
+  </data>
+  <data name="CaptchaLogin_Error_Network" xml:space="preserve">
+    <value>ネットワークリクエストに失敗しました。接続を確認して再試行してください。</value>
+  </data>
+  <data name="CaptchaLogin_Error_NetworkWithStatus" xml:space="preserve">
+    <value>ネットワークリクエストに失敗しました (HTTP {0})。接続を確認して再試行してください。</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithCode" xml:space="preserve">
+    <value>リクエストに失敗しました ({0})。</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithMessage" xml:space="preserve">
+    <value>[{0}] {1}</value>
+  </data>
+
   <data name="HoyolabToolboxPage_RefreshInfo" xml:space="preserve">
     <value>情報を更新</value>
   </data>

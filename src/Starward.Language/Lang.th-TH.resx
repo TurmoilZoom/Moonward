@@ -804,6 +804,76 @@
   <data name="HoyolabToolboxPage_InputCookie" xml:space="preserve">
     <value>ใส่ Cookie</value>
   </data>
+  <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
+    <value>เข้าสู่ระบบด้วยรหัสยืนยัน</value>
+  </data>
+  <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
+    <value>หมายเลขโทรศัพท์</value>
+  </data>
+  <data name="CaptchaLogin_Code" xml:space="preserve">
+    <value>รหัสยืนยัน</value>
+  </data>
+  <data name="CaptchaLogin_SendCode" xml:space="preserve">
+    <value>ส่งรหัส</value>
+  </data>
+  <data name="CaptchaLogin_Login" xml:space="preserve">
+    <value>เข้าสู่ระบบ</value>
+  </data>
+  <data name="CaptchaLogin_InvalidPhone" xml:space="preserve">
+    <value>โปรดป้อนหมายเลขมือถือที่ถูกต้องของจีนแผ่นดินใหญ่</value>
+  </data>
+  <data name="CaptchaLogin_CodeRequired" xml:space="preserve">
+    <value>โปรดป้อนรหัสยืนยัน</value>
+  </data>
+  <data name="CaptchaLogin_SendCodeFirst" xml:space="preserve">
+    <value>โปรดส่งรหัสยืนยันก่อน</value>
+  </data>
+  <data name="CaptchaLogin_GeetestTitle" xml:space="preserve">
+    <value>โปรดทำการยืนยันความปลอดภัยให้เสร็จสิ้น</value>
+  </data>
+  <data name="CaptchaLogin_GeetestCancelled" xml:space="preserve">
+    <value>การยืนยันความปลอดภัยถูกยกเลิก</value>
+  </data>
+  <data name="CaptchaLogin_ResendInSeconds" xml:space="preserve">
+    <value>ส่งอีกครั้ง ({0}s)</value>
+  </data>
+  <data name="CaptchaLogin_SendSuccess" xml:space="preserve">
+    <value>ส่งรหัสยืนยันแล้ว</value>
+  </data>
+  <data name="CaptchaLogin_ErrorTitle" xml:space="preserve">
+    <value>เข้าสู่ระบบด้วยรหัสยืนยันล้มเหลว</value>
+  </data>
+  <data name="CaptchaLogin_Error_InvalidCode" xml:space="preserve">
+    <value>รหัสยืนยันไม่ถูกต้อง โปรดตรวจสอบแล้วลองอีกครั้ง</value>
+  </data>
+  <data name="CaptchaLogin_Error_CodeExpired" xml:space="preserve">
+    <value>รหัสยืนยันหมดอายุแล้ว โปรดขอรหัสใหม่</value>
+  </data>
+  <data name="CaptchaLogin_Error_TooFrequent" xml:space="preserve">
+    <value>พยายามบ่อยเกินไป โปรดรอแล้วลองอีกครั้งในภายหลัง</value>
+  </data>
+  <data name="CaptchaLogin_Error_PhoneInvalid" xml:space="preserve">
+    <value>หมายเลขโทรศัพท์นี้ไม่ถูกต้องหรือไม่ได้ลงทะเบียนกับบัญชี miHoYo</value>
+  </data>
+  <data name="CaptchaLogin_Error_RiskControl" xml:space="preserve">
+    <value>ต้องยืนยันเพิ่มเติม โปรดทำการตรวจสอบความปลอดภัยให้เสร็จหรือลองใหม่ภายหลัง</value>
+  </data>
+  <data name="CaptchaLogin_Error_SessionFailed" xml:space="preserve">
+    <value>สร้างเซสชันไม่สำเร็จ โปรดลองเข้าสู่ระบบอีกครั้ง</value>
+  </data>
+  <data name="CaptchaLogin_Error_Network" xml:space="preserve">
+    <value>คำขอเครือข่ายล้มเหลว โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</value>
+  </data>
+  <data name="CaptchaLogin_Error_NetworkWithStatus" xml:space="preserve">
+    <value>คำขอเครือข่ายล้มเหลว (HTTP {0}) โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithCode" xml:space="preserve">
+    <value>คำขอล้มเหลว ({0})</value>
+  </data>
+  <data name="CaptchaLogin_Error_UnknownWithMessage" xml:space="preserve">
+    <value>[{0}] {1}</value>
+  </data>
+
   <data name="HoyolabToolboxPage_RefreshInfo" xml:space="preserve">
     <value>รีเฟรซข้อมูล</value>
   </data>
