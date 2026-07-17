@@ -329,7 +329,7 @@
     <value>没有抽卡记录</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>更新记录</value>
+    <value>更新（增量）</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>正在更新物品名称…</value>
@@ -338,13 +338,13 @@
     <value>更新 (保存的 URL)</value>
   </data>
   <data name="GachaLogPage_UpdateAll" xml:space="preserve">
-    <value>全部更新</value>
+    <value>更新全部</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
-    <value>从米游社同步（实验）</value>
+    <value>从米游社同步</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>从米游社同步全部（实验）</value>
+    <value>从米游社同步全部</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>通过 URL 更新</value>
@@ -393,10 +393,10 @@
     <value>操作已取消</value>
   </data>
   <data name="GachaLogPage_OnlySupportZZZCNServer" xml:space="preserve">
-    <value>该功能仅支持绝区零。</value>
+    <value>米游社同步支持原神（国服）与绝区零；HoYoLAB 同步目前仅支持绝区零。</value>
   </data>
   <data name="GachaLogPage_PleaseLoginMiyousheAndAddZZZRole" xml:space="preserve">
-    <value>请先在米游社工具箱中添加米游社账号。</value>
+    <value>请先在米游社/HoYoLAB 工具箱中登录并添加游戏账号。</value>
   </data>
   <data name="GachaLogPage_CurrentAccountMissingCookiePleaseReloginMiyoushe" xml:space="preserve">
     <value>当前账号缺少登录凭据，请重新登录米游社。</value>
@@ -2961,10 +2961,10 @@
     <value>视频解码失败，需要安装 VP9 视频扩展。</value>
   </data>
   <data name="GachaLogPage_SyncFromHoYoLAB" xml:space="preserve">
-    <value>从 HoYoLAB 同步 (实验)</value>
+    <value>从 HoYoLAB 同步</value>
   </data>
   <data name="GachaLogPage_SyncAllFromHoYoLAB" xml:space="preserve">
-    <value>从 HoYoLAB 同步全部 (实验)</value>
+    <value>从 HoYoLAB 同步全部</value>
   </data>
   <data name="AppConfig_AnUnknownIssueOccurredDuringInitialization" xml:space="preserve">
     <value>初始化过程中发生未知错误</value>

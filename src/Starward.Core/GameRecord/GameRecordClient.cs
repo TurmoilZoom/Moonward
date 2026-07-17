@@ -97,11 +97,27 @@ public abstract class GameRecordClient
     }
 
 
+    /// <summary>
+    /// 生成 Gen1 DS 签名（salt&amp;t&amp;r，无 body/query），使用默认 <see cref="ApiSalt"/>。
+    /// </summary>
+    /// <returns>形如 <c>t,r,md5</c> 的 DS 头值。</returns>
     protected string CreateSecret()
+    {
+        return CreateSecret(ApiSalt);
+    }
+
+
+    /// <summary>
+    /// 生成 Gen1 DS 签名（salt&amp;t&amp;r），使用指定 salt。
+    /// 用于 genAuthKey 等需 LK2 salt 的接口（与 BBS 默认 X6 salt 不同）。
+    /// </summary>
+    /// <param name="salt">DS 盐值（如 LK2）。</param>
+    /// <returns>形如 <c>t,r,md5</c> 的 DS 头值。</returns>
+    protected string CreateSecret(string salt)
     {
         var t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         string r = GetRandomString(t);
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={ApiSalt}&t={t}&r={r}"));
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={salt}&t={t}&r={r}"));
         var check = Convert.ToHexString(bytes).ToLower();
         return $"{t},{r},{check}";
     }
@@ -536,6 +552,20 @@ public abstract class GameRecordClient
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public abstract Task<ZZZGachaRecordData> GetZZZGachaRecordAsync(GameRecordRole role, int gachaType, long? endId = null, string? language = null, CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// 通过 stoken 生成抽卡记录 authkey（Auth Key B，auth_appid=webview_gacha）。
+    /// 国服需 Cookie 含有效 stoken+mid；国际服当前社区无稳定支持，子类可抛 <see cref="NotSupportedException"/>。
+    /// </summary>
+    /// <param name="role">游戏角色（Uid / GameBiz / Region / Cookie）。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>含 authkey、authkey_ver、sign_type 的结果。</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="role"/> 为空。</exception>
+    /// <exception cref="ArgumentException">Cookie 缺少 stoken 或 mid。</exception>
+    /// <exception cref="NotSupportedException">当前平台不支持 stoken 换 authkey。</exception>
+    /// <exception cref="miHoYoApiException">协议业务失败。</exception>
+    public abstract Task<GameAuthKey> GenAuthKeyAsync(GameRecordRole role, CancellationToken cancellationToken = default);
 
 
     /// <summary>

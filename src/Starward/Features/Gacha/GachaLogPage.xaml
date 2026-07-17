@@ -127,10 +127,6 @@
                 </StackPanel>
                 <SplitButton.Flyout>
                     <MenuFlyout>
-                        <!--  更新 全部  -->
-                        <MenuFlyoutItem Command="{x:Bind UpdateGachaLogCommand}"
-                                        CommandParameter="all"
-                                        Text="{x:Bind lang:Lang.GachaLogPage_UpdateAll}" />
                         <!--  从 米游社 同步  -->
                         <MenuFlyoutItem x:Name="MenuFlyoutItem_SyncFromMiyoushe"
                                         Command="{x:Bind SyncFromMiyousheCommand}"
@@ -151,6 +147,10 @@
                                         CommandParameter="all"
                                         Text="{x:Bind lang:Lang.GachaLogPage_SyncAllFromHoYoLAB}"
                                         Visibility="Collapsed" />
+                        <!--  更新全部：位于「通过 URL 更新」之上  -->
+                        <MenuFlyoutItem Command="{x:Bind UpdateGachaLogCommand}"
+                                        CommandParameter="all"
+                                        Text="{x:Bind lang:Lang.GachaLogPage_UpdateAll}" />
                         <!--  通过 URL 更新（预填已保存 URL，可改/粘贴后更新）  -->
                         <MenuFlyoutItem Command="{x:Bind InputUrlCommand}" Text="{x:Bind lang:Lang.GachaLogPage_InputURL}" />
                         <MenuFlyoutItem x:Name="MenuFlyoutItem_CloudGame"

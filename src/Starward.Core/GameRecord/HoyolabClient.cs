@@ -794,6 +794,20 @@ public class HoyolabClient : GameRecordClient
 
 
     /// <summary>
+    /// 国际服当前无稳定的 stoken→webview_gacha authkey 社区实现（Snap.Hutao / UIGF 均标记不支持），故不提供。
+    /// 国际服原神/星铁请继续使用游戏内网页缓存 URL；绝区零可走战绩 gacha_record 接口。
+    /// </summary>
+    /// <param name="role">未使用。</param>
+    /// <param name="cancellationToken">未使用。</param>
+    /// <returns>永不成功返回。</returns>
+    /// <exception cref="NotSupportedException">始终抛出。</exception>
+    public override Task<GameAuthKey> GenAuthKeyAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException("Generating gacha authkey from HoYoLAB SToken is not supported.");
+    }
+
+
+    /// <summary>
     /// 式舆防卫战
     /// </summary>
     /// <param name="role"></param>

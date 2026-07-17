@@ -2583,7 +2583,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 This feature currently supports ZZZ only. 的本地化字符串。
+        ///   查找类似 Miyoushe sync supports Genshin Impact (CN) and Zenless Zone Zero. HoYoLAB sync is available for Zenless Zone Zero only. 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_OnlySupportZZZCNServer {
             get {
@@ -2610,7 +2610,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Please log in via Miyoushe toolbox and add your Miyoushe account first. 的本地化字符串。
+        ///   查找类似 Please log in via the Miyoushe/HoYoLAB toolbox and add your game account first. 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_PleaseLoginMiyousheAndAddZZZRole {
             get {
@@ -2655,7 +2655,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Multiple ZZZ roles were found. Please choose one role to sync gacha records. 的本地化字符串。
+        ///   查找类似 Multiple game roles were found. Please choose one role to sync gacha records. 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_SelectMiyousheRoleDescription {
             get {
@@ -2691,7 +2691,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Sync All from HoYoLAB (Experimental) 的本地化字符串。
+        ///   查找类似 Sync all from HoYoLAB 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_SyncAllFromHoYoLAB {
             get {
@@ -2700,7 +2700,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Sync from HoYoLAB (Experimental) 的本地化字符串。
+        ///   查找类似 Sync from HoYoLAB 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_SyncFromHoYoLAB {
             get {
@@ -2709,7 +2709,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Sync from Miyoushe (Experimental) 的本地化字符串。
+        ///   查找类似 Sync from Miyoushe 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_SyncFromMiyoushe {
             get {
@@ -2718,7 +2718,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Sync all from Miyoushe (Experimental) 的本地化字符串。
+        ///   查找类似 Sync all from Miyoushe 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_SyncFromMiyousheAll {
             get {
@@ -2727,7 +2727,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Update (All) 的本地化字符串。
+        ///   查找类似 Update All 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_UpdateAll {
             get {
@@ -2736,7 +2736,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Update Records 的本地化字符串。
+        ///   查找类似 Update (Incremental) 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_UpdateRecords {
             get {

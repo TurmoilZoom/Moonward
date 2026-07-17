@@ -270,7 +270,7 @@
     <value>ガチャの記録がありません</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>記録を更新</value>
+    <value>更新（差分）</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>アイテム名を更新中…</value>
@@ -279,13 +279,13 @@
     <value>更新 (保存済みのURL)</value>
   </data>
   <data name="GachaLogPage_UpdateAll" xml:space="preserve">
-    <value>更新 (すべて)</value>
+    <value>すべて更新</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
-    <value>米游社から同期（実験）</value>
+    <value>米游社から同期</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>ミヤホスからすべて同期（実験的）</value>
+    <value>米游社からすべて同期</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>URLを入力</value>
@@ -334,7 +334,7 @@
     <value>操作をキャンセルしました</value>
   </data>
   <data name="GachaLogPage_OnlySupportZZZCNServer" xml:space="preserve">
-    <value>この機能は現在ゼンレスゾーンゼロのみ対応しています。</value>
+    <value>米游社同期は原神（中国サーバー）とゼンレスゾーンゼロに対応。HoYoLAB同期はゼンレスゾーンゼロのみ対応しています。</value>
   </data>
   <data name="GachaLogPage_PleaseLoginMiyousheAndAddZZZRole" xml:space="preserve">
     <value>先に米游社ツールボックスにログインし、米游社アカウントを追加してください。</value>
@@ -2902,10 +2902,10 @@
     <value>動画デコードに失敗しました。VP9 Video Extensionsをインストールしてください。</value>
   </data>
   <data name="GachaLogPage_SyncFromHoYoLAB" xml:space="preserve">
-    <value>HoYoLABから同期（実験）</value>
+    <value>HoYoLABから同期</value>
   </data>
   <data name="GachaLogPage_SyncAllFromHoYoLAB" xml:space="preserve">
-    <value>HoYoLABからすべて同期（実験）</value>
+    <value>HoYoLABからすべて同期</value>
   </data>
   <data name="AppConfig_AnUnknownIssueOccurredDuringInitialization" xml:space="preserve">
     <value>初期化中に不明な問題が発生しました。</value>

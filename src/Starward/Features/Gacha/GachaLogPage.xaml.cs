@@ -77,7 +77,8 @@ public sealed partial class GachaLogPage : PageBase
     /// <para><b>输入：</b><paramref name="e"/> — 导航事件参数（基类 PageBase 从中解析 CurrentGameBiz / CurrentGameId）。</para>
     /// <para><b>副作用：</b>设置 <see cref="GachaTypeText"/> 文本；根据游戏类型注入对应 <see cref="_gachaLogService"/>
     /// （GenshinGachaService / StarRailGachaService / ZZZGachaService）、启用对应物品统计视图标志位、
-    /// 设置表情图标；对国服绝区零显示米游社同步菜单项、国际服显示 HoYoLAB 同步菜单项；关闭国际服的云游戏入口。</para>
+    /// 设置表情图标；对原神/绝区零国服（含 B 服）显示米游社同步、绝区零国际服显示 HoYoLAB 同步；关闭国际服的云游戏入口。
+    /// 星铁不提供米游社同步（genAuthKey 端到端不可用）。</para>
     /// </summary>
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -88,6 +89,12 @@ public sealed partial class GachaLogPage : PageBase
             EnableGenshinGachaItemStats = true;
             _gachaLogService = AppConfig.GetService<GenshinGachaService>();
             Image_Emoji.Source = new BitmapImage(AppConfig.EmojiPaimon);
+            // 原神国服/B 服：stoken genAuthKey → public-operation 抽卡接口
+            if (CurrentGameBiz.IsChinaServer() || CurrentGameBiz.IsBilibili())
+            {
+                MenuFlyoutItem_SyncFromMiyoushe.Visibility = Visibility.Visible;
+                MenuFlyoutItem_SyncFromMiyousheAll.Visibility = Visibility.Visible;
+            }
         }
         if (CurrentGameBiz.Game == GameBiz.hkrpg)
         {
@@ -921,10 +928,14 @@ public sealed partial class GachaLogPage : PageBase
     /// <para><b>输入：</b><paramref name="url"/> — 抽卡 API 完整 URL（含 authkey）；
     /// <paramref name="all"/> — 是否拉取全部记录（默认 false 仅拉取最新）。</para>
     /// <para><b>副作用：</b>通过 <see cref="_gachaLogService"/>.GetGachaLogAsync 拉取数据写入本地数据库；
-    /// 成功后刷新 UID 列表与统计卡片；可取消（TaskCanceledException 仅记录日志）。</para>
+    /// 成功后刷新 UID 列表与统计卡片；可取消（TaskCanceledException 仅记录日志）。
+    /// 失败时关闭进度条并另弹错误反馈，避免「正在获取 UID」常驻。</para>
     /// </summary>
     private async Task UpdateGachaLogInternalAsync(string url, bool all = false)
     {
+        InfoBar? progressInfoBar = null;
+        // 成功或用户取消后保留进度条（Success / 已取消文案）；失败则在 finally 关闭
+        bool keepProgressInfoBar = false;
         try
         {
             var uid = await _gachaLogService.GetUidFromGachaLogUrl(url);
@@ -948,12 +959,14 @@ public sealed partial class GachaLogPage : PageBase
                 infoBar.Message = Lang.GachaLogPage_OperationCanceled;
                 infoBar.ActionButton = null;
             };
+            progressInfoBar = infoBar;
             InAppToast.MainWindow?.Show(infoBar);
             var progress = new Progress<string>((str) => infoBar.Message = str);
             var newUid = await _gachaLogService.GetGachaLogAsync(url, all, CurrentLanguage, progress, cancelSource.Token);
             infoBar.Title = $"Uid {newUid}";
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
+            keepProgressInfoBar = true;
             if (SelectUid == uid)
             {
                 UpdateGachaTypeStats(uid);
@@ -970,6 +983,8 @@ public sealed partial class GachaLogPage : PageBase
         catch (TaskCanceledException)
         {
             _logger.LogInformation("Get gacha log canceled");
+            MarkProgressInfoBarCanceled(progressInfoBar);
+            keepProgressInfoBar = true;
         }
         catch (GachaApiException ex)
         {
@@ -1003,29 +1018,48 @@ public sealed partial class GachaLogPage : PageBase
             _logger.LogWarning(ex, "Request gacha log HTTP error");
             ShowGachaFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GachaLog));
         }
+        finally
+        {
+            if (!keepProgressInfoBar)
+            {
+                DismissProgressInfoBar(progressInfoBar);
+            }
+        }
     }
 
 
     /// <summary>
-    /// 从米游社/HoYoLAB 同步绝区零抽卡记录。
-    /// <para><b>输入：</b><paramref name="param"/> — <c>"all"</c> 同步全部记录，<c>null</c> 仅最新。</para>
-    /// <para><b>副作用：</b>仅支持绝区零国服/国际服；多角色时弹出选择对话框；通过 ZZZGachaService 拉取数据，带可取消的进度 InfoBar。</para>
+    /// 从米游社/HoYoLAB 同步抽卡记录。
+    /// <list type="bullet">
+    /// <item>绝区零：国服/国际服均走战绩 <c>gacha_record</c> 接口（ZZZGachaService）。</item>
+    /// <item>原神：仅国服与 B 服；stoken 调 genAuthKey 后走 public-operation 抽卡接口。</item>
+    /// <item>星铁：不提供此入口（社区无可用端到端 genAuthKey 实现）。</item>
+    /// </list>
+    /// <para><b>输入：</b><paramref name="param"/> — <c>"all"</c> 同步全部记录，否则仅增量。</para>
     /// </summary>
     [RelayCommand]
     private async Task SyncFromMiyousheAsync(string? param = null)
     {
+        InfoBar? progressInfoBar = null;
+        bool keepProgressInfoBar = false;
         try
         {
-            if (CurrentGameBiz.Game != GameBiz.nap)
+            bool isZzz = CurrentGameBiz.Game == GameBiz.nap;
+            bool isGenshinCn = CurrentGameBiz.Game == GameBiz.hk4e
+                && (CurrentGameBiz.IsChinaServer() || CurrentGameBiz.IsBilibili());
+            if (!isZzz && !isGenshinCn)
             {
                 InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_OnlySupportZZZCNServer);
                 return;
             }
-            if (_gachaLogService is not ZZZGachaService zzzGachaService)
+
+            // B 服角色在米游社绑定表中仍记为 _cn
+            GameBiz roleGameBiz = CurrentGameBiz.Value switch
             {
-                throw new InvalidOperationException($"Current gacha service type is {_gachaLogService.GetType().Name}.");
-            }
-            GameBiz roleGameBiz = CurrentGameBiz == GameBiz.nap_bilibili ? GameBiz.nap_cn : CurrentGameBiz;
+                GameBiz.nap_bilibili => GameBiz.nap_cn,
+                GameBiz.hk4e_bilibili => GameBiz.hk4e_cn,
+                _ => CurrentGameBiz,
+            };
             var roles = _gameRecordService.GetGameRoles(roleGameBiz);
             if (roles.Count == 0)
             {
@@ -1051,6 +1085,13 @@ public sealed partial class GachaLogPage : PageBase
                 InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_CurrentAccountMissingCookiePleaseReloginMiyoushe);
                 return;
             }
+            // 原神 genAuthKey 必须 stoken+mid（短信验证码登录会写入；纯 cookie_token 手动登录通常没有）
+            if (isGenshinCn && !CookieHasSTokenAndMid(role.Cookie))
+            {
+                InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_CurrentAccountMissingCookiePleaseReloginMiyoushe);
+                WeakReferenceMessenger.Default.Send(new MainViewNavigateMessage(typeof(GameRecordPage)));
+                return;
+            }
             _gameRecordService.SetLastSelectGachaSyncRole(roleGameBiz, role);
             var cancelSource = new CancellationTokenSource();
             var button = new Button
@@ -1072,12 +1113,37 @@ public sealed partial class GachaLogPage : PageBase
                 infoBar.Message = Lang.GachaLogPage_OperationCanceled;
                 infoBar.ActionButton = null;
             };
+            progressInfoBar = infoBar;
             InAppToast.MainWindow?.Show(infoBar);
-            var progress = new Progress<string>((str) => infoBar.Message = str);
-            var uid = await zzzGachaService.GetGachaLogByGameRecordAsync(role, param is "all", CurrentLanguage, progress, cancelSource.Token);
+            IProgress<string> progress = new Progress<string>((str) => infoBar.Message = str);
+
+            long uid;
+            if (isZzz)
+            {
+                if (_gachaLogService is not ZZZGachaService zzzGachaService)
+                {
+                    throw new InvalidOperationException($"Current gacha service type is {_gachaLogService.GetType().Name}.");
+                }
+                uid = await zzzGachaService.GetGachaLogByGameRecordAsync(role, param is "all", CurrentLanguage, progress, cancelSource.Token);
+            }
+            else
+            {
+                // 原神：genAuthKey → 拼 URL → 复用现有 GetGachaLogAsync 分页逻辑
+                progress.Report(Lang.GachaLogService_GettingUid);
+                var authKey = await _gameRecordService.GenAuthKeyAsync(role, cancelSource.Token);
+                string url = GameRecordService.BuildGachaLogUrlFromAuthKey(CurrentGameBiz, role, authKey, CurrentLanguage);
+                uid = await _gachaLogService.GetGachaLogAsync(url, param is "all", CurrentLanguage, progress, cancelSource.Token);
+                // 拉取成功后缓存 URL，便于短时内增量更新复用（authkey 仍会过期）
+                if (uid > 0)
+                {
+                    _gachaLogService.SaveGachaLogUrl(uid, url);
+                }
+            }
+
             infoBar.Title = $"Uid {uid}";
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
+            keepProgressInfoBar = true;
             if (SelectUid == uid)
             {
                 UpdateGachaTypeStats(uid);
@@ -1093,23 +1159,113 @@ public sealed partial class GachaLogPage : PageBase
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Sync zzz gacha record from miyoushe canceled");
+            _logger.LogInformation("Sync gacha record from miyoushe canceled");
+            MarkProgressInfoBarCanceled(progressInfoBar);
+            keepProgressInfoBar = true;
         }
         catch (miHoYoApiException ex)
         {
-            _logger.LogWarning(ex, "Sync zzz gacha record from miyoushe error ({retcode})", ex.ReturnCode);
+            _logger.LogWarning(ex, "Sync gacha record from miyoushe error ({retcode})", ex.ReturnCode);
             GameRecordPage.HandleMiHoYoApiException(ex);
+        }
+        catch (GachaApiException ex)
+        {
+            _logger.LogWarning(ex, "Sync gacha record from miyoushe gacha api error ({retcode})", ex.ReturnCode);
+            ShowGachaFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GachaLog));
         }
         catch (NotSupportedException ex)
         {
-            _logger.LogWarning(ex, "Sync zzz gacha record from miyoushe is not supported");
+            _logger.LogWarning(ex, "Sync gacha record from miyoushe is not supported");
             InAppToast.MainWindow?.Warning(null, ex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Sync zzz gacha record from miyoushe");
+            _logger.LogError(ex, "Sync gacha record from miyoushe");
             InAppToast.MainWindow?.Error(ex);
         }
+        finally
+        {
+            // 失败（含 genAuthKey / getGachaLog 报错）必须关掉进度条，避免与错误 Toast 叠成常驻「正在获取 UID」
+            if (!keepProgressInfoBar)
+            {
+                DismissProgressInfoBar(progressInfoBar);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 关闭拉取进度 InfoBar（失败路径用），避免 duration=0 的进度条常驻。
+    /// </summary>
+    /// <param name="infoBar">进度条；为 null 时无操作。</param>
+    private static void DismissProgressInfoBar(InfoBar? infoBar)
+    {
+        if (infoBar is null)
+        {
+            return;
+        }
+        try
+        {
+            infoBar.ActionButton = null;
+            infoBar.IsOpen = false;
+        }
+        catch
+        {
+            // UI 已卸载时忽略
+        }
+    }
+
+
+    /// <summary>
+    /// 将进度 InfoBar 标为已取消（保留可见文案，去掉取消按钮）。
+    /// </summary>
+    /// <param name="infoBar">进度条；为 null 时无操作。</param>
+    private static void MarkProgressInfoBarCanceled(InfoBar? infoBar)
+    {
+        if (infoBar is null)
+        {
+            return;
+        }
+        try
+        {
+            infoBar.Message = Lang.GachaLogPage_OperationCanceled;
+            infoBar.ActionButton = null;
+        }
+        catch
+        {
+            // UI 已卸载时忽略
+        }
+    }
+
+
+    /// <summary>
+    /// 判断 Cookie 是否同时包含 genAuthKey 所需的 stoken 与 mid。
+    /// </summary>
+    /// <param name="cookie">角色 Cookie 原文。</param>
+    /// <returns>两者均非空时为 true。</returns>
+    private static bool CookieHasSTokenAndMid(string cookie)
+    {
+        bool hasStoken = false;
+        bool hasMid = false;
+        foreach (string part in cookie.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            int eq = part.IndexOf('=');
+            if (eq <= 0)
+            {
+                continue;
+            }
+            string key = part[..eq].Trim();
+            string value = part[(eq + 1)..].Trim();
+            if (key.Equals("stoken", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(value))
+            {
+                hasStoken = true;
+            }
+            else if (key.Equals("mid", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(value))
+            {
+                hasMid = true;
+            }
+        }
+        return hasStoken && hasMid;
     }
 
 

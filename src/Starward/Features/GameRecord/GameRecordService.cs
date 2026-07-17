@@ -1442,6 +1442,72 @@ internal class GameRecordService
     }
 
 
+    /// <summary>
+    /// 通过米游社 stoken 换取抽卡 authkey（仅国服；国际服不支持）。
+    /// 用于原神/星铁「从米游社同步」：拿到 authkey 后拼 public-operation URL，再走既有 GachaLogClient。
+    /// </summary>
+    /// <param name="role">含 stoken+mid Cookie 的国服角色。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>authkey 结果。</returns>
+    public async Task<GameAuthKey> GenAuthKeyAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(role);
+        IsHoyolab = role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false;
+        if (IsHoyolab)
+        {
+            throw new NotSupportedException("Generating gacha authkey from HoYoLAB SToken is not supported.");
+        }
+        await UpdateDeviceFpAsync(cancellationToken: cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GenAuthKeyAsync(role, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 将 genAuthKey 结果拼成可被 <see cref="Starward.Core.Gacha.GachaLogClient"/> 解析的 public-operation 抽卡 URL。
+    /// 当前仅用于原神国服/B 服的「从米游社同步」；星铁未开放该入口。
+    /// </summary>
+    /// <param name="launcherGameBiz">当前启动器选中的游戏（含 bilibili 服；决定 API 主机）。</param>
+    /// <param name="role">米游社角色，提供绑定接口的 <c>game_biz</c> 与 <c>region</c>。</param>
+    /// <param name="authKey">genAuthKey 返回值。</param>
+    /// <param name="lang">物品名称语言，如 zh-cn；为空时默认 zh-cn。</param>
+    /// <returns>含 authkey 等查询参数的完整 API URL（带 ?，后续可再接 &amp;gacha_type=）。</returns>
+    /// <exception cref="NotSupportedException">非原神国服（含 B 服）时抛出。</exception>
+    public static string BuildGachaLogUrlFromAuthKey(GameBiz launcherGameBiz, GameRecordRole role, GameAuthKey authKey, string? lang = null)
+    {
+        ArgumentNullException.ThrowIfNull(role);
+        ArgumentNullException.ThrowIfNull(authKey);
+        if (string.IsNullOrWhiteSpace(authKey.Authkey))
+        {
+            throw new ArgumentException("Authkey is empty.", nameof(authKey));
+        }
+        if (launcherGameBiz.Game != GameBiz.hk4e || !(launcherGameBiz.IsChinaServer() || launcherGameBiz.IsBilibili()))
+        {
+            throw new NotSupportedException($"Building gacha URL from authkey is only supported for Genshin Impact CN servers (current: {launcherGameBiz}).");
+        }
+
+        const string apiPrefix = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog";
+        // 查询参数中的 game_biz 用绑定角色的 biz（hk4e_cn），不要用 bilibili 启动器 biz
+        string roleGameBiz = string.IsNullOrWhiteSpace(role.GameBiz) ? GameBiz.hk4e_cn : role.GameBiz;
+        string language = string.IsNullOrWhiteSpace(lang) ? "zh-cn" : LanguageUtil.FilterLanguage(lang);
+        int authkeyVer = authKey.AuthkeyVer > 0 ? authKey.AuthkeyVer : 1;
+        int signType = authKey.SignType > 0 ? authKey.SignType : 2;
+
+        // 对齐 TeyvatGuide / Snap.Hutao：authkey 四件套 + game_biz（及可选 region）
+        var sb = new System.Text.StringBuilder(apiPrefix);
+        sb.Append("?auth_appid=webview_gacha");
+        sb.Append("&authkey=").Append(Uri.EscapeDataString(authKey.Authkey));
+        sb.Append("&authkey_ver=").Append(authkeyVer);
+        sb.Append("&sign_type=").Append(signType);
+        sb.Append("&lang=").Append(Uri.EscapeDataString(language));
+        sb.Append("&game_biz=").Append(Uri.EscapeDataString(roleGameBiz));
+        if (!string.IsNullOrWhiteSpace(role.Region))
+        {
+            sb.Append("&region=").Append(Uri.EscapeDataString(role.Region));
+        }
+        return sb.ToString();
+    }
+
+
 
 
     #endregion

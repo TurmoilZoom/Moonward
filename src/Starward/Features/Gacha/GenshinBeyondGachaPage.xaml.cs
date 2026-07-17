@@ -284,8 +284,15 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
 
 
 
+    /// <summary>
+    /// 执行千星奇域抽卡拉取（进度 InfoBar + 取消）。失败时关闭进度条，避免常驻。
+    /// </summary>
+    /// <param name="url">含 authkey 的抽卡 URL。</param>
+    /// <param name="all">是否全量拉取。</param>
     private async Task UpdateGachaLogInternalAsync(string url, bool all = false)
     {
+        InfoBar? progressInfoBar = null;
+        bool keepProgressInfoBar = false;
         try
         {
             var uid = await _gachaLogService.GetUidFromGachaLogUrl(url);
@@ -309,12 +316,14 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
                 infoBar.Message = Lang.GachaLogPage_OperationCanceled;
                 infoBar.ActionButton = null;
             };
+            progressInfoBar = infoBar;
             InAppToast.MainWindow?.Show(infoBar);
             var progress = new Progress<string>((str) => infoBar.Message = str);
             var newUid = await _gachaLogService.GetGachaLogAsync(url, all, System.Globalization.CultureInfo.CurrentUICulture.Name, progress, cancelSource.Token);
             infoBar.Title = $"Uid {newUid}";
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
+            keepProgressInfoBar = true;
             if (SelectUid == uid)
             {
                 UpdateGachaTypeStats(uid);
@@ -331,6 +340,12 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         catch (TaskCanceledException)
         {
             _logger.LogInformation("Get gacha log canceled");
+            if (progressInfoBar is not null)
+            {
+                progressInfoBar.Message = Lang.GachaLogPage_OperationCanceled;
+                progressInfoBar.ActionButton = null;
+            }
+            keepProgressInfoBar = true;
         }
         catch (GachaApiException ex)
         {
@@ -363,6 +378,21 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         {
             _logger.LogWarning(ex, "Request beyond gacha log HTTP error");
             ShowGachaFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GachaLog));
+        }
+        finally
+        {
+            if (!keepProgressInfoBar && progressInfoBar is not null)
+            {
+                try
+                {
+                    progressInfoBar.ActionButton = null;
+                    progressInfoBar.IsOpen = false;
+                }
+                catch
+                {
+                    // UI 已卸载时忽略
+                }
+            }
         }
     }
 

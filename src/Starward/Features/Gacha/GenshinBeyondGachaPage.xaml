@@ -64,7 +64,7 @@
                 </StackPanel>
                 <SplitButton.Flyout>
                     <MenuFlyout>
-                        <!--  更新 全部  -->
+                        <!--  更新全部：位于「通过 URL 更新」之上  -->
                         <MenuFlyoutItem Command="{x:Bind UpdateGachaLogCommand}"
                                         CommandParameter="all"
                                         Text="{x:Bind lang:Lang.GachaLogPage_UpdateAll}" />

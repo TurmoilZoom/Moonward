@@ -19,6 +19,8 @@ using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Core.GameRecord.ZZZ.ThresholdSimulation;
 using Starward.Core.GameRecord.ZZZ.UpgradeGuide;
+using System.Text;
+using System.Text.Json;
 
 namespace Starward.Core.GameRecord;
 
@@ -862,6 +864,88 @@ public class HyperionClient : GameRecordClient
         request.Headers.Add(x_rpc_device_id, DeviceId);
         request.Headers.Add(x_rpc_device_fp, DeviceFp);
         return await CommonSendAsync<ZZZGachaRecordData>(request, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 通过 stoken 生成原神/星铁等游戏的抽卡 authkey（Auth Key B）。
+    /// 对齐 TeyvatGuide <c>takumiReq.bind.authKey</c> 与 UIGF 文档：POST binding/api/genAuthKey，DS 使用 LK2 Gen1。
+    /// </summary>
+    /// <param name="role">须含有效 stoken+mid 的 Cookie，以及 GameBiz / Uid / Region。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>可用于 public-operation 抽卡接口的 authkey 结果。</returns>
+    public override async Task<GameAuthKey> GenAuthKeyAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(role);
+        if (string.IsNullOrWhiteSpace(role.Cookie))
+        {
+            throw new ArgumentException("Cookie is required.", nameof(role));
+        }
+        if (!TryBuildSTokenCookie(role.Cookie, out string stokenCookie))
+        {
+            throw new ArgumentException("Cookie must contain stoken and mid.", nameof(role));
+        }
+        if (string.IsNullOrWhiteSpace(role.GameBiz) || string.IsNullOrWhiteSpace(role.Region))
+        {
+            throw new ArgumentException("GameBiz and Region are required.", nameof(role));
+        }
+
+        // genAuthKey 固定要求 LK2 Gen1 DS（与战绩接口的 X4/X6 salt 不同）
+        const string apiSaltLk2 = "d9200c846b10886e8c874fc33c8f308b";
+        var body = new GenAuthKeyPostBody("webview_gacha", role.GameBiz, role.Uid, role.Region);
+        string json = JsonSerializer.Serialize(body, typeof(GenAuthKeyPostBody), GameRecordJsonContext.Default);
+        const string url = "https://api-takumi.mihoyo.com/binding/api/genAuthKey";
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(json, Encoding.UTF8, Application_Json),
+        };
+        // 仅带 stoken+mid，与社区实现一致，避免无关 cookie 键干扰
+        request.Headers.Add(Cookie, stokenCookie);
+        request.Headers.Add(Referer, "https://app.mihoyo.com");
+        request.Headers.Add(DS, CreateSecret(apiSaltLk2));
+        request.Headers.Add(x_rpc_app_version, AppVersion);
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add(x_rpc_device_id, DeviceId);
+        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        return await CommonSendAsync<GameAuthKey>(request, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 从完整 Cookie 串中提取 stoken 与 mid，拼成 genAuthKey 所需 Cookie。
+    /// </summary>
+    /// <param name="cookie">角色 Cookie 原文。</param>
+    /// <param name="stokenCookie">输出 <c>stoken=...;mid=...</c>；失败时为空。</param>
+    /// <returns>两者均非空时为 true。</returns>
+    private static bool TryBuildSTokenCookie(string cookie, out string stokenCookie)
+    {
+        stokenCookie = "";
+        string? stoken = null;
+        string? mid = null;
+        foreach (string part in cookie.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            int eq = part.IndexOf('=');
+            if (eq <= 0)
+            {
+                continue;
+            }
+            string key = part[..eq].Trim();
+            string value = part[(eq + 1)..].Trim();
+            if (key.Equals("stoken", StringComparison.OrdinalIgnoreCase))
+            {
+                stoken = value;
+            }
+            else if (key.Equals("mid", StringComparison.OrdinalIgnoreCase))
+            {
+                mid = value;
+            }
+        }
+        if (string.IsNullOrWhiteSpace(stoken) || string.IsNullOrWhiteSpace(mid))
+        {
+            return false;
+        }
+        stokenCookie = $"stoken={stoken};mid={mid}";
+        return true;
     }
 
 

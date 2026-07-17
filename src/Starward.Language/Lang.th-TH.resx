@@ -269,7 +269,7 @@
     <value>ไม่มีประวัติการสุ่ม</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>อัพเดทประวัติการสุ่ม</value>
+    <value>อัปเดต (เพิ่มเติม)</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>กำลังอัปเดตชื่อไอเทม…</value>
@@ -278,13 +278,13 @@
     <value>อัพเดต (URL ที่เซฟไว้)</value>
   </data>
   <data name="GachaLogPage_UpdateAll" xml:space="preserve">
-    <value>อัพเดต (ทั้งหมด)</value>
+    <value>อัปเดตทั้งหมด</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
-    <value>ซิงค์จาก Miyoushe (ทดลอง)</value>
+    <value>ซิงค์จาก Miyoushe</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>ซิงค์ทั้งหมดจาก Miyoushe (ทดลอง)</value>
+    <value>ซิงค์ทั้งหมดจาก Miyoushe</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>ใส่ URL บันทึกการสุ่ม</value>
@@ -333,7 +333,7 @@
     <value>กระบวนการถูกยกเลิก</value>
   </data>
   <data name="GachaLogPage_OnlySupportZZZCNServer" xml:space="preserve">
-    <value>ฟีเจอร์นี้รองรับเฉพาะ ZZZ ในขณะนี้</value>
+    <value>การซิงค์ Miyoushe รองรับ Genshin Impact (CN) และ Zenless Zone Zero ส่วน HoYoLAB รองรับเฉพาะ Zenless Zone Zero</value>
   </data>
   <data name="GachaLogPage_PleaseLoginMiyousheAndAddZZZRole" xml:space="preserve">
     <value>โปรดเข้าสู่ระบบผ่าน Miyoushe toolbox และเพิ่มบัญชี Miyoushe ของคุณก่อน</value>
@@ -2897,10 +2897,10 @@
     <value>การถอดรหัสวิดีโอล้มเหลว โปรดติดตั้ง VP9 Video Extensions</value>
   </data>
   <data name="GachaLogPage_SyncFromHoYoLAB" xml:space="preserve">
-    <value>ซิงค์จาก HoYoLAB (ทดลอง)</value>
+    <value>ซิงค์จาก HoYoLAB</value>
   </data>
   <data name="GachaLogPage_SyncAllFromHoYoLAB" xml:space="preserve">
-    <value>ซิงค์ทั้งหมดจาก HoYoLAB (ทดลอง)</value>
+    <value>ซิงค์ทั้งหมดจาก HoYoLAB</value>
   </data>
   <data name="AppConfig_AnUnknownIssueOccurredDuringInitialization" xml:space="preserve">
     <value>เกิดปัญหาที่ไม่ทราบสาเหตุระหว่างการเริ่มต้นระบบ</value>

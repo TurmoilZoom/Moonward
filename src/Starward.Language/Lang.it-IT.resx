@@ -270,7 +270,7 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Nessun Registro Gacha</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>Aggiorna Record</value>
+    <value>Aggiorna (incrementale)</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>Aggiornamento nomi oggetti…</value>
@@ -279,13 +279,13 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Aggiorna (URL salvato)</value>
   </data>
   <data name="GachaLogPage_UpdateAll" xml:space="preserve">
-    <value>Aggiorna (Tutto)</value>
+    <value>Aggiorna tutto</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
-    <value>Sincronizza da Miyoushe (Sperimentale)</value>
+    <value>Sincronizza da Miyoushe</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Sincronizza tutto da Miyoushe (Sperimentale)</value>
+    <value>Sincronizza tutto da Miyoushe</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>Ingresso URL</value>
@@ -334,7 +334,7 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Operazione annullata</value>
   </data>
   <data name="GachaLogPage_OnlySupportZZZCNServer" xml:space="preserve">
-    <value>Questa funzione al momento supporta solo ZZZ.</value>
+    <value>La sincronizzazione Miyoushe supporta Genshin Impact (CN) e Zenless Zone Zero. HoYoLAB solo Zenless Zone Zero.</value>
   </data>
   <data name="GachaLogPage_PleaseLoginMiyousheAndAddZZZRole" xml:space="preserve">
     <value>Accedi tramite la toolbox di Miyoushe e aggiungi prima il tuo account Miyoushe.</value>
@@ -2903,10 +2903,10 @@ Sei invitato a inviare i dati esportati al seguente repository:</value>
     <value>Decodifica video fallita. Installa le estensioni video VP9.</value>
   </data>
   <data name="GachaLogPage_SyncFromHoYoLAB" xml:space="preserve">
-    <value>Sincronizza da HoYoLAB (Sperimentale)</value>
+    <value>Sincronizza da HoYoLAB</value>
   </data>
   <data name="GachaLogPage_SyncAllFromHoYoLAB" xml:space="preserve">
-    <value>Sincronizza tutto da HoYoLAB (Sperimentale)</value>
+    <value>Sincronizza tutto da HoYoLAB</value>
   </data>
   <data name="AppConfig_AnUnknownIssueOccurredDuringInitialization" xml:space="preserve">
     <value>Si è verificato un problema sconosciuto durante l'inizializzazione.</value>

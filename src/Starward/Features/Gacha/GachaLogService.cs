@@ -213,10 +213,26 @@ internal abstract class GachaLogService
         long uid = await _client.GetUidByGachaUrlAsync(url);
         if (uid > 0)
         {
-            using var dapper = DatabaseService.CreateConnection();
-            dapper.Execute("INSERT OR REPLACE INTO GachaLogUrl (GameBiz, Uid, Url, Time) VALUES (@GameBiz, @Uid, @Url, @Time);", new GachaLogUrl(CurrentGameBiz, uid, url));
+            SaveGachaLogUrl(uid, url);
         }
         return uid;
+    }
+
+
+    /// <summary>
+    /// 将抽卡记录 URL 按 UID 持久化到本地（不发起网络请求）。
+    /// 用于米游社 genAuthKey 同步成功后缓存 URL，避免重复请求。
+    /// </summary>
+    /// <param name="uid">玩家 UID；须 &gt; 0。</param>
+    /// <param name="url">含 authkey 的抽卡 API/页面 URL。</param>
+    public virtual void SaveGachaLogUrl(long uid, string url)
+    {
+        if (uid <= 0 || string.IsNullOrWhiteSpace(url))
+        {
+            return;
+        }
+        using var dapper = DatabaseService.CreateConnection();
+        dapper.Execute("INSERT OR REPLACE INTO GachaLogUrl (GameBiz, Uid, Url, Time) VALUES (@GameBiz, @Uid, @Url, @Time);", new GachaLogUrl(CurrentGameBiz, uid, url));
     }
 
 

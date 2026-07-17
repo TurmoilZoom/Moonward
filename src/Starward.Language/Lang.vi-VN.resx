@@ -270,7 +270,7 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
     <value>Không có bản ghi gacha</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>Cập nhật bản ghi</value>
+    <value>Cập nhật (tăng dần)</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>Đang cập nhật tên vật phẩm…</value>
@@ -279,13 +279,13 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
     <value>Cập nhật (URL đã lưu)</value>
   </data>
   <data name="GachaLogPage_UpdateAll" xml:space="preserve">
-    <value>Cập nhật (tất cả)</value>
+    <value>Cập nhật tất cả</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
-    <value>Đồng bộ với Miyoushe (Thử nghiệm)</value>
+    <value>Đồng bộ từ Miyoushe</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Đồng nhất với toàn bộ Miyoushe (Thử nghiệm)</value>
+    <value>Đồng bộ tất cả từ Miyoushe</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>Nhập URL</value>
@@ -334,7 +334,7 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
     <value>Thao tác bị huỷ</value>
   </data>
   <data name="GachaLogPage_OnlySupportZZZCNServer" xml:space="preserve">
-    <value>Tính năng này hiện chỉ hỗ trợ ZZZ.</value>
+    <value>Đồng bộ Miyoushe hỗ trợ Genshin Impact (CN) và Zenless Zone Zero. HoYoLAB chỉ hỗ trợ Zenless Zone Zero.</value>
   </data>
   <data name="GachaLogPage_PleaseLoginMiyousheAndAddZZZRole" xml:space="preserve">
     <value>Hãy đăng nhập qua hộp công cụ Miyoushe và thêm tài khoản Miyoushe trước.</value>
@@ -2900,10 +2900,10 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Quá trình giải mã video thất bại. Vui lòng cài đặt tiện ích mở rộng video VP9.</value>
   </data>
   <data name="GachaLogPage_SyncFromHoYoLAB" xml:space="preserve">
-    <value>Đồng nhất với toàn bộ HoYoLAB (Thử nghiệm)</value>
+    <value>Đồng bộ từ HoYoLAB</value>
   </data>
   <data name="GachaLogPage_SyncAllFromHoYoLAB" xml:space="preserve">
-    <value>Đồng bộ với HoYoLAB (Thử nghiệm)</value>
+    <value>Đồng bộ tất cả từ HoYoLAB</value>
   </data>
   <data name="AppConfig_AnUnknownIssueOccurredDuringInitialization" xml:space="preserve">
     <value>Đã xảy ra lỗi không xác định trong quá trình khởi tạo.</value>

@@ -52,6 +52,9 @@ namespace Starward.Core.GameRecord;
 [JsonSerializable(typeof(miHoYoApiWrapper<DeadlyAssaultInfo>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ZZZDailyNote>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ZZZGachaRecordData>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<GameAuthKey>))]
+[JsonSerializable(typeof(GenAuthKeyPostBody))]
+[JsonSerializable(typeof(GameAuthKey))]
 [JsonSerializable(typeof(miHoYoApiWrapper<BH3DailyNote>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ThresholdSimulationAbstractInfo>))]
 // 每日签到（luna/sol）请求与响应类型

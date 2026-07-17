@@ -329,7 +329,7 @@ closing the program during decompression will cause game file corruption.</value
     <value>No Gacha Records</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>Update Records</value>
+    <value>Update (Incremental)</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>Updating item names…</value>
@@ -338,13 +338,13 @@ closing the program during decompression will cause game file corruption.</value
     <value>Update (Saved URL)</value>
   </data>
   <data name="GachaLogPage_UpdateAll" xml:space="preserve">
-    <value>Update (All)</value>
+    <value>Update All</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
-    <value>Sync from Miyoushe (Experimental)</value>
+    <value>Sync from Miyoushe</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>Sync all from Miyoushe (Experimental)</value>
+    <value>Sync all from Miyoushe</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>Update via URL</value>
@@ -393,10 +393,10 @@ closing the program during decompression will cause game file corruption.</value
     <value>Operation canceled</value>
   </data>
   <data name="GachaLogPage_OnlySupportZZZCNServer" xml:space="preserve">
-    <value>This feature currently supports ZZZ only.</value>
+    <value>Miyoushe sync supports Genshin Impact (CN) and Zenless Zone Zero. HoYoLAB sync is available for Zenless Zone Zero only.</value>
   </data>
   <data name="GachaLogPage_PleaseLoginMiyousheAndAddZZZRole" xml:space="preserve">
-    <value>Please log in via Miyoushe toolbox and add your Miyoushe account first.</value>
+    <value>Please log in via the Miyoushe/HoYoLAB toolbox and add your game account first.</value>
   </data>
   <data name="GachaLogPage_CurrentAccountMissingCookiePleaseReloginMiyoushe" xml:space="preserve">
     <value>The current account is missing login credentials. Please re-login Miyoushe.</value>
@@ -405,7 +405,7 @@ closing the program during decompression will cause game file corruption.</value
     <value>Select Miyoushe account</value>
   </data>
   <data name="GachaLogPage_SelectMiyousheRoleDescription" xml:space="preserve">
-    <value>Multiple ZZZ roles were found. Please choose one role to sync gacha records.</value>
+    <value>Multiple game roles were found. Please choose one role to sync gacha records.</value>
   </data>
   <data name="GachaLogPage_PleaseSelectMiyousheRole" xml:space="preserve">
     <value>Please select a Miyoushe account first.</value>
@@ -2961,10 +2961,10 @@ You are welcome to submit the exported data to the following repository:</value>
     <value>Video decoding failed. Please install the VP9 Video Extensions.</value>
   </data>
   <data name="GachaLogPage_SyncFromHoYoLAB" xml:space="preserve">
-    <value>Sync from HoYoLAB (Experimental)</value>
+    <value>Sync from HoYoLAB</value>
   </data>
   <data name="GachaLogPage_SyncAllFromHoYoLAB" xml:space="preserve">
-    <value>Sync All from HoYoLAB (Experimental)</value>
+    <value>Sync all from HoYoLAB</value>
   </data>
   <data name="AppConfig_AnUnknownIssueOccurredDuringInitialization" xml:space="preserve">
     <value>An unknown issue occurred during initialization.</value>

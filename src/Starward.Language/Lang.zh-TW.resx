@@ -270,7 +270,7 @@
     <value>沒有抽卡記錄</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>更新記錄</value>
+    <value>更新（增量）</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>正在更新物品名稱…</value>
@@ -279,13 +279,13 @@
     <value>更新 (保存的 URL)</value>
   </data>
   <data name="GachaLogPage_UpdateAll" xml:space="preserve">
-    <value>全部更新</value>
+    <value>更新全部</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyoushe" xml:space="preserve">
-    <value>從米遊社同步（實驗性功能）</value>
+    <value>從米遊社同步</value>
   </data>
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
-    <value>從米遊社同步全部（實驗性功能）</value>
+    <value>從米遊社同步全部</value>
   </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>輸入URL</value>
@@ -334,7 +334,7 @@
     <value>操作已取消</value>
   </data>
   <data name="GachaLogPage_OnlySupportZZZCNServer" xml:space="preserve">
-    <value>此功能目前僅支援絕區零。</value>
+    <value>米遊社同步支援原神（國服）與絕區零；HoYoLAB 同步目前僅支援絕區零。</value>
   </data>
   <data name="GachaLogPage_PleaseLoginMiyousheAndAddZZZRole" xml:space="preserve">
     <value>請現在米遊社工具箱新增您的米遊社帳號。</value>
@@ -2903,10 +2903,10 @@
     <value>影片解碼失敗，請安裝VP9影片擴展。</value>
   </data>
   <data name="GachaLogPage_SyncFromHoYoLAB" xml:space="preserve">
-    <value>從HoYoLAB同步（實驗性功能）</value>
+    <value>從 HoYoLAB 同步</value>
   </data>
   <data name="GachaLogPage_SyncAllFromHoYoLAB" xml:space="preserve">
-    <value>從HoYoLAB同步全部（實驗性功能）</value>
+    <value>從 HoYoLAB 同步全部</value>
   </data>
   <data name="AppConfig_AnUnknownIssueOccurredDuringInitialization" xml:space="preserve">
     <value>初始化過程中發生未知問題。</value>
