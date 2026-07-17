@@ -75,6 +75,24 @@ dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeI
 
 API 客户端要点：走 `GameRecordClient.CommonSendAsync`；签名用 `CreateSecret()`（Gen1/LK2）；JSON 一律用 `*JsonContext.Default`，**不要无 context 反序列化**。`SignInActivityConfig` 里 **nap（绝区零）/ bh3（崩坏3）的 `act_id` 为最佳猜测**，可能需上线后用真实账号核对（仅改该文件即可）。
 
+### 米哈游 API 错误反馈 —— Core 抛协议异常，UI 统一分类并负责恢复
+
+`src/Starward/Features/MiHoYoApiErrorFeedback.cs` 是米哈游相关 UI 业务异常的唯一分类入口。不要在单个页面/服务里按 retcode 拼文案、复制 `switch`、或将 `Exception.Message` 当作已本地化的用户提示。
+
+- **Core / Client 层只表达协议失败**：战绩、签到、账号认证及 passport 接口用 `miHoYoApiException(retcode, responseMessage)`；抽卡 authkey 接口用 `GachaApiException`。两者的 `ResponseMessage` 保存服务端原文，供未知错误诊断；异常类型不得引用 `Lang` 或自行把某个 retcode 固化为用户文案。
+- **UI 业务层按实际接口传入场景**：捕获 `miHoYoApiException`、`GachaApiException` 或 `HttpRequestException` 后调用 `MiHoYoApiErrorFeedbackFactory.Create(exception, MiHoYoApiContext.XXX)`。现有场景包括 `GameRecord`、`SignIn`、`GachaLog`、`SelfQuery`、`AccountAuth`、`LauncherPublicApi`、`PassportCaptcha`。相同 retcode 在不同接口不一定同义，尤其 `PassportCaptcha` 必须走独立映射；抽卡/authkey 失效是 `RefreshUrl`，不能提示米游社重新登录。
+- **显示与恢复职责分开**：`MiHoYoApiErrorFeedback` 提供 `Severity`、本地化标题/消息和 `RecoveryAction`。主页面用 `MiHoYoApiErrorFeedbackFactory.Show(feedback, onRecovery)` 展示 `InAppToast`；页面在回调中执行实际恢复操作（战绩通常发送 `GameRecordOpenLoginMessage` 或 `GameRecordVerifyAccountMessage`，自助查询重新输入 URL）。Factory 不知道页面导航/控件，不能把 UI 恢复逻辑塞回 Factory。
+- **对话框内错误留在对话框**：`CaptchaLoginDialog` 打开时调用 Factory 的 `Create`，再显示框内 `InfoBar`，以保留表单上下文；对话框关闭后才可由调用页面用 Toast 提示。未知 retcode/异常必须保留服务端消息和状态码，已确认的码只展示本地化提示及状态码。
+- **扩展规则**：新增米哈游 API 场景先加/复用准确的 `MiHoYoApiContext`，再在 Factory 集中添加经过确认的 retcode、HTTP 状态、文案键和恢复动作；不要为了“统一”而复用语义不同的映射。新增文案照“本地化”流程处理。
+
+### GameRecord 登录、设备指纹与 Cookie
+
+- 战绩工具箱**已移除 WebView 网页登录**。当前入口是手动输入 Cookie，以及仅国服可用的短信验证码登录；登录失效时应通过上述入口恢复，而非恢复 WebView 页面。
+- `GameRecordService.ExecuteGameRecordRequestAsync` 对国服失败仅尝试刷新设备指纹，并且**最多重试一次**。旧的 stoken Cookie 静默刷新已移除：持久化 Cookie 通常没有可用的长期凭据，不能重新引入 `GameRecordCookieRefreshService`、`GetCookieTokenBySTokenAsync` 或隐式替换数据库 Cookie。
+- 短信登录分层：`Core/GameRecord/Passport/MihoyoPassportClient.cs` 只处理 passport HTTP/RSA/DTO；`CaptchaLoginService` 编排发码、登录、aigis 极验后重试（上限 3 次）、换取 ltoken/cookie_token 并拼装 Cookie；`CaptchaLoginDialog` 与 `GeetestVerifyPopup` 处理 WinUI 交互。Core 不得引用 WinUI。
+- `CaptchaLoginService` 每次 passport 请求前通过 `GameRecordService.UpdateDeviceFpAsync` 同步设备标识；UI 以回调完成极验并返回 `x-rpc-aigis`，取消时保留 `OperationCanceledException` 让 `PassportCaptcha` 反馈处理。日志可记录流程和脱敏手机号后四位，**绝不可记录 Cookie、stoken、ltoken、cookie_token、验证码、authkey 或完整手机号**。
+- 新增 passport DTO 同样要注册 `GameRecordJsonContext`，并在 `AppConfig.ServiceProvider.cs` 注册新服务；国服/国际服差异继续停留在 Client / Service 门面，不要下沉进页面。
+
 ### 数据库 —— SQLite + Dapper，追加式迁移
 `Features/Database/DatabaseService.cs`：
 - 连接 `StarwardDatabase.db`，`KVT`（通用键值）与 `Setting`（用户设置）两张核心表 + 各游戏的抽卡/战绩表。
@@ -91,11 +109,12 @@ API 客户端要点：走 `GameRecordClient.CommonSendAsync`；签名用 `Create
 
 ## 本地化
 
-- 应用内文案在 `Starward.Language/Lang.resx`，正式翻译走 [Crowdin](https://crowdin.com/project/starward)，**禁止硬编码用户可见字符串**。
-- **开发时新增一条 `Lang.*` 字符串需要 3 处手工编辑**（`dotnet build` 不会重新生成 VS 设计器文件）：
+- 应用内文案在 `Starward.Language/Lang.resx`，正式翻译走 [Crowdin](https://crowdin.com/project/starward)，**禁止硬编码用户可见字符串**。API 错误文案尤其应由 `MiHoYoApiErrorFeedbackFactory` 经资源键读取，不能在异常或页面中硬编码。
+- **开发时新增一条 `Lang.*` 字符串至少需要 3 处手工编辑**（`dotnet build` 不会重新生成 VS 设计器文件）：
   1. `Lang.resx`（默认/英文）
   2. `Lang.zh-CN.resx`（中文）
   3. `Lang.Designer.cs`（手动加 `public static string XXX => ...` 属性）
+- 如本次改动需要交付其它已维护语言，也同步更新相应的 `Lang.<语言-地区>.resx`；不要只改 Designer 或依赖不存在的自动生成。
 - 文档（`docs/*.md`）翻译用 `文件名.<语言-地区>.md` 命名。
 
 ## UI 约定
@@ -103,6 +122,7 @@ API 客户端要点：走 `GameRecordClient.CommonSendAsync`；签名用 `Create
 - 页面继承 `PageBase`，导航参数为 `GameId` / `GameBiz`。
 - 主视觉风格是**亚克力**背景；动画优先用 **Composition**（`Helpers/FluentAnimations.cs`）而非 Storyboard。
 - `DropDownButton` 弹出层在独立视觉树，**无法做亚克力，不要强行改造**（会回退纯色）。
+- 短暂悬停说明优先复用 `Controls/InstantTooltip` / `InstantTooltipHost`，避免新增另一套 Tooltip 或重复悬浮计时逻辑。
 - 跨组件通信用 `CommunityToolkit.Mvvm.Messaging`；日志用 `ILogger<T>`。
 - **x:Bind 绑定的 `ObservableObject` 属性必须在 UI 线程赋值**；在 `ConfigureAwait(false)` / `Task.Run` 内赋值会抛 `COMException 0x8001010E` 且从 catch 逃逸（典型坑：服务里 `Task.Run` 包 DB 工作返回值，`await` 后再回 UI 线程赋值）。
 - **不要升级 `CommunityToolkit.WinUI.Controls.Segmented`**（csproj 有注释说明，新版有回归）。
