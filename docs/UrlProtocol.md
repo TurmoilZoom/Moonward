@@ -32,7 +32,7 @@ starward://startgame/{game_biz}?install_path={install_path}&profile={profile}&ui
 |Key|Type|Description|
 |---|---|---|
 |install_path| `string` (Option) | Folder full path of game executable. |
-|profile| `string` (Option) | Launch method / profile id. `none` = launch without launch-argument profiles (DX12 and other global toggles still apply). `config1` … `config8` map 1:1 to display names “Profile 1” … “Profile 8” (`config1` uses legacy storage). When omitted, the app's currently active launch method is used ("follow app setting"); the default active method is `none`. |
+|profile| `string` (Option) | Launch method / profile id. `none` = launch without launch-argument profiles (DX12 and other global toggles still apply). `configN` (N ≥ 1, no upper limit) maps 1:1 to display name “Profile N” (`config1` uses legacy storage). When omitted, the app's currently active launch method is used ("follow app setting"); the default active method is `none`. |
 |uid| `long` (Option) | Game character UID from HoYoLAB / miyoushe toolbox roles. When set (and the matching role Cookie has a valid `stoken`), Starward requests an auth ticket and appends `login_auth_ticket` so the game logs in as that account (CN servers only). Takes priority over the profile's saved login account. |
 
 

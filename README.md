@@ -79,7 +79,7 @@ This repository ([TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)
 - 游戏内公告窗口、云游戏入口（部分游戏）
 - 硬链接节省磁盘空间（部分游戏）
 - 游戏时间记录与统计
-- 多启动配置文件（config1 ~ config8 与配置文件 1~8 对应；启动方式含「无」），支持 `starward://` URL 协议远程启动
+- 多启动配置文件（configN 与配置文件 N 对应，无数量上限；启动方式含「无」），支持 `starward://` URL 协议远程启动
 - 通过 [Velopack](https://github.com/velopack/velopack) 实现应用内自动更新
 
 ### 拓展工具

@@ -117,7 +117,7 @@ internal class UrlProtocolService
                         var kvs = HttpUtility.ParseQueryString(uri.Query);
                         string? installPath = kvs["install_path"];
 
-                        // profile 参数：config1…config8（与配置文件 1…8 对应）、none（无）；
+                        // profile 参数：configN（与配置文件 N 对应，N≥1）、none（无）；
                         // 缺省（「跟随软件设置」）时按当前生效的启动方式。
                         string? profileId = kvs["profile"] ?? AppConfig.GetActiveLaunchProfileId(biz);
                         AppConfig.ResolveLaunchProfile(biz, profileId, out bool useNone, out GameLaunchProfile? profile);

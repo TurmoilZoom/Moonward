@@ -15,7 +15,6 @@ using Starward.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,7 +42,6 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     public GameLaunchProfileDialog()
     {
         this.InitializeComponent();
-        Profiles.CollectionChanged += Profiles_CollectionChanged;
         this.Loaded += GameLaunchProfileDialog_Loaded;
         this.Unloaded += GameLaunchProfileDialog_Unloaded;
     }
@@ -53,12 +51,6 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     public GameBiz CurrentGameBiz { get; set; }
-
-
-    private void Profiles_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        OnPropertyChanged(nameof(CanCreateProfile));
-    }
 
 
     private void GameLaunchProfileDialog_Loaded(object sender, RoutedEventArgs e)
@@ -134,9 +126,9 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 是否还可以新建配置文件（每个游戏最多 <see cref="GameLaunchProfile.MaxCount"/> 个）。
+    /// 是否还可以新建配置文件（已取消数量上限，始终为 true）。
     /// </summary>
-    public bool CanCreateProfile => Profiles.Count < GameLaunchProfile.MaxCount;
+    public bool CanCreateProfile => true;
 
 
     /// <summary>
@@ -585,10 +577,6 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     [RelayCommand]
     private void NewProfile()
     {
-        if (!CanCreateProfile)
-        {
-            return;
-        }
         if (IsDirty && SelectedProfile is not null)
         {
             _pendingDiscardAction = CreateNewProfileCore;
@@ -601,11 +589,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
     private void CreateNewProfileCore()
     {
-        string? id = GetNextAvailableProfileId();
-        if (id is null)
-        {
-            return;
-        }
+        string id = GameLaunchProfile.GetNextAvailableId(Profiles.Select(p => p.Id));
         // Name 序号必须与 configN 中的 N 一致（如 config3 → 配置文件3）
         var profile = new GameLaunchProfile
         {
@@ -615,20 +599,6 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         Profiles.Add(profile);
         PersistExtraProfiles();
         SelectProfileCore(profile);
-    }
-
-
-    private string? GetNextAvailableProfileId()
-    {
-        var used = new HashSet<string>(Profiles.Select(p => p.Id), StringComparer.OrdinalIgnoreCase);
-        foreach (string name in GameLaunchProfile.InternalNames)
-        {
-            if (!used.Contains(name))
-            {
-                return name;
-            }
-        }
-        return null;
     }
 
 

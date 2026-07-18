@@ -568,31 +568,14 @@ public static partial class AppConfig
         {
             return result;
         }
-        // 仅接受 config2…config8：唯一、不与 config1 冲突，总数不超过 MaxCount - 1。
+        // 仅接受 config2…configN：唯一、不与 config1 冲突，无数量上限。
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { GameLaunchProfile.DefaultId };
         foreach (GameLaunchProfile p in list)
         {
-            if (result.Count >= GameLaunchProfile.MaxCount - 1)
-            {
-                break;
-            }
             p.Id = GameLaunchProfile.NormalizeId(p.Id);
             if (string.IsNullOrEmpty(p.Id) || used.Contains(p.Id) || !GameLaunchProfile.IsKnownId(p.Id) || GameLaunchProfile.IsDefaultId(p.Id))
             {
-                string? free = null;
-                foreach (string name in GameLaunchProfile.InternalNames)
-                {
-                    if (!used.Contains(name))
-                    {
-                        free = name;
-                        break;
-                    }
-                }
-                if (free is null)
-                {
-                    break;
-                }
-                p.Id = free;
+                p.Id = GameLaunchProfile.GetNextAvailableId(used);
                 // Id 被重分配后清空名称，由界面按 configN →「配置文件 N」重新生成
                 p.Name = "";
             }
@@ -670,7 +653,7 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 获取当前在启动参数编辑界面选中的配置文件内部名（config1…config8）。
+    /// 获取当前在启动参数编辑界面选中的配置文件内部名（configN）。
     /// </summary>
     public static string? GetSelectedLaunchProfileId(GameBiz biz)
     {
