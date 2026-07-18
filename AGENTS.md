@@ -81,6 +81,8 @@ SDK 见 `global.json`，**不要擅自升级 SDK/NuGet**。改完至少 build �
 - `DropDownButton` 弹出层无法亚克力，不要强行改造
 - 短暂悬停说明用 `InstantTooltip`，勿另起一套
 - **不要升级** `CommunityToolkit.WinUI.Controls.Segmented`（csproj 有说明）
+- **层级复杂的控件**须考虑命中测试（hit test）与输入路由：装饰层/叠层/透明区域是否误拦指针与键盘；可点区域、`IsHitTestVisible`、事件冒泡/隧道是否与预期一致
+- **可视化控件**（自定义外观、Composition、复杂模板）设计前对照官方文档、社区文档与成熟开源实现，勿凭直觉堆 XAML/视觉层
 
 ## 本地化
 

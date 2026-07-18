@@ -146,6 +146,24 @@ Velopack + GitHub Releases；预览版 = pre-release，按架构分渠道。`Rel
 - **x:Bind 绑定的 `ObservableObject` 属性必须在 UI 线程赋值**；在 `ConfigureAwait(false)` / `Task.Run` 内赋值会 `COMException 0x8001010E` 且易从 catch 逃逸
 - **不要升级** `CommunityToolkit.WinUI.Controls.Segmented`（csproj 有回归说明）
 
+### 复杂控件：命中测试与输入路由
+
+视觉树层级较深（叠层、装饰、遮罩、Popup、自定义模板、Composition 视觉）时，**不能只看效果对不对**，还要验证输入是否落到正确元素：
+
+- **命中测试（hit test）**：透明/半透明装饰层、全屏叠层、未设 `IsHitTestVisible="False"` 的背景是否挡住下方按钮/列表；可点区域是否与视觉反馈一致
+- **输入路由**：指针/触摸/键盘事件的捕获、冒泡与隧道是否被中间层截断；焦点与键盘导航是否仍可达；滚动容器与内嵌可点控件是否争抢手势
+- 改模板或加装饰层后，至少手测：点击、悬停、拖拽、滚轮、Tab 焦点、以及叠层关闭后下层是否仍可交互
+
+### 可视化控件：先查文档与参考实现
+
+设计或重写**外观向**控件（自定义 ControlTemplate、视觉状态、Composition 动画、非标准布局）时，**先对齐正确做法再写代码**，避免凭直觉堆节点导致命中/无障碍/主题/性能问题：
+
+1. **官方文档**：WinUI 3 / Windows App SDK（控件模板、视觉状态、Composition、输入与焦点）— [WinUI 3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)
+2. **社区文档与组件**：Community Toolkit for Windows 等已验证模式
+3. **开源参考**：上游/同类 WinUI 应用与控件库中的成熟实现（模板结构、hit-test 边界、动画接入点），对齐后再适配本仓风格
+
+本仓已有模式优先复用（如 `FluentAnimations`、`InstantTooltip`）；新模式应能说清「参考了何处、为何这样分层」。
+
 ## 注释规范
 
 适量，与现有风格一致；不给一目了然的代码堆砌注释。
