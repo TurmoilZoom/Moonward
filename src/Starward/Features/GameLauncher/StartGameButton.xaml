@@ -420,7 +420,6 @@
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
-                    Opacity="0"
                     PointerEntered="QuickMenu_PointerEntered"
                     PointerExited="QuickMenu_PointerExited">
                     <!--  开合动效改为「从一点放大 / 收缩」(Composition)，与抽卡筛选浮层一致，见 StartGameButton.xaml.cs  -->

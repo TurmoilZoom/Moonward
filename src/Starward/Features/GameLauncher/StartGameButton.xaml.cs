@@ -114,6 +114,16 @@ public sealed partial class StartGameButton : UserControl
     /// <summary>窗口根元素，用于全局 PointerMoved 追踪按钮与菜单之间的移动路径。</summary>
     private UIElement? _menuPointerTrackingRoot;
 
+    /// <summary>
+    /// 打开后的悬停宽限截止时间。WinUI 在 <see cref="Popup.IsOpen"/> 变为 true 时，
+    /// 常对触发源合成 <c>PointerExited</c>（光标其实仍在按钮上）；宽限期内忽略自动关闭，
+    /// 否则 120ms 定时器会在指针未移动时把刚打开的菜单关掉，表现为「要试几次才弹出」。
+    /// </summary>
+    private DateTimeOffset _menuHoverGuardUntil;
+
+    /// <summary>打开 Popup 后忽略合成 PointerExited 的宽限时长。</summary>
+    private static readonly TimeSpan MenuHoverGuardDuration = TimeSpan.FromMilliseconds(300);
+
 
     /// <summary>
     /// 打开快速启动菜单：首次打开时从「点」展开；已打开或正在收起时则取消收起。
@@ -121,6 +131,9 @@ public sealed partial class StartGameButton : UserControl
     private void OpenQuickMenu()
     {
         _menuCloseTimer?.Stop();
+        // 悬停/点击打开时指针应在按钮上；打开 Popup 后可能被合成 Exited 清掉，先置位并开宽限。
+        _pointerOverMenuButton = true;
+        _menuHoverGuardUntil = DateTimeOffset.UtcNow.Add(MenuHoverGuardDuration);
 
         if (!Popup_QuickMenu.IsOpen)
         {
@@ -128,6 +141,8 @@ public sealed partial class StartGameButton : UserControl
             QuickMenu.CurrentGameId = CurrentGameId;
             QuickMenu.OnOpening();
             _quickMenuClosing = false;
+            // UIElement.Opacity 保持 1，仅用 Composition 做开合透明度，避免与 XAML Opacity 相乘导致偶发不可见。
+            QuickMenuRoot.Opacity = 1;
             // 打开前先把菜单缩成一个点并隐藏，避免开场闪现整块。
             Visual v = ElementCompositionPreview.GetElementVisual(QuickMenuRoot);
             v.Scale = new Vector3(0.01f, 0.01f, 1f);
@@ -143,6 +158,18 @@ public sealed partial class StartGameButton : UserControl
 
         SettingButtonPointerOver = true;
         EnableMenuPointerTracking();
+
+        // Popup 打开会立刻改命中树；延后一拍纠正可能已被合成 PointerExited 清掉的标志，并取消误启的关闭定时器。
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (!Popup_QuickMenu.IsOpen)
+            {
+                return;
+            }
+
+            _pointerOverMenuButton = true;
+            _menuCloseTimer?.Stop();
+        });
     }
 
 
@@ -218,6 +245,12 @@ public sealed partial class StartGameButton : UserControl
     /// <summary>启动延迟关闭定时器，在指针离开按钮与菜单后短暂等待再尝试关闭。</summary>
     private void ScheduleCloseQuickMenu()
     {
+        // 宽限期内的「离开」多半是打开 Popup 时的合成事件，此时指针通常仍停在按钮上且未必再触发 Moved。
+        if (DateTimeOffset.UtcNow < _menuHoverGuardUntil)
+        {
+            return;
+        }
+
         _menuCloseTimer?.Stop();
         _menuCloseTimer?.Start();
     }
@@ -231,6 +264,11 @@ public sealed partial class StartGameButton : UserControl
     private void MenuCloseTimer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
     {
         sender.Stop();
+        if (DateTimeOffset.UtcNow < _menuHoverGuardUntil)
+        {
+            return;
+        }
+
         if (!_pointerOverMenuButton && !_pointerOverMenuPopup && !_menuChildPopupOpen)
         {
             CloseQuickMenu();
@@ -317,11 +355,15 @@ public sealed partial class StartGameButton : UserControl
 
         batch.Completed += (_, _) =>
         {
-            // 若中途被重新悬停取消了收起（_quickMenuClosing=false），则不真正关闭。
-            if (_quickMenuClosing)
+            // Composition 完成回调不保证在 UI 线程；改 Popup.IsOpen 须回到 DispatcherQueue。
+            DispatcherQueue.TryEnqueue(() =>
             {
-                FinalizeCloseQuickMenu();
-            }
+                // 若中途被重新悬停取消了收起（_quickMenuClosing=false），则不真正关闭。
+                if (_quickMenuClosing)
+                {
+                    FinalizeCloseQuickMenu();
+                }
+            });
         };
         batch.End();
     }
@@ -444,11 +486,39 @@ public sealed partial class StartGameButton : UserControl
     }
 
 
-    /// <summary>指针离开汉堡按钮：调度延迟关闭（若指针移入菜单则由全局追踪保持打开）。</summary>
+    /// <summary>
+    /// 指针离开汉堡按钮：调度延迟关闭（若指针移入菜单则由全局追踪保持打开）。
+    /// <para>
+    /// 注意：将 <see cref="Popup.IsOpen"/> 设为 true 时，WinUI 常对触发按钮合成一次
+    /// <c>PointerExited</c>，此时坐标仍可能落在按钮矩形内；必须忽略，否则菜单会闪一下关掉。
+    /// </para>
+    /// </summary>
     /// <param name="sender">汉堡按钮。</param>
     /// <param name="e">指针路由事件参数。</param>
     private void Button_Menu_PointerExited(object sender, PointerRoutedEventArgs e)
     {
+        // 合成 Exited：光标其实还在按钮上
+        if (IsPointerOverElement(Button_Menu, e))
+        {
+            _pointerOverMenuButton = true;
+            return;
+        }
+
+        // 已移入菜单（含按钮与菜单之间的命中），保持打开
+        if (Popup_QuickMenu.IsOpen && IsPointerOverElement(QuickMenuRoot, e))
+        {
+            _pointerOverMenuButton = false;
+            _pointerOverMenuPopup = true;
+            _menuCloseTimer?.Stop();
+            return;
+        }
+
+        // 打开后的宽限：合成 Exited 有时给出按钮外的坐标，但指针并未真正离开
+        if (DateTimeOffset.UtcNow < _menuHoverGuardUntil)
+        {
+            return;
+        }
+
         _pointerOverMenuButton = false;
         ScheduleCloseQuickMenu();
     }
@@ -470,6 +540,22 @@ public sealed partial class StartGameButton : UserControl
     /// <param name="e">指针路由事件参数。</param>
     private void QuickMenu_PointerExited(object sender, PointerRoutedEventArgs e)
     {
+        // 移回汉堡按钮时不要关
+        if (IsPointerOverElement(Button_Menu, e))
+        {
+            _pointerOverMenuPopup = false;
+            _pointerOverMenuButton = true;
+            _menuCloseTimer?.Stop();
+            return;
+        }
+
+        // 仍在菜单矩形内（子控件切换时的瞬时 Exited）则忽略
+        if (IsPointerOverElement(QuickMenuRoot, e))
+        {
+            _pointerOverMenuPopup = true;
+            return;
+        }
+
         _pointerOverMenuPopup = false;
         ScheduleCloseQuickMenu();
     }
