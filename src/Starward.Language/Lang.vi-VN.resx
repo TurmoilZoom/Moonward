@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1792,7 +1792,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Chọn cách khởi chạy</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
-    <value>Tạo lối tắt game</value>
+    <value>Lối tắt game</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>Theo cài đặt ứng dụng</value>

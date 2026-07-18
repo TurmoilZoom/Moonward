@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1792,13 +1792,13 @@ Accetti il rischio e desideri continuare?</value>
     <value>Seleziona metodo di avvio</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
-    <value>Crea collegamento al gioco</value>
+    <value>Collegamento al gioco</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>Segui impostazione app</value>
   </data>
   <data name="StartGameMenu_Generate" xml:space="preserve">
-    <value>Genera</value>
+    <value>Crea</value>
   </data>
   <data name="StartGameMenu_ShortcutIcon" xml:space="preserve">
     <value>Icona collegamento</value>

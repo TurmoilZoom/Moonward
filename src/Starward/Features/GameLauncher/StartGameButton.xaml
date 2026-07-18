@@ -422,7 +422,7 @@
                     CornerRadius="8"
                     PointerEntered="QuickMenu_PointerEntered"
                     PointerExited="QuickMenu_PointerExited">
-                    <!--  开合动效改为「从一点放大 / 收缩」(Composition)，与抽卡筛选浮层一致，见 StartGameButton.xaml.cs  -->
+                    <!--  开合动效：自底边向上平铺展开+淡入 / 向下收起+淡出（Composition Y 缩放 + Opacity），见 StartGameButton.xaml.cs  -->
                     <ScrollViewer x:Name="ScrollViewer_QuickMenu"
                               Background="Transparent"
                               VerticalScrollBarVisibility="Auto"

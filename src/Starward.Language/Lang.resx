@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1850,13 +1850,13 @@ Do you accept the risk and continue to use it?</value>
     <value>Select Launch Method</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
-    <value>Create Game Shortcut</value>
+    <value>Game Shortcut</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>Follow App Setting</value>
   </data>
   <data name="StartGameMenu_Generate" xml:space="preserve">
-    <value>Generate</value>
+    <value>Create</value>
   </data>
   <data name="StartGameMenu_ShortcutIcon" xml:space="preserve">
     <value>Shortcut Icon</value>

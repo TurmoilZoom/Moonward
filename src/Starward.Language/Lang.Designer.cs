@@ -3276,7 +3276,7 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Create Game Launch Shortcut 的本地化字符串。
+        ///   查找类似 Game Shortcut 的本地化字符串。
         /// </summary>
         public static string StartGameMenu_AddTaskbarLaunch {
             get {
@@ -3294,7 +3294,7 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Generate 的本地化字符串。
+        ///   查找类似 Create 的本地化字符串。
         /// </summary>
         public static string StartGameMenu_Generate {
             get {

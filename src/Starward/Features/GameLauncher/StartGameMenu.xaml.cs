@@ -125,15 +125,15 @@ public sealed partial class StartGameMenu : UserControl
     }
 
 
-    #region 注册 URL 协议（.url 快捷方式依赖）
+    #region 注册 URL 协议（.url 快捷方式依赖；菜单内无开关，仅生成快捷方式时检测/引导）
 
 
     private bool _suppressUrlProtocolApply;
 
 
     /// <summary>
-    /// 「注册 URL 协议」开关。与「设置 - 高级」一致：开 = 注册 <c>starward://</c> 协议，关 = 注销。
-    /// 生成的 .url 快捷方式需系统识别该协议才能启动游戏。
+    /// 系统是否已注册 <c>starward://</c> 协议。菜单内不再展示开关；生成 .url 快捷方式前会读取此状态，
+    /// 未注册时弹窗征求同意后再写入并注册。
     /// </summary>
     public bool EnableUrlProtocol
     {
@@ -163,7 +163,7 @@ public sealed partial class StartGameMenu : UserControl
 
 
     /// <summary>
-    /// 把「注册 URL 协议」开关同步到系统实际注册状态（不触发注册/注销）。
+    /// 同步系统实际协议注册状态到 <see cref="EnableUrlProtocol"/>（不触发注册/注销）。
     /// </summary>
     private async void RefreshUrlProtocolState()
     {
@@ -537,7 +537,7 @@ public sealed partial class StartGameMenu : UserControl
                 {
                     return; // 用户拒绝：不注册、不生成
                 }
-                EnableUrlProtocol = true; // 用户确定：打开开关（注册协议）
+                EnableUrlProtocol = true; // 用户确定：注册协议
             }
 
             string gameName = GetGameDisplayName();
