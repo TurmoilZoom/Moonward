@@ -80,7 +80,7 @@ public sealed partial class StartGameMenu : UserControl
 
 
     /// <summary>
-    /// 「选择启动方式」下拉的配置文件列表（默认配置 + 额外配置）。
+    /// 「选择启动方式」下拉：首项为「无」，其后为 config1… 对应配置文件（不含「无」以外的虚拟项）。
     /// </summary>
     public ObservableCollection<GameLaunchProfile> Profiles { get; } = new();
 
@@ -194,37 +194,42 @@ public sealed partial class StartGameMenu : UserControl
         CurrentGameBiz = CurrentGameId.GameBiz;
 
         Profiles.Clear();
-        var defaultProfile = new GameLaunchProfile
+        // 「无」：不在启动参数配置中管理，默认启动方式。
+        Profiles.Add(new GameLaunchProfile
+        {
+            Id = GameLaunchProfile.NoneId,
+            Name = Lang.StartGameMenu_LaunchMethodNone,
+        });
+        var config1 = new GameLaunchProfile
         {
             Id = GameLaunchProfile.DefaultId,
-            Name = AppConfig.GetDefaultLaunchProfileName(CurrentGameBiz) ?? Lang.GameLauncherSettingDialog_DefaultProfileName,
+            Name = ProfileNameFromId(GameLaunchProfile.DefaultId, AppConfig.GetDefaultLaunchProfileName(CurrentGameBiz)),
             Argument = AppConfig.GetStartArgument(CurrentGameBiz),
             EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
             ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
         };
-        Profiles.Add(defaultProfile);
+        Profiles.Add(config1);
         foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz))
         {
-            if (!string.IsNullOrEmpty(extra.Id) && !extra.IsDefault)
+            if (GameLaunchProfile.IsKnownId(extra.Id) && !extra.IsDefault && !extra.IsNone)
             {
+                extra.Id = GameLaunchProfile.NormalizeId(extra.Id);
+                extra.Name = ProfileNameFromId(extra.Id, extra.Name);
                 Profiles.Add(extra);
             }
         }
 
-        // 「选择启动方式」当前生效配置。
+        // 「选择启动方式」：未设置时默认「无」。
         _activeProfileId = AppConfig.GetActiveLaunchProfileId(CurrentGameBiz);
-        if (string.IsNullOrEmpty(_activeProfileId))
-        {
-            _activeProfileId = GameLaunchProfile.DefaultId;
-        }
-        GameLaunchProfile active = Profiles.FirstOrDefault(p => string.Equals(p.Id, _activeProfileId, StringComparison.OrdinalIgnoreCase)) ?? Profiles[0];
+        GameLaunchProfile active = Profiles.FirstOrDefault(p => string.Equals(p.Id, _activeProfileId, StringComparison.OrdinalIgnoreCase))
+            ?? Profiles.First(p => p.IsNone);
         _activeProfileId = active.Id;
         _suppressActiveSelection = true;
         ComboBox_ActiveProfile.SelectedItem = active;
         _suppressActiveSelection = false;
         UpdateApplyButtonState(animateCheck: false);
 
-        // 「添加任务栏启动方式」选项：跟随软件设置 + 各配置文件。
+        // 「游戏快捷方式」：跟随软件设置 + 各配置文件（不含「无」）。
         TaskbarOptions.Clear();
         TaskbarOptions.Add(new TaskbarLaunchOption
         {
@@ -234,6 +239,10 @@ public sealed partial class StartGameMenu : UserControl
         });
         foreach (GameLaunchProfile p in Profiles)
         {
+            if (p.IsNone)
+            {
+                continue;
+            }
             TaskbarOptions.Add(new TaskbarLaunchOption
             {
                 DisplayName = p.Name,
@@ -242,6 +251,17 @@ public sealed partial class StartGameMenu : UserControl
             });
         }
         ComboBox_TaskbarProfile.SelectedIndex = 0;
+    }
+
+
+    /// <summary>
+    /// 由 configN 得到默认显示名「配置文件 N」（序号与 Id 严格一致）；非空自定义名则保留。
+    /// </summary>
+    private static string ProfileNameFromId(string id, string? customName)
+    {
+        int index = GameLaunchProfile.TryGetIndex(id) ?? 1;
+        string fromId = string.Format(Lang.GameLauncherSettingDialog_ProfileNameFormat, index);
+        return string.IsNullOrWhiteSpace(customName) ? fromId : customName.Trim();
     }
 
 
@@ -431,8 +451,18 @@ public sealed partial class StartGameMenu : UserControl
 
     private void UpdateApplyButtonState(bool animateCheck)
     {
-        bool isActive = ComboBox_ActiveProfile.SelectedItem is GameLaunchProfile p
-            && string.Equals(p.Id, _activeProfileId, StringComparison.OrdinalIgnoreCase);
+        bool isActive = false;
+        if (ComboBox_ActiveProfile.SelectedItem is GameLaunchProfile p)
+        {
+            if (p.IsNone || GameLaunchProfile.IsNoneId(_activeProfileId))
+            {
+                isActive = p.IsNone && GameLaunchProfile.IsNoneId(_activeProfileId);
+            }
+            else
+            {
+                isActive = string.Equals(p.Id, _activeProfileId, StringComparison.OrdinalIgnoreCase);
+            }
+        }
 
         ShowActiveCheck = isActive;
 

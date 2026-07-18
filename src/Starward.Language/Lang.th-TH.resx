@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1788,13 +1788,16 @@
     <value>โปรไฟล์อาร์กิวเมนต์เริ่มเกม</value>
   </data>
   <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
-    <value>เลือกวิธีเริ่มเกม</value>
+    <value>พารามิเตอร์การเริ่ม</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
     <value>ทางลัดเกม</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>ตามการตั้งค่าแอป</value>
+  </data>
+  <data name="StartGameMenu_LaunchMethodNone" xml:space="preserve">
+    <value>ไม่มี</value>
   </data>
   <data name="StartGameMenu_Generate" xml:space="preserve">
     <value>สร้าง</value>
@@ -1824,13 +1827,16 @@
     <value>โปรไฟล์ใหม่</value>
   </data>
   <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
-    <value>ชื่อ</value>
+    <value>ชื่อโปรไฟล์</value>
   </data>
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>คำสั่งแสดงตัวอย่าง URL</value>
   </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>ค่าเริ่มต้น</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileNameFormat" xml:space="preserve">
+    <value>โปรไฟล์ {0}</value>
   </data>
   <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
     <value>ขณะนี้มีเพียงโปรไฟล์แรกเท่านั้นที่มีผลเมื่อเริ่มเกม</value>

@@ -564,9 +564,9 @@ public sealed partial class GameLauncherPage : PageBase
     {
         try
         {
-            // 点击开始游戏按当前生效（active）的启动配置文件启动；缺省/默认时回退到默认配置（legacy 键）。
-            GameLaunchProfile? profile = AppConfig.GetLaunchProfileById(CurrentGameBiz, AppConfig.GetActiveLaunchProfileId(CurrentGameBiz));
-            var process = await _gameLauncherService.StartGameAsync(CurrentGameId, null, profile);
+            // 点击开始游戏按当前生效的启动方式：「无」不依赖启动参数配置；config1 用 legacy 键；其余用额外配置。
+            AppConfig.ResolveLaunchProfile(CurrentGameBiz, AppConfig.GetActiveLaunchProfileId(CurrentGameBiz), out bool useNone, out GameLaunchProfile? profile);
+            var process = await _gameLauncherService.StartGameAsync(CurrentGameId, null, profile, useNone);
             if (process is not null)
             {
                 GameState = GameState.GameIsRunning;

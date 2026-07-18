@@ -32,7 +32,7 @@ starward://startgame/{game_biz}?install_path={install_path}&profile={profile}
 |Key|Type|Description|
 |---|---|---|
 |install_path| `string` (Option) | Folder full path of game executable. |
-|profile| `string` (Option) | Launch profile internal name. One of `Alice`, `Bob`, `Charlie`, `Dave`, `Eve`, `Mallory`, `Trent`, `Carol`. `Alice` is the default profile. When omitted, the app's currently active (applied) profile is used ("follow app setting"); when not found or `Alice`, the default profile is used. |
+|profile| `string` (Option) | Launch method / profile id. `none` = launch without launch-argument profiles (DX12 and other global toggles still apply). `config1` … `config8` map 1:1 to display names “Profile 1” … “Profile 8” (`config1` uses legacy storage). When omitted, the app's currently active launch method is used ("follow app setting"); the default active method is `none`. |
 
 
 ### Record playtime

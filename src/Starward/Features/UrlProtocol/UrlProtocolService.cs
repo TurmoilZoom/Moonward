@@ -55,7 +55,7 @@ internal class UrlProtocolService
     /// 生成启动游戏的 URL 协议链接，供快捷方式、配置预览或外部调用使用。
     /// </summary>
     /// <param name="biz">游戏业务标识（如 <c>hk4e_cn</c>、<c>hkrpg_global</c>）。</param>
-    /// <param name="profileId">启动配置内部名（如 <c>Alice</c>）；为 <see langword="null"/> 或空白时不附带 profile 查询参数（表示跟随软件当前生效配置）。</param>
+    /// <param name="profileId">启动配置内部名（如 <c>config1</c>）；为 <see langword="null"/> 或空白时不附带 profile 查询参数（表示跟随软件当前生效配置）。</param>
     /// <returns>格式为 <c>starward://startgame/{game_biz}</c> 或带 <c>?profile=</c> 的完整 URL；<paramref name="biz"/> 无效时返回空字符串。</returns>
     public static string BuildStartGameUrl(GameBiz biz, string? profileId = null)
     {
@@ -64,7 +64,8 @@ internal class UrlProtocolService
         {
             return "";
         }
-        if (string.IsNullOrWhiteSpace(profileId))
+        profileId = GameLaunchProfile.NormalizeId(profileId);
+        if (string.IsNullOrEmpty(profileId))
         {
             return $"starward://startgame/{gameBiz}";
         }
@@ -77,7 +78,7 @@ internal class UrlProtocolService
     /// 解析并执行 <c>starward://</c> URL 协议请求。
     /// 当前支持 <c>startgame</c>（启动游戏）与 <c>playtime</c>（记录游玩时长）两种主机名。
     /// </summary>
-    /// <param name="url">完整的协议 URL 字符串（如 <c>starward://startgame/hk4e_cn?profile=Alice</c>）。</param>
+    /// <param name="url">完整的协议 URL 字符串（如 <c>starward://startgame/hk4e_cn?profile=config1</c>）。</param>
     /// <returns>
     /// 已成功识别并处理（含执行失败但已弹出错误提示）时返回 <see langword="true"/>；
     /// 未识别、测试模式或前置条件不满足时返回 <see langword="false"/>，由调用方继续正常启动流程。
@@ -110,11 +111,11 @@ internal class UrlProtocolService
                         var kvs = HttpUtility.ParseQueryString(uri.Query);
                         string? installPath = kvs["install_path"];
 
-                        // profile 参数：显式指定配置文件内部名（Alice…Carol）时按其启动；
-                        // 缺省（「跟随软件设置」）时按当前生效（active）配置启动。最终缺省/默认名/未找到回退到默认配置。
+                        // profile 参数：config1…config8（与配置文件 1…8 对应）、none（无）；
+                        // 缺省（「跟随软件设置」）时按当前生效的启动方式。
                         string? profileId = kvs["profile"] ?? AppConfig.GetActiveLaunchProfileId(biz);
-                        GameLaunchProfile? profile = AppConfig.GetLaunchProfileById(biz, profileId);
-                        await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, installPath, profile);
+                        AppConfig.ResolveLaunchProfile(biz, profileId, out bool useNone, out GameLaunchProfile? profile);
+                        await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, installPath, profile, useNone);
                     }
                     else
                     {

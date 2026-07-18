@@ -568,7 +568,7 @@ public static partial class AppConfig
         {
             return result;
         }
-        // 规范化内部名：必须取自固定名单、唯一、不与默认配置（Alice）冲突，并限制总数为 MaxCount。
+        // 仅接受 config2…config8：唯一、不与 config1 冲突，总数不超过 MaxCount - 1。
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { GameLaunchProfile.DefaultId };
         foreach (GameLaunchProfile p in list)
         {
@@ -576,7 +576,8 @@ public static partial class AppConfig
             {
                 break;
             }
-            if (string.IsNullOrEmpty(p.Id) || used.Contains(p.Id) || Array.IndexOf(GameLaunchProfile.InternalNames, p.Id) < 0)
+            p.Id = GameLaunchProfile.NormalizeId(p.Id);
+            if (string.IsNullOrEmpty(p.Id) || used.Contains(p.Id) || !GameLaunchProfile.IsKnownId(p.Id) || GameLaunchProfile.IsDefaultId(p.Id))
             {
                 string? free = null;
                 foreach (string name in GameLaunchProfile.InternalNames)
@@ -592,6 +593,8 @@ public static partial class AppConfig
                     break;
                 }
                 p.Id = free;
+                // Id 被重分配后清空名称，由界面按 configN →「配置文件 N」重新生成
+                p.Name = "";
             }
             used.Add(p.Id);
             result.Add(p);
@@ -601,11 +604,12 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 按内部名获取启动配置文件。null/空/默认名(Alice)/未找到 时返回 null，调用方应回退到默认配置（legacy 键）。
+    /// 按内部名获取额外启动配置文件。null/空/none/config1/未找到 时返回 null（config1 由调用方读 legacy 键）。
     /// </summary>
     public static GameLaunchProfile? GetLaunchProfileById(GameBiz biz, string? id)
     {
-        if (string.IsNullOrWhiteSpace(id) || string.Equals(id, GameLaunchProfile.DefaultId, StringComparison.OrdinalIgnoreCase))
+        id = GameLaunchProfile.NormalizeId(id);
+        if (string.IsNullOrEmpty(id) || GameLaunchProfile.IsNoneId(id) || GameLaunchProfile.IsDefaultId(id))
         {
             return null;
         }
@@ -633,7 +637,7 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 获取默认配置文件的中文显示名（为 null 时由界面回退到本地化默认名）。
+    /// 获取 config1 的自定义显示名（为 null 时由界面按序号生成为「配置文件1」）。
     /// </summary>
     public static string? GetDefaultLaunchProfileName(GameBiz biz)
     {
@@ -641,7 +645,7 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 设置默认配置文件的中文显示名。
+    /// 设置 config1 的自定义显示名。
     /// </summary>
     public static void SetDefaultLaunchProfileName(GameBiz biz, string? value)
     {
@@ -649,11 +653,13 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 获取当前在启动参数编辑界面选中的配置文件内部名。
+    /// 获取当前在启动参数编辑界面选中的配置文件内部名（config1…config8）。
     /// </summary>
     public static string? GetSelectedLaunchProfileId(GameBiz biz)
     {
-        return GetValue<string>(default, $"launch_profile_selected_{biz}");
+        string? id = GetValue<string>(default, $"launch_profile_selected_{biz}");
+        id = GameLaunchProfile.NormalizeId(id);
+        return string.IsNullOrEmpty(id) ? null : id;
     }
 
     /// <summary>
@@ -661,26 +667,65 @@ public static partial class AppConfig
     /// </summary>
     public static void SetSelectedLaunchProfileId(GameBiz biz, string? value)
     {
-        SetValue(value, $"launch_profile_selected_{biz}");
+        string? id = GameLaunchProfile.NormalizeId(value);
+        SetValue(string.IsNullOrEmpty(id) ? null : id, $"launch_profile_selected_{biz}");
     }
 
 
     /// <summary>
-    /// 获取当前生效（active）的启动配置文件内部名：点击「开始游戏」按钮、以及不带 profile 参数的
-    /// <c>starward://startgame/{biz}</c>（即「跟随软件设置」）均按此配置启动。
-    /// 与编辑界面用的 <see cref="GetSelectedLaunchProfileId"/> 区分。缺省/Alice/未找到时回退到默认配置（legacy 键）。
+    /// 获取当前生效（active）的启动方式内部名：点击「开始游戏」、以及不带 profile 参数的
+    /// <c>starward://startgame/{biz}</c>（「跟随软件设置」）均按此启动。
+    /// 与编辑界面用的 <see cref="GetSelectedLaunchProfileId"/> 区分。
+    /// 未设置、none 或无效 id 时返回 <see cref="GameLaunchProfile.NoneId"/>。
     /// </summary>
-    public static string? GetActiveLaunchProfileId(GameBiz biz)
+    public static string GetActiveLaunchProfileId(GameBiz biz)
     {
-        return GetValue<string>(default, $"launch_profile_active_{biz}");
+        string? raw = GetValue<string>(default, $"launch_profile_active_{biz}");
+        if (GameLaunchProfile.IsNoneId(raw))
+        {
+            return GameLaunchProfile.NoneId;
+        }
+        string id = GameLaunchProfile.NormalizeId(raw);
+        return string.IsNullOrEmpty(id) ? GameLaunchProfile.NoneId : id;
     }
 
     /// <summary>
-    /// 设置当前生效（active）的启动配置文件内部名（「选择启动方式」点击「应用」后写入）。
+    /// 设置当前生效（active）的启动方式内部名（「选择启动方式」点击「应用」后写入）。
+    /// 传入空或 <see cref="GameLaunchProfile.NoneId"/> 表示「无」。
     /// </summary>
     public static void SetActiveLaunchProfileId(GameBiz biz, string? value)
     {
-        SetValue(value, $"launch_profile_active_{biz}");
+        if (GameLaunchProfile.IsNoneId(value))
+        {
+            SetValue(GameLaunchProfile.NoneId, $"launch_profile_active_{biz}");
+            return;
+        }
+        string id = GameLaunchProfile.NormalizeId(value);
+        SetValue(string.IsNullOrEmpty(id) ? GameLaunchProfile.NoneId : id, $"launch_profile_active_{biz}");
+    }
+
+
+    /// <summary>
+    /// 解析启动方式：是否为「无」、以及对应的配置文件（config1 时 profile 为 null，由调用方读 legacy 键）。
+    /// </summary>
+    /// <param name="biz">游戏区服。</param>
+    /// <param name="profileId">启动方式 / 配置内部名；null 或 none 表示「无」。</param>
+    /// <param name="useNoneLaunchMethod">为 true 时不使用任何启动参数配置（仍可应用 DX12 等全局开关）。</param>
+    /// <param name="profile">额外配置文件；config1 或「无」时为 null。</param>
+    public static void ResolveLaunchProfile(GameBiz biz, string? profileId, out bool useNoneLaunchMethod, out GameLaunchProfile? profile)
+    {
+        profile = null;
+        if (GameLaunchProfile.IsNoneId(profileId))
+        {
+            useNoneLaunchMethod = true;
+            return;
+        }
+        useNoneLaunchMethod = false;
+        if (GameLaunchProfile.IsDefaultId(profileId))
+        {
+            return;
+        }
+        profile = GetLaunchProfileById(biz, profileId);
     }
 
 

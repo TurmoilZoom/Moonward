@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1847,13 +1847,16 @@ Do you accept the risk and continue to use it?</value>
     <value>Launch Argument Profiles</value>
   </data>
   <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
-    <value>Select Launch Method</value>
+    <value>Launch Arguments</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
     <value>Game Shortcut</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>Follow App Setting</value>
+  </data>
+  <data name="StartGameMenu_LaunchMethodNone" xml:space="preserve">
+    <value>None</value>
   </data>
   <data name="StartGameMenu_Generate" xml:space="preserve">
     <value>Create</value>
@@ -1883,13 +1886,16 @@ Do you accept the risk and continue to use it?</value>
     <value>New Profile</value>
   </data>
   <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
-    <value>Name</value>
+    <value>Profile Name</value>
   </data>
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>URL Preview Command</value>
   </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>Default</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileNameFormat" xml:space="preserve">
+    <value>Profile {0}</value>
   </data>
   <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
     <value>Only the first profile currently takes effect when launching the game.</value>

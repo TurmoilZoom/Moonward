@@ -99,7 +99,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 所有启动配置文件，作为下拉框数据源。第一个固定为默认配置文件（Id = "Alice"）。
+    /// 所有启动配置文件，作为下拉框数据源。第一个固定为 config1（配置文件1）；不含「无」。
     /// </summary>
     public ObservableCollection<GameLaunchProfile> Profiles { get; } = new();
 
@@ -115,7 +115,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(CanDeleteProfile));
-                OnPropertyChanged(nameof(SelectedProfileInternalName));
+                OnPropertyChanged(nameof(SelectedProfileName));
                 OnPropertyChanged(nameof(ProfileStartGameUrl));
             }
         }
@@ -137,7 +137,10 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     /// <summary>
     /// 当前配置文件的内部名（只读显示在名称右侧）。
     /// </summary>
-    public string SelectedProfileInternalName => SelectedProfile?.Id ?? "";
+    /// <summary>
+    /// 当前选中配置的显示名，用于删除确认文案（如「删除  配置文件2」）。
+    /// </summary>
+    public string SelectedProfileName => SelectedProfile?.Name ?? "";
 
 
     /// <summary>
@@ -310,26 +313,43 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         ShowDx12Argument = AppConfig.GetEnableDX12(CurrentGameBiz);
 
         Profiles.Clear();
-        var defaultProfile = new GameLaunchProfile
+        var config1 = new GameLaunchProfile
         {
             Id = GameLaunchProfile.DefaultId,
-            Name = AppConfig.GetDefaultLaunchProfileName(CurrentGameBiz) ?? Lang.GameLauncherSettingDialog_DefaultProfileName,
+            Name = ProfileNameFromId(GameLaunchProfile.DefaultId, AppConfig.GetDefaultLaunchProfileName(CurrentGameBiz)),
             Argument = AppConfig.GetStartArgument(CurrentGameBiz),
             EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
             ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
         };
-        Profiles.Add(defaultProfile);
+        Profiles.Add(config1);
         foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz))
         {
-            if (!string.IsNullOrEmpty(extra.Id) && !extra.IsDefault)
+            if (GameLaunchProfile.IsKnownId(extra.Id) && !extra.IsDefault && !extra.IsNone)
             {
+                extra.Id = GameLaunchProfile.NormalizeId(extra.Id);
+                extra.Name = ProfileNameFromId(extra.Id, extra.Name);
                 Profiles.Add(extra);
             }
         }
 
         string? selectedId = AppConfig.GetSelectedLaunchProfileId(CurrentGameBiz);
-        GameLaunchProfile target = Profiles.FirstOrDefault(p => p.Id == selectedId) ?? defaultProfile;
+        if (!GameLaunchProfile.IsKnownId(selectedId))
+        {
+            selectedId = GameLaunchProfile.DefaultId;
+        }
+        GameLaunchProfile target = Profiles.FirstOrDefault(p => string.Equals(p.Id, selectedId, StringComparison.OrdinalIgnoreCase)) ?? config1;
         SelectProfileCore(target);
+    }
+
+
+    /// <summary>
+    /// 由 configN 得到默认显示名「配置文件 N」（序号与 Id 严格一致）；非空自定义名则保留。
+    /// </summary>
+    private static string ProfileNameFromId(string id, string? customName)
+    {
+        int index = GameLaunchProfile.TryGetIndex(id) ?? 1;
+        string fromId = string.Format(Lang.GameLauncherSettingDialog_ProfileNameFormat, index);
+        return string.IsNullOrWhiteSpace(customName) ? fromId : customName.Trim();
     }
 
 
@@ -405,7 +425,8 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         {
             return;
         }
-        string name = string.IsNullOrWhiteSpace(EditingName) ? p.Name : EditingName.Trim();
+        // 空名称回退为与 configN 序号一致的「配置文件 N」
+        string name = string.IsNullOrWhiteSpace(EditingName) ? ProfileNameFromId(p.Id, null) : EditingName.Trim();
         if (p.IsDefault)
         {
             AppConfig.SetStartArgument(CurrentGameBiz, EditingArgument);
@@ -426,6 +447,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         }
         p.Name = name;
         EditingName = name;
+        OnPropertyChanged(nameof(SelectedProfileName));
         if (!p.IsDefault)
         {
             PersistExtraProfiles();
@@ -465,10 +487,11 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         {
             return;
         }
+        // Name 序号必须与 configN 中的 N 一致（如 config3 → 配置文件3）
         var profile = new GameLaunchProfile
         {
             Id = id,
-            Name = Lang.GameLauncherSettingDialog_LaunchProfile + Profiles.Count,
+            Name = ProfileNameFromId(id, null),
         };
         Profiles.Add(profile);
         PersistExtraProfiles();

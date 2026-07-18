@@ -35,7 +35,7 @@ starward://startgame/{game_biz}?install_path={install_path}&profile={profile}
 | 键 | 类型 | 说明 |
 |---|---|---|
 | install_path | `string`（可选） | 游戏可执行文件所在文件夹的完整路径。 |
-| profile | `string`（可选） | 启动配置文件的内部名，可选值为 `Alice`、`Bob`、`Charlie`、`Dave`、`Eve`、`Mallory`、`Trent`、`Carol`。`Alice` 为默认配置文件；省略时跟随软件当前生效（已应用）的配置（即「跟随软件设置」）；未找到或为 `Alice` 时使用默认配置文件。 |
+| profile | `string`（可选） | 启动方式 / 配置内部名。`none` 表示「无」：不使用启动参数配置启动（仍受 DX12 等全局开关影响）。`config1` … `config8` 与「配置文件1」…「配置文件8」一一对应（`config1` 数据存于 legacy 键）。省略时跟随软件当前生效的启动方式（「跟随软件设置」）；默认生效方式为 `none`。 |
 
 
 ### 记录游戏时长

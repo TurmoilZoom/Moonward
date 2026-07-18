@@ -30,7 +30,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="0,0,40,8"
+        <TextBlock Margin="0,0,40,16"
                    FontSize="20"
                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                    Text="{x:Bind lang:Lang.GameLaunchProfileWindow_Title}" />
@@ -42,7 +42,8 @@
             <StackPanel HorizontalAlignment="Stretch"
                         Spacing="12">
 
-                <!--  配置文件选择  -->
+                <!--  配置文件 / 名称 / 命令行参数：共用列定义，保证输入控件左缘对齐，左侧标签居中  -->
+                <!--  不用 RowSpacing：重命名行折叠时避免空行仍占间距；行间用 Margin 12 与外层 StackPanel 一致  -->
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -51,16 +52,27 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  配置文件选择  -->
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               HorizontalAlignment="Center"
                                VerticalAlignment="Center"
-                               Text="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchProfile}" />
+                               Text="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchProfile}"
+                               TextAlignment="Center" />
                     <ComboBox x:Name="ComboBox_LaunchProfile"
+                              Grid.Row="0"
                               Grid.Column="1"
                               Height="36"
                               HorizontalAlignment="Stretch"
                               BorderThickness="0"
                               CornerRadius="8"
-                              DisplayMemberPath="DisplayName"
+                              DisplayMemberPath="Name"
                               ItemsSource="{x:Bind Profiles}"
                               SelectedItem="{x:Bind SelectedProfile, Mode=OneWay}"
                               SelectionChanged="ComboBox_LaunchProfile_SelectionChanged">
@@ -81,7 +93,8 @@
                         </FlyoutBase.AttachedFlyout>
                     </ComboBox>
                     <!--  新建配置文件  -->
-                    <Button Grid.Column="2"
+                    <Button Grid.Row="0"
+                            Grid.Column="2"
                             Width="36"
                             Height="36"
                             Padding="0"
@@ -95,7 +108,8 @@
                                   Glyph="&#xE710;" />
                     </Button>
                     <!--  重命名配置文件  -->
-                    <Button Grid.Column="3"
+                    <Button Grid.Row="0"
+                            Grid.Column="3"
                             Width="36"
                             Height="36"
                             Padding="0"
@@ -109,6 +123,7 @@
                     </Button>
                     <!--  删除配置文件  -->
                     <Button x:Name="Button_DeleteProfile"
+                            Grid.Row="0"
                             Grid.Column="4"
                             Width="36"
                             Height="36"
@@ -122,7 +137,7 @@
                         <Button.Flyout>
                             <Flyout>
                                 <StackPanel MaxWidth="260" Spacing="12">
-                                    <TextBlock TextWrapping="Wrap"><Run Text="{x:Bind lang:Lang.Common_Delete}" /><Run Text="  " /><Run Text="{x:Bind SelectedProfileInternalName, Mode=OneWay}" /></TextBlock>
+                                    <TextBlock TextWrapping="Wrap"><Run Text="{x:Bind lang:Lang.Common_Delete}" /><Run Text="  " /><Run Text="{x:Bind SelectedProfileName, Mode=OneWay}" /></TextBlock>
                                     <StackPanel HorizontalAlignment="Right"
                                                 Orientation="Horizontal"
                                                 Spacing="8">
@@ -135,50 +150,62 @@
                             </Flyout>
                         </Button.Flyout>
                     </Button>
-                </Grid>
 
-                <!--  配置文件名称（点击重命名后显示）  -->
-                <Grid ColumnSpacing="12" Visibility="{x:Bind RenameAreaVisibility, Mode=OneWay}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ProfileName}" />
+                    <!--  配置文件名称（点击重命名后显示）；Margin 折叠时不参与布局  -->
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               Margin="0,12,0,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ProfileName}"
+                               TextAlignment="Center"
+                               Visibility="{x:Bind RenameAreaVisibility, Mode=OneWay}" />
                     <TextBox x:Name="TextBox_ProfileName"
+                             Grid.Row="1"
                              Grid.Column="1"
+                             Margin="0,12,0,0"
                              HorizontalAlignment="Stretch"
                              IsSpellCheckEnabled="False"
-                             Text="{x:Bind EditingName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Grid>
+                             Text="{x:Bind EditingName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{x:Bind RenameAreaVisibility, Mode=OneWay}" />
 
-                <!--  命令行参数：标签 + 输入框同一行，DX12 只读参数接其后  -->
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_CommandLineArgument}" />
-                    <TextBox Grid.Column="1"
-                             MinWidth="160"
-                             VerticalAlignment="Center"
-                             IsSpellCheckEnabled="False"
-                             Text="{x:Bind EditingArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             TextWrapping="Wrap" />
-                    <!--  DX12 自动追加参数：只读、不可编辑、强调色，勾选 DX12 时显示  -->
-                    <Border Grid.Column="2"
-                            VerticalAlignment="Center"
-                            Padding="8,4,8,4"
-                            Background="{ThemeResource ControlFillColorDefaultBrush}"
-                            CornerRadius="6"
-                            IsHitTestVisible="False"
-                            Visibility="{x:Bind Dx12ArgumentVisibility, Mode=OneWay}">
-                        <TextBlock VerticalAlignment="Center"
-                                   FontFamily="Consolas"
-                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                   IsTextSelectionEnabled="False"
-                                   Text="-use-d3d12" />
-                    </Border>
+                    <!--  命令行参数：输入区横跨至与配置文件行删除按钮右缘对齐；DX12 徽章贴右  -->
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Margin="0,12,0,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Text="{x:Bind lang:Lang.GameLauncherSettingDialog_CommandLineArgument}"
+                               TextAlignment="Center" />
+                    <Grid Grid.Row="2"
+                          Grid.Column="1"
+                          Grid.ColumnSpan="4"
+                          Margin="0,12,0,0"
+                          ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <!--  保持单行（默认 NoWrap），以显示 WinUI 自带清除按钮  -->
+                        <TextBox MinWidth="160"
+                                 VerticalAlignment="Center"
+                                 IsSpellCheckEnabled="False"
+                                 Text="{x:Bind EditingArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <!--  DX12 自动追加参数：只读、不可编辑、强调色，勾选 DX12 时显示  -->
+                        <Border Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Padding="8,4,8,4"
+                                Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                CornerRadius="6"
+                                IsHitTestVisible="False"
+                                Visibility="{x:Bind Dx12ArgumentVisibility, Mode=OneWay}">
+                            <TextBlock VerticalAlignment="Center"
+                                       FontFamily="Consolas"
+                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                       IsTextSelectionEnabled="False"
+                                       Text="-use-d3d12" />
+                        </Border>
+                    </Grid>
                 </Grid>
                 <TextBlock HorizontalAlignment="Left"
                            FontSize="12"

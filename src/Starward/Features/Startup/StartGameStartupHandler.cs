@@ -21,7 +21,9 @@ internal sealed class StartGameStartupHandler : IStartupHandler
         GameBiz biz = (GameBiz)context.Configuration.GetValue<string>("biz");
         if (GameId.FromGameBiz(biz) is GameId gameId)
         {
-            await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId);
+            // 与首页「开始游戏」一致：按当前生效的启动方式（默认「无」）。
+            AppConfig.ResolveLaunchProfile(biz, AppConfig.GetActiveLaunchProfileId(biz), out bool useNone, out GameLaunchProfile? profile);
+            await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, profile: profile, useNoneLaunchMethod: useNone);
         }
         return StartupOutcome.Exit;
     }

@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1789,13 +1789,16 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Perfiles de argumentos de inicio</value>
   </data>
   <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
-    <value>Seleccionar método de inicio</value>
+    <value>Argumentos de inicio</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
     <value>Acceso directo del juego</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>Seguir configuración de la app</value>
+  </data>
+  <data name="StartGameMenu_LaunchMethodNone" xml:space="preserve">
+    <value>Ninguno</value>
   </data>
   <data name="StartGameMenu_Generate" xml:space="preserve">
     <value>Crear</value>
@@ -1825,13 +1828,16 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Nuevo perfil</value>
   </data>
   <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
-    <value>Nombre</value>
+    <value>Nombre del perfil</value>
   </data>
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>Comando de vista previa de URL</value>
   </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>Predeterminado</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileNameFormat" xml:space="preserve">
+    <value>Perfil {0}</value>
   </data>
   <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
     <value>Actualmente solo el primer perfil tiene efecto al iniciar el juego</value>

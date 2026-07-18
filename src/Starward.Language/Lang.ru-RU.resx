@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1790,13 +1790,16 @@
     <value>Профили аргументов запуска</value>
   </data>
   <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
-    <value>Выбрать способ запуска</value>
+    <value>Параметры запуска</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
     <value>Ярлык игры</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>Следовать настройкам приложения</value>
+  </data>
+  <data name="StartGameMenu_LaunchMethodNone" xml:space="preserve">
+    <value>Нет</value>
   </data>
   <data name="StartGameMenu_Generate" xml:space="preserve">
     <value>Создать</value>
@@ -1826,13 +1829,16 @@
     <value>Новый профиль</value>
   </data>
   <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
-    <value>Имя</value>
+    <value>Имя профиля</value>
   </data>
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>Команда предпросмотра URL</value>
   </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>По умолчанию</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileNameFormat" xml:space="preserve">
+    <value>Профиль {0}</value>
   </data>
   <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
     <value>В настоящее время при запуске игры действует только первый профиль</value>

@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1789,13 +1789,16 @@
     <value>실행 인수 프로필</value>
   </data>
   <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
-    <value>실행 방식 선택</value>
+    <value>실행 인수</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
     <value>게임 바로 가기</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>앱 설정 따르기</value>
+  </data>
+  <data name="StartGameMenu_LaunchMethodNone" xml:space="preserve">
+    <value>없음</value>
   </data>
   <data name="StartGameMenu_Generate" xml:space="preserve">
     <value>생성</value>
@@ -1825,13 +1828,16 @@
     <value>새 프로필</value>
   </data>
   <data name="GameLauncherSettingDialog_ProfileName" xml:space="preserve">
-    <value>이름</value>
+    <value>구성 이름</value>
   </data>
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>URL 미리보기 명령</value>
   </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>기본값</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileNameFormat" xml:space="preserve">
+    <value>구성 {0}</value>
   </data>
   <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
     <value>현재 게임 실행 시 첫 번째 프로필만 적용됩니다</value>

@@ -312,7 +312,9 @@ internal partial class GameLauncherService
     /// 启动游戏
     /// </summary>
     /// <returns></returns>
-    public async Task<Process?> StartGameAsync(GameId gameId, string? installPath = null, GameLaunchProfile? profile = null)
+    /// <param name="profile">额外配置文件（config2…）；null 且 <paramref name="useNoneLaunchMethod"/> 为 false 时使用 config1 的 legacy 键。</param>
+    /// <param name="useNoneLaunchMethod">「无」：不使用启动参数配置（无命令行参数、无自定义启动程序），仍应用 DX12 等全局开关。</param>
+    public async Task<Process?> StartGameAsync(GameId gameId, string? installPath = null, GameLaunchProfile? profile = null, bool useNoneLaunchMethod = false)
     {
         const int ERROR_CANCELLED = 0x000004C7;
         try
@@ -321,12 +323,24 @@ internal partial class GameLauncherService
             {
                 throw new Exception($"Game is running: {existingProcess.ProcessName}.exe ({existingProcess.Id}).");
             }
-            // 启动配置文件：profile 非空时（如 URL 协议指定 Alice…Carol）使用其参数/自定义启动程序，否则使用默认配置（legacy 键）。
-            bool enableThirdPartyTool = profile?.EnableThirdPartyTool ?? AppConfig.GetEnableThirdPartyTool(gameId.GameBiz);
-            string? thirdPartyToolPath = profile is null
-                ? GetThirdPartyToolPath(gameId)
-                : (string.IsNullOrWhiteSpace(profile.ThirdPartyToolPath) ? null : GetFullPathIfRelativePath(profile.ThirdPartyToolPath));
-            string? startArgument = profile is null ? AppConfig.GetStartArgument(gameId.GameBiz) : profile.Argument;
+            // 「无」：不依赖启动参数配置；否则 profile 非空用其数据，null 用 config1（legacy 键）。
+            bool enableThirdPartyTool;
+            string? thirdPartyToolPath;
+            string? startArgument;
+            if (useNoneLaunchMethod)
+            {
+                enableThirdPartyTool = false;
+                thirdPartyToolPath = null;
+                startArgument = null;
+            }
+            else
+            {
+                enableThirdPartyTool = profile?.EnableThirdPartyTool ?? AppConfig.GetEnableThirdPartyTool(gameId.GameBiz);
+                thirdPartyToolPath = profile is null
+                    ? GetThirdPartyToolPath(gameId)
+                    : (string.IsNullOrWhiteSpace(profile.ThirdPartyToolPath) ? null : GetFullPathIfRelativePath(profile.ThirdPartyToolPath));
+                startArgument = profile is null ? AppConfig.GetStartArgument(gameId.GameBiz) : profile.Argument;
+            }
 
             string? exe = null, arg = null, verb = null;
             if (Directory.Exists(installPath))

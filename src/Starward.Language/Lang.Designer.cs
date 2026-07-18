@@ -3159,7 +3159,7 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Name 的本地化字符串。
+        ///   查找类似 Profile Name 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_ProfileName {
             get {
@@ -3182,6 +3182,15 @@ namespace Starward.Language {
         public static string GameLauncherSettingDialog_DefaultProfileName {
             get {
                 return ResourceManager.GetString("GameLauncherSettingDialog_DefaultProfileName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Profile {0} 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ProfileNameFormat {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ProfileNameFormat", resourceCulture);
             }
         }
 
@@ -3267,7 +3276,7 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Select Launch Method 的本地化字符串。
+        ///   查找类似 Launch Arguments 的本地化字符串。
         /// </summary>
         public static string StartGameMenu_SelectLaunchMethod {
             get {
@@ -3290,6 +3299,15 @@ namespace Starward.Language {
         public static string StartGameMenu_FollowAppSetting {
             get {
                 return ResourceManager.GetString("StartGameMenu_FollowAppSetting", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 None 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_LaunchMethodNone {
+            get {
+                return ResourceManager.GetString("StartGameMenu_LaunchMethodNone", resourceCulture);
             }
         }
 

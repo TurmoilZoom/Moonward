@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -1787,13 +1787,16 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Startargument-Profile</value>
   </data>
   <data name="StartGameMenu_SelectLaunchMethod" xml:space="preserve">
-    <value>Startmethode auswählen</value>
+    <value>Startparameter</value>
   </data>
   <data name="StartGameMenu_AddTaskbarLaunch" xml:space="preserve">
     <value>Spielverknüpfung</value>
   </data>
   <data name="StartGameMenu_FollowAppSetting" xml:space="preserve">
     <value>App-Einstellung folgen</value>
+  </data>
+  <data name="StartGameMenu_LaunchMethodNone" xml:space="preserve">
+    <value>Keine</value>
   </data>
   <data name="StartGameMenu_Generate" xml:space="preserve">
     <value>Erstellen</value>
@@ -1830,6 +1833,9 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>Standard</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ProfileNameFormat" xml:space="preserve">
+    <value>Profil {0}</value>
   </data>
   <data name="GameLauncherSettingDialog_OnlyDefaultProfileEffective" xml:space="preserve">
     <value>Derzeit wird beim Spielstart nur das erste Profil angewendet</value>
