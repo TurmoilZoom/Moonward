@@ -653,6 +653,23 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 获取 config1 绑定的登录账号游戏 UID（米游社工具箱角色）；0 表示不指定。
+    /// </summary>
+    public static long GetDefaultLaunchLoginUid(GameBiz biz)
+    {
+        return GetValue<long>(0, $"launch_profile_login_uid_{biz}");
+    }
+
+    /// <summary>
+    /// 设置 config1 绑定的登录账号游戏 UID；传入 null 或 ≤0 表示清除。
+    /// </summary>
+    public static void SetDefaultLaunchLoginUid(GameBiz biz, long? value)
+    {
+        long uid = value is > 0 ? value.Value : 0;
+        SetValue<long?>(uid == 0 ? null : uid, $"launch_profile_login_uid_{biz}");
+    }
+
+    /// <summary>
     /// 获取当前在启动参数编辑界面选中的配置文件内部名（config1…config8）。
     /// </summary>
     public static string? GetSelectedLaunchProfileId(GameBiz biz)

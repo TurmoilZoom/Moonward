@@ -3177,6 +3177,24 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Login Account 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_LoginAccount {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_LoginAccount", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Not specified 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_LoginAccountNone {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_LoginAccountNone", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Default 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_DefaultProfileName {

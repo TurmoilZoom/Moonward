@@ -1832,6 +1832,12 @@
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>คำสั่งแสดงตัวอย่าง URL</value>
   </data>
+  <data name="GameLauncherSettingDialog_LoginAccount" xml:space="preserve">
+    <value>บัญชีเข้าสู่ระบบ</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LoginAccountNone" xml:space="preserve">
+    <value>ไม่ระบุ</value>
+  </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>ค่าเริ่มต้น</value>
   </data>

@@ -48,9 +48,10 @@ public static class GameShortcutService
     /// <param name="profileId">配置文件内部名；null = 跟随软件设置（URL 不带 profile 参数）。</param>
     /// <param name="profileDisplayName">配置文件显示名（用于文件名）。</param>
     /// <param name="icon">图标来源；null 时回退到 Starward.exe 图标。</param>
-    public static string CreateStartGameShortcut(GameBiz biz, string gameName, string? profileId, string profileDisplayName, IconSource? icon)
+    /// <param name="loginUid">配置绑定的登录账号 UID；&gt;0 时写入 URL <c>uid</c> 参数。</param>
+    public static string CreateStartGameShortcut(GameBiz biz, string gameName, string? profileId, string profileDisplayName, IconSource? icon, long? loginUid = null)
     {
-        string url = UrlProtocolService.BuildStartGameUrl(biz, profileId);
+        string url = UrlProtocolService.BuildStartGameUrl(biz, profileId, loginUid);
         // 默认创建到桌面
         string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
         string fileName = SanitizeFileName($"{gameName} - {profileDisplayName}") + ".url";

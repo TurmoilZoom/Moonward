@@ -1833,6 +1833,12 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>Lệnh xem trước URL</value>
   </data>
+  <data name="GameLauncherSettingDialog_LoginAccount" xml:space="preserve">
+    <value>Tài khoản đăng nhập</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LoginAccountNone" xml:space="preserve">
+    <value>Không chỉ định</value>
+  </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>Mặc định</value>
   </data>

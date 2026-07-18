@@ -1833,6 +1833,12 @@
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>URL 미리보기 명령</value>
   </data>
+  <data name="GameLauncherSettingDialog_LoginAccount" xml:space="preserve">
+    <value>로그인 계정</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LoginAccountNone" xml:space="preserve">
+    <value>지정 안 함</value>
+  </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>기본값</value>
   </data>

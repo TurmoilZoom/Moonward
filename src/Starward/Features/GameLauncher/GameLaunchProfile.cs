@@ -181,6 +181,14 @@ public sealed class GameLaunchProfile : ObservableObject
 
 
     /// <summary>
+    /// 启动时用于自动登录的游戏角色 UID（与米游社工具箱 <c>GameRecordRole.Uid</c> 一致）。
+    /// <c>null</c> 或 <c>≤0</c> 表示不指定；config1 存于 legacy 键，其余配置写入 JSON。
+    /// </summary>
+    [JsonPropertyName("login_uid")]
+    public long? LoginUid { get; set; }
+
+
+    /// <summary>
     /// 是否为第一个配置文件（config1，数据在 legacy 键）。
     /// </summary>
     [JsonIgnore]

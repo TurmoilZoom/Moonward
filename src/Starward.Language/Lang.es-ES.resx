@@ -1833,6 +1833,12 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>Comando de vista previa de URL</value>
   </data>
+  <data name="GameLauncherSettingDialog_LoginAccount" xml:space="preserve">
+    <value>Cuenta de inicio de sesión</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LoginAccountNone" xml:space="preserve">
+    <value>No especificado</value>
+  </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>Predeterminado</value>
   </data>

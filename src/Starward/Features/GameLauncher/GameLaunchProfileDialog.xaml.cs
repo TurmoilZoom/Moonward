@@ -6,8 +6,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Starward.Core;
+using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Background;
+using Starward.Features.GameRecord;
 using Starward.Features.UrlProtocol;
 using Starward.Helpers;
 using System;
@@ -33,6 +35,9 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     private readonly ILogger<GameLaunchProfileDialog> _logger = AppConfig.GetLogger<GameLaunchProfileDialog>();
+
+
+    private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
 
 
     public GameLaunchProfileDialog()
@@ -144,9 +149,69 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 当前配置文件对应的 URL 协议启动指令预览。
+    /// 当前配置文件对应的 URL 协议启动指令预览（含编辑中的登录 UID）。
     /// </summary>
-    public string ProfileStartGameUrl => UrlProtocolService.BuildStartGameUrl(CurrentGameBiz, SelectedProfile?.Id);
+    public string ProfileStartGameUrl => UrlProtocolService.BuildStartGameUrl(CurrentGameBiz, SelectedProfile?.Id, EditingLoginUid > 0 ? EditingLoginUid : null);
+
+
+    /// <summary>
+    /// 登录账号下拉选项（「不指定」+ 当前区服米游社角色）。
+    /// </summary>
+    public ObservableCollection<LoginAccountOption> LoginAccountOptions { get; } = new();
+
+
+    /// <summary>
+    /// 是否显示「登录账号」区域（仅国服支持 auth ticket 自动登录）。
+    /// </summary>
+    public bool ShowLoginAccount
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(LoginAccountVisibility));
+            }
+        }
+    }
+
+
+    /// <summary>登录账号行可见性。</summary>
+    public Visibility LoginAccountVisibility => ShowLoginAccount ? Visibility.Visible : Visibility.Collapsed;
+
+
+    /// <summary>
+    /// 工作副本：登录账号游戏 UID；0 表示不指定。
+    /// </summary>
+    public long EditingLoginUid
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                UpdateIsDirty();
+                OnPropertyChanged(nameof(ProfileStartGameUrl));
+                SyncSelectedLoginAccountOption();
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 当前选中的登录账号选项（ComboBox SelectedItem）。
+    /// </summary>
+    public LoginAccountOption? SelectedLoginAccountOption
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value) && value is not null && EditingLoginUid != value.Uid)
+            {
+                EditingLoginUid = value.Uid;
+            }
+        }
+    }
 
 
     /// <summary>
@@ -302,15 +367,19 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             IsDirty = false;
             return;
         }
+        long savedUid = NormalizeLoginUid(p.LoginUid);
         IsDirty = EditingName != p.Name
             || (EditingArgument ?? "") != (p.Argument ?? "")
-            || (EditingThirdPartyToolPath ?? "") != (p.ThirdPartyToolPath ?? "");
+            || (EditingThirdPartyToolPath ?? "") != (p.ThirdPartyToolPath ?? "")
+            || EditingLoginUid != savedUid;
     }
 
 
     private void InitializeLaunchProfiles()
     {
         ShowDx12Argument = AppConfig.GetEnableDX12(CurrentGameBiz);
+        ShowLoginAccount = CurrentGameBiz.Server is "cn";
+        LoadLoginAccountOptions();
 
         Profiles.Clear();
         var config1 = new GameLaunchProfile
@@ -320,6 +389,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             Argument = AppConfig.GetStartArgument(CurrentGameBiz),
             EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
             ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
+            LoginUid = AppConfig.GetDefaultLaunchLoginUid(CurrentGameBiz),
         };
         Profiles.Add(config1);
         foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz))
@@ -343,6 +413,49 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
+    /// 加载与米游社工具箱一致的角色列表作为登录账号选项。
+    /// </summary>
+    private void LoadLoginAccountOptions()
+    {
+        LoginAccountOptions.Clear();
+        LoginAccountOptions.Add(new LoginAccountOption
+        {
+            Uid = 0,
+            DisplayName = Lang.GameLauncherSettingDialog_LoginAccountNone,
+        });
+        if (!ShowLoginAccount)
+        {
+            return;
+        }
+        try
+        {
+            foreach (GameRecordRole role in _gameRecordService.GetGameRoles(CurrentGameBiz))
+            {
+                LoginAccountOptions.Add(LoginAccountOption.FromRole(role));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Load login account options ({biz})", CurrentGameBiz);
+        }
+    }
+
+
+    private void SyncSelectedLoginAccountOption()
+    {
+        LoginAccountOption? match = LoginAccountOptions.FirstOrDefault(o => o.Uid == EditingLoginUid)
+            ?? LoginAccountOptions.FirstOrDefault();
+        if (!ReferenceEquals(SelectedLoginAccountOption, match))
+        {
+            SelectedLoginAccountOption = match;
+        }
+    }
+
+
+    private static long NormalizeLoginUid(long? uid) => uid is > 0 ? uid.Value : 0;
+
+
+    /// <summary>
     /// 由 configN 得到默认显示名「配置文件 N」（序号与 Id 严格一致）；非空自定义名则保留。
     /// </summary>
     private static string ProfileNameFromId(string id, string? customName)
@@ -359,9 +472,11 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         EditingName = profile.Name;
         EditingArgument = profile.Argument;
         EditingThirdPartyToolPath = profile.ThirdPartyToolPath;
+        EditingLoginUid = NormalizeLoginUid(profile.LoginUid);
         IsRenamingProfile = false;
         IsDirty = false;
         AppConfig.SetSelectedLaunchProfileId(CurrentGameBiz, profile.Id);
+        OnPropertyChanged(nameof(ProfileStartGameUrl));
     }
 
 
@@ -427,6 +542,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         }
         // 空名称回退为与 configN 序号一致的「配置文件 N」
         string name = string.IsNullOrWhiteSpace(EditingName) ? ProfileNameFromId(p.Id, null) : EditingName.Trim();
+        long loginUid = EditingLoginUid > 0 ? EditingLoginUid : 0;
         if (p.IsDefault)
         {
             AppConfig.SetStartArgument(CurrentGameBiz, EditingArgument);
@@ -434,6 +550,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             bool enableTool = !string.IsNullOrWhiteSpace(savedPath);
             AppConfig.SetEnableThirdPartyTool(CurrentGameBiz, enableTool);
             AppConfig.SetDefaultLaunchProfileName(CurrentGameBiz, name);
+            AppConfig.SetDefaultLaunchLoginUid(CurrentGameBiz, loginUid > 0 ? loginUid : null);
             p.Argument = EditingArgument;
             p.EnableThirdPartyTool = enableTool;
             p.ThirdPartyToolPath = savedPath;
@@ -445,9 +562,11 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             p.ThirdPartyToolPath = EditingThirdPartyToolPath;
             p.EnableThirdPartyTool = !string.IsNullOrWhiteSpace(EditingThirdPartyToolPath);
         }
+        p.LoginUid = loginUid > 0 ? loginUid : null;
         p.Name = name;
         EditingName = name;
         OnPropertyChanged(nameof(SelectedProfileName));
+        OnPropertyChanged(nameof(ProfileStartGameUrl));
         if (!p.IsDefault)
         {
             PersistExtraProfiles();
@@ -658,6 +777,32 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         if (sender.FontSize > 12)
         {
             sender.FontSize -= 1;
+        }
+    }
+
+
+    /// <summary>
+    /// 「登录账号」下拉选项：与米游社工具箱角色同源。
+    /// </summary>
+    public sealed class LoginAccountOption
+    {
+        /// <summary>游戏角色 UID；0 表示不指定。</summary>
+        public long Uid { get; set; }
+
+        /// <summary>下拉显示文本。</summary>
+        public string DisplayName { get; set; } = "";
+
+        public static LoginAccountOption FromRole(GameRecordRole role)
+        {
+            string nickname = string.IsNullOrWhiteSpace(role.Nickname) ? "-" : role.Nickname;
+            string region = string.IsNullOrWhiteSpace(role.RegionName) ? "" : role.RegionName;
+            string level = role.Level > 0 ? $" Lv.{role.Level}" : "";
+            string regionPart = string.IsNullOrEmpty(region) ? "" : $"（{region}）";
+            return new LoginAccountOption
+            {
+                Uid = role.Uid,
+                DisplayName = $"{nickname}{regionPart}{level} · {role.Uid}",
+            };
         }
     }
 

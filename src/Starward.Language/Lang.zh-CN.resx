@@ -1891,6 +1891,12 @@
   <data name="GameLauncherSettingDialog_UrlPreviewCommand" xml:space="preserve">
     <value>URL指令预览</value>
   </data>
+  <data name="GameLauncherSettingDialog_LoginAccount" xml:space="preserve">
+    <value>登录账号</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LoginAccountNone" xml:space="preserve">
+    <value>不指定</value>
+  </data>
   <data name="GameLauncherSettingDialog_DefaultProfileName" xml:space="preserve">
     <value>默认配置</value>
   </data>

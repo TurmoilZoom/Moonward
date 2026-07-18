@@ -56,8 +56,9 @@ internal class UrlProtocolService
     /// </summary>
     /// <param name="biz">游戏业务标识（如 <c>hk4e_cn</c>、<c>hkrpg_global</c>）。</param>
     /// <param name="profileId">启动配置内部名（如 <c>config1</c>）；为 <see langword="null"/> 或空白时不附带 profile 查询参数（表示跟随软件当前生效配置）。</param>
-    /// <returns>格式为 <c>starward://startgame/{game_biz}</c> 或带 <c>?profile=</c> 的完整 URL；<paramref name="biz"/> 无效时返回空字符串。</returns>
-    public static string BuildStartGameUrl(GameBiz biz, string? profileId = null)
+    /// <param name="loginUid">登录账号的游戏角色 UID；&gt;0 时附加 <c>uid</c> 查询参数。</param>
+    /// <returns>格式为 <c>starward://startgame/{game_biz}</c> 或带查询参数的完整 URL；<paramref name="biz"/> 无效时返回空字符串。</returns>
+    public static string BuildStartGameUrl(GameBiz biz, string? profileId = null, long? loginUid = null)
     {
         string gameBiz = biz.ToString();
         if (string.IsNullOrWhiteSpace(gameBiz))
@@ -65,11 +66,16 @@ internal class UrlProtocolService
             return "";
         }
         profileId = GameLaunchProfile.NormalizeId(profileId);
+        long uid = loginUid is > 0 ? loginUid.Value : 0;
         if (string.IsNullOrEmpty(profileId))
         {
-            return $"starward://startgame/{gameBiz}";
+            return uid > 0
+                ? $"starward://startgame/{gameBiz}?uid={uid}"
+                : $"starward://startgame/{gameBiz}";
         }
-        return $"starward://startgame/{gameBiz}?profile={profileId}";
+        return uid > 0
+            ? $"starward://startgame/{gameBiz}?profile={profileId}&uid={uid}"
+            : $"starward://startgame/{gameBiz}?profile={profileId}";
     }
 
 
@@ -103,7 +109,7 @@ internal class UrlProtocolService
                     return false;
                 }
 
-                // starward://startgame/{game_biz}?install_path=&profile=
+                // starward://startgame/{game_biz}?install_path=&profile=&uid=
                 if (uri.Host is "startgame")
                 {
                     if (GameBiz.TryParse(uri.AbsolutePath.Trim('/'), out GameBiz biz) && GameId.FromGameBiz(biz) is GameId gameId)
@@ -115,7 +121,8 @@ internal class UrlProtocolService
                         // 缺省（「跟随软件设置」）时按当前生效的启动方式。
                         string? profileId = kvs["profile"] ?? AppConfig.GetActiveLaunchProfileId(biz);
                         AppConfig.ResolveLaunchProfile(biz, profileId, out bool useNone, out GameLaunchProfile? profile);
-                        await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, installPath, profile, useNone);
+                        long? loginUid = long.TryParse(kvs["uid"], out long uid) && uid > 0 ? uid : null;
+                        await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, installPath, profile, useNone, loginUid);
                     }
                     else
                     {

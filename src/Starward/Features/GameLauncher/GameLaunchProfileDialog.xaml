@@ -383,24 +383,51 @@
                     </Button>
                 </Grid>
 
-                <!--  保存配置文件  -->
-                <Button Grid.Row="7"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="5"
-                        Margin="0,20,0,0"
-                        Height="36"
-                        MinWidth="96"
-                        HorizontalAlignment="Right"
-                        BorderThickness="0"
-                        Command="{x:Bind SaveProfileCommand}"
-                        CornerRadius="8"
-                        IsEnabled="{x:Bind IsDirty, Mode=OneWay}"
-                        Style="{ThemeResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon FontSize="16" Glyph="&#xE74E;" />
-                        <TextBlock Text="{x:Bind lang:Lang.Common_Save}" />
+                <!--  底部：左「登录账号」+ 右「保存」  -->
+                <Grid Grid.Row="7"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="5"
+                      Margin="0,20,0,0"
+                      ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!--  登录账号（国服；列表同源米游社工具箱角色）  -->
+                    <StackPanel Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="8"
+                                Visibility="{x:Bind LoginAccountVisibility, Mode=OneWay}">
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{x:Bind lang:Lang.GameLauncherSettingDialog_LoginAccount}"
+                                   TextAlignment="Left" />
+                        <ComboBox MinWidth="200"
+                                  Height="36"
+                                  HorizontalAlignment="Left"
+                                  BorderThickness="0"
+                                  CornerRadius="8"
+                                  DisplayMemberPath="DisplayName"
+                                  ItemsSource="{x:Bind LoginAccountOptions}"
+                                  SelectedItem="{x:Bind SelectedLoginAccountOption, Mode=TwoWay}" />
                     </StackPanel>
-                </Button>
+                    <!--  保存配置文件  -->
+                    <Button Grid.Column="2"
+                            Height="36"
+                            MinWidth="96"
+                            HorizontalAlignment="Right"
+                            BorderThickness="0"
+                            Command="{x:Bind SaveProfileCommand}"
+                            CornerRadius="8"
+                            IsEnabled="{x:Bind IsDirty, Mode=OneWay}"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="16" Glyph="&#xE74E;" />
+                            <TextBlock Text="{x:Bind lang:Lang.Common_Save}" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
 
             </Grid>
         </ScrollViewer>

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Starward.Core;
+using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
+using Starward.Features.GameRecord;
 using Starward.Features.GameSetting;
 using Starward.Features.HoYoPlay;
 using Starward.Features.PlayTime;
@@ -28,13 +30,21 @@ internal partial class GameLauncherService
 
     private readonly GameAuthLoginService _gameAuthLoginService;
 
+    private readonly GameRecordService _gameRecordService;
 
-    public GameLauncherService(ILogger<GameLauncherService> logger, HoYoPlayService hoYoPlayService, PlayTimeService playTimeService, GameAuthLoginService gameAuthLoginService)
+
+    public GameLauncherService(
+        ILogger<GameLauncherService> logger,
+        HoYoPlayService hoYoPlayService,
+        PlayTimeService playTimeService,
+        GameAuthLoginService gameAuthLoginService,
+        GameRecordService gameRecordService)
     {
         _logger = logger;
         _hoYoPlayService = hoYoPlayService;
         _playTimeService = playTimeService;
         _gameAuthLoginService = gameAuthLoginService;
+        _gameRecordService = gameRecordService;
     }
 
 
@@ -314,7 +324,8 @@ internal partial class GameLauncherService
     /// <returns></returns>
     /// <param name="profile">额外配置文件（config2…）；null 且 <paramref name="useNoneLaunchMethod"/> 为 false 时使用 config1 的 legacy 键。</param>
     /// <param name="useNoneLaunchMethod">「无」：不使用启动参数配置（无命令行参数、无自定义启动程序），仍应用 DX12 等全局开关。</param>
-    public async Task<Process?> StartGameAsync(GameId gameId, string? installPath = null, GameLaunchProfile? profile = null, bool useNoneLaunchMethod = false)
+    /// <param name="loginUid">URL 或调用方显式指定的游戏角色 UID；优先于配置文件中的 <see cref="GameLaunchProfile.LoginUid"/>。</param>
+    public async Task<Process?> StartGameAsync(GameId gameId, string? installPath = null, GameLaunchProfile? profile = null, bool useNoneLaunchMethod = false, long? loginUid = null)
     {
         const int ERROR_CANCELLED = 0x000004C7;
         try
@@ -384,7 +395,25 @@ internal partial class GameLauncherService
                 }
             }
             arg = startArgument?.Trim();
-            if (AppConfig.EnableLoginAuthTicket is true)
+            long resolvedLoginUid = ResolveLoginUid(gameId.GameBiz, profile, useNoneLaunchMethod, loginUid);
+            if (resolvedLoginUid > 0)
+            {
+                GameRecordRole? role = _gameRecordService.GetGameRoles(gameId.GameBiz)
+                    .FirstOrDefault(r => r.Uid == resolvedLoginUid);
+                if (role is null)
+                {
+                    _logger.LogWarning("Login account role not found (biz={Biz}, uid={Uid})", gameId.GameBiz, resolvedLoginUid);
+                }
+                else
+                {
+                    string? ticket = await _gameAuthLoginService.CreateAuthTicketByGameRoleAsync(gameId, role);
+                    if (!string.IsNullOrWhiteSpace(ticket))
+                    {
+                        arg += $" login_auth_ticket={ticket}";
+                    }
+                }
+            }
+            else if (AppConfig.EnableLoginAuthTicket is true)
             {
                 string? ticket = await _gameAuthLoginService.CreateAuthTicketByGameBiz(gameId);
                 if (!string.IsNullOrWhiteSpace(ticket))
@@ -439,6 +468,34 @@ internal partial class GameLauncherService
             _logger.LogInformation("Start game operation canceled.");
         }
         return null;
+    }
+
+
+    /// <summary>
+    /// 解析启动时用于 auth ticket 登录的游戏角色 UID。
+    /// 优先级：显式参数 → 额外配置 LoginUid → config1 legacy 键 → 0（不指定）。
+    /// 「无」启动方式且无显式 uid 时不读取配置登录账号。
+    /// </summary>
+    private static long ResolveLoginUid(GameBiz biz, GameLaunchProfile? profile, bool useNoneLaunchMethod, long? explicitLoginUid)
+    {
+        if (explicitLoginUid is > 0)
+        {
+            return explicitLoginUid.Value;
+        }
+        if (useNoneLaunchMethod)
+        {
+            return 0;
+        }
+        if (profile?.LoginUid is > 0)
+        {
+            return profile.LoginUid.Value;
+        }
+        // profile 为 null 表示 config1（legacy）
+        if (profile is null)
+        {
+            return AppConfig.GetDefaultLaunchLoginUid(biz);
+        }
+        return 0;
     }
 
 

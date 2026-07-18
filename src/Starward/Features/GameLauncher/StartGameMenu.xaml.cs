@@ -207,6 +207,7 @@ public sealed partial class StartGameMenu : UserControl
             Argument = AppConfig.GetStartArgument(CurrentGameBiz),
             EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
             ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
+            LoginUid = AppConfig.GetDefaultLaunchLoginUid(CurrentGameBiz),
         };
         Profiles.Add(config1);
         foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz))
@@ -248,6 +249,7 @@ public sealed partial class StartGameMenu : UserControl
                 DisplayName = p.Name,
                 ProfileId = p.Id,
                 ProfileDisplayName = p.Name,
+                LoginUid = p.LoginUid is > 0 ? p.LoginUid : null,
             });
         }
         ComboBox_TaskbarProfile.SelectedIndex = 0;
@@ -572,7 +574,7 @@ public sealed partial class StartGameMenu : UserControl
 
             string gameName = GetGameDisplayName();
             GameShortcutService.IconSource? icon = GameShortcutService.GetGameIconSource(CurrentGameBiz);
-            string urlPath = GameShortcutService.CreateStartGameShortcut(CurrentGameBiz, gameName, option.ProfileId, option.ProfileDisplayName, icon);
+            string urlPath = GameShortcutService.CreateStartGameShortcut(CurrentGameBiz, gameName, option.ProfileId, option.ProfileDisplayName, icon, option.LoginUid);
             InAppToast.MainWindow?.Success(Lang.StartGameMenu_ShortcutCreated, urlPath);
             _ = RevealInExplorerAsync(urlPath);
             RequestClose?.Invoke();
@@ -629,6 +631,9 @@ public sealed partial class StartGameMenu : UserControl
         public string? ProfileId { get; set; }
 
         public string ProfileDisplayName { get; set; } = "";
+
+        /// <summary>配置绑定的登录账号 UID；null 表示不附加。</summary>
+        public long? LoginUid { get; set; }
     }
 
 
