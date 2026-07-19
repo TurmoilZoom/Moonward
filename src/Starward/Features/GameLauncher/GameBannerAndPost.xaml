@@ -10,6 +10,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameLauncher"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
              xmlns:sch="using:Starward.Core.HoYoPlay"
              x:DefaultBindMode="OneWay"
              IsHitTestVisible="False"
@@ -59,7 +60,8 @@
                             Margin="0,0,8,0"
                             Command="{x:Bind OpenGameNoticeWindowCommand}"
                             Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                            ToolTipService.ToolTip="{x:Bind lang:Lang.MainPage_GameNotices}"
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.MainPage_GameNotices}"
                             Visibility="Collapsed">
                         <!--  始终不显示红点提醒  -->
                         <FontIcon FontSize="18"

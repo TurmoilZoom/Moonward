@@ -90,7 +90,8 @@
                                 Command="{x:Bind RefreshSignInStatusCommand}"
                                 CornerRadius="4"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Refresh}">
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
                             <FontIcon FontSize="14"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                       Glyph="&#xE72C;" />
@@ -150,7 +151,8 @@
                                 <DataTemplate x:DataType="local:SignInAwardView">
                                     <Grid Padding="2"
                                           RowSpacing="2"
-                                          ToolTipService.ToolTip="{x:Bind Name}">
+                                          sc:InstantTooltip.Placement="Top"
+                                          sc:InstantTooltip.Text="{x:Bind Name}">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
@@ -212,14 +214,9 @@
                             <FontIcon VerticalAlignment="Center"
                                       FontSize="12"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                      Glyph="&#xE9CE;">
-                                <ToolTipService.ToolTip>
-                                    <ToolTip MaxWidth="320">
-                                        <TextBlock Text="{x:Bind lang:Lang.SignInButton_AutoSignInHint}"
-                                                   TextWrapping="Wrap" />
-                                    </ToolTip>
-                                </ToolTipService.ToolTip>
-                            </FontIcon>
+                                      Glyph="&#xE9CE;"
+                                      sc:InstantTooltip.Placement="Top"
+                                      sc:InstantTooltip.Text="{x:Bind lang:Lang.SignInButton_AutoSignInHint}" />
                             <TextBlock VerticalAlignment="Center"
                                        FontSize="13"
                                        Text="{x:Bind lang:Lang.SignInButton_AutoSignIn}" />

@@ -298,7 +298,8 @@
                                                         <Grid Width="48"
                                                               Height="48"
                                                               Background="Transparent"
-                                                              ToolTipService.ToolTip="{x:Bind Name}">
+                                                              sc:InstantTooltip.Placement="Top"
+                                                              sc:InstantTooltip.Text="{x:Bind Name}">
                                                             <sc:CachedImage Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
                                                                             CornerRadius="24"
                                                                             Source="{x:Bind Id, Converter={StaticResource SimulatedUniverseBuffIconConverter}}" />
@@ -419,7 +420,8 @@
                                                                         Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
                                                                         CornerRadius="16"
                                                                         Source="{x:Bind Icon}"
-                                                                        ToolTipService.ToolTip="{x:Bind Name}" />
+                                                                        sc:InstantTooltip.Placement="Top"
+                                                                        sc:InstantTooltip.Text="{x:Bind Name}" />
                                                     </DataTemplate>
                                                 </ItemsRepeater.ItemTemplate>
                                             </ItemsRepeater>

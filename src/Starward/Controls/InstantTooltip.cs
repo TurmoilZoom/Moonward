@@ -125,12 +125,7 @@ public static class InstantTooltip
         // XAML 解析阶段可能尚无 XamlRoot，无法创建 Popup；推迟到 Loaded
         if (element.XamlRoot is null)
         {
-            if (element.GetValue(WireStateProperty) is not string marker)
-            {
-                marker = Guid.NewGuid().ToString();
-                element.SetValue(WireStateProperty, marker);
-                element.Loaded += Element_LoadedForWire;
-            }
+            EnsureLoadedSubscription(element);
         }
         else
         {
@@ -140,7 +135,7 @@ public static class InstantTooltip
 
 
     /// <summary>
-    /// 元素首次进入视觉树后完成挂接（仅在此前因无 XamlRoot 而延迟时使用）。
+    /// 元素进入视觉树后完成挂接（无 XamlRoot 时延迟，或 ItemsRepeater 回收后再次 Loaded）。
     /// </summary>
     /// <param name="sender">已 Loaded 的锚点元素。</param>
     /// <param name="e">路由事件参数。</param>
@@ -152,6 +147,7 @@ public static class InstantTooltip
         }
 
         element.Loaded -= Element_LoadedForWire;
+        element.ClearValue(WireStateProperty);
         if (!string.IsNullOrEmpty(GetText(element)))
         {
             WireElement(element);
@@ -176,6 +172,22 @@ public static class InstantTooltip
 
 
     /// <summary>
+    /// 在尚无 XamlRoot 或元素即将复用时，订阅 <see cref="FrameworkElement.Loaded"/> 以便稍后挂接。
+    /// </summary>
+    /// <param name="element">目标锚点。</param>
+    private static void EnsureLoadedSubscription(FrameworkElement element)
+    {
+        if (element.GetValue(WireStateProperty) is string)
+        {
+            return;
+        }
+
+        element.SetValue(WireStateProperty, Guid.NewGuid().ToString());
+        element.Loaded += Element_LoadedForWire;
+    }
+
+
+    /// <summary>
     /// 取消 Loaded 等待、从 Host 注销；若该窗口已无任何锚点则释放 Host。
     /// </summary>
     /// <param name="element">要解除的锚点。</param>
@@ -187,22 +199,51 @@ public static class InstantTooltip
         if (element.XamlRoot is not null && Hosts.TryGetValue(element.XamlRoot, out InstantTooltipHost? host))
         {
             host.Unregister(element);
-            if (host.IsEmpty)
-            {
-                host.Dispose();
-                Hosts.Remove(element.XamlRoot);
-            }
+            TryReleaseHost(element.XamlRoot, host);
         }
     }
 
 
     /// <summary>
-    /// 元素卸载时由 <see cref="InstantTooltipHost"/> 回调，解除挂接。
+    /// Host 内无锚点时释放 Popup 并从字典移除。
+    /// </summary>
+    /// <param name="xamlRoot">视觉树根。</param>
+    /// <param name="host">待检查的宿主。</param>
+    private static void TryReleaseHost(XamlRoot xamlRoot, InstantTooltipHost host)
+    {
+        if (!host.IsEmpty)
+        {
+            return;
+        }
+
+        host.Dispose();
+        Hosts.Remove(xamlRoot);
+    }
+
+
+    /// <summary>
+    /// 元素卸载时由 <see cref="InstantTooltipHost"/> 回调：先从 Host 注销；
+    /// 若文案仍在则订阅 Loaded，以便列表虚拟化复用后重新挂接。
     /// </summary>
     /// <param name="element">已卸载的元素。</param>
-    internal static void OnElementUnloaded(FrameworkElement element)
+    /// <param name="host">发起回调的宿主（已完成 Unregister 前由 Host 传入当前实例）。</param>
+    internal static void OnElementUnloaded(FrameworkElement element, InstantTooltipHost host)
     {
-        UnwireElement(element);
+        // Host 侧已 Unregister，此处只处理字典生命周期与复用重挂
+        if (Hosts.TryGetValue(host.XamlRoot, out InstantTooltipHost? registered) && ReferenceEquals(registered, host))
+        {
+            TryReleaseHost(host.XamlRoot, host);
+        }
+
+        if (!string.IsNullOrEmpty(GetText(element)))
+        {
+            EnsureLoadedSubscription(element);
+        }
+        else
+        {
+            element.Loaded -= Element_LoadedForWire;
+            element.ClearValue(WireStateProperty);
+        }
     }
 
 

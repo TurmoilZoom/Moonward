@@ -6,6 +6,7 @@
                xmlns:lang="using:Starward.Language"
                xmlns:local="using:Starward.Features.Screenshot"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
                x:DefaultBindMode="OneWay"
                Background="{ThemeResource CustomAcrylicBrush}"
                BorderThickness="0"
@@ -66,7 +67,8 @@
                                 Padding="0"
                                 Click="Button_OpenFolder_Click"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Open}">
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Open}">
                             <FontIcon FontSize="16"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                       Glyph="&#xE8A7;" />
@@ -79,7 +81,8 @@
                                 Padding="0"
                                 Click="Button_RemoveFolder_Click"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Remove}"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Remove}"
                                 Visibility="{x:Bind CanRemove}">
                             <FontIcon FontSize="16"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -93,7 +96,8 @@
                                 Padding="0"
                                 Click="Button_BackupFolder_Click"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                ToolTipService.ToolTip="{x:Bind lang:Lang.ScreenshotPage_BackupScreenshots}"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.ScreenshotPage_BackupScreenshots}"
                                 Visibility="{x:Bind InGame}">
                             <FontIcon FontSize="16"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"

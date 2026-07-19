@@ -175,7 +175,8 @@
                     Padding="0"
                     Click="Button_Share_Click"
                     Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                    ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewWindow2_Share}">
+                    sc:InstantTooltip.Placement="Bottom"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_Share}">
                 <FontIcon FontSize="16"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xE72D;"
@@ -186,7 +187,8 @@
                     Height="36"
                     Padding="0"
                     Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                    ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Delete}">
+                    sc:InstantTooltip.Placement="Bottom"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Delete}">
                 <FontIcon FontSize="16"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xE74D;"
@@ -223,7 +225,8 @@
                     Padding="0"
                     Click="Button_OpenFullScreen_Click"
                     Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                    ToolTipService.ToolTip="{x:Bind lang:Lang.GameSettingPage_FullScreen}">
+                    sc:InstantTooltip.Placement="Bottom"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.GameSettingPage_FullScreen}">
                 <FontIcon FontSize="14"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xE740;"
@@ -269,7 +272,8 @@
                 Click="Button_PreviousImage_Click"
                 CornerRadius="0"
                 Opacity="0"
-                ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewWindow2_Previous}"
+                sc:InstantTooltip.Placement="Right"
+                sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_Previous}"
                 Visibility="{x:Bind local:ImageViewWindow2.ObjectToVisibility(ScreenshotCollection)}">
             <FontIcon Glyph="&#xE76B;" IsTextScaleFactorEnabled="False" />
             <Button.Resources>
@@ -312,7 +316,8 @@
                 Click="Button_NextImage_Click"
                 CornerRadius="0"
                 Opacity="0"
-                ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewWindow2_Next}"
+                sc:InstantTooltip.Placement="Left"
+                sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_Next}"
                 Visibility="{x:Bind local:ImageViewWindow2.ObjectToVisibility(ScreenshotCollection)}">
             <FontIcon Glyph="&#xE76C;" IsTextScaleFactorEnabled="False" />
             <Button.Resources>
@@ -515,7 +520,8 @@
                           Padding="0"
                           IsEnabled="{x:Bind local:ImageViewWindow2.ObjectToBool(ScreenshotCollection)}"
                           Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                          ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewWindow2_ShowGallery}">
+                          sc:InstantTooltip.Placement="Top"
+                          sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_ShowGallery}">
                 <Grid>
                     <FontIcon FontFamily="{ThemeResource PhotoFluentIcons}"
                               FontSize="16"
@@ -583,7 +589,8 @@
                     Padding="0"
                     Click="Button_ZoomToFitFactor_Click"
                     Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                    ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewWindow2_FitToWindow}">
+                    sc:InstantTooltip.Placement="Top"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_FitToWindow}">
                 <FontIcon FontSize="16"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xE9A6;"
@@ -603,7 +610,8 @@
                     Padding="0"
                     Click="Button_ZoomOut_Click"
                     Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                    ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewPage_ZoomOut}">
+                    sc:InstantTooltip.Placement="Top"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewPage_ZoomOut}">
                 <FontIcon FontSize="16"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xE71F;"
@@ -627,7 +635,8 @@
                     Padding="0"
                     Click="Button_ZoomIn_Click"
                     Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                    ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewPage_ZoomIn}">
+                    sc:InstantTooltip.Placement="Top"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewPage_ZoomIn}">
                 <FontIcon FontSize="16"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xE8A3;"

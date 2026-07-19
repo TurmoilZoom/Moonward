@@ -115,7 +115,8 @@
                         Content="&#xE71F;"
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewPage_ZoomOut}" />
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewPage_ZoomOut}" />
                 <!--  缩放率  -->
                 <TextBlock x:Name="_TextBlock_Factor"
                            Width="40"
@@ -130,7 +131,8 @@
                         Content="&#xE8A3;"
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewPage_ZoomIn}" />
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewPage_ZoomIn}" />
                 <!--  旋转  -->
                 <Button x:Name="Button_Rotate"
                         Width="36"
@@ -139,7 +141,8 @@
                         Content="&#xE7AD;"
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.ImageViewPage_Rotate}" />
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewPage_Rotate}" />
                 <!--  全屏  -->
                 <Button x:Name="Button_FullScreen"
                         Width="36"
@@ -148,7 +151,8 @@
                         Content="&#xE740;"
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.GameSettingPage_FullScreen}" />
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GameSettingPage_FullScreen}" />
                 <AppBarSeparator Padding="0" />
                 <!--  复制  -->
                 <Button x:Name="Button_Copy"
@@ -158,7 +162,8 @@
                         Content="&#xE8C8;"
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Copy}">
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Copy}">
                     <Button.ContentTransitions>
                         <TransitionCollection>
                             <ContentThemeTransition />
@@ -173,7 +178,8 @@
                         Content="&#xE8E5;"
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Open}" />
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Open}" />
                 <!--  关闭  -->
                 <Button x:Name="Button_Close"
                         Width="36"
@@ -182,7 +188,8 @@
                         Content="&#xE711;"
                         FontFamily="{ThemeResource SymbolThemeFontFamily}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.DownloadGamePage_Close}"
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.DownloadGamePage_Close}"
                         Visibility="Collapsed" />
             </StackPanel>
         </Border>

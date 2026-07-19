@@ -318,7 +318,8 @@
                                                 Padding="0"
                                                 Command="{x:Bind InitializeInstalledGamesCommand}"
                                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                                ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Refresh}">
+                                                sc:InstantTooltip.Placement="Top"
+                                                sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
                                             <FontIcon FontSize="14"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                       Glyph="&#xE72C;" />
@@ -331,7 +332,8 @@
                                                 Padding="0"
                                                 Command="{x:Bind AutoSearchInstalledGamesCommand}"
                                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                                ToolTipService.ToolTip="{x:Bind lang:Lang.GameBizSelector_AutoSearch}">
+                                                sc:InstantTooltip.Placement="Top"
+                                                sc:InstantTooltip.Text="{x:Bind lang:Lang.GameBizSelector_AutoSearch}">
                                             <FontIcon FontSize="14"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                       Glyph="&#xE721;" />

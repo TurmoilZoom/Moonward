@@ -211,7 +211,8 @@
                               PointerEntered="Grid_Rarity5Item_PointerEntered"
                               PointerExited="Grid_Rarity5Item_PointerExited"
                               Tag="{x:Bind}"
-                              ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                              sc:InstantTooltip.Placement="Top"
+                              sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="40" />
                                 <ColumnDefinition />
@@ -281,7 +282,8 @@
                               PointerEntered="Grid_Rarity4Item_PointerEntered"
                               PointerExited="Grid_Rarity4Item_PointerExited"
                               Tag="{x:Bind}"
-                              ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                              sc:InstantTooltip.Placement="Top"
+                              sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="28" />
                                 <ColumnDefinition />

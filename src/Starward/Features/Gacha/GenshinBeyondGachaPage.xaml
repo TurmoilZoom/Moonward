@@ -268,7 +268,8 @@
                                                   Height="28"
                                                   Background="Transparent"
                                                   Tag="{x:Bind}"
-                                                  ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                                                  sc:InstantTooltip.Placement="Top"
+                                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="36" />
                                                     <ColumnDefinition />
@@ -311,7 +312,8 @@
                                                   Background="Transparent"
                                                   ColumnSpacing="8"
                                                   Tag="{x:Bind}"
-                                                  ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                                                  sc:InstantTooltip.Placement="Top"
+                                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="28" />
                                                     <ColumnDefinition />
@@ -439,7 +441,8 @@
                                                   Height="28"
                                                   Background="Transparent"
                                                   Tag="{x:Bind}"
-                                                  ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                                                  sc:InstantTooltip.Placement="Top"
+                                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="36" />
                                                     <ColumnDefinition />
@@ -482,7 +485,8 @@
                                                   Background="Transparent"
                                                   ColumnSpacing="8"
                                                   Tag="{x:Bind}"
-                                                  ToolTipService.ToolTip="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                                                  sc:InstantTooltip.Placement="Top"
+                                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="28" />
                                                     <ColumnDefinition />

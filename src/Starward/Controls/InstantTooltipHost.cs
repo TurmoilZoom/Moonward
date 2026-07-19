@@ -77,6 +77,9 @@ internal sealed class InstantTooltipHost
     /// <summary>当前是否无任何挂接元素（为 true 时 <see cref="InstantTooltip"/> 可释放本 Host）。</summary>
     public bool IsEmpty => _elements.Count == 0;
 
+    /// <summary>本宿主所属的视觉树根（与字典键一致）。</summary>
+    public XamlRoot XamlRoot => _xamlRoot;
+
 
     /// <summary>
     /// 为指定视觉树根创建 Tooltip 宿主（搭建 Popup 视觉树，默认不打开）。
@@ -180,7 +183,8 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 锚点离开视觉树时转交 <see cref="InstantTooltip.OnElementUnloaded"/> 做完整解绑。
+    /// 锚点离开视觉树：先本宿主注销，再交给 <see cref="InstantTooltip.OnElementUnloaded"/>
+    /// 处理 Host 生命周期与虚拟化复用后的重新挂接。
     /// </summary>
     /// <param name="sender">卸载的锚点。</param>
     /// <param name="e">路由事件参数。</param>
@@ -188,7 +192,9 @@ internal sealed class InstantTooltipHost
     {
         if (sender is FrameworkElement element)
         {
-            InstantTooltip.OnElementUnloaded(element);
+            // 不依赖 element.XamlRoot（卸载后可能已空），由本实例直接注销
+            Unregister(element);
+            InstantTooltip.OnElementUnloaded(element, this);
         }
     }
 
