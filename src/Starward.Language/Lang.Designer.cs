@@ -1169,6 +1169,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Accumulated Points 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteButton_StarRail_AccumulatedPoints {
+            get {
+                return ResourceManager.GetString("DailyNoteButton_StarRail_AccumulatedPoints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 All Finished 的本地化字符串。
         /// </summary>
         public static string DailyNoteButton_StarRail_AllFinished {
@@ -1205,7 +1214,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Echo of War 的本地化字符串。
+        ///   查找类似 Echo of War Remaining 的本地化字符串。
         /// </summary>
         public static string DailyNoteButton_StarRail_EchoOfWar {
             get {

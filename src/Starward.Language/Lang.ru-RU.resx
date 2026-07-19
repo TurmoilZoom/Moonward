@@ -2255,7 +2255,7 @@ You are welcome to submit exported data to:</value>
     <value>Ежедневная тренировка</value>
   </data>
   <data name="DailyNoteButton_StarRail_EchoOfWar" xml:space="preserve">
-    <value>Эхо войны</value>
+    <value>Эхо войны осталось</value>
   </data>
   <data name="DailyNoteButton_StarRail_BonusSynchronicityPoints" xml:space="preserve">
     <value>Доп. очки аппроксимации</value>
@@ -3190,5 +3190,8 @@ ChatGPT может допускать ошибки. Проверьте важн�
   </data>
   <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
     <value>Ввести новый URL</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
+    <value>Накопленные очки</value>
   </data>
 </root>

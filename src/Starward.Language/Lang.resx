@@ -2312,7 +2312,7 @@ Repository:</value>
     <value>Daily Training</value>
   </data>
   <data name="DailyNoteButton_StarRail_EchoOfWar" xml:space="preserve">
-    <value>Echo of War</value>
+    <value>Echo of War Remaining</value>
   </data>
   <data name="DailyNoteButton_StarRail_BonusSynchronicityPoints" xml:space="preserve">
     <value>Bonus Synchronicity Points</value>
@@ -3228,5 +3228,8 @@ Repository:</value>
   </data>
   <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
     <value>Enter new URL</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
+    <value>Accumulated Points</value>
   </data>
 </root>

@@ -2254,7 +2254,7 @@ You are welcome to submit exported data to:</value>
     <value>Entrenamiento diario</value>
   </data>
   <data name="DailyNoteButton_StarRail_EchoOfWar" xml:space="preserve">
-    <value>Eco de la guerra</value>
+    <value>Eco de la guerra restante</value>
   </data>
   <data name="DailyNoteButton_StarRail_BonusSynchronicityPoints" xml:space="preserve">
     <value>Puntos de sincronización adicionales</value>
@@ -3170,5 +3170,8 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
     <value>Introducir nueva URL</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
+	<value>Puntos acumulados</value>
   </data>
 </root>

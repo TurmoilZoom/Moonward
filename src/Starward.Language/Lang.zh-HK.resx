@@ -2253,7 +2253,7 @@
     <value>每日實訓</value>
   </data>
   <data name="DailyNoteButton_StarRail_EchoOfWar" xml:space="preserve">
-    <value>歷戰餘響</value>
+    <value>歷戰餘響剩餘</value>
   </data>
   <data name="DailyNoteButton_StarRail_BonusSynchronicityPoints" xml:space="preserve">
     <value>額外擬合值</value>
@@ -3169,5 +3169,8 @@
   </data>
   <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
     <value>輸入新連結</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
+    <value>週期積分</value>
   </data>
 </root>

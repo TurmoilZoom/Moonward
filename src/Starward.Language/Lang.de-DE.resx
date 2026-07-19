@@ -2252,7 +2252,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
     <value>Tägliches Training</value>
   </data>
   <data name="DailyNoteButton_StarRail_EchoOfWar" xml:space="preserve">
-    <value>Echo des Krieges</value>
+    <value>Echo des Krieges übrig</value>
   </data>
   <data name="DailyNoteButton_StarRail_BonusSynchronicityPoints" xml:space="preserve">
     <value>Zusätzliche Synchropunkte</value>
@@ -3168,5 +3168,8 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   </data>
   <data name="MiHoYoApiError_RefreshUrl" xml:space="preserve">
     <value>Neue URL eingeben</value>
+  </data>
+  <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
+    <value>Angesammelte Punkte</value>
   </data>
 </root>
