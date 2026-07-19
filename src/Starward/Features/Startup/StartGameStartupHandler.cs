@@ -2,7 +2,9 @@ using Microsoft.Extensions.Configuration;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
+using Starward.Features.GameRecord.SignIn;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Starward.Features.Startup;
@@ -23,7 +25,16 @@ internal sealed class StartGameStartupHandler : IStartupHandler
         {
             // 与首页「开始游戏」一致：按当前生效的启动方式（默认「无」）。
             AppConfig.ResolveLaunchProfile(biz, AppConfig.GetActiveLaunchProfileId(biz), out bool useNone, out GameLaunchProfile? profile);
-            await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, profile: profile, useNoneLaunchMethod: useNone);
+            Process? process = await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, profile: profile, useNoneLaunchMethod: useNone);
+            // 与 URL 启动一致：不经主界面批量签到时，对配置中绑定的账号静默签到
+            if (process is not null)
+            {
+                long resolvedLoginUid = GameLauncherService.ResolveLoginUid(biz, profile, useNone, explicitLoginUid: null);
+                if (resolvedLoginUid > 0)
+                {
+                    await AppConfig.GetService<AutoSignInService>().TrySignInForLaunchAccountAsync(biz, resolvedLoginUid);
+                }
+            }
         }
         return StartupOutcome.Exit;
     }

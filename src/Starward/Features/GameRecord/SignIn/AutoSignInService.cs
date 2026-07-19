@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Starward.Features.GameRecord.SignIn;
 
 /// <summary>
-/// 自动签到：软件启动后批量为所有账号(cookie)下每个游戏角色静默签到，请求之间插入随机延时，模拟真人操作节奏。
+/// 自动签到：主界面启动后批量为所有账号(cookie)下每个游戏角色静默签到；URL/CLI 带账号启动游戏时对指定角色补签一次。
 /// 是否签到按游戏区分（<see cref="AppConfig.GetAutoSignInEnabled(GameBiz)"/>）；依赖服务器返回的 <see cref="Core.GameRecord.SignIn.SignInRewardInfo.IsSign"/> 天然去重，再加 10 分钟失败冷却避免出错时反复请求。
 /// </summary>
 internal class AutoSignInService
@@ -72,6 +72,50 @@ internal class AutoSignInService
     /// <param name="value">是否开启。</param>
     public void SetEnabled(GameBiz biz, bool value) => AppConfig.SetAutoSignInEnabled(biz, value);
 
+
+
+    /// <summary>
+    /// 启动游戏时对指定 UID 尝试自动签到（需该游戏已开启自动签到）。
+    /// 用于 URL / CLI 等不经主界面的启动路径；静默执行（冷却 / 已签 / 失败均不打扰用户）。
+    /// </summary>
+    /// <param name="gameBiz">启动器侧游戏业务线（含 bilibili，内部映射到签到用 biz）。</param>
+    /// <param name="uid">米游社工具箱中的游戏角色 UID。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    public async Task TrySignInForLaunchAccountAsync(GameBiz gameBiz, long uid, CancellationToken cancellationToken = default)
+    {
+        if (uid <= 0)
+        {
+            return;
+        }
+
+        try
+        {
+            // 与 SignInButton 一致：bilibili 服角色与开关按国服 biz 存储
+            GameBiz signInBiz = gameBiz.Server is "bilibili" ? $"{gameBiz.Game}_cn" : gameBiz;
+            if (!GameFeatureConfig.FromGameBiz(signInBiz).SupportSignIn || !IsEnabled(signInBiz))
+            {
+                return;
+            }
+
+            GameRecordRole? role = _gameRecordService.GetGameRoles(signInBiz).FirstOrDefault(r => r.Uid == uid);
+            if (role is null)
+            {
+                _logger.LogWarning("Auto sign-in on launch: role not found (biz {biz}, uid {uid}).", signInBiz, uid);
+                return;
+            }
+
+            // 单次签到无需批量节奏延时
+            await SignInRoleCoreAsync(role, static _ => Task.CompletedTask, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // ignore
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Auto sign-in on launch failed (biz {biz}, uid {uid}).", gameBiz, uid);
+        }
+    }
 
 
     /// <summary>

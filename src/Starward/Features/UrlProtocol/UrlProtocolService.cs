@@ -3,8 +3,10 @@ using Microsoft.Win32;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
+using Starward.Features.GameRecord.SignIn;
 using Starward.Features.PlayTime;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web;
@@ -122,7 +124,16 @@ internal class UrlProtocolService
                         string? profileId = kvs["profile"] ?? AppConfig.GetActiveLaunchProfileId(biz);
                         AppConfig.ResolveLaunchProfile(biz, profileId, out bool useNone, out GameLaunchProfile? profile);
                         long? loginUid = long.TryParse(kvs["uid"], out long uid) && uid > 0 ? uid : null;
-                        await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, installPath, profile, useNone, loginUid);
+                        Process? process = await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, installPath, profile, useNone, loginUid);
+                        // URL 进程即将 Exit，不经主界面批量签到；启动成功且解析到指定账号时静默签该账号
+                        if (process is not null)
+                        {
+                            long resolvedLoginUid = GameLauncherService.ResolveLoginUid(biz, profile, useNone, loginUid);
+                            if (resolvedLoginUid > 0)
+                            {
+                                await AppConfig.GetService<AutoSignInService>().TrySignInForLaunchAccountAsync(biz, resolvedLoginUid);
+                            }
+                        }
                     }
                     else
                     {

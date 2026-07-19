@@ -476,7 +476,7 @@ internal partial class GameLauncherService
     /// 优先级：显式参数 → 额外配置 LoginUid → config1 legacy 键 → 0（不指定）。
     /// 「无」启动方式且无显式 uid 时不读取配置登录账号。
     /// </summary>
-    private static long ResolveLoginUid(GameBiz biz, GameLaunchProfile? profile, bool useNoneLaunchMethod, long? explicitLoginUid)
+    internal static long ResolveLoginUid(GameBiz biz, GameLaunchProfile? profile, bool useNoneLaunchMethod, long? explicitLoginUid)
     {
         if (explicitLoginUid is > 0)
         {
