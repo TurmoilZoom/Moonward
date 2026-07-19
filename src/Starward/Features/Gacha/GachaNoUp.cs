@@ -463,6 +463,25 @@ public class GachaNoUp
             Name = "丽娜",
             NoUpTimes = [(new DateTime(2024, 7, 1), DateTime.MaxValue)],
         });
+        // 3.0 下半起，部分曾限定代理人可在独家频段/独家重映作为非 UP 歪出
+        nap2.Items.Add(1071, new GachaNoUpItem
+        {
+            Id = 1071,
+            Name = "凯撒",
+            NoUpTimes = [(new DateTime(2026, 7, 29), DateTime.MaxValue)],
+        });
+        nap2.Items.Add(1221, new GachaNoUpItem
+        {
+            Id = 1221,
+            Name = "柳",
+            NoUpTimes = [(new DateTime(2026, 7, 29), DateTime.MaxValue)],
+        });
+        nap2.Items.Add(1241, new GachaNoUpItem
+        {
+            Id = 1241,
+            Name = "朱鸢",
+            NoUpTimes = [(new DateTime(2026, 7, 29), DateTime.MaxValue)],
+        });
         Dictionary.Add("nap2", nap2);
         Dictionary.Add("nap102", nap2);
 
@@ -502,6 +521,25 @@ public class GachaNoUp
             Id = 14121,
             Name = "啜泣摇篮",
             NoUpTimes = [(new DateTime(2024, 7, 1), DateTime.MaxValue)],
+        });
+        // 与上列代理人配套的专属音擎：音擎频段 / 音擎回响
+        nap3.Items.Add(14107, new GachaNoUpItem
+        {
+            Id = 14107,
+            Name = "奔袭獠牙",
+            NoUpTimes = [(new DateTime(2026, 7, 29), DateTime.MaxValue)],
+        });
+        nap3.Items.Add(14122, new GachaNoUpItem
+        {
+            Id = 14122,
+            Name = "时流贤者",
+            NoUpTimes = [(new DateTime(2026, 7, 29), DateTime.MaxValue)],
+        });
+        nap3.Items.Add(14124, new GachaNoUpItem
+        {
+            Id = 14124,
+            Name = "防暴者Ⅵ型",
+            NoUpTimes = [(new DateTime(2026, 7, 29), DateTime.MaxValue)],
         });
         Dictionary.Add("nap3", nap3);
         Dictionary.Add("nap103", nap3);
