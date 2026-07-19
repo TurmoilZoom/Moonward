@@ -861,6 +861,9 @@
   <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
     <value>验证码登录</value>
   </data>
+  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
+    <value>网页登录</value>
+  </data>
   <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
     <value>手机号</value>
   </data>
@@ -950,6 +953,9 @@
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>开拓月历</value>
+  </data>
+  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
+    <value>登录后请点击此按钮</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
     <value>已经添加了{0}个游戏角色：

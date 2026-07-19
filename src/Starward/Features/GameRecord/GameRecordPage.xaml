@@ -89,7 +89,7 @@
                         </TextBlock>
                     </StackPanel>
 
-                    <!-- 未登录状态显示的登录按钮（短信验证码 / 手动输入 Cookie） -->
+                    <!-- 未登录：国服验证码 / 国际服网页登录 / 手动 Cookie -->
                     <Button x:Name="Button_Login"
                             Grid.Column="1"
                             Grid.ColumnSpan="2"
@@ -100,6 +100,13 @@
                             Visibility="{x:Bind CurrentRole, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
                         <Button.Flyout>
                             <MenuFlyout x:Name="Flyout_LoginMenu_1" Placement="BottomEdgeAlignedLeft">
+                                <MenuFlyoutItem x:Name="MenuFlyoutItem_WebLogin_1"
+                                                Command="{x:Bind WebLoginCommand}"
+                                                Text="{x:Bind lang:Lang.HoyolabToolboxPage_WebLogin}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE774;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_CaptchaLogin_1"
                                                 Command="{x:Bind CaptchaLoginCommand}"
                                                 Text="{x:Bind lang:Lang.HoyolabToolboxPage_CaptchaLogin}">
@@ -180,6 +187,13 @@
                                         </StackPanel>
                                         <Button.Flyout>
                                             <MenuFlyout x:Name="Flyout_LoginMenu_2" Placement="RightEdgeAlignedTop">
+                                                <MenuFlyoutItem x:Name="MenuFlyoutItem_WebLogin_2"
+                                                                Command="{x:Bind WebLoginCommand}"
+                                                                Text="{x:Bind lang:Lang.HoyolabToolboxPage_WebLogin}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE774;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
                                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_CaptchaLogin_2"
                                                                 Command="{x:Bind CaptchaLoginCommand}"
                                                                 Text="{x:Bind lang:Lang.HoyolabToolboxPage_CaptchaLogin}">

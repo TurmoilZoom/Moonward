@@ -86,7 +86,7 @@ dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeI
 
 ### GameRecord 登录、设备指纹与 Cookie
 
-- **入口**：手动 Cookie + 国服短信验证码（**无 WebView**）。完全失效走上述入口，不要恢复网页登录。
+- **入口**：国服短信验证码 + 手动 Cookie；国际服（HoYoLAB）无 passport 短信 → **WebView 网页登录**（`LoginPage`）+ 手动 Cookie。完全失效走上述入口；国服不要改回网页登录。
 - **静默换票**：验证码登录保证 `stoken`/`mid`。国服失败 → `ExecuteWithRequestRecoveryAsync`（冷却刷指纹；`IsLoginExpired` 时 `GameRecordCookieRefreshService` 换票回写，**最多重试一次**）。缺 stoken 或失败 → 上层登录失效反馈。
 - **分层**：`MihoyoPassportClient`（协议/DTO）→ `CaptchaLoginService`（发码/登录/aigis/拼 Cookie）与 `GameRecordCookieRefreshService`（换票+DB）→ `CaptchaLoginDialog` / `GeetestVerifyPopup`（UI 回调极验）。换票勿堆 `HyperionClient`；Core 禁 WinUI；CN/OS 差留在 Client/Service。
 - **安全**：passport/换票前同步 device_id/fp；日志可记流程与手机号后四位，**禁止** Cookie/Token/验证码/authkey/完整手机号。新 DTO 注册 JsonContext；新服务注册 `ServiceProvider`。

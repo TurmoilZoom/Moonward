@@ -801,6 +801,9 @@
   <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
     <value>เข้าสู่ระบบด้วยรหัสยืนยัน</value>
   </data>
+  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
+    <value>ล็อกอินผ่านเว็บ</value>
+  </data>
   <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
     <value>หมายเลขโทรศัพท์</value>
   </data>
@@ -891,6 +894,9 @@
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>ปฏิทินการบุกเบิก</value>
+  </data>
+  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
+    <value>กดปุ่มนี้หลังจากล็อกอินเสร็จสมบูรณ์</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
     <value>เพิ่ม {0} บทบาทของเกมแล้ว:

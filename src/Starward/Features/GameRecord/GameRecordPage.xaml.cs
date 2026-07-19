@@ -69,8 +69,9 @@ public sealed partial class GameRecordPage : PageBase
         _gameRecordService.Language = System.Globalization.CultureInfo.CurrentUICulture.Name;
         InitializeNavigationViewItemVisibility();
 
-        // 短信验证码登录仅国服米游社（对齐 passport ma-cn-*）
+        // 国服：短信验证码登录；国际服无 passport 短信，提供 WebView 网页登录
         var captchaVisible = _gameRecordService.IsHoyolab ? Visibility.Collapsed : Visibility.Visible;
+        var webLoginVisible = _gameRecordService.IsHoyolab ? Visibility.Visible : Visibility.Collapsed;
         if (MenuFlyoutItem_CaptchaLogin_1 is not null)
         {
             MenuFlyoutItem_CaptchaLogin_1.Visibility = captchaVisible;
@@ -78,6 +79,14 @@ public sealed partial class GameRecordPage : PageBase
         if (MenuFlyoutItem_CaptchaLogin_2 is not null)
         {
             MenuFlyoutItem_CaptchaLogin_2.Visibility = captchaVisible;
+        }
+        if (MenuFlyoutItem_WebLogin_1 is not null)
+        {
+            MenuFlyoutItem_WebLogin_1.Visibility = webLoginVisible;
+        }
+        if (MenuFlyoutItem_WebLogin_2 is not null)
+        {
+            MenuFlyoutItem_WebLogin_2.Visibility = webLoginVisible;
         }
     }
 
@@ -110,8 +119,15 @@ public sealed partial class GameRecordPage : PageBase
         });
         WeakReferenceMessenger.Default.Register<GameRecordOpenLoginMessage>(this, (r, m) =>
         {
-            // 子页面只知道接口错误，不直接依赖主页面 UI；由主页面弹出登录菜单（验证码 / Cookie）。
-            OpenLoginMenu();
+            // 子页面只知道接口错误；国服弹出登录菜单，国际服无验证码则直接进网页登录。
+            if (_gameRecordService.IsHoyolab)
+            {
+                WebLogin();
+            }
+            else
+            {
+                OpenLoginMenu();
+            }
         });
 
         await Task.Delay(16);
@@ -400,6 +416,17 @@ public sealed partial class GameRecordPage : PageBase
     }
 
 
+    /// <summary>
+    /// 国际服（HoYoLAB）网页登录：嵌入 WebView2 打开官网，登录后读取 Cookie 入库。
+    /// 国服优先短信验证码，不提供此项。
+    /// </summary>
+    [RelayCommand]
+    private void WebLogin()
+    {
+        NavigateTo(typeof(LoginPage), CurrentGameBiz);
+    }
+
+
 
 
     [RelayCommand]
@@ -442,7 +469,8 @@ public sealed partial class GameRecordPage : PageBase
         {
             CurrentRole = role;
             _gameRecordService.SetLastSelectGameRecordRole(CurrentGameBiz, role);
-            if (frame.SourcePageType is not null)
+            // 网页登录过程中切换角色列表选中项时不要把 LoginPage 冲掉
+            if (frame.SourcePageType?.Name is not nameof(LoginPage) && frame.SourcePageType is not null)
             {
                 NavigateTo(frame.SourcePageType, force_navigate: true);
             }

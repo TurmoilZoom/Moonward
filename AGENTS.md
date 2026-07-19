@@ -53,7 +53,7 @@ SDK 见 `global.json`，**不要擅自升级 SDK/NuGet**。改完至少 build �
 
 **登录与 Cookie**
 
-- 入口：手动 Cookie + 国服短信验证码（**无 WebView**）；验证码登录写入 `stoken`/`mid`。
+- 入口：国服短信验证码 + 手动 Cookie；国际服无 passport 短信时提供 **WebView 网页登录**（`LoginPage`）+ 手动 Cookie。验证码登录写入 `stoken`/`mid`。
 - 国服失效：`ExecuteWithRequestRecoveryAsync`（指纹 + stoken 换票，**最多重试一次**）；失败则引导重新登录。
 - 分层：`MihoyoPassportClient` → `CaptchaLoginService` / `GameRecordCookieRefreshService` → 对话框 UI。Core 禁止 WinUI；日志禁止 Cookie/Token/验证码/完整手机号明文。
 

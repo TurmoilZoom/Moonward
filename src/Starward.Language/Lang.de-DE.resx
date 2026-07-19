@@ -802,6 +802,9 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="HoyolabToolboxPage_CaptchaLogin" xml:space="preserve">
     <value>Captcha-Anmeldung</value>
   </data>
+  <data name="HoyolabToolboxPage_WebLogin" xml:space="preserve">
+    <value>Webanmeldung</value>
+  </data>
   <data name="CaptchaLogin_PhoneNumber" xml:space="preserve">
     <value>Telefonnummer</value>
   </data>
@@ -892,6 +895,9 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   </data>
   <data name="HoyolabToolboxPage_TrailblazeMonthlyCalendar" xml:space="preserve">
     <value>Monatskalender des Trailblazes</value>
+  </data>
+  <data name="LoginPage_ClickThisButtonAfterLoggingIn" xml:space="preserve">
+    <value>Klicken Sie nach dem Anmelden auf diesen Knopf.</value>
   </data>
   <data name="LoginPage_AlreadyAddedGameRoles" xml:space="preserve">
     <value>Bereits {0} Spielrollen hinzugefügt:
