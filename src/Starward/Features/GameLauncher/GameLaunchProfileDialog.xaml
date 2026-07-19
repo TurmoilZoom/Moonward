@@ -7,6 +7,7 @@
                xmlns:lang="using:Starward.Language"
                xmlns:local="using:Starward.Features.GameLauncher"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
                x:DefaultBindMode="OneWay"
                Background="{ThemeResource CustomAcrylicBrush}"
                BorderThickness="0"
@@ -94,7 +95,7 @@
                         </Flyout>
                     </FlyoutBase.AttachedFlyout>
                 </ComboBox>
-                <!--  新建配置文件  -->
+                <!--  新建配置文件；悬停用 InstantTooltip（亚克力气泡，非系统 ToolTip）  -->
                 <Button Grid.Row="0"
                         Grid.Column="2"
                         Width="36"
@@ -103,8 +104,9 @@
                         Command="{x:Bind NewProfileCommand}"
                         CornerRadius="8"
                         IsEnabled="{x:Bind CanCreateProfile, Mode=OneWay}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.GameLauncherSettingDialog_NewProfile}">
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherSettingDialog_NewProfile}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="&#xE710;" />
@@ -117,8 +119,9 @@
                         Padding="0"
                         Command="{x:Bind ShowRenameProfileCommand}"
                         CornerRadius="8"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                        ToolTipService.ToolTip="{x:Bind lang:Lang.ImageBatchConvertWindow_Rename}">
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageBatchConvertWindow_Rename}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="&#xE70F;" />
@@ -132,6 +135,8 @@
                         Padding="0"
                         CornerRadius="8"
                         IsEnabled="{x:Bind CanDeleteProfile, Mode=OneWay}"
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Delete}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -375,8 +380,9 @@
                             Padding="0"
                             Click="Button_CopyProfileUrl_Click"
                             CornerRadius="8"
-                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                            ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Copy}">
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Copy}"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                         <FontIcon FontSize="16"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                   Glyph="&#xE71B;" />
