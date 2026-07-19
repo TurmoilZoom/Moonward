@@ -522,9 +522,6 @@
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>當前登入的帳戶</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>切換帳戶</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>帳戶資訊</value>
   </data>
@@ -1345,9 +1342,6 @@
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>功能</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>隱藏遊戲帳號切換器</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>停用遊戲通知紅點提示</value>
   </data>
@@ -1414,9 +1408,6 @@
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>已儲存的帳戶</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>帳戶切換在遊戲執行期間無法生效。</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>建議在系統設定中啟用 {0} 和 {1} 以取得更好的使用者體驗。</value>
@@ -2045,9 +2036,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>實時便箋</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>目前登入的帳號尚未儲存。</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>已停用授權登入</value>
   </data>
@@ -2059,9 +2047,6 @@
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>重新認證</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>以登錄檔為基礎的遊戲帳號切換功能</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>絕區零抽卡物品圖片</value>

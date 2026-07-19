@@ -13,7 +13,6 @@ using Starward.Features.Background;
 using Starward.Features.Database;
 using Starward.Features.Gacha;
 using Starward.Features.Gacha.UIGF;
-using Starward.Features.GameAccount;
 using Starward.Features.GameInstall;
 using Starward.Features.GameLauncher;
 using Starward.Features.GameRecord;
@@ -102,7 +101,6 @@ public static partial class AppConfig
             sc.AddSingleton<GameInstallService>();
 
             sc.AddSingleton<GameAuthLoginService>();
-            sc.AddSingleton<GameAccountService>();
 
             sc.AddSingleton<ScreenCaptureService>();
 

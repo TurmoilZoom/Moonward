@@ -521,9 +521,6 @@
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>บัญชีปัจจุบัน</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>เปลี่ยนบัญชี</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>ข้อมูลบัญชี</value>
   </data>
@@ -1344,9 +1341,6 @@
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>ฟีเจอร์</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>ซ่อนตัวสลับบัญชีของเกม</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>ปิดการแจ้งเตือนจุดแดงสำหรับประกาศเกม</value>
   </data>
@@ -1413,9 +1407,6 @@
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>บัญชีที่บันทึกไว้</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>การสลับบัญชีไม่สามารถมีผลในขณะที่เกมกำลังทำงาน</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>แนะนำให้เปิดใช้งาน {0} และ {1} ในการตั้งค่าระบบเพื่อประสบการณ์ผู้ใช้ที่ดีขึ้น</value>
@@ -2044,9 +2035,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>บันทึกเรียลไทม์</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>บัญชีที่เข้าสู่ระบบอยู่ในขณะนี้ไม่ได้ถูกบันทึก</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>ปิดใช้งานการเข้าสู่ระบบแบบอนุญาต</value>
   </data>
@@ -2058,9 +2046,6 @@
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>ยืนยันตัวตนอีกครั้ง</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>คุณสมบัติการสลับบัญชีเกมตามรีจิสทรี</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>รูปภาพไอเทมกาชาของ ZZZ</value>

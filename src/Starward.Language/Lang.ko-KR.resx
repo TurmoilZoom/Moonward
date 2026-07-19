@@ -522,9 +522,6 @@
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>현재 계정</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>계정 변경</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>계정 정보</value>
   </data>
@@ -1345,9 +1342,6 @@
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>기능</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>계정 변환기 표시</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>게임 알림 뱃지 표시하지 않음</value>
   </data>
@@ -1414,9 +1408,6 @@
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>저장된 계정</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>게임 실행 중에는 계정변경 기능을 사용할 수 없습니다.</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>시스템 설정에서 {0} 와 {1} 를 활성화 하면 더 나은 경험을 제공할 수 있습니다.</value>
@@ -2045,9 +2036,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>실시간 메모</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>현재 로그인 된 계정이 저장되지 않음.</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>인증 로그인 비활성화</value>
   </data>
@@ -2059,9 +2047,6 @@
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>재인증</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>레지스트리 기반 계정전환 기능</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>젠레스 존 제로 뽑기 아이템</value>

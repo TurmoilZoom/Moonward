@@ -261,7 +261,9 @@ internal static class DatabaseService
         Sql_v16,
         Sql_v17,
         Sql_v18,
-        Sql_v19
+        Sql_v19,
+        Sql_v20,
+        Sql_v21,
     ];
 
 
@@ -1043,7 +1045,19 @@ internal static class DatabaseService
         ALTER TABLE StarRailPureFictionInfo ADD COLUMN ExtraStarNum INTEGER DEFAULT 0 NOT NULL;
         ALTER TABLE StarRailForgottenHallInfo ADD COLUMN ExtraStarNum INTEGER DEFAULT 0 NOT NULL;
 
-        PRAGMA USER_VERSION = 19;
+        PRAGMA USER_VERSION = 20;
+        COMMIT TRANSACTION;
+        """;
+
+    /// <summary>
+    /// 移除已下线的注册表账号切换功能数据表。
+    /// </summary>
+    private const string Sql_v21 = """
+        BEGIN TRANSACTION;
+
+        DROP TABLE IF EXISTS GameAccount;
+
+        PRAGMA USER_VERSION = 21;
         COMMIT TRANSACTION;
         """;
 

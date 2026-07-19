@@ -581,9 +581,6 @@ closing the program during decompression will cause game file corruption.</value
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>Current Login Account</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>Switch Account</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>Account Information</value>
   </data>
@@ -1403,9 +1400,6 @@ Do you accept the risk and continue to use it?</value>
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>Features</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>Hide game account switcher</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>Disable red dot reminder for game notices</value>
   </data>
@@ -1472,9 +1466,6 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>Saved account</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>Account switching cannot take effect while game is running.</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>Recommend enabling {0} and {1} in system settings for a better user experience.</value>
@@ -2103,9 +2094,6 @@ Do you accept the risk and continue to use it?</value>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Real-time Note</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>The currently logged-in account is not saved.</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>Auth login disabled</value>
   </data>
@@ -2117,9 +2105,6 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>Re-authenticate</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>Registry-based Game Account Switching Feature</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>ZZZ Gacha Item Images</value>

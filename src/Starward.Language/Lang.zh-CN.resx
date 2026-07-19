@@ -581,9 +581,6 @@
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>当前登录的账号</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>切换账号</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>账号信息</value>
   </data>
@@ -1403,9 +1400,6 @@
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>功能</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>隐藏游戏账号切换器</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>禁用游戏通知的红点提醒</value>
   </data>
@@ -1472,9 +1466,6 @@
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>已保存的账号</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>游戏运行时账号切换功能无法生效。</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>推荐在系统设置中启用 {0} 和 {1} 以获得更好的使用体验。</value>
@@ -2103,9 +2094,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>实时便笺</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>当前登录的账号未保存</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>已禁用授权登录</value>
   </data>
@@ -2117,9 +2105,6 @@
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>重新认证</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>基于注册表的游戏账号切换功能</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>绝区零抽卡物品图片</value>

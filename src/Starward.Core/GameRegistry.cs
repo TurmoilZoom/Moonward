@@ -53,13 +53,7 @@ public class GameRegistry
 
 
     public const string GENERAL_DATA_h2389025596 = "GENERAL_DATA_h2389025596";
-    public const string MIHOYOSDK_ADL_PROD_CN_h3123967166 = "MIHOYOSDK_ADL_PROD_CN_h3123967166";
-    public const string MIHOYOSDK_ADL_PROD_OVERSEA_h1158948810 = "MIHOYOSDK_ADL_PROD_OVERSEA_h1158948810";
-    public const string MIHOYOSDK_ADL_0 = "MIHOYOSDK_ADL_0";
-    public const string App_LastUserID_h2841727341 = "App_LastUserID_h2841727341";
-    public const string GENERAL_DATA_V2_LastLoginUserId_h47158221 = "GENERAL_DATA_V2_LastLoginUserId_h47158221";
     public const string GraphicsSettings_Model_h2986158309 = "GraphicsSettings_Model_h2986158309";
-    public const string __LastUid___h2153286551 = "__LastUid___h2153286551";
 
 
 

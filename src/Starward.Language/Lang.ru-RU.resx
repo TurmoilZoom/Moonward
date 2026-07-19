@@ -522,9 +522,6 @@
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>Использовать учётную запись для входа</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>Сменить аккаунт</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>Информация об аккаунте</value>
   </data>
@@ -1345,9 +1342,6 @@
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>Функции</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>Скрыть переключатель игровых аккаунтов</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>Отключить красной точке для новых игровых уведомлений</value>
   </data>
@@ -1414,9 +1408,6 @@
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>Учётная запись сохранена</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>Переключение учётной записи не может происходить во время игры.</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>Рекомендуется включить {0} и {1} в системных настройках для лучшего использования.</value>
@@ -2046,9 +2037,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Заметка в реальном времени</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>Текущий вход в аккаунт не сохранен.</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>Авторизационный вход отключён</value>
   </data>
@@ -2060,9 +2048,6 @@
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>Повторная аутентификация</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>Функция переключения игровых аккаунтов на основе реестра</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>ZZZ Изображения предметов из гачи</value>

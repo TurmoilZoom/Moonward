@@ -522,9 +522,6 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>Tài khoản đăng nhập hiện tại</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>Chuyển đổi tài khoản</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>Thông tin tài khoản</value>
   </data>
@@ -1345,9 +1342,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>Tính năng</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>Ẩn trình chuyển đổi tài khoản</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>Tắt thông báo chấm đỏ cho thông báo trò chơi</value>
   </data>
@@ -1414,9 +1408,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>Tài khoản đã lưu</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>Việc chuyển đổi tài khoản không có hiệu lực khi trò chơi đang chạy.</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>Đề xuất bật {0} và {1} trong cài đặt hệ thống để có trải nghiệm người dùng tốt hơn.</value>
@@ -2045,9 +2036,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Ghi chú thời gian thực</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>Thông tin đăng nhập của tài khoản hiện tại chưa được lưu.</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>Đã tắt đăng nhập ủy quyền</value>
   </data>
@@ -2059,9 +2047,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>Xác thực lại</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>Tính năng chuyển tại khoản dựa trên Registry</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>Hình vật phẩm Gacha ZZZ</value>

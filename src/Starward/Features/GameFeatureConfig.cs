@@ -45,12 +45,6 @@ internal partial class GameFeatureConfig
 
 
     /// <summary>
-    /// 支持游戏账号切换
-    /// </summary>
-    public bool SupportGameAccountSwitcher { get; init; }
-
-
-    /// <summary>
     /// 支持实时便笺
     /// </summary>
     public bool SupportDailyNote { get; init; }
@@ -116,7 +110,6 @@ internal partial class GameFeatureConfig
             nameof(GameRecordPage),
         ],
         InGameNoticesWindow = true,
-        SupportGameAccountSwitcher = true,
         SupportDailyNote = true,
         SupportSignIn = true,
     };
@@ -152,7 +145,6 @@ internal partial class GameFeatureConfig
         InGameNoticesWindow = true,
         SupportHardLink = true,
         SupportCloudGame = true,
-        SupportGameAccountSwitcher = true,
         SupportDailyNote = true,
         SupportSignIn = true,
     };
@@ -173,7 +165,6 @@ internal partial class GameFeatureConfig
         InGameNoticesWindow = true,
         SupportHardLink = true,
         SupportCloudGame = true,
-        SupportGameAccountSwitcher = true,
         SupportDailyNote = true,
         SupportSignIn = true,
     };
@@ -211,7 +202,6 @@ internal partial class GameFeatureConfig
         ],
         InGameNoticesWindow = true,
         SupportHardLink = true,
-        SupportGameAccountSwitcher = true,
         SupportDailyNote = true,
         SupportSignIn = true,
     };
@@ -230,7 +220,6 @@ internal partial class GameFeatureConfig
         ],
         InGameNoticesWindow = true,
         SupportHardLink = true,
-        SupportGameAccountSwitcher = true,
         SupportDailyNote = true,
         SupportSignIn = true,
     };
@@ -268,7 +257,6 @@ internal partial class GameFeatureConfig
         ],
         InGameNoticesWindow = true,
         SupportHardLink = true,
-        SupportGameAccountSwitcher = true,
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportCloudGame = true,
@@ -288,7 +276,6 @@ internal partial class GameFeatureConfig
         ],
         InGameNoticesWindow = true,
         SupportHardLink = true,
-        SupportGameAccountSwitcher = true,
         SupportDailyNote = true,
         SupportSignIn = true,
     };

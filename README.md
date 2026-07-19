@@ -58,13 +58,13 @@
 
 > **Starward** 出自星穹铁道开服前的宣传语——愿此行，终抵群星（May This Journey Lead Us **Starward**）。
 
-Starward 是一款以 [MIT License](LICENSE) 开源的第三方游戏启动器，面向 Windows 10 及以上系统，支持米哈游 PC 端全部主要游戏。它在保留官方启动器核心能力的同时，提供游戏时间统计、抽卡记录、截图浏览、账号切换、实时便笺、每日签到等拓展功能，并采用亚克力视觉与 Composition 动画，带来更现代的桌面体验。
+Starward 是一款以 [MIT License](LICENSE) 开源的第三方游戏启动器，面向 Windows 10 及以上系统，支持米哈游 PC 端全部主要游戏。它在保留官方启动器核心能力的同时，提供游戏时间统计、抽卡记录、截图浏览、实时便笺、每日签到等拓展功能，并采用亚克力视觉与 Composition 动画，带来更现代的桌面体验。
 
 本仓库（[TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)）基于上游 [Scighost/Starward](https://github.com/Scighost/Starward) 维护，在持续同步上游改进的同时，合入额外的功能增强与问题修复。正式发行版见 [Releases](https://github.com/TurmoilZoom/Starward/releases)。
 
 **English**
 
-Starward is an open-source third-party game launcher under the MIT license, built for Windows 10 and later. It supports all major miHoYo PC titles and aims to fully replace the official HoYoPlay launcher — with extras like playtime tracking, gacha history, screenshot gallery, account switching, daily notes, and sign-in rewards, wrapped in a modern acrylic UI with GPU-accelerated animations.
+Starward is an open-source third-party game launcher under the MIT license, built for Windows 10 and later. It supports all major miHoYo PC titles and aims to fully replace the official HoYoPlay launcher — with extras like playtime tracking, gacha history, screenshot gallery, daily notes, and sign-in rewards, wrapped in a modern acrylic UI with GPU-accelerated animations.
 
 This repository ([TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)) is a maintained fork of [Scighost/Starward](https://github.com/Scighost/Starward), carrying additional enhancements and fixes on top of upstream improvements. Download releases from [Releases](https://github.com/TurmoilZoom/Starward/releases).
 
@@ -91,7 +91,6 @@ This repository ([TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)
 | 战绩 / 便笺 | 实时便笺、深渊记录等 GameRecord 数据 |
 | 每日签到 | 米游社 / HoYoLAB 签到，支持自动签到 |
 | 自助查询 | 游戏内数据自助导出（部分游戏） |
-| 账号切换 | 快速切换已登录的游戏账号（部分区服） |
 
 ### 本 Fork 增强
 
@@ -115,7 +114,7 @@ This repository ([TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)
 | 绝区零（Zenless Zone Zero） | ✅ | ✅ | ✅ |
 | 崩坏 3（Honkai Impact 3rd） | ✅ | ✅ | — |
 
-各游戏可用功能因区服而异（如祈愿记录、云游戏、账号切换等），以应用内实际显示为准。
+各游戏可用功能因区服而异（如祈愿记录、云游戏等），以应用内实际显示为准。
 
 ---
 

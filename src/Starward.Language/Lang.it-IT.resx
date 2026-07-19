@@ -522,9 +522,6 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>Account Attivo</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>Cambia Account</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>Informazioni Account</value>
   </data>
@@ -1345,9 +1342,6 @@ Accetti il rischio e desideri continuare?</value>
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>Funzionalità</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>Nascondi cambio account di gioco</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>Disabilita il punto rosso per le notifiche di gioco</value>
   </data>
@@ -1414,9 +1408,6 @@ Accetti il rischio e desideri continuare?</value>
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>Salva Account</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>Il cambio account non può avere effetto mentre il gioco è in esecuzione.</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>Consigliato di abilitare {0} e {1} nelle impostazioni di sistema per una migliore esperienza utente.</value>
@@ -2045,9 +2036,6 @@ Accetti il rischio e desideri continuare?</value>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Nota in tempo reale</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>L'account attualmente connesso non è salvato.</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>Accesso con autorizzazione disattivato</value>
   </data>
@@ -2059,9 +2047,6 @@ Accetti il rischio e desideri continuare?</value>
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>Ri-autentica</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>Funzione di cambio account di gioco basata sul registro</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>Immagini oggetti gacha ZZZ</value>

@@ -522,9 +522,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="LauncherPage_CurrentAccount" xml:space="preserve">
     <value>Cuenta de inicio de sesión actual</value>
   </data>
-  <data name="LauncherPage_SwitchAccount" xml:space="preserve">
-    <value>Cambiar Cuenta</value>
-  </data>
   <data name="LauncherPage_AccountInformation" xml:space="preserve">
     <value>Información de la cuenta</value>
   </data>
@@ -1345,9 +1342,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="ExperienceSettingPage_Features" xml:space="preserve">
     <value>Funciones</value>
   </data>
-  <data name="ExperienceSettingPage_HideGameAccountSwitcher" xml:space="preserve">
-    <value>Ocultar el cambiador de cuentas del juego</value>
-  </data>
   <data name="ExperienceSettingPage_DisableRedDotReminderForGameNotices" xml:space="preserve">
     <value>Desactivar recordatorio de punto rojo para avisos del juego</value>
   </data>
@@ -1414,9 +1408,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   </data>
   <data name="LauncherPage_SavedAccount" xml:space="preserve">
     <value>Cuenta guardada</value>
-  </data>
-  <data name="LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning" xml:space="preserve">
-    <value>El cambio de cuenta no puede tener efecto mientras el juego se está ejecutando.</value>
   </data>
   <data name="AppearanceSettingPage_BetterExperience" xml:space="preserve">
     <value>Se recomienda habilitar {0} y {1} en la configuración del sistema para una mejor experiencia de usuario.</value>
@@ -2045,9 +2036,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Nota en tiempo real</value>
   </data>
-  <data name="GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved" xml:space="preserve">
-    <value>La cuenta actualmente iniciada no se ha guardado.</value>
-  </data>
   <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
     <value>Inicio de sesión de autorización desactivado</value>
   </data>
@@ -2059,9 +2047,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   </data>
   <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
     <value>Volver a autenticar</value>
-  </data>
-  <data name="SettingPage_RegistryBasedGameAccountSwitchingFeature" xml:space="preserve">
-    <value>Función de cambio de cuenta de juego basada en el registro</value>
   </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>Imágenes de objetos de Gacha de ZZZ</value>

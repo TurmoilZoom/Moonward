@@ -2016,15 +2016,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Hide game account switcher 的本地化字符串。
-        /// </summary>
-        public static string ExperienceSettingPage_HideGameAccountSwitcher {
-            get {
-                return ResourceManager.GetString("ExperienceSettingPage_HideGameAccountSwitcher", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Minimize to system tray 的本地化字符串。
         /// </summary>
         public static string ExperienceSettingPage_MinimizeToSystemTray {
@@ -2912,15 +2903,6 @@ namespace Starward.Language {
         public static string GachaStatsCard_MissStreak {
             get {
                 return ResourceManager.GetString("GachaStatsCard_MissStreak", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 The currently logged-in account is not saved. 的本地化字符串。
-        /// </summary>
-        public static string GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved {
-            get {
-                return ResourceManager.GetString("GameAccountSwitcher_TheCurrentlyLoggedInAccountIsNotSaved", resourceCulture);
             }
         }
         
@@ -5505,15 +5487,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Account switching cannot take effect while game is running. 的本地化字符串。
-        /// </summary>
-        public static string LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning {
-            get {
-                return ResourceManager.GetString("LauncherPage_AccountSwitchingCannotTakeEffectWhileGameIsRunning", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 If it is not the latest version, please modify the config.ini file in the game installation directory. 的本地化字符串。
         /// </summary>
         public static string LauncherPage_AlreadyTheLatestVersionDesc {
@@ -5807,15 +5780,6 @@ namespace Starward.Language {
         public static string LauncherPage_StartVerification {
             get {
                 return ResourceManager.GetString("LauncherPage_StartVerification", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Switch Account 的本地化字符串。
-        /// </summary>
-        public static string LauncherPage_SwitchAccount {
-            get {
-                return ResourceManager.GetString("LauncherPage_SwitchAccount", resourceCulture);
             }
         }
         
@@ -7068,15 +7032,6 @@ namespace Starward.Language {
         public static string SettingPage_RegisterURLProtocol {
             get {
                 return ResourceManager.GetString("SettingPage_RegisterURLProtocol", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Registry-based Game Account Switching Feature 的本地化字符串。
-        /// </summary>
-        public static string SettingPage_RegistryBasedGameAccountSwitchingFeature {
-            get {
-                return ResourceManager.GetString("SettingPage_RegistryBasedGameAccountSwitchingFeature", resourceCulture);
             }
         }
         
