@@ -360,6 +360,9 @@
   <data name="Common_Delete" xml:space="preserve">
     <value>Удалить</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>Загрузка</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>Удалены записи {0} гачи Uid {1}.</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1297,7 +1300,7 @@
     <value>Внешний вид</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>Управление файлами</value>
+    <value>Данные</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>Готово</value>
@@ -1584,7 +1587,7 @@
     <value>Цифра 0 означает отсутствие ограничений скорости.</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>Загрузка</value>
+    <value>Загрузка игры</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>Пауза</value>

@@ -328,7 +328,7 @@
                             <TextBlock FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
-                                   Text="{x:Bind lang:Lang.SettingPage_Download}" />
+                                   Text="{x:Bind lang:Lang.Common_Download}" />
                         </StackPanel>
                         <Grid Margin="0,2,0,0"
                           Visibility="{x:Bind DownloadBytesText, Converter={StaticResource ObjectToVisibilityConverter}}">

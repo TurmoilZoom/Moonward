@@ -360,6 +360,9 @@
   <data name="Common_Delete" xml:space="preserve">
     <value>削除</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>ダウンロード</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>UID {1} の {0} のガチャの記録を削除しました。</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1296,7 +1299,7 @@
     <value>外観</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>ファイルの管理</value>
+    <value>データ</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>完了</value>
@@ -1583,7 +1586,7 @@
     <value>0を入力した場合は速度制限を行いません。</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>ダウンロード</value>
+    <value>ゲームのダウンロード</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>一時停止</value>

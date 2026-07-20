@@ -419,6 +419,9 @@
   <data name="Common_Delete" xml:space="preserve">
     <value>删除</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>下载</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>已删除 UID {1} 的 {0} 条抽卡记录。</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1355,7 +1358,7 @@
     <value>外观</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>文件管理</value>
+    <value>数据</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>完成</value>
@@ -1642,7 +1645,7 @@
     <value>数字 0 代表不限速</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>下载</value>
+    <value>游戏下载</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>已暂停</value>

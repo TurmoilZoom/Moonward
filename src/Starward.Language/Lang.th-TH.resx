@@ -359,6 +359,9 @@
   <data name="Common_Delete" xml:space="preserve">
     <value>ลบ</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>ดาวน์โหลด</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>ลบประวัติการสุ่ม {0} ครั้งของ UID {1}</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1296,7 +1299,7 @@
     <value>ลักษณะที่ปรากฏ</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>การจัดการไฟล์</value>
+    <value>ข้อมูล</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>เสร็จสิ้น</value>
@@ -1583,7 +1586,7 @@
     <value>เลข 0 หมายถึงไม่จำกัดความเร็ว</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>ดาวน์โหลด</value>
+    <value>ดาวน์โหลดเกม</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>หยุดชั่วคราว</value>

@@ -360,6 +360,9 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="Common_Delete" xml:space="preserve">
     <value>Cancella</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>Scarica</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>Eliminato {0} gacha record di UID {1}.</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1297,7 +1300,7 @@ Accetti il rischio e desideri continuare?</value>
     <value>Aspetto</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>Gestore file</value>
+    <value>Dati</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>Completato</value>
@@ -1584,7 +1587,7 @@ Accetti il rischio e desideri continuare?</value>
     <value>Il numero 0 significa nessun limite di velocità.</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>Scarica</value>
+    <value>Download di gioco</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>In pausa</value>

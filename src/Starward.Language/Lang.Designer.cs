@@ -789,6 +789,15 @@ namespace Starward.Language {
                 return ResourceManager.GetString("Common_Delete", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Download 的本地化字符串。
+        /// </summary>
+        public static string Common_Download {
+            get {
+                return ResourceManager.GetString("Common_Download", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Disabled 的本地化字符串。
@@ -6847,7 +6856,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Download 的本地化字符串。
+        ///   查找类似 Game Download 的本地化字符串。
         /// </summary>
         public static string SettingPage_Download {
             get {
@@ -6901,7 +6910,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 File Management 的本地化字符串。
+        ///   查找类似 Data 的本地化字符串。
         /// </summary>
         public static string SettingPage_FileManagement {
             get {

@@ -419,6 +419,9 @@ closing the program during decompression will cause game file corruption.</value
   <data name="Common_Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>Deleted {0} gacha record(s) of UID {1}.</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1355,7 +1358,7 @@ Do you accept the risk and continue to use it?</value>
     <value>Appearance</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>File Management</value>
+    <value>Data</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>Completed</value>
@@ -1642,7 +1645,7 @@ Do you accept the risk and continue to use it?</value>
     <value>The number 0 means no speed limit.</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>Download</value>
+    <value>Game Download</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>Paused</value>

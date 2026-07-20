@@ -360,6 +360,9 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="Common_Delete" xml:space="preserve">
     <value>Xoá</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>Tải về</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>Đã xoá {0} bản ghi gacha của UID {1}.</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1297,7 +1300,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Hiển thị</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>Quản lí tập tin</value>
+    <value>Dữ liệu</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>Hoàn thành</value>
@@ -1584,7 +1587,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Nhập 0 để không giới hạn.</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>Tải về</value>
+    <value>Tải game</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>Tạm dừng</value>

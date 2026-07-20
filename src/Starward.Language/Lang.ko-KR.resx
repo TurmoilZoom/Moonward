@@ -360,6 +360,9 @@
   <data name="Common_Delete" xml:space="preserve">
     <value>삭제</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>다운로드</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>Uid {1} 의 뽑기기록  {0} 건이 삭제되었습니다.</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1297,7 +1300,7 @@
     <value>표시</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>파일 관리</value>
+    <value>데이터</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>완료</value>
@@ -1584,7 +1587,7 @@
     <value>속도 제한을 해제하시려면 0을 입력하세요.</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>다운로드</value>
+    <value>게임 다운로드</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>일시 정지됨</value>

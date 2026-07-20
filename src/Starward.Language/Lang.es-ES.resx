@@ -360,6 +360,9 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="Common_Delete" xml:space="preserve">
     <value>Eliminar</value>
   </data>
+  <data name="Common_Download" xml:space="preserve">
+    <value>Descargar</value>
+  </data>
   <data name="GachaLogPage_DeletedGachaRecordsOfUid" xml:space="preserve">
     <value>Se eliminaron {0} registro(s) de gacha del UID {1}.</value>
     <comment>{0} = {count} ,  {1} = {uid}</comment>
@@ -1297,7 +1300,7 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Apariencia</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>Gestión de archivos</value>
+    <value>Datos</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>Completado</value>
@@ -1584,7 +1587,7 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>El número 0 significa que no hay límite de velocidad.</value>
   </data>
   <data name="SettingPage_Download" xml:space="preserve">
-    <value>Descargar</value>
+    <value>Descarga de juegos</value>
   </data>
   <data name="DownloadGamePage_Paused" xml:space="preserve">
     <value>Pausado</value>

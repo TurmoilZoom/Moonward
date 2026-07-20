@@ -298,7 +298,7 @@ public sealed partial class AppBackground : UserControl
                 InAppToast.MainWindow?.ShowWithButton(InfoBarSeverity.Warning,
                                                       Lang.AppBackground_ImageDecodingFailed,
                                                       Lang.AppBackground_PleaseInstallTheWebPImageExtension,
-                                                      Lang.SettingPage_Download,
+                                                      Lang.Common_Download,
                                                       async () => await Launcher.LaunchUriAsync(new("https://apps.microsoft.com/detail/9pg2dk419drg")));
             }
             else
@@ -535,7 +535,7 @@ public sealed partial class AppBackground : UserControl
         _logger.LogError(args.ExtendedErrorCode, "Media player failed.");
         if (_needToInstallVp9VideoExtension)
         {
-            InAppToast.MainWindow?.ShowWithButton(InfoBarSeverity.Warning, null, Lang.AppBackground_VideoDecodingFailedPleaseInstallTheVP9VideoExtensions, Lang.SettingPage_Download, async () => await Launcher.LaunchUriAsync(new("https://apps.microsoft.com/detail/9n4d0msmp0pt")));
+            InAppToast.MainWindow?.ShowWithButton(InfoBarSeverity.Warning, null, Lang.AppBackground_VideoDecodingFailedPleaseInstallTheVP9VideoExtensions, Lang.Common_Download, async () => await Launcher.LaunchUriAsync(new("https://apps.microsoft.com/detail/9n4d0msmp0pt")));
             _needToInstallVp9VideoExtension = false;
         }
         else
@@ -862,7 +862,7 @@ public sealed partial class AppBackground : UserControl
     {
         if (!_vp9DecoderSuggested)
         {
-            InAppToast.MainWindow?.ShowWithButton(InfoBarSeverity.Warning, null, Lang.ItIsRecommendedToInstallTheVP9VideoExtensionsToReduceCPUUsage, Lang.SettingPage_Download, async () => await Launcher.LaunchUriAsync(new("https://apps.microsoft.com/detail/9n4d0msmp0pt")));
+            InAppToast.MainWindow?.ShowWithButton(InfoBarSeverity.Warning, null, Lang.ItIsRecommendedToInstallTheVP9VideoExtensionsToReduceCPUUsage, Lang.Common_Download, async () => await Launcher.LaunchUriAsync(new("https://apps.microsoft.com/detail/9n4d0msmp0pt")));
             _vp9DecoderSuggested = true;
         }
     }
