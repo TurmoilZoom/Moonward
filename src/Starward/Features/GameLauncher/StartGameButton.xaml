@@ -264,20 +264,23 @@
 
 
 
-            <!--  游戏信息 / 下载进度  -->
+            <!--  游戏信息 / 下载进度：安装中固定展示；运行中仍悬停展示；锚点/宽/底边间距对齐汉堡菜单；内容不可命中  -->
             <Popup x:Name="Popup_GameInfoOrDownloadProgress"
-               DesiredPlacement="Top"
-               PlacementTarget="{x:Bind Grid_Root}"
-               VerticalOffset="-4">
-                <Grid MinWidth="200"
-                  MaxWidth="260"
+               DesiredPlacement="TopEdgeAlignedRight"
+               PlacementTarget="{x:Bind Button_Menu}"
+               ShouldConstrainToRootBounds="True"
+               VerticalOffset="-8">
+                <!--  Width=240 与 StartGameMenu 一致；相对 Button_Menu 右对齐，底边间距与快速菜单相同  -->
+                <Grid Width="240"
                   Padding="20,12,20,12"
                   Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
-                  CornerRadius="8">
+                  CornerRadius="8"
+                  IsHitTestVisible="False">
                     <!--  游戏信息  -->
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            IsTextScaleFactorEnabled="False"
                            Text="{x:Bind RunningGameInfo}"
+                           TextWrapping="Wrap"
                            Visibility="{x:Bind GameStateIsInstalling, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
 
                     <StackPanel Visibility="{x:Bind GameStateIsInstalling, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -327,8 +330,7 @@
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind lang:Lang.SettingPage_Download}" />
                         </StackPanel>
-                        <Grid Width="200"
-                          Margin="0,2,0,0"
+                        <Grid Margin="0,2,0,0"
                           Visibility="{x:Bind DownloadBytesText, Converter={StaticResource ObjectToVisibilityConverter}}">
                             <TextBlock FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -356,8 +358,7 @@
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind lang:Lang.StartGameButton_Install}" />
                         </StackPanel>
-                        <Grid Width="200"
-                          Margin="0,2,0,0"
+                        <Grid Margin="0,2,0,0"
                           Visibility="{x:Bind InstallBytesText, Converter={StaticResource ObjectToVisibilityConverter}}">
                             <TextBlock FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -372,8 +373,7 @@
                         </Grid>
 
                         <!--  校验进度  -->
-                        <Grid Width="200"
-                          Margin="0,12,0,0"
+                        <Grid Margin="0,12,0,0"
                           Visibility="{x:Bind VerifySpeedText, Converter={StaticResource ObjectToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <FontIcon FontSize="12"

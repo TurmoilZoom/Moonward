@@ -133,15 +133,16 @@
         </Button>
 
 
-        <!--  下载进度  -->
+        <!--  下载进度：进行中固定展示；右对齐；内容不可命中以免挡点击  -->
         <Popup x:Name="Popup_DownloadProgress"
-               DesiredPlacement="Top"
+               DesiredPlacement="TopEdgeAlignedRight"
                PlacementTarget="{x:Bind Grid_Root}">
             <Border MinWidth="200"
                     MaxWidth="240"
                     Padding="20,12,20,12"
                     Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
-                    CornerRadius="8">
+                    CornerRadius="8"
+                    IsHitTestVisible="False">
                 <StackPanel>
                     <!--  下载状态  -->
                     <TextBlock FontSize="14"

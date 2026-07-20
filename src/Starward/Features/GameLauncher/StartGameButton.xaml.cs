@@ -88,6 +88,7 @@ public sealed partial class StartGameButton : UserControl
         DisableMenuPointerTracking();
         QuickMenu.RequestClose -= CloseQuickMenu;
         QuickMenu.ChildPopupOpenChanged -= QuickMenu_ChildPopupOpenChanged;
+        Popup_GameInfoOrDownloadProgress.IsOpen = false;
     }
 
 
@@ -674,6 +675,36 @@ public sealed partial class StartGameButton : UserControl
         OnPropertyChanged(nameof(StartGameButtonText));
         UpdateButtonForeground();
         UpdateEffectsState();
+        // 进入 Installing 即固定打开进度框；离开安装态时关闭（运行中改由悬停控制）。
+        UpdateGameInfoOrDownloadProgressPopup();
+    }
+
+
+    /// <summary>
+    /// 安装中固定展示进度信息框；游戏运行中仅在指针悬停根区域时展示；其余状态关闭。
+    /// </summary>
+    /// <param name="pointerOverRoot">
+    /// 指针是否位于胶囊根区域。仅影响 <see cref="GameState.GameIsRunning"/>：
+    /// 传入时按悬停开关；为 <see langword="null"/> 时不改运行中 Popup 状态
+    /// （避免 <see cref="UpdateActionButtonState"/> 因按钮悬停刷新而误关）。
+    /// </param>
+    private void UpdateGameInfoOrDownloadProgressPopup(bool? pointerOverRoot = null)
+    {
+        if (GameState is GameState.Installing)
+        {
+            Popup_GameInfoOrDownloadProgress.IsOpen = true;
+        }
+        else if (GameState is GameState.GameIsRunning)
+        {
+            if (pointerOverRoot.HasValue)
+            {
+                Popup_GameInfoOrDownloadProgress.IsOpen = pointerOverRoot.Value;
+            }
+        }
+        else
+        {
+            Popup_GameInfoOrDownloadProgress.IsOpen = false;
+        }
     }
 
 
@@ -704,7 +735,7 @@ public sealed partial class StartGameButton : UserControl
 
 
     /// <summary>
-    /// 胶囊根 Grid 或主按钮指针进入：运行中/安装中时打开信息 Popup；主按钮进入时标记悬停。
+    /// 胶囊根 Grid 或主按钮指针进入：运行中按悬停打开信息 Popup（安装中已固定展示）；主按钮进入时标记悬停。
     /// </summary>
     /// <param name="sender"><see cref="Grid_Root"/> 或 <see cref="Button_GameAction"/>。</param>
     /// <param name="e">指针路由事件参数。</param>
@@ -712,10 +743,7 @@ public sealed partial class StartGameButton : UserControl
     {
         if (sender as Grid == Grid_Root)
         {
-            if (GameState is GameState.GameIsRunning or GameState.Installing)
-            {
-                Popup_GameInfoOrDownloadProgress.IsOpen = true;
-            }
+            UpdateGameInfoOrDownloadProgressPopup(pointerOverRoot: true);
         }
         else if (sender as Button == Button_GameAction)
         {
@@ -725,7 +753,7 @@ public sealed partial class StartGameButton : UserControl
 
 
     /// <summary>
-    /// 胶囊根 Grid 或主按钮指针离开：关闭信息 Popup；主按钮离开时取消悬停标记。
+    /// 胶囊根 Grid 或主按钮指针离开：运行中关闭信息 Popup（安装中保持打开）；主按钮离开时取消悬停标记。
     /// </summary>
     /// <param name="sender"><see cref="Grid_Root"/> 或 <see cref="Button_GameAction"/>。</param>
     /// <param name="e">指针路由事件参数。</param>
@@ -733,7 +761,7 @@ public sealed partial class StartGameButton : UserControl
     {
         if (sender as Grid == Grid_Root)
         {
-            Popup_GameInfoOrDownloadProgress.IsOpen = false;
+            UpdateGameInfoOrDownloadProgressPopup(pointerOverRoot: false);
         }
         else if (sender as Button == Button_GameAction)
         {
@@ -902,7 +930,6 @@ public sealed partial class StartGameButton : UserControl
             ErrorMessage = null;
             ProgressRingValue = 100;
             ProgressPercentText = "100%";
-            Popup_GameInfoOrDownloadProgress.IsOpen = false;
         }
         else
         {
@@ -911,6 +938,8 @@ public sealed partial class StartGameButton : UserControl
             VerifySpeedText = null;
             RemainTimeText = "--:--:--";
         }
+        // 安装会话内始终固定展示；Finish 后 GameState 会离开 Installing 并由 UpdateActionButtonState 关闭。
+        UpdateGameInfoOrDownloadProgressPopup();
     }
 
 

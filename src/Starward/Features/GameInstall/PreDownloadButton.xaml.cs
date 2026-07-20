@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Starward.RPC.GameInstall;
@@ -17,6 +18,7 @@ public sealed partial class PreDownloadButton : UserControl
     public PreDownloadButton()
     {
         this.InitializeComponent();
+        this.Unloaded += (_, _) => Popup_DownloadProgress.IsOpen = false;
     }
 
 
@@ -149,10 +151,8 @@ public sealed partial class PreDownloadButton : UserControl
     {
         PointerOver = true;
         UpdateButtonState();
-        if (IsPredownloadFinished || State is not GameInstallState.Stop)
-        {
-            Popup_DownloadProgress.IsOpen = true;
-        }
+        // 进行中已固定展示；此处再同步一次，避免状态刚切换时漏开。
+        UpdateDownloadProgressPopup();
     }
 
 
@@ -161,7 +161,8 @@ public sealed partial class PreDownloadButton : UserControl
     {
         PointerOver = false;
         UpdateButtonState();
-        Popup_DownloadProgress.IsOpen = false;
+        // 进行中保持打开，不因指针离开而关闭。
+        UpdateDownloadProgressPopup();
     }
 
 
@@ -172,6 +173,20 @@ public sealed partial class PreDownloadButton : UserControl
         OnPropertyChanged(nameof(ButtonIcon));
         OnPropertyChanged(nameof(ButtonText));
         OnPropertyChanged(nameof(InstallStateText));
+        UpdateDownloadProgressPopup();
+    }
+
+
+    /// <summary>
+    /// 预下载进行中固定展示进度信息框；未开始或已完成时关闭。
+    /// </summary>
+    private void UpdateDownloadProgressPopup()
+    {
+        // 完成态与 Stop（尚未开始/已结束清理）不展示；其余活跃状态固定打开。
+        bool active = !IsPredownloadFinished
+            && State is not GameInstallState.Stop
+            && State is not GameInstallState.Finish;
+        Popup_DownloadProgress.IsOpen = active;
     }
 
 
