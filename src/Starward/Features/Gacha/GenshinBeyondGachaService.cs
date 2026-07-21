@@ -266,7 +266,11 @@ internal class GenshinBeyondGachaService
         {
             stats.Pity_4 = 0;
         }
-        stats.Average_4 = (double)(stats.Count - stats.Pity_4) / stats.Count_4;
+        // 无 4 星样本时不计算平均，避免 NaN；展示侧用 Average_4_Text 显示「—」
+        if (stats.Count_4 > 0)
+        {
+            stats.Average_4 = (double)(stats.Count - stats.Pity_4) / stats.Count_4;
+        }
         stats.Pity_3 = list.Count - 1 - list.FindLastIndex(x => x.RankType == 3);
         int pity_3 = 0;
         foreach (var item in list)
@@ -347,7 +351,11 @@ internal class GenshinBeyondGachaService
         {
             stats.Pity_5 = 0;
         }
-        stats.Average_5 = (double)(stats.Count - stats.Pity_5) / stats.Count_5;
+        // 无 5 星样本时不计算平均，避免 NaN；展示侧用 Average_5_Text 显示「—」
+        if (stats.Count_5 > 0)
+        {
+            stats.Average_5 = (double)(stats.Count - stats.Pity_5) / stats.Count_5;
+        }
         stats.Pity_4 = list.Count - 1 - list.FindLastIndex(x => x.RankType == 4);
         int pity_4 = 0;
         foreach (var item in list)
@@ -518,6 +526,16 @@ public class GenshinBeyondGachaTypeStats
     public double Average_5 { get; set; }
 
     public double Average_4 { get; set; }
+
+    /// <summary>
+    /// 5 星平均抽数展示文本：有样本时形如「62.50」，无样本时为「—」。
+    /// </summary>
+    public string Average_5_Text => Count_5 == 0 ? "—" : $"{Average_5:F2}";
+
+    /// <summary>
+    /// 4 星平均抽数展示文本：有样本时形如「8.50」，无样本时为「—」。
+    /// </summary>
+    public string Average_4_Text => Count_4 == 0 ? "—" : $"{Average_4:F2}";
 
     public List<GenshinBeyondGachaItemEx> List_5 { get; set; }
 

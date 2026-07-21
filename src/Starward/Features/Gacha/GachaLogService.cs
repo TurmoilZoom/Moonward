@@ -385,7 +385,11 @@ internal abstract class GachaLogService
                 {
                     stats.Pity_5 = 0;
                 }
-                stats.Average_5 = (double)(stats.Count - stats.Pity_5) / stats.Count_5;
+                // 无 5 星样本时不计算平均，避免 NaN；展示侧用 Average_5_Text 显示「—」
+                if (stats.Count_5 > 0)
+                {
+                    stats.Average_5 = (double)(stats.Count - stats.Pity_5) / stats.Count_5;
+                }
                 stats.Pity_4 = list.Count - 1 - list.FindLastIndex(x => x.RankType == 4);
 
                 if (stats.Count_5_Up > 0)

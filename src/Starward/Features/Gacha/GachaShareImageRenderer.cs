@@ -289,7 +289,7 @@ internal static class GachaShareImageRenderer
 
         // 5★/S 平均
         string averageLeft = $"{rarityLabel}{Lang.GachaStatsCard_Average}{stats.Avarage_5_Desc_Text}";
-        string averageRight = $"{stats.Average_5:F2}{stats.Avarage_5_Up_Text}";
+        string averageRight = $"{stats.Average_5_Text}{stats.Avarage_5_Up_Text}";
         DrawText(ds, averageLeft, x, y, bodyFormat, RarityAverage);
         DrawText(ds, averageRight, rightX - MeasureTextWidth(ds, averageRight, bodyFormat), y, bodyFormat, RarityAverage);
         y += 20f + RowSpacing;

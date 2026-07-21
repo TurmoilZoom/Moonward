@@ -160,7 +160,7 @@ public class GachaTypeStats
     /// <summary>
     /// 5 星平均抽数（不含当前 pity 的平均）。
     /// 计算公式：(Count - Pity_5) / Count_5
-    /// 当 Count_5 为 0 时会产生除零，实际使用中通常有值或由 UI 处理。
+    /// 当 <see cref="Count_5"/> 为 0 时无意义，展示请用 <see cref="Average_5_Text"/>。
     /// </summary>
     public double Average_5 { get; set; }
 
@@ -181,6 +181,11 @@ public class GachaTypeStats
     /// ZZZ 中为 A 级记录。
     /// </summary>
     public List<GachaLogItemEx> List_4 { get; set; }
+
+    /// <summary>
+    /// 5 星平均抽数展示文本：有 5 星时形如「62.50」，无样本时为「—」（与 <see cref="FiftyFiftyNoUpText"/> 一致）。
+    /// </summary>
+    public string Average_5_Text => Count_5 == 0 ? "—" : $"{Average_5:F2}";
 
     /// <summary>
     /// 5 星平均抽数描述文本的后缀。

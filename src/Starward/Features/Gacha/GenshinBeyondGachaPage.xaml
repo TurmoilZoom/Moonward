@@ -224,7 +224,7 @@
                         <TextBlock Grid.Row="3"
                                    HorizontalAlignment="Right"
                                    Foreground="{ThemeResource Rarity4ForegroundBrush}">
-                            <Run Text="{x:Bind GachaStatsType1000.Average_4.ToString('F2', x:Null)}" />
+                            <Run Text="{x:Bind GachaStatsType1000.Average_4_Text}" />
                         </TextBlock>
 
                         <!--  4★ 统计  -->
@@ -397,7 +397,7 @@
                         <TextBlock Grid.Row="3"
                                    HorizontalAlignment="Right"
                                    Foreground="{ThemeResource Rarity5ForegroundBrush}">
-                            <Run Text="{x:Bind GachaStatsType2000.Average_5.ToString('F2', x:Null)}" />
+                            <Run Text="{x:Bind GachaStatsType2000.Average_5_Text}" />
                         </TextBlock>
 
                         <!--  5★ 统计  -->

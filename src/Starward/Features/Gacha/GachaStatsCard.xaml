@@ -105,7 +105,7 @@
         <TextBlock Grid.Row="3"
                    HorizontalAlignment="Right"
                    Foreground="{ThemeResource Rarity2ForegroundBrush}">
-            <Run Text="{x:Bind WarpTypeStats.Average_5.ToString('F2', x:Null)}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Up_Text}" />
+            <Run Text="{x:Bind WarpTypeStats.Average_5_Text}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Up_Text}" />
         </TextBlock>
 
         <!--  5★ 统计（非 UP 卡池显示）；UP 卡池此行改为显示「不歪概率」，二者互斥同占第 4 行  -->
