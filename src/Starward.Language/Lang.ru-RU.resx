@@ -287,6 +287,33 @@
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
     <value>Синхронизировать всё с Miyoushe</value>
   </data>
+  <data name="GachaLogPage_UpdateItemIconsAndLanguageText" xml:space="preserve">
+    <value>Update item icons and language text</value>
+  </data>
+  <data name="GachaLogPage_UpdatingItemIcons" xml:space="preserve">
+    <value>Обновление иконок предметов…</value>
+  </data>
+  <data name="GachaLogPage_FetchingItemInfoLanguage" xml:space="preserve">
+    <value>Получение данных предметов ({0})…</value>
+  </data>
+  <data name="GachaLogPage_UpdateIconsSucceeded" xml:space="preserve">
+    <value>Обновлено предметов: {0} (языков: {1})</value>
+  </data>
+  <data name="GachaLogPage_UpdateIconsNoItemData" xml:space="preserve">
+    <value>Данные предметов не получены. Войдите снова на странице игровых записей.</value>
+  </data>
+  <data name="GachaLogPage_UpdateIconsFallbackToCdn" xml:space="preserve">
+    <value>Cultivate API risk control triggered; falling back to static metadata…</value>
+  </data>
+  <data name="GachaLogPage_UpdateIconsSucceededViaCdn" xml:space="preserve">
+    <value>Updated {0} items via fallback metadata (cultivate API was blocked by risk control).</value>
+  </data>
+  <data name="GachaLogPage_UpdateIconsRiskControlTitle" xml:space="preserve">
+    <value>Risk control</value>
+  </data>
+  <data name="GachaLogPage_UpdateIconsRiskControl" xml:space="preserve">
+    <value>The cultivate-tool API triggered risk control ({0}). This is unrelated to Game Record verification. Try again later, or use the toolbox “ZZZ Gacha Item Images”.</value>
+  </data>
   <data name="GachaLogPage_InputURL" xml:space="preserve">
     <value>Входной URL-адрес</value>
   </data>

@@ -301,7 +301,7 @@ public sealed partial class SignInButton : UserControl
         }
         catch (HttpRequestException ex)
         {
-            ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.SignIn));
+            ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.SignIn), _signInGameBiz);
             _logger.LogError(ex, "Claim sign-in failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
         }
         catch (Exception ex)
@@ -345,7 +345,7 @@ public sealed partial class SignInButton : UserControl
         }
         catch (HttpRequestException ex)
         {
-            ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.SignIn));
+            ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.SignIn), _signInGameBiz);
             _logger.LogError(ex, "Claim re-sign-in failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
         }
         catch (Exception ex)
@@ -362,7 +362,7 @@ public sealed partial class SignInButton : UserControl
     /// </summary>
     /// <param name="result">签到 / 补签操作结果。</param>
     /// <param name="isResign">是否为补签操作，影响标题文案。</param>
-    private static void ShowResultToast(SignInActionResponse result, bool isResign)
+    private void ShowResultToast(SignInActionResponse result, bool isResign)
     {
         var toast = InAppToast.MainWindow;
         if (toast is null)
@@ -370,6 +370,7 @@ public sealed partial class SignInButton : UserControl
             return;
         }
         string actionTitle = isResign ? Lang.SignInButton_ReSign : Lang.SignInButton_SignIn;
+        GameBiz biz = _signInGameBiz;
         switch (result.Kind)
         {
             case SignInActionResult.Success:
@@ -379,10 +380,10 @@ public sealed partial class SignInButton : UserControl
                 toast.Information(actionTitle, FormatResultMessage(Lang.SignInButton_AlreadySignedToday, result.ReturnCode));
                 break;
             case SignInActionResult.CookieExpired:
-                ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(new miHoYoApiException(result.ReturnCode ?? SignInReturnCode.NotLoggedIn, result.ResponseMessage), MiHoYoApiContext.SignIn));
+                ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(new miHoYoApiException(result.ReturnCode ?? SignInReturnCode.NotLoggedIn, result.ResponseMessage), MiHoYoApiContext.SignIn), biz);
                 break;
             case SignInActionResult.RiskControl:
-                toast.ShowWithButton(InfoBarSeverity.Warning, actionTitle, Lang.SignInButton_RiskControl, Lang.HoyolabToolboxPage_VerifyAccount, () => WeakReferenceMessenger.Default.Send(new GameRecordVerifyAccountMessage()));
+                toast.ShowWithButton(InfoBarSeverity.Warning, actionTitle, Lang.SignInButton_RiskControl, Lang.HoyolabToolboxPage_VerifyAccount, () => GameRecordAccountRecovery.RequestVerifyAccount(biz));
                 break;
             case SignInActionResult.NotEnoughCoin:
                 toast.Warning(actionTitle, FormatResultMessage(Lang.SignInButton_NotEnoughCoin, result.ReturnCode));
@@ -397,7 +398,7 @@ public sealed partial class SignInButton : UserControl
                 toast.Warning(actionTitle, FormatResultMessage(Lang.SignInButton_PleaseSignInFirst, result.ReturnCode));
                 break;
             default:
-                ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(new miHoYoApiException(result.ReturnCode ?? -1, result.ResponseMessage ?? Lang.SignInButton_SignInFailed), MiHoYoApiContext.SignIn));
+                ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(new miHoYoApiException(result.ReturnCode ?? -1, result.ResponseMessage ?? Lang.SignInButton_SignInFailed), MiHoYoApiContext.SignIn), biz);
                 break;
         }
     }
@@ -408,17 +409,18 @@ public sealed partial class SignInButton : UserControl
     /// 显示签到请求的统一 API 反馈，并复用战绩登录和账号验证入口。
     /// </summary>
     /// <param name="feedback">已分类的 API 错误反馈。</param>
-    private static void ShowApiFeedback(MiHoYoApiErrorFeedback feedback)
+    /// <param name="preferredBiz">验证账号时优先使用的游戏区服。</param>
+    private static void ShowApiFeedback(MiHoYoApiErrorFeedback feedback, GameBiz? preferredBiz = null)
     {
         MiHoYoApiErrorFeedbackFactory.Show(feedback, action =>
         {
             if (action is MiHoYoApiRecoveryAction.Relogin)
             {
-                WeakReferenceMessenger.Default.Send(new GameRecordOpenLoginMessage());
+                GameRecordAccountRecovery.RequestOpenLogin();
             }
             else if (action is MiHoYoApiRecoveryAction.VerifyAccount)
             {
-                WeakReferenceMessenger.Default.Send(new GameRecordVerifyAccountMessage());
+                GameRecordAccountRecovery.RequestVerifyAccount(preferredBiz);
             }
         });
     }

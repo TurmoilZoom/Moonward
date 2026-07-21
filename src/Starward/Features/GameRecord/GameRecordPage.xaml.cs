@@ -115,19 +115,14 @@ public sealed partial class GameRecordPage : PageBase
         });
         WeakReferenceMessenger.Default.Register<GameRecordVerifyAccountMessage>(this, (r, m) =>
         {
-            ShowBattleChronicleWindow();
+            // 与 GameRecordAccountRecovery 一致：不依赖本页 CurrentRole 也可打开验证窗
+            GameRecordAccountRecovery.RequestVerifyAccount(CurrentGameBiz);
         });
         WeakReferenceMessenger.Default.Register<GameRecordOpenLoginMessage>(this, (r, m) =>
         {
-            // 子页面只知道接口错误；国服弹出登录菜单，国际服无验证码则直接进网页登录。
-            if (_gameRecordService.IsHoyolab)
-            {
-                WebLogin();
-            }
-            else
-            {
-                OpenLoginMenu();
-            }
+            // 消费跨页挂起标志；国服弹出登录菜单，国际服无验证码则直接进网页登录。
+            GameRecordAccountRecovery.ConsumePendingOpenLogin();
+            OpenLoginForRecovery();
         });
 
         await Task.Delay(16);
@@ -140,6 +135,12 @@ public sealed partial class GameRecordPage : PageBase
             await UpdateDeviceInfoAsync();
             await RefreshGameRoleHeadIconSilentlyAsync();
             NavigateToDefaultPage();
+        }
+
+        // 从抽卡页等非战绩页触发「重新登录」时：导航后挂起标志在此消费并打开登录
+        if (GameRecordAccountRecovery.ConsumePendingOpenLogin())
+        {
+            OpenLoginForRecovery();
         }
     }
 
@@ -412,6 +413,22 @@ public sealed partial class GameRecordPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Open login menu");
+        }
+    }
+
+
+    /// <summary>
+    /// 错误恢复 / 跨页重新登录入口：国际服直接网页登录，国服弹登录菜单。
+    /// </summary>
+    private void OpenLoginForRecovery()
+    {
+        if (_gameRecordService.IsHoyolab)
+        {
+            WebLogin();
+        }
+        else
+        {
+            OpenLoginMenu();
         }
     }
 
@@ -841,20 +858,22 @@ public sealed partial class GameRecordPage : PageBase
 
     /// <summary>
     /// 统一处理战绩相关的 <see cref="miHoYoApiException"/>，并提供站内登录或验证恢复入口。
+    /// 恢复动作不依赖本页是否已加载（抽卡页、启动器等也可点按钮生效）。
     /// </summary>
     /// <param name="ex">米哈游 API 异常。</param>
-    public static void HandleMiHoYoApiException(miHoYoApiException ex)
+    /// <param name="preferredBiz">验证账号时优先使用的游戏区服；为 null 时自动选取任意角色。</param>
+    public static void HandleMiHoYoApiException(miHoYoApiException ex, GameBiz? preferredBiz = null)
     {
         var feedback = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GameRecord);
         MiHoYoApiErrorFeedbackFactory.Show(feedback, action =>
         {
             if (action is MiHoYoApiRecoveryAction.Relogin)
             {
-                WeakReferenceMessenger.Default.Send(new GameRecordOpenLoginMessage());
+                GameRecordAccountRecovery.RequestOpenLogin();
             }
             else if (action is MiHoYoApiRecoveryAction.VerifyAccount)
             {
-                WeakReferenceMessenger.Default.Send(new GameRecordVerifyAccountMessage());
+                GameRecordAccountRecovery.RequestVerifyAccount(preferredBiz);
             }
         });
     }
@@ -872,7 +891,7 @@ public sealed partial class GameRecordPage : PageBase
         {
             if (action is MiHoYoApiRecoveryAction.Relogin)
             {
-                WeakReferenceMessenger.Default.Send(new GameRecordOpenLoginMessage());
+                GameRecordAccountRecovery.RequestOpenLogin();
             }
         });
     }

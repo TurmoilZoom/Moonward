@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Starward.Core;
+using Starward.Core.Gacha.ZZZ;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.BH3.DailyNote;
 using Starward.Core.GameRecord.Genshin.DailyNote;
@@ -1439,6 +1440,32 @@ internal class GameRecordService
             await UpdateDeviceFpAsync(cancellationToken: cancellationToken);
         }
         return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZGachaRecordAsync(role, gachaType, endId, language, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 通过养成指南 icon_info + item_list 获取绝区零抽卡物品元数据（名称、图标、稀有度等）。
+    /// 任意已登录绝区零角色即可；国际服语言由 <paramref name="language"/> 控制。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">期望语言；国服通常仅中文名称，国际服可切换。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>合并后的 wiki（含 Language 与 List）。</returns>
+    public async Task<ZZZGachaWiki> GetZZZGachaWikiFromCultivateToolAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(role);
+        bool isHoyolab = role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false;
+        IsHoyolab = isHoyolab;
+        string lang = LanguageUtil.FilterLanguage(language);
+        if (isHoyolab)
+        {
+            Language = lang;
+        }
+        else
+        {
+            await UpdateDeviceFpAsync(cancellationToken: cancellationToken);
+        }
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZGachaWikiAsync(role, lang, cancellationToken), cancellationToken);
     }
 
 

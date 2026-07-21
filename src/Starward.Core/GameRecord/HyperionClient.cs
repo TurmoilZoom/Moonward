@@ -1069,44 +1069,90 @@ public class HyperionClient : GameRecordClient
 
 
     /// <summary>
-    /// 养成指南，不可用，返回未登录错误
+    /// 国服养成指南 badge 登录，换取 <c>e_nap_token</c>。
+    /// 对齐 genshin.py：浏览器 UA、Gen2 DS、禁止 x-rpc-device_id（否则 -100 / 易触发 10035）。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="avatar_id"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [Obsolete("不可用，返回未登录错误", true)]
-    public override async Task<UpgradeGuideItemList> GetZZZUpgradeGuideItemListAsync(GameRecordRole role, int avatar_id = 1011, CancellationToken cancellationToken = default)
+    public override async Task<string> LoginZZZCultivateBadgeAsync(GameRecordRole role, string language, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(role);
+        string lang = LanguageUtil.FilterLanguage(language);
+        var body = new ZZZCultivateBadgeLoginBody
+        {
+            GameBiz = "nap_cn",
+            Lang = lang,
+            Region = role.Region,
+            Uid = role.Uid.ToString(),
+        };
+        const string url = "https://api-takumi.mihoyo.com/common/badge/v1/login/account";
+        string json = JsonSerializer.Serialize(body, typeof(ZZZCultivateBadgeLoginBody), GameRecordJsonContext.Default);
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(json, Encoding.UTF8, Application_Json),
+        };
+        request.Headers.Add(Cookie, role.Cookie);
+        request.Headers.Add(Referer, "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html");
+        request.Headers.Add("Origin", "https://act.mihoyo.com");
+        // genshin.py 对 CN act DS 头使用较低 app_version；过高 + BBS UA 易 10035
+        request.Headers.Add(x_rpc_app_version, "2.11.1");
+        request.Headers.Add(x_rpc_client_type, "5");
+        if (!string.IsNullOrWhiteSpace(DeviceFp))
+        {
+            request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        }
+        request.Headers.Add(DS, CreateSecret2(url, body));
+        var (wrapper, response) = await SendCultivateBadgeLoginAsync(request, cancellationToken);
+        if (wrapper is null)
+        {
+            throw new miHoYoApiException(-1, "Can not parse the response body.");
+        }
+        if (wrapper.Retcode != 0)
+        {
+            throw new miHoYoApiException(wrapper.Retcode, wrapper.Message);
+        }
+        return MergeCookieFromSetCookie(role.Cookie, response);
+    }
+
+
+    /// <summary>
+    /// 养成指南 item_list（国服 api-takumi）。须已合并 <c>e_nap_token</c>；禁止 x-rpc-device_id。
+    /// </summary>
+    public override async Task<UpgradeGuideItemList> GetZZZUpgradeGuideItemListAsync(GameRecordRole role, string cookie, int avatar_id = 1011, CancellationToken cancellationToken = default)
     {
         var url = $"https://api-takumi.mihoyo.com/event/nap_cultivate_tool/user/item_list?uid={role.Uid}&region={role.Region}&avatar_id={avatar_id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        return await CommonSendAsync<UpgradeGuideItemList>(request, cancellationToken);
+        request.Headers.Add(Cookie, cookie);
+        request.Headers.Add(Referer, "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html");
+        request.Headers.Add("Origin", "https://act.mihoyo.com");
+        request.Headers.Add(x_rpc_app_version, "2.11.1");
+        request.Headers.Add(x_rpc_client_type, "5");
+        if (!string.IsNullOrWhiteSpace(DeviceFp))
+        {
+            request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        }
+        request.Headers.Add(DS, CreateSecret2(url));
+        return await CommonSendCultivateAsync<UpgradeGuideItemList>(request, cancellationToken);
     }
 
 
 
     /// <summary>
-    /// 养成指南，不可用，返回未登录错误
+    /// 养成指南 icon_info（国服 api-takumi）。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [Obsolete("不可用，返回未登录错误", true)]
-    public override async Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    public override async Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, string cookie, CancellationToken cancellationToken = default)
     {
         var url = $"https://api-takumi.mihoyo.com/event/nap_cultivate_tool/user/icon_info?uid={role.Uid}&region={role.Region}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        return await CommonSendAsync<UpgradeGuidIconInfo>(request, cancellationToken);
+        request.Headers.Add(Cookie, cookie);
+        request.Headers.Add(Referer, "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html");
+        request.Headers.Add("Origin", "https://act.mihoyo.com");
+        request.Headers.Add(x_rpc_app_version, "2.11.1");
+        request.Headers.Add(x_rpc_client_type, "5");
+        if (!string.IsNullOrWhiteSpace(DeviceFp))
+        {
+            request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        }
+        request.Headers.Add(DS, CreateSecret2(url));
+        return await CommonSendCultivateAsync<UpgradeGuidIconInfo>(request, cancellationToken);
     }
 
 

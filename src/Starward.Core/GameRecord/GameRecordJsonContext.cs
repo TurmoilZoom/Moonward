@@ -46,6 +46,8 @@ namespace Starward.Core.GameRecord;
 [JsonSerializable(typeof(miHoYoApiWrapper<InterKnotReportDetail>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<UpgradeGuideItemList>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<UpgradeGuidIconInfo>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<object>))]
+[JsonSerializable(typeof(ZZZCultivateBadgeLoginBody))]
 [JsonSerializable(typeof(miHoYoApiWrapper<GenshinDailyNote>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<StarRailDailyNote>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ShiyuDefenseWrapper>))]

@@ -2727,6 +2727,87 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Update item icons and language text 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdateItemIconsAndLanguageText {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdateItemIconsAndLanguageText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Updating item icons… 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdatingItemIcons {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdatingItemIcons", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fetching item info ({0})… 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_FetchingItemInfoLanguage {
+            get {
+                return ResourceManager.GetString("GachaLogPage_FetchingItemInfoLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Updated {0} items ({1} languages) 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdateIconsSucceeded {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdateIconsSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No item data returned. Please re-login on the Game Record page. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdateIconsNoItemData {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdateIconsNoItemData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cultivate API risk control triggered; falling back to static metadata… 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdateIconsFallbackToCdn {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdateIconsFallbackToCdn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Updated {0} items via fallback metadata 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdateIconsSucceededViaCdn {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdateIconsSucceededViaCdn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Risk control 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdateIconsRiskControlTitle {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdateIconsRiskControlTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The cultivate-tool API triggered risk control 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UpdateIconsRiskControl {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UpdateIconsRiskControl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Update All 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_UpdateAll {

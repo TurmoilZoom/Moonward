@@ -56,6 +56,16 @@ public abstract class GameRecordClient
     protected const string x_rpc_client_type = "x-rpc-client_type";
     protected const string x_rpc_language = "X-Rpc-Language";
 
+    /// <summary>
+    /// 养成指南 H5 接口使用桌面浏览器 UA（勿用 BBS 手机 UA，易触发 10035 极验风控）。
+    /// </summary>
+    protected const string CultivateToolUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+    /// <summary>
+    /// 国际服 act 接口 Gen1 DS 盐（与 BBS/HoyolabClient.ApiSalt 不同）。
+    /// </summary>
+    protected const string CultivateToolDsSaltOverseas = "6s25p5ox5y14umn1p61aqyyvbvvl3lrt";
+
     #endregion
 
 
@@ -213,6 +223,55 @@ public abstract class GameRecordClient
     protected virtual async Task CommonSendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
         _ = await CommonSendAsync<object>(request, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 养成指南 / badge 接口发送：使用浏览器 UA，避免 BBS 客户端标识触发 act 风控。
+    /// </summary>
+    protected async Task<T> CommonSendCultivateAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default) where T : class
+    {
+        request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+        request.Headers.TryAddWithoutValidation(Accept, Application_Json);
+        // 覆盖或补齐为桌面浏览器 UA（勿用 miHoYoBBS 手机 UA）
+        request.Headers.Remove(UserAgent);
+        request.Headers.TryAddWithoutValidation(UserAgent, CultivateToolUserAgent);
+        var response = await _httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+#if DEBUG
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var responseData = JsonSerializer.Deserialize(content, typeof(miHoYoApiWrapper<T>), GameRecordJsonContext.Default) as miHoYoApiWrapper<T>;
+#else
+        var responseData = await response.Content.ReadFromJsonAsync(typeof(miHoYoApiWrapper<T>), GameRecordJsonContext.Default, cancellationToken) as miHoYoApiWrapper<T>;
+#endif
+        if (responseData is null)
+        {
+            throw new miHoYoApiException(-1, "Can not parse the response body.");
+        }
+        if (responseData.Retcode != 0)
+        {
+            throw new miHoYoApiException(responseData.Retcode, responseData.Message);
+        }
+        return responseData.Data;
+    }
+
+
+    /// <summary>
+    /// 养成指南 badge 登录发送：与 <see cref="CommonSendCultivateAsync{T}"/> 相同 UA，并返回响应以便合并 Set-Cookie。
+    /// </summary>
+    protected async Task<(miHoYoApiWrapper<object>? Wrapper, HttpResponseMessage Response)> SendCultivateBadgeLoginAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken = default)
+    {
+        request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+        request.Headers.TryAddWithoutValidation(Accept, Application_Json);
+        request.Headers.Remove(UserAgent);
+        request.Headers.TryAddWithoutValidation(UserAgent, CultivateToolUserAgent);
+        var response = await _httpClient.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var wrapper = JsonSerializer.Deserialize(content, typeof(miHoYoApiWrapper<object>), GameRecordJsonContext.Default) as miHoYoApiWrapper<object>;
+        return (wrapper, response);
     }
 
 
@@ -606,62 +665,195 @@ public abstract class GameRecordClient
 
 
     /// <summary>
-    /// 通过养成指南获取抽卡物品信息，不可用，返回未登录错误
+    /// 通过养成指南 <c>icon_info</c> + <c>item_list</c> 获取绝区零抽卡物品元数据（代理人/音擎/邦布：名称、图标、稀有度等）。
+    /// 需有效 Cookie 的战绩角色；会先 badge 登录换 <c>e_nap_token</c>。目录数据与 UID 无关。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [Obsolete("不可用，返回未登录错误", true)]
-    public Task<ZZZGachaWiki> GetZZZGachaWikiAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    /// <remarks>
+    /// 对齐 genshin.py：养成接口拒绝携带 <c>x-rpc-device_id</c>（会直接 -100），且必须先 POST badge/login 取得 <c>e_nap_token</c>。
+    /// </remarks>
+    /// <param name="role">已登录的绝区零角色（Uid / Region / Cookie）。</param>
+    /// <param name="language">期望语言（如 zh-cn、en-us）；国际服生效，国服通常仅返回中文名称。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>合并后的 <see cref="ZZZGachaWiki"/>（含 Language 与 List）。</returns>
+    public async Task<ZZZGachaWiki> GetZZZGachaWikiAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-        //var items = await GetZZZUpgradeGuideItemListAsync(role, cancellationToken: cancellationToken);
-        //var icons = await GetZZZUpgradeGuideIconInfoAsync(role, cancellationToken);
-        //var wiki = new ZZZGachaWiki
-        //{
-        //    Avatar = items.AvatarList.Select(x => new ZZZGachaInfo { Id = x.Id, Name = x.Name, Rarity = x.Rarity }).ToList(),
-        //    Weapon = items.Weapon.Select(x => new ZZZGachaInfo { Id = x.Id, Name = x.Name, Rarity = x.Rarity, Icon = x.Icon }).ToList(),
-        //    Buddy = items.BuddyList.Select(x => new ZZZGachaInfo { Id = x.Id, Name = x.Name, Rarity = x.Rarity }).ToList()
-        //};
-        //foreach (var item in wiki.Avatar)
-        //{
-        //    if (icons.AvatarIcon.TryGetValue(item.Id, out UpgradeGuidIconInfoItem? info))
-        //    {
-        //        item.Icon = info.SquareAvatar;
-        //    }
-        //}
-        //foreach (var item in wiki.Buddy)
-        //{
-        //    if (icons.BuddyIcon.TryGetValue(item.Id, out UpgradeGuidIconInfoItem? value))
-        //    {
-        //        item.Icon = value.SquareAvatar;
-        //    }
-        //}
-        //return wiki;
+        ArgumentNullException.ThrowIfNull(role);
+        string lang = LanguageUtil.FilterLanguage(language);
+        // badge 登录拿 e_nap_token；-100 时再刷一次 token 后重试（与 genshin.py 一致）
+        string cookie = await LoginZZZCultivateBadgeAsync(role, lang, cancellationToken);
+        try
+        {
+            return await FetchZZZGachaWikiWithCookieAsync(role, cookie, lang, cancellationToken);
+        }
+        catch (miHoYoApiException ex) when (ex.IsLoginExpired)
+        {
+            cookie = await LoginZZZCultivateBadgeAsync(role, lang, cancellationToken);
+            return await FetchZZZGachaWikiWithCookieAsync(role, cookie, lang, cancellationToken);
+        }
     }
 
 
-
-    /// <summary>
-    /// 养成指南，不可用，返回未登录错误
-    /// </summary>
-    /// <param name="role"></param>
-    /// <param name="avatar_id"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [Obsolete("不可用，返回未登录错误", true)]
-    public abstract Task<UpgradeGuideItemList> GetZZZUpgradeGuideItemListAsync(GameRecordRole role, int avatar_id = 1011, CancellationToken cancellationToken = default);
-
+    private async Task<ZZZGachaWiki> FetchZZZGachaWikiWithCookieAsync(GameRecordRole role, string cookie, string lang, CancellationToken cancellationToken)
+    {
+        var items = await GetZZZUpgradeGuideItemListAsync(role, cookie, cancellationToken: cancellationToken);
+        var icons = await GetZZZUpgradeGuideIconInfoAsync(role, cookie, cancellationToken);
+        return MergeZZZGachaWiki(items, icons, lang);
+    }
 
 
     /// <summary>
-    /// 养成指南，不可用，返回未登录错误
+    /// 养成指南 badge 登录：POST <c>common/badge/v1/login/account</c>，把响应 <c>Set-Cookie</c>（含 <c>e_nap_token</c>）合并进 Cookie。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [Obsolete("不可用，返回未登录错误", true)]
-    public abstract Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default);
+    /// <param name="role">已登录角色。</param>
+    /// <param name="language">语言代码。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>合并 e_nap_token 后的 Cookie 串。</returns>
+    public abstract Task<string> LoginZZZCultivateBadgeAsync(GameRecordRole role, string language, CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// 将响应 <c>Set-Cookie</c> 中的键值合并进基础 Cookie 串（同名覆盖）。
+    /// </summary>
+    protected static string MergeCookieFromSetCookie(string? baseCookie, HttpResponseMessage response)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (!string.IsNullOrWhiteSpace(baseCookie))
+        {
+            foreach (string part in baseCookie.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                int eq = part.IndexOf('=');
+                if (eq > 0)
+                {
+                    map[part[..eq].Trim()] = part[(eq + 1)..].Trim();
+                }
+            }
+        }
+        if (response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string>? setCookies))
+        {
+            foreach (string sc in setCookies)
+            {
+                // 仅取第一段 name=value，忽略 Path/Expires 等属性
+                string segment = sc.Split(';', 2)[0];
+                int eq = segment.IndexOf('=');
+                if (eq > 0)
+                {
+                    map[segment[..eq].Trim()] = segment[(eq + 1)..].Trim();
+                }
+            }
+        }
+        return string.Join("; ", map.Select(kv => $"{kv.Key}={kv.Value}"));
+    }
+
+
+    /// <summary>
+    /// 将养成指南 item_list 与 icon_info 合并为抽卡物品信息列表。
+    /// </summary>
+    /// <param name="items">item_list 响应。</param>
+    /// <param name="icons">icon_info 响应。</param>
+    /// <param name="language">写入 <see cref="ZZZGachaWiki.Language"/> 的语言代码。</param>
+    /// <returns>合并后的 wiki。</returns>
+    protected static ZZZGachaWiki MergeZZZGachaWiki(UpgradeGuideItemList items, UpgradeGuidIconInfo icons, string language)
+    {
+        var list = new List<ZZZGachaInfo>();
+        Dictionary<string, UpgradeGuidIconInfoItem>? avatarIcons = icons.AvatarIcon;
+        Dictionary<string, UpgradeGuidIconInfoItem>? buddyIcons = icons.BuddyIcon;
+
+        if (items.AvatarList is not null)
+        {
+            foreach (var item in items.AvatarList)
+            {
+                var info = new ZZZGachaInfo
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Rarity = MapZZZCultivateRarity(item.Rarity),
+                    ElementType = item.ElementType,
+                    Profession = item.AvatarProfession,
+                    Icon = "",
+                };
+                if (avatarIcons is not null && avatarIcons.TryGetValue(item.Id.ToString(), out UpgradeGuidIconInfoItem? icon))
+                {
+                    info.Icon = icon.SquareAvatar ?? "";
+                }
+                list.Add(info);
+            }
+        }
+
+        if (items.Weapon is not null)
+        {
+            foreach (var item in items.Weapon)
+            {
+                list.Add(new ZZZGachaInfo
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Icon = item.Icon ?? "",
+                    Rarity = MapZZZCultivateRarity(item.Rarity),
+                    Profession = item.Profession,
+                });
+            }
+        }
+
+        if (items.BuddyList is not null)
+        {
+            foreach (var item in items.BuddyList)
+            {
+                var info = new ZZZGachaInfo
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Rarity = MapZZZCultivateRarity(item.Rarity),
+                    Icon = "",
+                };
+                if (buddyIcons is not null && buddyIcons.TryGetValue(item.Id.ToString(), out UpgradeGuidIconInfoItem? icon))
+                {
+                    info.Icon = icon.SquareAvatar ?? "";
+                }
+                list.Add(info);
+            }
+        }
+
+        return new ZZZGachaWiki
+        {
+            Game = GameBiz.nap,
+            Language = language,
+            List = list,
+        };
+    }
+
+
+    /// <summary>
+    /// 养成指南稀有度字符串映射为抽卡记录内部 Rank（S→4, A→3, B→2）。
+    /// </summary>
+    private static int MapZZZCultivateRarity(string? rarity) => rarity switch
+    {
+        "S" or "s" => 4,
+        "A" or "a" => 3,
+        "B" or "b" => 2,
+        _ => 0,
+    };
+
+
+    /// <summary>
+    /// 养成指南 item_list：代理人/音擎/邦布等物品列表（含名称、稀有度；音擎含 icon）。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色（提供 Uid/Region）。</param>
+    /// <param name="cookie">含 <c>e_nap_token</c> 的完整 Cookie（由 <see cref="LoginZZZCultivateBadgeAsync"/> 合并）。</param>
+    /// <param name="avatar_id">请求参数 avatar_id，默认 1011（安比）；接口返回全量列表。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>item_list 数据。</returns>
+    public abstract Task<UpgradeGuideItemList> GetZZZUpgradeGuideItemListAsync(GameRecordRole role, string cookie, int avatar_id = 1011, CancellationToken cancellationToken = default);
+
+
+
+    /// <summary>
+    /// 养成指南 icon_info：代理人/邦布方形头像等图标 URL。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色（提供 Uid/Region）。</param>
+    /// <param name="cookie">含 <c>e_nap_token</c> 的完整 Cookie。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>icon_info 数据。</returns>
+    public abstract Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, string cookie, CancellationToken cancellationToken = default);
 
 
 

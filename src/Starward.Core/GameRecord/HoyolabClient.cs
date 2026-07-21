@@ -19,6 +19,7 @@ using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Core.GameRecord.ZZZ.ThresholdSimulation;
 using Starward.Core.GameRecord.ZZZ.UpgradeGuide;
+using System.Text.Json;
 
 namespace Starward.Core.GameRecord;
 
@@ -919,44 +920,115 @@ public class HoyolabClient : GameRecordClient
 
 
     /// <summary>
-    /// 养成指南，不可用，返回未登录错误
+    /// 国际服养成指南 badge 登录，换取 <c>e_nap_token</c>。
+    /// 主机 <c>sg-act-public-api</c>；浏览器 UA + act 专用 Gen1 DS 盐；禁止 x-rpc-device_id。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="avatar_id"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [Obsolete("不可用，返回未登录错误", true)]
-    public override async Task<UpgradeGuideItemList> GetZZZUpgradeGuideItemListAsync(GameRecordRole role, int avatar_id = 1011, CancellationToken cancellationToken = default)
+    public override async Task<string> LoginZZZCultivateBadgeAsync(GameRecordRole role, string language, CancellationToken cancellationToken = default)
     {
-        var url = $"https://sg-public-api.hoyolab.com/event/nap_cultivate_tool/user/item_list?uid={role.Uid}&region={role.Region}&avatar_id={avatar_id}";
+        ArgumentNullException.ThrowIfNull(role);
+        string lang = LanguageUtil.FilterLanguage(language);
+        Language = lang;
+        var body = new ZZZCultivateBadgeLoginBody
+        {
+            GameBiz = "nap_global",
+            Lang = lang,
+            Region = role.Region,
+            Uid = role.Uid.ToString(),
+        };
+        const string url = "https://sg-act-public-api.hoyolab.com/common/badge/v1/login/account";
+        string json = JsonSerializer.Serialize(body, typeof(ZZZCultivateBadgeLoginBody), GameRecordJsonContext.Default);
+        string cookie = ApplyMi18nLangToCookie(role.Cookie, lang);
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(json, System.Text.Encoding.UTF8, Application_Json),
+        };
+        request.Headers.Add(Cookie, cookie);
+        request.Headers.Add(Referer, "https://act.hoyolab.com/zzz/gt/character-builder-h/index.html");
+        request.Headers.Add("Origin", "https://act.hoyolab.com");
+        request.Headers.Add(x_rpc_app_version, "1.5.0");
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add(x_rpc_language, lang);
+        request.Headers.Add("x-rpc-lang", lang);
+        if (!string.IsNullOrWhiteSpace(DeviceFp))
+        {
+            request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        }
+        // 国际服 act 用 genshin.py OVERSEAS Gen1 salt，不是 BBS ApiSalt
+        request.Headers.Add(DS, CreateSecret(CultivateToolDsSaltOverseas));
+        var (wrapper, response) = await SendCultivateBadgeLoginAsync(request, cancellationToken);
+        if (wrapper is null)
+        {
+            throw new miHoYoApiException(-1, "Can not parse the response body.");
+        }
+        if (wrapper.Retcode != 0)
+        {
+            throw new miHoYoApiException(wrapper.Retcode, wrapper.Message);
+        }
+        return MergeCookieFromSetCookie(cookie, response);
+    }
+
+
+    /// <summary>
+    /// 养成指南 item_list（国际服 sg-act-public-api）。须已合并 e_nap_token；禁止 x-rpc-device_id。
+    /// </summary>
+    public override async Task<UpgradeGuideItemList> GetZZZUpgradeGuideItemListAsync(GameRecordRole role, string cookie, int avatar_id = 1011, CancellationToken cancellationToken = default)
+    {
+        var url = $"https://sg-act-public-api.hoyolab.com/event/nap_cultivate_tool/user/item_list?uid={role.Uid}&region={role.Region}&avatar_id={avatar_id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.hoyolab.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        return await CommonSendAsync<UpgradeGuideItemList>(request, cancellationToken);
+        request.Headers.Add(Cookie, ApplyMi18nLangToCookie(cookie, Language));
+        request.Headers.Add(Referer, "https://act.hoyolab.com/zzz/gt/character-builder-h/index.html");
+        request.Headers.Add("Origin", "https://act.hoyolab.com");
+        request.Headers.Add(x_rpc_app_version, "1.5.0");
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add(x_rpc_language, Language);
+        request.Headers.Add("x-rpc-lang", Language);
+        if (!string.IsNullOrWhiteSpace(DeviceFp))
+        {
+            request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        }
+        request.Headers.Add(DS, CreateSecret(CultivateToolDsSaltOverseas));
+        return await CommonSendCultivateAsync<UpgradeGuideItemList>(request, cancellationToken);
     }
 
 
 
     /// <summary>
-    /// 养成指南，不可用，返回未登录错误
+    /// 养成指南 icon_info（国际服）。
     /// </summary>
-    /// <param name="role"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [Obsolete("不可用，返回未登录错误", true)]
-    public override async Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default)
+    public override async Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, string cookie, CancellationToken cancellationToken = default)
     {
-        var url = $"https://sg-public-api.hoyolab.com/event/nap_cultivate_tool/user/icon_info?uid={role.Uid}&region={role.Region}";
+        var url = $"https://sg-act-public-api.hoyolab.com/event/nap_cultivate_tool/user/icon_info?uid={role.Uid}&region={role.Region}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.hoyolab.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        return await CommonSendAsync<UpgradeGuidIconInfo>(request, cancellationToken);
+        request.Headers.Add(Cookie, ApplyMi18nLangToCookie(cookie, Language));
+        request.Headers.Add(Referer, "https://act.hoyolab.com/zzz/gt/character-builder-h/index.html");
+        request.Headers.Add("Origin", "https://act.hoyolab.com");
+        request.Headers.Add(x_rpc_app_version, "1.5.0");
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add(x_rpc_language, Language);
+        request.Headers.Add("x-rpc-lang", Language);
+        if (!string.IsNullOrWhiteSpace(DeviceFp))
+        {
+            request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        }
+        request.Headers.Add(DS, CreateSecret(CultivateToolDsSaltOverseas));
+        return await CommonSendCultivateAsync<UpgradeGuidIconInfo>(request, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 将 Cookie 中的 <c>mi18nLang</c> 设为指定语言；不存在则追加，便于多语言循环请求。
+    /// </summary>
+    private static string ApplyMi18nLangToCookie(string? cookie, string lang)
+    {
+        if (string.IsNullOrWhiteSpace(cookie))
+        {
+            return $"mi18nLang={lang}";
+        }
+        if (cookie.Contains("mi18nLang=", StringComparison.OrdinalIgnoreCase))
+        {
+            return System.Text.RegularExpressions.Regex.Replace(cookie, @"mi18nLang=[^;]*", $"mi18nLang={lang}", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+        return cookie.TrimEnd(' ', ';') + $"; mi18nLang={lang}";
     }
 
 
