@@ -2072,7 +2072,7 @@
     <value>係絕區零抽卡紀錄頁面顯示物品圖片。</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchWithGameRecord" xml:space="preserve">
-    <value>用戰績帳號拉取</value>
+    <value>從已登入帳號取得</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchSucceeded" xml:space="preserve">
     <value>已獲取 {0} 個語言包（{1} 個物品），請選擇後儲存或匯出。</value>
@@ -2140,12 +2140,24 @@
   <data name="ZZZGachaInfoWindow_SaveToDatabase" xml:space="preserve">
     <value>儲存到資料庫</value>
   </data>
+  <data name="ZZZGachaInfoWindow_GroupFetch" xml:space="preserve">
+    <value>取得資料</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupLanguagePacks" xml:space="preserve">
+    <value>語言包</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupMaintainer" xml:space="preserve">
+    <value>維護者</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_OpenWebCapture" xml:space="preserve">
+    <value>網頁取得</value>
+  </data>
   <data name="ZZZGachaInfoWindow_ExportToFolder" xml:space="preserve">
     <value>匯出到資料夾</value>
   </data>
   <data name="ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide" xml:space="preserve">
     <value>呢個工具用於更新《絕區零》抽卡紀錄嘅物品圖片資料。
-建議：如果已經喺遊戲戰績登入咗米遊社/HoYoLAB，撳「用戰績帳號拉取」就可以用同抽卡頁一樣嘅養成指南介面攞資料，唔使喺網頁入面再登入。國服帳號攞中文包；HoYoLAB 帳號攞全部語言。
+建議：如果已經喺遊戲戰績登入咗米遊社/HoYoLAB，撳「從已登入帳號取得」就可以用同抽卡頁一樣嘅養成指南介面攞資料，唔使喺網頁入面再登入。國服帳號攞中文包；HoYoLAB 帳號攞全部語言。
 備用：撳「米遊社」或者「HoYoLAB」喺網頁入面登入再等資料；HoYoLAB 仲可以撳「獲取全部語言嘅資料」。
 攞到之後可以揀語言包儲存到資料庫或者匯出到資料夾。
 歡迎將匯出嘅資料提交去以下倉庫：</value>

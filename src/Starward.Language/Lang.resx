@@ -2131,7 +2131,7 @@ Do you accept the risk and continue to use it?</value>
     <value>Display item images in ZZZ gacha record page.</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchWithGameRecord" xml:space="preserve">
-    <value>Fetch with Game Record Account</value>
+    <value>Fetch from Signed-in Account</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchSucceeded" xml:space="preserve">
     <value>Fetched {0} language pack(s) ({1} items). Select one to save or export.</value>
@@ -2199,12 +2199,24 @@ Do you accept the risk and continue to use it?</value>
   <data name="ZZZGachaInfoWindow_SaveToDatabase" xml:space="preserve">
     <value>Save to Database</value>
   </data>
+  <data name="ZZZGachaInfoWindow_GroupFetch" xml:space="preserve">
+    <value>Fetch</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupLanguagePacks" xml:space="preserve">
+    <value>Language Packs</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupMaintainer" xml:space="preserve">
+    <value>Maintainer</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_OpenWebCapture" xml:space="preserve">
+    <value>Web Fetch</value>
+  </data>
   <data name="ZZZGachaInfoWindow_ExportToFolder" xml:space="preserve">
     <value>Export to Folder</value>
   </data>
   <data name="ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide" xml:space="preserve">
     <value>This tool updates item image data for Zenless Zone Zero gacha records.
-Preferred: if you already logged into Miyoushe/HoYoLAB in the game record toolbox, click "Fetch with Game Record Account" (same cultivate-tool API as the gacha page). CN → Chinese pack; HoYoLAB → all languages.
+Preferred: if you already logged into Miyoushe/HoYoLAB in the game record toolbox, click "Fetch from Signed-in Account" (same cultivate-tool API as the gacha page). CN → Chinese pack; HoYoLAB → all languages.
 Fallback: open Miyoushe/HoYoLAB in the embedded page and log in.
 After fetch: save to database, export JSON, or (maintainers) configure a GitHub PAT and publish selected packs to the metadata branch. The app downloads metadata via jsDelivr from that branch.
 Repository:</value>

@@ -8712,11 +8712,47 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Fetch with Game Record Account 的本地化字符串。
+        ///   查找类似 Fetch from Signed-in Account 的本地化字符串。
         /// </summary>
         public static string ZZZGachaInfoWindow_FetchWithGameRecord {
             get {
                 return ResourceManager.GetString("ZZZGachaInfoWindow_FetchWithGameRecord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fetch 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GroupFetch {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GroupFetch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Language Packs 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GroupLanguagePacks {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GroupLanguagePacks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Maintainer 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GroupMaintainer {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GroupMaintainer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Web Fetch 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_OpenWebCapture {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_OpenWebCapture", resourceCulture);
             }
         }
         

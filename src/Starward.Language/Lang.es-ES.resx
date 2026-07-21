@@ -2073,7 +2073,7 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Mostrar imágenes de objetos en la página de registro de gacha de ZZZ.</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchWithGameRecord" xml:space="preserve">
-    <value>Fetch with Game Record Account</value>
+    <value>Fetch from Signed-in Account</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchSucceeded" xml:space="preserve">
     <value>Fetched {0} language pack(s) ({1} items). Select one to save or export.</value>
@@ -2141,12 +2141,24 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="ZZZGachaInfoWindow_SaveToDatabase" xml:space="preserve">
     <value>Guardar en la base de datos</value>
   </data>
+  <data name="ZZZGachaInfoWindow_GroupFetch" xml:space="preserve">
+    <value>Fetch</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupLanguagePacks" xml:space="preserve">
+    <value>Language Packs</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupMaintainer" xml:space="preserve">
+    <value>Maintainer</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_OpenWebCapture" xml:space="preserve">
+    <value>Web Fetch</value>
+  </data>
   <data name="ZZZGachaInfoWindow_ExportToFolder" xml:space="preserve">
     <value>Exportar a carpeta</value>
   </data>
   <data name="ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide" xml:space="preserve">
     <value>This tool updates item image data for Zenless Zone Zero gacha records.
-Preferred: if you already logged into Miyoushe/HoYoLAB in the game record toolbox, click "Fetch with Game Record Account" to pull data via the same cultivate-tool API as the gacha page (no re-login in the web page). CN account → Chinese pack; HoYoLAB account → all languages.
+Preferred: if you already logged into Miyoushe/HoYoLAB in the game record toolbox, click "Fetch from Signed-in Account" to pull data via the same cultivate-tool API as the gacha page (no re-login in the web page). CN account → Chinese pack; HoYoLAB account → all languages.
 Fallback: click "Miyoushe" or "HoYoLAB", log in on the page, and wait for data. For HoYoLAB you may also click "Fetch Data for All Languages".
 Then select a language pack to save to the database or export to a folder.
 You are welcome to submit exported data to:</value>

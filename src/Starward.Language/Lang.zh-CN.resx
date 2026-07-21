@@ -2131,7 +2131,7 @@
     <value>在绝区零抽卡记录页面中显示物品图片</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchWithGameRecord" xml:space="preserve">
-    <value>用战绩账号拉取</value>
+    <value>从已登录账号获取</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchSucceeded" xml:space="preserve">
     <value>已获取 {0} 个语言包（{1} 个物品），请选择后保存或导出。</value>
@@ -2199,12 +2199,24 @@
   <data name="ZZZGachaInfoWindow_SaveToDatabase" xml:space="preserve">
     <value>保存到数据库</value>
   </data>
+  <data name="ZZZGachaInfoWindow_GroupFetch" xml:space="preserve">
+    <value>获取数据</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupLanguagePacks" xml:space="preserve">
+    <value>语言包</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupMaintainer" xml:space="preserve">
+    <value>维护者</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_OpenWebCapture" xml:space="preserve">
+    <value>网页获取</value>
+  </data>
   <data name="ZZZGachaInfoWindow_ExportToFolder" xml:space="preserve">
     <value>导出到文件夹</value>
   </data>
   <data name="ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide" xml:space="preserve">
     <value>此工具用于更新《绝区零》抽卡记录的物品图片数据。
-推荐：已在游戏战绩登录米游社/HoYoLAB 时，点击「用战绩账号拉取」（与抽卡页相同的养成指南接口）。国服→中文包；HoYoLAB→全部语言。
+推荐：已在游戏战绩登录米游社/HoYoLAB 时，点击「从已登录账号获取」（与抽卡页相同的养成指南接口）。国服→中文包；HoYoLAB→全部语言。
 备用：在内嵌页打开米游社/HoYoLAB 并登录。
 获取后可保存到数据库、导出 JSON，或（维护者）配置 GitHub PAT 后将选中语言包提交到 metadata 分支。应用经 jsDelivr 从该分支拉取元数据。
 仓库：</value>

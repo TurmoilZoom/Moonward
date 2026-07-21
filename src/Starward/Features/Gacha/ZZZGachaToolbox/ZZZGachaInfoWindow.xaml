@@ -24,45 +24,75 @@
         </Grid.RowDefinitions>
 
 
-        <StackPanel Margin="8,0,8,0"
-                    Orientation="Horizontal"
-                    Spacing="8">
-            <!--  优先：复用战绩 Cookie 直接调养成指南接口  -->
-            <Button x:Name="Button_FetchWithGameRecord"
-                    Command="{x:Bind FetchFromGameRecordCommand}"
-                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_FetchWithGameRecord}" />
-            <Button x:Name="Button_Miyoushe"
-                    Command="{x:Bind NavigateToMiyousheCommand}"
-                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_Miyoushe}" />
-            <Button x:Name="Button_Hoyolab"
-                    Command="{x:Bind NavigateToHoYoLABCommand}"
-                    Content="HoYoLAB" />
-            <Button x:Name="Button_GetAllLanguages"
-                    Command="{x:Bind GetAllLanguagesInfoCommand}"
-                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_FetchDataForAllLanguages}"
-                    IsEnabled="False" />
-            <Button x:Name="Button_SelectAll"
-                    Command="{x:Bind SelectAllLanguagesCommand}"
-                    Content="{x:Bind lang:Lang.Common_SelectAll}"
-                    IsEnabled="False" />
-            <Button x:Name="Button_SaveToDatabase"
-                    Command="{x:Bind SaveToDatabaseCommand}"
-                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_SaveToDatabase}"
-                    IsEnabled="False" />
-            <Button x:Name="Button_ExportFiles"
-                    Command="{x:Bind ExportToFolderCommand}"
-                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_ExportToFolder}"
-                    IsEnabled="False" />
-            <!--  维护者：PAT + 提交到 GitHub metadata 分支  -->
-            <Button x:Name="Button_ManagePat"
-                    Command="{x:Bind ManageGitHubPatCommand}"
-                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_ManageGitHubPat}" />
-            <Button x:Name="Button_PublishMetadata"
-                    Command="{x:Bind PublishToMetadataBranchCommand}"
-                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_PublishToMetadata}"
-                    IsEnabled="False" />
+        <!--
+          工具栏按流程分组：获取数据 → 语言包处理 → 维护者发布。
+          窄窗口时横向滚动，避免一排按钮挤在一起难辨职责。
+        -->
+        <ScrollViewer Margin="8,0,8,0"
+                      HorizontalScrollBarVisibility="Auto"
+                      HorizontalScrollMode="Auto"
+                      VerticalScrollBarVisibility="Disabled"
+                      VerticalScrollMode="Disabled">
+            <StackPanel Orientation="Horizontal" Spacing="16">
 
-        </StackPanel>
+                <!--  获取数据：已登录账号优先；网页获取为降级  -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="Button_FetchWithGameRecord"
+                            Command="{x:Bind FetchFromGameRecordCommand}"
+                            Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_FetchWithGameRecord}"
+                            Style="{ThemeResource AccentButtonStyle}" />
+                    <DropDownButton Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_OpenWebCapture}">
+                        <DropDownButton.Flyout>
+                            <MenuFlyout Placement="Bottom">
+                                <MenuFlyoutItem Command="{x:Bind NavigateToMiyousheCommand}"
+                                                Text="{x:Bind lang:Lang.ZZZGachaInfoWindow_Miyoushe}" />
+                                <MenuFlyoutItem Command="{x:Bind NavigateToHoYoLABCommand}" Text="HoYoLAB" />
+                            </MenuFlyout>
+                        </DropDownButton.Flyout>
+                    </DropDownButton>
+                    <Button x:Name="Button_GetAllLanguages"
+                            Command="{x:Bind GetAllLanguagesInfoCommand}"
+                            Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_FetchDataForAllLanguages}"
+                            IsEnabled="False" />
+                </StackPanel>
+
+                <Border Width="1"
+                        Margin="0,4"
+                        Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+                <!--  语言包：选择后保存本地 / 导出 JSON  -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="Button_SelectAll"
+                            Command="{x:Bind SelectAllLanguagesCommand}"
+                            Content="{x:Bind lang:Lang.Common_SelectAll}"
+                            IsEnabled="False" />
+                    <Button x:Name="Button_SaveToDatabase"
+                            Command="{x:Bind SaveToDatabaseCommand}"
+                            Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_SaveToDatabase}"
+                            IsEnabled="False" />
+                    <Button x:Name="Button_ExportFiles"
+                            Command="{x:Bind ExportToFolderCommand}"
+                            Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_ExportToFolder}"
+                            IsEnabled="False" />
+                </StackPanel>
+
+                <Border Width="1"
+                        Margin="0,4"
+                        Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+                <!--  维护者：PAT + 提交 GitHub metadata 分支  -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="Button_ManagePat"
+                            Command="{x:Bind ManageGitHubPatCommand}"
+                            Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_ManageGitHubPat}" />
+                    <Button x:Name="Button_PublishMetadata"
+                            Command="{x:Bind PublishToMetadataBranchCommand}"
+                            Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_PublishToMetadata}"
+                            IsEnabled="False" />
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
 
 
         <TextBlock x:Name="TextBlock_Status"

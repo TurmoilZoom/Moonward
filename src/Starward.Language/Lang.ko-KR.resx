@@ -2073,7 +2073,7 @@
     <value>젠레스 존 제로 뽑기기록 페이지에서 아이템 이미지 표시.</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchWithGameRecord" xml:space="preserve">
-    <value>전투 기록 계정으로 가져오기</value>
+    <value>로그인한 계정에서 가져오기</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchSucceeded" xml:space="preserve">
     <value>{0}개 언어 팩({1}개 아이템)을 가져왔습니다. 저장 또는 내보내기를 선택하세요.</value>
@@ -2140,6 +2140,18 @@
   </data>
   <data name="ZZZGachaInfoWindow_SaveToDatabase" xml:space="preserve">
     <value>데이터베이스에 저장</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupFetch" xml:space="preserve">
+    <value>데이터 가져오기</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupLanguagePacks" xml:space="preserve">
+    <value>언어 팩</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupMaintainer" xml:space="preserve">
+    <value>관리자</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_OpenWebCapture" xml:space="preserve">
+    <value>웹에서 가져오기</value>
   </data>
   <data name="ZZZGachaInfoWindow_ExportToFolder" xml:space="preserve">
     <value>폴더에 저장</value>

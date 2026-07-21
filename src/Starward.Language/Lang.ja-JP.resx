@@ -2072,7 +2072,7 @@
     <value>ZZZガチャ記録ページにアイテム画像を表示します。</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchWithGameRecord" xml:space="preserve">
-    <value>戦績アカウントで取得</value>
+    <value>ログイン済みアカウントから取得</value>
   </data>
   <data name="ZZZGachaInfoWindow_FetchSucceeded" xml:space="preserve">
     <value>{0} 言語パック（{1} アイテム）を取得しました。保存またはエクスポートする項目を選択してください。</value>
@@ -2139,6 +2139,18 @@
   </data>
   <data name="ZZZGachaInfoWindow_SaveToDatabase" xml:space="preserve">
     <value>データベースへ保存</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupFetch" xml:space="preserve">
+    <value>データ取得</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupLanguagePacks" xml:space="preserve">
+    <value>言語パック</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GroupMaintainer" xml:space="preserve">
+    <value>メンテナー</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_OpenWebCapture" xml:space="preserve">
+    <value>Web取得</value>
   </data>
   <data name="ZZZGachaInfoWindow_ExportToFolder" xml:space="preserve">
     <value>フォルダーにエクスポート</value>

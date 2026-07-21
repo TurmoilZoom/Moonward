@@ -614,7 +614,7 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
 
 
     /// <summary>
-    /// 勾选当前已获取的全部语言包（便于导出 / 提交 metadata）。
+    /// 全选 / 取消全选：已全部选中时清空选择，否则勾选全部语言包（便于导出 / 提交 metadata）。
     /// </summary>
     [RelayCommand]
     private void SelectAllLanguages()
@@ -626,8 +626,15 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
                 return;
             }
 
-            // Multiple 模式下 ListViewBase.SelectAll 勾选全部项
-            GridView_Languages.SelectAll();
+            // Multiple 模式：已全选则清空，否则 SelectAll
+            if (GridView_Languages.SelectedItems.Count == GachaInfoResult.Count)
+            {
+                GridView_Languages.SelectedItems.Clear();
+            }
+            else
+            {
+                GridView_Languages.SelectAll();
+            }
             RefreshPublishButtons();
         }
         catch (Exception ex)
