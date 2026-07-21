@@ -3139,7 +3139,8 @@
     <value>自动签到</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>每个游戏的「自动签到」相互独立，Starward只在软件启动后十秒开始批量处理「自动签到」，按用户顺序进行，并且在签到请求之间会有3~8秒的随机延时，尽量模拟真实的操作。在触发验证导致失败的情况下，不作重试直至下次软件启动。</value>
+    <value>1.每个游戏的自动签到相互独立
+2.开启自动签到后，通过指定登录账号的快捷方式启动游戏时会单独给该账号进行签到</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>签到成功，奖励已领取</value>

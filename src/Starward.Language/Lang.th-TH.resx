@@ -3075,7 +3075,8 @@ You are welcome to submit exported data to:</value>
     <value>เช็คอินอัตโนมัติ</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>เช็คอินอัตโนมัติแยกกันในแต่ละเกม Starward จะเช็คอินอัตโนมัติแบบกลุ่ม 10 วินาทีหลังเริ่มต้น ตามลำดับผู้ใช้ พร้อมหน่วงเวลาแบบสุ่ม 3–8 วินาทีระหว่างคำขอ หากการยืนยันล้มเหลว จะไม่ลองใหม่จนกว่าจะเริ่มครั้งถัดไป</value>
+    <value>1.เช็คอินอัตโนมัติของแต่ละเกมเป็นอิสระต่อกัน
+2.เมื่อเปิดเช็คอินอัตโนมัติแล้ว การเปิดเกมผ่านทางลัดของบัญชีเข้าสู่ระบบที่ระบุจะเช็คอินเฉพาะบัญชีนั้น</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>เช็คอินสำเร็จ รับรางวัลแล้ว</value>

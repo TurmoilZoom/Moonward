@@ -3080,7 +3080,8 @@
     <value>自動チェックイン</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>各ゲームの自動チェックインは独立しています。Starward は起動 10 秒後に自動チェックインを一括処理し、ユーザーの順序で実行します。リクエスト間には 3〜8 秒のランダム遅延があり、実際の操作を模倣します。認証が必要で失敗した場合、次回起動まで再試行しません。</value>
+    <value>1.各ゲームの自動チェックインは互いに独立しています
+2.自動チェックインを有効にした後、特定のログインアカウント用ショートカットからゲームを起動すると、そのアカウントのみがチェックインされます</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>チェックイン成功、報酬を受け取りました</value>

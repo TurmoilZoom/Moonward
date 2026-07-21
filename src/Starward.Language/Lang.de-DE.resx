@@ -3079,7 +3079,8 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
     <value>Automatischer Check-in</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>Der automatische Check-in ist für jedes Spiel unabhängig. Starward führt den automatischen Check-in 10 Sekunden nach dem Start stapelweise aus, in Benutzerreihenfolge, mit einer zufälligen Verzögerung von 3–8 Sekunden zwischen Anfragen, um echte Nutzung zu simulieren. Bei Verifizierung und Fehlschlag wird bis zum nächsten Start nicht erneut versucht.</value>
+    <value>1. Der automatische Check-in ist für jedes Spiel unabhängig
+2. Nach Aktivierung des automatischen Check-ins wird beim Start des Spiels über eine Verknüpfung für ein bestimmtes Anmeldekonto nur dieses Konto eingecheckt</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Check-in erfolgreich, Belohnung erhalten</value>

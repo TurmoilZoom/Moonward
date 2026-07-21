@@ -3081,7 +3081,8 @@ You are welcome to submit exported data to:</value>
     <value>Registro automático</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>El registro automático es independiente para cada juego. Starward solo ejecuta el registro automático 10 segundos después del inicio, procesando los roles en orden con un retraso aleatorio de 3–8 segundos entre solicitudes para simular el uso real. Si se activa la verificación y falla, no reintentará hasta el próximo inicio.</value>
+    <value>1. El registro automático es independiente para cada juego
+2. Tras activar el registro automático, al iniciar el juego con un acceso directo de una cuenta de inicio de sesión específica se registrará solo esa cuenta</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Registro exitoso, recompensa reclamada</value>

@@ -3139,7 +3139,8 @@ Repository:</value>
     <value>Auto check-in</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>Auto check-in is independent for each game. Starward only runs batch auto check-in 10 seconds after startup, processing roles in order with a random 3–8 second delay between requests to mimic real usage. If verification is triggered and check-in fails, it will not retry until the next startup.</value>
+    <value>1. Auto check-in is independent for each game
+2. After enabling auto check-in, launching the game via a shortcut for a specific login account will check in for that account separately</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Reward claimed successfully</value>

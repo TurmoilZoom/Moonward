@@ -3081,7 +3081,8 @@ You are welcome to submit exported data to:</value>
     <value>Check-in automatico</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>Il check-in automatico è indipendente per ogni gioco. Starward esegue il check-in automatico 10 secondi dopo l'avvio, elaborando i ruoli in ordine con un ritardo casuale di 3–8 secondi tra le richieste per simulare l'uso reale. Se la verifica fallisce, non riproverà fino al prossimo avvio.</value>
+    <value>1. Il check-in automatico è indipendente per ogni gioco
+2. Dopo aver attivato il check-in automatico, avviando il gioco da un collegamento per un account di accesso specifico verrà eseguito il check-in solo per quell'account</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Check-in riuscito, ricompensa ottenuta</value>

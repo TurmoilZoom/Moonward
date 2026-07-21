@@ -3081,7 +3081,8 @@ You are welcome to submit exported data to:</value>
     <value>Tự động điểm danh</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>Tự động điểm danh độc lập cho từng game. Starward chỉ chạy điểm danh tự động 10 giây sau khi khởi động, xử lý theo thứ tự người dùng với độ trễ ngẫu nhiên 3–8 giây giữa các yêu cầu. Nếu xác minh thất bại, sẽ không thử lại đến lần khởi động tiếp theo.</value>
+    <value>1. Tự động điểm danh của mỗi game độc lập với nhau
+2. Sau khi bật tự động điểm danh, khởi chạy game bằng lối tắt của tài khoản đăng nhập chỉ định sẽ điểm danh riêng cho tài khoản đó</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Điểm danh thành công, đã nhận thưởng</value>

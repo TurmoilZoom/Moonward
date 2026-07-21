@@ -3080,7 +3080,8 @@
     <value>自動簽到</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>每個遊戲嘅「自動簽到」相互獨立，Starward 只會喺軟件啟動後十秒開始批次處理「自動簽到」，按使用者順序進行，並且喺簽到請求之間會有 3~8 秒嘅隨機延遲，盡量模擬真實操作。觸發驗證導致失敗嘅情況下，唔會重試直至下次軟件啟動。</value>
+    <value>1.每個遊戲嘅自動簽到相互獨立
+2.開啟自動簽到後，透過指定登入帳號嘅捷徑啟動遊戲時會單獨為該帳號進行簽到</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>簽到成功，獎勵已領取</value>
