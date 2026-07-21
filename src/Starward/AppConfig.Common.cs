@@ -27,9 +27,9 @@ public static partial class AppConfig
     public static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
     /// <summary>
-    /// 当前 Starward.exe 的完整执行路径。
+    /// 当前 Moonward.exe 的完整执行路径。
     /// </summary>
-    public static string StarwardExecutePath => Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "Starward.exe");
+    public static string MoonwardExecutePath => Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "Moonward.exe");
 
     /// <summary>
     /// 设备唯一标识（基于 BIOS 版本 + MachineGuid + 机器名 的 MD5）。

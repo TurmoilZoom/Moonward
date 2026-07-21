@@ -15,7 +15,7 @@ internal sealed class StartupContext
 
     /// <summary>
     /// 将 <see cref="Args"/> 解析为键值配置（<c>--pid 1234 --biz hk4e_cn</c> 等），首次访问时惰性构建。
-    /// 仅在确有处理器读取时才解析，对 rpc / starward:// 等不读取键值的模式零开销。
+    /// 仅在确有处理器读取时才解析，对 rpc / moonward:// 等不读取键值的模式零开销。
     /// </summary>
     public IConfiguration Configuration => _configuration ??= new ConfigurationBuilder().AddCommandLine(Args).Build();
 

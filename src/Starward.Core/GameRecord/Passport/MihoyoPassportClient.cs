@@ -32,7 +32,7 @@ public class MihoyoPassportClient
 
 
     /// <summary>设备名（展示用请求头）。</summary>
-    public string DeviceName { get; set; } = "Starward";
+    public string DeviceName { get; set; } = "Moonward";
 
 
     /// <summary>设备型号（展示用请求头）。</summary>

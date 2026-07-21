@@ -90,7 +90,7 @@ public sealed partial class FileManageSetting : PageBase
             if (result is ContentDialogResult.Primary)
             {
                 // 通过 --migrate-to 重启：由启动流程在数据库打开前完成迁移（与升级迁移同一套搬运服务，按需提权）。
-                var info = new ProcessStartInfo { FileName = AppConfig.StarwardExecutePath };
+                var info = new ProcessStartInfo { FileName = AppConfig.MoonwardExecutePath };
                 info.ArgumentList.Add("--migrate-to");
                 info.ArgumentList.Add(target);
                 AppInstance.GetCurrent().UnregisterKey();
@@ -151,7 +151,7 @@ public sealed partial class FileManageSetting : PageBase
             {
                 AppConfig.DeleteAllSettings();
                 AppInstance.GetCurrent().UnregisterKey();
-                Process.Start(AppConfig.StarwardExecutePath);
+                Process.Start(AppConfig.MoonwardExecutePath);
                 App.Current.Exit();
             }
         }

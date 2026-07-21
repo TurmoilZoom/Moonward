@@ -57,7 +57,7 @@ public sealed partial class GameNoticeWindow : WindowEx
     {
         try
         {
-            Title = "Starward";
+            Title = "Moonward";
             AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
             AppWindow.TitleBar.IconShowOptions = IconShowOptions.ShowIconAndSystemMenu;
             AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;

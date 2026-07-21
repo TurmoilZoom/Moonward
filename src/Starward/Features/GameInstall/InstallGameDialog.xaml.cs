@@ -91,7 +91,7 @@ public sealed partial class InstallGameDialog : ContentDialog
                 }
                 else
                 {
-                    baseFolder = Path.Combine(Path.GetDirectoryName(AppConfig.StarwardExecutePath)!, "Games");
+                    baseFolder = Path.Combine(Path.GetDirectoryName(AppConfig.MoonwardExecutePath)!, "Games");
                 }
             }
             else

@@ -190,7 +190,7 @@ public sealed class ZZZGachaMetadataPublishService
         }
 
         // 不把 PAT 写入任何日志字段
-        return new GitHubClient(new ProductHeaderValue("Starward"))
+        return new GitHubClient(new ProductHeaderValue("Moonward"))
         {
             Credentials = new Credentials(pat),
         };

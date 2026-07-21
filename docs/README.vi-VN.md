@@ -1,7 +1,7 @@
-# Starward
+# Moonward
 
-> **Starward** xuất phát từ khẩu hiệu của Star Rail: May This Journey Lead Us **Starward**, rất phù hợp để dùng làm tên ứng dụng.
-> Starward là một trình khởi chạy mã nguồn mở của bên thứ ba được phát triển để giải quyết những thiếu sót của HoYoPlay (miHoYo Launcher). Nó hỗ trợ tất cả các trò chơi trên PC của HoYoverse và nhằm mục đích thay thế hoàn toàn trình khởi chạy chính thức. Ngoài những chức năng cơ bản của trình khởi chạy chính thức, tôi cũng sẽ tích hợp thêm một số tính năng dựa trên nhu cầu cá nhân, chẳng hạn như:
+> **Moonward** xuất phát từ khẩu hiệu của Star Rail: May This Journey Lead Us **Moonward**, rất phù hợp để dùng làm tên ứng dụng.
+> Moonward là một trình khởi chạy mã nguồn mở của bên thứ ba được phát triển để giải quyết những thiếu sót của HoYoPlay (miHoYo Launcher). Nó hỗ trợ tất cả các trò chơi trên PC của HoYoverse và nhằm mục đích thay thế hoàn toàn trình khởi chạy chính thức. Ngoài những chức năng cơ bản của trình khởi chạy chính thức, tôi cũng sẽ tích hợp thêm một số tính năng dựa trên nhu cầu cá nhân, chẳng hạn như:
 
 -  Ghi lại thời gian chơi
 -  Chuyển đổi tài khoản trò chơi
@@ -21,7 +21,7 @@ Còn nhiều tính năng khác để chờ bạn khám phá...
 
 >[WebP Imaging Extension](https://apps.microsoft.com/detail/9pg2dk419drg) thường được tích hợp sẵn trong hệ thống của bạn. Nếu ứng dụng không hiển thị đúng hình nền, vui lòng đảm bảo rằng tiện ích này đã được cài đặt.
 
-Tiếp theo, tải xuống gói dành cho kiến ​​trúc CPU của bạn từ [GitHub Release](https://github.com/Scighost/Starward/releases). Giải nén nó, sau đó chạy `Starward.exe` và làm theo hướng dẫn.
+Tiếp theo, tải xuống gói dành cho kiến ​​trúc CPU của bạn từ [GitHub Release](https://github.com/Scighost/Starward/releases). Giải nén nó, sau đó chạy `Moonward.exe` và làm theo hướng dẫn.
 
 ## Dịch thuật
 
@@ -36,7 +36,7 @@ Tiếp theo, tải xuống gói dành cho kiến ​​trúc CPU của bạn t�
 [![zh-CN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat&logo=crowdin&query=%24.progress.8.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-CN)
 [![zh-TW translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-TW&style=flat&logo=crowdin&query=%24.progress.9.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-TW)
 
-Starward sử dụng [Crowdin](https://crowdin.com/project/starward) cho việc dịch văn bản trong ứng dụng. Bạn có thể đóng góp bằng cách giúp chúng tôi dịch và hiệu chỉnh nội dung bằng ngôn ngữ địa phương của bạn. Chúng tôi mong muốn có thêm nhiều người tham gia cùng chúng tôi.
+Moonward sử dụng [Crowdin](https://crowdin.com/project/starward) cho việc dịch văn bản trong ứng dụng. Bạn có thể đóng góp bằng cách giúp chúng tôi dịch và hiệu chỉnh nội dung bằng ngôn ngữ địa phương của bạn. Chúng tôi mong muốn có thêm nhiều người tham gia cùng chúng tôi.
 
 [Hướng dẫn dịch thuật ở đây](./docs/Localization.md)
 
@@ -50,7 +50,7 @@ Starward sử dụng [Crowdin](https://crowdin.com/project/starward) cho việc 
 
 ## Ủng hộ
 
-Phát triển không phải là dễ dàng. Nếu bạn nghĩ Starward hữu ích, bạn có thể ủng hộ cho tôi qua https://donate.scighost.com.
+Phát triển không phải là dễ dàng. Nếu bạn nghĩ Moonward hữu ích, bạn có thể ủng hộ cho tôi qua https://donate.scighost.com.
 
 ## Cảm ơn
 
@@ -59,11 +59,11 @@ Phát triển không phải là dễ dàng. Nếu bạn nghĩ Starward hữu íc
     <img src="https://github.com/Scighost/Starward/assets/61003590/44552992-e2c5-451f-9c2a-73176e8e4e93" width="240px" />
 </picture>
 
-Đầu tiên, tôi xin gửi lời cảm ơn chân thành nhất tới tất cả những người đóng góp và dịch giả của dự án này. Starward chỉ có thể trở nên tốt hơn nhờ có bạn.
+Đầu tiên, tôi xin gửi lời cảm ơn chân thành nhất tới tất cả những người đóng góp và dịch giả của dự án này. Moonward chỉ có thể trở nên tốt hơn nhờ có bạn.
 
 Sau đó, tôi muốn gửi lời cảm ơn đặc biệt tới [@neon-nyan](https://github.com/neon-nyan). Nguồn cảm hứng và thiết kế cho dự án này đến trực tiếp từ dự án [Collapse](https://github.com/neon-nyan/Collapse) của anh ấy. Tôi đã thu được rất nhiều kiến ​​thức từ mã nguồn của Collapse, và với những tài liệu tham khảo quý giá như vậy, quá trình phát triển của tôi đã suôn sẻ hơn rất nhiều.
 
-Tiếp theo, xin gửi lời cảm ơn sâu sắc đến nhà phát triển chính của [Snap Hutao](https://github.com/DGP-Studio/Snap.Hutao), [@Lightczx](https://github.com/Lightczx). Sự trợ giúp của anh ấy là vô giá trong quá trình phát triển Starward.
+Tiếp theo, xin gửi lời cảm ơn sâu sắc đến nhà phát triển chính của [Snap Hutao](https://github.com/DGP-Studio/Snap.Hutao), [@Lightczx](https://github.com/Lightczx). Sự trợ giúp của anh ấy là vô giá trong quá trình phát triển Moonward.
 
 Ngoài ra, cảm ơn [CloudFlare](https://www.cloudflare.com/) vì đã cung cấp dịch vụ CDN miễn phí và [SignPath Foundation](https://signpath.org/) vì đã cung cấp dịch vụ ký mã miễn phí cho các dự án mã nguồn mở.
 

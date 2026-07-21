@@ -33,12 +33,12 @@ public static class RpcRunner
 
         var logFolder = Path.Combine(AppConfig.CacheFolder, "log");
         Directory.CreateDirectory(logFolder);
-        var logFile = Path.Combine(logFolder, $"Starward_{DateTime.Now:yyMMdd}.log");
-        Log.Logger = new LoggerConfiguration().WriteTo.File(path: logFile, shared: true, outputTemplate: $$"""[{Timestamp:HH:mm:ss.fff}] [{Level:u4}] [Starward RPC ({{Environment.ProcessId}})] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}""")
+        var logFile = Path.Combine(logFolder, $"Moonward_{DateTime.Now:yyMMdd}.log");
+        Log.Logger = new LoggerConfiguration().WriteTo.File(path: logFile, shared: true, outputTemplate: $$"""[{Timestamp:HH:mm:ss.fff}] [{Level:u4}] [Moonward RPC ({{Environment.ProcessId}})] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}""")
                                           .Enrich.FromLogContext()
                                           .ReadFrom.Configuration(builder.Configuration)
                                           .CreateLogger();
-        Log.Information($"Welcome to Starward RPC v{AppConfig.AppVersion}\r\nSystem: {Environment.OSVersion}\r\nCommand Line: {Environment.CommandLine}");
+        Log.Information($"Welcome to Moonward RPC v{AppConfig.AppVersion}\r\nSystem: {Environment.OSVersion}\r\nCommand Line: {Environment.CommandLine}");
 
         if (args.Length < 2 || args[1] is not AppConfig.StartupMagic)
         {
@@ -96,7 +96,7 @@ public static class RpcRunner
             config.ConfigureHttpClient(client =>
             {
                 client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
-                client.DefaultRequestHeaders.Add("User-Agent", $"Starward.RPC/{AppConfig.AppVersion}");
+                client.DefaultRequestHeaders.Add("User-Agent", $"Moonward.RPC/{AppConfig.AppVersion}");
             });
             config.ConfigurePrimaryHttpMessageHandler(GetDefaultSocketsHttpHandler);
         });

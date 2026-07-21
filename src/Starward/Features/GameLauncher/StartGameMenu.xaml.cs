@@ -132,7 +132,7 @@ public sealed partial class StartGameMenu : UserControl
 
 
     /// <summary>
-    /// 系统是否已注册 <c>starward://</c> 协议。菜单内不再展示开关；生成 .url 快捷方式前会读取此状态，
+    /// 系统是否已注册 <c>moonward://</c> 协议。菜单内不再展示开关；生成 .url 快捷方式前会读取此状态，
     /// 未注册时弹窗征求同意后再写入并注册。
     /// </summary>
     public bool EnableUrlProtocol
@@ -169,7 +169,7 @@ public sealed partial class StartGameMenu : UserControl
     {
         try
         {
-            var status = await Launcher.QueryUriSupportAsync(new Uri("starward://"), LaunchQuerySupportType.Uri);
+            var status = await Launcher.QueryUriSupportAsync(new Uri("moonward://"), LaunchQuerySupportType.Uri);
             _suppressUrlProtocolApply = true;
             EnableUrlProtocol = status is LaunchQuerySupportStatus.Available;
             _suppressUrlProtocolApply = false;
@@ -541,8 +541,8 @@ public sealed partial class StartGameMenu : UserControl
 
     /// <summary>
     /// 生成桌面快捷方式；图标默认使用该游戏在游戏列表中的图标。
-    /// 快捷方式以命令行参数直接把 starward:// 传给 Starward.exe，启动游戏无需注册系统 URL 协议
-    /// （系统级协议注册是设置页里的独立开关，仅用于从浏览器/运行框等外部唤起 starward://）。
+    /// 快捷方式以命令行参数直接把 moonward:// 传给 Moonward.exe，启动游戏无需注册系统 URL 协议
+    /// （系统级协议注册是设置页里的独立开关，仅用于从浏览器/运行框等外部唤起 moonward://）。
     /// </summary>
     private async void Button_GenerateShortcut_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
@@ -553,7 +553,7 @@ public sealed partial class StartGameMenu : UserControl
                 return;
             }
 
-            // 生成的是 .url 快捷方式，依赖系统识别 starward:// 协议；未注册时先征求用户同意再注册。
+            // 生成的是 .url 快捷方式，依赖系统识别 moonward:// 协议；未注册时先征求用户同意再注册。
             if (!EnableUrlProtocol)
             {
                 var dialog = new ContentDialog

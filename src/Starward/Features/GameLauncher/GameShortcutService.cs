@@ -8,8 +8,8 @@ namespace Starward.Features.GameLauncher;
 
 /// <summary>
 /// 生成「创建游戏快捷方式」用的 Internet 快捷方式（.url）并提供可选图标。
-/// 快捷方式以 <c>URL=starward://startgame/{biz}[?profile={id}]</c> 启动游戏，
-/// 依赖系统已注册 <c>starward://</c> 协议（见 <see cref="UrlProtocolService"/>）。
+/// 快捷方式以 <c>URL=moonward://startgame/{biz}[?profile={id}]</c> 启动游戏，
+/// 依赖系统已注册 <c>moonward://</c> 协议（见 <see cref="UrlProtocolService"/>）。
 /// <para>
 /// 之所以用 .url 而非 .lnk：Velopack 自更新每次都会扫描桌面 / 开始菜单等处所有「目标指向安装根目录」的
 /// .lnk，并强制把图标重置为主程序图标（见其 <c>unsafe_update_app_manifest_lnks</c>，注释 “force icon refresh”），
@@ -41,13 +41,13 @@ public static class GameShortcutService
 
     /// <summary>
     /// 在桌面生成一个启动游戏的 Internet 快捷方式（.url），返回 .url 完整路径。
-    /// 需系统已注册 <c>starward://</c> 协议方能由该快捷方式启动游戏（调用方负责确保已注册）。
+    /// 需系统已注册 <c>moonward://</c> 协议方能由该快捷方式启动游戏（调用方负责确保已注册）。
     /// </summary>
     /// <param name="biz">游戏区服。</param>
     /// <param name="gameName">游戏显示名（用于文件名）。</param>
     /// <param name="profileId">配置文件内部名；null = 跟随软件设置（URL 不带 profile 参数）。</param>
     /// <param name="profileDisplayName">配置文件显示名（用于文件名）。</param>
-    /// <param name="icon">图标来源；null 时回退到 Starward.exe 图标。</param>
+    /// <param name="icon">图标来源；null 时回退到 Moonward.exe 图标。</param>
     /// <param name="loginUid">配置绑定的登录账号 UID；&gt;0 时写入 URL <c>uid</c> 参数。</param>
     public static string CreateStartGameShortcut(GameBiz biz, string gameName, string? profileId, string profileDisplayName, IconSource? icon, long? loginUid = null)
     {
@@ -58,7 +58,7 @@ public static class GameShortcutService
         string urlPath = Path.Combine(dir, fileName);
 
         // 图标：四大游戏用各自 .ico，其它回退主程序图标；两者路径都在稳定的 current\ 目录下，更新后仍有效。
-        string iconFile = icon?.ExpandedPath ?? AppConfig.StarwardExecutePath;
+        string iconFile = icon?.ExpandedPath ?? AppConfig.MoonwardExecutePath;
         int iconIndex = icon?.Index ?? 0;
 
         // .url 即 InternetShortcut（INI 文本）。内容（URL/图标路径）均为 ASCII，UTF-8 写出即可。
@@ -87,7 +87,7 @@ public static class GameShortcutService
 
     /// <summary>
     /// 该游戏快捷方式使用的 .ico 图标（<c>static\bh3/hk4e/hkrpg/nap.ico</c>，随程序部署在 exe 同目录 <c>static\</c> 下）。
-    /// 仅四个主要游戏有对应 .ico，其它返回 null（快捷方式回退到 Starward 程序图标）。
+    /// 仅四个主要游戏有对应 .ico，其它返回 null（快捷方式回退到 Moonward 程序图标）。
     /// </summary>
     public static IconSource? GetGameIconSource(GameBiz biz)
     {
@@ -103,7 +103,7 @@ public static class GameShortcutService
         {
             return null;
         }
-        string? dir = Path.GetDirectoryName(AppConfig.StarwardExecutePath);
+        string? dir = Path.GetDirectoryName(AppConfig.MoonwardExecutePath);
         if (string.IsNullOrEmpty(dir))
         {
             return null;

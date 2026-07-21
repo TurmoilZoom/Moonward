@@ -37,11 +37,11 @@ internal static class AppConfig
     static AppConfig()
     {
         AppVersion = typeof(AppConfig).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "";
-        MutexAndPipeName = $"Starward.RPC/{Process.GetCurrentProcess().SessionId}/{AppVersion}";
+        MutexAndPipeName = $"Moonward.RPC/{Process.GetCurrentProcess().SessionId}/{AppVersion}";
         IsAdmin = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
 
         IsAppInRemovableStorage = IsDeviceRemovableOrOnUSB(AppContext.BaseDirectory);
-        // Velopack 部署结构：<root>/current/Starward.RPC.exe、<root>/Update.exe；便携版 <root> 下有 .portable 标记。
+        // Velopack 部署结构：<root>/current/Moonward.RPC.exe、<root>/Update.exe；便携版 <root> 下有 .portable 标记。
         string? rootFolder = new DirectoryInfo(AppContext.BaseDirectory).Parent?.FullName;
         bool isVelopackInstall = rootFolder is not null && File.Exists(Path.Combine(rootFolder, "Update.exe"));
         IsPortable = isVelopackInstall && File.Exists(Path.Combine(rootFolder!, ".portable"));
@@ -58,11 +58,11 @@ internal static class AppConfig
         }
         else if (IsAppInRemovableStorage)
         {
-            CacheFolder = Path.Combine(Path.GetPathRoot(AppContext.BaseDirectory)!, ".StarwardCache");
+            CacheFolder = Path.Combine(Path.GetPathRoot(AppContext.BaseDirectory)!, ".MoonwardCache");
         }
         else
         {
-            CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
+            CacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Moonward");
         }
         Directory.CreateDirectory(CacheFolder);
     }

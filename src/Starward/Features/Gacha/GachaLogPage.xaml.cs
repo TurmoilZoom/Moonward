@@ -1724,7 +1724,7 @@ public sealed partial class GachaLogPage : PageBase
                 "json" => "json",
                 _ => "json"
             };
-            var suggestName = $"Starward_Export_{CurrentGameBiz.Game}_{uid}_{DateTime.Now:yyyyMMddHHmmss}.{ext}";
+            var suggestName = $"Moonward_Export_{CurrentGameBiz.Game}_{uid}_{DateTime.Now:yyyyMMddHHmmss}.{ext}";
             var file = await FileDialogHelper.OpenSaveFileDialogAsync(this.XamlRoot, suggestName, (ext, $".{ext}"));
             if (file is not null)
             {

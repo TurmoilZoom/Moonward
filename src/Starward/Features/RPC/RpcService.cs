@@ -57,7 +57,7 @@ internal class RpcService
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = AppConfig.StarwardExecutePath,
+                    FileName = AppConfig.MoonwardExecutePath,
                     Verb = "runas",
                     UseShellExecute = true,
                     CreateNoWindow = true,

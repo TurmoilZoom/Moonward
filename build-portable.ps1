@@ -76,12 +76,12 @@ foreach ($arch in $architectures) {
     New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
 
     vpk pack `
-        --packId Starward `
+        --packId Moonward `
         --packVersion $Version `
         --packDir $pubDir `
-        --mainExe Starward.exe `
-        --packTitle Starward `
-        --packAuthors Scighost `
+        --mainExe Moonward.exe `
+        --packTitle Moonward `
+        --packAuthors "Scighost,TurmoilZoom" `
         --icon src/logo.ico `
         --channel $channel `
         --outputDir $releaseDir `

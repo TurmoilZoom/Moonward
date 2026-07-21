@@ -11,7 +11,7 @@ namespace Starward.Features.Startup;
 
 /// <summary>
 /// 命令行直接启动游戏：解析 <c>--biz</c> 指定的游戏后启动，随即退出。
-/// 对应命令行 <c>Starward.exe startgame --biz {game_biz}</c>。
+/// 对应命令行 <c>Moonward.exe startgame --biz {game_biz}</c>。
 /// </summary>
 internal sealed class StartGameStartupHandler : IStartupHandler
 {

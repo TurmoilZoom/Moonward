@@ -158,7 +158,7 @@
     <value>キャンセル</value>
   </data>
   <data name="SelectDirectoryPage_FirstUse" xml:space="preserve">
-    <value>{Starward}を使うのは初めてのようですね。</value>
+    <value>{Moonward}を使うのは初めてのようですね。</value>
   </data>
   <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
     <value>ランチャーに移動</value>
@@ -167,7 +167,7 @@
     <value>フォルダーを選択</value>
   </data>
   <data name="SelectGamePage_SomeGame" xml:space="preserve">
-    <value>{Starward}は、いくつかの「miHoYo/HoYoverse」のゲームをサポートしています。</value>
+    <value>{Moonward}は、いくつかの「miHoYo/HoYoverse」のゲームをサポートしています。</value>
   </data>
   <data name="SelectGamePage_TheLastStep" xml:space="preserve">
     <value>最後のステップ～</value>
@@ -981,7 +981,7 @@
     <value>免責事項</value>
   </data>
   <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
-    <value>このページの機能は、HyperionまたはHoYoLABアカウントにログインをする必要があります。Starwardはログイン認証情報(Cookie)を保存し、あなたになりすましてmiHoYoのサーバーにリクエストを送信します。この方法は危険であり、あなたのアカウントが異常な事になったり、またはアカウントがBANされたとしても責任は一切負いません。
+    <value>このページの機能は、HyperionまたはHoYoLABアカウントにログインをする必要があります。Moonwardはログイン認証情報(Cookie)を保存し、あなたになりすましてmiHoYoのサーバーにリクエストを送信します。この方法は危険であり、あなたのアカウントが異常な事になったり、またはアカウントがBANされたとしても責任は一切負いません。
 
 リスクを受け入れたうえで使用を続行しますか?</value>
   </data>
@@ -1263,7 +1263,7 @@
     <value>URLプロトコル (試験的)</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
-    <value>他のソフトウェアは、URLプロトコルを通じてStarwardの機能の一部を利用することができます。</value>
+    <value>他のソフトウェアは、URLプロトコルを通じてMoonwardの機能の一部を利用することができます。</value>
   </data>
   <data name="SettingPage_RegisterURLProtocol" xml:space="preserve">
     <value>URLプロトコルを登録</value>
@@ -1366,7 +1366,7 @@
     <value>ネットワークテスト</value>
   </data>
   <data name="SelectLanguagePage_AreYouAbleToReceiveUpdatesForStarward" xml:space="preserve">
-    <value>Starwardのアップデートを受け取りますか?</value>
+    <value>Moonwardのアップデートを受け取りますか?</value>
   </data>
   <data name="SelectDirectoryPage_PleaseSelectAFolderToStoreYourPersonalData" xml:space="preserve">
     <value>個人データを保存するフォルダーを選択してください。これは非常に重要です!</value>
@@ -1387,7 +1387,7 @@
     <value>虚構叙事</value>
   </data>
   <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Starwardの翻訳にご協力ください</value>
+    <value>Moonwardの翻訳にご協力ください</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>キャッシュ</value>
@@ -1991,10 +1991,10 @@
     <value>非互換性のお知らせ</value>
   </data>
   <data name="PreDownloadDialog_IncompatibilityNoticeContent" xml:space="preserve">
-    <value>Starward と HoYoPlay (miHoYo Launcher) の事前インストールファイルは互換性がなく、相互で認識できません。</value>
+    <value>Moonward と HoYoPlay (miHoYo Launcher) の事前インストールファイルは互換性がなく、相互で認識できません。</value>
   </data>
   <data name="WelcomeView_DearPlayerWelcomeToStarward" xml:space="preserve">
-    <value>プレイヤーの皆様、Starward へようこそ!</value>
+    <value>プレイヤーの皆様、Moonward へようこそ!</value>
   </data>
   <data name="WelcomeView_WelcomeToStarwardDescription" xml:space="preserve">
     <value>このランチャーはHoYoverseのゲーム向けに設計されており、ゲームを簡単に管理し、より良い体験を得ることができます。</value>
@@ -2018,7 +2018,7 @@
     <value>インストール済み</value>
   </data>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
-    <value>Starward、起動!</value>
+    <value>Moonward、起動!</value>
   </data>
   <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
     <value>移行して起動</value>
@@ -2042,10 +2042,10 @@
     <value>クリックしてゲームを選択または切り替え。</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameUserDataFolderWarning" xml:space="preserve">
-    <value>Starwardのデータフォルダがゲームフォルダ内に含まれています。ゲームのアンインストール時にデータが削除されることを防ぐため、設定ページからデータフォルダの場所を変更し、再度お試しください。</value>
+    <value>Moonwardのデータフォルダがゲームフォルダ内に含まれています。ゲームのアンインストール時にデータが削除されることを防ぐため、設定ページからデータフォルダの場所を変更し、再度お試しください。</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning" xml:space="preserve">
-    <value>Starwardの実行ファイルがゲームフォルダ内に含まれています。ゲームのアンインストール時にデータが削除されることを防ぐため、実行ファイルの場所をゲームフォルダ外に移動し、再度お試しください。</value>
+    <value>Moonwardの実行ファイルがゲームフォルダ内に含まれています。ゲームのアンインストール時にデータが削除されることを防ぐため、実行ファイルの場所をゲームフォルダ外に移動し、再度お試しください。</value>
   </data>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>クラウドゲーム</value>
@@ -2418,7 +2418,7 @@
     <value>ハイダイナミックレンジ</value>
   </data>
   <data name="WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity" xml:space="preserve">
-    <value>Starwardの起動に時間がかかる場合は、Windowsセキュリティのスマート アプリ コントロールを無効にすることをおすすめします。</value>
+    <value>Moonwardの起動に時間がかかる場合は、Windowsセキュリティのスマート アプリ コントロールを無効にすることをおすすめします。</value>
   </data>
   <data name="WelcomeView_OpenWindowsSecurity" xml:space="preserve">
     <value>Windowsセキュリティを開く</value>
@@ -2427,7 +2427,7 @@
     <value>詳細</value>
   </data>
   <data name="WelcomeView_NetworkErrorYouCanContinueUsingStarwardButYouWonTReceiveFutureUpdates" xml:space="preserve">
-    <value>ネットワークエラーが発生しました。Starwardは引き続きご利用いただけますが、今後のアップデートを受信することはできません。</value>
+    <value>ネットワークエラーが発生しました。Moonwardは引き続きご利用いただけますが、今後のアップデートを受信することはできません。</value>
   </data>
   <data name="MainView_CheckSystemProxy_SystemProxyIsEnabled" xml:space="preserve">
     <value>システムプロキシは有効です。</value>
@@ -2610,7 +2610,7 @@
     <value>フォルダーの変更</value>
   </data>
   <data name="HotkeySetting_SingleKeyShortcutsTips" xml:space="preserve">
-    <value>シングルキーショートカット(F1-F12)を登録する場合は、Starwardを管理者権限で実行する必要があります。そうでなければ、ショートカットがゲームで動作しない場合があります。</value>
+    <value>シングルキーショートカット(F1-F12)を登録する場合は、Moonwardを管理者権限で実行する必要があります。そうでなければ、ショートカットがゲームで動作しない場合があります。</value>
   </data>
   <data name="SettingPage_KeyboardShortcuts" xml:space="preserve">
     <value>キーボード ショートカット</value>
@@ -2649,10 +2649,10 @@
     <value>Xboxプロトコルコントローラーのみがサポートされています。他のタイプのコントローラーとの互換性は保証されません。</value>
   </data>
   <data name="GamepadControlSetting_SimulateInputDesc" xml:space="preserve">
-    <value>ゲームコントローラーを使用してキーボードとマウスの入力をシミュレートします。この機能はゲームで正常に動作するためにStarwardを管理者権限で実行する必要があります。</value>
+    <value>ゲームコントローラーを使用してキーボードとマウスの入力をシミュレートします。この機能はゲームで正常に動作するためにMoonwardを管理者権限で実行する必要があります。</value>
   </data>
   <data name="GamepadControlSetting_LongPressGuideButtonDesc" xml:space="preserve">
-    <value>ガイドボタンを長押しすると、Starwardのメインウィンドウが開きます。</value>
+    <value>ガイドボタンを長押しすると、Moonwardのメインウィンドウが開きます。</value>
   </data>
   <data name="GamepadControlSetting_BothThumbsticksDesc" xml:space="preserve">
     <value>両方のサムスティックを同時に押し込むと、コントローラーベースのキーボードとマウスシミュレーションが有効になります。</value>
@@ -2664,7 +2664,7 @@
     <value>• ガイドボタンをマッピングする場合、デフォルトの Xbox Game Bar ショートカットは無効になります。 他のソフトウェア (Steam Big Picture Modeなど) もガイドボタンに反応する可能性があります。競合が発生した場合は、それらの機能を手動で無効にする必要があります。</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingKeyboardDesc" xml:space="preserve">
-    <value>• キーボードキーにマッピングする場合、キーボードに表示される名前をスペースで区切って入力します。 例えば、ボタンを「Ctrl + Alt + F1」にマッピングするには、「Ctrl Alt F1」と入力します。 numpadキーについては、Pad8、Pad+ のような、キーの前にPadを追加。 この機能はゲームで正しく動作するために、Starwardが管理者権限で実行する必要があります。</value>
+    <value>• キーボードキーにマッピングする場合、キーボードに表示される名前をスペースで区切って入力します。 例えば、ボタンを「Ctrl + Alt + F1」にマッピングするには、「Ctrl Alt F1」と入力します。 numpadキーについては、Pad8、Pad+ のような、キーの前にPadを追加。 この機能はゲームで正しく動作するために、Moonwardが管理者権限で実行する必要があります。</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingShareDesc" xml:space="preserve">
     <value>共有ボタンは引き続きXboxゲームバーのスクリーンショットをトリガーしますが、現時点では良い解決策はありません</value>

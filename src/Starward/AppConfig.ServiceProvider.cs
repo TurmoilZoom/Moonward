@@ -49,11 +49,11 @@ public static partial class AppConfig
         {
             var logFolder = Path.Combine(CacheFolder, "log");
             Directory.CreateDirectory(logFolder);
-            LogFile = Path.Combine(logFolder, $"Starward_{DateTime.Now:yyMMdd}.log");
+            LogFile = Path.Combine(logFolder, $"Moonward_{DateTime.Now:yyMMdd}.log");
             Log.Logger = new LoggerConfiguration().WriteTo.File(path: LogFile, shared: true, outputTemplate: $$"""[{Timestamp:HH:mm:ss.fff}] [{Level:u4}] [{{Path.GetFileName(Environment.ProcessPath)}} ({{Environment.ProcessId}})] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}""")
                                                   .Enrich.FromLogContext()
                                                   .CreateLogger();
-            Log.Information($"Welcome to Starward v{AppVersion}\r\nSystem: {Environment.OSVersion}\r\nCommand Line: {Environment.CommandLine}");
+            Log.Information($"Welcome to Moonward v{AppVersion}\r\nSystem: {Environment.OSVersion}\r\nCommand Line: {Environment.CommandLine}");
 
             var sc = new ServiceCollection();
             sc.AddMemoryCache();
@@ -160,9 +160,9 @@ public static partial class AppConfig
         {
             client.DefaultRequestHeaders.Clear();
 #if DEBUG
-            client.DefaultRequestHeaders.Add("User-Agent", $"Starward.Debug/{AppVersion}");
+            client.DefaultRequestHeaders.Add("User-Agent", $"Moonward.Debug/{AppVersion}");
 #else
-            client.DefaultRequestHeaders.Add("User-Agent", $"Starward/{AppVersion}");
+            client.DefaultRequestHeaders.Add("User-Agent", $"Moonward/{AppVersion}");
 #endif
             client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
         });

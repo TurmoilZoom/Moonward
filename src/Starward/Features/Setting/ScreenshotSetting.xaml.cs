@@ -323,7 +323,7 @@ public sealed partial class ScreenshotSetting : PageBase
             ColorPrimaries colorPrimaries = writeColorProfile
                 ? await ScreenCaptureService.GetColorPrimariesFromDisplayInformationAsync(displayInfo)
                 : ColorPrimaries.BT709;
-            Directory.CreateDirectory(Path.Combine(ScreenshotFolder, "Starward"));
+            Directory.CreateDirectory(Path.Combine(ScreenshotFolder, "Moonward"));
             CanvasRenderTarget? renderTarget = null;
             string extension = ScreenshotForamt switch
             {
@@ -379,7 +379,7 @@ public sealed partial class ScreenshotSetting : PageBase
                 throw new NotSupportedException($"Unsupported pixel format: {canvasBitmap.Format}");
             }
 
-            filePath = Path.Join(ScreenshotFolder, "Starward", $"Starward_{frameTime:yyyyMMdd_HHmmssff}.{extension}");
+            filePath = Path.Join(ScreenshotFolder, "Moonward", $"Moonward_{frameTime:yyyyMMdd_HHmmssff}.{extension}");
             using MemoryStream ms = new();
             if (extension is "png")
             {

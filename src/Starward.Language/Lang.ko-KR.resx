@@ -158,7 +158,7 @@
     <value>취소</value>
   </data>
   <data name="SelectDirectoryPage_FirstUse" xml:space="preserve">
-    <value>처음 {Starward} 를 사용하시는군요!</value>
+    <value>처음 {Moonward} 를 사용하시는군요!</value>
   </data>
   <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
     <value>실행기로 이동</value>
@@ -167,7 +167,7 @@
     <value>폴더 선택</value>
   </data>
   <data name="SelectGamePage_SomeGame" xml:space="preserve">
-    <value>{Starward} 는 일부 {miHoYo/HoYoverse} 게임을 지원합니다. 아래에서 선택해주세요. 이는 추후에 수정할수 있습니다.</value>
+    <value>{Moonward} 는 일부 {miHoYo/HoYoverse} 게임을 지원합니다. 아래에서 선택해주세요. 이는 추후에 수정할수 있습니다.</value>
   </data>
   <data name="SelectGamePage_TheLastStep" xml:space="preserve">
     <value>마지막 단계 입니다~</value>
@@ -982,7 +982,7 @@
     <value>면책조항</value>
   </data>
   <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
-    <value>이 기능은 사용자의 쿠키를 이용하여 Starward 프로그램이 사용자를 가장하여 miHoYo 서버에 접속하여 데이터를 청구합니다. 이런 행위는 사용자 계정의 이상 혹은 계정정지 등을 초래할 수 있으며 이로인해 발생한 손해 는 사용자가 전적으로 책임져야 함을 알립니다.
+    <value>이 기능은 사용자의 쿠키를 이용하여 Moonward 프로그램이 사용자를 가장하여 miHoYo 서버에 접속하여 데이터를 청구합니다. 이런 행위는 사용자 계정의 이상 혹은 계정정지 등을 초래할 수 있으며 이로인해 발생한 손해 는 사용자가 전적으로 책임져야 함을 알립니다.
 
 위 내용을 이해하였으며 그래도 계속하시겠습니까?</value>
   </data>
@@ -1264,7 +1264,7 @@
     <value>URL 프로토콜 (실험기능)</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
-    <value>타 프로그램에서 URL 프로토콜을 통해 Starward 의 일부기능을 사용할 수 있습니다.</value>
+    <value>타 프로그램에서 URL 프로토콜을 통해 Moonward 의 일부기능을 사용할 수 있습니다.</value>
   </data>
   <data name="SettingPage_RegisterURLProtocol" xml:space="preserve">
     <value>URL 프로토콜 등록</value>
@@ -1367,7 +1367,7 @@
     <value>네트워크 테스트</value>
   </data>
   <data name="SelectLanguagePage_AreYouAbleToReceiveUpdatesForStarward" xml:space="preserve">
-    <value>Starward 의 업데이트를 정상적으로 받을 수 있습니까?</value>
+    <value>Moonward 의 업데이트를 정상적으로 받을 수 있습니까?</value>
   </data>
   <data name="SelectDirectoryPage_PleaseSelectAFolderToStoreYourPersonalData" xml:space="preserve">
     <value>중요한 사용자 설정 파일을 저장할 위치를 선택하세요 !</value>
@@ -1388,7 +1388,7 @@
     <value>허구 이야기</value>
   </data>
   <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>도움! Starward 번역</value>
+    <value>도움! Moonward 번역</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>캐시</value>
@@ -1992,13 +1992,13 @@
     <value>서비스 미지원 알림</value>
   </data>
   <data name="PreDownloadDialog_IncompatibilityNoticeContent" xml:space="preserve">
-    <value>Starward 와 HoYoPlay (미호요 공식런처) 의 사전다운로드 파일은 서로 호환되지 않습니다.</value>
+    <value>Moonward 와 HoYoPlay (미호요 공식런처) 의 사전다운로드 파일은 서로 호환되지 않습니다.</value>
   </data>
   <data name="WelcomeView_DearPlayerWelcomeToStarward" xml:space="preserve">
-    <value>안녕하세요. Starward 을 사용해주셔서 감사합니다!</value>
+    <value>안녕하세요. Moonward 을 사용해주셔서 감사합니다!</value>
   </data>
   <data name="WelcomeView_WelcomeToStarwardDescription" xml:space="preserve">
-    <value>Starward 는 HoYoverse 게임전용 런처입니다. Hoyoverse 의 게임을 더 쉽게 관리하고 플레이 할 수 있게 도움을 주죠.</value>
+    <value>Moonward 는 HoYoverse 게임전용 런처입니다. Hoyoverse 의 게임을 더 쉽게 관리하고 플레이 할 수 있게 도움을 주죠.</value>
   </data>
   <data name="WelcomeView_SelectUserDataFolderDescription" xml:space="preserve">
     <value>중요한 사용자 데이터가 아래 폴더에 저장되어 있습니다. 아래 버튼을 클릭하여 디렉토리를 변경할 수 있습니다.</value>
@@ -2019,7 +2019,7 @@
     <value>설치됨</value>
   </data>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
-    <value>Starward, 시작!</value>
+    <value>Moonward, 시작!</value>
   </data>
   <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
     <value>마이그레이션 후 시작</value>
@@ -2043,10 +2043,10 @@
     <value>여기를 클릭하여 게임을 선택하세요.</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameUserDataFolderWarning" xml:space="preserve">
-    <value>Starward 데이터는 기본적으로 게임폴더에 저장됩니다. 게임을 제거하면 함께 제거됩니다. 설정에서 저장할 위치를 변경후 다시시도 하세요.</value>
+    <value>Moonward 데이터는 기본적으로 게임폴더에 저장됩니다. 게임을 제거하면 함께 제거됩니다. 설정에서 저장할 위치를 변경후 다시시도 하세요.</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning" xml:space="preserve">
-    <value>Starward 프로그램은 기본적으로 게임 폴더에 저장됩니다. 게임을 제거하면 함께 제거됩니다. 프로그램 위치를 변경 후 다시 시도하세요.</value>
+    <value>Moonward 프로그램은 기본적으로 게임 폴더에 저장됩니다. 게임을 제거하면 함께 제거됩니다. 프로그램 위치를 변경 후 다시 시도하세요.</value>
   </data>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>클라우드 게임</value>
@@ -2419,7 +2419,7 @@
     <value>HDR</value>
   </data>
   <data name="WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity" xml:space="preserve">
-    <value>Starward 실행이 느릴경우 Windows 보안 의 스마트 앱 컨트롤 기능을 비활성화 해주세요.</value>
+    <value>Moonward 실행이 느릴경우 Windows 보안 의 스마트 앱 컨트롤 기능을 비활성화 해주세요.</value>
   </data>
   <data name="WelcomeView_OpenWindowsSecurity" xml:space="preserve">
     <value>Windows 보안 열기</value>
@@ -2428,7 +2428,7 @@
     <value>더 알아보기</value>
   </data>
   <data name="WelcomeView_NetworkErrorYouCanContinueUsingStarwardButYouWonTReceiveFutureUpdates" xml:space="preserve">
-    <value>네트워크 오류. Starward 를 계속 이용할 수 있지만 업데이트를 확인 할 수 없습니다.</value>
+    <value>네트워크 오류. Moonward 를 계속 이용할 수 있지만 업데이트를 확인 할 수 없습니다.</value>
   </data>
   <data name="MainView_CheckSystemProxy_SystemProxyIsEnabled" xml:space="preserve">
     <value>시스템 프록시 활성화됨</value>
@@ -2611,7 +2611,7 @@
     <value>폴더 변경</value>
   </data>
   <data name="HotkeySetting_SingleKeyShortcutsTips" xml:space="preserve">
-    <value>단일 키 (F1-F12) 를 단축키로 설정시, Starward 를 관리자 권한으로 실행해야 합니다.</value>
+    <value>단일 키 (F1-F12) 를 단축키로 설정시, Moonward 를 관리자 권한으로 실행해야 합니다.</value>
   </data>
   <data name="SettingPage_KeyboardShortcuts" xml:space="preserve">
     <value>키보드 단축키</value>
@@ -2650,10 +2650,10 @@
     <value>Xbox 용 컨트롤러에서 테스트 되었습니다. 다른 유형의 컨트롤러는 정상작동을 보당하지 않습니다.</value>
   </data>
   <data name="GamepadControlSetting_SimulateInputDesc" xml:space="preserve">
-    <value>컨트롤러 입력 변환 을 사용하려면 Starward 를 관리자 권한으로 실행해야 합니다.</value>
+    <value>컨트롤러 입력 변환 을 사용하려면 Moonward 를 관리자 권한으로 실행해야 합니다.</value>
   </data>
   <data name="GamepadControlSetting_LongPressGuideButtonDesc" xml:space="preserve">
-    <value>가이드 버튼을 길게 눌러 Starward 윈도우를 활성화 합니다.</value>
+    <value>가이드 버튼을 길게 눌러 Moonward 윈도우를 활성화 합니다.</value>
   </data>
   <data name="GamepadControlSetting_BothThumbsticksDesc" xml:space="preserve">
     <value>컨트롤러의 양쪽 스틱을 동시에 눌러 키보드/마우스 시뮬레이션 기능을 활성화 합니다.</value>
@@ -2665,7 +2665,7 @@
     <value>• 가이드 버튼을 매핑에 사용 할 경우 기본 Xbox Game Bar 바로가기를 사용할 수 없습니다. Steam Big Picture Mode 모드 등 다른 가이드 버튼을 사용하는 프로그램과 충돌할 수 있습니다. 계속 사용하려면 해당 기능들을 수동으로 비활성화 해주세요.</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingKeyboardDesc" xml:space="preserve">
-    <value>• 키보드 매핑 시 키보드상의 문자를 입력하세요. 키 조합은 스페이스바 로 구분해주세요. (예: "Ctrl + Alt + F1" 을 입력하고 싶으면 "Ctrl + Alt + F1" 로 입력하세요.) 숫자 키패드를 사용하려면 숫자앞에 Pad를 추가하세요. (예:Pad8, Pad+ ) 위 기능은 Starward 를 관리자 권한으로 실행해야 사용할 수 있습니다.</value>
+    <value>• 키보드 매핑 시 키보드상의 문자를 입력하세요. 키 조합은 스페이스바 로 구분해주세요. (예: "Ctrl + Alt + F1" 을 입력하고 싶으면 "Ctrl + Alt + F1" 로 입력하세요.) 숫자 키패드를 사용하려면 숫자앞에 Pad를 추가하세요. (예:Pad8, Pad+ ) 위 기능은 Moonward 를 관리자 권한으로 실행해야 사용할 수 있습니다.</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingShareDesc" xml:space="preserve">
     <value>• 공유 버튼은 Xbox Game Bar 의 스크린샷 기능을 불러올 수 있습니다. 현재 해결방법이 제공되지 않습니다.</value>

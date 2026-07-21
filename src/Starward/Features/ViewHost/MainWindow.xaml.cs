@@ -71,7 +71,7 @@ public sealed partial class MainWindow : WindowEx
     /// </summary>
     private void InitializeMainWindow()
     {
-        Title = "Starward";
+        Title = "Moonward";
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         AppWindow.TitleBar.IconShowOptions = IconShowOptions.ShowIconAndSystemMenu;
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;

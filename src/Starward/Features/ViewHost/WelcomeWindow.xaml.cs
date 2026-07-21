@@ -39,7 +39,7 @@ public sealed partial class WelcomeWindow : WindowEx
 
 
     /// <param name="legacyUserDataFolder">旧版本 UserDataFolder（数据库所在目录），升级迁移源之一。</param>
-    /// <param name="legacyCacheFolder">旧版本缓存根（%LocalAppData%\Starward 等），升级迁移源之一。</param>
+    /// <param name="legacyCacheFolder">旧版本缓存根（%LocalAppData%\Moonward 等），升级迁移源之一。</param>
     /// <param name="presetTarget">提权迁移子进程的预设目标目录（带 --migrate-to 时），将自动开始迁移。</param>
     public WelcomeWindow(string? legacyUserDataFolder = null, string? legacyCacheFolder = null, string? presetTarget = null)
     {

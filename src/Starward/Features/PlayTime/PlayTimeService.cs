@@ -440,7 +440,7 @@ internal class PlayTimeService
                     _logger.LogInformation("Start to log playtime ({biz}, {pid})", biz, process.Id);
                     Process.Start(new ProcessStartInfo
                     {
-                        FileName = AppConfig.StarwardExecutePath,
+                        FileName = AppConfig.MoonwardExecutePath,
                         Arguments = $"playtime --biz {biz} --pid {process.Id} {AppConfig.GetDataFolderArgument()}",
                         CreateNoWindow = true,
                     });
@@ -483,7 +483,7 @@ internal class PlayTimeService
 
             Process? p = Process.Start(new ProcessStartInfo
             {
-                FileName = AppConfig.StarwardExecutePath,
+                FileName = AppConfig.MoonwardExecutePath,
                 Arguments = $"playtime --biz {biz} --pid {process.Id} {AppConfig.GetDataFolderArgument()}",
                 CreateNoWindow = true,
             });

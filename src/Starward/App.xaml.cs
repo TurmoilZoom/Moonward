@@ -59,13 +59,13 @@ public partial class App : Application
     /// <param name="e">未处理异常事件参数，包含 <see cref="Microsoft.UI.Xaml.UnhandledExceptionEventArgs.Exception"/>。</param>
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        // 优先使用 AppConfig 中已配置的日志路径，否则回退到 LocalAppData\Starward\log
+        // 优先使用 AppConfig 中已配置的日志路径，否则回退到 LocalAppData\Moonward\log
         string logFile = AppConfig.LogFile;
         if (string.IsNullOrWhiteSpace(logFile))
         {
-            string logFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward", "log");
+            string logFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Moonward", "log");
             Directory.CreateDirectory(logFolder);
-            logFile = Path.Combine(logFolder, $"Starward_{DateTime.Now:yyMMdd}.log");
+            logFile = Path.Combine(logFolder, $"Moonward_{DateTime.Now:yyMMdd}.log");
         }
 
         // 组装崩溃日志：时间戳、异常堆栈、Exception.Data 中的键值对
@@ -96,7 +96,7 @@ public partial class App : Application
         // 去掉可执行文件路径，仅保留用户传入的参数，那么args[0]为第一个参数
         string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
 
-        // 开发/调试：starward://test/ 调试窗口。须在环境初始化（及 DI 容器构建）之前处理，以跳过
+        // 开发/调试：moonward://test/ 调试窗口。须在环境初始化（及 DI 容器构建）之前处理，以跳过
         // 数据目录选择/迁移等副作用，故此分支不进入下方的启动处理器职责链。
         if (args is [var first, ..] && first.StartsWith(StartupVerbs.TestUrlProtocolPrefix, StringComparison.OrdinalIgnoreCase))
         {
@@ -107,7 +107,7 @@ public partial class App : Application
         // 环境检查：数据目录、配置、服务等初始化
         await AppConfig.CheckEnviromentAsync();
 
-        // 特殊启动模式（rpc / playtime / startgame / starward://）：交由启动处理器职责链分发；若已接管则直接返回
+        // 特殊启动模式（rpc / playtime / startgame / moonward://）：交由启动处理器职责链分发；若已接管则直接返回
         if (await DispatchStartupAsync(new StartupContext(args)))
         {
             return;
@@ -139,7 +139,7 @@ public partial class App : Application
 
     /// <summary>
     /// 按注册顺序运行启动处理器职责链（<see cref="IStartupHandler"/>），分发 rpc / playtime /
-    /// startgame / starward:// 等特殊启动模式。命中 <see cref="StartupOutcome.Exit"/> 的处理器在此处
+    /// startgame / moonward:// 等特殊启动模式。命中 <see cref="StartupOutcome.Exit"/> 的处理器在此处
     /// 统一终止进程，各处理器自身不再负责进程生命周期。
     /// </summary>
     /// <param name="context">本次启动的命令行上下文。</param>
@@ -157,7 +157,7 @@ public partial class App : Application
                 Environment.Exit(0);
                 return true; // 不可达：Environment.Exit 已终止进程
             }
-            // Continue：已识别但放行（例如未注册的 starward:// 主机名），继续询问后续处理器
+            // Continue：已识别但放行（例如未注册的 moonward:// 主机名），继续询问后续处理器
         }
         return false;
     }

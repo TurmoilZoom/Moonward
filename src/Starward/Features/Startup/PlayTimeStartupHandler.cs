@@ -8,7 +8,7 @@ namespace Starward.Features.Startup;
 
 /// <summary>
 /// 游玩时长记录子进程：由游戏进程派生，上报本次会话时长后退出。
-/// 对应命令行 <c>Starward.exe playtime --pid {pid} --biz {game_biz}</c>。
+/// 对应命令行 <c>Moonward.exe playtime --pid {pid} --biz {game_biz}</c>。
 /// </summary>
 internal sealed class PlayTimeStartupHandler : IStartupHandler
 {

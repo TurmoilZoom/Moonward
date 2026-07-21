@@ -101,7 +101,7 @@ public sealed partial class UIGF4GachaWindow : WindowEx
             ExportError = null;
             if (ListView_Export.SelectedItems.Count > 0)
             {
-                string name = $"Starward_UIGF_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.json";
+                string name = $"Moonward_UIGF_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.json";
                 string? path = await FileDialogHelper.OpenSaveFileDialogAsync(Content.XamlRoot, name, ("JSON", ".json"));
                 if (!string.IsNullOrWhiteSpace(path))
                 {

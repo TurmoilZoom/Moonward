@@ -4,9 +4,9 @@
 
 ## 项目概述
 
-Starward：Windows 米哈游游戏启动器（WinUI 3 / .NET 10），支持原神（hk4e）、星穹铁道（hkrpg）、绝区零（nap）、崩坏3（bh3）。
+Moonward（产品品牌；工程目录与 C# 命名空间仍为 `Starward.*`）：Windows 米哈游游戏启动器（WinUI 3 / .NET 10），支持原神（hk4e）、星穹铁道（hkrpg）、绝区零（nap）、崩坏3（bh3）。
 
-本仓为 **fork**（上游 Scighost/Starward，发布走 TurmoilZoom/Starward + Velopack）。日常开发在 `rebase/develop`，会周期性变基上游——**许多自定义改动易在变基中丢失**。
+本仓为 **fork**（上游 Scighost/Starward，发布走 TurmoilZoom/Starward + Velopack，安装包身份为 Moonward）。日常开发在 `rebase/develop`，会周期性变基上游——**许多自定义改动易在变基中丢失**。
 
 ## 构建与运行
 
@@ -103,7 +103,7 @@ dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeI
 
 1. `Program.Main`：**Velopack 必须最先**（`VelopackApp.Build().Run()`），处理安装/更新/卸载后可直接退出。**禁止在 Velopack 前插入逻辑。**
 2. `App.OnLaunched`：
-   - 先特判 `starward://test/`（须在环境/DI 之前，否则 `CacheFolder` 未就绪会崩）
+   - 先特判 `moonward://test/`（须在环境/DI 之前，否则 `CacheFolder` 未就绪会崩）
    - `CheckEnviromentAsync()`
    - `DispatchStartupAsync`：按 DI 注册顺序跑 `IStartupHandler`（当前：rpc → playtime → startgame → urlprotocol）；`StartupOutcome.Exit` 则 `Environment.Exit`
    - 单实例（`main`）→ `MainWindow` 或仅托盘（`--hide`）
@@ -185,6 +185,6 @@ Velopack + GitHub Releases；预览版 = pre-release，按架构分渠道。`Rel
 
 - 精简版：`AGENTS.md`
 - 本地化：`docs/Localization.md`
-- URL 协议：`docs/UrlProtocol.md`（`starward://`）
-- 日志：`%LocalAppData%/Starward/log/` 或 `UserDataFolder/data/log/`
+- URL 协议：`docs/UrlProtocol.md`（`moonward://`）
+- 日志：`%LocalAppData%/Moonward/log/` 或 `UserDataFolder/data/log/`
 - [WinUI 3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)

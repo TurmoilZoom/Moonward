@@ -2,7 +2,7 @@ English | [简体中文](./Localization.zh-CN.md) | [Tiếng Việt](./Localizat
 
 # Localization
 
-Firstly, I would like to express my sincerest thanks to all contributors to this project. Thanks to your selfless contributions, Starward can be used by people in different languages ​​around the world. Whether your contribution is a line of code, a translation correction, or a suggestion, your work adds significant value to the project. Everyone is an indispensable part of this vibrant community.
+Firstly, I would like to express my sincerest thanks to all contributors to this project. Thanks to your selfless contributions, Moonward can be used by people in different languages ​​around the world. Whether your contribution is a line of code, a translation correction, or a suggestion, your work adds significant value to the project. Everyone is an indispensable part of this vibrant community.
 
 <picture>
     <source srcset="https://github.com/Scighost/Starward/assets/61003590/9d369ec3-ab7c-408f-88c2-11bfe4453208" type="image/avif" />
@@ -26,7 +26,7 @@ After the translation is completed, please submit it back to this repository thr
 
 ## In-app Text Translation
 
-The in-app text translation for Starward is hosted on the [Crowdin](https://crowdin.com/project/starward) platform, where you can modify the text content at any time. If you would like to add a new translation language, please create an [issue](https://github.com/Scighost/Starward/issues).
+The in-app text translation for Moonward is hosted on the [Crowdin](https://crowdin.com/project/starward) platform, where you can modify the text content at any time. If you would like to add a new translation language, please create an [issue](https://github.com/Scighost/Starward/issues).
 
 The changes you make on Crowdin will be synchronized to the [l10n/main](https://github.com/Scighost/Starward/tree/l10n/main) branch within an hour, triggering an automated build process. Find the latest workflow named `New Crowdin updates` in [GitHub Actions](https://github.com/Scighost/Starward/actions/workflows/build.yml) and download the compiled binary file (Artifacts). You can check the display effect of translated text in the app in real time. **The version under development may corrupt your personal database `StarwardDatabase.db`. Please make a backup before testing. This version should not be used for a long time.**
 

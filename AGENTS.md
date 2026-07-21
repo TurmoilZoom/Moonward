@@ -5,7 +5,7 @@
 
 ## 项目
 
-Starward：Windows 米哈游游戏启动器（WinUI 3 / .NET 10），支持原神、星铁、绝区零、崩坏3。
+Moonward（产品品牌；工程/命名空间仍为 `Starward.*`）：Windows 米哈游游戏启动器（WinUI 3 / .NET 10），支持原神、星铁、绝区零、崩坏3。
 本仓为 fork，日常分支 `rebase/develop`，会周期性变基上游——**自定义改动易在变基中丢失**。
 
 ```
@@ -107,5 +107,5 @@ SDK 见 `global.json`，**不要擅自升级 SDK/NuGet**。改完至少 build �
 - 详版：`CLAUDE.md`
 - 本地化：`docs/Localization.md`
 - URL 协议：`docs/UrlProtocol.md`
-- 日志：`%LocalAppData%/Starward/log/` 或 `UserDataFolder/data/log/`
+- 日志：`%LocalAppData%/Moonward/log/` 或 `UserDataFolder/data/log/`
 - [WinUI 3](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/)

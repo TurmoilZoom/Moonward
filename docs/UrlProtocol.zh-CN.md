@@ -1,6 +1,6 @@
 # URL 协议
 
-其他软件甚至网站都可以通过 `starward` URL 协议调用 Starward 的部分功能。只有在用户在设置页面中启用该功能后，URL 协议才会被注册。
+其他软件甚至网站都可以通过 `moonward` URL 协议调用 Moonward 的部分功能。只有在用户在设置页面中启用该功能后，URL 协议才会被注册。
 
 ![URL Protocol](https://user-images.githubusercontent.com/61003590/278273851-7c614cde-d8c4-403b-876e-cecc3570f684.png)
 
@@ -27,7 +27,7 @@
 ### 启动游戏
 
 ```
-starward://startgame/{game_biz}?install_path={install_path}&profile={profile}&uid={uid}
+moonward://startgame/{game_biz}?install_path={install_path}&profile={profile}&uid={uid}
 ```
 
 **可用查询参数**
@@ -42,7 +42,7 @@ starward://startgame/{game_biz}?install_path={install_path}&profile={profile}&ui
 ### 记录游戏时长
 
 ```
-starward://playtime/{game_biz}?pid={pid}
+moonward://playtime/{game_biz}?pid={pid}
 ```
 
 **可用查询参数**

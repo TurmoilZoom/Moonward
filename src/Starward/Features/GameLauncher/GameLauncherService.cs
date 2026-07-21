@@ -548,7 +548,7 @@ internal partial class GameLauncherService
     public static string GetRelativePathIfInRemovableStorage(string path, out bool removableStorage)
     {
         removableStorage = DriveHelper.IsDeviceRemovableOrOnUSB(path);
-        if (removableStorage && Path.GetPathRoot(AppConfig.StarwardExecutePath) == Path.GetPathRoot(path))
+        if (removableStorage && Path.GetPathRoot(AppConfig.MoonwardExecutePath) == Path.GetPathRoot(path))
         {
             path = Path.GetRelativePath(Path.GetDirectoryName(AppConfig.ConfigPath)!, path);
         }

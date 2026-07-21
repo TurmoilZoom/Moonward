@@ -18,7 +18,7 @@ internal enum StartupOutcome
 
 /// <summary>
 /// 单一命令行启动模式的处理器，是「职责链（Chain of Responsibility）」中的一环。
-/// 每种特殊启动参数（rpc / playtime / startgame / starward:// 等）实现为一个独立处理器，
+/// 每种特殊启动参数（rpc / playtime / startgame / moonward:// 等）实现为一个独立处理器，
 /// 由 <see cref="App.OnLaunched"/> 在环境初始化后按注册顺序依次询问，取代原先硬编码的 if 分支。
 /// </summary>
 /// <remarks>

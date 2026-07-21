@@ -74,7 +74,7 @@ public sealed partial class AdvancedSetting : PageBase
     {
         try
         {
-            var status = await Launcher.QueryUriSupportAsync(new Uri("starward://"), LaunchQuerySupportType.Uri);
+            var status = await Launcher.QueryUriSupportAsync(new Uri("moonward://"), LaunchQuerySupportType.Uri);
 #pragma warning disable MVVMTK0034 // Direct field reference to [ObservableProperty] backing field
             _EnableUrlProtocol = status is LaunchQuerySupportStatus.Available;
 #pragma warning restore MVVMTK0034 // Direct field reference to [ObservableProperty] backing field
@@ -94,7 +94,7 @@ public sealed partial class AdvancedSetting : PageBase
     {
         try
         {
-            await Launcher.LaunchUriAsync(new Uri("starward://test"));
+            await Launcher.LaunchUriAsync(new Uri("moonward://test"));
         }
         catch (Exception ex)
         {
@@ -174,7 +174,7 @@ public sealed partial class AdvancedSetting : PageBase
         catch (RpcException ex) when (ex.Status is { StatusCode: StatusCode.DeadlineExceeded })
         {
             int sessionId = Process.GetCurrentProcess().SessionId;
-            var process = Process.GetProcessesByName("Starward.RPC").FirstOrDefault(x => x.SessionId == sessionId);
+            var process = Process.GetProcessesByName("Moonward.RPC").FirstOrDefault(x => x.SessionId == sessionId);
             if (process != null)
             {
                 RPCServerProcessId = process.Id;

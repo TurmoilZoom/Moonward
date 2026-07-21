@@ -158,7 +158,7 @@
     <value>Annulla</value>
   </data>
   <data name="SelectDirectoryPage_FirstUse" xml:space="preserve">
-    <value>Sembra essere la tua prima volta che usi {Starward}.</value>
+    <value>Sembra essere la tua prima volta che usi {Moonward}.</value>
   </data>
   <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
     <value>Vai al Launcher</value>
@@ -167,7 +167,7 @@
     <value>Seleziona Cartella</value>
   </data>
   <data name="SelectGamePage_SomeGame" xml:space="preserve">
-    <value>{Starward} supporta alcuni giochi {miHoYo/HoYoverse}, seleziona quello interessato qui sotto, puoi anche cambiarlo in qualsiasi momento dopo aver avviato il launcher.</value>
+    <value>{Moonward} supporta alcuni giochi {miHoYo/HoYoverse}, seleziona quello interessato qui sotto, puoi anche cambiarlo in qualsiasi momento dopo aver avviato il launcher.</value>
   </data>
   <data name="SelectGamePage_TheLastStep" xml:space="preserve">
     <value>L'ultimo passaggio ~</value>
@@ -982,7 +982,7 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Avvertenza</value>
   </data>
   <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
-    <value>Le funzioni di questa pagina richiedono l'accesso al tuo account Hyperion/HoYoLAB. Starward salverà le tue credenziali di accesso (Cookie) e invierà richieste al server di miHoYo per tuo conto. Questo metodo è rischioso e non siamo responsabili se il tuo account dovesse risultare anomalo o essere bannato.
+    <value>Le funzioni di questa pagina richiedono l'accesso al tuo account Hyperion/HoYoLAB. Moonward salverà le tue credenziali di accesso (Cookie) e invierà richieste al server di miHoYo per tuo conto. Questo metodo è rischioso e non siamo responsabili se il tuo account dovesse risultare anomalo o essere bannato.
 
 Accetti il rischio e desideri continuare?</value>
   </data>
@@ -1264,7 +1264,7 @@ Accetti il rischio e desideri continuare?</value>
     <value>Protocollo URL (Sperimentale)</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
-    <value>Altri software possono utilizzare alcune funzionalità di Starward attraverso il protocollo URL.</value>
+    <value>Altri software possono utilizzare alcune funzionalità di Moonward attraverso il protocollo URL.</value>
   </data>
   <data name="SettingPage_RegisterURLProtocol" xml:space="preserve">
     <value>Registra Protocollo URL</value>
@@ -1367,7 +1367,7 @@ Accetti il rischio e desideri continuare?</value>
     <value>Test Di Rete</value>
   </data>
   <data name="SelectLanguagePage_AreYouAbleToReceiveUpdatesForStarward" xml:space="preserve">
-    <value>Sei in grado di ricevere aggiornamenti per Starward?</value>
+    <value>Sei in grado di ricevere aggiornamenti per Moonward?</value>
   </data>
   <data name="SelectDirectoryPage_PleaseSelectAFolderToStoreYourPersonalData" xml:space="preserve">
     <value>Seleziona una cartella per memorizzare i tuoi dati personali, è molto importante!</value>
@@ -1388,7 +1388,7 @@ Accetti il rischio e desideri continuare?</value>
     <value>Pura Finzione</value>
   </data>
   <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Aiutaci a tradurre Starward</value>
+    <value>Aiutaci a tradurre Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>Cache</value>
@@ -1992,10 +1992,10 @@ Accetti il rischio e desideri continuare?</value>
     <value>Avviso di incompatibilità</value>
   </data>
   <data name="PreDownloadDialog_IncompatibilityNoticeContent" xml:space="preserve">
-    <value>I file di pre-installazione di Starward e HoYoPlay (miHoYo Launcher) sono incompatibili e non possono riconoscersi a vicenda.</value>
+    <value>I file di pre-installazione di Moonward e HoYoPlay (miHoYo Launcher) sono incompatibili e non possono riconoscersi a vicenda.</value>
   </data>
   <data name="WelcomeView_DearPlayerWelcomeToStarward" xml:space="preserve">
-    <value>Caro giocatore, benvenuto su Starward!</value>
+    <value>Caro giocatore, benvenuto su Moonward!</value>
   </data>
   <data name="WelcomeView_WelcomeToStarwardDescription" xml:space="preserve">
     <value>Questo è un launcher progettato specificamente per i giochi HoYoverse, che ti aiuta a gestire facilmente i tuoi giochi e godere di un'esperienza migliore.</value>
@@ -2019,7 +2019,7 @@ Accetti il rischio e desideri continuare?</value>
     <value>Installato</value>
   </data>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
-    <value>Starward, Avvia!</value>
+    <value>Moonward, Avvia!</value>
   </data>
   <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
     <value>Migra e avvia</value>
@@ -2043,10 +2043,10 @@ Accetti il rischio e desideri continuare?</value>
     <value>Fai clic per selezionare o cambiare gioco.</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameUserDataFolderWarning" xml:space="preserve">
-    <value>La cartella dati di Starward si trova all'interno della cartella del gioco e verrà eliminata insieme ad essa. Modifica la posizione della cartella dati nella pagina delle impostazioni e riprova.</value>
+    <value>La cartella dati di Moonward si trova all'interno della cartella del gioco e verrà eliminata insieme ad essa. Modifica la posizione della cartella dati nella pagina delle impostazioni e riprova.</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning" xml:space="preserve">
-    <value>Il programma Starward si trova all'interno della cartella del gioco e verrà eliminato insieme al gioco. Sposta il programma fuori dalla cartella del gioco e riprova.</value>
+    <value>Il programma Moonward si trova all'interno della cartella del gioco e verrà eliminato insieme al gioco. Sposta il programma fuori dalla cartella del gioco e riprova.</value>
   </data>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Gioco cloud</value>
@@ -2419,7 +2419,7 @@ You are welcome to submit exported data to:</value>
     <value>Alta gamma dinamica</value>
   </data>
   <data name="WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity" xml:space="preserve">
-    <value>Se Starward impiega molto tempo ad avviarsi, si consiglia di disabilitare il Controllo intelligente delle app in Sicurezza di Windows.</value>
+    <value>Se Moonward impiega molto tempo ad avviarsi, si consiglia di disabilitare il Controllo intelligente delle app in Sicurezza di Windows.</value>
   </data>
   <data name="WelcomeView_OpenWindowsSecurity" xml:space="preserve">
     <value>Apri Sicurezza di Windows</value>
@@ -2428,7 +2428,7 @@ You are welcome to submit exported data to:</value>
     <value>Scopri di più</value>
   </data>
   <data name="WelcomeView_NetworkErrorYouCanContinueUsingStarwardButYouWonTReceiveFutureUpdates" xml:space="preserve">
-    <value>Errore di rete. Puoi continuare a usare Starward, ma non riceverai aggiornamenti futuri.</value>
+    <value>Errore di rete. Puoi continuare a usare Moonward, ma non riceverai aggiornamenti futuri.</value>
   </data>
   <data name="MainView_CheckSystemProxy_SystemProxyIsEnabled" xml:space="preserve">
     <value>Il proxy di sistema è abilitato.</value>
@@ -2611,7 +2611,7 @@ You are welcome to submit exported data to:</value>
     <value>Cambia cartella</value>
   </data>
   <data name="HotkeySetting_SingleKeyShortcutsTips" xml:space="preserve">
-    <value>Se registri scorciatoie a tasto singolo (F1–F12), devi eseguire Starward con privilegi di amministratore; altrimenti, le scorciatoie potrebbero non funzionare nel gioco.</value>
+    <value>Se registri scorciatoie a tasto singolo (F1–F12), devi eseguire Moonward con privilegi di amministratore; altrimenti, le scorciatoie potrebbero non funzionare nel gioco.</value>
   </data>
   <data name="SettingPage_KeyboardShortcuts" xml:space="preserve">
     <value>Scorciatoie da tastiera</value>
@@ -2650,10 +2650,10 @@ You are welcome to submit exported data to:</value>
     <value>Sono supportati solo controller con protocollo Xbox. La compatibilità con altri tipi di controller non è garantita.</value>
   </data>
   <data name="GamepadControlSetting_SimulateInputDesc" xml:space="preserve">
-    <value>Simula input di tastiera e mouse usando un controller di gioco. Questa funzione richiede che Starward venga eseguito con privilegi di amministratore per funzionare correttamente nei giochi.</value>
+    <value>Simula input di tastiera e mouse usando un controller di gioco. Questa funzione richiede che Moonward venga eseguito con privilegi di amministratore per funzionare correttamente nei giochi.</value>
   </data>
   <data name="GamepadControlSetting_LongPressGuideButtonDesc" xml:space="preserve">
-    <value>Tieni premuto il pulsante Guida per aprire la finestra principale di Starward.</value>
+    <value>Tieni premuto il pulsante Guida per aprire la finestra principale di Moonward.</value>
   </data>
   <data name="GamepadControlSetting_BothThumbsticksDesc" xml:space="preserve">
     <value>Premi contemporaneamente entrambi i pulsanti dei thumbstick per attivare la simulazione di tastiera e mouse basata su controller.</value>
@@ -2665,7 +2665,7 @@ You are welcome to submit exported data to:</value>
     <value>• Quando si mappa il pulsante Guida, la scorciatoia predefinita di Xbox Game Bar verrà disabilitata. Altri software (come la modalità Big Picture di Steam) potrebbero rispondere al pulsante Guida. Se si verificano conflitti, devi disabilitare manualmente quelle funzioni.</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingKeyboardDesc" xml:space="preserve">
-    <value>• Quando si mappa sui tasti della tastiera, inserisci i nomi dei tasti come appaiono sulla tastiera, separati da spazi. Ad esempio, per mappare un pulsante su "Ctrl + Alt + F1", inserisci: "Ctrl Alt F1". Per i tasti del tastierino numerico, aggiungi Pad prima del tasto, come: Pad8, Pad+. Questa funzione richiede che Starward venga eseguito con privilegi di amministratore per funzionare correttamente nei giochi.</value>
+    <value>• Quando si mappa sui tasti della tastiera, inserisci i nomi dei tasti come appaiono sulla tastiera, separati da spazi. Ad esempio, per mappare un pulsante su "Ctrl + Alt + F1", inserisci: "Ctrl Alt F1". Per i tasti del tastierino numerico, aggiungi Pad prima del tasto, come: Pad8, Pad+. Questa funzione richiede che Moonward venga eseguito con privilegi di amministratore per funzionare correttamente nei giochi.</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingShareDesc" xml:space="preserve">
     <value>Il pulsante Condividi attiva ancora gli screenshot di Xbox Game Bar, e attualmente non c'è una buona soluzione.</value>

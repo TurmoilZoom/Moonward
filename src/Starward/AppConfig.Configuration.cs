@@ -38,8 +38,8 @@ public static partial class AppConfig
     public static string CacheFolder { get; private set; }
 
     /// <summary>
-    /// 旧版本缓存根目录（%LocalAppData%\Starward / .StarwardCache / 便携 .cache），<b>仅</b>用于升级迁移时探测旧数据来源，不作为运行期缓存路径。
-    /// 注意：在标准安装下该目录同时是 Velopack 安装根目录（含 current\、Update.exe 等），迁移时必须按白名单只搬运 Starward 自己的数据，绝不能动 Velopack 文件。
+    /// 旧版本缓存根目录（%LocalAppData%\Moonward / .MoonwardCache / 便携 .cache），<b>仅</b>用于升级迁移时探测旧数据来源，不作为运行期缓存路径。
+    /// 注意：在标准安装下该目录同时是 Velopack 安装根目录（含 current\、Update.exe 等），迁移时必须按白名单只搬运 Moonward 自己的数据，绝不能动 Velopack 文件。
     /// </summary>
     public static string? LegacyCacheFolder { get; private set; }
 
@@ -106,7 +106,7 @@ public static partial class AppConfig
             AppVersion = typeof(AppConfig).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "";
             IsAppInRemovableStorage = DriveHelper.IsDeviceRemovableOrOnUSB(AppContext.BaseDirectory);
 
-            // Velopack 部署结构：<root>/current/Starward.exe、<root>/Update.exe；便携版 <root> 下有 .portable 标记。
+            // Velopack 部署结构：<root>/current/Moonward.exe、<root>/Update.exe；便携版 <root> 下有 .portable 标记。
             string? rootFolder = new DirectoryInfo(AppContext.BaseDirectory).Parent?.FullName;
             bool isVelopackInstall = rootFolder is not null && File.Exists(Path.Combine(rootFolder, "Update.exe"));
             IsPortable = isVelopackInstall && File.Exists(Path.Combine(rootFolder!, ".portable"));
@@ -125,17 +125,17 @@ public static partial class AppConfig
             }
             else if (IsAppInRemovableStorage)
             {
-                LegacyCacheFolder = Path.Combine(Path.GetPathRoot(AppContext.BaseDirectory)!, ".StarwardCache");
+                LegacyCacheFolder = Path.Combine(Path.GetPathRoot(AppContext.BaseDirectory)!, ".MoonwardCache");
                 ConfigPath = Path.Combine(LegacyCacheFolder, "config.ini");
             }
             else if (IsPortable)
             {
-                LegacyCacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
+                LegacyCacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Moonward");
                 ConfigPath = Path.Combine(rootFolder!, "config.ini");
             }
             else
             {
-                LegacyCacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
+                LegacyCacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Moonward");
             }
 
             // 子进程短路：命令行带 --data-folder 时直接采用该目录，不显示任何 UI（rpc / playtime / 提权迁移子进程）。
@@ -190,7 +190,7 @@ public static partial class AppConfig
         }
         catch (Exception ex)
         {
-            User32.MessageBox(HWND.NULL, $"{Lang.AppConfig_AnUnknownIssueOccurredDuringInitialization}\n{ex.Message}", "Starward", User32.MB_FLAGS.MB_OK);
+            User32.MessageBox(HWND.NULL, $"{Lang.AppConfig_AnUnknownIssueOccurredDuringInitialization}\n{ex.Message}", "Moonward", User32.MB_FLAGS.MB_OK);
             Environment.Exit(0);
         }
     }
@@ -264,9 +264,9 @@ public static partial class AppConfig
         if (string.IsNullOrWhiteSpace(ConfigPath))
         {
 #if DEBUG
-            using RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Starward.Debug");
+            using RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Moonward.Debug");
 #else
-            using RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Starward");
+            using RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Moonward");
 #endif
             dataFolder = (key.GetValue("DataFolder") as string)?.Trim();
             legacyUserDataFolder = (key.GetValue("UserDataFolder") as string)?.Trim();
@@ -372,14 +372,14 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 从注册表加载 Language、EnableLoginAuthTicket、stoken、mid（调试版使用 Starward.Debug 子键）。
+    /// 从注册表加载 Language、EnableLoginAuthTicket、stoken、mid（调试版使用 Moonward.Debug 子键）。
     /// </summary>
     public static void LoadConfigurationFromRegistry()
     {
 #if DEBUG
-        using var key = Registry.CurrentUser.CreateSubKey(@"Software\Starward.Debug");
+        using var key = Registry.CurrentUser.CreateSubKey(@"Software\Moonward.Debug");
 #else
-        using var key = Registry.CurrentUser.CreateSubKey(@"Software\Starward");
+        using var key = Registry.CurrentUser.CreateSubKey(@"Software\Moonward");
 #endif
         string? lang = (key.GetValue("Language") as string)?.Trim();
         EnableLoginAuthTicket = key.GetValue("EnableLoginAuthTicket") is 1;
@@ -414,9 +414,9 @@ public static partial class AppConfig
         try
         {
 #if DEBUG
-            using var key = Registry.CurrentUser.CreateSubKey(@"Software\Starward.Debug");
+            using var key = Registry.CurrentUser.CreateSubKey(@"Software\Moonward.Debug");
 #else
-            using var key = Registry.CurrentUser.CreateSubKey(@"Software\Starward");
+            using var key = Registry.CurrentUser.CreateSubKey(@"Software\Moonward");
 #endif
             if (!string.IsNullOrWhiteSpace(Language))
             {

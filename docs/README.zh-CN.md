@@ -1,8 +1,8 @@
-# Starward
+# Moonward
 
-> **Starward** 出自星穹铁道开服前的宣传语———愿此行，终抵群星 (May This Journey Lead Us **Starward**)。
+> **Moonward** 出自星穹铁道开服前的宣传语———愿此行，终抵群星 (May This Journey Lead Us **Moonward**)。
 
-Starward 是一个为了解决 HoYoPlay (米哈游启动器) 的缺点而开发的开源第三方启动器，支持米哈游 PC 端的所有游戏，目标是完全替代官方启动器。除了启动器的基本功能外，我还会根据个人需求增加一些拓展功能，比如：
+Moonward 是一个为了解决 HoYoPlay (米哈游启动器) 的缺点而开发的开源第三方启动器，支持米哈游 PC 端的所有游戏，目标是完全替代官方启动器。除了启动器的基本功能外，我还会根据个人需求增加一些拓展功能，比如：
 
 -  记录游戏时间
 -  切换游戏账号
@@ -23,7 +23,7 @@ Starward 是一个为了解决 HoYoPlay (米哈游启动器) 的缺点而开发�
 - 为了更好的使用体验，请在系统设置中开启**透明效果**和**动画效果**
 >[WebP 映像扩展](https://apps.microsoft.com/detail/9pg2dk419drg) 一般情况下系统自带，如果程序无法正常显示背景图片请自行检查是否安装。
 
-然后在 [GitHub Release](https://github.com/Scighost/Starward/releases) 下载对应 CPU 架构的压缩包，解压后运行 `Starward.exe` 并按提示操作。
+然后在 [GitHub Release](https://github.com/Scighost/Starward/releases) 下载对应 CPU 架构的压缩包，解压后运行 `Moonward.exe` 并按提示操作。
 
 
 ## 本地化
@@ -39,7 +39,7 @@ Starward 是一个为了解决 HoYoPlay (米哈游启动器) 的缺点而开发�
 [![zh-CN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat&logo=crowdin&query=%24.progress.8.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-CN)
 [![zh-TW translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-TW&style=flat&logo=crowdin&query=%24.progress.9.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-TW)
 
-Starward 使用 [Crowdin](https://crowdin.com/project/starward) 进行应用内文本的本地化工作，你可以帮助我们翻译和校对本地语言，我们期待有更多的人加入。
+Moonward 使用 [Crowdin](https://crowdin.com/project/starward) 进行应用内文本的本地化工作，你可以帮助我们翻译和校对本地语言，我们期待有更多的人加入。
 
 [本地化指南](./Localization.zh-CN.md)
 
@@ -55,7 +55,7 @@ Starward 使用 [Crowdin](https://crowdin.com/project/starward) 进行应用内�
 
 ## 赞助
 
-开发不易，如果你觉得 Starward 好用，可以在 https://donate.scighost.com 赞助我。
+开发不易，如果你觉得 Moonward 好用，可以在 https://donate.scighost.com 赞助我。
 
 
 ## 致谢
@@ -65,11 +65,11 @@ Starward 使用 [Crowdin](https://crowdin.com/project/starward) 进行应用内�
     <img src="https://github.com/Scighost/Starward/assets/61003590/44552992-e2c5-451f-9c2a-73176e8e4e93" width="240px" />
 </picture>
 
-首先，我要向本项目的所有贡献者和翻译者致以最诚挚的感谢，有了你们，Starward 才能变得更好。
+首先，我要向本项目的所有贡献者和翻译者致以最诚挚的感谢，有了你们，Moonward 才能变得更好。
 
 然后，我要特别感谢 [@neon-nyan](https://github.com/neon-nyan)，本项目的灵感和设计正是来源于他的项目 [Collapse](https://github.com/neon-nyan/Collapse)。我也从 Collapse 的代码中学到了很多知识，有此珠玉在前，我的开发过程顺利了很多。
 
-其次，感谢[胡桃工具箱](https://github.com/DGP-Studio/Snap.Hutao)的主要开发者 [@Lightczx](https://github.com/Lightczx)，Starward 的开发过程中得到了他的很多帮助。
+其次，感谢[胡桃工具箱](https://github.com/DGP-Studio/Snap.Hutao)的主要开发者 [@Lightczx](https://github.com/Lightczx)，Moonward 的开发过程中得到了他的很多帮助。
 
 我还要感谢 [CloudFlare](https://www.cloudflare.com/) 提供的免费 CDN，以及 [SignPath Foundation](https://signpath.org/) 为开源项目提供免费的代码签名服务。
 

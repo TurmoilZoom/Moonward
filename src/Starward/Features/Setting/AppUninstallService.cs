@@ -10,8 +10,8 @@ namespace Starward.Features.Setting;
 /// 应用卸载相关的数据清理。
 /// <para>
 /// Velopack（控制面板卸载或自身 <c>Update.exe uninstall</c>）只会移除 <c>current\</c>、<c>Update.exe</c>、快捷方式与它自己注册的卸载项，
-/// <b>不会</b>触碰用户数据目录（<c>&lt;所选目录&gt;\data</c>）、Starward 自己的注册表键（<c>HKCU\Software\Starward</c>）
-/// 以及 <c>starward://</c> 协议注册（<c>HKCU\Software\Classes\Starward</c>）。
+/// <b>不会</b>触碰用户数据目录（<c>&lt;所选目录&gt;\data</c>）、Moonward 自己的注册表键（<c>HKCU\Software\Moonward</c>）
+/// 以及 <c>moonward://</c> 协议注册（<c>HKCU\Software\Classes\Moonward</c>）。
 /// </para>
 /// <para>
 /// 本类负责清理这三处残留。是否清理由注册表标记 <see cref="FlagValueName"/> 控制，
@@ -28,15 +28,15 @@ internal static class AppUninstallService
 {
 
 #if DEBUG
-    private const string RegistryKeyPath = @"Software\Starward.Debug";
+    private const string RegistryKeyPath = @"Software\Moonward.Debug";
 #else
-    private const string RegistryKeyPath = @"Software\Starward";
+    private const string RegistryKeyPath = @"Software\Moonward";
 #endif
 
     /// <summary>
-    /// <c>starward://</c> 协议注册键（与 <see cref="UrlProtocol.UrlProtocolService"/> 一致，不分调试/正式）。
+    /// <c>moonward://</c> 协议注册键（与 <see cref="UrlProtocol.UrlProtocolService"/> 一致，不分调试/正式）。
     /// </summary>
-    private const string ProtocolKeyPath = @"Software\Classes\Starward";
+    private const string ProtocolKeyPath = @"Software\Classes\Moonward";
 
     /// <summary>
     /// 注册表标记：卸载时是否一并删除用户数据（DWORD）。与其它配置同存于 <see cref="RegistryKeyPath"/>。
@@ -79,7 +79,7 @@ internal static class AppUninstallService
 
     /// <summary>
     /// 在 Velopack 卸载钩子（<c>OnBeforeUninstallFastCallback</c>）中调用：
-    /// 根据 <see cref="FlagValueName"/> 标记决定是否删除用户数据目录、<c>starward://</c> 协议键与 Starward 注册表键。
+    /// 根据 <see cref="FlagValueName"/> 标记决定是否删除用户数据目录、<c>moonward://</c> 协议键与 Moonward 注册表键。
     /// 必须保持静默、无 UI、尽快返回（钩子 30 秒超时）。
     /// </summary>
     public static void PerformUninstallCleanup()
@@ -105,9 +105,9 @@ internal static class AppUninstallService
 
             Log($"Uninstall cleanup start: dataFolder='{dataFolder}'");
             TryDeleteUserDataFolder(dataFolder);
-            // starward:// 协议注册（HKCU\Software\Classes\Starward），卸载后已无意义。
+            // moonward:// 协议注册（HKCU\Software\Classes\Moonward），卸载后已无意义。
             TryDeleteSubKeyTree(Registry.CurrentUser, ProtocolKeyPath, "protocol key");
-            // 删除 Starward 自己的注册表键（含 DataFolder / 语言 / 登录票据 / 本标记），最后删（前面要读它）。
+            // 删除 Moonward 自己的注册表键（含 DataFolder / 语言 / 登录票据 / 本标记），最后删（前面要读它）。
             TryDeleteSubKeyTree(Registry.CurrentUser, RegistryKeyPath, "config key");
             Log("Uninstall cleanup done.");
         }
@@ -189,7 +189,7 @@ internal static class AppUninstallService
     {
         try
         {
-            string file = Path.Combine(Path.GetTempPath(), "Starward.Uninstall.log");
+            string file = Path.Combine(Path.GetTempPath(), "Moonward.Uninstall.log");
             File.AppendAllText(file, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}{Environment.NewLine}", Encoding.UTF8);
         }
         catch { }

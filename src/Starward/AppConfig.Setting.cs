@@ -674,7 +674,7 @@ public static partial class AppConfig
 
     /// <summary>
     /// 获取当前生效（active）的启动方式内部名：点击「开始游戏」、以及不带 profile 参数的
-    /// <c>starward://startgame/{biz}</c>（「跟随软件设置」）均按此启动。
+    /// <c>moonward://startgame/{biz}</c>（「跟随软件设置」）均按此启动。
     /// 与编辑界面用的 <see cref="GetSelectedLaunchProfileId"/> 区分。
     /// 未设置、none 或无效 id 时返回 <see cref="GameLaunchProfile.NoneId"/>。
     /// </summary>

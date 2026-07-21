@@ -5,6 +5,10 @@
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<LangVersion>preview</LangVersion>
 		<RootNamespace>Starward</RootNamespace>
+		<!-- 产品品牌为 Moonward；命名空间/项目名仍为 Starward 以便变基上游 -->
+		<AssemblyName>Moonward</AssemblyName>
+		<Product>Moonward</Product>
+		<AssemblyTitle>Moonward</AssemblyTitle>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ApplicationManifest>app.manifest</ApplicationManifest>

@@ -158,7 +158,7 @@
     <value>Отменить</value>
   </data>
   <data name="SelectDirectoryPage_FirstUse" xml:space="preserve">
-    <value>Кажется, вы впервые используете {Starward}.</value>
+    <value>Кажется, вы впервые используете {Moonward}.</value>
   </data>
   <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
     <value>Перейти в лаунчер</value>
@@ -167,7 +167,7 @@
     <value>Выбрать папку</value>
   </data>
   <data name="SelectGamePage_SomeGame" xml:space="preserve">
-    <value>{Starward} поддерживает некоторые игры {miHoYo/HoYoverse}, выберите игру ниже. После входа в лаунчер вы сможете менять игру в любое время.</value>
+    <value>{Moonward} поддерживает некоторые игры {miHoYo/HoYoverse}, выберите игру ниже. После входа в лаунчер вы сможете менять игру в любое время.</value>
   </data>
   <data name="SelectGamePage_TheLastStep" xml:space="preserve">
     <value>Последний шаг ~</value>
@@ -982,7 +982,7 @@
     <value>Оговорка</value>
   </data>
   <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
-    <value>Для работы этой страницы требуется войти в свою учетную запись Hyperion/HoYoLAB, и Starward сохранит ваши учетные данные для входа (Cookie) и выдаст вам персональные данные для отправки запросов на сервер miHoo. Этот метод является рискованным, и мы не несем ответственности за ненормальные или забаненные в результате действия вашей учетной записи.
+    <value>Для работы этой страницы требуется войти в свою учетную запись Hyperion/HoYoLAB, и Moonward сохранит ваши учетные данные для входа (Cookie) и выдаст вам персональные данные для отправки запросов на сервер miHoo. Этот метод является рискованным, и мы не несем ответственности за ненормальные или забаненные в результате действия вашей учетной записи.
 
 Вы принимаете риск и продолжаете его использовать?</value>
   </data>
@@ -1264,7 +1264,7 @@
     <value>Протокол URL (Экспериментально)</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
-    <value>Другие программы могут использовать некоторые функции Starward через протокол URL.</value>
+    <value>Другие программы могут использовать некоторые функции Moonward через протокол URL.</value>
   </data>
   <data name="SettingPage_RegisterURLProtocol" xml:space="preserve">
     <value>Зарегистрировать URL протокол</value>
@@ -1367,7 +1367,7 @@
     <value>Тест сети</value>
   </data>
   <data name="SelectLanguagePage_AreYouAbleToReceiveUpdatesForStarward" xml:space="preserve">
-    <value>Можете ли вы получать обновления для Starward?</value>
+    <value>Можете ли вы получать обновления для Moonward?</value>
   </data>
   <data name="SelectDirectoryPage_PleaseSelectAFolderToStoreYourPersonalData" xml:space="preserve">
     <value>Пожалуйста, выберите папку для хранения ваших личных данных, это очень важно!</value>
@@ -1388,7 +1388,7 @@
     <value>Чистый вымысел</value>
   </data>
   <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Помогите нам перевести Starward</value>
+    <value>Помогите нам перевести Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>Кэш</value>
@@ -1993,10 +1993,10 @@
     <value>Несовместимость</value>
   </data>
   <data name="PreDownloadDialog_IncompatibilityNoticeContent" xml:space="preserve">
-    <value>Предустановленные файлы Starward и HoYoPlay (miHoYo Launcher) несовместимы и не могут распознавать друг друга.</value>
+    <value>Предустановленные файлы Moonward и HoYoPlay (miHoYo Launcher) несовместимы и не могут распознавать друг друга.</value>
   </data>
   <data name="WelcomeView_DearPlayerWelcomeToStarward" xml:space="preserve">
-    <value>Дорогой игрок, добро пожаловать в Starward!</value>
+    <value>Дорогой игрок, добро пожаловать в Moonward!</value>
   </data>
   <data name="WelcomeView_WelcomeToStarwardDescription" xml:space="preserve">
     <value>Это лаунчер, созданный специально для игр HoYoverse, который поможет вам легко управлять вашими играми и наслаждаться лучшим опытом.</value>
@@ -2020,7 +2020,7 @@
     <value>Установлено</value>
   </data>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
-    <value>Starward, начинаем!</value>
+    <value>Moonward, начинаем!</value>
   </data>
   <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
     <value>Мигрировать и запустить</value>
@@ -2044,10 +2044,10 @@
     <value>Нажмите, чтобы выбрать или сменить игру.</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameUserDataFolderWarning" xml:space="preserve">
-    <value>Папка данных Starward находится внутри папки игры и будет удалена вместе с ней. Пожалуйста, измените расположение папки данных на странице настроек и попробуйте снова.</value>
+    <value>Папка данных Moonward находится внутри папки игры и будет удалена вместе с ней. Пожалуйста, измените расположение папки данных на странице настроек и попробуйте снова.</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning" xml:space="preserve">
-    <value>Программа Starward находится внутри папки игры и будет удалена вместе с игрой. Пожалуйста, переместите программу за пределы папки игры и попробуйте снова.</value>
+    <value>Программа Moonward находится внутри папки игры и будет удалена вместе с игрой. Пожалуйста, переместите программу за пределы папки игры и попробуйте снова.</value>
   </data>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Облачный гейминг</value>
@@ -2420,7 +2420,7 @@ You are welcome to submit exported data to:</value>
     <value>Высокий динамический диапазон</value>
   </data>
   <data name="WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity" xml:space="preserve">
-    <value>Если Starward запускается слишком долго, рекомендуется отключить функцию Smart App Control в разделе "Безопасность Windows".
+    <value>Если Moonward запускается слишком долго, рекомендуется отключить функцию Smart App Control в разделе "Безопасность Windows".
 
 
 
@@ -2446,7 +2446,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Подробнее</value>
   </data>
   <data name="WelcomeView_NetworkErrorYouCanContinueUsingStarwardButYouWonTReceiveFutureUpdates" xml:space="preserve">
-    <value>Сетевая ошибка. Вы можете продолжить использовать Starward, но не будете получать будущие обновления.
+    <value>Сетевая ошибка. Вы можете продолжить использовать Moonward, но не будете получать будущие обновления.
 </value>
   </data>
   <data name="MainView_CheckSystemProxy_SystemProxyIsEnabled" xml:space="preserve">
@@ -2630,7 +2630,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Изменить папку</value>
   </data>
   <data name="HotkeySetting_SingleKeyShortcutsTips" xml:space="preserve">
-    <value>Если вы назначаете горячие клавиши на одиночные клавиши (F1–F12), необходимо запускать Starward с правами администратора — в противном случае сочетания могут не работать в игре.</value>
+    <value>Если вы назначаете горячие клавиши на одиночные клавиши (F1–F12), необходимо запускать Moonward с правами администратора — в противном случае сочетания могут не работать в игре.</value>
   </data>
   <data name="SettingPage_KeyboardShortcuts" xml:space="preserve">
     <value>Сочетания клавиш</value>
@@ -2669,10 +2669,10 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Поддерживаются только контроллеры по протоколу Xbox. Совместимость с другими типами контроллеров не гарантируется.</value>
   </data>
   <data name="GamepadControlSetting_SimulateInputDesc" xml:space="preserve">
-    <value>Эмуляция ввода с клавиатуры и мыши с помощью игрового контроллера. Для корректной работы в играх Starward необходимо запускать с правами администратора.</value>
+    <value>Эмуляция ввода с клавиатуры и мыши с помощью игрового контроллера. Для корректной работы в играх Moonward необходимо запускать с правами администратора.</value>
   </data>
   <data name="GamepadControlSetting_LongPressGuideButtonDesc" xml:space="preserve">
-    <value>Нажмите и удерживайте кнопку Guide, чтобы открыть главное окно Starward.</value>
+    <value>Нажмите и удерживайте кнопку Guide, чтобы открыть главное окно Moonward.</value>
   </data>
   <data name="GamepadControlSetting_BothThumbsticksDesc" xml:space="preserve">
     <value>Одновременно нажмите обе кнопки на стиках, чтобы активировать эмуляцию клавиатуры и мыши с помощью контроллера.</value>
@@ -2684,7 +2684,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>• При назначении кнопки Guide стандартное сочетание клавиш Xbox Game Bar будет отключено. Другие программы (например, Steam в режиме Big Picture) также могут реагировать на кнопку Guide. В случае конфликтов потребуется вручную отключить соответствующие функции.</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingKeyboardDesc" xml:space="preserve">
-    <value>• При назначении клавиш клавиатуры вводите их имена так, как они указаны на клавиатуре, разделяя пробелами. Например, чтобы назначить кнопку сочетанию «Ctrl + Alt + F1», введите: «Ctrl Alt F1». Для клавиш на цифровой клавиатуре добавляйте префикс Pad, например: Pad8, Pad+. Для корректной работы этой функции в играх Starward необходимо запускать с правами администратора.</value>
+    <value>• При назначении клавиш клавиатуры вводите их имена так, как они указаны на клавиатуре, разделяя пробелами. Например, чтобы назначить кнопку сочетанию «Ctrl + Alt + F1», введите: «Ctrl Alt F1». Для клавиш на цифровой клавиатуре добавляйте префикс Pad, например: Pad8, Pad+. Для корректной работы этой функции в играх Moonward необходимо запускать с правами администратора.</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingShareDesc" xml:space="preserve">
     <value>Кнопка «Поделиться» по-прежнему запускает скриншоты Xbox Game Bar, и в настоящее время нет хорошего решения.</value>

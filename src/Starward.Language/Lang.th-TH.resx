@@ -158,7 +158,7 @@
     <value>ยกเลิก</value>
   </data>
   <data name="SelectDirectoryPage_FirstUse" xml:space="preserve">
-    <value>เหมือนจะเป็นครั้งแรกที่คุณใช้ {Starward} นะ</value>
+    <value>เหมือนจะเป็นครั้งแรกที่คุณใช้ {Moonward} นะ</value>
   </data>
   <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
     <value>ไปที่ Launcher</value>
@@ -167,7 +167,7 @@
     <value>เลือกโฟลเดอร์</value>
   </data>
   <data name="SelectGamePage_SomeGame" xml:space="preserve">
-    <value>{Starward} รองรับเกมของ {miHoYo/HoYoverse} แค่บางเกมเท่านั้น โปรดเลือกเกมที่ต้องการจากด้านล่าง - สามารถเปลี่ยนเมื่อไหร่ก็ได้หลังจากเข้า Launcher</value>
+    <value>{Moonward} รองรับเกมของ {miHoYo/HoYoverse} แค่บางเกมเท่านั้น โปรดเลือกเกมที่ต้องการจากด้านล่าง - สามารถเปลี่ยนเมื่อไหร่ก็ได้หลังจากเข้า Launcher</value>
   </data>
   <data name="SelectGamePage_TheLastStep" xml:space="preserve">
     <value>ขั้นตอนสุดท้ายแล้ว ~</value>
@@ -981,7 +981,7 @@
     <value>คำเตือน</value>
   </data>
   <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
-    <value>ฟีเจอร์ในหน้านี้จำเป็นต้องให้ผู้ใช้ล็อกอินเข้าบัญชี HoYoLAB แล้ว Starward จะเก็บข้อมูลการล็อกอิน (Cookie) เพื่อที่จะปลอมตัวเป็นผู้ใช้และส่งคำขอข้อมูลต่างๆไปยังเซิฟเวอร์ของ miHoYo - วิธีนี้มีความเสี่ยงและทางเราจะไม่รับผิดชอบใดๆหากบัญชีของผู้ใช้เกิดความผิดปกติและถูกแบน
+    <value>ฟีเจอร์ในหน้านี้จำเป็นต้องให้ผู้ใช้ล็อกอินเข้าบัญชี HoYoLAB แล้ว Moonward จะเก็บข้อมูลการล็อกอิน (Cookie) เพื่อที่จะปลอมตัวเป็นผู้ใช้และส่งคำขอข้อมูลต่างๆไปยังเซิฟเวอร์ของ miHoYo - วิธีนี้มีความเสี่ยงและทางเราจะไม่รับผิดชอบใดๆหากบัญชีของผู้ใช้เกิดความผิดปกติและถูกแบน
 
 คุณยอมรับความเสี่ยงและยืนยันที่จะใช้ฟีเจอร์นี้หรือไม่</value>
   </data>
@@ -1263,7 +1263,7 @@
     <value>URL โพรโทคอล (ทดลอง)</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
-    <value>ซอฟต์แวร์อื่นสามารถใช้บางฟีเจอร์ของ Starward ผ่าน URL โพรโทคอล</value>
+    <value>ซอฟต์แวร์อื่นสามารถใช้บางฟีเจอร์ของ Moonward ผ่าน URL โพรโทคอล</value>
   </data>
   <data name="SettingPage_RegisterURLProtocol" xml:space="preserve">
     <value>ลงทะเบียน URL โพรโทคอล</value>
@@ -1366,7 +1366,7 @@
     <value>ทดสอบเครือข่าย</value>
   </data>
   <data name="SelectLanguagePage_AreYouAbleToReceiveUpdatesForStarward" xml:space="preserve">
-    <value>คุณสามารถรับการอัปเดตของ Starward ได้หรือไม่?</value>
+    <value>คุณสามารถรับการอัปเดตของ Moonward ได้หรือไม่?</value>
   </data>
   <data name="SelectDirectoryPage_PleaseSelectAFolderToStoreYourPersonalData" xml:space="preserve">
     <value>กรุณาเลือกโฟลเดอร์เพื่อเก็บข้อมูลส่วนตัวของคุณ มันสำคัญมาก!</value>
@@ -1387,7 +1387,7 @@
     <value>นิยายบริสุทธิ์</value>
   </data>
   <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>ช่วยแปล Starward</value>
+    <value>ช่วยแปล Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>แคช</value>
@@ -1991,10 +1991,10 @@
     <value>ประกาศความไม่เข้ากัน</value>
   </data>
   <data name="PreDownloadDialog_IncompatibilityNoticeContent" xml:space="preserve">
-    <value>ไฟล์ติดตั้งล่วงหน้าของ Starward และ HoYoPlay (miHoYo Launcher) ไม่เข้ากันและไม่สามารถรับรู้ซึ่งกันและกัน</value>
+    <value>ไฟล์ติดตั้งล่วงหน้าของ Moonward และ HoYoPlay (miHoYo Launcher) ไม่เข้ากันและไม่สามารถรับรู้ซึ่งกันและกัน</value>
   </data>
   <data name="WelcomeView_DearPlayerWelcomeToStarward" xml:space="preserve">
-    <value>เรียนผู้เล่น ยินดีต้อนรับสู่ Starward!</value>
+    <value>เรียนผู้เล่น ยินดีต้อนรับสู่ Moonward!</value>
   </data>
   <data name="WelcomeView_WelcomeToStarwardDescription" xml:space="preserve">
     <value>นี่คือตัวเรียกใช้งานที่ออกแบบมาโดยเฉพาะสำหรับเกม HoYoverse ช่วยให้คุณจัดการเกมได้อย่างง่ายดายและเพลิดเพลินกับประสบการณ์ที่ดีขึ้น</value>
@@ -2018,7 +2018,7 @@
     <value>ติดตั้งแล้ว</value>
   </data>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
-    <value>Starward เริ่ม!</value>
+    <value>Moonward เริ่ม!</value>
   </data>
   <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
     <value>ย้ายข้อมูลและเริ่มต้น</value>
@@ -2042,10 +2042,10 @@
     <value>คลิกเพื่อเลือกหรือสลับเกม</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameUserDataFolderWarning" xml:space="preserve">
-    <value>โฟลเดอร์ข้อมูล Starward อยู่ในโฟลเดอร์เกมและจะถูกลบไปพร้อมกับเกม กรุณาเปลี่ยนตำแหน่งโฟลเดอร์ข้อมูลในหน้าการตั้งค่าแล้วลองอีกครั้ง</value>
+    <value>โฟลเดอร์ข้อมูล Moonward อยู่ในโฟลเดอร์เกมและจะถูกลบไปพร้อมกับเกม กรุณาเปลี่ยนตำแหน่งโฟลเดอร์ข้อมูลในหน้าการตั้งค่าแล้วลองอีกครั้ง</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning" xml:space="preserve">
-    <value>โปรแกรม Starward อยู่ในโฟลเดอร์เกมและจะถูกลบไปพร้อมกับเกม กรุณาย้ายโปรแกรมออกจากโฟลเดอร์เกมแล้วลองอีกครั้ง</value>
+    <value>โปรแกรม Moonward อยู่ในโฟลเดอร์เกมและจะถูกลบไปพร้อมกับเกม กรุณาย้ายโปรแกรมออกจากโฟลเดอร์เกมแล้วลองอีกครั้ง</value>
   </data>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>เกมคลาวด์</value>
@@ -2418,7 +2418,7 @@ You are welcome to submit exported data to:</value>
     <value>ช่วงไดนามิกสูง</value>
   </data>
   <data name="WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity" xml:space="preserve">
-    <value>หาก Starward ใช้เวลานานในการเริ่มต้น แนะนำให้ปิด Smart App Control ใน Windows Security</value>
+    <value>หาก Moonward ใช้เวลานานในการเริ่มต้น แนะนำให้ปิด Smart App Control ใน Windows Security</value>
   </data>
   <data name="WelcomeView_OpenWindowsSecurity" xml:space="preserve">
     <value>เปิด Windows Security</value>
@@ -2427,7 +2427,7 @@ You are welcome to submit exported data to:</value>
     <value>เรียนรู้เพิ่มเติม</value>
   </data>
   <data name="WelcomeView_NetworkErrorYouCanContinueUsingStarwardButYouWonTReceiveFutureUpdates" xml:space="preserve">
-    <value>ข้อผิดพลาดเครือข่าย คุณยังคงใช้ Starward ได้ แต่จะไม่ได้รับการอัปเดตในอนาคต</value>
+    <value>ข้อผิดพลาดเครือข่าย คุณยังคงใช้ Moonward ได้ แต่จะไม่ได้รับการอัปเดตในอนาคต</value>
   </data>
   <data name="MainView_CheckSystemProxy_SystemProxyIsEnabled" xml:space="preserve">
     <value>เปิดใช้พรอกซีระบบแล้ว</value>
@@ -2610,7 +2610,7 @@ You are welcome to submit exported data to:</value>
     <value>เปลี่ยนโฟลเดอร์</value>
   </data>
   <data name="HotkeySetting_SingleKeyShortcutsTips" xml:space="preserve">
-    <value>หากคุณลงทะเบียนแป้นพิมพ์ลัดแบบปุ่มเดียว (F1–F12) คุณต้องเรียกใช้ Starward ด้วยสิทธิ์ผู้ดูแลระบบ มิฉะนั้นแป้นพิมพ์ลัดอาจไม่ทำงานในเกม</value>
+    <value>หากคุณลงทะเบียนแป้นพิมพ์ลัดแบบปุ่มเดียว (F1–F12) คุณต้องเรียกใช้ Moonward ด้วยสิทธิ์ผู้ดูแลระบบ มิฉะนั้นแป้นพิมพ์ลัดอาจไม่ทำงานในเกม</value>
   </data>
   <data name="SettingPage_KeyboardShortcuts" xml:space="preserve">
     <value>แป้นพิมพ์ลัด</value>
@@ -2649,10 +2649,10 @@ You are welcome to submit exported data to:</value>
     <value>รองรับเฉพาะคอนโทรลเลอร์ที่ใช้โปรโตคอล Xbox เท่านั้น ไม่รับประกันความเข้ากันได้กับคอนโทรลเลอร์ประเภทอื่น</value>
   </data>
   <data name="GamepadControlSetting_SimulateInputDesc" xml:space="preserve">
-    <value>จำลองอินพุตแป้นพิมพ์และเมาส์โดยใช้คอนโทรลเลอร์เกม ฟีเจอร์นี้ต้องเรียกใช้ Starward ด้วยสิทธิ์ผู้ดูแลระบบจึงจะทำงานได้อย่างถูกต้องในเกม</value>
+    <value>จำลองอินพุตแป้นพิมพ์และเมาส์โดยใช้คอนโทรลเลอร์เกม ฟีเจอร์นี้ต้องเรียกใช้ Moonward ด้วยสิทธิ์ผู้ดูแลระบบจึงจะทำงานได้อย่างถูกต้องในเกม</value>
   </data>
   <data name="GamepadControlSetting_LongPressGuideButtonDesc" xml:space="preserve">
-    <value>กดค้างที่ปุ่ม Guide เพื่อเปิดหน้าต่างหลักของ Starward</value>
+    <value>กดค้างที่ปุ่ม Guide เพื่อเปิดหน้าต่างหลักของ Moonward</value>
   </data>
   <data name="GamepadControlSetting_BothThumbsticksDesc" xml:space="preserve">
     <value>กดปุ่มแท่งควบคุมทั้งสองพร้อมกันเพื่อเปิดใช้งานการจำลองแป้นพิมพ์และเมาส์ด้วยคอนโทรลเลอร์</value>
@@ -2664,7 +2664,7 @@ You are welcome to submit exported data to:</value>
     <value>• เมื่อจับคู่ปุ่ม Guide แป้นพิมพ์ลัดเริ่มต้นของ Xbox Game Bar จะถูกปิดใช้งาน ซอฟต์แวร์อื่น (เช่น Steam Big Picture Mode) อาจตอบสนองต่อปุ่ม Guide ได้เช่นกัน หากเกิดข้อขัดแย้ง คุณต้องปิดใช้งานฟีเจอร์เหล่านั้นด้วยตนเอง</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingKeyboardDesc" xml:space="preserve">
-    <value>• เมื่อจับคู่กับปุ่มแป้นพิมพ์ ให้ป้อนชื่อปุ่มตามที่ปรากฏบนแป้นพิมพ์ คั่นด้วยช่องว่าง ตัวอย่างเช่น จับคู่ปุ่มเป็น "Ctrl + Alt + F1" ให้ป้อน "Ctrl Alt F1" สำหรับปุ่มบนแป้นตัวเลข ให้เพิ่ม Pad ก่อนปุ่ม เช่น Pad8, Pad+ ฟีเจอร์นี้ต้องเรียกใช้ Starward ด้วยสิทธิ์ผู้ดูแลระบบจึงจะทำงานได้อย่างถูกต้องในเกม</value>
+    <value>• เมื่อจับคู่กับปุ่มแป้นพิมพ์ ให้ป้อนชื่อปุ่มตามที่ปรากฏบนแป้นพิมพ์ คั่นด้วยช่องว่าง ตัวอย่างเช่น จับคู่ปุ่มเป็น "Ctrl + Alt + F1" ให้ป้อน "Ctrl Alt F1" สำหรับปุ่มบนแป้นตัวเลข ให้เพิ่ม Pad ก่อนปุ่ม เช่น Pad8, Pad+ ฟีเจอร์นี้ต้องเรียกใช้ Moonward ด้วยสิทธิ์ผู้ดูแลระบบจึงจะทำงานได้อย่างถูกต้องในเกม</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingShareDesc" xml:space="preserve">
     <value>• ปุ่ม Share ยังคงทริกเกอร์ภาพหน้าจอของ Xbox Game Bar และขณะนี้ยังไม่มีวิธีแก้ปัญหาที่ดี</value>

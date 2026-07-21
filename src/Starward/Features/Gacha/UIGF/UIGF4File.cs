@@ -66,7 +66,7 @@ public class UIGF4FileInfo
     public UIGF4FileInfo()
     {
         ExportTimestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-        ExportApp = "Starward";
+        ExportApp = "Moonward";
         ExportAppVersion = AppConfig.AppVersion;
     }
 

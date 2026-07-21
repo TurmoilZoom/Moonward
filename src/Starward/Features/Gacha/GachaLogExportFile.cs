@@ -36,7 +36,7 @@ internal class GachaLogExportFile<T> where T : GachaLogItem
         public string ExportTimestamp { get; set; }
 
         [JsonPropertyName("export_app")]
-        public string ExportApp { get; set; } = "Starward";
+        public string ExportApp { get; set; } = "Moonward";
 
         [JsonPropertyName("export_app_version")]
         public string ExportAppVersion { get; set; } = AppConfig.AppVersion ?? "";

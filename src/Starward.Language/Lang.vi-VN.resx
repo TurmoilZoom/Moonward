@@ -158,7 +158,7 @@
     <value>Huỷ</value>
   </data>
   <data name="SelectDirectoryPage_FirstUse" xml:space="preserve">
-    <value>Có vẻ đây là lần đầu tiên bạn sử dụng {Starward}.</value>
+    <value>Có vẻ đây là lần đầu tiên bạn sử dụng {Moonward}.</value>
   </data>
   <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
     <value>Đi đến trình khởi chạy</value>
@@ -167,7 +167,7 @@
     <value>Chọn thư mục</value>
   </data>
   <data name="SelectGamePage_SomeGame" xml:space="preserve">
-    <value>{Starward} hỗ trợ một số trò chơi {miHoYo/HoYoverse}, vui lòng chọn trò chơi của bạn ở bên dưới, bạn cũng có thể thay đổi nó bất kì lúc nào sau khi vào trình khởi chạy.</value>
+    <value>{Moonward} hỗ trợ một số trò chơi {miHoYo/HoYoverse}, vui lòng chọn trò chơi của bạn ở bên dưới, bạn cũng có thể thay đổi nó bất kì lúc nào sau khi vào trình khởi chạy.</value>
   </data>
   <data name="SelectGamePage_TheLastStep" xml:space="preserve">
     <value>Bước cuối cùng ~</value>
@@ -982,7 +982,7 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
     <value>Từ chối trách nhiệm</value>
   </data>
   <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
-    <value>Tính năng trên trang này yêu cầu bạn phải đăng nhập vào tài khoản Hyperion/HoYoLAB, và Starward sẽ lưu thông tin đăng nhập (Cookie) và thay bạn gửi yêu cầu đến máy chủ miHoYo. Phương pháp này có rủi ro và chúng tôi sẽ không chịu trách nhiệm nếu tài khoản của bạn có dấu hiệu bất thường và bị cấm.
+    <value>Tính năng trên trang này yêu cầu bạn phải đăng nhập vào tài khoản Hyperion/HoYoLAB, và Moonward sẽ lưu thông tin đăng nhập (Cookie) và thay bạn gửi yêu cầu đến máy chủ miHoYo. Phương pháp này có rủi ro và chúng tôi sẽ không chịu trách nhiệm nếu tài khoản của bạn có dấu hiệu bất thường và bị cấm.
 
 Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
@@ -1264,7 +1264,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Giao thức URL (thử nghiệm)</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
-    <value>Những phần mềm khác có thể sử dụng một số tính năng của Starward thông qua giao thức URL.</value>
+    <value>Những phần mềm khác có thể sử dụng một số tính năng của Moonward thông qua giao thức URL.</value>
   </data>
   <data name="SettingPage_RegisterURLProtocol" xml:space="preserve">
     <value>Đăng kí giao thức URL</value>
@@ -1367,7 +1367,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Kiểm tra mạng</value>
   </data>
   <data name="SelectLanguagePage_AreYouAbleToReceiveUpdatesForStarward" xml:space="preserve">
-    <value>Bạn có thể nhận được cập nhật cho Starward không?</value>
+    <value>Bạn có thể nhận được cập nhật cho Moonward không?</value>
   </data>
   <data name="SelectDirectoryPage_PleaseSelectAFolderToStoreYourPersonalData" xml:space="preserve">
     <value>Hãy chọn một thư mục để lưu trữ dữ liệu cá nhân của bạn, nó rất quan trọng!</value>
@@ -1388,7 +1388,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Kể chuyện hư cấu</value>
   </data>
   <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Giúp chúng tôi dịch Starward</value>
+    <value>Giúp chúng tôi dịch Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>Bộ nhớ đệm</value>
@@ -1992,10 +1992,10 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Thông báo không tương thích</value>
   </data>
   <data name="PreDownloadDialog_IncompatibilityNoticeContent" xml:space="preserve">
-    <value>Các tệp cài đặt sẵn của Starward và HoYoPlay (miHoYo Launcher) không tương thích và không thể nhận ra nhau.</value>
+    <value>Các tệp cài đặt sẵn của Moonward và HoYoPlay (miHoYo Launcher) không tương thích và không thể nhận ra nhau.</value>
   </data>
   <data name="WelcomeView_DearPlayerWelcomeToStarward" xml:space="preserve">
-    <value>Người chơi thân mến, chào mừng đến với Starward!</value>
+    <value>Người chơi thân mến, chào mừng đến với Moonward!</value>
   </data>
   <data name="WelcomeView_WelcomeToStarwardDescription" xml:space="preserve">
     <value>Đây là trình khởi chạy được thiết kế dành riêng cho trò chơi HoYoverse, giúp bạn dễ dàng quản lý trò chơi và tận hưởng trải nghiệm tốt hơn.</value>
@@ -2019,7 +2019,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Đã cài đặt</value>
   </data>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
-    <value>Starward, Bắt đầu thôi!</value>
+    <value>Moonward, Bắt đầu thôi!</value>
   </data>
   <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
     <value>Di chuyển và khởi động</value>
@@ -2043,10 +2043,10 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Nhấp để chọn hoặc chuyển trò chơi.</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameUserDataFolderWarning" xml:space="preserve">
-    <value>Thư mục dữ liệu Starward nằm trong thư mục trò chơi và sẽ bị xóa cùng với nó. Vui lòng thay đổi vị trí thư mục dữ liệu trong trang cài đặt và thử lại.</value>
+    <value>Thư mục dữ liệu Moonward nằm trong thư mục trò chơi và sẽ bị xóa cùng với nó. Vui lòng thay đổi vị trí thư mục dữ liệu trong trang cài đặt và thử lại.</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning" xml:space="preserve">
-    <value>Ứng dụng Starward nằm trong thư mục trò chơi và sẽ bị xóa cùng với trò chơi. Vui lòng di chuyển chương trình ra khỏi thư mục trò chơi và thử lại.</value>
+    <value>Ứng dụng Moonward nằm trong thư mục trò chơi và sẽ bị xóa cùng với trò chơi. Vui lòng di chuyển chương trình ra khỏi thư mục trò chơi và thử lại.</value>
   </data>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Trò Chơi Đám Mây</value>
@@ -2419,7 +2419,7 @@ You are welcome to submit exported data to:</value>
     <value>Dải tương phản cao (HDR)</value>
   </data>
   <data name="WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity" xml:space="preserve">
-    <value>Nếu Starward khởi động chậm, bạn nên tắt tính năng Smart App Control trong Windows Security.</value>
+    <value>Nếu Moonward khởi động chậm, bạn nên tắt tính năng Smart App Control trong Windows Security.</value>
   </data>
   <data name="WelcomeView_OpenWindowsSecurity" xml:space="preserve">
     <value>Mở Windows Security</value>
@@ -2428,7 +2428,7 @@ You are welcome to submit exported data to:</value>
     <value>Tìm hiểu thêm</value>
   </data>
   <data name="WelcomeView_NetworkErrorYouCanContinueUsingStarwardButYouWonTReceiveFutureUpdates" xml:space="preserve">
-    <value>Lỗi mạng. Bạn vẫn có thể tiếp tục dùng Starward, nhưng sẽ không nhận được các bản cập nhật trong tương lai.</value>
+    <value>Lỗi mạng. Bạn vẫn có thể tiếp tục dùng Moonward, nhưng sẽ không nhận được các bản cập nhật trong tương lai.</value>
   </data>
   <data name="MainView_CheckSystemProxy_SystemProxyIsEnabled" xml:space="preserve">
     <value>Đang sử dụng proxy hệ thống.</value>
@@ -2611,7 +2611,7 @@ You are welcome to submit exported data to:</value>
     <value>Thay đổi thư mục</value>
   </data>
   <data name="HotkeySetting_SingleKeyShortcutsTips" xml:space="preserve">
-    <value>Khi đặt phím tắt một phím (F1–F12), hãy khởi chạy Starward dưới quyền admin, vì nếu không thì phím tắt có thể bị vô hiệu trong game.</value>
+    <value>Khi đặt phím tắt một phím (F1–F12), hãy khởi chạy Moonward dưới quyền admin, vì nếu không thì phím tắt có thể bị vô hiệu trong game.</value>
   </data>
   <data name="SettingPage_KeyboardShortcuts" xml:space="preserve">
     <value>Phím tắt</value>
@@ -2650,10 +2650,10 @@ You are welcome to submit exported data to:</value>
     <value>Chỉ hỗ trợ tay cầm theo giao thức Xbox. Không đảm bảo tương thích với các loại tay cầm khác.</value>
   </data>
   <data name="GamepadControlSetting_SimulateInputDesc" xml:space="preserve">
-    <value>Mô phỏng nhập liệu bàn phím và chuột bằng tay cầm. Tính năng này cần Starward chạy với quyền admin để hoạt động đúng trong game.</value>
+    <value>Mô phỏng nhập liệu bàn phím và chuột bằng tay cầm. Tính năng này cần Moonward chạy với quyền admin để hoạt động đúng trong game.</value>
   </data>
   <data name="GamepadControlSetting_LongPressGuideButtonDesc" xml:space="preserve">
-    <value>Nhấn và giữ nút Guide để mở cửa sổ chính của Starward.</value>
+    <value>Nhấn và giữ nút Guide để mở cửa sổ chính của Moonward.</value>
   </data>
   <data name="GamepadControlSetting_BothThumbsticksDesc" xml:space="preserve">
     <value>Nhấn đồng thời cả hai nút cần analog để kích hoạt mô phỏng bàn phím và chuột từ tay cầm.</value>
@@ -2665,7 +2665,7 @@ You are welcome to submit exported data to:</value>
     <value>• Khi ánh xạ nút Guide, phím tắt mặc định của Xbox Game Bar sẽ bị vô hiệu hóa. Các phần mềm khác (như Chế độ Steam Big Picture) cũng có thể phản hồi nút Guide. Nếu có xung đột, bạn phải tự tắt các tính năng đó.</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingKeyboardDesc" xml:space="preserve">
-    <value>• Khi gán sang phím bàn phím, nhập tên các phím như chúng xuất hiện trên bàn phím, cách nhau bởi dấu cách. Ví dụ: để gán một nút cho “Ctrl + Alt + F1”, nhập: "Ctrl Alt F1". Đối với phím số ở bàn phím numpad, thêm tiền tố Pad trước tên phím, ví dụ: Pad8, Pad+. Tính năng này cần Starward chạy với quyền admin để hoạt động chính xác trong trò chơi.</value>
+    <value>• Khi gán sang phím bàn phím, nhập tên các phím như chúng xuất hiện trên bàn phím, cách nhau bởi dấu cách. Ví dụ: để gán một nút cho “Ctrl + Alt + F1”, nhập: "Ctrl Alt F1". Đối với phím số ở bàn phím numpad, thêm tiền tố Pad trước tên phím, ví dụ: Pad8, Pad+. Tính năng này cần Moonward chạy với quyền admin để hoạt động chính xác trong trò chơi.</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingShareDesc" xml:space="preserve">
     <value>Nút Share vẫn kích hoạt chụp màn hình Xbox Game Bar và hiện tại chưa có giải pháp tốt.</value>

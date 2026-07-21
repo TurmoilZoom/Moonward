@@ -1,6 +1,6 @@
 # Dịch thuật
 
-Đầu tiên, tôi xin gửi lời cảm ơn chân thành nhất đến tất cả những người đóng góp cho dự án này. Nhờ những đóng góp quên mình của bạn, Starward có thể được sử dụng bởi mọi người ở nhiều ngôn ngữ khác nhau trên thế giới. Cho dù đóng góp của bạn là một dòng mã, một bản sửa lỗi hay một đề xuất thì công việc của bạn sẽ tăng thêm giá trị đáng kể cho dự án. Mọi người đều là một phần không thể thiếu của cộng đồng sôi động này.
+Đầu tiên, tôi xin gửi lời cảm ơn chân thành nhất đến tất cả những người đóng góp cho dự án này. Nhờ những đóng góp quên mình của bạn, Moonward có thể được sử dụng bởi mọi người ở nhiều ngôn ngữ khác nhau trên thế giới. Cho dù đóng góp của bạn là một dòng mã, một bản sửa lỗi hay một đề xuất thì công việc của bạn sẽ tăng thêm giá trị đáng kể cho dự án. Mọi người đều là một phần không thể thiếu của cộng đồng sôi động này.
 
 <picture>
     <source srcset="https://github.com/Scighost/Starward/assets/61003590/9d369ec3-ab7c-408f-88c2-11bfe4453208" type="image/avif" />
@@ -21,7 +21,7 @@ Sau khi dịch xong, vui lòng gửi lại về repo này thông qua Pull Reques
 
 ## Dịch văn bản trong ứng dụng
 
-Bản dịch văn bản trong ứng dụng cho Starward được lưu trữ trên nền tảng [Crowdin](https://crowdin.com/project/starward), nơi bạn có thể sửa đổi nội dung văn bản bất cứ lúc nào. Nếu bạn muốn thêm ngôn ngữ dịch mới, vui lòng tạo [issue](https://github.com/Scighost/Starward/issues).
+Bản dịch văn bản trong ứng dụng cho Moonward được lưu trữ trên nền tảng [Crowdin](https://crowdin.com/project/starward), nơi bạn có thể sửa đổi nội dung văn bản bất cứ lúc nào. Nếu bạn muốn thêm ngôn ngữ dịch mới, vui lòng tạo [issue](https://github.com/Scighost/Starward/issues).
 
 Những thay đổi bạn thực hiện trên Crowdin sẽ được đồng bộ hóa với nhánh [l10n/main](https://github.com/Scighost/Starward/tree/l10n/main) trong vòng 1 giờ đổng hồ, kích hoạt quá trình build tự động. Tìm quy trình làm việc mới nhất có tên `New Crowdin updates` trong [GitHub Actions](https://github.com/Scighost/Starward/actions/workflows/build.yml) và tải xuống tệp đã biên dịch (Artifacts). Bạn có thể kiểm tra hiệu ứng hiển thị của văn bản dịch trong ứng dụng theo thời gian thực. **Phiên bản đang được phát triển có thể làm hỏng cơ sở dữ liệu cá nhân của bạn `StarwardDatabase.db`. Vui lòng sao lưu trước khi kiểm tra. Phiên bản này không nên được sử dụng trong một thời gian dài.**
 

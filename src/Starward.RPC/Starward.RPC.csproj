@@ -2,6 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net10.0-windows</TargetFramework>
+		<!-- 输出 Moonward.RPC.exe；命名空间仍为 Starward.RPC -->
+		<AssemblyName>Moonward.RPC</AssemblyName>
+		<Product>Moonward.RPC</Product>
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
 		<!--<SelfContained>true</SelfContained>-->

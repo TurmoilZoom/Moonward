@@ -29,7 +29,7 @@ public static class RpcClientFactory
         Process? process = null;
         if (!CheckRpcServerRunning())
         {
-            string name = Path.Combine(AppContext.BaseDirectory, "Starward.RPC.exe");
+            string name = Path.Combine(AppContext.BaseDirectory, "Moonward.RPC.exe");
             process = Process.Start(new ProcessStartInfo
             {
                 FileName = name,

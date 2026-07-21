@@ -1,8 +1,8 @@
 # 贡献指南
 
-感谢你愿意帮助改进 Starward。无论是一行代码、一份翻译、一条 Bug 反馈，还是功能建议，都对项目很有价值。
+感谢你愿意帮助改进 Moonward。无论是一行代码、一份翻译、一条 Bug 反馈，还是功能建议，都对项目很有价值。
 
-Starward 是 Windows 平台的米哈游游戏启动器（WinUI 3 / .NET 10），支持原神、星穹铁道、绝区零、崩坏 3 等 PC 端游戏。
+Moonward 是 Windows 平台的米哈游游戏启动器（WinUI 3 / .NET 10），支持原神、星穹铁道、绝区零、崩坏 3 等 PC 端游戏。
 
 ## 仓库说明
 
@@ -23,8 +23,8 @@ Starward 是 Windows 平台的米哈游游戏启动器（WinUI 3 / .NET 10），
 使用 [Bug Report](https://github.com/TurmoilZoom/Starward/issues/new?template=bug_report.yml) 模板提交 Issue，并尽量提供：
 
 - 清晰的复现步骤与预期行为
-- Starward 版本号与 Windows 版本号
-- 相关日志（位于 `%LocalAppData%/Starward/log/` 或用户数据目录下的 `data/log/`）
+- Moonward 版本号与 Windows 版本号
+- 相关日志（位于 `%LocalAppData%/Moonward/log/` 或用户数据目录下的 `data/log/`）
 
 提交前请先搜索已有 Issue，避免重复。
 

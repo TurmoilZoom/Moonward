@@ -1,6 +1,6 @@
 # 本地化
 
-首先，我要向本项目的所有贡献者致以最诚挚的感谢。因为你们的无私贡献，Starward 可以被世界各地不同语言的人们使用。无论你的贡献是一行代码、一个翻译修正，或是一个建议，你们的工作都为我们的项目增色不少。在这个充满活力的社区中，每一个人都是不可或缺的一部分。
+首先，我要向本项目的所有贡献者致以最诚挚的感谢。因为你们的无私贡献，Moonward 可以被世界各地不同语言的人们使用。无论你的贡献是一行代码、一个翻译修正，或是一个建议，你们的工作都为我们的项目增色不少。在这个充满活力的社区中，每一个人都是不可或缺的一部分。
 
 <picture>
     <source srcset="https://github.com/Scighost/Starward/assets/61003590/9d369ec3-ab7c-408f-88c2-11bfe4453208" type="image/avif" />
@@ -24,7 +24,7 @@
 
 ## 应用内文本翻译
 
-Starward 的应用内文本翻译托管在 [Crowdin](https://crowdin.com/project/starward) 平台上，您可以随时修改其中的文本内容。如果您想增加一个新的翻译语言，请创建一个 [issue](https://github.com/Scighost/Starward/issues)。
+Moonward 的应用内文本翻译托管在 [Crowdin](https://crowdin.com/project/starward) 平台上，您可以随时修改其中的文本内容。如果您想增加一个新的翻译语言，请创建一个 [issue](https://github.com/Scighost/Starward/issues)。
 
 您在 Crowdin 中做出的修改会在一个小时内同步到 [l10n/main](https://github.com/Scighost/Starward/tree/l10n/main) 分支，并触发自动构建流程。在 [GitHub Actions](https://github.com/Scighost/Starward/actions/workflows/build.yml) 中找到最新的名为 `New Crowdin updates` 的 workflow，下载编译完成的二进制文件（Artifacts），您可以及时地检查翻译文本在应用内的显示效果。**开发中的版本可能会损坏您的个人数据库 `StarwardDatabase.db`，请做好备份后再测试，此版本不应该长时间使用。**
 

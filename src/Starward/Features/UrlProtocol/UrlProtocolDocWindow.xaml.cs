@@ -99,9 +99,9 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
 
             await webview.EnsureCoreWebView2Async();
             string ua = webview.CoreWebView2.Settings.UserAgent;
-            if (!ua.Contains("Starward"))
+            if (!ua.Contains("Moonward"))
             {
-                webview.CoreWebView2.Settings.UserAgent = $"{ua} Starward/{AppConfig.AppVersion}";
+                webview.CoreWebView2.Settings.UserAgent = $"{ua} Moonward/{AppConfig.AppVersion}";
             }
             webview.CoreWebView2.Profile.PreferredColorScheme = ShouldAppsUseDarkMode()
                 ? CoreWebView2PreferredColorScheme.Dark

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Starward.Features.Setting;
 
 /// <summary>
-/// 升级迁移服务：把分散在「旧版缓存根」（<c>%LocalAppData%\Starward</c> / <c>.StarwardCache</c> / 便携 <c>.cache</c>，
+/// 升级迁移服务：把分散在「旧版缓存根」（<c>%LocalAppData%\Moonward</c> / <c>.MoonwardCache</c> / 便携 <c>.cache</c>，
 /// 在标准安装下同时是 Velopack 安装根）与「旧版 UserDataFolder」下的 Starward 数据，
 /// 按<b>白名单</b>统一搬运到用户选择的新数据目录。
 /// <para>

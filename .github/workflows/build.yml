@@ -1,4 +1,4 @@
-# 编译 Starward 并上传构建产物（Artifacts）。
+# 编译 Moonward（源码工程仍为 Starward.*）并上传构建产物（Artifacts）。
 # 在 main 或 dev/* 分支的 push / pull_request 时触发，覆盖 Debug/Release × x64/arm64 四种组合。
 
 name: Build
@@ -43,10 +43,10 @@ jobs:
       run: |
         $sha = "${{ steps.sha.outputs.sha }}"
         # DONOT_CHECK_UPDATE：CI 构建跳过启动时的更新检查
-        dotnet publish src/Starward/Starward.csproj -c $env:Configuration -r "win-$env:Platform" -o "build/Starward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
+        dotnet publish src/Starward/Starward.csproj -c $env:Configuration -r "win-$env:Platform" -o "build/Moonward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v7
       with:
-        name: Starward_${{ matrix.configuration }}_${{ matrix.platform }}_${{ steps.sha.outputs.sha }}
-        path: build/Starward/
+        name: Moonward_${{ matrix.configuration }}_${{ matrix.platform }}_${{ steps.sha.outputs.sha }}
+        path: build/Moonward/

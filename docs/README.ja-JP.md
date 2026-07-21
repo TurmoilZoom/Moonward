@@ -1,6 +1,6 @@
-# Starward って何ですか?
+# Moonward って何ですか?
 
-**Starward** は、崩壊:スターレイルのスローガン「May This Journey Lead Us Starward」(この旅が私たちを星へと導くように)に由来しています。 **Starward** は、miHoYo のすべてのデスクトップ版ゲームをサポートするゲームランチャーです。このプロジェクトの目標は、公式ランチャーを完全に置き換える事と更にいくつかの拡張機能を追加する事になります。
+**Moonward** は、崩壊:スターレイルのスローガン「May This Journey Lead Us Moonward」(この旅が私たちを星へと導くように)に由来しています。 **Moonward** は、miHoYo のすべてのデスクトップ版ゲームをサポートするゲームランチャーです。このプロジェクトの目標は、公式ランチャーを完全に置き換える事と更にいくつかの拡張機能を追加する事になります。
 
 ゲームのダウンロードとインストールに加えて以下の機能が含まれます:
 
@@ -12,7 +12,7 @@
 
 さらに多くの機能の追加を計画しています...
 
-> Starward は、ガチャアイテムの画像など開発者がゲームデータやリソース関連と言った断続的に更新を必要とする物は実装しません。
+> Moonward は、ガチャアイテムの画像など開発者がゲームデータやリソース関連と言った断続的に更新を必要とする物は実装しません。
 
 ## ダウンロード
 
@@ -23,9 +23,9 @@
 - [WebView2 ランタイム](https://developer.microsoft.com/microsoft-edge/webview2)がインストール済みである事
 - Windows 10 を使用しているユーザーは、[Segoe Fluent Icons](https://aka.ms/SegoeFluentIcons) フォントのインストールを推奨します
 
-[GitHub のリリースページ](https://github.com/Scighost/Starward/releases)から使用している CPU のアーキテクチャに対応したパッケージをダウンロードして展開を行い、`Starward.exe` のプロンプトに従って操作をしてください。
+[GitHub のリリースページ](https://github.com/Scighost/Starward/releases)から使用している CPU のアーキテクチャに対応したパッケージをダウンロードして展開を行い、`Moonward.exe` のプロンプトに従って操作をしてください。
 
-一部のデバイスで `Starward.exe` を実行時にクラッシュをする問題が発生する事があります。この問題が発生した場合は、`Starward.exe` が存在するフォルダーに `config.ini` のファイルを作成して、以下を貼り付けてください。`config.ini` の詳細は、[docs/Configuration.ja-JP.md](./Configuration.ja-JP.md) を参照してください。
+一部のデバイスで `Moonward.exe` を実行時にクラッシュをする問題が発生する事があります。この問題が発生した場合は、`Moonward.exe` が存在するフォルダーに `config.ini` のファイルを作成して、以下を貼り付けてください。`config.ini` の詳細は、[docs/Configuration.ja-JP.md](./Configuration.ja-JP.md) を参照してください。
 
 ``` ini
 UserDataFolder=.
@@ -45,7 +45,7 @@ UserDataFolder=.
 [![zh-CN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat&logo=crowdin&query=%24.progress.8.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-CN)
 [![zh-TW translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-TW&style=flat&logo=crowdin&query=%24.progress.9.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-TW)
 
-Starward はローカライズに[Crowdin](https://crowdin.com/project/starward) を使用しています。機械翻訳がされた英文を原文として提供をしています。現地語の翻訳や校正が行えますのでご参加を是非ともお待ちしています。 新しい言語を翻訳したい場合は、Issue を作成してください。
+Moonward はローカライズに[Crowdin](https://crowdin.com/project/starward) を使用しています。機械翻訳がされた英文を原文として提供をしています。現地語の翻訳や校正が行えますのでご参加を是非ともお待ちしています。 新しい言語を翻訳したい場合は、Issue を作成してください。
 
 ## 開発
 
@@ -57,7 +57,7 @@ Starward はローカライズに[Crowdin](https://crowdin.com/project/starward)
 
 ## 謝辞
 
- まず最初に、このプロジェクトのインスパイアとなる 「Collapse」 の開発者 [neon-nyan](https://github.com/neon-nyan) 氏に感謝をします。Starward は彼が作ったリソースだけでなく、「ユーザーインターフェース」も参考にしています。  [Collapse](https://github.com/neon-nyan/Collapse) のコードから多くの事を学び、私の開発プロセスをよりスムーズにしてくれました。
+ まず最初に、このプロジェクトのインスパイアとなる 「Collapse」 の開発者 [neon-nyan](https://github.com/neon-nyan) 氏に感謝をします。Moonward は彼が作ったリソースだけでなく、「ユーザーインターフェース」も参考にしています。  [Collapse](https://github.com/neon-nyan/Collapse) のコードから多くの事を学び、私の開発プロセスをよりスムーズにしてくれました。
 
 それから、無料の CDN を提供してくれた [CloudFlare](https://www.cloudflare.com/) と、オープンソースプロジェクト向けに無料のコード署名を提供してくれた [SignPath Foundation](https://signpath.org/) に感謝します。
 

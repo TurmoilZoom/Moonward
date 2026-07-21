@@ -1,11 +1,11 @@
 <p align="center">
   <picture>
     <source srcset="https://github.com/Scighost/Starward/assets/61003590/9d369ec3-ab7c-408f-88c2-11bfe4453208" type="image/avif" />
-    <img src="https://github.com/Scighost/Starward/assets/61003590/44552992-e2c5-451f-9c2a-73176e8e4e93" alt="Starward Logo" width="240"/>
+    <img src="https://github.com/Scighost/Starward/assets/61003590/44552992-e2c5-451f-9c2a-73176e8e4e93" alt="Moonward Logo" width="240"/>
   </picture>
 </p>
 
-<h1 align="center">Starward</h1>
+<h1 align="center">Moonward</h1>
 
 <p align="center">
   🎮 开源的米哈游 PC 端游戏启动器，专为现代化 Windows 平台设计<br/>
@@ -56,15 +56,17 @@
 
 **中文**
 
-> **Starward** 出自星穹铁道开服前的宣传语——愿此行，终抵群星（May This Journey Lead Us **Starward**）。
+> **Moonward** 是本 fork 的产品品牌名，基于上游 **Starward**（出自星穹铁道开服前宣传语——愿此行，终抵群星 / May This Journey Lead Us **Starward**）发展而来。源码工程与 C# 命名空间仍保留 `Starward.*`，以便持续变基上游。
 
-Starward 是一款以 [MIT License](LICENSE) 开源的第三方游戏启动器，面向 Windows 10 及以上系统，支持米哈游 PC 端全部主要游戏。它在保留官方启动器核心能力的同时，提供游戏时间统计、抽卡记录、截图浏览、实时便笺、每日签到等拓展功能，并采用亚克力视觉与 Composition 动画，带来更现代的桌面体验。
+Moonward 是一款以 [MIT License](LICENSE) 开源的第三方游戏启动器，面向 Windows 10 及以上系统，支持米哈游 PC 端全部主要游戏。它在保留官方启动器核心能力的同时，提供游戏时间统计、抽卡记录、截图浏览、实时便笺、每日签到等拓展功能，并采用亚克力视觉与 Composition 动画，带来更现代的桌面体验。
 
 本仓库（[TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)）基于上游 [Scighost/Starward](https://github.com/Scighost/Starward) 维护，在持续同步上游改进的同时，合入额外的功能增强与问题修复。正式发行版见 [Releases](https://github.com/TurmoilZoom/Starward/releases)。
 
 **English**
 
-Starward is an open-source third-party game launcher under the MIT license, built for Windows 10 and later. It supports all major miHoYo PC titles and aims to fully replace the official HoYoPlay launcher — with extras like playtime tracking, gacha history, screenshot gallery, daily notes, and sign-in rewards, wrapped in a modern acrylic UI with GPU-accelerated animations.
+**Moonward** is the product brand of this fork, built on upstream **Starward**. Source project folders and C# namespaces remain `Starward.*` to keep rebasing upstream practical.
+
+Moonward is an open-source third-party game launcher under the MIT license, built for Windows 10 and later. It supports all major miHoYo PC titles and aims to fully replace the official HoYoPlay launcher — with extras like playtime tracking, gacha history, screenshot gallery, daily notes, and sign-in rewards, wrapped in a modern acrylic UI with GPU-accelerated animations.
 
 This repository ([TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)) is a maintained fork of [Scighost/Starward](https://github.com/Scighost/Starward), carrying additional enhancements and fixes on top of upstream improvements. Download releases from [Releases](https://github.com/TurmoilZoom/Starward/releases).
 
@@ -79,7 +81,7 @@ This repository ([TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)
 - 游戏内公告窗口、云游戏入口（部分游戏）
 - 硬链接节省磁盘空间（部分游戏）
 - 游戏时间记录与统计
-- 多启动配置文件（configN 与配置文件 N 对应，无数量上限；启动方式含「无」），支持 `starward://` URL 协议远程启动
+- 多启动配置文件（configN 与配置文件 N 对应，无数量上限；启动方式含「无」），支持 `moonward://` URL 协议远程启动
 - 通过 [Velopack](https://github.com/velopack/velopack) 实现应用内自动更新
 
 ### 拓展工具
@@ -97,7 +99,7 @@ This repository ([TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)
 在继承上游全部能力的基础上，本仓库还包含以下定制改动：
 
 - 每日签到（SignIn）与自动签到后台任务
-- `starward://` URL 协议（启动游戏、切换配置等），详见 [URL 协议文档](docs/UrlProtocol.zh-CN.md)
+- `moonward://` URL 协议（启动游戏、切换配置等），详见 [URL 协议文档](docs/UrlProtocol.zh-CN.md)
 - 游戏快捷方式与多配置文件支持
 - 亚克力风格 UI 与 Composition 动画（首页呼吸灯、功能图钉、卡池拖拽等）
 - 壁纸类型记忆、UIGF 导入修复、自定义背景稳定性等多项体验改进
@@ -182,27 +184,27 @@ This repository ([TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)
 
 **中文**
 
-Starward 通过 [Velopack](https://github.com/velopack/velopack) 安装，卸载方式与常规 Windows 应用相同：
+Moonward 通过 [Velopack](https://github.com/velopack/velopack) 安装，卸载方式与常规 Windows 应用相同：
 
 1. 打开 **设置 → 应用 → 已安装的应用**（快捷方式：`Win + X` → 已安装的应用）。
-2. 找到 **Starward**，选择**卸载**并等待完成。
+2. 找到 **Moonward**，选择**卸载**并等待完成。
 
 **关于用户数据**
 
 - 用户数据（数据库、缓存、背景图、抽卡记录等）存放在安装时选择的目录下的 `data\` 文件夹中，**不会**随 Velopack 默认卸载流程自动删除。
 - 应用内 **设置 → 文件管理** 提供「卸载时删除我的数据」开关，**默认开启**。开启时，通过控制面板卸载会一并清理：
   - 用户数据目录（`<所选目录>\data`）
-  - `starward://` URL 协议注册
-  - `HKCU\Software\Starward` 注册表项
+  - `moonward://` URL 协议注册
+  - `HKCU\Software\Moonward` 注册表项
 - 若希望卸载后保留数据以便重装续用，请在卸载前关闭该开关。
 - 若你将数据目录迁移到非默认位置，卸载前请确认路径；本地数据仅有一份，请注意备份。
-- 卸载诊断日志（如有）位于 `%TEMP%\Starward.Uninstall.log`。
+- 卸载诊断日志（如有）位于 `%TEMP%\Moonward.Uninstall.log`。
 
 也可在安装目录运行 `Update.exe uninstall` 完成卸载，行为与控制面板一致。
 
 **English**
 
-Starward is installed via Velopack. To uninstall, go to **Settings → Apps → Installed apps**, find **Starward**, and click **Uninstall**.
+Moonward is installed via Velopack. To uninstall, go to **Settings → Apps → Installed apps**, find **Moonward**, and click **Uninstall**.
 
 User data lives in the `data\` subfolder of your chosen directory. Whether it is deleted on uninstall is controlled by the **Delete my data when uninstalling** option in **Settings → File Management** (enabled by default). Turn it off before uninstalling if you want to keep your data for a future reinstall.
 
@@ -245,13 +247,13 @@ dotnet build src/Starward/Starward.csproj -c Debug -p:Platform=x64
 | 本地化平台 | [Crowdin — starward](https://crowdin.com/project/starward) | 应用内多语言翻译（与上游共享） |
 | 文档素材 | [Scighost/Starward assets](https://github.com/Scighost/Starward) | Logo、截图等视觉资源 |
 
-感谢 [Scighost](https://github.com/Scighost) 创建并长期维护 Starward 上游项目。若你的改动属于通用改进而非 fork 定制，也欢迎直接向上游贡献。
+感谢 [Scighost](https://github.com/Scighost) 创建并长期维护 Moonward 上游项目。若你的改动属于通用改进而非 fork 定制，也欢迎直接向上游贡献。
 
 ---
 
 ## 🙏 特别感谢 / Special Thanks
 
-- [**Scighost**](https://github.com/Scighost) — Starward 原作者与上游维护者
+- [**Scighost**](https://github.com/Scighost) — Moonward 原作者与上游维护者
 
 **相关开源项目 / Related Open-Source Projects**
 
@@ -285,13 +287,13 @@ dotnet build src/Starward/Starward.csproj -c Debug -p:Platform=x64
 - [H.NotifyIcon](https://github.com/HavenDV/H.NotifyIcon) — 系统托盘
 - [Vanara PInvoke](https://github.com/dahall/Vanara) — Windows API 互操作
 - [MiniExcel](https://github.com/mini-software/MiniExcel) — Excel 导出
-- [Starward.*](https://www.nuget.org/profiles/Scighost) — 上游维护的原生库与资源包
+- [Moonward.*](https://www.nuget.org/profiles/Scighost) — 上游维护的原生库与资源包
 
 ---
 
 ## 📸 截图 / Screenshots
 
-<img width="1200" src="https://github.com/user-attachments/assets/ddd51a20-9705-4112-a454-75b07b7a6f8f" alt="Starward Screenshot"/>
+<img width="1200" src="https://github.com/user-attachments/assets/ddd51a20-9705-4112-a454-75b07b7a6f8f" alt="Moonward Screenshot"/>
 
 ---
 

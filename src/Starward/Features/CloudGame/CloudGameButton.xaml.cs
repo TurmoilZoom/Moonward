@@ -141,7 +141,7 @@ public sealed partial class CloudGameButton : UserControl
                     {
                         Process.Start(new ProcessStartInfo
                         {
-                            FileName = AppConfig.StarwardExecutePath,
+                            FileName = AppConfig.MoonwardExecutePath,
                             Arguments = $"playtime --biz {CurrentGameId.GameBiz} --pid {p.Id}",
                             CreateNoWindow = true,
                         });

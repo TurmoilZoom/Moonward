@@ -158,7 +158,7 @@
     <value>不想選</value>
   </data>
   <data name="SelectDirectoryPage_FirstUse" xml:space="preserve">
-    <value>這似乎是您第一次使用 {Starward}。</value>
+    <value>這似乎是您第一次使用 {Moonward}。</value>
   </data>
   <data name="SelectGamePage_GoToLauncher" xml:space="preserve">
     <value>進入啟動器</value>
@@ -167,7 +167,7 @@
     <value>選擇資料夾</value>
   </data>
   <data name="SelectGamePage_SomeGame" xml:space="preserve">
-    <value>{Starward} 支援部分 {miHoYo/HoYoverse} 遊戲，請在下方選擇您的目標，進入啟動器後也可隨時變更。</value>
+    <value>{Moonward} 支援部分 {miHoYo/HoYoverse} 遊戲，請在下方選擇您的目標，進入啟動器後也可隨時變更。</value>
   </data>
   <data name="SelectGamePage_TheLastStep" xml:space="preserve">
     <value>最後一步了~</value>
@@ -982,7 +982,7 @@
     <value>免責聲明</value>
   </data>
   <data name="HoyolabToolboxPage_DisclaimerContent" xml:space="preserve">
-    <value>本頁面的功能需要您登入 米遊社/HoYoLAB 帳戶，Starward 將會保存您的登入憑證 (Cookie) 並模仿您本人向 miHoYo 的伺服器發送請求。這種方法十分危險，如果因此造成了您的帳戶異常或被封禁，本應用概不負責。
+    <value>本頁面的功能需要您登入 米遊社/HoYoLAB 帳戶，Moonward 將會保存您的登入憑證 (Cookie) 並模仿您本人向 miHoYo 的伺服器發送請求。這種方法十分危險，如果因此造成了您的帳戶異常或被封禁，本應用概不負責。
 
 您是否願意承擔風險並繼續使用？</value>
   </data>
@@ -1264,7 +1264,7 @@
     <value>URL 協議 (實驗中)</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
-    <value>其他軟體可透過 URL 協議使用 Starward 的部分功能</value>
+    <value>其他軟體可透過 URL 協議使用 Moonward 的部分功能</value>
   </data>
   <data name="SettingPage_RegisterURLProtocol" xml:space="preserve">
     <value>註冊 URL 協議</value>
@@ -1367,7 +1367,7 @@
     <value>網路測試</value>
   </data>
   <data name="SelectLanguagePage_AreYouAbleToReceiveUpdatesForStarward" xml:space="preserve">
-    <value>您能收到 Starward 的更新嗎？</value>
+    <value>您能收到 Moonward 的更新嗎？</value>
   </data>
   <data name="SelectDirectoryPage_PleaseSelectAFolderToStoreYourPersonalData" xml:space="preserve">
     <value>請選擇一個資料夾來儲存您的個人資料，這非常重要！</value>
@@ -1388,7 +1388,7 @@
     <value>虛構敘事</value>
   </data>
   <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>幫助我們翻譯 Starward</value>
+    <value>幫助我們翻譯 Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>快取</value>
@@ -1992,10 +1992,10 @@
     <value>不相容提醒</value>
   </data>
   <data name="PreDownloadDialog_IncompatibilityNoticeContent" xml:space="preserve">
-    <value>Starward 和 HoYoPlay (米哈遊啟動器) 的預下載檔案不相容，無法互相辨識。</value>
+    <value>Moonward 和 HoYoPlay (米哈遊啟動器) 的預下載檔案不相容，無法互相辨識。</value>
   </data>
   <data name="WelcomeView_DearPlayerWelcomeToStarward" xml:space="preserve">
-    <value>親愛的玩家，歡迎來到 Starward！</value>
+    <value>親愛的玩家，歡迎來到 Moonward！</value>
   </data>
   <data name="WelcomeView_WelcomeToStarwardDescription" xml:space="preserve">
     <value>這是一個專為米哈遊旗下游戲打造的啟動器，幫助您輕鬆管理遊戲，享受更好的體驗。</value>
@@ -2019,7 +2019,7 @@
     <value>已安裝</value>
   </data>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
-    <value>Starward，啟動！</value>
+    <value>Moonward，啟動！</value>
   </data>
   <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
     <value>遷移並啟動</value>
@@ -2043,10 +2043,10 @@
     <value>點選此處選擇或切換遊戲。</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameUserDataFolderWarning" xml:space="preserve">
-    <value>Starward 資料目錄位於遊戲資料夾內，刪除遊戲時會一併被刪除。請在設定修改資料目錄後重試。</value>
+    <value>Moonward 資料目錄位於遊戲資料夾內，刪除遊戲時會一併被刪除。請在設定修改資料目錄後重試。</value>
   </data>
   <data name="GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning" xml:space="preserve">
-    <value>Starward 程式位於遊戲資料夾內，刪除遊戲時會一併被刪除。請將程式移出遊戲資料夾後重試。</value>
+    <value>Moonward 程式位於遊戲資料夾內，刪除遊戲時會一併被刪除。請將程式移出遊戲資料夾後重試。</value>
   </data>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>雲端遊戲</value>
@@ -2419,7 +2419,7 @@
     <value>高動態範圍</value>
   </data>
   <data name="WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity" xml:space="preserve">
-    <value>如果 Starward 啟動時間過長，建議關閉 Windows 安全中心的SmartApp控制功能。</value>
+    <value>如果 Moonward 啟動時間過長，建議關閉 Windows 安全中心的SmartApp控制功能。</value>
   </data>
   <data name="WelcomeView_OpenWindowsSecurity" xml:space="preserve">
     <value>開啟 Windows 安全中心</value>
@@ -2428,7 +2428,7 @@
     <value>了解更多</value>
   </data>
   <data name="WelcomeView_NetworkErrorYouCanContinueUsingStarwardButYouWonTReceiveFutureUpdates" xml:space="preserve">
-    <value>網絡出錯，您可以繼續使用 Starward ，但無法收到更新。</value>
+    <value>網絡出錯，您可以繼續使用 Moonward ，但無法收到更新。</value>
   </data>
   <data name="MainView_CheckSystemProxy_SystemProxyIsEnabled" xml:space="preserve">
     <value>系統代理已開啟。</value>
@@ -2611,7 +2611,7 @@
     <value>修改資料夾</value>
   </data>
   <data name="HotkeySetting_SingleKeyShortcutsTips" xml:space="preserve">
-    <value>如果註冊單鍵快捷鍵 (F1-F12)，需要以管理員權限運行 Starward，否則在遊戲中快捷鍵無法生效。</value>
+    <value>如果註冊單鍵快捷鍵 (F1-F12)，需要以管理員權限運行 Moonward，否則在遊戲中快捷鍵無法生效。</value>
   </data>
   <data name="SettingPage_KeyboardShortcuts" xml:space="preserve">
     <value>鍵盤快速鍵</value>
@@ -2650,10 +2650,10 @@
     <value>僅適配 Xbox 協議手把，不能保證其他類型手柄的使用體驗。</value>
   </data>
   <data name="GamepadControlSetting_SimulateInputDesc" xml:space="preserve">
-    <value>使用手把模擬鍵鼠操作。需要以管理員權限運行 Starward，才能在遊戲中使用此功能。</value>
+    <value>使用手把模擬鍵鼠操作。需要以管理員權限運行 Moonward，才能在遊戲中使用此功能。</value>
   </data>
   <data name="GamepadControlSetting_LongPressGuideButtonDesc" xml:space="preserve">
-    <value>長按導航鍵，打開 Starward 主窗口。</value>
+    <value>長按導航鍵，打開 Moonward 主窗口。</value>
   </data>
   <data name="GamepadControlSetting_BothThumbsticksDesc" xml:space="preserve">
     <value>同時按下左右搖桿鍵，激活手把模擬鍵鼠功能。</value>
@@ -2665,7 +2665,7 @@
     <value>• 映射導航鍵時，Xbox Game Bar 的預設快捷操作將被禁用；其他程式（如 Steam 的大螢幕模式）也可能響應導航鍵，如有衝突需手動關閉相關功能。</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingKeyboardDesc" xml:space="preserve">
-    <value>• 映射為鍵盤按鍵時，請輸入鍵盤按鍵上的文字，多個按鍵之間用空格分隔。例如，將按鍵映射為“Ctrl + Alt + F1”組合鍵，應輸入“Ctrl + Alt + F1”，小鍵盤按鍵需在文字前添加 Pad，例如 Pad8，Pad+ 。需要以管理員權限運行 Starward，才能在遊戲中使用此功能。</value>
+    <value>• 映射為鍵盤按鍵時，請輸入鍵盤按鍵上的文字，多個按鍵之間用空格分隔。例如，將按鍵映射為“Ctrl + Alt + F1”組合鍵，應輸入“Ctrl + Alt + F1”，小鍵盤按鍵需在文字前添加 Pad，例如 Pad8，Pad+ 。需要以管理員權限運行 Moonward，才能在遊戲中使用此功能。</value>
   </data>
   <data name="GamepadControlSetting_ButtonMappingShareDesc" xml:space="preserve">
     <value>• 按下分享鍵仍會觸發 Xbox Game Bar 的截圖功能，暫時沒有好的解決辦法。</value>

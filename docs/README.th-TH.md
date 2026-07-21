@@ -1,7 +1,7 @@
-# อะไรคือ Starward?
+# อะไรคือ Moonward?
 
-**Starward**  มาจากสโลแกนของ Star Rail: ขอให้การเดินทางครั้งนี้ พาเรามุ่งไปสู่ดวงดาว (May This Journey Lead Us **Starward**) ซึ่งเหมาะมากที่จะใช้เป็นชื่อแอพ 
-Starward เป็น launcer ที่รองรับเกมบนเดสก์ท็อปทั้งหมดของ miHoYo/HoYoverse โดยมีเป้าหมายที่จะแทนที่ launcher หลักอย่างเป็นทางการ พร้อมกับเพิ่มฟีเจอร์ใหม่ๆเข้าไปด้วย
+**Moonward**  มาจากสโลแกนของ Star Rail: ขอให้การเดินทางครั้งนี้ พาเรามุ่งไปสู่ดวงดาว (May This Journey Lead Us **Moonward**) ซึ่งเหมาะมากที่จะใช้เป็นชื่อแอพ 
+Moonward เป็น launcer ที่รองรับเกมบนเดสก์ท็อปทั้งหมดของ miHoYo/HoYoverse โดยมีเป้าหมายที่จะแทนที่ launcher หลักอย่างเป็นทางการ พร้อมกับเพิ่มฟีเจอร์ใหม่ๆเข้าไปด้วย
 
 นอกจากที่จะให้ผู้ใช้ดาวน์โหลดแล้วติดตั้งเกม ก็ยังมีฟีเจอร์เพิ่มเติม ดังนี้:
 
@@ -13,7 +13,7 @@ Starward เป็น launcer ที่รองรับเกมบนเด�
 
 และมีอีกที่วางแผนไว้...
 
-> Starward จะไม่มีฟีเจอร์ที่ต้องให้ผู้พัฒนาคอยอัพเดตข้อมูลและทรัพยากรของเกม เช่นรูปของไอเทม ฯลฯ
+> Moonward จะไม่มีฟีเจอร์ที่ต้องให้ผู้พัฒนาคอยอัพเดตข้อมูลและทรัพยากรของเกม เช่นรูปของไอเทม ฯลฯ
 
 ## การดาวน์โหลด
 
@@ -23,9 +23,9 @@ Starward เป็น launcer ที่รองรับเกมบนเด�
 - ติดตั้ง [Visual C++ Runtime](https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist) 
 - ติดตั้ง [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2) installed
 
-ดาวน์โหลดแพ็คเกจสำหรับสถาปัตยกรรม CPU ที่ใช้อยู่จาก [GitHub Release](https://github.com/Scighost/Starward/releases) แตกไฟล์ แล้วรัน 'Starward.exe' แล้วทำตามที่มันบอกจนเซ็ทอัพเสร็จ
+ดาวน์โหลดแพ็คเกจสำหรับสถาปัตยกรรม CPU ที่ใช้อยู่จาก [GitHub Release](https://github.com/Scighost/Starward/releases) แตกไฟล์ แล้วรัน 'Moonward.exe' แล้วทำตามที่มันบอกจนเซ็ทอัพเสร็จ
 
-Starward อาจ crash ได้บนบางอุปกรณ์ หากพบเจอปัญหานี้ให้สร้าง 'config.ini' ไฟล์ในโฟลเดอร์ 'Starward' แล้ววางข้อความต่อไปนี้ลงไป 
+Moonward อาจ crash ได้บนบางอุปกรณ์ หากพบเจอปัญหานี้ให้สร้าง 'config.ini' ไฟล์ในโฟลเดอร์ 'Moonward' แล้ววางข้อความต่อไปนี้ลงไป 
 ไปที่ [docs/Configuration.md](./Configuration.md) หากต้องการข้อมูลเพิ่มเติมเกี่ยวกับ 'config.ini'
 
 ``` ini
@@ -45,7 +45,7 @@ UserDataFolder=.
 [![zh-CN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat&logo=crowdin&query=%24.progress.8.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-CN)
 [![zh-TW translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-TW&style=flat&logo=crowdin&query=%24.progress.9.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-TW)
 
-Starward ใช้ [Crowdin](https://crowdin.com/project/starward) ในการแปลภาษาโดยให้ข้อความภาษาอังกฤษที่ถูกแปลด้วยเครื่องจักรเป็นภาษาต้นแบบ คุณสามารถช่วยแปลหรือตรวจสอบข้อความภาษาของคุณได้
+Moonward ใช้ [Crowdin](https://crowdin.com/project/starward) ในการแปลภาษาโดยให้ข้อความภาษาอังกฤษที่ถูกแปลด้วยเครื่องจักรเป็นภาษาต้นแบบ คุณสามารถช่วยแปลหรือตรวจสอบข้อความภาษาของคุณได้
 เรายินดีต้อนรับคนที่สนใจช่วย หากคุณต้องการเพิ่มภาษาอื่นๆ สามารถสร้าง issue เพื่อบอกพวกเราได้
 
 ## การพัฒนา
@@ -59,7 +59,7 @@ Starward ใช้ [Crowdin](https://crowdin.com/project/starward) ในกา�
 ## คำขอบคุณ
 
 ก่อนอื่น ขอขอบคุณคุณ [neon-nyan](https://github.com/neon-nyan) อย่างมาก โดยเฉพาะโปรเจกต์ [Collapse](https://github.com/neon-nyan/Collapse) ที่เป็นแรงบันดาลใจให้โปรเจกต์นี้
-Starward ไม่เพียงแต่จะใช้ทรัพยากรบางส่วนที่เขาสร้างแล้ว ยังนำเอาแนวการออกแบบ UI มาใช้อีกด้วย 
+Moonward ไม่เพียงแต่จะใช้ทรัพยากรบางส่วนที่เขาสร้างแล้ว ยังนำเอาแนวการออกแบบ UI มาใช้อีกด้วย 
 ผมได้เรียนรู้เยอะมากจากโค้ดของ Collapse และได้ทำให้การพัฒนา Starwart เป็นไปได้อย่างราบรื่น
 
 นอกจากนี้ผมต้องขอบคุณ [CloudFlare](https://www.cloudflare.com/) ที่ให้บริการ CDN ฟรี และ [SignPath Foundation](https://signpath.org/) ที่ให้บริการโค้ดไซน์ฟรีสำหรับโครงการโอเพนซอร์ส

@@ -62,7 +62,7 @@ public sealed partial class UpdateWindow : WindowEx
     private void InitializeWindow()
     {
         AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-        Title = "Starward · Update";
+        Title = "Moonward · Update";
         RootGrid.RequestedTheme = ShouldAppsUseDarkMode() ? ElementTheme.Dark : ElementTheme.Light;
         SystemBackdrop = new DesktopAcrylicBackdrop();
         AdaptTitleBarButtonColorToActuallTheme();
@@ -471,9 +471,9 @@ public sealed partial class UpdateWindow : WindowEx
 
             await webview.EnsureCoreWebView2Async();
             string ua = webview.CoreWebView2.Settings.UserAgent;
-            if (!ua.Contains("Starward"))
+            if (!ua.Contains("Moonward"))
             {
-                webview.CoreWebView2.Settings.UserAgent = $"{ua} Starward/{AppConfig.AppVersion}";
+                webview.CoreWebView2.Settings.UserAgent = $"{ua} Moonward/{AppConfig.AppVersion}";
             }
             webview.CoreWebView2.Profile.PreferredColorScheme = ShouldAppsUseDarkMode() ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light;
             webview.CoreWebView2.DOMContentLoaded -= CoreWebView2_DOMContentLoaded;

@@ -47,9 +47,9 @@ public static class Program
         string logFile = AppConfig.LogFile;
         if (string.IsNullOrWhiteSpace(logFile))
         {
-            string logFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward", "log");
+            string logFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Moonward", "log");
             Directory.CreateDirectory(logFolder);
-            logFile = Path.Combine(logFolder, $"Starward_{DateTime.Now:yyMMdd}.log");
+            logFile = Path.Combine(logFolder, $"Moonward_{DateTime.Now:yyMMdd}.log");
         }
         var sb = new StringBuilder();
         sb.AppendLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Program Crash:");
