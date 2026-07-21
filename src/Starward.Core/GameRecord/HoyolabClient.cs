@@ -90,14 +90,21 @@ public class HoyolabClient : GameRecordClient
 
 
     /// <summary>
-    /// HoYoLAB 签到请求头：不需要 DS / signgame，仅设备指纹；语言由 CommonSendAsync 统一附加。
+    /// HoYoLAB 签到请求头：不需要 DS；绝区零专用主机需 x-rpc-signgame 与 Origin；语言由 CommonSendAsync 统一附加。
     /// </summary>
     /// <param name="request">待发送的 HTTP 请求。</param>
-    /// <param name="config">签到活动配置（OS 侧不使用 signgame）。</param>
+    /// <param name="config">签到活动配置（提供 signgame / origin）。</param>
     /// <param name="signData">保留参数，OS 侧始终不附加 DS。</param>
     protected override void AddSignInPlatformHeaders(HttpRequestMessage request, SignInActivityConfig config, bool signData)
     {
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
+        // 官方签到页与多数自动签到工具对 ZZZ 会带 x-rpc-signgame；其它游戏 SignGame 亦无害
+        request.Headers.Add("x-rpc-signgame", config.SignGame);
+        if (!string.IsNullOrEmpty(config.Origin))
+        {
+            // 绝区零 OS 的 sg-act-nap-api 与国服 act-nap-api 对称，专用主机需要 Origin
+            request.Headers.Add("Origin", config.Origin);
+        }
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
         request.Headers.Add(x_rpc_device_id, DeviceId);

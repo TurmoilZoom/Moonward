@@ -6,7 +6,8 @@ namespace Starward.Core.GameRecord.SignIn;
 /// act_id 与接口主机会随版本 / 活动轮换：
 /// <list type="bullet">
 /// <item>原神 (hk4e)、星铁 (hkrpg) 的 act_id 已在本仓库代码 / 参考项目中验证；</item>
-/// <item>绝区零 (nap)、崩坏3 (bh3) 为最佳猜测，可能需要上线后用真实账号核对，届时仅改本文件即可。</item>
+/// <item>绝区零 (nap) OS 走 sg-act-nap-api（与 MihoyoBBSTools / SIMNet 等一致），勿用 sg-public-api；</item>
+/// <item>崩坏3 (bh3) act_id 仍可能需核对，届时仅改本文件即可。</item>
 /// </list>
 /// </para>
 /// </summary>
@@ -32,7 +33,7 @@ public sealed class SignInActivityConfig
 
 
     /// <summary>
-    /// 可选的 Origin 请求头：绝区零 CN 的 act-nap-api 专用主机需要，其余游戏为 null（不添加）。
+    /// 可选的 Origin 请求头：绝区零 act-nap-api / sg-act-nap-api 专用主机需要，其余游戏为 null（不添加）。
     /// </summary>
     public string? Origin { get; init; }
 
@@ -78,9 +79,9 @@ public sealed class SignInActivityConfig
             (GameBiz.hkrpg, false) => new() { ActId = "e202304121516551", SignGame = "hkrpg", BaseUrl = "https://api-takumi.mihoyo.com/event/luna/" },
             (GameBiz.hkrpg, true) => new() { ActId = "e202303301540311", SignGame = "hkrpg", BaseUrl = "https://sg-public-api.hoyolab.com/event/luna/os/" },
 
-            // 绝区零 —— CN 走 act-nap-api 专用主机并带 Origin 头，OS act_id 与官方 HoYoLAB 签到页一致
+            // 绝区零 —— CN/OS 均走 nap 专用活动主机并带 Origin；OS 与 MihoyoBBSTools / SIMNet 等主流工具一致（非 sg-public-api）
             (GameBiz.nap, false) => new() { ActId = "e202406242138391", SignGame = "zzz", BaseUrl = "https://act-nap-api.mihoyo.com/event/luna/zzz/", Origin = "https://act.mihoyo.com" },
-            (GameBiz.nap, true) => new() { ActId = "e202406031448091", SignGame = "zzz", BaseUrl = "https://sg-public-api.hoyolab.com/event/luna/zzz/os/" },
+            (GameBiz.nap, true) => new() { ActId = "e202406031448091", SignGame = "zzz", BaseUrl = "https://sg-act-nap-api.hoyolab.com/event/luna/zzz/os/", Origin = "https://act.hoyolab.com" },
 
             // 崩坏3 —— 走通用 luna(CN) / mani(OS) 接口，仅 act_id 需校正
             (GameBiz.bh3, false) => new() { ActId = "e202306201626331", SignGame = "bh3", BaseUrl = "https://api-takumi.mihoyo.com/event/luna/" },
