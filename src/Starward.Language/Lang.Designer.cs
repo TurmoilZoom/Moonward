@@ -8757,11 +8757,191 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Fetched {0} language pack(s) ({1} items). Select one to save or export. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_FetchSucceeded {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_FetchSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fetch with Game Record Account 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_FetchWithGameRecord {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_FetchWithGameRecord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Clear Stored PAT 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_ClearPat {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_ClearPat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 A PAT is already stored in Windows PasswordVault on this device. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GitHubPatConfigured {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GitHubPatConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Store a GitHub Personal Access Token... 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GitHubPatDialogDescription {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GitHubPatDialogDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 PAT cannot be empty. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GitHubPatEmpty {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GitHubPatEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Stored GitHub PAT has been removed. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GitHubPatCleared {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GitHubPatCleared", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No PAT stored... 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GitHubPatNotConfigured {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GitHubPatNotConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ghp_… or github_pat_… 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GitHubPatPlaceholder {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GitHubPatPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 PAT validation failed and was not kept: {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GitHubPatValidateFailed {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GitHubPatValidateFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 PAT saved and validated (GitHub: {0}). 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_GitHubPatValidated {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_GitHubPatValidated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 GitHub PAT… 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_ManageGitHubPat {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_ManageGitHubPat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Miyoushe 的本地化字符串。
         /// </summary>
         public static string ZZZGachaInfoWindow_Miyoushe {
             get {
                 return ResourceManager.GetString("ZZZGachaInfoWindow_Miyoushe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Publish failed: {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_PublishFailed {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_PublishFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Select one or more language packs to publish. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_PublishNoSelection {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_PublishNoSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Publishing to metadata branch… 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_PublishingMetadata {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_PublishingMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Published {0} file(s) to metadata ({1}). Clients load them via jsDelivr. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_PublishSucceeded {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_PublishSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Publish to metadata Branch 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_PublishToMetadata {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_PublishToMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 GitHub rejected the request (check PAT scopes): {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_PublishUnauthorized {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_PublishUnauthorized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Saved {1} items ({0}) to database. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_SavedToDatabase {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_SavedToDatabase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Save &amp; Validate 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_SavePat {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_SavePat", resourceCulture);
             }
         }
         
@@ -8775,10 +8955,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 This tool is used to update item images in Zenless Zone Zero gacha records.
-        ///Click &quot;Miyoushe&quot; or &quot;HoYoLAB&quot; in the top left corner, log in, and wait for the data to be retrieved. If logging in via HoYoLAB, you also need to click &quot;Fetch Data for All Languages&quot;.
-        ///After retrieving the data, you can save it to the database in any language or export it to a folder.
-        ///You are welcome to submit the exported data to the following repository: 的本地化字符串。
+        ///   查找类似 This tool updates item image data for Zenless Zone Zero gacha records. 的本地化字符串。
         /// </summary>
         public static string ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide {
             get {

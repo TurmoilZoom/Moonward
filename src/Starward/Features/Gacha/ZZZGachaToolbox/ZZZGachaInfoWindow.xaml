@@ -19,6 +19,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
 
@@ -26,6 +27,10 @@
         <StackPanel Margin="8,0,8,0"
                     Orientation="Horizontal"
                     Spacing="8">
+            <!--  优先：复用战绩 Cookie 直接调养成指南接口  -->
+            <Button x:Name="Button_FetchWithGameRecord"
+                    Command="{x:Bind FetchFromGameRecordCommand}"
+                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_FetchWithGameRecord}" />
             <Button x:Name="Button_Miyoushe"
                     Command="{x:Bind NavigateToMiyousheCommand}"
                     Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_Miyoushe}" />
@@ -36,6 +41,10 @@
                     Command="{x:Bind GetAllLanguagesInfoCommand}"
                     Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_FetchDataForAllLanguages}"
                     IsEnabled="False" />
+            <Button x:Name="Button_SelectAll"
+                    Command="{x:Bind SelectAllLanguagesCommand}"
+                    Content="{x:Bind lang:Lang.Common_SelectAll}"
+                    IsEnabled="False" />
             <Button x:Name="Button_SaveToDatabase"
                     Command="{x:Bind SaveToDatabaseCommand}"
                     Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_SaveToDatabase}"
@@ -44,12 +53,28 @@
                     Command="{x:Bind ExportToFolderCommand}"
                     Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_ExportToFolder}"
                     IsEnabled="False" />
+            <!--  维护者：PAT + 提交到 GitHub metadata 分支  -->
+            <Button x:Name="Button_ManagePat"
+                    Command="{x:Bind ManageGitHubPatCommand}"
+                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_ManageGitHubPat}" />
+            <Button x:Name="Button_PublishMetadata"
+                    Command="{x:Bind PublishToMetadataBranchCommand}"
+                    Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_PublishToMetadata}"
+                    IsEnabled="False" />
 
         </StackPanel>
 
 
+        <TextBlock x:Name="TextBlock_Status"
+                   Grid.Row="1"
+                   Margin="12,0,12,0"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="{x:Bind StatusMessage}"
+                   TextWrapping="Wrap" />
+
+
         <GridView x:Name="GridView_Languages"
-                  Grid.Row="1"
+                  Grid.Row="2"
                   Margin="8,0,8,0"
                   ItemsSource="{x:Bind GachaInfoResult}"
                   SelectionChanged="GridView_Languages_SelectionChanged"
@@ -67,15 +92,16 @@
         </GridView>
 
 
-        <StackPanel Grid.Row="2"
+        <StackPanel Grid.Row="3"
                     Margin="40"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Spacing="4">
             <TextBlock Text="{x:Bind lang:Lang.ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide}" TextWrapping="Wrap" />
             <TextBlock TextWrapping="Wrap">
-                <Hyperlink NavigateUri="https://github.com/Scighost/Starward/tree/metadata/v1/zzz" UnderlineStyle="None">
-                    <Run Text="https://github.com/Scighost/Starward/tree/metadata/v1/zzz" />
+                <Hyperlink x:Name="Hyperlink_MetadataRepo"
+                           UnderlineStyle="None">
+                    <Run x:Name="Run_MetadataRepoUrl" />
                 </Hyperlink>
             </TextBlock>
 
@@ -85,7 +111,7 @@
 
 
         <WebView2 x:Name="webview2"
-                  Grid.Row="2"
+                  Grid.Row="3"
                   Visibility="Collapsed" />
 
 

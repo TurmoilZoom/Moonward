@@ -747,7 +747,8 @@ public abstract class GachaLogClient
 
     /// <summary>
     /// 获取绝区零频段记录相关物品信息（角色、音擎、邦布等）。
-    /// 国服中文使用内置静态 JSON；其他语言使用对应语言的静态资源。
+    /// 经 jsDelivr 读取 GitHub <c>metadata</c> 分支上的静态 JSON（见 <see cref="ZZZGachaMetadataPaths"/>）。
+    /// 国服中文优先 <c>nap_cn.zh-cn</c>；其余走 <c>nap_global.{lang}</c>。
     /// </summary>
     /// <param name="gameBiz">nap 相关业务线。</param>
     /// <param name="lang">语言代码。</param>
@@ -756,17 +757,12 @@ public abstract class GachaLogClient
     public async Task<ZZZGachaWiki> GetZZZGachaInfoAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default)
     {
         lang = LanguageUtil.FilterLanguage(lang);
-        ZZZGachaWiki wiki;
-        if (gameBiz.IsChinaServer() && lang is "zh-cn")
-        {
-            const string url = $"https://starward-static.scighost.com/metadata/v1/zzz/ZZZGachaInfo.nap_cn.zh-cn.json";
-            wiki = await CommonGetAsync<ZZZGachaWiki>(url, cancellationToken);
-        }
-        else
-        {
-            string url = $"https://starward-static.scighost.com/metadata/v1/zzz/ZZZGachaInfo.nap_global.{lang}.json";
-            wiki = await CommonGetAsync<ZZZGachaWiki>(url, cancellationToken);
-        }
+        // 与 metadata 分支文件命名一致：ZZZGachaInfo.{biz}.{lang}.json
+        string languageKey = gameBiz.IsChinaServer() && lang is "zh-cn"
+            ? "nap_cn.zh-cn"
+            : $"nap_global.{lang}";
+        string url = ZZZGachaMetadataPaths.GetJsDelivrUrl(languageKey);
+        ZZZGachaWiki wiki = await CommonGetAsync<ZZZGachaWiki>(url, cancellationToken);
         if (string.IsNullOrWhiteSpace(wiki.Language))
         {
             wiki.Language = lang;

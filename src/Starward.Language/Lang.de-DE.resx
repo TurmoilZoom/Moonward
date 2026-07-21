@@ -2088,6 +2088,66 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="ToolboxSetting_DisplayItemImagesInZZZGachaRecordPage" xml:space="preserve">
     <value>Artikelbilder auf der ZZZ-Gacha-Aufzeichnungsseite anzeigen.</value>
   </data>
+  <data name="ZZZGachaInfoWindow_FetchWithGameRecord" xml:space="preserve">
+    <value>Mit Spielbericht-Konto abrufen</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_FetchSucceeded" xml:space="preserve">
+    <value>{0} Sprachpaket(e) ({1} Artikel) abgerufen. Zum Speichern oder Exportieren auswählen.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_SavedToDatabase" xml:space="preserve">
+    <value>{1} Artikel ({0}) in der Datenbank gespeichert.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_ManageGitHubPat" xml:space="preserve">
+    <value>GitHub PAT…</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_PublishToMetadata" xml:space="preserve">
+    <value>Publish to metadata Branch</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GitHubPatPlaceholder" xml:space="preserve">
+    <value>ghp_… or github_pat_…</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GitHubPatConfigured" xml:space="preserve">
+    <value>A PAT is already stored in Windows PasswordVault on this device.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GitHubPatNotConfigured" xml:space="preserve">
+    <value>No PAT stored. Maintainers need a token with contents:write on TurmoilZoom/Starward.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GitHubPatDialogDescription" xml:space="preserve">
+    <value>Store a GitHub Personal Access Token (encrypted via Windows PasswordVault) to publish selected JSON packs to the metadata branch. The token is never written to the app database or logs.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_SavePat" xml:space="preserve">
+    <value>Save &amp; Validate</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_ClearPat" xml:space="preserve">
+    <value>Clear Stored PAT</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GitHubPatEmpty" xml:space="preserve">
+    <value>PAT cannot be empty.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GitHubPatValidated" xml:space="preserve">
+    <value>PAT saved and validated (GitHub: {0}).</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GitHubPatValidateFailed" xml:space="preserve">
+    <value>PAT validation failed and was not kept: {0}</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_GitHubPatCleared" xml:space="preserve">
+    <value>Stored GitHub PAT has been removed.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_PublishNoSelection" xml:space="preserve">
+    <value>Select one or more language packs to publish.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_PublishingMetadata" xml:space="preserve">
+    <value>Publishing to metadata branch…</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_PublishSucceeded" xml:space="preserve">
+    <value>Published {0} file(s) to metadata ({1}). Clients load them via jsDelivr.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_PublishUnauthorized" xml:space="preserve">
+    <value>GitHub rejected the request (check PAT scopes): {0}</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_PublishFailed" xml:space="preserve">
+    <value>Publish failed: {0}</value>
+  </data>
   <data name="ZZZGachaInfoWindow_Miyoushe" xml:space="preserve">
     <value>Miyoushe</value>
   </data>
@@ -2101,10 +2161,11 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>In Ordner exportieren</value>
   </data>
   <data name="ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide" xml:space="preserve">
-    <value>Dieses Tool wird verwendet, um Artikelbilder in Zenless Zone Zero-Gacha-Aufzeichnungen zu aktualisieren.
-Klicken Sie oben links auf "Miyoushe" oder "HoYoLAB", melden Sie sich an und warten Sie, bis die Daten abgerufen werden. Bei der Anmeldung über HoYoLAB müssen Sie auch auf "Daten für alle Sprachen abrufen" klicken.
-Nach dem Abrufen der Daten können Sie diese in einer beliebigen Sprache in der Datenbank speichern oder in einen Ordner exportieren.
-Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository zu übermitteln:</value>
+    <value>Dieses Tool aktualisiert Artikelbilddaten für Zenless Zone Zero-Gacha-Aufzeichnungen.
+Empfohlen: Wenn Sie bereits in der Spielbericht-Toolbox bei Miyoushe/HoYoLAB angemeldet sind, klicken Sie auf „Mit Spielbericht-Konto abrufen“ – dieselbe Cultivate-Tool-API wie auf der Gacha-Seite, ohne erneute Web-Anmeldung. CN → Chinesisch; HoYoLAB → alle Sprachen.
+Fallback: „Miyoushe“ oder „HoYoLAB“ öffnen, auf der Seite anmelden und warten. Bei HoYoLAB ggf. „Daten für alle Sprachen abrufen“.
+Danach Sprachpaket speichern oder exportieren.
+Exportierte Daten gerne an folgendes Repository senden:</value>
   </data>
   <data name="SettingPage_Toolbox" xml:space="preserve">
     <value>Werkzeugkasten</value>

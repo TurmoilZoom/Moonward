@@ -13,6 +13,7 @@ using Starward.Features.Background;
 using Starward.Features.Database;
 using Starward.Features.Gacha;
 using Starward.Features.Gacha.UIGF;
+using Starward.Features.Gacha.ZZZGachaToolbox;
 using Starward.Features.GameInstall;
 using Starward.Features.GameLauncher;
 using Starward.Features.GameRecord;
@@ -78,6 +79,8 @@ public static partial class AppConfig
             sc.AddSingleton<UIGFGachaService>();
             sc.AddSingleton<GenshinBeyondGachaClient>();
             sc.AddSingleton<GenshinBeyondGachaService>();
+            // 维护者：将 ZZZ 抽卡元数据提交到 GitHub metadata 分支（PAT 走 PasswordVault）
+            sc.AddSingleton<ZZZGachaMetadataPublishService>();
 
             sc.AddSingleton<HoyolabClient>();
             sc.AddSingleton<HyperionClient>();

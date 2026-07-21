@@ -5,11 +5,15 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Web.WebView2.Core;
+using Octokit;
 using Starward.Core;
 using Starward.Core.Gacha.ZZZ;
+using Starward.Core.GameRecord;
 using Starward.Features.Database;
+using Starward.Features.GameRecord;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -39,6 +43,12 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
     private readonly HttpClient _httpClient = AppConfig.GetService<HttpClient>();
 
 
+    private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
+
+
+    private readonly ZZZGachaMetadataPublishService _metadataPublishService = AppConfig.GetService<ZZZGachaMetadataPublishService>();
+
+
     private const string Source_cn = "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html";
     private const string Source_global = "https://act.hoyolab.com/zzz/gt/character-builder-h/index.html";
 
@@ -59,6 +69,10 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         SystemBackdrop = new DesktopAcrylicBackdrop();
         AdaptTitleBarButtonColorToActuallTheme();
         SetIcon();
+
+        string browseUrl = ZZZGachaMetadataPaths.GitHubBrowseUrl;
+        Hyperlink_MetadataRepo.NavigateUri = new Uri(browseUrl);
+        Run_MetadataRepoUrl.Text = browseUrl;
     }
 
 
@@ -66,6 +80,8 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
     {
         try
         {
+            RefreshGameRecordFetchAvailability();
+            RefreshPublishButtons();
             await webview2.EnsureCoreWebView2Async();
             coreWebView2 = webview2.CoreWebView2;
             coreWebView2.Profile.PreferredColorScheme = CoreWebView2PreferredColorScheme.Dark;
@@ -113,11 +129,202 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
     public ObservableCollection<string> GachaInfoResult { get; set => SetProperty(ref field, value); } = new();
 
 
+    /// <summary>状态栏文案（进度 / 成功 / 错误提示）。</summary>
+    public string StatusMessage { get; set => SetProperty(ref field, value); } = "";
+
+
+    private bool isFetchingFromGameRecord;
+
+
     private Dictionary<string, List<ZZZGachaInfo>> gachaInfoDict = new();
+
 
     private Dictionary<string, IconInfo> iconInfoDict = new();
 
+
     private Dictionary<string, ItemList> itemListDict = new();
+
+
+
+    /// <summary>
+    /// 根据本地是否已有带 Cookie 的绝区零战绩角色，刷新「用战绩账号拉取」按钮可用性。
+    /// </summary>
+    private void RefreshGameRecordFetchAvailability()
+    {
+        try
+        {
+            bool hasCookie = PickZZZGameRecordRolesWithCookie().Count > 0;
+            Button_FetchWithGameRecord.IsEnabled = hasCookie && !isFetchingFromGameRecord;
+            if (!hasCookie && string.IsNullOrWhiteSpace(StatusMessage))
+            {
+                StatusMessage = Lang.GachaLogPage_PleaseLoginMiyousheAndAddZZZRole;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ZZZGachaInfoWindow: RefreshGameRecordFetchAvailability");
+        }
+    }
+
+
+    /// <summary>
+    /// 选取国服/国际服各至多一个带 Cookie 的绝区零战绩角色（优先上次同步角色）。
+    /// </summary>
+    /// <returns>可用角色列表（可能为空）。</returns>
+    private List<GameRecordRole> PickZZZGameRecordRolesWithCookie()
+    {
+        var result = new List<GameRecordRole>();
+        foreach (GameBiz biz in new[] { GameBiz.nap_cn, GameBiz.nap_global })
+        {
+            GameRecordRole? preferred = _gameRecordService.GetLastSelectGachaSyncRoleOrTheFirstOne(biz);
+            if (preferred is not null && !string.IsNullOrWhiteSpace(preferred.Cookie))
+            {
+                result.Add(preferred);
+                continue;
+            }
+            foreach (GameRecordRole role in _gameRecordService.GetGameRoles(biz))
+            {
+                if (!string.IsNullOrWhiteSpace(role.Cookie))
+                {
+                    result.Add(role);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+
+    /// <summary>
+    /// 使用本地战绩 Cookie 调用养成指南接口（badge → item_list + icon_info），与抽卡页「更新物品图标和语言」同源。
+    /// 国服写 nap_cn.zh-cn；国际服写 nap_global 下全部 UI 语言。
+    /// </summary>
+    [RelayCommand]
+    private async Task FetchFromGameRecordAsync()
+    {
+        if (isFetchingFromGameRecord)
+        {
+            return;
+        }
+
+        try
+        {
+            isFetchingFromGameRecord = true;
+            Button_FetchWithGameRecord.IsEnabled = false;
+
+            List<GameRecordRole> roles = PickZZZGameRecordRolesWithCookie();
+            if (roles.Count == 0)
+            {
+                StatusMessage = Lang.GachaLogPage_PleaseLoginMiyousheAndAddZZZRole;
+                return;
+            }
+
+            int languageCount = 0;
+            int itemCount = 0;
+
+            foreach (GameRecordRole role in roles)
+            {
+                cts.Token.ThrowIfCancellationRequested();
+                bool isHoyolab = role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false;
+                // 目录键与 WebView 抓包路径一致：nap_cn / nap_global
+                string bizKey = isHoyolab ? GameBiz.nap_global : GameBiz.nap_cn;
+                List<string> languages = isHoyolab
+                    ? LanguageUtil.GetAllLanguages()
+                    : ["zh-cn"];
+
+                foreach (string lang in languages)
+                {
+                    cts.Token.ThrowIfCancellationRequested();
+                    StatusMessage = string.Format(Lang.GachaLogPage_FetchingItemInfoLanguage, $"{bizKey}.{lang}");
+
+                    ZZZGachaWiki wiki = await _gameRecordService.GetZZZGachaWikiFromCultivateToolAsync(role, lang, cts.Token).ConfigureAwait(true);
+                    if (wiki.List is null || wiki.List.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    string actualLang = string.IsNullOrWhiteSpace(wiki.Language)
+                        ? LanguageUtil.FilterLanguage(lang)
+                        : LanguageUtil.FilterLanguage(wiki.Language);
+                    string key = $"{bizKey}.{actualLang}";
+                    AddOrUpdateGachaInfoResult(key, wiki.List);
+                    languageCount++;
+                    itemCount = Math.Max(itemCount, wiki.List.Count);
+
+                    // 全语言循环时轻微限流，降低 act 接口风控概率
+                    if (isHoyolab && languages.Count > 1)
+                    {
+                        await Task.Delay(Random.Shared.Next(200, 300), cts.Token).ConfigureAwait(true);
+                    }
+                }
+            }
+
+            if (languageCount == 0)
+            {
+                StatusMessage = Lang.GachaLogPage_UpdateIconsNoItemData;
+            }
+            else
+            {
+                StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_FetchSucceeded, languageCount, itemCount);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            StatusMessage = Lang.GachaLogPage_OperationCanceled;
+        }
+        catch (miHoYoApiException ex) when (IsCultivateToolRiskControl(ex.ReturnCode))
+        {
+            // 10035 等是 act 极验风控，与战绩页「验证账号」无关；可改用网页登录抓包
+            _logger.LogWarning(ex, "ZZZ cultivate tool risk control ({retcode}) in toolbox", ex.ReturnCode);
+            StatusMessage = string.Format(Lang.GachaLogPage_UpdateIconsRiskControl, ex.ReturnCode);
+        }
+        catch (miHoYoApiException ex)
+        {
+            _logger.LogWarning(ex, "Fetch ZZZ gacha info from game record ({retcode})", ex.ReturnCode);
+            StatusMessage = string.IsNullOrWhiteSpace(ex.Message)
+                ? $"retcode={ex.ReturnCode}"
+                : $"{ex.Message} ({ex.ReturnCode})";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Fetch ZZZ gacha info from game record");
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            isFetchingFromGameRecord = false;
+            RefreshGameRecordFetchAvailability();
+        }
+    }
+
+
+    /// <summary>养成/badge 接口极验风控 retcode（与 ZZZGachaService 一致）。</summary>
+    private static bool IsCultivateToolRiskControl(int retcode) => retcode is 10035 or 10041 or 1034 or 5003 or -3503;
+
+
+    /// <summary>
+    /// 写入或覆盖某语言包，并刷新列表 UI（保证在 UI 线程修改 ObservableCollection）。
+    /// </summary>
+    private void AddOrUpdateGachaInfoResult(string key, List<ZZZGachaInfo> list)
+    {
+        void Apply()
+        {
+            gachaInfoDict[key] = list;
+            GachaInfoResult.Remove(key);
+            GachaInfoResult.Add(key);
+            // 列表有数据后启用「全选」
+            Button_SelectAll.IsEnabled = GachaInfoResult.Count > 0;
+        }
+
+        if (DispatcherQueue.HasThreadAccess)
+        {
+            Apply();
+        }
+        else
+        {
+            DispatcherQueue.TryEnqueue(Apply);
+        }
+    }
 
 
 
@@ -146,7 +353,6 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         }
         catch { }
     }
-
 
 
     private async void CoreWebView2_WebResourceResponseReceived(CoreWebView2 sender, CoreWebView2WebResourceResponseReceivedEventArgs args)
@@ -371,9 +577,7 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
                     list.Add(info);
                 }
 
-                gachaInfoDict.TryAdd(key, list);
-                GachaInfoResult.Remove(key);
-                GachaInfoResult.Add(key);
+                AddOrUpdateGachaInfoResult(key, list);
             }
         }
         catch (Exception ex)
@@ -388,15 +592,202 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
     {
         try
         {
-            if (sender is GridView gridView)
-            {
-                Button_SaveToDatabase.IsEnabled = gridView.SelectedItems.Count == 1;
-                Button_ExportFiles.IsEnabled = gridView.SelectedItems.Count > 0;
-            }
+            RefreshPublishButtons();
         }
         catch { }
     }
 
+
+    /// <summary>
+    /// 按选中项与 PAT 状态刷新「全选 / 保存 / 导出 / 提交 metadata」按钮。
+    /// </summary>
+    private void RefreshPublishButtons()
+    {
+        int total = GachaInfoResult?.Count ?? 0;
+        int selected = GridView_Languages.SelectedItems.Count;
+        Button_SelectAll.IsEnabled = total > 0;
+        Button_SaveToDatabase.IsEnabled = selected == 1;
+        Button_ExportFiles.IsEnabled = selected > 0;
+        // 维护者提交：需已存 PAT 且至少选中一个语言包
+        Button_PublishMetadata.IsEnabled = selected > 0 && _metadataPublishService.HasStoredPat && !isPublishingMetadata;
+    }
+
+
+    /// <summary>
+    /// 勾选当前已获取的全部语言包（便于导出 / 提交 metadata）。
+    /// </summary>
+    [RelayCommand]
+    private void SelectAllLanguages()
+    {
+        try
+        {
+            if (GachaInfoResult is null || GachaInfoResult.Count == 0)
+            {
+                return;
+            }
+
+            // Multiple 模式下 ListViewBase.SelectAll 勾选全部项
+            GridView_Languages.SelectAll();
+            RefreshPublishButtons();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ZZZGachaInfoWindow: SelectAllLanguages");
+        }
+    }
+
+
+    private bool isPublishingMetadata;
+
+
+    /// <summary>
+    /// 维护者：配置 / 清除 / 校验 GitHub PAT（PasswordVault 加密存储）。
+    /// </summary>
+    [RelayCommand]
+    private async Task ManageGitHubPatAsync()
+    {
+        try
+        {
+            var passwordBox = new PasswordBox
+            {
+                PlaceholderText = Lang.ZZZGachaInfoWindow_GitHubPatPlaceholder,
+                Width = 360,
+            };
+            var statusText = new TextBlock
+            {
+                TextWrapping = TextWrapping.Wrap,
+                Opacity = 0.8,
+                Text = _metadataPublishService.HasStoredPat
+                    ? Lang.ZZZGachaInfoWindow_GitHubPatConfigured
+                    : Lang.ZZZGachaInfoWindow_GitHubPatNotConfigured,
+            };
+            var panel = new StackPanel { Spacing = 12, Width = 360 };
+            panel.Children.Add(new TextBlock
+            {
+                Text = Lang.ZZZGachaInfoWindow_GitHubPatDialogDescription,
+                TextWrapping = TextWrapping.Wrap,
+            });
+            panel.Children.Add(passwordBox);
+            panel.Children.Add(statusText);
+
+            var dialog = new ContentDialog
+            {
+                Title = Lang.ZZZGachaInfoWindow_ManageGitHubPat,
+                Content = panel,
+                PrimaryButtonText = Lang.ZZZGachaInfoWindow_SavePat,
+                SecondaryButtonText = Lang.ZZZGachaInfoWindow_ClearPat,
+                CloseButtonText = Lang.Common_Cancel,
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.Content.XamlRoot,
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+            if (result is ContentDialogResult.Primary)
+            {
+                string pat = passwordBox.Password?.Trim() ?? "";
+                if (string.IsNullOrWhiteSpace(pat))
+                {
+                    StatusMessage = Lang.ZZZGachaInfoWindow_GitHubPatEmpty;
+                    return;
+                }
+
+                _metadataPublishService.SavePat(pat);
+                // 校验连通性；失败则清除以免留下无效密钥
+                try
+                {
+                    string login = await _metadataPublishService.ValidatePatAsync(cts.Token).ConfigureAwait(true);
+                    StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_GitHubPatValidated, login);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "GitHub PAT validation failed");
+                    _metadataPublishService.ClearPat();
+                    StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_GitHubPatValidateFailed, ex.Message);
+                }
+            }
+            else if (result is ContentDialogResult.Secondary)
+            {
+                _metadataPublishService.ClearPat();
+                StatusMessage = Lang.ZZZGachaInfoWindow_GitHubPatCleared;
+            }
+
+            RefreshPublishButtons();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Manage GitHub PAT");
+            StatusMessage = ex.Message;
+        }
+    }
+
+
+    /// <summary>
+    /// 维护者：将选中的语言包以一次 commit 推送到 GitHub metadata 分支（Octokit + PAT）。
+    /// </summary>
+    [RelayCommand]
+    private async Task PublishToMetadataBranchAsync()
+    {
+        if (isPublishingMetadata)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!_metadataPublishService.HasStoredPat)
+            {
+                StatusMessage = Lang.ZZZGachaInfoWindow_GitHubPatNotConfigured;
+                return;
+            }
+
+            var packages = new Dictionary<string, IReadOnlyList<ZZZGachaInfo>>(StringComparer.Ordinal);
+            foreach (string key in GridView_Languages.SelectedItems.Cast<string>())
+            {
+                if (gachaInfoDict.TryGetValue(key, out List<ZZZGachaInfo>? list) && list is { Count: > 0 })
+                {
+                    packages[key] = list;
+                }
+            }
+
+            if (packages.Count == 0)
+            {
+                StatusMessage = Lang.ZZZGachaInfoWindow_PublishNoSelection;
+                return;
+            }
+
+            isPublishingMetadata = true;
+            RefreshPublishButtons();
+            StatusMessage = Lang.ZZZGachaInfoWindow_PublishingMetadata;
+
+            (string sha, int fileCount) = await _metadataPublishService.PublishAsync(packages, cancellationToken: cts.Token).ConfigureAwait(true);
+            StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_PublishSucceeded, fileCount, sha);
+        }
+        catch (OperationCanceledException)
+        {
+            StatusMessage = Lang.GachaLogPage_OperationCanceled;
+        }
+        catch (AuthorizationException ex)
+        {
+            // PAT 权限或失效；不记录 token
+            _logger.LogWarning(ex, "Publish ZZZ metadata unauthorized");
+            StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_PublishUnauthorized, ex.Message);
+        }
+        catch (ApiException ex)
+        {
+            _logger.LogWarning(ex, "Publish ZZZ metadata API error ({status})", ex.StatusCode);
+            StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_PublishFailed, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Publish ZZZ metadata");
+            StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_PublishFailed, ex.Message);
+        }
+        finally
+        {
+            isPublishingMetadata = false;
+            RefreshPublishButtons();
+        }
+    }
 
 
     [RelayCommand]
@@ -419,12 +810,14 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
                         VALUES (@Id, @Name, @Icon, @Rarity, @ElementType, @Profession);
                         """, list, t);
                     t.Commit();
+                    StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_SavedToDatabase, key, list.Count);
                 }
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Save ZZZGachaInfo to database");
+            StatusMessage = ex.Message;
         }
     }
 
@@ -467,10 +860,9 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         catch (Exception ex)
         {
             _logger.LogError(ex, "Export ZZZGachaInfo to folder");
+            StatusMessage = ex.Message;
         }
     }
 
 
 }
-
-
