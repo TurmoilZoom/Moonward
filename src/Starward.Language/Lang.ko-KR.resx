@@ -287,29 +287,11 @@
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
     <value>미유시에서 모두 동기화</value>
   </data>
-  <data name="GachaLogPage_UpdateItemIconsAndLanguageText" xml:space="preserve">
-    <value>아이템 아이콘 및 언어 텍스트 업데이트</value>
-  </data>
-  <data name="GachaLogPage_UpdatingItemIcons" xml:space="preserve">
-    <value>아이템 아이콘 업데이트 중…</value>
-  </data>
   <data name="GachaLogPage_FetchingItemInfoLanguage" xml:space="preserve">
     <value>아이템 정보 가져오는 중 ({0})…</value>
   </data>
-  <data name="GachaLogPage_UpdateIconsSucceeded" xml:space="preserve">
-    <value>{0}개 아이템 업데이트됨 ({1}개 언어)</value>
-  </data>
   <data name="GachaLogPage_UpdateIconsNoItemData" xml:space="preserve">
     <value>아이템 데이터를 받지 못했습니다. 전적 페이지에서 다시 로그인해 주세요.</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsFallbackToCdn" xml:space="preserve">
-    <value>Cultivate API risk control triggered; falling back to static metadata…</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsSucceededViaCdn" xml:space="preserve">
-    <value>Updated {0} items via fallback metadata (cultivate API was blocked by risk control).</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsRiskControlTitle" xml:space="preserve">
-    <value>Risk control</value>
   </data>
   <data name="GachaLogPage_UpdateIconsRiskControl" xml:space="preserve">
     <value>The cultivate-tool API triggered risk control ({0}). This is unrelated to Game Record verification. Try again later, or use the toolbox “ZZZ Gacha Item Images”.</value>

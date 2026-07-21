@@ -286,29 +286,11 @@
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
     <value>從米遊社同步全部</value>
   </data>
-  <data name="GachaLogPage_UpdateItemIconsAndLanguageText" xml:space="preserve">
-    <value>更新物品圖示同語言文本</value>
-  </data>
-  <data name="GachaLogPage_UpdatingItemIcons" xml:space="preserve">
-    <value>正在更新物品圖示…</value>
-  </data>
   <data name="GachaLogPage_FetchingItemInfoLanguage" xml:space="preserve">
     <value>正在取得物品資訊（{0}）…</value>
   </data>
-  <data name="GachaLogPage_UpdateIconsSucceeded" xml:space="preserve">
-    <value>已更新 {0} 個物品（{1} 種語言）</value>
-  </data>
   <data name="GachaLogPage_UpdateIconsNoItemData" xml:space="preserve">
     <value>未取得物品資料，請到遊戲戰績頁重新登入。</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsFallbackToCdn" xml:space="preserve">
-    <value>Cultivate API risk control triggered; falling back to static metadata…</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsSucceededViaCdn" xml:space="preserve">
-    <value>Updated {0} items via fallback metadata (cultivate API was blocked by risk control).</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsRiskControlTitle" xml:space="preserve">
-    <value>Risk control</value>
   </data>
   <data name="GachaLogPage_UpdateIconsRiskControl" xml:space="preserve">
     <value>The cultivate-tool API triggered risk control ({0}). This is unrelated to Game Record verification. Try again later, or use the toolbox “ZZZ Gacha Item Images”.</value>

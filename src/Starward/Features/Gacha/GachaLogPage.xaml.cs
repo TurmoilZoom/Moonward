@@ -78,7 +78,7 @@ public sealed partial class GachaLogPage : PageBase
     /// <para><b>副作用：</b>设置 <see cref="GachaTypeText"/> 文本；根据游戏类型注入对应 <see cref="_gachaLogService"/>
     /// （GenshinGachaService / StarRailGachaService / ZZZGachaService）、启用对应物品统计视图标志位、
     /// 设置表情图标；对原神/绝区零国服（含 B 服）显示米游社同步、绝区零国际服显示 HoYoLAB 同步；
-    /// 绝区零在设置菜单中显示「更新物品图标和语言文本」；关闭国际服的云游戏入口。
+    /// 关闭国际服的云游戏入口。
     /// 星铁不提供米游社同步（genAuthKey 端到端不可用）。</para>
     /// </summary>
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -110,7 +110,6 @@ public sealed partial class GachaLogPage : PageBase
             _gachaLogService = AppConfig.GetService<ZZZGachaService>();
             Image_Emoji.Source = new BitmapImage(AppConfig.EmojiBangboo);
             MenuFlyoutItem_CloudGame.Visibility = Visibility.Collapsed;
-            Button_UpdateIconsFromGameRecord.Visibility = Visibility.Visible;
             if (CurrentGameBiz.Value is GameBiz.nap_cn or GameBiz.nap_bilibili)
             {
                 MenuFlyoutItem_SyncFromMiyoushe.Visibility = Visibility.Visible;
@@ -1193,155 +1192,6 @@ public sealed partial class GachaLogPage : PageBase
                 DismissProgressInfoBar(progressInfoBar);
             }
         }
-    }
-
-
-    /// <summary>
-    /// 使用任意已登录的绝区零战绩角色，调用养成指南 icon_info + item_list，更新本地物品图标与多语言名称。
-    /// </summary>
-    [RelayCommand]
-    private async Task UpdateIconsFromGameRecordAsync()
-    {
-        InfoBar? progressInfoBar = null;
-        bool keepProgressInfoBar = false;
-        try
-        {
-            if (CurrentGameBiz.Game != GameBiz.nap || _gachaLogService is not ZZZGachaService zzzGachaService)
-            {
-                return;
-            }
-
-            GameRecordRole? role = PickAnyZZZGameRecordRole();
-            if (role is null)
-            {
-                InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_PleaseLoginMiyousheAndAddZZZRole);
-                WeakReferenceMessenger.Default.Send(new MainViewNavigateMessage(typeof(GameRecordPage)));
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(role.Cookie))
-            {
-                InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_CurrentAccountMissingCookiePleaseReloginMiyoushe);
-                return;
-            }
-
-            var cancelSource = new CancellationTokenSource();
-            var button = new Button
-            {
-                Content = Lang.Common_Cancel,
-                HorizontalAlignment = HorizontalAlignment.Right,
-            };
-            var infoBar = new InfoBar
-            {
-                Severity = InfoBarSeverity.Informational,
-                Background = Application.Current.Resources["CustomAcrylicBrush"] as Brush,
-                ActionButton = button,
-                Message = Lang.GachaLogPage_UpdatingItemIcons,
-            };
-            button.Click += (_, _) =>
-            {
-                cancelSource.Cancel();
-                infoBar.Message = Lang.GachaLogPage_OperationCanceled;
-                infoBar.ActionButton = null;
-            };
-            progressInfoBar = infoBar;
-            InAppToast.MainWindow?.Show(infoBar);
-            IProgress<string> progress = new Progress<string>(str => infoBar.Message = str);
-
-            (IReadOnlyList<string> languages, int itemCount, bool usedFallback) = await zzzGachaService.UpdateGachaInfoFromGameRecordAsync(
-                role,
-                CurrentLanguage,
-                progress,
-                cancelSource.Token);
-
-            // 用当前 UI 语言名称回写本地记录，使列表立即显示新语言
-            await zzzGachaService.ApplyGachaItemNamesAsync(LanguageUtil.FilterLanguage(CurrentLanguage), cancellationToken: cancelSource.Token);
-
-            infoBar.Severity = usedFallback ? InfoBarSeverity.Warning : InfoBarSeverity.Success;
-            infoBar.ActionButton = null;
-            infoBar.Message = usedFallback
-                ? string.Format(Lang.GachaLogPage_UpdateIconsSucceededViaCdn, itemCount)
-                : string.Format(Lang.GachaLogPage_UpdateIconsSucceeded, itemCount, languages.Count);
-            keepProgressInfoBar = true;
-
-            if (SelectUid > 0)
-            {
-                UpdateGachaTypeStats(SelectUid);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Update ZZZ gacha icons from game record canceled");
-            MarkProgressInfoBarCanceled(progressInfoBar);
-            keepProgressInfoBar = true;
-        }
-        catch (miHoYoApiException ex)
-        {
-            _logger.LogWarning(ex, "Update ZZZ gacha icons from game record error ({retcode})", ex.ReturnCode);
-            // 10035 等是养成接口极验，与战绩「验证账号」无关；勿引导打开战绩页
-            if (ex.ReturnCode is 10035 or 10041 or 1034 or 5003 or -3503)
-            {
-                InAppToast.MainWindow?.Warning(Lang.GachaLogPage_UpdateIconsRiskControlTitle, string.Format(Lang.GachaLogPage_UpdateIconsRiskControl, ex.ReturnCode));
-            }
-            else
-            {
-                GameRecordPage.HandleMiHoYoApiException(ex, CurrentGameBiz);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Update ZZZ gacha icons from game record");
-            InAppToast.MainWindow?.Error(ex);
-        }
-        finally
-        {
-            if (!keepProgressInfoBar)
-            {
-                DismissProgressInfoBar(progressInfoBar);
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// 选取任意一个已登录的绝区零战绩角色：优先当前区服上次同步角色，否则跨国服/国际服取第一个有 Cookie 的角色。
-    /// </summary>
-    /// <returns>可用角色；无任何角色时为 null。</returns>
-    private GameRecordRole? PickAnyZZZGameRecordRole()
-    {
-        // B 服角色在米游社绑定表中仍记为 nap_cn
-        GameBiz preferredBiz = CurrentGameBiz.Value switch
-        {
-            GameBiz.nap_bilibili => GameBiz.nap_cn,
-            _ => CurrentGameBiz,
-        };
-
-        GameRecordRole? preferred = _gameRecordService.GetLastSelectGachaSyncRoleOrTheFirstOne(preferredBiz);
-        if (preferred is not null && !string.IsNullOrWhiteSpace(preferred.Cookie))
-        {
-            return preferred;
-        }
-
-        foreach (GameBiz biz in new[] { GameBiz.nap_cn, GameBiz.nap_global })
-        {
-            if (biz == preferredBiz)
-            {
-                continue;
-            }
-            GameRecordRole? role = _gameRecordService.GetLastSelectGachaSyncRoleOrTheFirstOne(biz);
-            if (role is not null && !string.IsNullOrWhiteSpace(role.Cookie))
-            {
-                return role;
-            }
-            foreach (GameRecordRole r in _gameRecordService.GetGameRoles(biz))
-            {
-                if (!string.IsNullOrWhiteSpace(r.Cookie))
-                {
-                    return r;
-                }
-            }
-        }
-
-        return preferred;
     }
 
 

@@ -204,13 +204,6 @@
                             <!--  分割线  -->
                             <MenuFlyoutSeparator />
 
-                            <!--  绝区零：养成指南更新物品图标与多语言名称  -->
-                            <Button x:Name="Button_UpdateIconsFromGameRecord"
-                                    HorizontalAlignment="Stretch"
-                                    Command="{x:Bind UpdateIconsFromGameRecordCommand}"
-                                    Content="{x:Bind lang:Lang.GachaLogPage_UpdateItemIconsAndLanguageText}"
-                                    Visibility="Collapsed" />
-
                             <!--  导入导出  -->
                             <Button HorizontalAlignment="Stretch" Content="{x:Bind lang:Lang.GachaLogPage_ImportAndExport}">
                                 <Button.Flyout>

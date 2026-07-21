@@ -346,29 +346,11 @@
   <data name="GachaLogPage_SyncFromMiyousheAll" xml:space="preserve">
     <value>从米游社同步全部</value>
   </data>
-  <data name="GachaLogPage_UpdateItemIconsAndLanguageText" xml:space="preserve">
-    <value>更新物品图标和语言文本</value>
-  </data>
-  <data name="GachaLogPage_UpdatingItemIcons" xml:space="preserve">
-    <value>正在更新物品图标…</value>
-  </data>
   <data name="GachaLogPage_FetchingItemInfoLanguage" xml:space="preserve">
     <value>正在获取物品信息（{0}）…</value>
   </data>
-  <data name="GachaLogPage_UpdateIconsSucceeded" xml:space="preserve">
-    <value>已更新 {0} 个物品（{1} 种语言）</value>
-  </data>
   <data name="GachaLogPage_UpdateIconsNoItemData" xml:space="preserve">
     <value>未获取到物品数据，请到游戏战绩页重新登录。</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsFallbackToCdn" xml:space="preserve">
-    <value>养成接口触发风控，改用备用元数据…</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsSucceededViaCdn" xml:space="preserve">
-    <value>已通过备用元数据更新 {0} 个物品（养成接口被风控拦截，与战绩验证无关）。</value>
-  </data>
-  <data name="GachaLogPage_UpdateIconsRiskControlTitle" xml:space="preserve">
-    <value>接口风控</value>
   </data>
   <data name="GachaLogPage_UpdateIconsRiskControl" xml:space="preserve">
     <value>养成指南接口触发风控（{0}），与战绩页账号验证无关。请稍后再试，或使用工具箱「绝区零抽卡物品图片」。</value>

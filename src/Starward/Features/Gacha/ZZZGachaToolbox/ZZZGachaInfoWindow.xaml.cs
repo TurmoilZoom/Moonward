@@ -196,7 +196,7 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
 
 
     /// <summary>
-    /// 使用本地战绩 Cookie 调用养成指南接口（badge → item_list + icon_info），与抽卡页「更新物品图标和语言」同源。
+    /// 使用本地战绩 Cookie 调用养成指南接口（badge → item_list + icon_info）。
     /// 国服写 nap_cn.zh-cn；国际服写 nap_global 下全部 UI 语言。
     /// </summary>
     [RelayCommand]
