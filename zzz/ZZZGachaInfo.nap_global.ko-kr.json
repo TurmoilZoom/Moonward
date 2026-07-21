@@ -1,0 +1,1522 @@
+{
+  "retcode": 0,
+  "message": "",
+  "data": {
+    "game": "nap",
+    "lang": "ko-kr",
+    "list": [
+      {
+        "id": 1011,
+        "name": "엔비",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1011.png",
+        "rarity": 3,
+        "element_type": 203,
+        "profession": 2
+      },
+      {
+        "id": 1021,
+        "name": "네코마타",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1021.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 1
+      },
+      {
+        "id": 1031,
+        "name": "니콜",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1031.png",
+        "rarity": 3,
+        "element_type": 205,
+        "profession": 4
+      },
+      {
+        "id": 1041,
+        "name": "「11호」",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1041.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 1
+      },
+      {
+        "id": 1051,
+        "name": "이드하리",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1051.png",
+        "rarity": 4,
+        "element_type": 202,
+        "profession": 6
+      },
+      {
+        "id": 1061,
+        "name": "코린",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1061.png",
+        "rarity": 3,
+        "element_type": 200,
+        "profession": 1
+      },
+      {
+        "id": 1071,
+        "name": "카이사르",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1071.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 5
+      },
+      {
+        "id": 1081,
+        "name": "빌리",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1081.png",
+        "rarity": 3,
+        "element_type": 200,
+        "profession": 1
+      },
+      {
+        "id": 1091,
+        "name": "미야비",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1091.png",
+        "rarity": 4,
+        "element_type": 202,
+        "profession": 3
+      },
+      {
+        "id": 1101,
+        "name": "콜레다",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1101.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 2
+      },
+      {
+        "id": 1111,
+        "name": "앤톤",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1111.png",
+        "rarity": 3,
+        "element_type": 203,
+        "profession": 1
+      },
+      {
+        "id": 1121,
+        "name": "벤",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1121.png",
+        "rarity": 3,
+        "element_type": 201,
+        "profession": 5
+      },
+      {
+        "id": 1131,
+        "name": "소우카쿠",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1131.png",
+        "rarity": 3,
+        "element_type": 202,
+        "profession": 4
+      },
+      {
+        "id": 1141,
+        "name": "리카온",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1141.png",
+        "rarity": 4,
+        "element_type": 202,
+        "profession": 2
+      },
+      {
+        "id": 1151,
+        "name": "루시",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1151.png",
+        "rarity": 3,
+        "element_type": 201,
+        "profession": 4
+      },
+      {
+        "id": 1161,
+        "name": "라이터",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1161.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 2
+      },
+      {
+        "id": 1171,
+        "name": "버니스",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1171.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 3
+      },
+      {
+        "id": 1181,
+        "name": "그레이스",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1181.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 3
+      },
+      {
+        "id": 1191,
+        "name": "엘렌",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1191.png",
+        "rarity": 4,
+        "element_type": 202,
+        "profession": 1
+      },
+      {
+        "id": 1201,
+        "name": "하루마사",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1201.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 1
+      },
+      {
+        "id": 1211,
+        "name": "리나",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1211.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 4
+      },
+      {
+        "id": 1221,
+        "name": "야나기",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1221.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 3
+      },
+      {
+        "id": 1241,
+        "name": "주연",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1241.png",
+        "rarity": 4,
+        "element_type": 205,
+        "profession": 1
+      },
+      {
+        "id": 1251,
+        "name": "청의",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1251.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 2
+      },
+      {
+        "id": 1261,
+        "name": "제인",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1261.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 3
+      },
+      {
+        "id": 1271,
+        "name": "세스",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1271.png",
+        "rarity": 3,
+        "element_type": 203,
+        "profession": 5
+      },
+      {
+        "id": 1281,
+        "name": "파이퍼",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1281.png",
+        "rarity": 3,
+        "element_type": 200,
+        "profession": 3
+      },
+      {
+        "id": 1291,
+        "name": "휴고",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1291.png",
+        "rarity": 4,
+        "element_type": 202,
+        "profession": 1
+      },
+      {
+        "id": 1301,
+        "name": "오피&「도깨비불」",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1301.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 1
+      },
+      {
+        "id": 1311,
+        "name": "아스트라",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1311.png",
+        "rarity": 4,
+        "element_type": 205,
+        "profession": 4
+      },
+      {
+        "id": 1321,
+        "name": "이블린",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1321.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 1
+      },
+      {
+        "id": 1331,
+        "name": "비비안",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1331.png",
+        "rarity": 4,
+        "element_type": 205,
+        "profession": 3
+      },
+      {
+        "id": 1341,
+        "name": "자오",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1341.png",
+        "rarity": 4,
+        "element_type": 202,
+        "profession": 5
+      },
+      {
+        "id": 1351,
+        "name": "펄크라",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1351.png",
+        "rarity": 3,
+        "element_type": 200,
+        "profession": 2
+      },
+      {
+        "id": 1361,
+        "name": "「트리거」",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1361.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 2
+      },
+      {
+        "id": 1371,
+        "name": "의현",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1371.png",
+        "rarity": 4,
+        "element_type": 205,
+        "profession": 6
+      },
+      {
+        "id": 1381,
+        "name": "0호·엔비",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1381.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 1
+      },
+      {
+        "id": 1391,
+        "name": "귤복복",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1391.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 2
+      },
+      {
+        "id": 1401,
+        "name": "앨리스",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1401.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 3
+      },
+      {
+        "id": 1411,
+        "name": "유즈하",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1411.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 4
+      },
+      {
+        "id": 1421,
+        "name": "반인호",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1421.png",
+        "rarity": 3,
+        "element_type": 200,
+        "profession": 5
+      },
+      {
+        "id": 1431,
+        "name": "엽빛나",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1431.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 1
+      },
+      {
+        "id": 1441,
+        "name": "마나토",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1441.png",
+        "rarity": 3,
+        "element_type": 201,
+        "profession": 6
+      },
+      {
+        "id": 1451,
+        "name": "루시아",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1451.png",
+        "rarity": 4,
+        "element_type": 205,
+        "profession": 4
+      },
+      {
+        "id": 1461,
+        "name": "「시드」",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1461.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 1
+      },
+      {
+        "id": 1471,
+        "name": "반악",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1471.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 6
+      },
+      {
+        "id": 1481,
+        "name": "다이아린",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1481.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 2
+      },
+      {
+        "id": 1491,
+        "name": "수나",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1491.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 4
+      },
+      {
+        "id": 1501,
+        "name": "아리아",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1501.png",
+        "rarity": 4,
+        "element_type": 205,
+        "profession": 3
+      },
+      {
+        "id": 1511,
+        "name": "남궁우",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1511.png",
+        "rarity": 4,
+        "element_type": 205,
+        "profession": 2
+      },
+      {
+        "id": 1521,
+        "name": "시시아",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1521.png",
+        "rarity": 4,
+        "element_type": 203,
+        "profession": 1
+      },
+      {
+        "id": 1531,
+        "name": "스타라이트·빌리",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1531.png",
+        "rarity": 4,
+        "element_type": 200,
+        "profession": 6
+      },
+      {
+        "id": 1541,
+        "name": "프로미아",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1541.png",
+        "rarity": 4,
+        "element_type": 202,
+        "profession": 3
+      },
+      {
+        "id": 1551,
+        "name": "피로이스",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1551.png",
+        "rarity": 4,
+        "element_type": 205,
+        "profession": 1
+      },
+      {
+        "id": 1561,
+        "name": "벨리나",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1561.png",
+        "rarity": 4,
+        "element_type": 204,
+        "profession": 3
+      },
+      {
+        "id": 1571,
+        "name": "노르마",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1571.png",
+        "rarity": 4,
+        "element_type": 201,
+        "profession": 2
+      },
+      {
+        "id": 12001,
+        "name": "「루나」-보름달",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c6d0db2311871334ae4f90c2673b2c53.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 12002,
+        "name": "「루나」-그믐달",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/4b5ecaeed5fdcf3554c79d17177b1474.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 12003,
+        "name": "「루나」-초승달",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/ad483ed6e47941367982c3aa23a25b22.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 12004,
+        "name": "「잔향」-Ⅰ형",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/8eb53629bc5e7a54b757dec3fd6fb7e5.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 12005,
+        "name": "「잔향」-Ⅱ형",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/3cb7062ad15ea0b0a29980db83c1df15.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 12006,
+        "name": "「잔향」-Ⅲ형",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/61407aefea4623d91b12b316c0d77618.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 12007,
+        "name": "「급류」-총",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/ec7170f42824d6b5d605e1b26ab2099d.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 12008,
+        "name": "「급류」-화살",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/f13f93b3f18807975d9d54b1a7325816.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 12009,
+        "name": "「급류」-도끼",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/0bd08b7f0c1eabf7bf351646615ff815.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 12010,
+        "name": "「자기 폭풍」-알파",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/b78eeed1543b2d32f07525722b1f08fa.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 12011,
+        "name": "「자기 폭풍」-브라보",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/11cdb3f9e4d261056d5657ab0c7cd481.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 12012,
+        "name": "「자기 폭풍」-찰리",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/dc2145eeccc28bb4dc8b7a619d4d4564.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 12013,
+        "name": "「아이덴티티」-베이스",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/f5b55bdeb538c0548c1e2fd0966cf24f.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 12014,
+        "name": "「아이덴티티」-인플렉션",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/0f45beea16214846753e4b1d4dc39e8e.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 12015,
+        "name": "「잿더미」-코발트블루",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/def8ec9209613d74cdd0a09e86f2576a.png",
+        "rarity": 2,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 13001,
+        "name": "거리의 슈퍼스타",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/b9f4d24911a7c28f38b642e21980380e.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 13002,
+        "name": "시간의 파편",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/1116df5f1075a0a9834dd18a7eaf5f74.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 13003,
+        "name": "우림의 식객",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/8da3261ca8f26fb8be466cc54ba519cf.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 13004,
+        "name": "별빛 엔진",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/759efcba53f41128bc89893e70afdbc9.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 13005,
+        "name": "스팀오븐",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/49c781d76550d9924548f3e7df03e655.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 13006,
+        "name": "귀중한 화석 코어",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/2eb9bc279913baa75024e21423d5a6a7.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 13007,
+        "name": "오리지널 변신 아이템",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/002487ce3ed1e95b70296cd6e3537fba.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 13008,
+        "name": "쌍둥이의 눈물",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/ba05def7b27bacbc63f372d4ba900b24.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 13009,
+        "name": "감전 립글로스",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/47c4a006056debb236137a26c4986b72.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 13010,
+        "name": "버니 밴드",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/d117dcd4aa9beed93a9b36f04948cf61.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 13011,
+        "name": "봄날의 포옹",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/8c429b9a8f8acd1a17657dc309e87210.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 13012,
+        "name": "기변의 큐브",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/4f595df919888b130172b793d4f44907.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 13013,
+        "name": "도금된 화신풍",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/b82b889795ae104867c81de01d42623f.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 13014,
+        "name": "일렉트로 워크",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c4f6fef4c586f59b64a235434ea88a88.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 13015,
+        "name": "열망의 악센트",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/597bca191fbecfff20b516ed41a0e7a5.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 13016,
+        "name": "조명을 새기는 칼",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/7728959ceb9bfe49e246751fba0b0875.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 13018,
+        "name": "둥둥 메아리",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/68548a96cd293a3ef1fd63d06f1da60b.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 13019,
+        "name": "푸른 물결의 솥",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/f5f63b3d3ee9d49bf79d7ae22d1ebf1f.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 13020,
+        "name": "들끓는 가마솥",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/673dc8c7dce9255e7f16ab483f1763f7.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 13101,
+        "name": "데마라 배터리 Ⅱ형",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/9f0bbb8eb444996834800de861c601ec.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 13103,
+        "name": "보물함",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c27b83af83fa4233dd4a42c416c2a0b5.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 13106,
+        "name": "하우스키퍼",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/557b1ce1c311e5ef4a34d6697f83f0fe.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 13108,
+        "name": "별빛 엔진 레플리카",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/7399a2af3ed2bdf31edee2846416e627.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 13111,
+        "name": "굴착기-붉은 축",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/a7efa5a31a7da0850d4abd43c2ddc7e2.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 13112,
+        "name": "빅 실린더",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/e58831afa7216ebd12c1dd787972bd51.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 13113,
+        "name": "수줍은 악마",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/215481f80cd397cccc50079f429c1caf.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 13115,
+        "name": "호전적인 꽝꽝이",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/04020e10c7946fb0bbadb269dff09414.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 13127,
+        "name": "평화 수호자-특화형",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/f7e11c7e449b310bdf94b58efbf87b24.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 13128,
+        "name": "뛰뛰빵빵",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/6db0817f1652d6846e4fc4a3410dcbe9.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 13135,
+        "name": "커터칼",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/f26ee5dd4810447ec9e1b72e480df4c6.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 13142,
+        "name": "진괘를 담은 함",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/44066478e0e8edac4a28ad995a961243.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 13144,
+        "name": "어스름한 밤의 화염",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/fdd67c970008a15a81aecdb089e88c3f.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 14001,
+        "name": "캐논 로터",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/ceeb7c2fad633b3fd527b6a7478bc097.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14002,
+        "name": "내 맘대로 게임 볼",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/3b512d074529ebc940ecd9f791874e7d.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 14003,
+        "name": "리볼버 로터",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/956f31c714b437561ad0a637624057d1.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14102,
+        "name": "스틸 쿠션",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/1cf312cb827c33c0a51d29ffa61bc14e.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14104,
+        "name": "유황석",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/44361cf31e8b38b435fc74d041e4a3b5.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14105,
+        "name": "크라켄의 요람",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/ef00d1e5cacf829b5bd38338bd67086b.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 14107,
+        "name": "저돌적인 송곳니",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/a797c40a8049d9a2b95fb15e98beea75.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 14109,
+        "name": "싸락눈 내린 별각",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/363e1d0448b23f318b0fa75b8e079c46.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14110,
+        "name": "헬파이어 기어",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/0207155d46f06263f7a354ba39afed94.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14114,
+        "name": "구속된 자",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/dd18cf438b6c892c0787e822c1fbf71b.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14116,
+        "name": "화염의 월계관",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/de669b18493ab4dd432443e60cd32d57.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14117,
+        "name": "타오르는 셰이커",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/93615b7ef58b675e138f7e0fb9e1fd20.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14118,
+        "name": "감입 컴파일러",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/a4b73ad205e1dfdf050ad43bc2a6051f.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14119,
+        "name": "심해 방문객",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/e2043267cd03d64dfbf295e7f45d7ba4.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14120,
+        "name": "잔심의 청낭",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/fd471528eed023836341d71fa651161b.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14121,
+        "name": "흐느끼는 요람",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/ac280dd2c70c20b5932426d0b83ab627.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 14122,
+        "name": "시류의 현자",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/d6365ce166241987e63e4ad2266b8fcc.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14124,
+        "name": "서프레서 Ⅵ형",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/2b69d40f2b4e819135fc0a64eeef97d3.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14125,
+        "name": "맑은 옥주전자",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/e3e21e3c2b39ecdbeea4f9fa1fef96a0.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14126,
+        "name": "예리한 집게칼",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/9897b935440038af55629804b50f5029.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14129,
+        "name": "천변하는 태양의 몰락",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c0ae5e67f52723e277b4309801d9a2ae.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14130,
+        "name": "소란한 총성과 화염",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/488f30b0a4ff99204891bdbbd7a580d5.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14131,
+        "name": "우아한 베니티백",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/d42c0da1d44181fe8f16211efd8a7343.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 14132,
+        "name": "심금을 울리는 야상곡",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/df42d2a22d29e1c15ffec3b813c6b4bc.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14133,
+        "name": "별빛 꿈을 누비는 새",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/357b7ab9b3f235d7277c35e8a19f1587.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14134,
+        "name": "당도 50% 눈토끼",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/fe25058f671647a0d51f4bf734f0479c.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 5
+      },
+      {
+        "id": 14136,
+        "name": "탐혼의 눈동자",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c8fb98cdd0b060e13bddad18357dfbb9.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14137,
+        "name": "청명의 보금자리",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/7d48e40c7eab153cdd06c70bfa780de0.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 14138,
+        "name": "순결한 희생",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/d462751ad451e58828fbb7173eba9d05.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14139,
+        "name": "복을 뿜는 맹호",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/472c64bfa2e8a46a062799cf3465bd7e.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14140,
+        "name": "완벽하게 단조된 별",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c3ffec48c6b7dcad59ad6831e3f01b97.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14141,
+        "name": "너구리의 7단 변신",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/3d8b32c23168ba859c13f33e28760818.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 14143,
+        "name": "구름을 헤친 빛",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/757e1a783e50121ee1e3ecad682a0ad0.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14145,
+        "name": "꿈을 빚는 용광로의 노래",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/eaa701e17096b58d9eafa006a8f094d6.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 14146,
+        "name": "기계 심장에 내린 씨앗",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/e9a9a6fcbcad7508ddefb122a972fc85.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14147,
+        "name": "성난 눈의 금강",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/4316c2e998b90e74b92b905583417ead.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 14148,
+        "name": "지난밤의 전화",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c6558434af0517c061934cf5a15da726.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14149,
+        "name": "사유로 빚은 노래",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/594629daf152d24a71cb398ede0289be.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 4
+      },
+      {
+        "id": 14150,
+        "name": "껍데기 속 영혼",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/2c8c0370a8e0f3d4b1a6496acd2b78e1.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14151,
+        "name": "네온사인 망상",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/a0a8e8e543ca896a19264d075c259be4.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 14152,
+        "name": "추적하는 송곳니",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/623031e836f4d89534b898216ecc0386.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14153,
+        "name": "별빛 기사의 가면",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/83d9cb7808b7ce048c63e583a911b2f4.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 6
+      },
+      {
+        "id": 14154,
+        "name": "삭월에 끊어지는 서리",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/162e857b850656bbdc15f5c6fd71ee9a.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14155,
+        "name": "태양의 유체",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/ab93eb95585186d3b527640148595935.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
+        "id": 14156,
+        "name": "영롱한 금빛 마음",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/dee0045b879010bc0c2ad79f29b4a221.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 3
+      },
+      {
+        "id": 14157,
+        "name": "수석 조수",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/490ba6661ba61af8b25a20569c476935.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 2
+      },
+      {
+        "id": 53001,
+        "name": "펭귄부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/14fce7609970d528f699f9ddd39b1b8e.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53002,
+        "name": "럭키부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/f4c83913b362b8749e3f825605760850.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53003,
+        "name": "탐험부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c5a5ebe61deb7758f4b515f59e1aa4de.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53004,
+        "name": "스모부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/73482f1dea9a53da09f8c3ba2e65b90a.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53005,
+        "name": "종이부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/b0be1eb902d19a33eac713c1b3a8506c.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53006,
+        "name": "봉투부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/9e98538dce840b772c8703b6f385b0cc.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53007,
+        "name": "울보부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/1c8d81ec52d1ac4b4aefc1e03881e9af.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53008,
+        "name": "아보카부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/387b0efea6d6445cfff6be8c0da081a3.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53009,
+        "name": "과녁부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/cb6f85a5d6977814c2b4e02a6448188f.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53010,
+        "name": "찌릿부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c9fd0284a0b0ad172b7e90f6a596c7e9.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53011,
+        "name": "자석부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/0d3b039fa1f9c1d5189fdb39ba0a8b8e.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53012,
+        "name": "압력부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/aa92dfec3ad6aa637f539a34b0a6ccd2.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53013,
+        "name": "불량부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/477a9dd24a798609f23cbccae25ec5ab.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53014,
+        "name": "야근부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/3d392df9562b22205c3690f1dcd7610e.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53015,
+        "name": "격투부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/aee08fa422437035a3f91f3d1270aab1.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53016,
+        "name": "엑스칼리부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/7880222f7eab190f4e06239c3f86abb5.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53017,
+        "name": "기사부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/e2c860c0380a203b3f1106a7e3e9e9ac.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53019,
+        "name": "블록부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/4ad612578c00c6117d51d21fad46a43c.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 53021,
+        "name": "유령부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/c28947b785fe621bf32a773eca2a26bb.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54001,
+        "name": "샤크부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/de7b457157f76481a78de26516384c33.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54002,
+        "name": "세이프티",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/7e351daaedcd8d78d132bdda7bf6a59b.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54003,
+        "name": "데빌부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/b2674e9933f44dda8e251d59455af77f.png",
+        "rarity": 3,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54004,
+        "name": "버틀러",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/d0931e00b2dbd5eebe7155a263a897b6.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54005,
+        "name": "에밀리온",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/f9bb41b3cbc1c245f33f419f5ea9f855.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54006,
+        "name": "날쌘부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/45a64ec8210d55b73364c6db573d3e50.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54008,
+        "name": "플러그부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/fea7608b13a66ed963b70ba6c99826cd.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54009,
+        "name": "공명부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/fa2704f0921e7c3fec84a454fd604ff4.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54010,
+        "name": "팬팬",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/92cfd828e3e9aca149e883b4d00da9ee.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54011,
+        "name": "레드모쿠스",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/78cd90d49f77188db111f68a7e8e0394.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54012,
+        "name": "최 순찰대원",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/4dd3d7d51d104d2200e050fca8280473.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54013,
+        "name": "리볼버부",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/6b0ec8b4d84d249cf634350d14f62813.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54014,
+        "name": "걸리버 요원",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/ae85a5e69d3b440f24a88534b64c18fb.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54015,
+        "name": "찰칵이",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/1e6c354d63affdd1e9c65949985eff7f.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54016,
+        "name": "로빈",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/22812b0d25954b22477d03847d614fe5.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54017,
+        "name": "사야",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/2ae24215899637e3ad679595a3caaf43.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54018,
+        "name": "에스메 양",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/0119c4ebc1cd75120e032af1bb60b85e.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54019,
+        "name": "「머큐리」",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/08646ba6dcc91544f7e247361c6a1a74.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54020,
+        "name": "비르크블리크",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/0c7d8d8bfc8202b0e99691bea5d03a9f.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54021,
+        "name": "싹싹",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/7d95f4f7097bf282b447f4296461760e.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      },
+      {
+        "id": 54022,
+        "name": "울트라 제이크",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u7f11d/a5be98906126df963169caa343656c66.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 0
+      }
+    ]
+  }
+}
