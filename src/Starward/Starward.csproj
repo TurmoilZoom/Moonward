@@ -82,22 +82,11 @@
 		<Content Update="Assets\**">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
-		<!--  本地月兔 Logo，覆盖 Starward.Assets 包内 Assets/logo.png  -->
-		<Content Include="Assets\logo.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<Link>Assets\logo.png</Link>
-		</Content>
-		<!--  签到图标、游戏快捷方式 .ico 等本地静态资源，输出到 static\  -->
+		<!--  签到图标、本地 Logo、游戏快捷方式 .ico 等，输出到 static\  -->
 		<Content Include="static\**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
-	<!--  确保输出目录使用本地 logo.png（后于 NuGet contentFiles 拷贝）  -->
-	<Target Name="OverridePackageLogo" AfterTargets="Build">
-		<Copy SourceFiles="$(MSBuildProjectDirectory)\Assets\logo.png"
-		      DestinationFiles="$(OutDir)Assets\logo.png"
-		      SkipUnchangedFiles="true" />
-	</Target>
 
 	<Target Name="RemoveDlls" AfterTargets="Publish">
 		<Delete Files="$(PublishDir)DirectML.dll" />
