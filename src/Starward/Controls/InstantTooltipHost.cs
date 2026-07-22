@@ -277,6 +277,7 @@ internal sealed class InstantTooltipHost
 
     /// <summary>
     /// 按当前方位将 Popup 定位到锚点附近（窗口坐标系，经 <see cref="UIElement.TransformToVisual"/>）。
+    /// 首选方位空间不足时会翻转（Top↔Bottom / Left↔Right），再钳位到 XamlRoot 可视区内，避免贴窗边被裁切。
     /// </summary>
     /// <param name="element">锚点元素。</param>
     private void UpdatePosition(FrameworkElement element)
@@ -288,26 +289,68 @@ internal sealed class InstantTooltipHost
         GeneralTransform transform = element.TransformToVisual(null);
         Rect bounds = transform.TransformBounds(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
 
-        switch (_currentPlacement)
+        Size rootSize = _xamlRoot.Size;
+        const double margin = 8;
+        bool hasRoot = rootSize.Width > 0 && rootSize.Height > 0;
+
+        // 首选方位放不下时翻到对侧，保证气泡完整可见（仍贴锚点）
+        InstantTooltipPlacement placement = _currentPlacement;
+        if (hasRoot)
+        {
+            placement = placement switch
+            {
+                InstantTooltipPlacement.Top when bounds.Top - Gap - tipHeight < margin
+                    && bounds.Bottom + Gap + tipHeight + margin <= rootSize.Height
+                    => InstantTooltipPlacement.Bottom,
+                InstantTooltipPlacement.Bottom when bounds.Bottom + Gap + tipHeight > rootSize.Height - margin
+                    && bounds.Top - Gap - tipHeight >= margin
+                    => InstantTooltipPlacement.Top,
+                InstantTooltipPlacement.Left when bounds.Left - Gap - tipWidth < margin
+                    && bounds.Right + Gap + tipWidth + margin <= rootSize.Width
+                    => InstantTooltipPlacement.Right,
+                InstantTooltipPlacement.Right when bounds.Right + Gap + tipWidth > rootSize.Width - margin
+                    && bounds.Left - Gap - tipWidth >= margin
+                    => InstantTooltipPlacement.Left,
+                _ => placement,
+            };
+            // 入场缩放原点随实际方位更新
+            _currentPlacement = placement;
+        }
+
+        double x;
+        double y;
+        switch (placement)
         {
             case InstantTooltipPlacement.Left:
-                _popup.HorizontalOffset = bounds.Left - tipWidth - Gap;
-                _popup.VerticalOffset = bounds.Top + (bounds.Height - tipHeight) / 2;
+                x = bounds.Left - tipWidth - Gap;
+                y = bounds.Top + (bounds.Height - tipHeight) / 2;
                 break;
             case InstantTooltipPlacement.Top:
-                _popup.HorizontalOffset = bounds.Left + (bounds.Width - tipWidth) / 2;
-                _popup.VerticalOffset = bounds.Top - tipHeight - Gap;
+                x = bounds.Left + (bounds.Width - tipWidth) / 2;
+                y = bounds.Top - tipHeight - Gap;
                 break;
             case InstantTooltipPlacement.Bottom:
-                _popup.HorizontalOffset = bounds.Left + (bounds.Width - tipWidth) / 2;
-                _popup.VerticalOffset = bounds.Bottom + Gap;
+                x = bounds.Left + (bounds.Width - tipWidth) / 2;
+                y = bounds.Bottom + Gap;
                 break;
             default:
                 // Right：导航 LeftCompact 侧栏默认，贴在锚点右侧垂直居中
-                _popup.HorizontalOffset = bounds.Right + Gap;
-                _popup.VerticalOffset = bounds.Top + (bounds.Height - tipHeight) / 2;
+                x = bounds.Right + Gap;
+                y = bounds.Top + (bounds.Height - tipHeight) / 2;
                 break;
         }
+
+        // 水平/垂直钳位：靠近窗边时把气泡整体移入可视区（如 Top 居中超出右缘）
+        if (hasRoot)
+        {
+            double maxX = Math.Max(margin, rootSize.Width - tipWidth - margin);
+            double maxY = Math.Max(margin, rootSize.Height - tipHeight - margin);
+            x = Math.Clamp(x, margin, maxX);
+            y = Math.Clamp(y, margin, maxY);
+        }
+
+        _popup.HorizontalOffset = x;
+        _popup.VerticalOffset = y;
     }
 
 

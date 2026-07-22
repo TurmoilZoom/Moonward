@@ -44,7 +44,7 @@
                    VerticalAlignment="Center"
                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
             <Run Text="{x:Bind lang:Lang.ToolboxSetting_GachaRecordsImportExport}" />
-            <Run Text="(UIGF v4.0)" />
+            <Run Text="{x:Bind VersionTitleSuffix}" />
         </TextBlock>
 
 
@@ -152,11 +152,20 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <cc:CachedImage Grid.Column="0"
-                                                    Width="{StaticResource GachaColIcon}"
-                                                    Height="{StaticResource GachaColIcon}"
-                                                    CornerRadius="8"
-                                                    Source="{x:Bind GameIcon}" />
+                                    <StackPanel Grid.Column="0"
+                                                Width="{StaticResource GachaColIcon}"
+                                                Spacing="2">
+                                        <cc:CachedImage Width="{StaticResource GachaColIcon}"
+                                                        Height="{StaticResource GachaColIcon}"
+                                                        CornerRadius="8"
+                                                        Source="{x:Bind GameIcon}" />
+                                        <!--  协议字段名区分同 UID 的 hk4e / hk4e_ugc 等  -->
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="10"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   Text="{x:Bind UigfGameKey}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
                                     <TextBlock Grid.Column="1"
                                                Width="{StaticResource GachaColUid}"
                                                VerticalAlignment="Center"
@@ -307,11 +316,19 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <cc:CachedImage Grid.Column="0"
-                                                    Width="{StaticResource GachaColIcon}"
-                                                    Height="{StaticResource GachaColIcon}"
-                                                    CornerRadius="8"
-                                                    Source="{x:Bind GameIcon}" />
+                                    <StackPanel Grid.Column="0"
+                                                Width="{StaticResource GachaColIcon}"
+                                                Spacing="2">
+                                        <cc:CachedImage Width="{StaticResource GachaColIcon}"
+                                                        Height="{StaticResource GachaColIcon}"
+                                                        CornerRadius="8"
+                                                        Source="{x:Bind GameIcon}" />
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="10"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   Text="{x:Bind UigfGameKey}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
                                     <TextBlock Grid.Column="1"
                                                Width="{StaticResource GachaColUid}"
                                                VerticalAlignment="Center"

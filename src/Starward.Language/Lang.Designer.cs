@@ -8224,6 +8224,87 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Failed to export gacha records. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_ExportFailed {
+            get {
+                return ResourceManager.GetString("GachaLogPage_ExportFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 The file could not be recognized or contains no gacha records. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_ImportFailedInvalidFile {
+            get {
+                return ResourceManager.GetString("GachaLogPage_ImportFailedInvalidFile", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Please select a UID first. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_PleaseSelectUidFirst {
+            get {
+                return ResourceManager.GetString("GachaLogPage_PleaseSelectUidFirst", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Supports UIGF v3.0, SRGF, and UIGF v4.0 / v4.1 / v4.2. The format is detected automatically from the selected file. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_UIGFImportVersionsTip {
+            get {
+                return ResourceManager.GetString("GachaLogPage_UIGFImportVersionsTip", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Export failed. 的本地化字符串。
+        /// </summary>
+        public static string UIGF4GachaWindow_ExportFailed {
+            get {
+                return ResourceManager.GetString("UIGF4GachaWindow_ExportFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Import failed. 的本地化字符串。
+        /// </summary>
+        public static string UIGF4GachaWindow_ImportFailed {
+            get {
+                return ResourceManager.GetString("UIGF4GachaWindow_ImportFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Failed to load local gacha records. 的本地化字符串。
+        /// </summary>
+        public static string UIGF4GachaWindow_LoadExportListFailed {
+            get {
+                return ResourceManager.GetString("UIGF4GachaWindow_LoadExportListFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Please select at least one account to export. 的本地化字符串。
+        /// </summary>
+        public static string UIGF4GachaWindow_PleaseSelectRecordsToExport {
+            get {
+                return ResourceManager.GetString("UIGF4GachaWindow_PleaseSelectRecordsToExport", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Please select at least one account to import. 的本地化字符串。
+        /// </summary>
+        public static string UIGF4GachaWindow_PleaseSelectRecordsToImport {
+            get {
+                return ResourceManager.GetString("UIGF4GachaWindow_PleaseSelectRecordsToImport", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Uid {0} import failed. 的本地化字符串。
         /// </summary>
         public static string UIGF4GachaWindow_Uid0ImportFailed {
@@ -8233,14 +8314,113 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 &quot;{0}&quot; field is missing in a gacha record. 的本地化字符串。
+        ///   查找类似 A gacha record is missing required data: {0}. 的本地化字符串。
         /// </summary>
         public static string UIGFGachaService_0FieldIsMissingInAGachaRecord {
             get {
                 return ResourceManager.GetString("UIGFGachaService_0FieldIsMissingInAGachaRecord", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Unable to read this file. Please select a valid UIGF JSON export. 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_CannotParseFile {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_CannotParseFile", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 banner ID 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_GachaId {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_GachaId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 gacha type 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_GachaType {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_GachaType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 item ID 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_ItemId {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_ItemId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 item type 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_ItemType {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_ItemType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 pool type 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_OpGachaType {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_OpGachaType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 rarity 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_RankType {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_RankType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 record ID 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_RecordId {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_RecordId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 schedule ID 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_ScheduleId {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_ScheduleId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 time 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_Field_Time {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_Field_Time", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Unable to read or write the file. Please check permissions and try again. 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_FileAccessFailed {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_FileAccessFailed", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Import successful. 的本地化字符串。
         /// </summary>
@@ -8249,22 +8429,40 @@ namespace Starward.Language {
                 return ResourceManager.GetString("UIGFGachaService_ImportSuccessful", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   查找类似 Import successful, but some records are missing item names. Please go to the gacha record settings, change the language, and apply. 的本地化字符串。
+        ///   查找类似 Import successful, but some records are missing item names. 的本地化字符串。
         /// </summary>
         public static string UIGFGachaService_ImportSuccessfulButNoRecordItemName {
             get {
                 return ResourceManager.GetString("UIGFGachaService_ImportSuccessfulButNoRecordItemName", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 No importable gacha records were found in this file. 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_NoGachaArchivesInFile {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_NoGachaArchivesInFile", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Uid mismatch detected. Expected: {0}, but found: {1}. 的本地化字符串。
         /// </summary>
         public static string UIGFGachaService_UidMismatchDetectedExpected0ButFound1 {
             get {
                 return ResourceManager.GetString("UIGFGachaService_UidMismatchDetectedExpected0ButFound1", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Import failed due to an unexpected error. 的本地化字符串。
+        /// </summary>
+        public static string UIGFGachaService_UnexpectedError {
+            get {
+                return ResourceManager.GetString("UIGFGachaService_UnexpectedError", resourceCulture);
             }
         }
         

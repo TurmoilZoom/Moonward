@@ -89,7 +89,9 @@
                             <TextBlock FontSize="16" Text="{x:Bind lang:Lang.GachaLogPage_OtherSettings}" />
 
                             <!--  复制 URL  -->
-                            <Button Margin="0,8,0,0" Command="{x:Bind CopyUrlCommand}">
+                            <Button Margin="0,8,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{x:Bind CopyUrlCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Name="FontIcon_CopyUrl"
                                               FontSize="16"
@@ -107,13 +109,62 @@
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        Text="{x:Bind lang:Lang.GachaLogPage_RestartGameAfterDeletingTheCacheFolder}"
                                        TextWrapping="Wrap" />
-                            <Button Command="{x:Bind DeleteGachaCacheFolderCommand}">
+                            <Button HorizontalAlignment="Stretch" Command="{x:Bind DeleteGachaCacheFolderCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon FontSize="16" Glyph="&#xEA99;" />
                                     <!--  删除缓存文件夹  -->
                                     <TextBlock Text="{x:Bind lang:Lang.GachaLogPage_DeleteCacheFolder}" />
                                 </StackPanel>
                             </Button>
+
+                            <!--  分割线  -->
+                            <MenuFlyoutSeparator />
+
+                            <!--  导入（左）/ 导出（右）同一行；千星奇域仅 UIGF v4.2（hk4e_ugc）  -->
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Button HorizontalAlignment="Stretch"
+                                        Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Import}">
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <StackPanel MinWidth="200" Spacing="8">
+                                                <HyperlinkButton Padding="0"
+                                                                 HorizontalAlignment="Left"
+                                                                 Content="UIGF-Org"
+                                                                 FontSize="12"
+                                                                 NavigateUri="https://uigf.org" />
+                                                <!--  千星奇域仅 UIGF v4.2（hk4e_ugc）  -->
+                                                <Button HorizontalAlignment="Stretch"
+                                                        Command="{x:Bind OpenUIGF4WindowCommand}"
+                                                        CommandParameter="import"
+                                                        Content="UIGF v4.2" />
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                                <Button Grid.Column="1"
+                                        HorizontalAlignment="Stretch"
+                                        Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Export}">
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <StackPanel MinWidth="200" Spacing="8">
+                                                <HyperlinkButton Padding="0"
+                                                                 HorizontalAlignment="Left"
+                                                                 Content="UIGF-Org"
+                                                                 FontSize="12"
+                                                                 NavigateUri="https://uigf.org" />
+                                                <Button HorizontalAlignment="Stretch"
+                                                        Command="{x:Bind OpenUIGF4WindowCommand}"
+                                                        CommandParameter="export|v4.2"
+                                                        Content="UIGF v4.2" />
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </Grid>
 
                         </StackPanel>
                     </Flyout>

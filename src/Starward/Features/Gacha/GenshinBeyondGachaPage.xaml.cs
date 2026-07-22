@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -7,6 +8,7 @@ using Microsoft.UI.Xaml.Media;
 using Starward.Core;
 using Starward.Core.Gacha;
 using Starward.Core.Gacha.Genshin;
+using Starward.Features.Gacha.UIGF;
 using Starward.Features.GameLauncher;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -71,6 +73,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
     protected override async void OnLoaded()
     {
         await Task.Delay(16);
+        WeakReferenceMessenger.Default.Register<GachaLogImportedMessage>(this, (s, m) => OnGachaLogImported(m));
         Initialize();
         await EnsureGachaInfoAsync();
     }
@@ -79,6 +82,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
 
     protected override void OnUnloaded()
     {
+        WeakReferenceMessenger.Default.UnregisterAll(this);
         _segmentedListBinding1000?.Dispose();
         _segmentedListBinding1000 = null;
         _segmentedListBinding2000?.Dispose();
@@ -90,6 +94,50 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         GachaStatsType1000 = null;
         GachaStatsType2000 = null;
         GachaItemStats = null;
+    }
+
+
+    /// <summary>
+    /// UIGF 等本地导入完成后刷新本页（仅处理 hk4eugc 归档）。
+    /// </summary>
+    private void OnGachaLogImported(GachaLogImportedMessage message)
+    {
+        try
+        {
+            var uids = message.ImportedUids
+                              .Where(x => x.Game.Value == "hk4eugc")
+                              .Select(x => x.Uid)
+                              .Distinct()
+                              .ToList();
+            if (uids.Count == 0)
+            {
+                return;
+            }
+            UidList ??= [];
+            foreach (long uid in uids)
+            {
+                if (!UidList.Contains(uid))
+                {
+                    UidList.Add(uid);
+                }
+            }
+            long target = SelectUid is long current && current != 0 && uids.Contains(current)
+                ? current
+                : uids[0];
+            if (SelectUid == target)
+            {
+                UpdateGachaTypeStats(target);
+            }
+            else
+            {
+                SelectUid = target;
+            }
+            StackPanel_Emoji.Visibility = Visibility.Collapsed;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Refresh after beyond gacha import");
+        }
     }
 
 
@@ -480,6 +528,34 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         {
             _logger.LogError(ex, "Copy url");
         }
+    }
+
+
+
+    /// <summary>
+    /// 打开 UIGF 导入导出窗口。千星奇域数据落在 <c>hk4e_ugc</c>，导出默认 v4.2；
+    /// 导入不区分子版本，选文件后按内容自动识别（含 hk4e_ugc）。
+    /// </summary>
+    /// <param name="parameter">形如 <c>export|v4.2</c> / <c>import</c>。</param>
+    [RelayCommand]
+    private void OpenUIGF4Window(string? parameter)
+    {
+        UIGF4Version version = UIGF4Version.V42;
+        bool openImport = false;
+        if (!string.IsNullOrWhiteSpace(parameter))
+        {
+            string[] parts = parameter.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 1 && parts[0].Equals("import", StringComparison.OrdinalIgnoreCase))
+            {
+                openImport = true;
+            }
+            string verText = parts.Length >= 2 ? parts[1] : parts[0];
+            if (UIGF4VersionExtensions.TryParse(verText) is UIGF4Version parsed)
+            {
+                version = parsed;
+            }
+        }
+        new UIGF4GachaWindow(version, openImport).Activate();
     }
 
 

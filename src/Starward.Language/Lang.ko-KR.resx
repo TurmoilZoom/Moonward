@@ -2184,6 +2184,72 @@
   <data name="UIGFGachaService_0FieldIsMissingInAGachaRecord" xml:space="preserve">
     <value>"{0}" 를 포함한 뽑기 기록이 없습니다.</value>
   </data>
+  <data name="UIGFGachaService_CannotParseFile" xml:space="preserve">
+    <value>Unable to read this file. Please select a valid UIGF JSON export.</value>
+  </data>
+  <data name="UIGFGachaService_NoGachaArchivesInFile" xml:space="preserve">
+    <value>No importable gacha records were found in this file.</value>
+  </data>
+  <data name="UIGFGachaService_UnexpectedError" xml:space="preserve">
+    <value>Import failed due to an unexpected error.</value>
+  </data>
+  <data name="UIGFGachaService_FileAccessFailed" xml:space="preserve">
+    <value>Unable to read or write the file. Please check permissions and try again.</value>
+  </data>
+  <data name="UIGFGachaService_Field_RecordId" xml:space="preserve">
+    <value>record ID</value>
+  </data>
+  <data name="UIGFGachaService_Field_ItemId" xml:space="preserve">
+    <value>item ID</value>
+  </data>
+  <data name="UIGFGachaService_Field_GachaType" xml:space="preserve">
+    <value>gacha type</value>
+  </data>
+  <data name="UIGFGachaService_Field_Time" xml:space="preserve">
+    <value>time</value>
+  </data>
+  <data name="UIGFGachaService_Field_RankType" xml:space="preserve">
+    <value>rarity</value>
+  </data>
+  <data name="UIGFGachaService_Field_GachaId" xml:space="preserve">
+    <value>banner ID</value>
+  </data>
+  <data name="UIGFGachaService_Field_ScheduleId" xml:space="preserve">
+    <value>schedule ID</value>
+  </data>
+  <data name="UIGFGachaService_Field_OpGachaType" xml:space="preserve">
+    <value>pool type</value>
+  </data>
+  <data name="UIGFGachaService_Field_ItemType" xml:space="preserve">
+    <value>item type</value>
+  </data>
+  <data name="UIGF4GachaWindow_PleaseSelectRecordsToExport" xml:space="preserve">
+    <value>Please select at least one account to export.</value>
+  </data>
+  <data name="UIGF4GachaWindow_PleaseSelectRecordsToImport" xml:space="preserve">
+    <value>Please select at least one account to import.</value>
+  </data>
+  <data name="UIGF4GachaWindow_ExportFailed" xml:space="preserve">
+    <value>Export failed.</value>
+  </data>
+  <data name="UIGF4GachaWindow_ImportFailed" xml:space="preserve">
+    <value>Import failed.</value>
+  </data>
+  <data name="UIGF4GachaWindow_LoadExportListFailed" xml:space="preserve">
+    <value>Failed to load local gacha records.</value>
+  </data>
+  <data name="GachaLogPage_ImportFailedInvalidFile" xml:space="preserve">
+    <value>The file could not be recognized or contains no gacha records.</value>
+  </data>
+  <data name="GachaLogPage_ExportFailed" xml:space="preserve">
+    <value>Failed to export gacha records.</value>
+  </data>
+  <data name="GachaLogPage_PleaseSelectUidFirst" xml:space="preserve">
+    <value>Please select a UID first.</value>
+  </data>
+  <data name="GachaLogPage_UIGFImportVersionsTip" xml:space="preserve">
+    <value>Supports UIGF v3.0, SRGF, and UIGF v4.0 / v4.1 / v4.2. The format is detected automatically from the selected file.</value>
+  </data>
   <data name="GachaImportAndExportWindow_Export" xml:space="preserve">
     <value>내보내기</value>
   </data>

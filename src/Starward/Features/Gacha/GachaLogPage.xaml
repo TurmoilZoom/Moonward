@@ -204,71 +204,105 @@
                             <!--  分割线  -->
                             <MenuFlyoutSeparator />
 
-                            <!--  导入导出  -->
-                            <Button HorizontalAlignment="Stretch" Content="{x:Bind lang:Lang.GachaLogPage_ImportAndExport}">
-                                <Button.Flyout>
-                                    <Flyout>
-                                        <StackPanel MinWidth="200" Spacing="8">
-                                            <!--  导出为  -->
-                                            <StackPanel Margin="0,8,0,0"
-                                                        Orientation="Horizontal"
-                                                        Spacing="8">
-                                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.GachaLogPage_ExportAs}" />
-                                                <Button Padding="1"
-                                                        VerticalAlignment="Bottom"
-                                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                                                    <FontIcon FontSize="12" Glyph="&#xE9CE;" />
-                                                    <Button.Flyout>
-                                                        <Flyout>
-                                                            <TextBlock>
-                                                                <Hyperlink NavigateUri="https://uigf.org/" UnderlineStyle="None">
-                                                                    <Run Text="UIGF/SRGF" />
-                                                                </Hyperlink>
-                                                            </TextBlock>
-                                                        </Flyout>
-                                                    </Button.Flyout>
-                                                </Button>
+                            <!--  导入（左）/ 导出（右）同一行，无图标  -->
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <!--  导入  -->
+                                <Button HorizontalAlignment="Stretch"
+                                        Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Import}">
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <StackPanel MinWidth="200" Spacing="8">
+                                                <!--  顶栏：UIGF-Org 链接 + 问号说明支持的导入格式/版本  -->
+                                                <Grid>
+                                                    <HyperlinkButton Padding="0"
+                                                                     HorizontalAlignment="Left"
+                                                                     VerticalAlignment="Center"
+                                                                     Content="UIGF-Org"
+                                                                     FontSize="12"
+                                                                     NavigateUri="https://uigf.org" />
+                                                    <Border HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            Padding="4"
+                                                            sc:InstantTooltip.Placement="Top"
+                                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_UIGFImportVersionsTip}">
+                                                        <FontIcon FontSize="14"
+                                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                  Glyph="&#xE9CE;" />
+                                                    </Border>
+                                                </Grid>
+                                                <!--  统一 UIGF 导入：选文件后自动识别 v3.0 / SRGF / v4.0–v4.2  -->
+                                                <Button HorizontalAlignment="Stretch"
+                                                        Command="{x:Bind OpenUIGF4WindowCommand}"
+                                                        CommandParameter="import"
+                                                        Content="UIGF" />
                                             </StackPanel>
-                                            <!--  Excel Json  -->
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition />
-                                                    <ColumnDefinition />
-                                                </Grid.ColumnDefinitions>
-                                                <Button x:Name="Button_Export_Excel"
-                                                        HorizontalAlignment="Stretch"
-                                                        Command="{x:Bind ExportGachaLogCommand}"
-                                                        CommandParameter="excel"
-                                                        Content="Excel"
-                                                        CornerRadius="4,0,0,4" />
-                                                <Button x:Name="Button_Export_JSON"
-                                                        Grid.Column="1"
-                                                        HorizontalAlignment="Stretch"
-                                                        Command="{x:Bind ExportGachaLogCommand}"
-                                                        CommandParameter="json"
-                                                        Content="Json"
-                                                        CornerRadius="0,4,4,0" />
-                                            </Grid>
-                                            <!--  从 Json 导入  -->
-                                            <Button x:Name="Button_Import"
-                                                    HorizontalAlignment="Stretch"
-                                                    Command="{x:Bind ImportGachaLogCommand}">
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <FontIcon Margin="0,2,0,0"
-                                                              FontSize="16"
-                                                              Glyph="&#xEA52;" />
-                                                    <TextBlock Text="{x:Bind lang:Lang.GachaLogPage_ImportFromJson}" />
-                                                </StackPanel>
-                                            </Button>
-                                            <!--  UIGF v4.0  -->
-                                            <Button x:Name="Button_UIGF4"
-                                                    HorizontalAlignment="Stretch"
-                                                    Command="{x:Bind OpenUIGF4WindowCommand}"
-                                                    Content="UIGF v4.0" />
-                                        </StackPanel>
-                                    </Flyout>
-                                </Button.Flyout>
-                            </Button>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                                <!--  导出  -->
+                                <Button Grid.Column="1"
+                                        HorizontalAlignment="Stretch"
+                                        Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Export}">
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <StackPanel MinWidth="200" Spacing="8">
+                                                <!--  UIGF 标准声明：功能区提供跳转 uigf.org  -->
+                                                <HyperlinkButton Padding="0"
+                                                                 HorizontalAlignment="Left"
+                                                                 Content="UIGF-Org"
+                                                                 FontSize="12"
+                                                                 NavigateUri="https://uigf.org" />
+                                                <!--  Excel Json  -->
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition />
+                                                        <ColumnDefinition />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Button x:Name="Button_Export_Excel"
+                                                            HorizontalAlignment="Stretch"
+                                                            Command="{x:Bind ExportGachaLogCommand}"
+                                                            CommandParameter="excel"
+                                                            Content="Excel"
+                                                            CornerRadius="4,0,0,4" />
+                                                    <Button x:Name="Button_Export_JSON"
+                                                            Grid.Column="1"
+                                                            HorizontalAlignment="Stretch"
+                                                            Command="{x:Bind ExportGachaLogCommand}"
+                                                            CommandParameter="json"
+                                                            Content="{x:Bind SingleGameJsonFormatLabel, Mode=OneWay}"
+                                                            CornerRadius="0,4,4,0" />
+                                                </Grid>
+                                                <!--  UIGF v4.0 / v4.1 同一行；v4.2 单独一行（协议名不翻译）  -->
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition />
+                                                        <ColumnDefinition />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Button HorizontalAlignment="Stretch"
+                                                            Command="{x:Bind OpenUIGF4WindowCommand}"
+                                                            CommandParameter="export|v4.0"
+                                                            Content="UIGF v4.0"
+                                                            CornerRadius="4,0,0,4" />
+                                                    <Button Grid.Column="1"
+                                                            HorizontalAlignment="Stretch"
+                                                            Command="{x:Bind OpenUIGF4WindowCommand}"
+                                                            CommandParameter="export|v4.1"
+                                                            Content="UIGF v4.1"
+                                                            CornerRadius="0,4,4,0" />
+                                                </Grid>
+                                                <Button HorizontalAlignment="Stretch"
+                                                        Command="{x:Bind OpenUIGF4WindowCommand}"
+                                                        CommandParameter="export|v4.2"
+                                                        Content="UIGF v4.2" />
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </Grid>
 
                             <!--  删除记录  -->
                             <Button HorizontalAlignment="Stretch">

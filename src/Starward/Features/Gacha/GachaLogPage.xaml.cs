@@ -75,7 +75,8 @@ public sealed partial class GachaLogPage : PageBase
     /// <summary>
     /// 页面导航到此时初始化游戏特定的抽卡服务、UI 标志位与表情图标。
     /// <para><b>输入：</b><paramref name="e"/> — 导航事件参数（基类 PageBase 从中解析 CurrentGameBiz / CurrentGameId）。</para>
-    /// <para><b>副作用：</b>设置 <see cref="GachaTypeText"/> 文本；根据游戏类型注入对应 <see cref="_gachaLogService"/>
+    /// <para><b>副作用：</b>设置 <see cref="GachaTypeText"/>、<see cref="SingleGameJsonFormatLabel"/>；
+    /// 根据游戏类型注入对应 <see cref="_gachaLogService"/>
     /// （GenshinGachaService / StarRailGachaService / ZZZGachaService）、启用对应物品统计视图标志位、
     /// 设置表情图标；对原神/绝区零国服（含 B 服）显示米游社同步、绝区零国际服显示 HoYoLAB 同步；
     /// 关闭国际服的云游戏入口。
@@ -85,6 +86,12 @@ public sealed partial class GachaLogPage : PageBase
     {
         base.OnNavigatedTo(e);
         GachaTypeText = GachaLogService.GetGachaLogText(CurrentGameBiz);
+        // 单游戏 Json 入口文案：原神/绝区零 UIGF v3、星铁 SRGF（协议名不翻译）
+        SingleGameJsonFormatLabel = CurrentGameBiz.Game switch
+        {
+            GameBiz.hkrpg => "SRGF",
+            _ => "UIGF v3.0",
+        };
         if (CurrentGameBiz.Game == GameBiz.hk4e)
         {
             EnableGenshinGachaItemStats = true;
@@ -132,6 +139,13 @@ public sealed partial class GachaLogPage : PageBase
 
 
     public string GachaTypeText { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>
+    /// 单游戏 Json 导入/导出按钮文案（原神/绝区零 UIGF v3.0、星铁 SRGF）。
+    /// 协议名本身不翻译。
+    /// </summary>
+    public string SingleGameJsonFormatLabel { get; set => SetProperty(ref field, value); } = "UIGF v3.0";
 
 
     public ObservableCollection<long> UidList { get; set => SetProperty(ref field, value); }
@@ -1715,6 +1729,7 @@ public sealed partial class GachaLogPage : PageBase
         {
             if (SelectUid is null or 0)
             {
+                InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_PleaseSelectUidFirst);
                 return;
             }
             long uid = SelectUid.Value;
@@ -1738,7 +1753,8 @@ public sealed partial class GachaLogPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Export gacha log");
-            InAppToast.MainWindow?.Error(ex);
+            // 不直接展示 Exception 类型名与英文 Message
+            InAppToast.MainWindow?.Error(Lang.GachaLogPage_ExportFailed);
         }
     }
 
@@ -1758,6 +1774,11 @@ public sealed partial class GachaLogPage : PageBase
             if (File.Exists(file))
             {
                 var uid = _gachaLogService.ImportGachaLog(file);
+                if (uid == 0)
+                {
+                    InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_ImportFailedInvalidFile);
+                    return;
+                }
                 if (uid == SelectUid)
                 {
                     UpdateGachaTypeStats(uid);
@@ -1771,27 +1792,49 @@ public sealed partial class GachaLogPage : PageBase
                     UidList.Add(uid);
                     SelectUid = uid;
                 }
-                if (uid != 0)
-                {
-                    // 按 ItemId 把导入记录的名称回写为当前软件语言（缺失则联网下载映射），完成后进度处理器会再次刷新。
-                    _ = AppConfig.GetService<GachaItemNameService>().ApplyForGameAsync(CurrentGameBiz);
-                }
+                // 按 ItemId 把导入记录的名称回写为当前软件语言（缺失则联网下载映射），完成后进度处理器会再次刷新。
+                _ = AppConfig.GetService<GachaItemNameService>().ApplyForGameAsync(CurrentGameBiz);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Import gacha log");
-            InAppToast.MainWindow?.Error(ex);
+            InAppToast.MainWindow?.Error(Lang.GachaLogPage_ImportFailedInvalidFile);
         }
     }
 
 
 
-    /// <summary>打开 UIGF v4.0 导入窗口（支持批量导入多个游戏的抽卡记录）。</summary>
+    /// <summary>
+    /// 打开 UIGF 导入导出窗口。
+    /// </summary>
+    /// <param name="parameter">
+    /// 形如 <c>export|v4.0</c> / <c>import</c>：模式|版本（版本仅导出需要）。
+    /// 导入为统一入口，选文件后按内容自动识别 UIGF v3.0 / SRGF / UIGF v4.0–v4.2。
+    /// </param>
     [RelayCommand]
-    private void OpenUIGF4Window()
+    private void OpenUIGF4Window(string? parameter)
     {
-        new UIGF4GachaWindow().Activate();
+        // 默认：导出 v4.0（与导出菜单入口一致）
+        UIGF4Version version = UIGF4Version.V40;
+        bool openImport = false;
+        if (!string.IsNullOrWhiteSpace(parameter))
+        {
+            string[] parts = parameter.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 1 && parts[0].Equals("import", StringComparison.OrdinalIgnoreCase))
+            {
+                openImport = true;
+                // 导入窗口若切到导出页，默认展示含千星奇域的完整列表
+                version = UIGF4Version.V42;
+            }
+            // 第二段为版本（export|v4.1）；仅 "import" 时 parts[0] 不是版本号，TryParse 会失败并保留上面默认
+            string verText = parts.Length >= 2 ? parts[1] : parts[0];
+            if (UIGF4VersionExtensions.TryParse(verText) is UIGF4Version parsed)
+            {
+                version = parsed;
+            }
+        }
+        new UIGF4GachaWindow(version, openImport).Activate();
     }
 
 

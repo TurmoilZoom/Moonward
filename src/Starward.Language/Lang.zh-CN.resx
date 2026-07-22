@@ -2231,7 +2231,7 @@
     <value>检测到 Uid 不匹配，预期: {0}，但发现: {1}。</value>
   </data>
   <data name="UIGFGachaService_ImportSuccessfulButNoRecordItemName" xml:space="preserve">
-    <value>导入成功，但部分记录缺少物品名称。请前往抽卡记录页面的设置，修改语言并应用。</value>
+    <value>导入成功，但部分记录缺少物品名称。</value>
   </data>
   <data name="UIGFGachaService_ImportSuccessful" xml:space="preserve">
     <value>导入成功</value>
@@ -2241,6 +2241,72 @@
   </data>
   <data name="UIGFGachaService_0FieldIsMissingInAGachaRecord" xml:space="preserve">
     <value>存在没有 {0} 数据的抽卡记录</value>
+  </data>
+  <data name="UIGFGachaService_CannotParseFile" xml:space="preserve">
+    <value>无法识别该文件，请选择有效的 UIGF JSON 导出文件。</value>
+  </data>
+  <data name="UIGFGachaService_NoGachaArchivesInFile" xml:space="preserve">
+    <value>文件中没有可导入的抽卡记录。</value>
+  </data>
+  <data name="UIGFGachaService_UnexpectedError" xml:space="preserve">
+    <value>导入失败，发生了意外错误。</value>
+  </data>
+  <data name="UIGFGachaService_FileAccessFailed" xml:space="preserve">
+    <value>无法读写该文件，请检查权限后重试。</value>
+  </data>
+  <data name="UIGFGachaService_Field_RecordId" xml:space="preserve">
+    <value>记录 ID</value>
+  </data>
+  <data name="UIGFGachaService_Field_ItemId" xml:space="preserve">
+    <value>物品 ID</value>
+  </data>
+  <data name="UIGFGachaService_Field_GachaType" xml:space="preserve">
+    <value>卡池类型</value>
+  </data>
+  <data name="UIGFGachaService_Field_Time" xml:space="preserve">
+    <value>时间</value>
+  </data>
+  <data name="UIGFGachaService_Field_RankType" xml:space="preserve">
+    <value>稀有度</value>
+  </data>
+  <data name="UIGFGachaService_Field_GachaId" xml:space="preserve">
+    <value>卡池 ID</value>
+  </data>
+  <data name="UIGFGachaService_Field_ScheduleId" xml:space="preserve">
+    <value>排期 ID</value>
+  </data>
+  <data name="UIGFGachaService_Field_OpGachaType" xml:space="preserve">
+    <value>池子类型</value>
+  </data>
+  <data name="UIGFGachaService_Field_ItemType" xml:space="preserve">
+    <value>物品类型</value>
+  </data>
+  <data name="UIGF4GachaWindow_PleaseSelectRecordsToExport" xml:space="preserve">
+    <value>请至少选择一个账号进行导出。</value>
+  </data>
+  <data name="UIGF4GachaWindow_PleaseSelectRecordsToImport" xml:space="preserve">
+    <value>请至少选择一个账号进行导入。</value>
+  </data>
+  <data name="UIGF4GachaWindow_ExportFailed" xml:space="preserve">
+    <value>导出失败。</value>
+  </data>
+  <data name="UIGF4GachaWindow_ImportFailed" xml:space="preserve">
+    <value>导入失败。</value>
+  </data>
+  <data name="UIGF4GachaWindow_LoadExportListFailed" xml:space="preserve">
+    <value>加载本地抽卡记录失败。</value>
+  </data>
+  <data name="GachaLogPage_ImportFailedInvalidFile" xml:space="preserve">
+    <value>无法识别该文件，或文件中没有抽卡记录。</value>
+  </data>
+  <data name="GachaLogPage_ExportFailed" xml:space="preserve">
+    <value>导出抽卡记录失败。</value>
+  </data>
+  <data name="GachaLogPage_PleaseSelectUidFirst" xml:space="preserve">
+    <value>请先选择一个 UID。</value>
+  </data>
+  <data name="GachaLogPage_UIGFImportVersionsTip" xml:space="preserve">
+    <value>支持 UIGF v3.0、SRGF 与 UIGF v4.0 / v4.1 / v4.2。选择文件后将按内容自动识别格式。</value>
   </data>
   <data name="GachaImportAndExportWindow_Export" xml:space="preserve">
     <value>导出</value>
