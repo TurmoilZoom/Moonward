@@ -1,17 +1,40 @@
 :root {
-  --bg: #f4f2ee;
-  --bg-raised: #fffcf8;
-  --ink: #1a1a18;
-  --ink-2: #3d3d38;
-  --muted: #6b6b63;
-  --line: #d8d4cb;
-  --line-strong: #b8b3a6;
-  --accent: #1f4b3a;
-  --accent-soft: #e4efe9;
-  --code-bg: #ebe7df;
-  --max: 40rem;
-  --font: 'IBM Plex Sans', 'Noto Sans SC', system-ui, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  /* Paper palette */
+  --bg: #f0ebe3;
+  --bg-deep: #e6dfd4;
+  --bg-raised: #faf7f2;
+  --bg-card: #fffcf7;
+  --ink: #1c1915;
+  --ink-2: #3f3a33;
+  --muted: #6e675c;
+  --line: #d4ccc0;
+  --line-strong: #b8aea0;
+  --accent: #1e4d3f;
+  --accent-hover: #163a30;
+  --accent-soft: #dceae4;
+  --code-bg: #ebe4d8;
+  --shadow: 0 1px 0 rgba(28, 25, 21, 0.04), 0 8px 24px -12px rgba(28, 25, 21, 0.18);
+  --shadow-sm: 0 1px 2px rgba(28, 25, 21, 0.06);
+
+  /* Accents for cards */
+  --teal: #1e4d3f;
+  --amber: #9a6b1f;
+  --blue: #2a4f7a;
+  --green: #3a6b3a;
+  --violet: #5a4578;
+  --rose: #8a3f4f;
+  --cyan: #2a6a6a;
+  --slate: #4a4a52;
+
+  --max: 68rem;
+  --radius: 12px;
+  --radius-sm: 8px;
+
+  /* Paper reading stack */
+  --font-serif: 'Source Serif 4', 'Noto Serif SC', 'Songti SC', 'SimSun', Georgia, serif;
+  --font-sans: 'Source Sans 3', 'Noto Sans SC', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
   color-scheme: light;
 }
 
@@ -28,22 +51,40 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: var(--font);
-  font-size: 16px;
-  line-height: 1.65;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.7;
   color: var(--ink-2);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+/* Soft paper grain */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: -1;
-  opacity: 0.4;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  z-index: 0;
+  opacity: 0.55;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(30, 77, 63, 0.07), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 95% 5%, rgba(154, 107, 31, 0.06), transparent 50%);
+}
+
+#app {
+  position: relative;
+  z-index: 1;
 }
 
 a {
@@ -58,8 +99,8 @@ a:hover {
 
 code,
 .mono {
-  font-family: var(--mono);
-  font-size: 0.9em;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
 }
 
 button {
@@ -71,30 +112,35 @@ button {
 }
 
 .wrap {
-  width: min(100% - 2rem, var(--max));
+  width: min(100% - 2.25rem, var(--max));
   margin-inline: auto;
 }
 
 h1,
-h2 {
+h2,
+h3 {
+  font-family: var(--font-serif);
   font-weight: 600;
   color: var(--ink);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   line-height: 1.25;
   margin: 0;
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: clamp(2.1rem, 4vw, 2.85rem);
+  font-weight: 700;
 }
 
 h2 {
-  font-size: 0.8rem;
+  font-size: 1.35rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 1rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.35rem;
+}
+
+h3 {
+  font-size: 1.05rem;
 }
 
 p {
@@ -107,8 +153,34 @@ ul {
   list-style: none;
 }
 
+.section-kicker {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 0.45rem;
+}
+
+.section-lead {
+  font-size: 0.98rem;
+  color: var(--muted);
+  max-width: 40rem;
+  margin: 0 0 1.15rem;
+  line-height: 1.6;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
