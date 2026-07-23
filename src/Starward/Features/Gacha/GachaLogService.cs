@@ -283,10 +283,11 @@ internal abstract class GachaLogService
     /// 核心方法：通过网页缓存中的抽卡记录 URL，从官方接口拉取记录并增量写入本地数据库。
     /// 支持全量（all=true）或增量同步（使用本地最新 Id 作为 endId 起点）。
     /// 内部会先获取 UID，再决定是否分页拉取，最后报告获取结果。
+    /// 落库后按软件语言回写物品名称（接口 lang 未生效或返回语言不一致时的兜底）。
     /// </summary>
     /// <param name="url">有效的抽卡记录 URL（必须包含 authkey 等必要参数）。</param>
     /// <param name="all">是否拉取全部历史记录。false 时仅获取本地最新 Id 之后的记录，实现增量更新。</param>
-    /// <param name="lang">可选语言代码，影响返回记录中物品名称的本地化。</param>
+    /// <param name="lang">可选语言代码，影响返回记录中物品名称的本地化，并作为落库后名称回写目标语言。</param>
     /// <param name="progress">进度报告回调，用于 UI 显示“正在获取 UID”、“正在获取 角色活动祈愿 第 3 页”等信息。</param>
     /// <param name="cancellationToken">取消令牌，支持中途取消拉取。</param>
     /// <returns>成功处理的玩家 UID；若无法获取 UID 或无记录则返回 0。</returns>
@@ -322,13 +323,45 @@ internal abstract class GachaLogService
             var newCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
             // 获取 {list.Count} 条记录，新增 {newCount - oldCount} 条记录
             progress?.Report(string.Format(Lang.GachaLogService_GetGachaResult, list.Count, newCount - oldCount));
-            // 本次确有拉取到记录时，检测是否出现本地未收录的新角色/物品，若有则静默联网补全物品信息（图标 + 名称）。
             if (list.Count > 0)
             {
-                await EnsureGachaInfoForUnknownItemsAsync(uid, lang, cancellationToken);
+                await EnsureLocalizedNamesAfterInsertAsync(uid, lang, cancellationToken);
             }
         }
         return uid;
+    }
+
+
+
+    /// <summary>
+    /// 抽卡记录落库后的名称本地化兜底：先补未知物品信息（图标 + 名称缓存），再按目标语言从
+    /// <c>GachaItemName</c> 回写该 UID 全部记录的 <c>Name</c>。
+    /// <para>用于 URL 更新、战绩同步等路径——接口可能已带 lang，但 URL 缺 lang、服务端忽略语言、
+    /// 或国服战绩固定中文时，仍保证展示跟随软件 UI 语言。失败仅记日志，不阻断已落库记录。</para>
+    /// </summary>
+    /// <param name="uid">玩家 UID；为 0 时直接返回。</param>
+    /// <param name="lang">目标语言；为空时取当前 UI 语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    protected async Task EnsureLocalizedNamesAfterInsertAsync(long uid, string? lang, CancellationToken cancellationToken = default)
+    {
+        if (uid == 0)
+        {
+            return;
+        }
+        string displayLanguage = LanguageUtil.FilterLanguage(
+            string.IsNullOrWhiteSpace(lang)
+                ? CultureInfo.CurrentUICulture.Name
+                : lang);
+        await EnsureGachaInfoForUnknownItemsAsync(uid, displayLanguage, cancellationToken);
+        try
+        {
+            await EnsureNameCacheAsync(displayLanguage, cancellationToken);
+            RewriteRecordNamesFromCache(displayLanguage, uid);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Rewrite gacha item names after insert failed, game {Game}, uid {Uid}, lang {Lang}", GameKey, uid, displayLanguage);
+        }
     }
 
 

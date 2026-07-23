@@ -142,11 +142,12 @@ internal class ZZZGachaService : GachaLogService
 
     /// <summary>
     /// 通过网页缓存解析出的 gacha URL 拉取抽卡记录（客户端 API 方式）。
-    /// 逻辑与基类基本一致：先取最后一条 Id 作为增量起点，调用客户端分页获取，插入后报告新增数量。
+    /// 逻辑与基类基本一致：先取最后一条 Id 作为增量起点，调用客户端分页获取，插入后报告新增数量，
+    /// 并按软件语言回写名称（与基类 <see cref="GachaLogService.EnsureLocalizedNamesAfterInsertAsync"/> 兜底一致）。
     /// </summary>
     /// <param name="url">从游戏网页缓存中提取的抽卡记录 URL。</param>
     /// <param name="all">是否拉取全部历史记录（true 时忽略本地最新 Id）。</param>
-    /// <param name="lang">语言代码（可选），影响返回记录的名称本地化。</param>
+    /// <param name="lang">语言代码（可选），影响返回记录的名称本地化，并作为落库后名称回写目标语言。</param>
     /// <param name="progress">进度报告回调，用于向 UI 显示“正在获取第 X 页”等信息。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>成功获取的玩家 UID；若无法获取则返回 0。</returns>
@@ -181,10 +182,9 @@ internal class ZZZGachaService : GachaLogService
             var newCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
             // 获取 {list.Count} 条记录，新增 {newCount - oldCount} 条记录
             progress?.Report(string.Format(Lang.GachaLogService_GetGachaResult, list.Count, newCount - oldCount));
-            // 本次确有拉取到记录时，检测是否出现本地未收录的新角色/物品，若有则静默联网补全物品信息（图标 + 名称）。
             if (list.Count > 0)
             {
-                await EnsureGachaInfoForUnknownItemsAsync(uid, lang, cancellationToken);
+                await EnsureLocalizedNamesAfterInsertAsync(uid, lang, cancellationToken);
             }
         }
         return uid;
@@ -196,15 +196,16 @@ internal class ZZZGachaService : GachaLogService
     /// 这是 ZZZ 特有的同步方式（GachaLogPage 中对应“从米游社同步”/“从 HoYoLAB 同步”菜单）。
     ///
     /// 主要处理点：
-    /// - 国服固定使用 zh-cn 作为 recordLanguage（用于 ToGachaLogItem 里的中文类型映射）。
-    /// - 国际服（_global）使用当前 UI 语言或传入 lang 作为 requestLanguage（影响 HoYoLAB 返回的本地化名称）和 recordLanguage。
+    /// - 国际服（_global）：用当前 UI 语言作为 requestLanguage（HoYoLAB <c>X-Rpc-Language</c>），尽量让接口直接返回对应语言名称。
+    /// - 国服（米游社）：战绩 gacha_record 通常仅返回中文名称，recordLanguage 固定 zh-cn（ItemType 中文映射）；
+    ///   落库后按软件 UI 语言从 <c>GachaItemName</c> 回写 Name（与 UIGF 导入后的名称本地化一致）。
     /// - 按 QueryGachaTypes 依次拉取每个频段，使用 endId 增量 + 服务端 HasMore 分页。
     /// - 客户端侧去重：遇到 Id &lt;= 本地最后 Id 即停止。
     /// - 防御性检测分页不前进的情况，避免死循环。
     /// </summary>
     /// <param name="role">玩家角色信息（包含 Uid、GameBiz 等），用于构造官方接口请求。</param>
     /// <param name="all">是否同步全部记录（false 时只增量拉取本地最新 Id 之后的数据）。</param>
-    /// <param name="lang">语言代码。国际服下会同时用于请求头和记录落库的语言标记。</param>
+    /// <param name="lang">软件 UI 语言。国际服用于请求头；国服/国际服均用于落库后名称回写目标语言。</param>
     /// <param name="progress">进度报告回调（显示“正在获取 独家频段 第 X 页”等）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>成功同步的玩家 UID；失败或无记录时返回 0。</returns>
@@ -225,21 +226,16 @@ internal class ZZZGachaService : GachaLogService
             return 0;
         }
 
-        // requestLanguage: global 场景下，用于更新 HoYoLAB 请求头语言。
-        // recordLanguage: 用于本地落库语言标记与 item_type 映射规则（国服固定 zh-cn）。
-        bool isGlobal = role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false;
-        string recordLanguage = "zh-cn";
-        string? requestLanguage = null;
-        if (isGlobal)
-        {
-            string sourceLanguage = string.IsNullOrWhiteSpace(lang)
+        // displayLanguage：软件 UI 语言，用于落库后把 Name 回写为当前界面语言。
+        // requestLanguage：仅国际服传给 HoYoLAB（CommonSendAsync 附加语言头）；国服接口忽略语言参数。
+        // recordLanguage：ToGachaLogItem 的 ItemType 映射与初始 Lang 标记；国服接口名称为中文，故固定 zh-cn。
+        string displayLanguage = LanguageUtil.FilterLanguage(
+            string.IsNullOrWhiteSpace(lang)
                 ? System.Globalization.CultureInfo.CurrentUICulture.Name
-                : lang;
-            string normalizedLanguage = LanguageUtil.FilterLanguage(sourceLanguage);
-
-            requestLanguage = normalizedLanguage;
-            recordLanguage = normalizedLanguage;
-        }
+                : lang);
+        bool isGlobal = role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false;
+        string recordLanguage = isGlobal ? displayLanguage : "zh-cn";
+        string? requestLanguage = isGlobal ? displayLanguage : null;
 
         long endId = 0;
         if (!all)
@@ -294,10 +290,10 @@ internal class ZZZGachaService : GachaLogService
         var newCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
         // 获取 {list.Count} 条记录，新增 {newCount - oldCount} 条记录
         progress?.Report(string.Format(Lang.GachaLogService_GetGachaResult, list.Count, newCount - oldCount));
-        // 本次确有拉取到记录时，检测是否出现本地未收录的新角色/物品，若有则静默联网补全物品信息（图标 + 名称）。
+        // 国服接口名称为中文时，靠 EnsureLocalizedNamesAfterInsertAsync 按软件语言回写 Name。
         if (list.Count > 0)
         {
-            await EnsureGachaInfoForUnknownItemsAsync(uid, lang, cancellationToken);
+            await EnsureLocalizedNamesAfterInsertAsync(uid, displayLanguage, cancellationToken);
         }
         return uid;
     }
