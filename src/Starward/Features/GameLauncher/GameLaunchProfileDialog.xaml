@@ -41,10 +41,11 @@
                       MaxHeight="432"
                       VerticalScrollBarVisibility="Hidden">
             <!--  表单共用列：标签左对齐 + 输入区左缘对齐（含 URL 指令预览）  -->
+            <!--  标签列限宽 + TextWrapping，避免英/德等长文案把输入区与右侧按钮挤叠  -->
             <!--  不用 RowSpacing：重命名行折叠时避免空行仍占间距；行间用 Margin 12  -->
             <Grid ColumnSpacing="8">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" MaxWidth="140" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -67,7 +68,8 @@
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Text="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchProfile}"
-                           TextAlignment="Left" />
+                           TextAlignment="Left"
+                           TextWrapping="Wrap" />
                 <ComboBox x:Name="ComboBox_LaunchProfile"
                           Grid.Row="0"
                           Grid.Column="1"
@@ -166,6 +168,7 @@
                            VerticalAlignment="Center"
                            Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ProfileName}"
                            TextAlignment="Left"
+                           TextWrapping="Wrap"
                            Visibility="{x:Bind RenameAreaVisibility, Mode=OneWay}" />
                 <TextBox x:Name="TextBox_ProfileName"
                          Grid.Row="1"
@@ -184,7 +187,8 @@
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Text="{x:Bind lang:Lang.GameLauncherSettingDialog_CommandLineArgument}"
-                           TextAlignment="Left" />
+                           TextAlignment="Left"
+                           TextWrapping="Wrap" />
                 <Grid Grid.Row="2"
                       Grid.Column="1"
                       Grid.ColumnSpan="4"
@@ -228,57 +232,65 @@
                     </Hyperlink>
                 </TextBlock>
 
+                <!--  自定义启动 | CMD 同一行、各占 1/2 宽；控件贴标签，长文案在标签列 MaxWidth 内换行  -->
                 <Grid Grid.Row="4"
                       Grid.Column="0"
                       Grid.ColumnSpan="5"
                       Margin="0,16,0,0"
                       ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <!--  ! TeachingTip 触发按钮  -->
-                    <Button x:Name="Button_ThirdPartyToolInfo"
-                            Width="20"
-                            Height="20"
-                            Padding="0"
-                            VerticalAlignment="Center"
-                            Click="Button_ThirdPartyToolInfo_Click"
-                            CornerRadius="10"
-                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                        <FontIcon FontSize="16"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                  Glyph="&#xE946;" />
-                    </Button>
-                    <TextBlock Grid.Column="1"
-                               VerticalAlignment="Center"
-                               Text="{x:Bind lang:Lang.LauncherPage_CustomStartExecutable}" />
-                    <!--  选择自定义启动程序  -->
-                    <Button Grid.Column="2"
-                            Height="36"
-                            BorderThickness="0"
-                            Command="{x:Bind ChangeThirdPartyPathCommand}"
-                            CornerRadius="8"
-                            IsEnabled="{x:Bind IsThirdPartyToolEnabled, Mode=OneWay}"
-                            Style="{ThemeResource AccentButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE7FC;" />
-                            <TextBlock Text="{x:Bind lang:Lang.Common_Select}" />
-                        </StackPanel>
-                    </Button>
-                    <!--  使用 CMD 启动游戏：与自定义启动程序互斥，靠右放置  -->
-                    <StackPanel Grid.Column="3"
-                                HorizontalAlignment="Right"
+                    <!--  左半：! + 标签 + Select（Select 紧贴标签；文字 MaxWidth + Wrap 保证可换行）  -->
+                    <Grid VerticalAlignment="Center" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="Button_ThirdPartyToolInfo"
+                                Width="20"
+                                Height="20"
+                                Padding="0"
                                 VerticalAlignment="Center"
-                                Orientation="Horizontal"
-                                Spacing="4">
-                        <ToggleSwitch MinWidth="0"
-                                      IsEnabled="{x:Bind IsCmdToggleEnabled, Mode=OneWay}"
-                                      IsOn="{x:Bind StartGameWithCMD, Mode=TwoWay}"
-                                      OffContent="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchGameUsingCMD}"
-                                      OnContent="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchGameUsingCMD}" />
+                                Click="Button_ThirdPartyToolInfo_Click"
+                                CornerRadius="10"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                            <FontIcon FontSize="16"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE946;" />
+                        </Button>
+                        <TextBlock Grid.Column="1"
+                                   MaxWidth="130"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind lang:Lang.LauncherPage_CustomStartExecutable}"
+                                   TextWrapping="WrapWholeWords" />
+                        <Button Grid.Column="2"
+                                Height="36"
+                                VerticalAlignment="Center"
+                                BorderThickness="0"
+                                Command="{x:Bind ChangeThirdPartyPathCommand}"
+                                CornerRadius="8"
+                                IsEnabled="{x:Bind IsThirdPartyToolEnabled, Mode=OneWay}"
+                                Style="{ThemeResource AccentButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE7FC;" />
+                                <TextBlock Text="{x:Bind lang:Lang.Common_Select}" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                    <!--  右半：? + 标签 + 开关整体靠右；问号在左、开关紧贴标签；文字可换行  -->
+                    <Grid Grid.Column="1"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center"
+                          ColumnSpacing="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
                         <Button Padding="4"
                                 VerticalAlignment="Center"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
@@ -296,7 +308,20 @@
                                 </Flyout>
                             </Button.Flyout>
                         </Button>
-                    </StackPanel>
+                        <TextBlock Grid.Column="1"
+                                   MaxWidth="160"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind lang:Lang.GameLauncherSettingDialog_LaunchGameUsingCMD}"
+                                   TextWrapping="WrapWholeWords" />
+                        <!--  On/Off 文案相同，标签外置；开关紧贴文案右侧  -->
+                        <ToggleSwitch Grid.Column="2"
+                                      MinWidth="0"
+                                      VerticalAlignment="Center"
+                                      IsEnabled="{x:Bind IsCmdToggleEnabled, Mode=OneWay}"
+                                      IsOn="{x:Bind StartGameWithCMD, Mode=TwoWay}"
+                                      OffContent="{x:Null}"
+                                      OnContent="{x:Null}" />
+                    </Grid>
                     <TeachingTip x:Name="TeachingTip_ThirdPartyTool"
                                  IsLightDismissEnabled="True"
                                  PreferredPlacement="Top"
@@ -351,7 +376,8 @@
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Text="{x:Bind lang:Lang.GameLauncherSettingDialog_UrlPreviewCommand}"
-                           TextAlignment="Left" />
+                           TextAlignment="Left"
+                           TextWrapping="Wrap" />
                 <Grid Grid.Row="6"
                       Grid.Column="1"
                       Grid.ColumnSpan="4"
@@ -406,9 +432,11 @@
                                 Orientation="Horizontal"
                                 Spacing="8"
                                 Visibility="{x:Bind LoginAccountVisibility, Mode=OneWay}">
-                        <TextBlock VerticalAlignment="Center"
+                        <TextBlock MaxWidth="100"
+                                   VerticalAlignment="Center"
                                    Text="{x:Bind lang:Lang.GameLauncherSettingDialog_LoginAccount}"
-                                   TextAlignment="Left" />
+                                   TextAlignment="Left"
+                                   TextWrapping="Wrap" />
                         <ComboBox MinWidth="200"
                                   Height="36"
                                   HorizontalAlignment="Left"

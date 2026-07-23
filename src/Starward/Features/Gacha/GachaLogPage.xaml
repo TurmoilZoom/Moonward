@@ -170,12 +170,26 @@
                 </StackPanel>
                 <Button.Flyout>
                     <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
-                        <StackPanel MinWidth="200" Spacing="8">
+                        <!--  显式 Presenter：关掉横向滚动；英文长说明在无 MaxWidth 的 StackPanel 里会按单行测宽，底部易出横条  -->
+                        <Flyout.FlyoutPresenterStyle>
+                            <Style BasedOn="{StaticResource DefaultFlyoutPresenterStyle}" TargetType="FlyoutPresenter">
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
+                                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+                                <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled" />
+                                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+                            </Style>
+                        </Flyout.FlyoutPresenterStyle>
+                        <StackPanel MinWidth="240"
+                                    MaxWidth="320"
+                                    Spacing="8">
                             <!--  其他设置  -->
                             <TextBlock FontSize="16" Text="{x:Bind lang:Lang.GachaLogPage_OtherSettings}" />
 
                             <!--  复制 URL  -->
-                            <Button Margin="0,8,0,0" Command="{x:Bind CopyUrlCommand}">
+                            <Button Margin="0,8,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{x:Bind CopyUrlCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Name="FontIcon_CopyUrl"
                                               FontSize="16"
@@ -187,13 +201,14 @@
                             <!--  总是出现 Authkey Timeout  -->
                             <TextBlock Margin="0,8,0,0"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind lang:Lang.GachaLogPage_AuthkeyTimeoutAlwaysOccurs}" />
+                                       Text="{x:Bind lang:Lang.GachaLogPage_AuthkeyTimeoutAlwaysOccurs}"
+                                       TextWrapping="Wrap" />
                             <TextBlock Margin="0,-4,0,0"
                                        FontSize="12"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        Text="{x:Bind lang:Lang.GachaLogPage_RestartGameAfterDeletingTheCacheFolder}"
                                        TextWrapping="Wrap" />
-                            <Button Command="{x:Bind DeleteGachaCacheFolderCommand}">
+                            <Button HorizontalAlignment="Stretch" Command="{x:Bind DeleteGachaCacheFolderCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon FontSize="16" Glyph="&#xEA99;" />
                                     <!--  删除缓存文件夹  -->
