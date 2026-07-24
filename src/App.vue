@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import {
+  codeSigning,
   featureCards,
   games,
   intro,
@@ -91,6 +92,7 @@ onUnmounted(() => {
           <a href="#features">{{ locale === 'zh' ? '功能' : 'Features' }}</a>
           <a href="#flow">{{ locale === 'zh' ? '启动流程' : 'Launch flow' }}</a>
           <a href="#install">{{ locale === 'zh' ? '安装' : 'Install' }}</a>
+          <a href="#code-signing">{{ locale === 'zh' ? '代码签名' : 'Code signing' }}</a>
           <a :href="links.github" target="_blank" rel="noopener noreferrer">GitHub</a>
           <button type="button" class="lang" @click="toggleLocale">
             {{ locale === 'zh' ? 'EN' : '中文' }}
@@ -360,6 +362,52 @@ onUnmounted(() => {
           </div>
         </div>
       </section>
+
+      <!-- Code signing policy (SignPath Foundation requirement for OSS homepage) -->
+      <section id="code-signing" class="block signing-block" aria-labelledby="signing-heading">
+        <p class="section-kicker">{{ t(codeSigning.kicker) }}</p>
+        <h2 id="signing-heading">{{ t(codeSigning.title) }}</h2>
+        <p class="signing-attribution">
+          Free code signing provided by
+          <a :href="links.signpath" target="_blank" rel="noopener noreferrer">SignPath.io</a>,
+          certificate by
+          <a :href="links.signpathFoundation" target="_blank" rel="noopener noreferrer">SignPath Foundation</a>.
+        </p>
+        <p class="section-lead">{{ t(codeSigning.lead) }}</p>
+
+        <h3 class="signing-roles-title">{{ t(codeSigning.rolesHeading) }}</h3>
+        <div class="signing-roles" role="list">
+          <div v-for="row in codeSigning.roles" :key="row.members" class="signing-role" role="listitem">
+            <span class="signing-role-name">{{ t(row.role) }}</span>
+            <a
+              class="signing-role-member mono"
+              :href="codeSigning.maintainerUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >{{ row.members }}</a>
+          </div>
+        </div>
+
+        <p class="signing-links">
+          <a
+            class="text-link"
+            :href="locale === 'zh' ? links.codeSigningPolicyZh : links.codeSigningPolicy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{ t(codeSigning.fullPolicy) }}</a>
+          <span class="signing-sep" aria-hidden="true">·</span>
+          <a
+            class="text-link"
+            :href="locale === 'zh' ? links.privacyZh : links.privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >{{ t(codeSigning.privacy) }}</a>
+          <span class="signing-sep" aria-hidden="true">·</span>
+          <a class="text-link" :href="links.download" target="_blank" rel="noopener noreferrer">
+            {{ locale === 'zh' ? '官方下载' : 'Official downloads' }}
+          </a>
+        </p>
+      </section>
     </main>
 
     <footer class="foot">
@@ -373,6 +421,8 @@ onUnmounted(() => {
         </p>
         <p class="meta mono">
           <a :href="links.license" target="_blank" rel="noopener noreferrer">MIT</a>
+          ·
+          <a href="#code-signing">Code signing policy</a>
           ·
           <a :href="links.github" target="_blank" rel="noopener noreferrer">TurmoilZoom/Moonward</a>
         </p>
@@ -1055,6 +1105,83 @@ onUnmounted(() => {
   background: var(--accent-soft);
 }
 
+/* —— Code signing policy —— */
+.signing-block {
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--line));
+}
+
+.signing-attribution {
+  margin: 0.35rem 0 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.signing-attribution a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.signing-attribution a:hover {
+  color: var(--accent-hover);
+}
+
+.signing-roles-title {
+  margin: 1rem 0 0.55rem;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.signing-roles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.signing-role {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+}
+
+.signing-role-name {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.signing-role-member {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.signing-role-member:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.signing-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  margin-top: 1rem;
+}
+
+.signing-sep {
+  color: var(--muted);
+}
+
 /* —— Footer —— */
 .foot {
   border-top: 1px solid var(--line);
@@ -1099,6 +1226,10 @@ onUnmounted(() => {
   }
 
   .install-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .signing-roles {
     grid-template-columns: 1fr;
   }
 

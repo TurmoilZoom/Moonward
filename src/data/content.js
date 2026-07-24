@@ -4,6 +4,14 @@ export const links = {
   upstream: 'https://github.com/Scighost/Starward',
   issues: 'https://github.com/TurmoilZoom/Moonward/issues',
   license: 'https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/LICENSE',
+  codeSigningPolicy:
+    'https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/CodeSigningPolicy.md',
+  codeSigningPolicyZh:
+    'https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/CodeSigningPolicy.zh-CN.md',
+  privacy: 'https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/Privacy.md',
+  privacyZh: 'https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/Privacy.zh-CN.md',
+  signpath: 'https://about.signpath.io',
+  signpathFoundation: 'https://signpath.org',
 }
 
 export const games = {
@@ -198,3 +206,34 @@ export const requirements = [
     },
   },
 ]
+
+/** SignPath OSS free code signing — required "Code signing policy" for homepage / download pages. */
+export const codeSigning = {
+  title: { zh: '代码签名策略', en: 'Code signing policy' },
+  kicker: { zh: '安全与分发', en: 'Security' },
+  // Required exact English attribution (SignPath Foundation terms).
+  attribution:
+    'Free code signing provided by SignPath.io, certificate by SignPath Foundation',
+  lead: {
+    zh: 'Windows 发行包通过 SignPath 进行代码签名。私钥由 SignPath 托管于 HSM，本项目不保存私钥。请仅从官方 GitHub Releases 下载。',
+    en: 'Windows release packages are code-signed via SignPath. The private key is held by SignPath on an HSM; this project does not store it. Download only from official GitHub Releases.',
+  },
+  rolesHeading: { zh: '团队角色', en: 'Team roles' },
+  roles: [
+    {
+      role: { zh: 'Authors（提交者）', en: 'Authors (committers)' },
+      members: '@TurmoilZoom',
+    },
+    {
+      role: { zh: 'Reviewers（审查者）', en: 'Reviewers' },
+      members: '@TurmoilZoom',
+    },
+    {
+      role: { zh: 'Approvers（签名批准）', en: 'Approvers (signing requests)' },
+      members: '@TurmoilZoom',
+    },
+  ],
+  maintainerUrl: 'https://github.com/TurmoilZoom',
+  fullPolicy: { zh: '完整策略文档', en: 'Full policy' },
+  privacy: { zh: '隐私策略', en: 'Privacy policy' },
+}
