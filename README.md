@@ -26,3 +26,18 @@
 
 上游项目：[Scighost/Starward](https://github.com/Scighost/Starward)  
 许可证：[MIT](LICENSE)
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+- Full policy (roles, what is signed, build process): [docs/CodeSigningPolicy.md](docs/CodeSigningPolicy.md) · [中文](docs/CodeSigningPolicy.zh-CN.md)
+- Privacy policy: [docs/Privacy.md](docs/Privacy.md) · [中文](docs/Privacy.zh-CN.md)
+
+Team roles (single maintainer):
+
+| Role | Members |
+|------|---------|
+| Authors (committers) | [@TurmoilZoom](https://github.com/TurmoilZoom) |
+| Reviewers | [@TurmoilZoom](https://github.com/TurmoilZoom) |
+| Approvers (signing requests) | [@TurmoilZoom](https://github.com/TurmoilZoom) |
