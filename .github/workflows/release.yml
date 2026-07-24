@@ -101,6 +101,15 @@ jobs:
 
     - name: Upload to GitHub Release
       shell: pwsh
+      # SignPath 要求在下载 / Release 页标明 Code signing policy（见 docs/CodeSigningPolicy.md）。
+      # 用 env 多行字符串，避免 pwsh here-string 顶格 @"/"@ 破坏 YAML 缩进块。
+      env:
+        RELEASE_NOTES: |
+          ## Code signing policy
+
+          Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+          See the full [Code signing policy](https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/CodeSigningPolicy.md) and [Privacy policy](https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/Privacy.md).
       run: |
         $ErrorActionPreference = "Stop"
         $version = $env:Version
@@ -144,14 +153,7 @@ jobs:
         Write-Host "Uploading $($files.Count) asset(s) from $releaseDir :"
         $files | ForEach-Object { Write-Host "  $($_.Name)" }
 
-        # SignPath 要求在下载 / Release 页标明 Code signing policy（见 docs/CodeSigningPolicy.md）。
-        $notes = @"
-## Code signing policy
-
-Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
-
-See the full [Code signing policy](https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/CodeSigningPolicy.md) and [Privacy policy](https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/Privacy.md).
-"@
+        $notes = $env:RELEASE_NOTES
         $createArgs = @(
           "release", "create", $version,
           "--title", $version,
