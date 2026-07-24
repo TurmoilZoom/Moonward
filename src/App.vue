@@ -1058,9 +1058,7 @@ onUnmounted(() => {
 }
 
 /* —— Install —— */
-.install-block {
-  margin-bottom: 0;
-}
+/* install 不再是 main 内最后一块，沿用 .block 的 margin-bottom 与下方签名区隔开 */
 
 .install-grid {
   display: grid;
