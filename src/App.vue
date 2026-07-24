@@ -1105,6 +1105,8 @@ onUnmounted(() => {
 
 /* —— Code signing policy —— */
 .signing-block {
+  /* 作为 main 内最后一块：去掉 .block 的 margin-bottom，与原先 install 贴页脚的处理一致 */
+  margin-bottom: 0;
   border-color: color-mix(in srgb, var(--accent) 22%, var(--line));
 }
 
