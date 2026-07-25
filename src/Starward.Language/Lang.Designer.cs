@@ -527,6 +527,357 @@ namespace Starward.Language {
                 return ResourceManager.GetString("CaptchaLogin_Error_UnknownWithMessage", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Common Command Line Arguments 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_PickerTitle {
+            get {
+                return ResourceManager.GetString("CmdArg_PickerTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Pick common arguments 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_PickerButtonTooltip {
+            get {
+                return ResourceManager.GetString("CmdArg_PickerButtonTooltip", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Combined result 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_CombinedResult {
+            get {
+                return ResourceManager.GetString("CmdArg_CombinedResult", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Selected arguments appear here; you can also edit freely 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_CombinedResultPlaceholder {
+            get {
+                return ResourceManager.GetString("CmdArg_CombinedResultPlaceholder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Whether an argument takes effect depends on the Unity version… 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_PickerHint {
+            get {
+                return ResourceManager.GetString("CmdArg_PickerHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Display 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Category_Display {
+            get {
+                return ResourceManager.GetString("CmdArg_Category_Display", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Resolution &amp; Monitor 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Category_Resolution {
+            get {
+                return ResourceManager.GetString("CmdArg_Category_Resolution", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Graphics 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Category_Graphics {
+            get {
+                return ResourceManager.GetString("CmdArg_Category_Graphics", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Other 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Category_Other {
+            get {
+                return ResourceManager.GetString("CmdArg_Category_Other", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Windowed 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Windowed {
+            get {
+                return ResourceManager.GetString("CmdArg_Windowed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Start in windowed mode 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Windowed_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_Windowed_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Fullscreen 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Fullscreen {
+            get {
+                return ResourceManager.GetString("CmdArg_Fullscreen", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Start in fullscreen mode 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Fullscreen_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_Fullscreen_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Borderless window 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_PopupWindow {
+            get {
+                return ResourceManager.GetString("CmdArg_PopupWindow", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Borderless window without title bar 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_PopupWindow_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_PopupWindow_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Exclusive fullscreen 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_WindowModeExclusive {
+            get {
+                return ResourceManager.GetString("CmdArg_WindowModeExclusive", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Request exclusive fullscreen 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_WindowModeExclusive_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_WindowModeExclusive_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Borderless fullscreen 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_WindowModeBorderless {
+            get {
+                return ResourceManager.GetString("CmdArg_WindowModeBorderless", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Request borderless fullscreen 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_WindowModeBorderless_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_WindowModeBorderless_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Screen width 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ScreenWidth {
+            get {
+                return ResourceManager.GetString("CmdArg_ScreenWidth", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Override window/render width 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ScreenWidth_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_ScreenWidth_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Screen height 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ScreenHeight {
+            get {
+                return ResourceManager.GetString("CmdArg_ScreenHeight", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Override window/render height 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ScreenHeight_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_ScreenHeight_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Monitor index 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Monitor {
+            get {
+                return ResourceManager.GetString("CmdArg_Monitor", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Start on the N-th monitor 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Monitor_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_Monitor_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Force Direct3D 11 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceD3D11 {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceD3D11", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Force the D3D11 graphics API 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceD3D11_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceD3D11_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Force Direct3D 12 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceD3D12 {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceD3D12", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Request D3D12 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceD3D12_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceD3D12_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Force Vulkan 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceVulkan {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceVulkan", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Force the Vulkan graphics API 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceVulkan_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceVulkan_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Prefer low-power GPU 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceLowPowerDevice {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceLowPowerDevice", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Prefer integrated/low-power GPU 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceLowPowerDevice_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceLowPowerDevice_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Single-threaded rendering 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceGfxDirect {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceGfxDirect", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Disable multi-threaded rendering 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_ForceGfxDirect_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_ForceGfxDirect_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Disable log file 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_NoLog {
+            get {
+                return ResourceManager.GetString("CmdArg_NoLog", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Do not write the Unity player log 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_NoLog_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_NoLog_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Single instance 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_SingleInstance {
+            get {
+                return ResourceManager.GetString("CmdArg_SingleInstance", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Allow only one game instance 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_SingleInstance_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_SingleInstance_Desc", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Challenge Attempts 的本地化字符串。

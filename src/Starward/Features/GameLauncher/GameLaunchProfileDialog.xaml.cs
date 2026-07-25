@@ -752,6 +752,30 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
+    /// 打开命令行参数勾选面板前，用当前输入框内容同步预设勾选状态。
+    /// 绝区零（及已开启全局 DX12）时，<c>-use-d3d12</c> 由应用全局开关管理，列表项置灰并同步勾选。
+    /// </summary>
+    private void Flyout_CommandLineArgumentPicker_Opening(object sender, object e)
+    {
+        // nap：DX12 始终走全局开关；其它游戏仅在已开启全局 DX12 时按只读同步，避免与启动附加重复
+        bool isDx12ManagedByApp = CurrentGameBiz.Game is GameBiz.nap || ShowDx12Argument;
+        CommandLineArgumentPicker.LoadFromArgument(
+            EditingArgument,
+            isDx12ManagedByApp: isDx12ManagedByApp,
+            isDx12Enabled: ShowDx12Argument);
+    }
+
+
+    /// <summary>
+    /// 勾选面板组合结果变更时写回配置文件的命令行参数输入框。
+    /// </summary>
+    private void CommandLineArgumentPicker_CombinedArgumentChanged(object sender, string? argument)
+    {
+        EditingArgument = argument;
+    }
+
+
+    /// <summary>
     /// 「登录账号」下拉选项：与米游社工具箱角色同源。
     /// </summary>
     public sealed class LoginAccountOption

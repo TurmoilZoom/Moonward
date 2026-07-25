@@ -3260,4 +3260,121 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>Накопленные очки</value>
   </data>
+  <data name="CmdArg_PickerTitle" xml:space="preserve">
+    <value>Common Command Line Arguments</value>
+  </data>
+  <data name="CmdArg_PickerButtonTooltip" xml:space="preserve">
+    <value>Pick common arguments</value>
+  </data>
+  <data name="CmdArg_CombinedResult" xml:space="preserve">
+    <value>Combined result</value>
+  </data>
+  <data name="CmdArg_CombinedResultPlaceholder" xml:space="preserve">
+    <value>Selected arguments appear here; you can also edit freely</value>
+  </data>
+  <data name="CmdArg_PickerHint" xml:space="preserve">
+    <value>Whether an argument takes effect depends on the Unity version used by the game; some options may be ignored. Borderless window and DX12 in game settings also append arguments automatically at launch.</value>
+  </data>
+  <data name="CmdArg_Category_Display" xml:space="preserve">
+    <value>Display</value>
+  </data>
+  <data name="CmdArg_Category_Resolution" xml:space="preserve">
+    <value>Resolution &amp; Monitor</value>
+  </data>
+  <data name="CmdArg_Category_Graphics" xml:space="preserve">
+    <value>Graphics</value>
+  </data>
+  <data name="CmdArg_Category_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="CmdArg_Windowed" xml:space="preserve">
+    <value>Windowed</value>
+  </data>
+  <data name="CmdArg_Windowed_Desc" xml:space="preserve">
+    <value>Start in windowed mode (-screen-fullscreen 0).</value>
+  </data>
+  <data name="CmdArg_Fullscreen" xml:space="preserve">
+    <value>Fullscreen</value>
+  </data>
+  <data name="CmdArg_Fullscreen_Desc" xml:space="preserve">
+    <value>Start in fullscreen mode (-screen-fullscreen 1).</value>
+  </data>
+  <data name="CmdArg_PopupWindow" xml:space="preserve">
+    <value>Borderless window</value>
+  </data>
+  <data name="CmdArg_PopupWindow_Desc" xml:space="preserve">
+    <value>Borderless window without title bar; common for multi-monitor setups. Game settings also have a global toggle that appends this at launch.</value>
+  </data>
+  <data name="CmdArg_WindowModeExclusive" xml:space="preserve">
+    <value>Exclusive fullscreen</value>
+  </data>
+  <data name="CmdArg_WindowModeExclusive_Desc" xml:space="preserve">
+    <value>Request exclusive fullscreen (-window-mode exclusive). Support varies by game/Unity version.</value>
+  </data>
+  <data name="CmdArg_WindowModeBorderless" xml:space="preserve">
+    <value>Borderless fullscreen</value>
+  </data>
+  <data name="CmdArg_WindowModeBorderless_Desc" xml:space="preserve">
+    <value>Request borderless fullscreen (-window-mode borderless). Support varies by game/Unity version.</value>
+  </data>
+  <data name="CmdArg_ScreenWidth" xml:space="preserve">
+    <value>Screen width</value>
+  </data>
+  <data name="CmdArg_ScreenWidth_Desc" xml:space="preserve">
+    <value>Override window/render width in pixels (-screen-width).</value>
+  </data>
+  <data name="CmdArg_ScreenHeight" xml:space="preserve">
+    <value>Screen height</value>
+  </data>
+  <data name="CmdArg_ScreenHeight_Desc" xml:space="preserve">
+    <value>Override window/render height in pixels (-screen-height).</value>
+  </data>
+  <data name="CmdArg_Monitor" xml:space="preserve">
+    <value>Monitor index</value>
+  </data>
+  <data name="CmdArg_Monitor_Desc" xml:space="preserve">
+    <value>Start on the N-th monitor (1-based, -monitor).</value>
+  </data>
+  <data name="CmdArg_ForceD3D11" xml:space="preserve">
+    <value>Force Direct3D 11</value>
+  </data>
+  <data name="CmdArg_ForceD3D11_Desc" xml:space="preserve">
+    <value>Force the D3D11 graphics API; useful when DX12 causes issues.</value>
+  </data>
+  <data name="CmdArg_ForceD3D12" xml:space="preserve">
+    <value>Force Direct3D 12</value>
+  </data>
+  <data name="CmdArg_ForceD3D12_Desc" xml:space="preserve">
+    <value>Request D3D12 (-use-d3d12). Enabling DX12 in app settings also appends this automatically.</value>
+  </data>
+  <data name="CmdArg_ForceVulkan" xml:space="preserve">
+    <value>Force Vulkan</value>
+  </data>
+  <data name="CmdArg_ForceVulkan_Desc" xml:space="preserve">
+    <value>Force the Vulkan graphics API. May not be supported by all miHoYo PC clients.</value>
+  </data>
+  <data name="CmdArg_ForceLowPowerDevice" xml:space="preserve">
+    <value>Prefer low-power GPU</value>
+  </data>
+  <data name="CmdArg_ForceLowPowerDevice_Desc" xml:space="preserve">
+    <value>Prefer integrated/low-power GPU (-force-low-power-device); helpful on hybrid-GPU laptops.</value>
+  </data>
+  <data name="CmdArg_ForceGfxDirect" xml:space="preserve">
+    <value>Single-threaded rendering</value>
+  </data>
+  <data name="CmdArg_ForceGfxDirect_Desc" xml:space="preserve">
+    <value>Disable multi-threaded rendering (-force-gfx-direct); can help with some GPU driver issues.</value>
+  </data>
+  <data name="CmdArg_NoLog" xml:space="preserve">
+    <value>Disable log file</value>
+  </data>
+  <data name="CmdArg_NoLog_Desc" xml:space="preserve">
+    <value>Do not write the Unity player log (-nolog).</value>
+  </data>
+  <data name="CmdArg_SingleInstance" xml:space="preserve">
+    <value>Single instance</value>
+  </data>
+  <data name="CmdArg_SingleInstance_Desc" xml:space="preserve">
+    <value>Allow only one game instance (-single-instance).</value>
+  </data>
 </root>

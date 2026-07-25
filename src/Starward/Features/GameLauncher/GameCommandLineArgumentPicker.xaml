@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Features.GameLauncher.GameCommandLineArgumentPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
+             xmlns:local="using:Starward.Features.GameLauncher"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sh="using:Starward.Helpers"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <Grid Width="420" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="{x:Bind lang:Lang.CmdArg_PickerTitle}"
+                   TextWrapping="Wrap" />
+
+        <ScrollViewer Grid.Row="1"
+                      MaxHeight="360"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{x:Bind Groups}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="local:GameCommandLineArgumentGroup">
+                        <StackPanel Margin="0,0,0,12" Spacing="6">
+                            <TextBlock FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{x:Bind Title}" />
+                            <ItemsControl ItemsSource="{x:Bind Options}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="local:GameCommandLineArgumentOption">
+                                        <Grid Margin="0,0,0,8" ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <CheckBox MinHeight="0"
+                                                      VerticalAlignment="Top"
+                                                      Checked="Option_CheckedChanged"
+                                                      IsChecked="{x:Bind IsSelected, Mode=TwoWay}"
+                                                      IsEnabled="{x:Bind IsEnabled, Mode=OneWay}"
+                                                      Unchecked="Option_CheckedChanged">
+                                                <StackPanel Spacing="2">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Text="{x:Bind Title}" TextWrapping="WrapWholeWords" />
+                                                        <TextBlock VerticalAlignment="Center"
+                                                                   FontFamily="Consolas"
+                                                                   FontSize="12"
+                                                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                   Text="{x:Bind TokenPreview, Mode=OneWay}" />
+                                                    </StackPanel>
+                                                    <TextBlock MaxWidth="300"
+                                                               FontSize="12"
+                                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                               Text="{x:Bind Description}"
+                                                               TextWrapping="WrapWholeWords" />
+                                                </StackPanel>
+                                            </CheckBox>
+
+                                            <!--  需要取值时显示输入框（宽高、显示器序号、模式值）  -->
+                                            <TextBox Grid.Column="1"
+                                                     Width="88"
+                                                     VerticalAlignment="Top"
+                                                     IsSpellCheckEnabled="False"
+                                                     PlaceholderText="{x:Bind DefaultValue}"
+                                                     Text="{x:Bind Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     TextChanged="OptionValue_TextChanged"
+                                                     Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowValueEditor)}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!--  组合结果：与父对话框命令行输入框同步  -->
+        <StackPanel Grid.Row="2" Spacing="6">
+            <TextBlock FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.CmdArg_CombinedResult}" />
+            <TextBox MinHeight="36"
+                     AcceptsReturn="False"
+                     FontFamily="Consolas"
+                     FontSize="12"
+                     IsSpellCheckEnabled="False"
+                     PlaceholderText="{x:Bind lang:Lang.CmdArg_CombinedResultPlaceholder}"
+                     Text="{x:Bind CombinedArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     TextChanged="CombinedArgument_TextChanged" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Spacing="4">
+            <TextBlock FontSize="11"
+                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                       Text="{x:Bind lang:Lang.CmdArg_PickerHint}"
+                       TextWrapping="Wrap" />
+            <HyperlinkButton Padding="0"
+                             FontSize="11"
+                             NavigateUri="https://docs.unity3d.com/Manual/PlayerCommandLineArguments.html">
+                <TextBlock Text="{x:Bind lang:Lang.GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument}"
+                           TextWrapping="Wrap" />
+            </HyperlinkButton>
+        </StackPanel>
+    </Grid>
+
+</UserControl>

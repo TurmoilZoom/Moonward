@@ -3239,4 +3239,121 @@
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>週期積分</value>
   </data>
+  <data name="CmdArg_PickerTitle" xml:space="preserve">
+    <value>常用指令行參數</value>
+  </data>
+  <data name="CmdArg_PickerButtonTooltip" xml:space="preserve">
+    <value>勾選常用參數</value>
+  </data>
+  <data name="CmdArg_CombinedResult" xml:space="preserve">
+    <value>組合結果</value>
+  </data>
+  <data name="CmdArg_CombinedResultPlaceholder" xml:space="preserve">
+    <value>勾選參數後顯示在這裡，也可直接編輯</value>
+  </data>
+  <data name="CmdArg_PickerHint" xml:space="preserve">
+    <value>參數是否生效取決於遊戲使用的 Unity 版本，部分選項可能被忽略。遊戲設定中的「無邊框視窗」與 DX12 開關也會在啟動時自動附加參數。</value>
+  </data>
+  <data name="CmdArg_Category_Display" xml:space="preserve">
+    <value>顯示模式</value>
+  </data>
+  <data name="CmdArg_Category_Resolution" xml:space="preserve">
+    <value>解析度與顯示器</value>
+  </data>
+  <data name="CmdArg_Category_Graphics" xml:space="preserve">
+    <value>圖形</value>
+  </data>
+  <data name="CmdArg_Category_Other" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="CmdArg_Windowed" xml:space="preserve">
+    <value>視窗化</value>
+  </data>
+  <data name="CmdArg_Windowed_Desc" xml:space="preserve">
+    <value>以視窗模式啟動（-screen-fullscreen 0）。</value>
+  </data>
+  <data name="CmdArg_Fullscreen" xml:space="preserve">
+    <value>全螢幕</value>
+  </data>
+  <data name="CmdArg_Fullscreen_Desc" xml:space="preserve">
+    <value>以全螢幕模式启动（-screen-fullscreen 1）。</value>
+  </data>
+  <data name="CmdArg_PopupWindow" xml:space="preserve">
+    <value>無邊框視窗</value>
+  </data>
+  <data name="CmdArg_PopupWindow_Desc" xml:space="preserve">
+    <value>无标题栏的無邊框視窗，多屏场景较常用。游戏设置中也有全局开关，启动时会自动附加该参数。</value>
+  </data>
+  <data name="CmdArg_WindowModeExclusive" xml:space="preserve">
+    <value>独占全螢幕</value>
+  </data>
+  <data name="CmdArg_WindowModeExclusive_Desc" xml:space="preserve">
+    <value>请求独占全螢幕（-window-mode exclusive）。是否支持取决于游戏/Unity 版本。</value>
+  </data>
+  <data name="CmdArg_WindowModeBorderless" xml:space="preserve">
+    <value>无边框全螢幕</value>
+  </data>
+  <data name="CmdArg_WindowModeBorderless_Desc" xml:space="preserve">
+    <value>请求无边框全螢幕（-window-mode borderless）。是否支持取决于游戏/Unity 版本。</value>
+  </data>
+  <data name="CmdArg_ScreenWidth" xml:space="preserve">
+    <value>寬度</value>
+  </data>
+  <data name="CmdArg_ScreenWidth_Desc" xml:space="preserve">
+    <value>覆盖窗口/渲染寬度（像素，-screen-width）。</value>
+  </data>
+  <data name="CmdArg_ScreenHeight" xml:space="preserve">
+    <value>高度</value>
+  </data>
+  <data name="CmdArg_ScreenHeight_Desc" xml:space="preserve">
+    <value>覆寫視窗/渲染高度（像素，-screen-height）。</value>
+  </data>
+  <data name="CmdArg_Monitor" xml:space="preserve">
+    <value>顯示器序號</value>
+  </data>
+  <data name="CmdArg_Monitor_Desc" xml:space="preserve">
+    <value>在第 N 塊顯示器上啟動（從 1 開始，-monitor）。</value>
+  </data>
+  <data name="CmdArg_ForceD3D11" xml:space="preserve">
+    <value>強制 Direct3D 11</value>
+  </data>
+  <data name="CmdArg_ForceD3D11_Desc" xml:space="preserve">
+    <value>强制使用 D3D11 圖形 API；DX12 异常时可尝试。</value>
+  </data>
+  <data name="CmdArg_ForceD3D12" xml:space="preserve">
+    <value>強制 Direct3D 12</value>
+  </data>
+  <data name="CmdArg_ForceD3D12_Desc" xml:space="preserve">
+    <value>請求使用 D3D12（-use-d3d12）。應用設定中開啟 DX12 時也會自動附加。</value>
+  </data>
+  <data name="CmdArg_ForceVulkan" xml:space="preserve">
+    <value>強制 Vulkan</value>
+  </data>
+  <data name="CmdArg_ForceVulkan_Desc" xml:space="preserve">
+    <value>强制使用 Vulkan 圖形 API。并非所有米哈游 PC 客户端都支持。</value>
+  </data>
+  <data name="CmdArg_ForceLowPowerDevice" xml:space="preserve">
+    <value>優先低功耗 GPU</value>
+  </data>
+  <data name="CmdArg_ForceLowPowerDevice_Desc" xml:space="preserve">
+    <value>優先使用整合/低功耗 GPU（-force-low-power-device），混合顯示卡筆電可能有用。</value>
+  </data>
+  <data name="CmdArg_ForceGfxDirect" xml:space="preserve">
+    <value>單執行緒渲染</value>
+  </data>
+  <data name="CmdArg_ForceGfxDirect_Desc" xml:space="preserve">
+    <value>停用多執行緒渲染（-force-gfx-direct），部分顯示卡驅動問題時可嘗試。</value>
+  </data>
+  <data name="CmdArg_NoLog" xml:space="preserve">
+    <value>停用日誌檔</value>
+  </data>
+  <data name="CmdArg_NoLog_Desc" xml:space="preserve">
+    <value>不寫入 Unity 玩家記錄（-nolog）。</value>
+  </data>
+  <data name="CmdArg_SingleInstance" xml:space="preserve">
+    <value>單實例</value>
+  </data>
+  <data name="CmdArg_SingleInstance_Desc" xml:space="preserve">
+    <value>僅允許執行一個遊戲實例（-single-instance）。</value>
+  </data>
 </root>

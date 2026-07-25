@@ -180,7 +180,7 @@
                          Text="{x:Bind EditingName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Visibility="{x:Bind RenameAreaVisibility, Mode=OneWay}" />
 
-                <!--  命令行参数：输入区横跨至与配置文件行删除按钮右缘对齐；DX12 徽章贴右  -->
+                <!--  命令行参数：输入区 + 预设勾选 + DX12 徽章  -->
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
                            Margin="0,12,0,0"
@@ -197,6 +197,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <!--  保持单行（默认 NoWrap），以显示 WinUI 自带清除按钮  -->
                     <TextBox MinWidth="160"
@@ -204,7 +205,7 @@
                              HorizontalTextAlignment="Left"
                              IsSpellCheckEnabled="False"
                              Text="{x:Bind EditingArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <!--  DX12 自动追加参数：只读、不可编辑、强调色，勾选 DX12 时显示  -->
+                    <!--  DX12 自动追加参数：只读徽章，勾选 DX12 时显示；「勾选常用参数」紧随其后  -->
                     <Border Grid.Column="1"
                             VerticalAlignment="Center"
                             Padding="8,4,8,4"
@@ -218,6 +219,28 @@
                                    IsTextSelectionEnabled="False"
                                    Text="-use-d3d12" />
                     </Border>
+                    <!--  打开常用参数勾选面板（放在 -use-d3d12 徽章后面）  -->
+                    <Button x:Name="Button_CommandLineArgumentPicker"
+                            Grid.Column="2"
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            CornerRadius="8"
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.CmdArg_PickerButtonTooltip}"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE8FD;" />
+                        <Button.Flyout>
+                            <Flyout x:Name="Flyout_CommandLineArgumentPicker"
+                                    Opening="Flyout_CommandLineArgumentPicker_Opening"
+                                    Placement="Bottom">
+                                <local:GameCommandLineArgumentPicker x:Name="CommandLineArgumentPicker"
+                                                                     CombinedArgumentChanged="CommandLineArgumentPicker_CombinedArgumentChanged" />
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
                 </Grid>
 
                 <TextBlock Grid.Row="3"
