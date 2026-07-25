@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -55,18 +56,49 @@ public sealed partial class StartGameMenu : UserControl
 
     private void ComboBox_DropDownOpened(object sender, object e)
     {
-        _openChildPopupCount++;
-        ChildPopupOpenChanged?.Invoke(true);
+        NotifyChildPopupOpen(true);
     }
 
 
     private void ComboBox_DropDownClosed(object sender, object e)
     {
-        if (_openChildPopupCount > 0)
+        NotifyChildPopupOpen(false);
+    }
+
+
+    /// <summary>
+    /// 免 UAC 说明 Flyout 打开：父级悬停菜单勿因指针移入 Flyout 而关闭。
+    /// </summary>
+    private void Flyout_SkipUacHelp_Opened(object sender, object e)
+    {
+        NotifyChildPopupOpen(true);
+    }
+
+
+    /// <summary>
+    /// 免 UAC 说明 Flyout 关闭。
+    /// </summary>
+    private void Flyout_SkipUacHelp_Closed(object sender, object e)
+    {
+        NotifyChildPopupOpen(false);
+    }
+
+
+    /// <summary>
+    /// 统计子 Popup/Flyout 打开数，通知 <see cref="StartGameButton"/> 保持快速菜单打开。
+    /// </summary>
+    private void NotifyChildPopupOpen(bool open)
+    {
+        if (open)
+        {
+            _openChildPopupCount++;
+            ChildPopupOpenChanged?.Invoke(true);
+        }
+        else if (_openChildPopupCount > 0)
         {
             _openChildPopupCount--;
+            ChildPopupOpenChanged?.Invoke(_openChildPopupCount > 0);
         }
-        ChildPopupOpenChanged?.Invoke(_openChildPopupCount > 0);
     }
 
 
@@ -303,6 +335,11 @@ public sealed partial class StartGameMenu : UserControl
         _shortcutExpanded = false;
         ShortcutExpandHost.Height = 0;
         ShortcutChevronRotate.Angle = 0;
+        // 免 UAC 为敏感选项，每次打开菜单重置为未勾选，避免误操作
+        if (CheckBox_SkipUac is not null)
+        {
+            CheckBox_SkipUac.IsChecked = false;
+        }
     }
 
 
@@ -540,11 +577,80 @@ public sealed partial class StartGameMenu : UserControl
 
 
     /// <summary>
-    /// 生成桌面快捷方式；图标默认使用该游戏在游戏列表中的图标。
-    /// 快捷方式以命令行参数直接把 moonward:// 传给 Moonward.exe，启动游戏无需注册系统 URL 协议
-    /// （系统级协议注册是设置页里的独立开关，仅用于从浏览器/运行框等外部唤起 moonward://）。
+    /// 清理本应用创建的免 UAC 启动计划任务（需确认；可能弹一次 UAC）。
+    /// 由说明 Flyout 内链接触发。
     /// </summary>
-    private async void Button_GenerateShortcut_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void Button_CleanupElevatedTasks_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // 先收起说明 Flyout，再弹确认框
+            Flyout_SkipUacHelp.Hide();
+
+            int found = ElevatedStartGameTaskService.ListStartGameTaskPaths().Count;
+            if (found == 0)
+            {
+                await new ContentDialog
+                {
+                    Title = Lang.StartGameMenu_CleanElevatedTasks,
+                    Content = Lang.StartGameMenu_CleanElevatedTasksNone,
+                    CloseButtonText = Lang.Common_Confirm,
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = this.XamlRoot,
+                }.ShowAsync();
+                return;
+            }
+
+            var dialog = new ContentDialog
+            {
+                Title = Lang.StartGameMenu_CleanElevatedTasks,
+                Content = string.Format(Lang.StartGameMenu_CleanElevatedTasksConfirm, found),
+                PrimaryButtonText = Lang.Common_Confirm,
+                CloseButtonText = Lang.Common_Cancel,
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.XamlRoot,
+            };
+            if (await dialog.ShowAsync() is not ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            ElevatedStartGameTaskService.CleanupResult result;
+            try
+            {
+                result = ElevatedStartGameTaskService.CleanupAllStartGameTasks();
+            }
+            catch (Exception ex) when (ElevatedStartGameTaskService.IsElevationCancelled(ex))
+            {
+                _logger.LogInformation(ex, "Cleanup elevated start-game tasks cancelled by user");
+                InAppToast.MainWindow?.Information(Lang.StartGameMenu_CleanElevatedTasksCancelled);
+                return;
+            }
+
+            if (result.RemainingCount == 0)
+            {
+                InAppToast.MainWindow?.Success(string.Format(Lang.StartGameMenu_CleanElevatedTasksDone, result.DeletedCount));
+            }
+            else
+            {
+                InAppToast.MainWindow?.Warning(
+                    string.Format(Lang.StartGameMenu_CleanElevatedTasksPartial, result.DeletedCount, result.RemainingCount));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Cleanup elevated start-game tasks");
+            InAppToast.MainWindow?.Error(ex);
+        }
+    }
+
+
+    /// <summary>
+    /// 生成桌面快捷方式；图标默认使用该游戏在游戏列表中的图标。
+    /// 普通路径：.url + moonward://（需注册 URL 协议）。
+    /// 勾选「关闭 UAC」：提权注册计划任务 + .lnk 触发 schtasks（不依赖协议注册）。
+    /// </summary>
+    private async void Button_GenerateShortcut_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -553,30 +659,53 @@ public sealed partial class StartGameMenu : UserControl
                 return;
             }
 
-            // 生成的是 .url 快捷方式，依赖系统识别 moonward:// 协议；未注册时先征求用户同意再注册。
-            if (!EnableUrlProtocol)
-            {
-                var dialog = new ContentDialog
-                {
-                    Title = Lang.StartGameMenu_AddTaskbarLaunch,
-                    Content = Lang.StartGameMenu_RegisterProtocolForUrlShortcutHint,
-                    PrimaryButtonText = Lang.Common_Confirm,
-                    CloseButtonText = Lang.Common_Cancel,
-                    DefaultButton = ContentDialogButton.Primary,
-                    XamlRoot = this.XamlRoot,
-                };
-                if (await dialog.ShowAsync() is not ContentDialogResult.Primary)
-                {
-                    return; // 用户拒绝：不注册、不生成
-                }
-                EnableUrlProtocol = true; // 用户确定：注册协议
-            }
-
             string gameName = GetGameDisplayName();
             GameShortcutService.IconSource? icon = GameShortcutService.GetGameIconSource(CurrentGameBiz);
-            string urlPath = GameShortcutService.CreateStartGameShortcut(CurrentGameBiz, gameName, option.ProfileId, option.ProfileDisplayName, icon, option.LoginUid);
-            InAppToast.MainWindow?.Success(Lang.StartGameMenu_ShortcutCreated, urlPath);
-            _ = RevealInExplorerAsync(urlPath);
+            bool skipUac = CheckBox_SkipUac.IsChecked is true;
+            string shortcutPath;
+
+            if (skipUac)
+            {
+                // 免 UAC：任务动作直接把 moonward:// 作为命令行参数传给 Moonward，无需系统协议注册。
+                try
+                {
+                    shortcutPath = GameShortcutService.CreateElevatedStartGameShortcut(
+                        CurrentGameBiz, gameName, option.ProfileId, option.ProfileDisplayName, icon, option.LoginUid);
+                }
+                catch (Exception ex) when (ElevatedStartGameTaskService.IsElevationCancelled(ex))
+                {
+                    _logger.LogInformation(ex, "Skip-UAC task registration cancelled by user ({biz})", CurrentGameBiz);
+                    InAppToast.MainWindow?.Information(Lang.StartGameMenu_SkipUacPromptCancelled);
+                    return;
+                }
+            }
+            else
+            {
+                // .url 依赖系统识别 moonward://；未注册时先征求用户同意再注册。
+                if (!EnableUrlProtocol)
+                {
+                    var dialog = new ContentDialog
+                    {
+                        Title = Lang.StartGameMenu_AddTaskbarLaunch,
+                        Content = Lang.StartGameMenu_RegisterProtocolForUrlShortcutHint,
+                        PrimaryButtonText = Lang.Common_Confirm,
+                        CloseButtonText = Lang.Common_Cancel,
+                        DefaultButton = ContentDialogButton.Primary,
+                        XamlRoot = this.XamlRoot,
+                    };
+                    if (await dialog.ShowAsync() is not ContentDialogResult.Primary)
+                    {
+                        return; // 用户拒绝：不注册、不生成
+                    }
+                    EnableUrlProtocol = true; // 用户确定：注册协议
+                }
+
+                shortcutPath = GameShortcutService.CreateStartGameShortcut(
+                    CurrentGameBiz, gameName, option.ProfileId, option.ProfileDisplayName, icon, option.LoginUid);
+            }
+
+            InAppToast.MainWindow?.Success(Lang.StartGameMenu_ShortcutCreated, shortcutPath);
+            _ = RevealInExplorerAsync(shortcutPath);
             RequestClose?.Invoke();
         }
         catch (Exception ex)

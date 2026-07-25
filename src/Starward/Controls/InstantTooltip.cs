@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Starward.Controls;
 
@@ -9,14 +10,17 @@ namespace Starward.Controls;
 /// <para>
 /// 与系统 <c>ToolTipService</c> 不同：无显示延迟、样式为亚克力圆角气泡、
 /// 同一 <see cref="XamlRoot"/> 内共享一个 <see cref="InstantTooltipHost"/>（单个 Popup）。
+/// 可选 <see cref="ActionTextProperty"/> + <see cref="SetActionCallback"/> 在气泡右下角提供可点击操作
+/// （指针移入气泡本身不会关闭，便于点击）。
 /// </para>
 /// <para>
 /// XAML 用法：
 /// <code>
 /// sc:InstantTooltip.Text="{x:Bind lang:Lang.SomeKey}"
 /// sc:InstantTooltip.Placement="Left"
+/// sc:InstantTooltip.ActionText="{x:Bind lang:Lang.SomeAction}"
 /// </code>
-/// 代码用法：<see cref="SetText"/> / <see cref="SetPlacement"/>。
+/// 操作回调需在代码中 <see cref="SetActionCallback"/>；可选 <see cref="SetOpenChangedCallback"/> 同步外层 Popup。
 /// 无独立 XAML 控件文件；视觉树在 <see cref="InstantTooltipHost"/> 内用代码创建。
 /// </para>
 /// </summary>
@@ -38,6 +42,12 @@ public static class InstantTooltip
     /// </summary>
     private static readonly Dictionary<XamlRoot, InstantTooltipHost> Hosts = new();
 
+    /// <summary>锚点 → 操作按钮点击回调（弱表，随元素回收）。</summary>
+    private static readonly ConditionalWeakTable<FrameworkElement, Action> ActionCallbacks = new();
+
+    /// <summary>锚点 → 可交互 Tooltip 打开/关闭回调（用于外层悬停菜单等保持打开）。</summary>
+    private static readonly ConditionalWeakTable<FrameworkElement, Action<bool>> OpenChangedCallbacks = new();
+
     /// <summary>
     /// Tooltip 文案附加属性。设为空或 <see langword="null"/> 会解除挂接；非空则在可挂接时注册到 Host。
     /// </summary>
@@ -57,6 +67,16 @@ public static class InstantTooltip
             typeof(InstantTooltipPlacement),
             typeof(InstantTooltip),
             new PropertyMetadata(InstantTooltipPlacement.Right));
+
+    /// <summary>
+    /// 可选：气泡右下角操作按钮文案。非空时 Host 显示可点击链接（需配合 <see cref="SetActionCallback"/>）。
+    /// </summary>
+    public static readonly DependencyProperty ActionTextProperty =
+        DependencyProperty.RegisterAttached(
+            "ActionText",
+            typeof(string),
+            typeof(InstantTooltip),
+            new PropertyMetadata(null));
 
 
     /// <summary>
@@ -100,6 +120,68 @@ public static class InstantTooltip
     public static void SetPlacement(DependencyObject element, InstantTooltipPlacement value)
     {
         element.SetValue(PlacementProperty, value);
+    }
+
+
+    /// <summary>
+    /// 取得气泡右下角操作按钮文案。
+    /// </summary>
+    public static string? GetActionText(DependencyObject element)
+    {
+        return (string?)element.GetValue(ActionTextProperty);
+    }
+
+
+    /// <summary>
+    /// 设置气泡右下角操作按钮文案；空则不显示操作按钮。
+    /// </summary>
+    public static void SetActionText(DependencyObject element, string? value)
+    {
+        element.SetValue(ActionTextProperty, value);
+    }
+
+
+    /// <summary>
+    /// 注册操作按钮点击回调（覆盖旧值；传 <see langword="null"/> 清除）。
+    /// </summary>
+    public static void SetActionCallback(FrameworkElement element, Action? callback)
+    {
+        ActionCallbacks.Remove(element);
+        if (callback is not null)
+        {
+            ActionCallbacks.Add(element, callback);
+        }
+    }
+
+
+    /// <summary>
+    /// 取得操作按钮点击回调。
+    /// </summary>
+    internal static Action? GetActionCallback(FrameworkElement element)
+    {
+        return ActionCallbacks.TryGetValue(element, out Action? callback) ? callback : null;
+    }
+
+
+    /// <summary>
+    /// 注册可交互 Tooltip 打开/关闭回调（有 <see cref="ActionTextProperty"/> 时，打开/关闭会通知，便于外层菜单保持打开）。
+    /// </summary>
+    public static void SetOpenChangedCallback(FrameworkElement element, Action<bool>? callback)
+    {
+        OpenChangedCallbacks.Remove(element);
+        if (callback is not null)
+        {
+            OpenChangedCallbacks.Add(element, callback);
+        }
+    }
+
+
+    /// <summary>
+    /// 取得打开/关闭回调。
+    /// </summary>
+    internal static Action<bool>? GetOpenChangedCallback(FrameworkElement element)
+    {
+        return OpenChangedCallbacks.TryGetValue(element, out Action<bool>? callback) ? callback : null;
     }
 
 

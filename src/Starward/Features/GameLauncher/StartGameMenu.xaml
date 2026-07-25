@@ -165,40 +165,94 @@
                         VerticalAlignment="Top"
                         Spacing="6">
 
-                <!--  启动方式（快捷方式按哪个配置启动）+ 生成按钮横向排列  -->
-                <TextBlock Style="{StaticResource MenuCaptionStyle}" Text="{x:Bind lang:Lang.StartGameMenu_SelectLaunchMethod}" />
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <ComboBox x:Name="ComboBox_TaskbarProfile"
-                              Grid.Column="0"
-                              Height="34"
-                              HorizontalAlignment="Stretch"
-                              CornerRadius="6"
-                              DropDownClosed="ComboBox_DropDownClosed"
-                              DropDownOpened="ComboBox_DropDownOpened"
-                              ItemsSource="{x:Bind TaskbarOptions}"
-                              SelectedIndex="0">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding DisplayName}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <Button x:Name="Button_GenerateShortcut"
-                            Grid.Column="1"
-                            Height="34"
-                            MinWidth="72"
-                            Padding="12,0"
-                            Click="Button_GenerateShortcut_Click"
-                            CornerRadius="6"
-                            Style="{ThemeResource AccentButtonStyle}">
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{x:Bind lang:Lang.StartGameMenu_Generate}" />
+                <!--  免 UAC：水平居中；问号点击后弹出说明 + 清理  -->
+                <StackPanel HorizontalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="2">
+                    <CheckBox x:Name="CheckBox_SkipUac"
+                              MinWidth="0"
+                              MinHeight="0"
+                              Padding="8,0,0,0"
+                              VerticalContentAlignment="Center"
+                              FontSize="12"
+                              Content="{x:Bind lang:Lang.StartGameMenu_SkipUacPrompt}"
+                              Style="{ThemeResource CompactCheckBoxStyle}" />
+                    <Button x:Name="Button_SkipUacHelp"
+                            MinWidth="28"
+                            MinHeight="28"
+                            Padding="4"
+                            VerticalAlignment="Center"
+                            helpers:PointerCursor.CursorShape="Hand"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            CornerRadius="4">
+                        <FontIcon FontSize="14"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE9CE;" />
+                        <Button.Flyout>
+                            <Flyout x:Name="Flyout_SkipUacHelp"
+                                    Closed="Flyout_SkipUacHelp_Closed"
+                                    Opened="Flyout_SkipUacHelp_Opened"
+                                    Placement="Top">
+                                <Grid MinWidth="200"
+                                      MaxWidth="280"
+                                      RowSpacing="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock FontSize="12"
+                                               Text="{x:Bind lang:Lang.StartGameMenu_SkipUacPromptHint}"
+                                               TextWrapping="Wrap" />
+                                    <HyperlinkButton Grid.Row="1"
+                                                     Padding="0"
+                                                     HorizontalAlignment="Right"
+                                                     helpers:PointerCursor.CursorShape="Hand"
+                                                     Click="Button_CleanupElevatedTasks_Click"
+                                                     Content="{x:Bind lang:Lang.StartGameMenu_CleanElevatedTasks}"
+                                                     FontSize="12" />
+                                </Grid>
+                            </Flyout>
+                        </Button.Flyout>
                     </Button>
-                </Grid>
+                </StackPanel>
+
+                <!--  「启动参数」caption 仅归属下方配置下拉  -->
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource MenuCaptionStyle}" Text="{x:Bind lang:Lang.StartGameMenu_SelectLaunchMethod}" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="ComboBox_TaskbarProfile"
+                                  Grid.Column="0"
+                                  Height="34"
+                                  HorizontalAlignment="Stretch"
+                                  CornerRadius="6"
+                                  DropDownClosed="ComboBox_DropDownClosed"
+                                  DropDownOpened="ComboBox_DropDownOpened"
+                                  ItemsSource="{x:Bind TaskbarOptions}"
+                                  SelectedIndex="0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button x:Name="Button_GenerateShortcut"
+                                Grid.Column="1"
+                                Height="34"
+                                MinWidth="72"
+                                Padding="12,0"
+                                Click="Button_GenerateShortcut_Click"
+                                CornerRadius="6"
+                                Style="{ThemeResource AccentButtonStyle}">
+                            <TextBlock VerticalAlignment="Center"
+                                       Text="{x:Bind lang:Lang.StartGameMenu_Generate}" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
 
             </StackPanel>
         </Grid>

@@ -17,7 +17,8 @@ namespace Starward.Controls;
 /// 每个 <see cref="XamlRoot"/> 共享一个 <see cref="Popup"/>，承载即时 Tooltip 的显示、定位与 Composition 动画。
 /// <para>
 /// 由 <see cref="InstantTooltip"/> 按窗口创建与释放；多锚点注册指针事件后，悬停时复用同一气泡改文案与偏移。
-/// 无 XAML 模板：UI 在构造函数中代码搭建（Border + TextBlock）。
+/// 无 XAML 模板：UI 在构造函数中代码搭建（Border + TextBlock，可选右下角操作链接）。
+/// 指针可移入气泡本身（便于点击操作）；仅当锚点与气泡都离开时才隐藏。
 /// </para>
 /// </summary>
 internal sealed class InstantTooltipHost
@@ -30,6 +31,12 @@ internal sealed class InstantTooltipHost
 
     /// <summary>退场动画时长（毫秒）。</summary>
     private const int HideDurationMs = 150;
+
+    /// <summary>
+    /// 带操作按钮的可交互气泡：指针离开锚点后、进入气泡前的宽限（毫秒）。
+    /// 仅 <see cref="_currentHasAction"/> 时使用，普通文案提示仍立即延后一拍关闭，不影响其它挂接。
+    /// </summary>
+    private const int InteractiveHideGraceMs = 450;
 
     /// <summary>提示与锚点元素的间距（像素）。</summary>
     private const double Gap = 8;
@@ -46,8 +53,14 @@ internal sealed class InstantTooltipHost
     /// <summary>提示气泡容器（亚克力背景、圆角、内边距）。</summary>
     private readonly Border _content;
 
+    /// <summary>正文 + 可选操作按钮的布局根。</summary>
+    private readonly Grid _body;
+
     /// <summary>提示正文。</summary>
     private readonly TextBlock _text;
+
+    /// <summary>可选操作链接（右下角）；无 ActionText 时折叠。</summary>
+    private readonly HyperlinkButton _actionButton;
 
     /// <summary>驱动 scale / opacity 关键帧动画的 Composition 合成器。</summary>
     private readonly Compositor _compositor;
@@ -64,11 +77,20 @@ internal sealed class InstantTooltipHost
     /// </summary>
     private bool _pointerInsideAnyElement;
 
+    /// <summary>指针是否在气泡内容上（含操作按钮），为 true 时不关闭 Popup。</summary>
+    private bool _pointerInsidePopup;
+
     /// <summary>是否已排队/正在执行隐藏流程，防止重复触发退场动画。</summary>
     private bool _hideScheduled;
 
+    /// <summary>可交互气泡专用的隐藏宽限定时器（仅 Action 提示使用）。</summary>
+    private readonly DispatcherQueueTimer _interactiveHideTimer;
+
     /// <summary>当前正在展示 Tooltip 的锚点；注销该锚点时需立即隐藏。</summary>
     private FrameworkElement? _currentAnchor;
+
+    /// <summary>当前展示是否带可点击操作（打开/关闭时通知外层）。</summary>
+    private bool _currentHasAction;
 
     /// <summary>当前展示所用的方位（影响偏移与缩放中心）。</summary>
     private InstantTooltipPlacement _currentPlacement = InstantTooltipPlacement.Right;
@@ -79,6 +101,9 @@ internal sealed class InstantTooltipHost
 
     /// <summary>本宿主所属的视觉树根（与字典键一致）。</summary>
     public XamlRoot XamlRoot => _xamlRoot;
+
+    /// <summary>指针是否仍在锚点或气泡内（用于延后隐藏）。</summary>
+    private bool IsPointerOverTooltipSurface => _pointerInsideAnyElement || _pointerInsidePopup;
 
 
     /// <summary>
@@ -96,27 +121,56 @@ internal sealed class InstantTooltipHost
         {
             // 跟随系统文字缩放会改变测量尺寸，定位易抖，故关闭
             IsTextScaleFactorEnabled = false,
-            MaxWidth = 320,
+            MaxWidth = 280,
             TextWrapping = TextWrapping.Wrap,
+            FontSize = 12,
             Foreground = GetThemeBrush("TextFillColorPrimaryBrush"),
         };
 
+        _actionButton = new HyperlinkButton
+        {
+            Padding = new Thickness(0),
+            MinHeight = 0,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            FontSize = 12,
+            Visibility = Visibility.Collapsed,
+            Foreground = GetThemeBrush("AccentTextFillColorPrimaryBrush"),
+        };
+        _actionButton.Click += ActionButton_Click;
+
+        _body = new Grid { RowSpacing = 10 };
+        _body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        _body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        Grid.SetRow(_text, 0);
+        Grid.SetRow(_actionButton, 1);
+        _body.Children.Add(_text);
+        _body.Children.Add(_actionButton);
+
         _content = new Border
         {
-            Padding = new Thickness(12, 6, 12, 6),
+            Padding = new Thickness(12, 8, 12, 8),
             Background = GetThemeBrush("CustomOverlayAcrylicBrush"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(6),
-            Child = _text,
+            // 允许命中气泡与按钮；指针进入气泡时保持打开
+            IsHitTestVisible = true,
+            Child = _body,
         };
+        _content.PointerEntered += Content_PointerEntered;
+        _content.PointerExited += Content_PointerExited;
 
         _popup = new Popup
         {
-            // 点击其它区域不自动关闭；由指针进出锚点控制显隐
+            // 点击其它区域不自动关闭；由指针进出锚点/气泡控制显隐
             IsLightDismissEnabled = false,
             Child = _content,
             XamlRoot = xamlRoot,
         };
+
+        _interactiveHideTimer = _dispatcherQueue.CreateTimer();
+        _interactiveHideTimer.IsRepeating = false;
+        _interactiveHideTimer.Interval = TimeSpan.FromMilliseconds(InteractiveHideGraceMs);
+        _interactiveHideTimer.Tick += InteractiveHideTimer_Tick;
 
         _compositor = ElementCompositionPreview.GetElementVisual(_content).Compositor;
     }
@@ -157,6 +211,8 @@ internal sealed class InstantTooltipHost
         if (_currentAnchor == element)
         {
             _pointerInsideAnyElement = false;
+            _pointerInsidePopup = false;
+            CancelPendingHide();
             HideTooltip();
         }
     }
@@ -175,10 +231,18 @@ internal sealed class InstantTooltipHost
         }
 
         _elements.Clear();
+        CancelInteractiveHideTimer();
+        NotifyOpenChanged(false);
         _popup.IsOpen = false;
         _pointerInsideAnyElement = false;
+        _pointerInsidePopup = false;
         _hideScheduled = false;
         _currentAnchor = null;
+        _currentHasAction = false;
+        _actionButton.Click -= ActionButton_Click;
+        _content.PointerEntered -= Content_PointerEntered;
+        _content.PointerExited -= Content_PointerExited;
+        _interactiveHideTimer.Tick -= InteractiveHideTimer_Tick;
     }
 
 
@@ -207,7 +271,7 @@ internal sealed class InstantTooltipHost
     private void Element_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
         _pointerInsideAnyElement = true;
-        _hideScheduled = false;
+        CancelPendingHide();
         if (sender is FrameworkElement element)
         {
             ShowTooltip(element);
@@ -216,22 +280,110 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 指针离开锚点：延后一拍再决定是否隐藏，避免相邻项切换时气泡闪断。
+    /// 指针离开锚点：延后一拍再决定是否隐藏，避免相邻项切换或移入气泡时闪断。
     /// </summary>
     /// <param name="sender">锚点元素。</param>
     /// <param name="e">指针事件参数。</param>
     private void Element_PointerExited(object sender, PointerRoutedEventArgs e)
     {
         _pointerInsideAnyElement = false;
-        // 相邻元素切换会先后触发 Exited(旧) → Entered(新)，延后判断避免闪烁。
+        ScheduleHideIfPointerLeftSurface();
+    }
+
+
+    /// <summary>
+    /// 指针进入气泡：保持打开（以便点击右下角操作）。
+    /// </summary>
+    private void Content_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        _pointerInsidePopup = true;
+        CancelPendingHide();
+    }
+
+
+    /// <summary>
+    /// 指针离开气泡：若也不在锚点上则延后隐藏。
+    /// </summary>
+    private void Content_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        _pointerInsidePopup = false;
+        ScheduleHideIfPointerLeftSurface();
+    }
+
+
+    /// <summary>
+    /// 操作按钮：执行锚点回调后关闭气泡。
+    /// </summary>
+    private void ActionButton_Click(object sender, RoutedEventArgs e)
+    {
+        FrameworkElement? anchor = _currentAnchor;
+        Action? callback = anchor is null ? null : InstantTooltip.GetActionCallback(anchor);
+        // 先关气泡，再回调（回调内可能弹 ContentDialog）
+        _pointerInsideAnyElement = false;
+        _pointerInsidePopup = false;
+        ForceClosePopup();
+        callback?.Invoke();
+    }
+
+
+    /// <summary>
+    /// 取消待隐藏（重新进入锚点/气泡时调用）。
+    /// </summary>
+    private void CancelPendingHide()
+    {
+        _hideScheduled = false;
+        CancelInteractiveHideTimer();
+    }
+
+
+    /// <summary>
+    /// 停止可交互气泡的隐藏宽限定时器。
+    /// </summary>
+    private void CancelInteractiveHideTimer()
+    {
+        if (_interactiveHideTimer.IsRunning)
+        {
+            _interactiveHideTimer.Stop();
+        }
+    }
+
+
+    /// <summary>
+    /// 相邻切换 / 移入气泡时 Exited→Entered 之间短暂为空，延后判断再隐藏。
+    /// 带操作按钮时使用更长宽限，便于鼠标从锚点移入气泡；纯文案提示仍只延后一拍，行为不变。
+    /// </summary>
+    private void ScheduleHideIfPointerLeftSurface()
+    {
+        if (_currentHasAction)
+        {
+            // 可交互：重启宽限，避免锚点与气泡间隙中气泡先消失
+            CancelInteractiveHideTimer();
+            _interactiveHideTimer.Start();
+            return;
+        }
+
         _dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
         {
-            if (!_pointerInsideAnyElement && !_hideScheduled)
+            if (!IsPointerOverTooltipSurface && !_hideScheduled)
             {
                 _hideScheduled = true;
                 HideTooltip();
             }
         });
+    }
+
+
+    /// <summary>
+    /// 可交互气泡宽限结束：若指针仍未回到锚点/气泡则隐藏。
+    /// </summary>
+    private void InteractiveHideTimer_Tick(DispatcherQueueTimer sender, object args)
+    {
+        CancelInteractiveHideTimer();
+        if (!IsPointerOverTooltipSurface && !_hideScheduled)
+        {
+            _hideScheduled = true;
+            HideTooltip();
+        }
     }
 
 
@@ -252,14 +404,71 @@ internal sealed class InstantTooltipHost
             return;
         }
 
+        bool wasOpenWithAction = _popup.IsOpen && _currentHasAction;
+        FrameworkElement? previousAnchor = _currentAnchor;
+
         _currentAnchor = element;
         _currentPlacement = InstantTooltip.GetPlacement(element);
         _text.Text = label;
+
+        string? actionText = InstantTooltip.GetActionText(element);
+        bool hasAction = !string.IsNullOrEmpty(actionText) && InstantTooltip.GetActionCallback(element) is not null;
+        _currentHasAction = hasAction;
+        if (hasAction)
+        {
+            _actionButton.Content = actionText;
+            _actionButton.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _actionButton.Content = null;
+            _actionButton.Visibility = Visibility.Collapsed;
+        }
+
         UpdatePosition(element);
         // 须在 IsOpen 前重置 visual，否则会先闪一帧完整大小
         PrepareShowVisual();
         _popup.IsOpen = true;
         PlayShowAnimation();
+
+        // 可交互气泡：通知外层（如快速菜单）勿因指针移入气泡而关闭
+        if (hasAction)
+        {
+            if (!wasOpenWithAction || !ReferenceEquals(previousAnchor, element))
+            {
+                InstantTooltip.GetOpenChangedCallback(element)?.Invoke(true);
+            }
+        }
+        else if (wasOpenWithAction && previousAnchor is not null)
+        {
+            InstantTooltip.GetOpenChangedCallback(previousAnchor)?.Invoke(false);
+        }
+    }
+
+
+    /// <summary>
+    /// 立即关闭 Popup 并通知可交互打开状态结束（无退场动画）。
+    /// </summary>
+    private void ForceClosePopup()
+    {
+        CancelPendingHide();
+        NotifyOpenChanged(false);
+        _popup.IsOpen = false;
+        _currentAnchor = null;
+        _currentHasAction = false;
+    }
+
+
+    /// <summary>
+    /// 若当前展示带操作按钮，通知打开/关闭回调。
+    /// </summary>
+    private void NotifyOpenChanged(bool isOpen)
+    {
+        if (!_currentHasAction || _currentAnchor is null)
+        {
+            return;
+        }
+        InstantTooltip.GetOpenChangedCallback(_currentAnchor)?.Invoke(isOpen);
     }
 
 
@@ -402,7 +611,7 @@ internal sealed class InstantTooltipHost
 
     /// <summary>
     /// 隐藏 Tooltip；有动画时先快速缩小淡出，动画结束后再关闭 Popup。
-    /// 退场期间若指针再次进入任一锚点，则不关闭 Popup（避免打断新目标的展示）。
+    /// 退场期间若指针再次进入锚点或气泡，则不关闭 Popup（避免打断新目标的展示）。
     /// </summary>
     private void HideTooltip()
     {
@@ -414,9 +623,11 @@ internal sealed class InstantTooltipHost
 
         if (!EntranceAnimation.AnimationsEnabled())
         {
+            NotifyOpenChanged(false);
             _popup.IsOpen = false;
             _hideScheduled = false;
             _currentAnchor = null;
+            _currentHasAction = false;
             return;
         }
 
@@ -441,11 +652,13 @@ internal sealed class InstantTooltipHost
             _dispatcherQueue.TryEnqueue(() =>
             {
                 _hideScheduled = false;
-                // 退场过程中若已 Entered 新锚点，保留 Popup 由 ShowTooltip 接管
-                if (!_pointerInsideAnyElement)
+                // 退场过程中若已 Entered 新锚点或气泡，保留 Popup 由 ShowTooltip 接管
+                if (!IsPointerOverTooltipSurface)
                 {
+                    NotifyOpenChanged(false);
                     _popup.IsOpen = false;
                     _currentAnchor = null;
+                    _currentHasAction = false;
                 }
             });
         };

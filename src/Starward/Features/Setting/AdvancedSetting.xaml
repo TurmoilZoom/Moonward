@@ -51,6 +51,27 @@
                 </Button>
             </StackPanel>
 
+            <!--  免 UAC 启动计划任务（由「游戏快捷方式 → 关闭启动 UAC 提示」创建）  -->
+            <TextBlock Margin="0,20,0,0"
+                       FontSize="20"
+                       Text="{x:Bind lang:Lang.SettingPage_ElevatedStartGameTasks}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="14"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.SettingPage_ElevatedStartGameTasksDesc}"
+                       TextWrapping="Wrap" />
+            <Button Margin="0,12,0,0"
+                    Height="40"
+                    Padding="16,0"
+                    BorderThickness="0"
+                    Command="{x:Bind CleanupElevatedStartGameTasksCommand}"
+                    CornerRadius="8,20,20,8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE74D;" />
+                    <TextBlock Text="{x:Bind lang:Lang.SettingPage_CleanElevatedStartGameTasks}" />
+                </StackPanel>
+            </Button>
+
             <!--  RPC Server  -->
             <TextBlock Margin="0,20,0,0"
                        FontSize="20"

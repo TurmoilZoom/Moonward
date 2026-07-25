@@ -1823,6 +1823,42 @@
   <data name="StartGameMenu_RegisterProtocolForUrlShortcutHint" xml:space="preserve">
     <value>URL 形式のショートカットを作成します。システムが認識できるようレジストリのサポートが必要です。URL プロトコルを登録して続行しますか？</value>
   </data>
+  <data name="StartGameMenu_SkipUacPrompt" xml:space="preserve">
+    <value>UAC をスキップ</value>
+  </data>
+  <data name="StartGameMenu_SkipUacPromptHint" xml:space="preserve">
+    <value>最高の特権で実行するタスクを作成し、このショートカットから起動する際に UAC を表示しません。ショートカット作成時に一度だけ管理者の承認が必要です。</value>
+  </data>
+  <data name="StartGameMenu_SkipUacPromptCancelled" xml:space="preserve">
+    <value>管理者の承認がキャンセルされたため、ショートカットは作成されませんでした</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasks" xml:space="preserve">
+    <value>UAC スキップ用タスクを削除</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksConfirm" xml:space="preserve">
+    <value>{0} 件の昇格起動用タスクを削除しますか？これらを使うデスクトップショートカットは再作成するまで動作しません。管理者の承認が一度必要な場合があります。</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksNone" xml:space="preserve">
+    <value>UAC スキップ用の起動タスクは見つかりませんでした。</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksCancelled" xml:space="preserve">
+    <value>管理者の承認がキャンセルされたため、タスクは削除されませんでした</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksDone" xml:space="preserve">
+    <value>{0} 件のタスクを削除しました</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksPartial" xml:space="preserve">
+    <value>{0} 件を削除しました。{1} 件が残っています</value>
+  </data>
+  <data name="SettingPage_ElevatedStartGameTasks" xml:space="preserve">
+    <value>UAC スキップ起動タスク</value>
+  </data>
+  <data name="SettingPage_ElevatedStartGameTasksDesc" xml:space="preserve">
+    <value>ゲームショートカットで「UAC プロンプトをスキップ」を選ぶと、\Moonward に最高特権のタスクが登録されます。不要になった場合やショートカット削除後はここで削除できます。</value>
+  </data>
+  <data name="SettingPage_CleanElevatedStartGameTasks" xml:space="preserve">
+    <value>UAC スキップ用タスクを削除</value>
+  </data>
   <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
     <value>起動引数プロファイル</value>
   </data>

@@ -3,9 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Starward.Features.GameLauncher;
 using Starward.Features.RPC;
 using Starward.Features.UrlProtocol;
 using Starward.Frameworks;
+using Starward.Helpers;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -108,6 +111,80 @@ public sealed partial class AdvancedSetting : PageBase
     private void OpenUrlProtocolDoc()
     {
         new UrlProtocolDocWindow().Activate();
+    }
+
+
+    #endregion
+
+
+
+
+    #region Elevated start-game tasks (skip UAC)
+
+
+    /// <summary>
+    /// 清理「关闭启动 UAC 提示」时注册的计划任务；先确认，可能弹一次 UAC。
+    /// </summary>
+    [RelayCommand]
+    private async Task CleanupElevatedStartGameTasksAsync()
+    {
+        try
+        {
+            int found = ElevatedStartGameTaskService.ListStartGameTaskPaths().Count;
+            if (found == 0)
+            {
+                await new ContentDialog
+                {
+                    Title = Lang.SettingPage_CleanElevatedStartGameTasks,
+                    Content = Lang.StartGameMenu_CleanElevatedTasksNone,
+                    CloseButtonText = Lang.Common_Confirm,
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = this.XamlRoot,
+                }.ShowAsync();
+                return;
+            }
+
+            var dialog = new ContentDialog
+            {
+                Title = Lang.SettingPage_CleanElevatedStartGameTasks,
+                Content = string.Format(Lang.StartGameMenu_CleanElevatedTasksConfirm, found),
+                PrimaryButtonText = Lang.Common_Confirm,
+                CloseButtonText = Lang.Common_Cancel,
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.XamlRoot,
+            };
+            if (await dialog.ShowAsync() is not ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            ElevatedStartGameTaskService.CleanupResult result;
+            try
+            {
+                result = ElevatedStartGameTaskService.CleanupAllStartGameTasks();
+            }
+            catch (Exception ex) when (ElevatedStartGameTaskService.IsElevationCancelled(ex))
+            {
+                _logger.LogInformation(ex, "Cleanup elevated start-game tasks cancelled by user");
+                InAppToast.MainWindow?.Information(Lang.StartGameMenu_CleanElevatedTasksCancelled);
+                return;
+            }
+
+            if (result.RemainingCount == 0)
+            {
+                InAppToast.MainWindow?.Success(string.Format(Lang.StartGameMenu_CleanElevatedTasksDone, result.DeletedCount));
+            }
+            else
+            {
+                InAppToast.MainWindow?.Warning(
+                    string.Format(Lang.StartGameMenu_CleanElevatedTasksPartial, result.DeletedCount, result.RemainingCount));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Cleanup elevated start-game tasks from advanced setting");
+            InAppToast.MainWindow?.Error(ex);
+        }
     }
 
 

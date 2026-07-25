@@ -3753,6 +3753,114 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Skip UAC prompt（中文：关闭 UAC 提示）的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_SkipUacPrompt {
+            get {
+                return ResourceManager.GetString("StartGameMenu_SkipUacPrompt", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Creates a scheduled task that runs with highest privileges so this shortcut can start the game without a UAC dialog. Administrator approval is required once when creating the shortcut. 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_SkipUacPromptHint {
+            get {
+                return ResourceManager.GetString("StartGameMenu_SkipUacPromptHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Administrator approval was cancelled; shortcut was not created 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_SkipUacPromptCancelled {
+            get {
+                return ResourceManager.GetString("StartGameMenu_SkipUacPromptCancelled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Clean up skip-UAC tasks 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_CleanElevatedTasks {
+            get {
+                return ResourceManager.GetString("StartGameMenu_CleanElevatedTasks", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Delete {0} elevated start-game scheduled task(s)? 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_CleanElevatedTasksConfirm {
+            get {
+                return ResourceManager.GetString("StartGameMenu_CleanElevatedTasksConfirm", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No skip-UAC start-game scheduled tasks were found. 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_CleanElevatedTasksNone {
+            get {
+                return ResourceManager.GetString("StartGameMenu_CleanElevatedTasksNone", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Administrator approval was cancelled; tasks were not deleted 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_CleanElevatedTasksCancelled {
+            get {
+                return ResourceManager.GetString("StartGameMenu_CleanElevatedTasksCancelled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Deleted {0} scheduled task(s) 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_CleanElevatedTasksDone {
+            get {
+                return ResourceManager.GetString("StartGameMenu_CleanElevatedTasksDone", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Deleted {0} task(s); {1} remain 的本地化字符串。
+        /// </summary>
+        public static string StartGameMenu_CleanElevatedTasksPartial {
+            get {
+                return ResourceManager.GetString("StartGameMenu_CleanElevatedTasksPartial", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Skip-UAC Start Tasks 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_ElevatedStartGameTasks {
+            get {
+                return ResourceManager.GetString("SettingPage_ElevatedStartGameTasks", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 When you create a game shortcut with Skip UAC prompt… 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_ElevatedStartGameTasksDesc {
+            get {
+                return ResourceManager.GetString("SettingPage_ElevatedStartGameTasksDesc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Clean Up Skip-UAC Tasks 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_CleanElevatedStartGameTasks {
+            get {
+                return ResourceManager.GetString("SettingPage_CleanElevatedStartGameTasks", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Launch Argument Profiles 的本地化字符串。
         /// </summary>
         public static string GameLaunchProfileWindow_Title {

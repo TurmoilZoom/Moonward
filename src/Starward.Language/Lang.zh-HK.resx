@@ -1823,6 +1823,42 @@
   <data name="StartGameMenu_RegisterProtocolForUrlShortcutHint" xml:space="preserve">
     <value>呢個操作會建立 URL 格式嘅捷徑，需要登錄項目支援以便系統識別。係咪註冊並繼續？</value>
   </data>
+  <data name="StartGameMenu_SkipUacPrompt" xml:space="preserve">
+    <value>關閉 UAC 提示</value>
+  </data>
+  <data name="StartGameMenu_SkipUacPromptHint" xml:space="preserve">
+    <value>會建立「以最高權限執行」嘅排程工作，之後用呢個捷徑開遊戲唔會再彈 UAC。建立捷徑時需要管理員授權一次。</value>
+  </data>
+  <data name="StartGameMenu_SkipUacPromptCancelled" xml:space="preserve">
+    <value>已取消管理員授權，未建立捷徑</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasks" xml:space="preserve">
+    <value>清理免 UAC 排程工作</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksConfirm" xml:space="preserve">
+    <value>會刪除 {0} 個免 UAC 啟動遊戲嘅排程工作。依賴呢啲工作嘅桌面捷徑會失效，要重新建立。可能需要管理員授權一次。</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksNone" xml:space="preserve">
+    <value>搵唔到免 UAC 啟動遊戲嘅排程工作。</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksCancelled" xml:space="preserve">
+    <value>已取消管理員授權，未刪除排程工作</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksDone" xml:space="preserve">
+    <value>已刪除 {0} 個排程工作</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksPartial" xml:space="preserve">
+    <value>已刪除 {0} 個工作，仲有 {1} 個剩低</value>
+  </data>
+  <data name="SettingPage_ElevatedStartGameTasks" xml:space="preserve">
+    <value>免 UAC 啟動工作</value>
+  </data>
+  <data name="SettingPage_ElevatedStartGameTasksDesc" xml:space="preserve">
+    <value>喺「遊戲捷徑」勾選「關閉啟動 UAC 提示」時，會喺排程工作庫 \Moonward 下註冊最高權限工作。唔再需要或移除相關捷徑後，可以喺呢度清理。</value>
+  </data>
+  <data name="SettingPage_CleanElevatedStartGameTasks" xml:space="preserve">
+    <value>清理免 UAC 排程工作</value>
+  </data>
   <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
     <value>啟動參數設定</value>
   </data>

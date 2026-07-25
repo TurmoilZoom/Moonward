@@ -1822,6 +1822,42 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="StartGameMenu_RegisterProtocolForUrlShortcutHint" xml:space="preserve">
     <value>Dies erstellt eine URL-Verknüpfung, die Registry-Unterstützung benötigt, damit das System sie erkennt. URL-Protokoll registrieren und fortfahren?</value>
   </data>
+  <data name="StartGameMenu_SkipUacPrompt" xml:space="preserve">
+    <value>UAC-Hinweis überspringen</value>
+  </data>
+  <data name="StartGameMenu_SkipUacPromptHint" xml:space="preserve">
+    <value>Erstellt eine geplante Aufgabe mit höchsten Rechten, damit diese Verknüpfung das Spiel ohne UAC-Dialog starten kann. Beim Erstellen ist einmalig eine Administratorfreigabe erforderlich.</value>
+  </data>
+  <data name="StartGameMenu_SkipUacPromptCancelled" xml:space="preserve">
+    <value>Administratorfreigabe abgebrochen; Verknüpfung wurde nicht erstellt</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasks" xml:space="preserve">
+    <value>Clean up skip-UAC tasks</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksConfirm" xml:space="preserve">
+    <value>Delete {0} elevated start-game scheduled task(s)? Existing desktop shortcuts that use them will stop working until recreated. Administrator approval may be required once.</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksNone" xml:space="preserve">
+    <value>No skip-UAC start-game scheduled tasks were found.</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksCancelled" xml:space="preserve">
+    <value>Administrator approval was cancelled; tasks were not deleted</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksDone" xml:space="preserve">
+    <value>Deleted {0} scheduled task(s)</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksPartial" xml:space="preserve">
+    <value>Deleted {0} task(s); {1} remain</value>
+  </data>
+  <data name="SettingPage_ElevatedStartGameTasks" xml:space="preserve">
+    <value>Skip-UAC Start Tasks</value>
+  </data>
+  <data name="SettingPage_ElevatedStartGameTasksDesc" xml:space="preserve">
+    <value>When you create a game shortcut with “Skip UAC prompt”, Moonward registers a highest-privilege scheduled task under \Moonward. You can remove those tasks here if you no longer need them or after uninstalling shortcuts.</value>
+  </data>
+  <data name="SettingPage_CleanElevatedStartGameTasks" xml:space="preserve">
+    <value>Clean Up Skip-UAC Tasks</value>
+  </data>
   <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
     <value>Startargument-Profile</value>
   </data>

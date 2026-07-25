@@ -1824,6 +1824,42 @@
   <data name="StartGameMenu_RegisterProtocolForUrlShortcutHint" xml:space="preserve">
     <value>URL 형식의 바로 가기를 만듭니다. 시스템이 인식하려면 레지스트리 지원이 필요합니다. URL 프로토콜을 등록하고 계속하시겠습니까?</value>
   </data>
+  <data name="StartGameMenu_SkipUacPrompt" xml:space="preserve">
+    <value>UAC 건너뛰기</value>
+  </data>
+  <data name="StartGameMenu_SkipUacPromptHint" xml:space="preserve">
+    <value>최고 권한으로 실행되는 예약 작업을 만들어 이 바로 가기로 게임을 시작할 때 UAC가 표시되지 않습니다. 바로 가기를 만들 때 관리자 승인이 한 번 필요합니다.</value>
+  </data>
+  <data name="StartGameMenu_SkipUacPromptCancelled" xml:space="preserve">
+    <value>관리자 승인이 취소되어 바로 가기가 생성되지 않았습니다</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasks" xml:space="preserve">
+    <value>UAC 건너뛰기 작업 정리</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksConfirm" xml:space="preserve">
+    <value>상승된 시작 게임 예약 작업 {0}개를 삭제할까요? 이를 사용하는 바탕 화면 바로 가기는 다시 만들기 전까지 동작하지 않습니다. 관리자 승인이 한 번 필요할 수 있습니다.</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksNone" xml:space="preserve">
+    <value>UAC 건너뛰기 시작 예약 작업이 없습니다.</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksCancelled" xml:space="preserve">
+    <value>관리자 승인이 취소되어 작업이 삭제되지 않았습니다</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksDone" xml:space="preserve">
+    <value>예약 작업 {0}개를 삭제했습니다</value>
+  </data>
+  <data name="StartGameMenu_CleanElevatedTasksPartial" xml:space="preserve">
+    <value>{0}개를 삭제했으며 {1}개가 남아 있습니다</value>
+  </data>
+  <data name="SettingPage_ElevatedStartGameTasks" xml:space="preserve">
+    <value>UAC 건너뛰기 시작 작업</value>
+  </data>
+  <data name="SettingPage_ElevatedStartGameTasksDesc" xml:space="preserve">
+    <value>게임 바로 가기에서 “UAC 프롬프트 건너뛰기”를 선택하면 \Moonward 아래에 최고 권한 예약 작업이 등록됩니다. 더 이상 필요 없거나 바로 가기를 제거한 뒤 여기에서 정리할 수 있습니다.</value>
+  </data>
+  <data name="SettingPage_CleanElevatedStartGameTasks" xml:space="preserve">
+    <value>UAC 건너뛰기 작업 정리</value>
+  </data>
   <data name="GameLaunchProfileWindow_Title" xml:space="preserve">
     <value>실행 인수 프로필</value>
   </data>
