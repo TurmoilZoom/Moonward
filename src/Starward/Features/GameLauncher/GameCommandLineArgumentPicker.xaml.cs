@@ -105,7 +105,8 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
 
 
     /// <summary>
-    /// 同步 force_d3d12 项：全局管理时只读展示，勾选跟全局 DX12；否则恢复可编辑。
+    /// 同步 force_d3d12 项：全局管理时只读展示，勾选跟全局 DX12；
+    /// 全局已开 DX12 时禁用同组其它图形 API（DX11/Vulkan），避免与启动附加的 <c>-use-d3d12</c> 冲突。
     /// </summary>
     private void ApplyDx12ManagedState()
     {
@@ -121,12 +122,39 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
             d3d12.IsSelected = _isDx12Enabled;
             // 配置里若曾手写 -use-d3d12 / -force-d3d12，从自定义残余中去掉，避免重复
             _customArgument = StripManagedDx12Tokens(_customArgument) ?? "";
+
+            foreach (GameCommandLineArgumentOption o in _options)
+            {
+                if (ReferenceEquals(o, d3d12)
+                    || string.IsNullOrEmpty(o.ExclusiveGroup)
+                    || o.ExclusiveGroup != d3d12.ExclusiveGroup)
+                {
+                    continue;
+                }
+                if (_isDx12Enabled)
+                {
+                    o.IsEnabled = false;
+                    o.IsSelected = false;
+                }
+                else
+                {
+                    o.IsEnabled = true;
+                }
+            }
         }
         else
         {
             d3d12.IsEnabled = true;
             d3d12.IncludeInBuild = true;
             // IsSelected 已由 ApplyFromArgumentString 解析，保持不变
+            foreach (GameCommandLineArgumentOption o in _options)
+            {
+                if (!string.IsNullOrEmpty(o.ExclusiveGroup)
+                    && o.ExclusiveGroup == d3d12.ExclusiveGroup)
+                {
+                    o.IsEnabled = true;
+                }
+            }
         }
     }
 
