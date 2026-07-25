@@ -219,27 +219,20 @@
                                    IsTextSelectionEnabled="False"
                                    Text="-use-d3d12" />
                     </Border>
-                    <!--  打开常用参数勾选面板（放在 -use-d3d12 徽章后面）  -->
+                    <!--  打开常用参数勾选面板（放在 -use-d3d12 徽章后面）；用 Popup 居中 + light dismiss，见 Click  -->
                     <Button x:Name="Button_CommandLineArgumentPicker"
                             Grid.Column="2"
                             Width="36"
                             Height="36"
                             Padding="0"
                             CornerRadius="8"
+                            Click="Button_CommandLineArgumentPicker_Click"
                             sc:InstantTooltip.Placement="Top"
                             sc:InstantTooltip.Text="{x:Bind lang:Lang.CmdArg_PickerButtonTooltip}"
                             Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                         <FontIcon FontSize="16"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                   Glyph="&#xE8FD;" />
-                        <Button.Flyout>
-                            <Flyout x:Name="Flyout_CommandLineArgumentPicker"
-                                    Opening="Flyout_CommandLineArgumentPicker_Opening"
-                                    Placement="Bottom">
-                                <local:GameCommandLineArgumentPicker x:Name="CommandLineArgumentPicker"
-                                                                     CombinedArgumentChanged="CommandLineArgumentPicker_CombinedArgumentChanged" />
-                            </Flyout>
-                        </Button.Flyout>
                     </Button>
                 </Grid>
 
@@ -504,6 +497,25 @@
                       Glyph="&#xE711;"
                       IsTextScaleFactorEnabled="False" />
         </Button>
+
+        <!--
+          常用参数勾选：用 Popup（非 Full Flyout）。
+          Full Flyout 会铺满窗口，点应用内其它区域仍算“在 Flyout 内”，light dismiss 失效。
+          Popup + IsLightDismissEnabled：点击面板外关闭；偏移在 code-behind 按 XamlRoot 居中。
+        -->
+        <Popup x:Name="Popup_CommandLineArgumentPicker"
+               IsLightDismissEnabled="True"
+               Opened="Popup_CommandLineArgumentPicker_Opened">
+            <Border x:Name="Border_CommandLineArgumentPickerHost"
+                    MaxWidth="460"
+                    MaxHeight="640"
+                    Padding="16"
+                    Background="{ThemeResource CustomAcrylicBrush}"
+                    CornerRadius="8">
+                <local:GameCommandLineArgumentPicker x:Name="CommandLineArgumentPicker"
+                                                     CombinedArgumentChanged="CommandLineArgumentPicker_CombinedArgumentChanged" />
+            </Border>
+        </Popup>
 
     </Grid>
 

@@ -63,6 +63,11 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
     private void GameLaunchProfileDialog_Unloaded(object sender, RoutedEventArgs e)
     {
+        // 对话框关闭时一并收起常用参数面板，避免悬挂 Popup
+        if (Popup_CommandLineArgumentPicker.IsOpen)
+        {
+            Popup_CommandLineArgumentPicker.IsOpen = false;
+        }
         WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 
@@ -752,17 +757,104 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 打开命令行参数勾选面板前，用当前输入框内容同步预设勾选状态。
-    /// 绝区零（及已开启全局 DX12）时，<c>-use-d3d12</c> 由应用全局开关管理，列表项置灰并同步勾选。
+    /// 打开/关闭常用参数勾选面板（Popup：窗口内居中 + light dismiss）。
     /// </summary>
-    private void Flyout_CommandLineArgumentPicker_Opening(object sender, object e)
+    private void Button_CommandLineArgumentPicker_Click(object sender, RoutedEventArgs e)
     {
+        if (Popup_CommandLineArgumentPicker.IsOpen)
+        {
+            Popup_CommandLineArgumentPicker.IsOpen = false;
+            return;
+        }
+
         // nap：DX12 始终走全局开关；其它游戏仅在已开启全局 DX12 时按只读同步，避免与启动附加重复
         bool isDx12ManagedByApp = CurrentGameBiz.Game is GameBiz.nap || ShowDx12Argument;
         CommandLineArgumentPicker.LoadFromArgument(
             EditingArgument,
             isDx12ManagedByApp: isDx12ManagedByApp,
             isDx12Enabled: ShowDx12Argument);
+
+        // 官方：WinUI 3 下 Popup 须设置 XamlRoot；IsLightDismissEnabled 点击面板外关闭
+        Popup_CommandLineArgumentPicker.XamlRoot = XamlRoot;
+        // 上下留白：限高，避免贴窗顶/底
+        double maxHeight = Math.Max(200, XamlRoot.Size.Height - 96);
+        Border_CommandLineArgumentPickerHost.MaxHeight = Math.Min(640, maxHeight);
+        Popup_CommandLineArgumentPicker.IsOpen = true;
+    }
+
+
+    /// <summary>
+    /// Popup 打开后按应用窗口尺寸居中（偏移相对 XamlRoot，不绑 ContentDialog 内容区）。
+    /// </summary>
+    private void Popup_CommandLineArgumentPicker_Opened(object sender, object e)
+    {
+        CenterCommandLineArgumentPickerPopup();
+        // 首帧 ActualSize 可能仍为 0，布局完成后再居中一次
+        Border_CommandLineArgumentPickerHost.SizeChanged -= Border_CommandLineArgumentPickerHost_SizeChanged;
+        Border_CommandLineArgumentPickerHost.SizeChanged += Border_CommandLineArgumentPickerHost_SizeChanged;
+    }
+
+
+    private void Border_CommandLineArgumentPickerHost_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (e.NewSize.Width <= 0 || e.NewSize.Height <= 0)
+        {
+            return;
+        }
+        CenterCommandLineArgumentPickerPopup();
+        Border_CommandLineArgumentPickerHost.SizeChanged -= Border_CommandLineArgumentPickerHost_SizeChanged;
+    }
+
+
+    /// <summary>
+    /// 将常用参数 Popup 置于当前 XamlRoot（应用窗口）中心，并保留上下约 48px 空隙。
+    /// </summary>
+    private void CenterCommandLineArgumentPickerPopup()
+    {
+        if (XamlRoot is null || !Popup_CommandLineArgumentPicker.IsOpen)
+        {
+            return;
+        }
+
+        FrameworkElement host = Border_CommandLineArgumentPickerHost;
+        host.UpdateLayout();
+        double width = host.ActualWidth;
+        double height = host.ActualHeight;
+        if (width <= 0 || height <= 0)
+        {
+            double availableWidth = Math.Max(0, XamlRoot.Size.Width - 48);
+            double availableHeight = Math.Max(0, XamlRoot.Size.Height - 96);
+            host.Measure(new Windows.Foundation.Size(Math.Min(460, availableWidth), Math.Min(640, availableHeight)));
+            width = host.DesiredSize.Width;
+            height = host.DesiredSize.Height;
+        }
+
+        if (width <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        double rootWidth = XamlRoot.Size.Width;
+        double rootHeight = XamlRoot.Size.Height;
+        // 目标：相对应用窗口居中；Popup 若挂在对话框内容树上，需把窗口坐标换算到 Parent 坐标
+        double targetX = (rootWidth - width) / 2;
+        double targetY = (rootHeight - height) / 2;
+        // 上下至少留约 48px（矮窗时尽量居中）
+        targetY = Math.Clamp(targetY, 48, Math.Max(48, rootHeight - height - 48));
+        targetX = Math.Max(0, targetX);
+
+        if (Popup_CommandLineArgumentPicker.Parent is UIElement parent
+            && XamlRoot.Content is UIElement rootContent)
+        {
+            Windows.Foundation.Point parentOrigin = parent.TransformToVisual(rootContent).TransformPoint(new Windows.Foundation.Point(0, 0));
+            Popup_CommandLineArgumentPicker.HorizontalOffset = targetX - parentOrigin.X;
+            Popup_CommandLineArgumentPicker.VerticalOffset = targetY - parentOrigin.Y;
+        }
+        else
+        {
+            Popup_CommandLineArgumentPicker.HorizontalOffset = targetX;
+            Popup_CommandLineArgumentPicker.VerticalOffset = targetY;
+        }
     }
 
 
