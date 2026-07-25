@@ -65,9 +65,9 @@ Sau đó, tôi muốn gửi lời cảm ơn đặc biệt tới [@neon-nyan](htt
 
 Tiếp theo, xin gửi lời cảm ơn sâu sắc đến nhà phát triển chính của [Snap Hutao](https://github.com/DGP-Studio/Snap.Hutao), [@Lightczx](https://github.com/Lightczx). Sự trợ giúp của anh ấy là vô giá trong quá trình phát triển Moonward.
 
-Ngoài ra, cảm ơn [CloudFlare](https://www.cloudflare.com/) vì đã cung cấp dịch vụ CDN miễn phí và [SignPath Foundation](https://signpath.org/) vì đã cung cấp dịch vụ ký mã miễn phí cho các dự án mã nguồn mở.
+Ngoài ra, cảm ơn [CloudFlare](https://www.cloudflare.com/) vì đã cung cấp dịch vụ CDN miễn phí.
 
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />&nbsp;&nbsp;&nbsp;&nbsp;<img alt="signpath foundation" height="72px" src="https://github.com/user-attachments/assets/052c654a-13fa-4e7a-8f1d-9f57c83f438b" />
+<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
 
 Và các [thư viện bên thứ ba](./docs/ThirdParty.md) được sử dụng trong dự án này.
 

@@ -62,9 +62,9 @@ Moonward ใช้ [Crowdin](https://crowdin.com/project/starward) ในกา�
 Moonward ไม่เพียงแต่จะใช้ทรัพยากรบางส่วนที่เขาสร้างแล้ว ยังนำเอาแนวการออกแบบ UI มาใช้อีกด้วย 
 ผมได้เรียนรู้เยอะมากจากโค้ดของ Collapse และได้ทำให้การพัฒนา Starwart เป็นไปได้อย่างราบรื่น
 
-นอกจากนี้ผมต้องขอบคุณ [CloudFlare](https://www.cloudflare.com/) ที่ให้บริการ CDN ฟรี และ [SignPath Foundation](https://signpath.org/) ที่ให้บริการโค้ดไซน์ฟรีสำหรับโครงการโอเพนซอร์ส
+นอกจากนี้ผมต้องขอบคุณ [CloudFlare](https://www.cloudflare.com/) ที่ให้บริการ CDN ฟรี
 
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />&nbsp;&nbsp;&nbsp;&nbsp;<img alt="signpath foundation" height="72px" src="https://github.com/user-attachments/assets/052c654a-13fa-4e7a-8f1d-9f57c83f438b" />
+<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
 
 และ[ไลบรารีของบุคคลที่สาม](./docs/ThirdParty.md) ที่ใช้ในโครงการนี้ 
 

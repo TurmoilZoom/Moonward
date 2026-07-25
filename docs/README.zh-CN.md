@@ -71,9 +71,9 @@ Moonward 使用 [Crowdin](https://crowdin.com/project/starward) 进行应用内�
 
 其次，感谢[胡桃工具箱](https://github.com/DGP-Studio/Snap.Hutao)的主要开发者 [@Lightczx](https://github.com/Lightczx)，Moonward 的开发过程中得到了他的很多帮助。
 
-我还要感谢 [CloudFlare](https://www.cloudflare.com/) 提供的免费 CDN，以及 [SignPath Foundation](https://signpath.org/) 为开源项目提供免费的代码签名服务。
+我还要感谢 [CloudFlare](https://www.cloudflare.com/) 提供的免费 CDN。
 
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />&nbsp;&nbsp;&nbsp;&nbsp;<img alt="signpath foundation" height="72px" src="https://github.com/user-attachments/assets/052c654a-13fa-4e7a-8f1d-9f57c83f438b" />
+<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
 
 以及本项目中使用的[第三方库](./docs/ThirdParty.md)。
 

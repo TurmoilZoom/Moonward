@@ -66,9 +66,9 @@ Moonward использует [Crowdin](https://crowdin.com/project/starward) д
 
 Далее, огромная благодарность основному разработчику [Snap Hutao](https://github.com/DGP-Studio/Snap.Hutao), [@Lightczx](https://github.com/Lightczx). Его помощь была бесценной в ходе разработки Moonward."
 
-Затем, спасибо [CloudFlare](https://www.cloudflare.com/) за предоставление бесплатного CDN и [SignPath Foundation](https://signpath.org/) за предоставление бесплатной подписи кода для проектов с открытым исходным кодом.
+Затем, спасибо [CloudFlare](https://www.cloudflare.com/) за предоставление бесплатного CDN.
 
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />&nbsp;&nbsp;&nbsp;&nbsp;<img alt="signpath foundation" height="72px" src="https://github.com/user-attachments/assets/052c654a-13fa-4e7a-8f1d-9f57c83f438b" />
+<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
 
 А также [сторонние библиотеки](./docs/ThirdParty.md), используемые в этом проекте.
 

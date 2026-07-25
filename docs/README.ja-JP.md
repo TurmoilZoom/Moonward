@@ -59,9 +59,9 @@ Moonward はローカライズに[Crowdin](https://crowdin.com/project/starward)
 
  まず最初に、このプロジェクトのインスパイアとなる 「Collapse」 の開発者 [neon-nyan](https://github.com/neon-nyan) 氏に感謝をします。Moonward は彼が作ったリソースだけでなく、「ユーザーインターフェース」も参考にしています。  [Collapse](https://github.com/neon-nyan/Collapse) のコードから多くの事を学び、私の開発プロセスをよりスムーズにしてくれました。
 
-それから、無料の CDN を提供してくれた [CloudFlare](https://www.cloudflare.com/) と、オープンソースプロジェクト向けに無料のコード署名を提供してくれた [SignPath Foundation](https://signpath.org/) に感謝します。
+それから、無料の CDN を提供してくれた [CloudFlare](https://www.cloudflare.com/) に感謝します。
 
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />&nbsp;&nbsp;&nbsp;&nbsp;<img alt="signpath foundation" height="72px" src="https://github.com/user-attachments/assets/052c654a-13fa-4e7a-8f1d-9f57c83f438b" />
+<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
   
 および、本プロジェクトで使用されている[サードパーティライブラリ](./docs/ThirdParty.md)。
 
