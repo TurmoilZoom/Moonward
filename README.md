@@ -5,30 +5,29 @@
 - **分支根目录**：Vue 3 + Vite 源码  
 - **`docs/`**：`npm run build` 产物，供 GitHub Pages 使用  
 
-## 开发
+## 本地预览（推荐）
 
 ```powershell
-npm install
-npm run dev
+cd D:\fork\starward\Starward-gh-pages
+npm start
 ```
 
-本地：`http://localhost:5173/Moonward/`
+缺依赖会自动 `npm install`，然后启动开发服并打开浏览器。  
+地址：`http://localhost:5173/Moonward/`
 
-## 构建
+安装区展示 **Setup / Portable × x64 / ARM64** 直链，并支持 **GitHub / CNB** 下载渠道切换（默认 CNB，与应用内更新源一致；选择会记入 `localStorage`）。
+
+- 清单优先 `api.github.com`（浏览器 CORS 可用）；CNB 列表无 CORS 时用同 tag/文件名改写为 `cnb.cool/.../releases/download/...` 直链  
+- 失败时可换渠道，或打开对应 Releases 页
+
+## 其他命令
 
 ```powershell
-npm run build
+npm run dev       # 仅开发服（不自动装依赖、不自动开浏览器）
+npm run build     # 构建到 dist/
+npm run preview   # 预览构建产物
+npm run deploy    # 构建并推送到远程 gh-pages
 ```
-
-输出到 `dist/`。部署脚本会同步到 `docs/`。
-
-## 部署
-
-```powershell
-npm run deploy
-```
-
-推送到远程 `gh-pages`（源码 + `docs/`）。
 
 GitHub Pages：**Settings → Pages → Branch `gh-pages` / `/docs`**
 

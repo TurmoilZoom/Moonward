@@ -9,6 +9,17 @@ import {
   requirements,
 } from './data/content'
 import { asset } from './utils/asset'
+import {
+  CHANNELS,
+  detectPreferredArch,
+  fetchLatestRelease,
+  findPackage,
+  formatBytes,
+  loadStoredChannel,
+  refinePreferredArch,
+  storeChannel,
+  switchReleaseChannel,
+} from './utils/releases'
 
 const locale = ref(localStorage.getItem('moonward-locale') || 'zh')
 const t = computed(() => (keyObj) => keyObj[locale.value] ?? keyObj.zh)
@@ -20,6 +31,124 @@ watch(locale, (v) => {
 
 function toggleLocale() {
   locale.value = locale.value === 'zh' ? 'en' : 'zh'
+}
+
+/* —— Latest release downloads —— */
+const releaseLoading = ref(true)
+const releaseError = ref(false)
+const release = ref(null)
+const preferredArch = ref(detectPreferredArch())
+/** @type {import('vue').Ref<'github' | 'cnb'>} */
+const downloadChannel = ref(loadStoredChannel())
+
+const channelOptions = [
+  CHANNELS.cnb,
+  CHANNELS.github,
+]
+
+const activeChannelMeta = computed(
+  () => CHANNELS[downloadChannel.value] || CHANNELS.cnb,
+)
+
+const releasesPageHref = computed(() => activeChannelMeta.value.releasesPage)
+
+const archColumns = [
+  { id: 'x64', label: { zh: 'Windows x64', en: 'Windows x64' } },
+  { id: 'arm64', label: { zh: 'Windows ARM64', en: 'Windows ARM64' } },
+]
+
+const recommendedSetup = computed(() => {
+  const pkgs = release.value?.packages
+  if (!pkgs?.length) return null
+  return (
+    findPackage(pkgs, preferredArch.value, 'setup') ||
+    findPackage(pkgs, 'x64', 'setup') ||
+    findPackage(pkgs, preferredArch.value, 'portable') ||
+    pkgs[0] ||
+    null
+  )
+})
+
+const heroDownloadHref = computed(
+  () => recommendedSetup.value?.url || '#install',
+)
+
+function packageFor(arch, kind) {
+  return findPackage(release.value?.packages || [], arch, kind)
+}
+
+function kindLabel(kind) {
+  if (locale.value === 'zh') {
+    return kind === 'setup' ? '安装包' : '便携版'
+  }
+  return kind === 'setup' ? 'Setup' : 'Portable'
+}
+
+function kindHint(kind) {
+  if (locale.value === 'zh') {
+    return kind === 'setup' ? '推荐 · 向导安装' : '解压即用 · 免安装'
+  }
+  return kind === 'setup' ? 'Recommended installer' : 'Unpack & run'
+}
+
+function sizeLabel(pkg) {
+  if (!pkg?.size) return ''
+  return formatBytes(pkg.size, locale.value)
+}
+
+/**
+ * @param {AbortSignal} [signal]
+ * @param {{ silent?: boolean }} [opts] silent：已有卡片时不置 loading，避免整区闪烁
+ */
+async function loadRelease(signal, opts = {}) {
+  const silent = Boolean(opts.silent && release.value?.packages?.length)
+  if (!silent) {
+    releaseLoading.value = true
+  }
+  releaseError.value = false
+  try {
+    preferredArch.value = await refinePreferredArch(preferredArch.value)
+    if (signal?.aborted) return
+    release.value = await fetchLatestRelease(downloadChannel.value, signal)
+    if (signal?.aborted) return
+    if (!release.value?.packages?.length) {
+      releaseError.value = true
+    }
+  } catch (e) {
+    // 切换线路 abort 旧请求时勿当成失败刷屏
+    if (signal?.aborted || (e && /** @type {Error} */ (e).name === 'AbortError')) return
+    releaseError.value = true
+    if (!silent) {
+      release.value = null
+    }
+  } finally {
+    if (!silent) {
+      releaseLoading.value = false
+    }
+  }
+}
+
+/**
+ * 切换下载渠道（GitHub / CNB）。
+ * 已有安装包清单时只改写 URL，不进 loading、不重新请求。
+ * @param {'github' | 'cnb'} channel
+ */
+function setDownloadChannel(channel) {
+  if (channel !== 'github' && channel !== 'cnb') return
+  if (downloadChannel.value === channel && release.value && !releaseError.value) return
+  downloadChannel.value = channel
+  storeChannel(channel)
+
+  // 清单与渠道无关：本地换链即可，卡片不卸载
+  if (release.value?.packages?.length && !releaseError.value) {
+    release.value = switchReleaseChannel(release.value, channel)
+    return
+  }
+
+  // 首次失败或尚无数据：完整拉取
+  releaseAbort?.abort()
+  releaseAbort = new AbortController()
+  loadRelease(releaseAbort.signal)
 }
 
 /* —— Mouse parallax (Bilibili-style layered banner) —— */
@@ -68,14 +197,18 @@ function layerStyle(depth) {
 }
 
 const activeStep = ref('config')
+let releaseAbort = null
 
 onMounted(() => {
   reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en'
+  releaseAbort = new AbortController()
+  loadRelease(releaseAbort.signal)
 })
 
 onUnmounted(() => {
   if (raf) cancelAnimationFrame(raf)
+  releaseAbort?.abort()
 })
 </script>
 
@@ -127,14 +260,26 @@ onUnmounted(() => {
           <li v-for="name in games[locale]" :key="name">{{ name }}</li>
         </ul>
         <p class="actions">
-          <a class="btn" :href="links.download" target="_blank" rel="noopener noreferrer">
-            {{ locale === 'zh' ? '下载最新版' : 'Download' }}
+          <a
+            class="btn"
+            :href="heroDownloadHref"
+            rel="noopener noreferrer"
+          >
+            {{
+              locale === 'zh'
+                ? recommendedSetup
+                  ? `下载 ${recommendedSetup.arch === 'arm64' ? 'ARM64' : 'x64'} ${kindLabel(recommendedSetup.kind)}`
+                  : '选择安装包'
+                : recommendedSetup
+                  ? `Download ${recommendedSetup.arch} ${kindLabel(recommendedSetup.kind)}`
+                  : 'Get installer'
+            }}
           </a>
-          <a class="btn ghost" :href="links.github" target="_blank" rel="noopener noreferrer">
+          <a class="btn ghost" href="#install">
+            {{ locale === 'zh' ? '全部版本' : 'All packages' }}
+          </a>
+          <a class="text-link" :href="links.github" target="_blank" rel="noopener noreferrer">
             GitHub
-          </a>
-          <a class="text-link" :href="links.upstream" target="_blank" rel="noopener noreferrer">
-            {{ locale === 'zh' ? '上游 Starward' : 'Upstream Starward' }}
           </a>
         </p>
       </div>
@@ -329,27 +474,110 @@ onUnmounted(() => {
 
       <!-- Install -->
       <section id="install" class="block install-block" aria-labelledby="install-heading">
-        <div class="install-grid">
+        <div class="install-head">
           <div>
             <p class="section-kicker">{{ locale === 'zh' ? '开始使用' : 'Get started' }}</p>
-            <h2 id="install-heading">{{ locale === 'zh' ? '安装' : 'Install' }}</h2>
+            <h2 id="install-heading">{{ locale === 'zh' ? '下载与安装' : 'Download & install' }}</h2>
             <p class="section-lead install-lead">
               {{
                 locale === 'zh'
-                  ? '从 GitHub Releases 下载对应 CPU 架构的安装包，按提示完成安装。'
-                  : 'Download the package for your CPU architecture from GitHub Releases and follow the installer.'
+                  ? '直接下载最新版安装包或便携版。多数电脑选 x64；Surface / 骁龙等 Windows on ARM 选 ARM64。可切换 GitHub / CNB 下载线路。'
+                  : 'Download the latest Setup or Portable build. Most PCs use x64; Windows on ARM uses ARM64. Switch GitHub / CNB download channels as needed.'
               }}
             </p>
-            <dl class="req">
-              <template v-for="row in requirements" :key="row.label.zh">
-                <dt>{{ t(row.label) }}</dt>
-                <dd>{{ t(row.value) }}</dd>
-              </template>
-            </dl>
           </div>
+          <div class="install-meta">
+            <div class="channel-switch" role="group" :aria-label="locale === 'zh' ? '下载渠道' : 'Download channel'">
+              <button
+                v-for="ch in channelOptions"
+                :key="ch.id"
+                type="button"
+                class="channel-btn"
+                :class="{ active: downloadChannel === ch.id }"
+                :aria-pressed="downloadChannel === ch.id"
+                @click="setDownloadChannel(ch.id)"
+              >
+                {{ ch.label[locale] || ch.label.zh }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="releaseLoading" class="dl-status" role="status">
+          {{ locale === 'zh' ? '正在获取最新版本…' : 'Fetching latest release…' }}
+        </div>
+
+        <div v-else-if="releaseError" class="dl-status error">
+          <p>
+            {{
+              locale === 'zh'
+                ? '暂时无法读取安装包列表，请切换渠道重试，或打开对应 Releases 页面手动下载。'
+                : 'Could not load packages. Try the other channel, or open the Releases page.'
+            }}
+          </p>
+          <a class="btn" :href="releasesPageHref" target="_blank" rel="noopener noreferrer">
+            {{ locale === 'zh' ? '打开 Releases' : 'Open Releases' }}
+          </a>
+        </div>
+
+        <div v-else class="dl-section">
+          <span v-if="release" class="ver mono">{{ release.tag || release.name }}</span>
+          <div class="dl-grid">
+            <article
+              v-for="col in archColumns"
+              :key="col.id"
+              class="dl-card"
+              :class="{ preferred: col.id === preferredArch }"
+            >
+              <header class="dl-card-head">
+                <h3>{{ t(col.label) }}</h3>
+                <span v-if="col.id === preferredArch" class="badge">
+                  {{ locale === 'zh' ? '推荐' : 'Likely yours' }}
+                </span>
+              </header>
+              <ul class="dl-list">
+                <li v-for="kind in ['setup', 'portable']" :key="kind">
+                  <template v-if="packageFor(col.id, kind)">
+                    <a
+                      class="dl-link"
+                      :class="{ primary: kind === 'setup' }"
+                      :href="packageFor(col.id, kind).url"
+                      rel="noopener noreferrer"
+                    >
+                      <span class="dl-link-main">
+                        <strong>{{ kindLabel(kind) }}</strong>
+                        <span class="dl-file mono">{{ packageFor(col.id, kind).name }}</span>
+                        <span class="dl-hint">{{ kindHint(kind) }}</span>
+                      </span>
+                      <span class="dl-size mono">{{ sizeLabel(packageFor(col.id, kind)) }}</span>
+                    </a>
+                  </template>
+                  <template v-else>
+                    <div class="dl-missing">
+                      <strong>{{ kindLabel(kind) }}</strong>
+                      <span>{{ locale === 'zh' ? '此版本暂无该包' : 'Not in this release' }}</span>
+                    </div>
+                  </template>
+                </li>
+              </ul>
+            </article>
+          </div>
+        </div>
+
+        <div class="install-foot">
+          <dl class="req">
+            <template v-for="row in requirements" :key="row.label.zh">
+              <dt>{{ t(row.label) }}</dt>
+              <dd>{{ t(row.value) }}</dd>
+            </template>
+          </dl>
           <div class="install-cta">
-            <a class="btn large" :href="links.download" target="_blank" rel="noopener noreferrer">
-              {{ locale === 'zh' ? '前往 Releases' : 'Open Releases' }}
+            <a class="text-link" :href="releasesPageHref" target="_blank" rel="noopener noreferrer">
+              {{
+                locale === 'zh'
+                  ? `全部历史版本（${activeChannelMeta.label.zh}）`
+                  : `All releases (${activeChannelMeta.label.en})`
+              }}
             </a>
             <a class="text-link" :href="links.issues" target="_blank" rel="noopener noreferrer">
               Issues
@@ -1011,17 +1239,247 @@ onUnmounted(() => {
 /* main 内最后一块：去掉 .block 的 margin-bottom，贴合页脚间距 */
 .install-block {
   margin-bottom: 0;
+  /* 左侧文案↔卡片 与 版本胶囊↔卡片 共用，改一处即可 */
+  --install-stack-gap: 1rem;
 }
 
-.install-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 0.8fr;
-  gap: 1.25rem;
-  align-items: end;
+.install-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  align-items: flex-start;
+  margin-bottom: var(--install-stack-gap);
 }
 
 .install-lead {
-  margin-bottom: 0.85rem;
+  margin-bottom: 0;
+  max-width: 36rem;
+}
+
+.install-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-sans);
+}
+
+.channel-switch {
+  display: inline-flex;
+  padding: 0.18rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-raised);
+  gap: 0.15rem;
+}
+
+.channel-btn {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.32rem 0.85rem;
+  border-radius: 999px;
+  color: var(--muted);
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.channel-btn:hover {
+  color: var(--ink);
+}
+
+.channel-btn.active {
+  color: #f7faf8;
+  background: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+/*
+ * 版本胶囊：两张下载卡片右上侧。
+ * absolute 不占左侧流式高度；与卡片顶边间距 = 左侧文案到底部卡片的间距（--install-stack-gap）。
+ */
+.dl-section {
+  position: relative;
+}
+
+.dl-section > .ver {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translateY(calc(-100% - var(--install-stack-gap)));
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+}
+
+.dl-status {
+  padding: 1.1rem 1.15rem;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--line-strong);
+  background: var(--bg-raised);
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  color: var(--ink-2);
+  margin-bottom: 1rem;
+}
+
+.dl-status.error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--rose) 35%, var(--line));
+  background: color-mix(in srgb, var(--rose) 6%, var(--bg-card));
+}
+
+.dl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1.15rem;
+}
+
+.dl-card {
+  padding: 0.95rem 1rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dl-card.preferred {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  background: var(--bg-card);
+}
+
+.dl-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dl-card-head h3 {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.badge {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+}
+
+.dl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dl-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.dl-link:hover {
+  border-color: var(--accent);
+  background: #fff;
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.dl-link.primary {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 65%, var(--bg-card));
+}
+
+.dl-link.primary:hover {
+  background: var(--accent-soft);
+}
+
+.dl-link-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.dl-link-main strong {
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.dl-file {
+  font-size: 0.72rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 16rem;
+}
+
+.dl-hint {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+
+.dl-size {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.dl-missing {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+}
+
+.dl-missing strong {
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+.install-foot {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr;
+  gap: 1rem 1.25rem;
+  align-items: end;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--line);
 }
 
 .req {
@@ -1049,11 +1507,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.65rem;
-  padding: 1.1rem 1.15rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  background: var(--accent-soft);
+  gap: 0.45rem;
 }
 
 /* —— Footer —— */
@@ -1099,14 +1553,24 @@ onUnmounted(() => {
     grid-template-columns: 1fr;
   }
 
-  .install-grid {
+  .dl-grid,
+  .install-foot {
     grid-template-columns: 1fr;
+  }
+
+  .install-meta {
+    align-items: flex-start;
   }
 
   .install-cta {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
+    gap: 0.65rem 1rem;
+  }
+
+  .dl-file {
+    max-width: 100%;
   }
 }
 
