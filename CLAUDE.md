@@ -8,6 +8,34 @@ Moonward（产品品牌；工程目录与 C# 命名空间仍为 `Starward.*`）�
 
 本仓为 **fork**（上游 Scighost/Starward，发布走 TurmoilZoom/Starward + Velopack，安装包身份为 Moonward）。日常开发在 `rebase/develop`，会周期性变基上游——**许多自定义改动易在变基中丢失**。
 
+## Git Worktree
+
+新建 worktree 时，工作树放在主仓库**同级**的 `Starward.worktrees/` 下，不要放进主仓库内部或与主仓并列散落。可参考当前结构：
+
+```
+../                         # 主仓库的父目录（例：…/fork/starward）
+  Starward/                 # 主工作区（本仓，日常分支 rebase/develop）
+  Starward.worktrees/       # 全部附加 worktree 的根目录
+    <name>/                 # 例：功能分支、并行任务工作树
+```
+
+```powershell
+# 在主仓库根目录执行
+git worktree add ../Starward.worktrees/<name> <branch>
+```
+
+## 提交信息
+
+推送到远程时：提交类型用英文 Conventional Commits，说明主体用中文（标题与正文）。与 `CONTRIBUTING.md` 一致。
+
+```
+feat: 为首页添加功能图钉
+fix: 修复自定义背景在分辨率变化后回退的问题
+docs: 补充 URL 协议说明
+```
+
+常用类型：`feat` / `fix` / `docs` / `refactor` / `improve` / `remove` / `chore` 等。一次提交只做一件事；不相关改动拆开。正文可补充原因与影响（中文）。
+
 ## 构建与运行
 
 **没有 .sln**，直接编主项目（会带上 ProjectReference）：

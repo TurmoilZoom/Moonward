@@ -18,6 +18,34 @@ src/Starward.Setup.Core/
 
 GameRecord 相关以「统一 API 错误反馈」「国服短信登录」为准；新增同类功能以 **SignIn（每日签到）** 为完整分层参考。
 
+## Git Worktree
+
+新建 worktree 时，工作树放在主仓库**同级**的 `Starward.worktrees/` 下，不要放进主仓库内部或与主仓并列散落。可参考当前结构：
+
+```
+../                         # 主仓库的父目录（例：…/fork/starward）
+  Starward/                 # 主工作区（本仓，日常分支 rebase/develop）
+  Starward.worktrees/       # 全部附加 worktree 的根目录
+    <name>/                 # 例：功能分支、并行任务工作树
+```
+
+```powershell
+# 在主仓库根目录执行
+git worktree add ../Starward.worktrees/<name> <branch>
+```
+
+## 提交信息
+
+推送到远程时：提交类型用英文 Conventional Commits，说明主体用中文（标题与正文）。
+
+```
+feat: 为首页添加功能图钉
+fix: 修复自定义背景在分辨率变化后回退的问题
+docs: 补充 URL 协议说明
+```
+
+常用类型：`feat` / `fix` / `docs` / `refactor` / `improve` / `remove` / `chore` 等。一次提交只做一件事；不相关改动拆开。
+
 ## 构建
 
 ```powershell
