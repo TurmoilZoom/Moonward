@@ -105,19 +105,11 @@ dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeI
 
 ### 米哈游 API 错误反馈
 
-入口：`Features/MiHoYoApiErrorFeedback.cs`（`MiHoYoApiErrorFeedbackFactory`）。禁止页面/服务自行 `switch` retcode、硬编码 Toast，或把 `Exception.Message` 当已本地化文案。
+入口：`Features/MiHoYoApiErrorFeedback.cs`（`MiHoYoApiErrorFeedbackFactory`）。
 
-- **Core**：战绩/签到/认证/passport → `miHoYoApiException`；抽卡 authkey → `GachaApiException`。`ResponseMessage` 保留服务端原文；异常类不得引用 `Lang`。
-- **UI**：`Create(exception, MiHoYoApiContext.XXX)`。同一 retcode 随 Context 变——`PassportCaptcha` 与战绩分开；抽卡/authkey 失效 → `RefreshUrl`，勿提示重登米游社。
-- **显示与恢复分离**：主窗口 `Show(feedback, onRecovery)`，恢复由页面接线；对话框内 `Create` + 框内 `InfoBar`。未知码保留原文与状态码。
-- **扩展**：先选准 Context，再在 Factory 集中加映射；勿把语义不同的码硬揉一起。文案走「本地化」。
-
-### GameRecord 登录、设备指纹与 Cookie
-
-- **入口**：国服短信验证码 + 手动 Cookie；国际服（HoYoLAB）无 passport 短信 → **WebView 网页登录**（`LoginPage`）+ 手动 Cookie。完全失效走上述入口；国服不要改回网页登录。
-- **静默换票**：验证码登录保证 `stoken`/`mid`。国服失败 → `ExecuteWithRequestRecoveryAsync`（冷却刷指纹；`IsLoginExpired` 时 `GameRecordCookieRefreshService` 换票回写，**最多重试一次**）。缺 stoken 或失败 → 上层登录失效反馈。
-- **分层**：`MihoyoPassportClient`（协议/DTO）→ `CaptchaLoginService`（发码/登录/aigis/拼 Cookie）与 `GameRecordCookieRefreshService`（换票+DB）→ `CaptchaLoginDialog` / `GeetestVerifyPopup`（UI 回调极验）。换票勿堆 `HyperionClient`；Core 禁 WinUI；CN/OS 差留在 Client/Service。
-- **安全**：passport/换票前同步 device_id/fp；日志可记流程与手机号后四位，**禁止** Cookie/Token/验证码/authkey/完整手机号。新 DTO 注册 JsonContext；新服务注册 `ServiceProvider`。
+- Core 只抛 `miHoYoApiException` / `GachaApiException`，保留服务端原文；**异常类不本地化**。
+- UI 用 `Create(exception, MiHoYoApiContext.XXX)` 展示；**禁止**页面/服务自行 `switch` retcode 或硬编码 Toast。
+- 扩展映射只改 Factory；文案走「本地化」。
 
 ### 数据库（SQLite + Dapper）
 
@@ -145,7 +137,7 @@ Velopack + GitHub Releases；预览版 = pre-release，按架构分渠道。`Rel
 
 - 应用 UI：`Starward.Language/Lang.*.resx`（Crowdin）。**禁止硬编码用户可见字符串**。
 - Core 领域文案（抽卡类型、自助查询类型等）：`Starward.Core/Localization/CoreLang.*.resx`，**增改规则与 Lang 相同**。
-- API 错误展示文案走 `MiHoYoApiErrorFeedbackFactory` + 资源键，不在异常/页面硬编码。
+- API 错误展示文案走 `MiHoYoApiErrorFeedbackFactory`，不在异常/页面硬编码。
 - 已维护语言以仓库内 `Lang.*.resx` / `CoreLang.*.resx` 文件名为准（含默认 `Lang.resx`、zh-CN/HK/TW、de/es/it/ja/ko/ru/th/vi 等）。
 - **`dotnet build` 不重生 Designer**；`Lang.Designer.cs` / `CoreLang.Designer.cs` 须手改。
 

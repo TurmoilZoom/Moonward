@@ -16,7 +16,7 @@ src/Starward.RPC/      提权安装等（独立进程）
 src/Starward.Setup.Core/
 ```
 
-GameRecord 相关以「统一 API 错误反馈」「国服短信登录」为准；新增同类功能以 **SignIn（每日签到）** 为完整分层参考。
+GameRecord 新增同类功能以 **SignIn（每日签到）** 为完整分层参考；API 错误走统一反馈（见下）。
 
 ## Git Worktree
 
@@ -71,19 +71,13 @@ SDK 见 `global.json`，**不要擅自升级 SDK/NuGet**。改完至少 build �
 | 设置 / DI | `AppConfig.Setting` / `ServiceProvider` | 按游戏开关、注册服务 |
 | 文案 | 全部 `Lang.*.resx` + `Lang.Designer.cs` | 见「本地化」 |
 
-## 米哈游 API 异常与登录
+## 米哈游 API 错误反馈
 
-**错误反馈**（`MiHoYoApiErrorFeedbackFactory`）
+入口：`MiHoYoApiErrorFeedbackFactory`（`Features/MiHoYoApiErrorFeedback.cs`）。
 
-- Core 只抛协议异常：战绩/通行证等 → `miHoYoApiException`；抽卡 authkey → `GachaApiException`。`ResponseMessage` 保留服务端原文；**异常类不得本地化或把 retcode 写成 UI 文案**。
-- UI：`Create(exception, MiHoYoApiContext.XXX)`，禁止页面/服务自行 `switch` retcode 或硬编码 Toast。同一 retcode 语义随 Context 变（`PassportCaptcha` ≠ 战绩；抽卡失效 → `RefreshUrl`，勿提示重登米游社）。
-- 主窗口 `Show(feedback, onRecovery)`，恢复由调用方接线；对话框内用 `Create` + 框内 `InfoBar`。未知码保留原文与状态码；扩展只改 Factory。
-
-**登录与 Cookie**
-
-- 入口：国服短信验证码 + 手动 Cookie；国际服无 passport 短信时提供 **WebView 网页登录**（`LoginPage`）+ 手动 Cookie。验证码登录写入 `stoken`/`mid`。
-- 国服失效：`ExecuteWithRequestRecoveryAsync`（指纹 + stoken 换票，**最多重试一次**）；失败则引导重新登录。
-- 分层：`MihoyoPassportClient` → `CaptchaLoginService` / `GameRecordCookieRefreshService` → 对话框 UI。Core 禁止 WinUI；日志禁止 Cookie/Token/验证码/完整手机号明文。
+- Core 只抛 `miHoYoApiException` / `GachaApiException`，保留服务端原文；**异常类不本地化**。
+- UI 用 `Create(exception, MiHoYoApiContext.XXX)` 展示；**禁止**页面/服务自行 `switch` retcode 或硬编码 Toast。
+- 扩展映射只改 Factory；文案走 Lang。
 
 ## 编码要点
 
