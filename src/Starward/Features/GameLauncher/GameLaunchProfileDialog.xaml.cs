@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
@@ -39,6 +41,13 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
 
 
+    /// <summary>
+    /// 常用参数面板：独立 Popup（仅 XamlRoot，不挂在 ContentDialog 内容树 Parent 上），
+    /// 避免 Offset 相对对话框 Parent 导致与整窗居中不一致。模式同 <c>GeetestVerifyPopup</c>。
+    /// </summary>
+    private Popup? _commandLineArgumentPickerPopup;
+
+
     public GameLaunchProfileDialog()
     {
         this.InitializeComponent();
@@ -64,9 +73,10 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     private void GameLaunchProfileDialog_Unloaded(object sender, RoutedEventArgs e)
     {
         // 对话框关闭时一并收起常用参数面板，避免悬挂 Popup
-        if (Popup_CommandLineArgumentPicker.IsOpen)
+        DetachCommandLineArgumentPickerXamlRootChanged();
+        if (_commandLineArgumentPickerPopup is { IsOpen: true })
         {
-            Popup_CommandLineArgumentPicker.IsOpen = false;
+            _commandLineArgumentPickerPopup.IsOpen = false;
         }
         WeakReferenceMessenger.Default.UnregisterAll(this);
     }
@@ -757,13 +767,14 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 打开/关闭常用参数勾选面板（Popup：窗口内居中 + light dismiss）。
+    /// 打开/关闭常用参数勾选面板（独立 Popup：整窗铺满 + 卡片布局居中，与 ContentDialog 同参照）。
     /// </summary>
     private void Button_CommandLineArgumentPicker_Click(object sender, RoutedEventArgs e)
     {
-        if (Popup_CommandLineArgumentPicker.IsOpen)
+        Popup popup = EnsureCommandLineArgumentPickerPopup();
+        if (popup.IsOpen)
         {
-            Popup_CommandLineArgumentPicker.IsOpen = false;
+            popup.IsOpen = false;
             return;
         }
 
@@ -774,87 +785,162 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             isDx12ManagedByApp: isDx12ManagedByApp,
             isDx12Enabled: ShowDx12Argument);
 
-        // 官方：WinUI 3 下 Popup 须设置 XamlRoot；IsLightDismissEnabled 点击面板外关闭
-        Popup_CommandLineArgumentPicker.XamlRoot = XamlRoot;
-        // 上下留白：限高，避免贴窗顶/底
-        double maxHeight = Math.Max(200, XamlRoot.Size.Height - 96);
-        Border_CommandLineArgumentPickerHost.MaxHeight = Math.Min(640, maxHeight);
-        Popup_CommandLineArgumentPicker.IsOpen = true;
+        popup.XamlRoot = XamlRoot;
+        AlignCommandLineArgumentPickerPopup(popup);
+        popup.IsOpen = true;
     }
 
 
     /// <summary>
-    /// Popup 打开后按应用窗口尺寸居中（偏移相对 XamlRoot，不绑 ContentDialog 内容区）。
+    /// 确保使用「仅 XamlRoot、无内容树 Parent」的独立 Popup。
+    /// XAML 里的 <see cref="Popup_CommandLineArgumentPicker"/> 只作 Child 模板宿主，首次打开时把 Child 挪到独立实例。
+    /// </summary>
+    private Popup EnsureCommandLineArgumentPickerPopup()
+    {
+        if (_commandLineArgumentPickerPopup is not null)
+        {
+            return _commandLineArgumentPickerPopup;
+        }
+
+        // 从对话框内容树中的 Popup 卸下 Child，避免 Offset 相对 ContentDialog 内 Parent
+        UIElement? child = Popup_CommandLineArgumentPicker.Child;
+        Popup_CommandLineArgumentPicker.Child = null;
+        Popup_CommandLineArgumentPicker.IsOpen = false;
+
+        var popup = new Popup
+        {
+            Child = child,
+            // Child 已铺满整窗时系统 light dismiss 无法点「外侧」；改点空白手动关
+            IsLightDismissEnabled = false,
+            HorizontalOffset = 0,
+            VerticalOffset = 0,
+        };
+        popup.Opened += Popup_CommandLineArgumentPicker_Opened;
+        popup.Closed += Popup_CommandLineArgumentPicker_Closed;
+        _commandLineArgumentPickerPopup = popup;
+        return popup;
+    }
+
+
+    /// <summary>
+    /// Popup 打开后再次对齐（布局就绪），并监听窗口尺寸变化。
     /// </summary>
     private void Popup_CommandLineArgumentPicker_Opened(object sender, object e)
     {
-        CenterCommandLineArgumentPickerPopup();
-        // 首帧 ActualSize 可能仍为 0，布局完成后再居中一次
-        Border_CommandLineArgumentPickerHost.SizeChanged -= Border_CommandLineArgumentPickerHost_SizeChanged;
-        Border_CommandLineArgumentPickerHost.SizeChanged += Border_CommandLineArgumentPickerHost_SizeChanged;
+        if (sender is Popup popup)
+        {
+            AlignCommandLineArgumentPickerPopup(popup);
+        }
+        AttachCommandLineArgumentPickerXamlRootChanged();
     }
 
 
-    private void Border_CommandLineArgumentPickerHost_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void Popup_CommandLineArgumentPicker_Closed(object sender, object e)
     {
-        if (e.NewSize.Width <= 0 || e.NewSize.Height <= 0)
+        DetachCommandLineArgumentPickerXamlRootChanged();
+    }
+
+
+    private void AttachCommandLineArgumentPickerXamlRootChanged()
+    {
+        if (XamlRoot is null)
         {
             return;
         }
-        CenterCommandLineArgumentPickerPopup();
-        Border_CommandLineArgumentPickerHost.SizeChanged -= Border_CommandLineArgumentPickerHost_SizeChanged;
+        XamlRoot.Changed -= CommandLineArgumentPickerXamlRoot_Changed;
+        XamlRoot.Changed += CommandLineArgumentPickerXamlRoot_Changed;
+    }
+
+
+    private void DetachCommandLineArgumentPickerXamlRootChanged()
+    {
+        if (XamlRoot is null)
+        {
+            return;
+        }
+        XamlRoot.Changed -= CommandLineArgumentPickerXamlRoot_Changed;
+    }
+
+
+    private void CommandLineArgumentPickerXamlRoot_Changed(XamlRoot sender, XamlRootChangedEventArgs args)
+    {
+        if (_commandLineArgumentPickerPopup is { IsOpen: true } popup)
+        {
+            AlignCommandLineArgumentPickerPopup(popup);
+        }
     }
 
 
     /// <summary>
-    /// 将常用参数 Popup 置于当前 XamlRoot（应用窗口）中心，并保留上下约 48px 空隙。
+    /// 将定位层铺满 XamlRoot 整窗，Offset 置 0，卡片由 Grid Center 对齐——
+    /// 与 ContentDialog 同一整窗参照（含左侧导航与标题栏区域）。
+    /// 同 <c>GeetestVerifyPopup.SizeToRoot</c>：独立 Popup + 铺满 + 布局居中，不手算卡片坐标。
     /// </summary>
-    private void CenterCommandLineArgumentPickerPopup()
+    private void AlignCommandLineArgumentPickerPopup(Popup popup)
     {
-        if (XamlRoot is null || !Popup_CommandLineArgumentPicker.IsOpen)
-        {
-            return;
-        }
-
-        FrameworkElement host = Border_CommandLineArgumentPickerHost;
-        host.UpdateLayout();
-        double width = host.ActualWidth;
-        double height = host.ActualHeight;
-        if (width <= 0 || height <= 0)
-        {
-            double availableWidth = Math.Max(0, XamlRoot.Size.Width - 48);
-            double availableHeight = Math.Max(0, XamlRoot.Size.Height - 96);
-            host.Measure(new Windows.Foundation.Size(Math.Min(460, availableWidth), Math.Min(640, availableHeight)));
-            width = host.DesiredSize.Width;
-            height = host.DesiredSize.Height;
-        }
-
-        if (width <= 0 || height <= 0)
+        if (XamlRoot is null)
         {
             return;
         }
 
         double rootWidth = XamlRoot.Size.Width;
         double rootHeight = XamlRoot.Size.Height;
-        // 目标：相对应用窗口居中；Popup 若挂在对话框内容树上，需把窗口坐标换算到 Parent 坐标
-        double targetX = (rootWidth - width) / 2;
-        double targetY = (rootHeight - height) / 2;
-        // 上下至少留约 48px（矮窗时尽量居中）
-        targetY = Math.Clamp(targetY, 48, Math.Max(48, rootHeight - height - 48));
-        targetX = Math.Max(0, targetX);
+        if (rootWidth <= 0 || rootHeight <= 0)
+        {
+            return;
+        }
 
-        if (Popup_CommandLineArgumentPicker.Parent is UIElement parent
-            && XamlRoot.Content is UIElement rootContent)
+        // 独立 Popup：原点即 XamlRoot 左上角（整窗客户区，含导航/标题栏）
+        popup.HorizontalOffset = 0;
+        popup.VerticalOffset = 0;
+        Grid_CommandLineArgumentPickerRoot.Width = rootWidth;
+        Grid_CommandLineArgumentPickerRoot.Height = rootHeight;
+        Border_CommandLineArgumentPickerHost.MaxHeight = Math.Min(640, Math.Max(200, rootHeight - 96));
+    }
+
+
+    /// <summary>
+    /// 点定位层空白（卡片外）关闭，模拟 light dismiss。
+    /// </summary>
+    private void Grid_CommandLineArgumentPickerRoot_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (e.OriginalSource is DependencyObject source
+            && (ReferenceEquals(source, Border_CommandLineArgumentPickerHost)
+                || IsDescendantOf(Border_CommandLineArgumentPickerHost, source)))
         {
-            Windows.Foundation.Point parentOrigin = parent.TransformToVisual(rootContent).TransformPoint(new Windows.Foundation.Point(0, 0));
-            Popup_CommandLineArgumentPicker.HorizontalOffset = targetX - parentOrigin.X;
-            Popup_CommandLineArgumentPicker.VerticalOffset = targetY - parentOrigin.Y;
+            return;
         }
-        else
+
+        if (_commandLineArgumentPickerPopup is not null)
         {
-            Popup_CommandLineArgumentPicker.HorizontalOffset = targetX;
-            Popup_CommandLineArgumentPicker.VerticalOffset = targetY;
+            _commandLineArgumentPickerPopup.IsOpen = false;
         }
+        e.Handled = true;
+    }
+
+
+    /// <summary>
+    /// 点击卡片本身不关闭面板（阻止冒泡到定位层）。
+    /// </summary>
+    private void Border_CommandLineArgumentPickerHost_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        e.Handled = true;
+    }
+
+
+    /// <summary>
+    /// 判断 <paramref name="node"/> 是否为 <paramref name="ancestor"/> 的子孙节点。
+    /// </summary>
+    private static bool IsDescendantOf(DependencyObject ancestor, DependencyObject node)
+    {
+        for (DependencyObject? current = node; current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (ReferenceEquals(current, ancestor))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 

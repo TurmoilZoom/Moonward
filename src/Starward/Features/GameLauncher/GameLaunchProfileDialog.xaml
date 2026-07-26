@@ -499,22 +499,30 @@
         </Button>
 
         <!--
-          常用参数勾选：用 Popup（非 Full Flyout）。
-          Full Flyout 会铺满窗口，点应用内其它区域仍算“在 Flyout 内”，light dismiss 失效。
-          Popup + IsLightDismissEnabled：点击面板外关闭；偏移在 code-behind 按 XamlRoot 居中。
+          常用参数勾选内容模板：XAML 里的 Popup 不直接打开。
+          首次点击时把 Child 挪到「仅 XamlRoot」的独立 Popup（见 EnsureCommandLineArgumentPickerPopup），
+          铺满整窗 + 卡片布局居中，与 ContentDialog 同一参照（含导航栏/标题栏）。
+          点空白关闭（系统 LightDismiss 在 Child 铺满时无效）。
         -->
         <Popup x:Name="Popup_CommandLineArgumentPicker"
-               IsLightDismissEnabled="True"
-               Opened="Popup_CommandLineArgumentPicker_Opened">
-            <Border x:Name="Border_CommandLineArgumentPickerHost"
-                    MaxWidth="460"
-                    MaxHeight="640"
-                    Padding="16"
-                    Background="{ThemeResource CustomAcrylicBrush}"
-                    CornerRadius="8">
-                <local:GameCommandLineArgumentPicker x:Name="CommandLineArgumentPicker"
-                                                     CombinedArgumentChanged="CommandLineArgumentPicker_CombinedArgumentChanged" />
-            </Border>
+               IsLightDismissEnabled="False"
+               Visibility="Collapsed">
+            <Grid x:Name="Grid_CommandLineArgumentPickerRoot"
+                  Background="Transparent"
+                  Tapped="Grid_CommandLineArgumentPickerRoot_Tapped">
+                <Border x:Name="Border_CommandLineArgumentPickerHost"
+                        MaxWidth="460"
+                        MaxHeight="640"
+                        Padding="16"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{ThemeResource CustomAcrylicBrush}"
+                        CornerRadius="8"
+                        Tapped="Border_CommandLineArgumentPickerHost_Tapped">
+                    <local:GameCommandLineArgumentPicker x:Name="CommandLineArgumentPicker"
+                                                         CombinedArgumentChanged="CommandLineArgumentPicker_CombinedArgumentChanged" />
+                </Border>
+            </Grid>
         </Popup>
 
     </Grid>
