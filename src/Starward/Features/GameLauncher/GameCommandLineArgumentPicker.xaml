@@ -24,8 +24,10 @@
                    Text="{x:Bind lang:Lang.CmdArg_PickerTitle}"
                    TextWrapping="Wrap" />
 
+        <!--  右侧 Padding 预留给纵向滚动条，避免叠在分辨率等取值输入框上  -->
         <ScrollViewer Grid.Row="1"
                       MaxHeight="360"
+                      Padding="0,0,16,0"
                       HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Auto">
             <ItemsControl ItemsSource="{x:Bind Groups}">
@@ -59,7 +61,7 @@
                                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                                    Text="{x:Bind TokenPreview, Mode=OneWay}" />
                                                     </StackPanel>
-                                                    <TextBlock MaxWidth="300"
+                                                    <TextBlock MaxWidth="280"
                                                                FontSize="12"
                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                Text="{x:Bind Description}"
@@ -70,6 +72,7 @@
                                             <!--  需要取值时显示输入框（宽高、显示器序号、模式值）  -->
                                             <TextBox Grid.Column="1"
                                                      Width="88"
+                                                     Margin="0,0,4,0"
                                                      VerticalAlignment="Top"
                                                      IsSpellCheckEnabled="False"
                                                      PlaceholderText="{x:Bind DefaultValue}"
