@@ -53,8 +53,11 @@ internal sealed class InstantTooltipHost
     /// <summary>提示气泡容器（亚克力背景、圆角、内边距）。</summary>
     private readonly Border _content;
 
-    /// <summary>正文 + 可选操作按钮的布局根。</summary>
-    private readonly Grid _body;
+    /// <summary>
+    /// 正文 + 可选操作按钮的布局根。
+    /// 使用 StackPanel：Collapsed 子项不参与 Spacing，纯文案时不会在底部留出操作行空隙。
+    /// </summary>
+    private readonly StackPanel _body;
 
     /// <summary>提示正文。</summary>
     private readonly TextBlock _text;
@@ -138,11 +141,8 @@ internal sealed class InstantTooltipHost
         };
         _actionButton.Click += ActionButton_Click;
 
-        _body = new Grid { RowSpacing = 10 };
-        _body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        _body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        Grid.SetRow(_text, 0);
-        Grid.SetRow(_actionButton, 1);
+        // Spacing 仅作用于可见子项；Grid.RowSpacing 在第二行 Collapsed 时仍会占位，导致纯文案底部多出空行
+        _body = new StackPanel { Spacing = 10 };
         _body.Children.Add(_text);
         _body.Children.Add(_actionButton);
 
