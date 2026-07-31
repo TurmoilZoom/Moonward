@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
+using Starward.Controls;
 using System;
 using System.Diagnostics;
 using System.Numerics;
@@ -119,6 +120,8 @@ internal static class GachaStatsListDragScrollHelper
             _lastTimestamp = Stopwatch.GetTimestamp();
             _velocity = 0;
             _isDragging = true;
+            // 拖拽滚动时隐藏记录项上的时间气泡，并避免列表移动时反复弹出。
+            InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, true);
         }
 
 
@@ -217,13 +220,7 @@ internal static class GachaStatsListDragScrollHelper
         /// </summary>
         private void TryFlingOrRestore()
         {
-            _isDragging = false;
-            try
-            {
-                //释放指针捕获
-                _scrollViewer.ReleasePointerCapture(null);
-            }
-            catch { }
+            EndDragSession();
 
             // 存在回弹位移，忽略速度，播放回弹动画
             if (_overscrollY != 0)
@@ -253,17 +250,27 @@ internal static class GachaStatsListDragScrollHelper
         /// <summary>强制结束拖拽，确保回弹位移被还原。</summary>
         private void FinishDrag(bool restoreOverscroll)
         {
-            _isDragging = false;
-            try
-            {
-                _scrollViewer.ReleasePointerCapture(null);
-            }
-            catch { }
+            EndDragSession();
 
             if (restoreOverscroll && _overscrollY != 0)
             {
                 PlaySpringBackAnimation();
             }
+        }
+
+
+        /// <summary>结束拖拽会话：清状态、释放指针捕获、恢复 InstantTooltip。</summary>
+        private void EndDragSession()
+        {
+            _isDragging = false;
+            try
+            {
+                //释放指针捕获
+                _scrollViewer.ReleasePointerCapture(null);
+            }
+            catch { }
+
+            InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, false);
         }
 
         #endregion
@@ -341,6 +348,13 @@ internal static class GachaStatsListDragScrollHelper
             _scrollViewer.PointerMoved -= OnPointerMoved;
             _scrollViewer.PointerReleased -= OnPointerReleased;
             _scrollViewer.PointerCaptureLost -= OnPointerCaptureLost;
+
+            // 卸载时若仍在拖拽，勿留下全局 Tooltip 抑制状态。
+            if (_isDragging)
+            {
+                InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, false);
+                _isDragging = false;
+            }
 
             // 若有残留过拉位移，直接清零
             if (_overscrollY != 0)

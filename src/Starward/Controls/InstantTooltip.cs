@@ -42,6 +42,11 @@ public static class InstantTooltip
     /// </summary>
     private static readonly Dictionary<XamlRoot, InstantTooltipHost> Hosts = new();
 
+    /// <summary>
+    /// 正在抑制 Tooltip 显示的视觉树根（拖拽滚动等场景：已有 Host 时强制关闭并忽略进入；Host 尚未创建时也会在创建后继承该状态）。
+    /// </summary>
+    private static readonly HashSet<XamlRoot> SuppressedRoots = new();
+
     /// <summary>锚点 → 操作按钮点击回调（弱表，随元素回收）。</summary>
     private static readonly ConditionalWeakTable<FrameworkElement, Action> ActionCallbacks = new();
 
@@ -182,6 +187,44 @@ public static class InstantTooltip
     internal static Action<bool>? GetOpenChangedCallback(FrameworkElement element)
     {
         return OpenChangedCallbacks.TryGetValue(element, out Action<bool>? callback) ? callback : null;
+    }
+
+
+    /// <summary>
+    /// 临时抑制指定窗口内的即时 Tooltip（拖拽列表滚动等场景）。
+    /// 为 <see langword="true"/> 时立即关闭已显示的气泡，并忽略指针进入触发的显示；为 <see langword="false"/> 时恢复。
+    /// </summary>
+    /// <param name="xamlRoot">目标视觉树根；为 <see langword="null"/> 时无操作。</param>
+    /// <param name="suppressed">是否抑制显示。</param>
+    public static void SetSuppressed(XamlRoot? xamlRoot, bool suppressed)
+    {
+        if (xamlRoot is null)
+        {
+            return;
+        }
+
+        if (suppressed)
+        {
+            SuppressedRoots.Add(xamlRoot);
+        }
+        else
+        {
+            SuppressedRoots.Remove(xamlRoot);
+        }
+
+        if (Hosts.TryGetValue(xamlRoot, out InstantTooltipHost? host))
+        {
+            host.SetSuppressed(suppressed);
+        }
+    }
+
+
+    /// <summary>
+    /// 指定视觉树根是否处于 Tooltip 抑制状态。
+    /// </summary>
+    internal static bool IsSuppressed(XamlRoot? xamlRoot)
+    {
+        return xamlRoot is not null && SuppressedRoots.Contains(xamlRoot);
     }
 
 
@@ -341,6 +384,11 @@ public static class InstantTooltip
         {
             host = new InstantTooltipHost(xamlRoot, themeSource);
             Hosts[xamlRoot] = host;
+            // 拖拽等场景可能先 SetSuppressed，后才有锚点挂接 Host
+            if (SuppressedRoots.Contains(xamlRoot))
+            {
+                host.SetSuppressed(true);
+            }
         }
 
         return host;

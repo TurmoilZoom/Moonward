@@ -98,6 +98,11 @@ internal sealed class InstantTooltipHost
     /// <summary>当前展示所用的方位（影响偏移与缩放中心）。</summary>
     private InstantTooltipPlacement _currentPlacement = InstantTooltipPlacement.Right;
 
+    /// <summary>
+    /// 为 true 时不响应指针进入、不打开气泡（拖拽滚动等外部场景通过 <see cref="SetSuppressed"/> 设置）。
+    /// </summary>
+    private bool _suppressed;
+
 
     /// <summary>当前是否无任何挂接元素（为 true 时 <see cref="InstantTooltip"/> 可释放本 Host）。</summary>
     public bool IsEmpty => _elements.Count == 0;
@@ -194,6 +199,29 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
+    /// 临时抑制本窗口内的 Tooltip 显示。
+    /// 为 <see langword="true"/> 时立即强制关闭气泡；为 <see langword="false"/> 时仅恢复，不主动重新弹出。
+    /// </summary>
+    /// <param name="suppressed">是否抑制。</param>
+    public void SetSuppressed(bool suppressed)
+    {
+        if (_suppressed == suppressed)
+        {
+            return;
+        }
+
+        _suppressed = suppressed;
+        if (suppressed)
+        {
+            // 拖拽中指针仍可能落在锚点上，清掉“在表面内”状态，避免解除抑制后误判保持打开。
+            _pointerInsideAnyElement = false;
+            _pointerInsidePopup = false;
+            ForceClosePopup();
+        }
+    }
+
+
+    /// <summary>
     /// 解除元素注册并清理事件订阅；若正是当前展示锚点则隐藏 Tooltip。
     /// </summary>
     /// <param name="element">待注销的锚点元素。</param>
@@ -270,6 +298,11 @@ internal sealed class InstantTooltipHost
     /// <param name="e">指针事件参数。</param>
     private void Element_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
+        if (_suppressed)
+        {
+            return;
+        }
+
         _pointerInsideAnyElement = true;
         CancelPendingHide();
         if (sender is FrameworkElement element)
@@ -393,7 +426,7 @@ internal sealed class InstantTooltipHost
     /// <param name="element">当前悬停的锚点；不可见或文案为空时直接返回。</param>
     private void ShowTooltip(FrameworkElement element)
     {
-        if (element.Visibility != Visibility.Visible)
+        if (_suppressed || element.Visibility != Visibility.Visible)
         {
             return;
         }
