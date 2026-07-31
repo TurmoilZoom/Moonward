@@ -168,10 +168,11 @@ internal static class MiHoYoApiErrorFeedbackFactory
 
         if (context is MiHoYoApiContext.GameRecord or MiHoYoApiContext.SignIn or MiHoYoApiContext.AccountAuth)
         {
+            // 风控验证码集合与 miHoYoApiException.IsVerificationRequired 保持一致（国服恢复层会据此换票）。
             return exception.ReturnCode switch
             {
                 -3 or -100 or -111 or 10001 or 1004 => CreateKnownFeedback("MiHoYoApiError_LoginExpired", exception.ReturnCode, MiHoYoApiRecoveryAction.Relogin),
-                -3503 or 1034 or 5003 or 10035 or 10041 => CreateKnownFeedback("MiHoYoApiError_VerificationRequired", exception.ReturnCode, MiHoYoApiRecoveryAction.VerifyAccount),
+                _ when exception.IsVerificationRequired => CreateKnownFeedback("MiHoYoApiError_VerificationRequired", exception.ReturnCode, MiHoYoApiRecoveryAction.VerifyAccount),
                 -110 or 1028 or -500004 => CreateKnownFeedback("MiHoYoApiError_TooManyRequests", exception.ReturnCode),
                 1008 or 1009 or -10002 => CreateKnownFeedback("MiHoYoApiError_GameRoleNotFound", exception.ReturnCode),
                 10101 => CreateKnownFeedback("MiHoYoApiError_AccountQueryLimit", exception.ReturnCode),

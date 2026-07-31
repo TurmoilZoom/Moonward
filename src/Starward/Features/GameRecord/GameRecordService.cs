@@ -117,7 +117,7 @@ internal class GameRecordService
 
 
     /// <summary>
-    /// 执行角色 GameRecord 请求；国服接口失败时先刷新设备指纹，登录失效时再凭 stoken 刷新 Cookie，并仅重试一次。
+    /// 执行角色 GameRecord 请求；国服接口失败时先刷新设备指纹，登录失效或风控验证类错误时再凭 stoken 刷新 Cookie，并仅重试一次。
     /// </summary>
     /// <typeparam name="T">请求返回类型。</typeparam>
     /// <param name="role">请求使用的游戏角色，刷新成功后会原地更新其 Cookie。</param>
@@ -135,18 +135,12 @@ internal class GameRecordService
         catch (miHoYoApiException ex) when (client is HyperionClient)
         {
             bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
+            // 角色路径换票成功时会原地更新 role.Cookie，action 内继续读 role 即可。
+            string? refreshedCookie = await TryRefreshCookieAfterRequestFailureAsync(ex, role, cookie: null, cancellationToken);
 
-            if (ex.IsLoginExpired)
+            if (!deviceFpUpdated && string.IsNullOrWhiteSpace(refreshedCookie))
             {
-                string? refreshedCookie = await _cookieRefreshService.RefreshCookieAsync(role, cancellationToken);
-                if (string.IsNullOrWhiteSpace(refreshedCookie))
-                {
-                    throw;
-                }
-            }
-            else if (!deviceFpUpdated)
-            {
-                // 未更新指纹时重试相同请求没有恢复条件，直接保留首次业务错误。
+                // 指纹与 Cookie 均未恢复时，重试相同请求没有意义，保留首次业务错误。
                 throw;
             }
 
@@ -165,7 +159,7 @@ internal class GameRecordService
 
 
     /// <summary>
-    /// 执行账号 Cookie 请求；国服接口失败时先刷新设备指纹，登录失效时再凭 stoken 刷新 Cookie，并仅重试一次。
+    /// 执行账号 Cookie 请求；国服接口失败时先刷新设备指纹，登录失效或风控验证类错误时再凭 stoken 刷新 Cookie，并仅重试一次。
     /// </summary>
     /// <typeparam name="T">请求返回类型。</typeparam>
     /// <param name="cookie">验证码登录或手动输入的完整 Cookie。</param>
@@ -184,20 +178,12 @@ internal class GameRecordService
         catch (miHoYoApiException ex) when (!isHoyolab)
         {
             bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
+            string? refreshedCookie = await TryRefreshCookieAfterRequestFailureAsync(ex, role: null, cookie, cancellationToken);
+            string currentCookie = string.IsNullOrWhiteSpace(refreshedCookie) ? cookie : refreshedCookie;
 
-            string currentCookie = cookie;
-            if (ex.IsLoginExpired)
+            if (!deviceFpUpdated && string.IsNullOrWhiteSpace(refreshedCookie))
             {
-                string? refreshedCookie = await _cookieRefreshService.RefreshCookieAsync(cookie, cancellationToken);
-                if (string.IsNullOrWhiteSpace(refreshedCookie))
-                {
-                    throw;
-                }
-                currentCookie = refreshedCookie;
-            }
-            else if (!deviceFpUpdated)
-            {
-                // 未更新指纹时重试相同请求没有恢复条件，直接保留首次业务错误。
+                // 指纹与 Cookie 均未恢复时，重试相同请求没有意义，保留首次业务错误。
                 throw;
             }
 
@@ -212,6 +198,47 @@ internal class GameRecordService
                 throw;
             }
         }
+    }
+
+
+    /// <summary>
+    /// 在国服接口失败后，对登录失效或风控验证类 retcode 尝试 stoken 换票。
+    /// </summary>
+    /// <param name="originalException">触发恢复的原始业务异常。</param>
+    /// <param name="role">角色请求路径下的角色；与 <paramref name="cookie"/> 二选一。</param>
+    /// <param name="cookie">账号 Cookie 请求路径下的原始 Cookie；与 <paramref name="role"/> 二选一。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>换票成功后的完整 Cookie；未尝试或未成功时为 null。</returns>
+    /// <exception cref="miHoYoApiException">登录失效且换票失败时重新抛出 <paramref name="originalException"/>。</exception>
+    private async Task<string?> TryRefreshCookieAfterRequestFailureAsync(
+        miHoYoApiException originalException,
+        GameRecordRole? role,
+        string? cookie,
+        CancellationToken cancellationToken)
+    {
+        if (!originalException.IsLoginExpired && !originalException.IsVerificationRequired)
+        {
+            return null;
+        }
+
+        string? refreshedCookie = role is not null
+            ? await _cookieRefreshService.RefreshCookieAsync(role, cancellationToken)
+            : !string.IsNullOrWhiteSpace(cookie)
+                ? await _cookieRefreshService.RefreshCookieAsync(cookie, cancellationToken)
+                : null;
+
+        if (!string.IsNullOrWhiteSpace(refreshedCookie))
+        {
+            return refreshedCookie;
+        }
+
+        // 登录失效必须换到新 Cookie 才能继续；风控类错误仍可仅凭新设备指纹重试。
+        if (originalException.IsLoginExpired)
+        {
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(originalException).Throw();
+        }
+
+        return null;
     }
 
 
