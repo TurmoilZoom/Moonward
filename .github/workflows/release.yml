@@ -154,7 +154,10 @@ jobs:
         gh @createArgs
         if ($LASTEXITCODE -ne 0) { throw "gh release create failed for $version" }
 
+    # GitHub Release 已上传成功；CNB 仅镜像资产，触发失败不应让整个 release job 标红。
+    # api.cnb.cool 从 GitHub-hosted runner 偶发 TCP 超时，故重试 + continue-on-error。
     - name: Trigger CNB build
+      continue-on-error: true
       shell: pwsh
       env:
         CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
@@ -162,6 +165,7 @@ jobs:
         $ErrorActionPreference = "Stop"
         $version = $env:Version
         $pre = $version.Contains("-")
+        $uri = "https://api.cnb.cool/TurmoilZoom/Starward/-/build/start"
         $body = @{
           event = "api_trigger"
           tag = $version
@@ -175,5 +179,27 @@ jobs:
           Authorization = "Bearer $env:CNB_TOKEN"
           "Content-Type" = "application/json"
         }
-        Write-Host "Triggering CNB api_trigger for release $version"
-        Invoke-RestMethod -Uri "https://api.cnb.cool/TurmoilZoom/Starward/-/build/start" -Method Post -Headers $headers -Body $body
+
+        $maxAttempts = 5
+        $delaySec = 10
+        for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+          try {
+            Write-Host "Triggering CNB api_trigger for release $version (attempt $attempt/$maxAttempts)"
+            Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body -TimeoutSec 60
+            Write-Host "CNB build triggered successfully."
+            exit 0
+          } catch {
+            Write-Host "::warning::CNB trigger attempt $attempt failed: $($_.Exception.Message)"
+            if ($attempt -lt $maxAttempts) {
+              Write-Host "Retrying in ${delaySec}s..."
+              Start-Sleep -Seconds $delaySec
+              $delaySec = [Math]::Min($delaySec * 2, 120)
+            }
+          }
+        }
+
+        Write-Host "::warning::Failed to trigger CNB mirror after $maxAttempts attempts."
+        Write-Host "GitHub Release for $version was uploaded successfully; only the CNB mirror trigger failed."
+        Write-Host "Manual fix: on CNB, run web_trigger_mirror with RELEASE_TAG=$version, IS_PRERELEASE=$(if ($pre) { 'true' } else { 'false' }), GITHUB_REPOSITORY=${{ github.repository }}"
+        # 非零退出 + continue-on-error：步骤标黄，job 仍成功；日志里能看到失败原因。
+        exit 1
