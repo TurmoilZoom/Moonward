@@ -25,16 +25,6 @@ public class miHoYoApiException : Exception
 
 
     /// <summary>
-    /// 获取当前返回码是否表示账号/设备/网络需要验证或触发战绩侧风控（如 10041）。
-    /// </summary>
-    /// <remarks>
-    /// 与 UI「校验账号」映射一致；国服请求恢复层可在此类错误下尝试 stoken 换票后重试。
-    /// 此属性不包含任何用户可见文案。
-    /// </remarks>
-    public bool IsVerificationRequired => ReturnCode is -3503 or 1034 or 5003 or 10035 or 10041;
-
-
-    /// <summary>
     /// 创建米哈游 API 异常。
     /// </summary>
     /// <param name="returnCode">接口 retcode。</param>
