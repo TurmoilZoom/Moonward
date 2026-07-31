@@ -1057,6 +1057,8 @@ public sealed partial class GachaLogPage : PageBase
     {
         InfoBar? progressInfoBar = null;
         bool keepProgressInfoBar = false;
+        GameRecordRole? role = null;
+        GameBiz roleGameBiz = default;
         try
         {
             bool isZzz = CurrentGameBiz.Game == GameBiz.nap;
@@ -1069,7 +1071,7 @@ public sealed partial class GachaLogPage : PageBase
             }
 
             // B 服角色在米游社绑定表中仍记为 _cn
-            GameBiz roleGameBiz = CurrentGameBiz.Value switch
+            roleGameBiz = CurrentGameBiz.Value switch
             {
                 GameBiz.nap_bilibili => GameBiz.nap_cn,
                 GameBiz.hk4e_bilibili => GameBiz.hk4e_cn,
@@ -1082,7 +1084,6 @@ public sealed partial class GachaLogPage : PageBase
                 WeakReferenceMessenger.Default.Send(new MainViewNavigateMessage(typeof(GameRecordPage)));
                 return;
             }
-            GameRecordRole? role;
             if (roles.Count == 1)
             {
                 role = roles[0];
@@ -1181,7 +1182,7 @@ public sealed partial class GachaLogPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogWarning(ex, "Sync gacha record from miyoushe error ({retcode})", ex.ReturnCode);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, roleGameBiz, role);
         }
         catch (GachaApiException ex)
         {

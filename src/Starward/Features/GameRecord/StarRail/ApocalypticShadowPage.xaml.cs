@@ -114,7 +114,7 @@ public sealed partial class ApocalypticShadowPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Refresh apocalyptic shadow data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {

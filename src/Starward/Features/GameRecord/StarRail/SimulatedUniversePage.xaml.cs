@@ -130,7 +130,7 @@ public sealed partial class SimulatedUniversePage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get simulated universe data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {

@@ -114,7 +114,7 @@ public sealed partial class PureFictionPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Refresh pure fiction data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {

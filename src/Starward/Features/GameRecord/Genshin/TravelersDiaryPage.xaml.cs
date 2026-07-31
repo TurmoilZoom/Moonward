@@ -227,7 +227,7 @@ public sealed partial class TravelersDiaryPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get realtime traveler's diary data details ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {
@@ -293,7 +293,7 @@ public sealed partial class TravelersDiaryPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get traveler's diary data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {
@@ -338,7 +338,7 @@ public sealed partial class TravelersDiaryPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get traveler's diary full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {

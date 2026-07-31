@@ -239,7 +239,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get realtime trailblaze calendar data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {
@@ -305,7 +305,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get trailblaze calendar data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {
@@ -350,7 +350,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Get trailblaze calendar full data details ({gameBiz}, {uid}, {month}).", gameRole?.GameBiz, gameRole?.Uid, month);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {

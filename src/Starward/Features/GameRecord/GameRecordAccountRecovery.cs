@@ -52,13 +52,14 @@ internal static class GameRecordAccountRecovery
 
 
     /// <summary>
-    /// 打开官方战绩 WebView 窗口以便完成账号验证（如 retcode 10035 / 1034）。
-    /// 使用任意已登录角色 Cookie；无角色时改为引导登录。
+    /// 打开官方战绩 WebView 窗口以便完成账号验证（如 retcode 10035 / 10041 / 1034）。
+    /// 优先使用 <paramref name="preferredRole"/>（触发风控的角色），其次按区服解析，最后才兜底任意角色。
     /// </summary>
-    /// <param name="preferredBiz">优先使用的游戏区服（如 nap_cn）；为 null 时按当前选中游戏或任意角色。</param>
-    public static void RequestVerifyAccount(GameBiz? preferredBiz = null)
+    /// <param name="preferredBiz">优先使用的游戏区服（如 nap_cn）；为 null 时可从 preferredRole 推断。</param>
+    /// <param name="preferredRole">触发错误时的角色；有 Cookie 时直接使用，避免跨账号/跨游戏打开错误战绩页。</param>
+    public static void RequestVerifyAccount(GameBiz? preferredBiz = null, GameRecordRole? preferredRole = null)
     {
-        GameRecordRole? role = ResolveRoleForVerify(preferredBiz);
+        GameRecordRole? role = ResolveRoleForVerify(preferredBiz, preferredRole);
         if (role is null || string.IsNullOrWhiteSpace(role.Cookie))
         {
             RequestOpenLogin();
@@ -91,20 +92,29 @@ internal static class GameRecordAccountRecovery
 
     /// <summary>
     /// 选取用于打开战绩验证页的角色。
+    /// 顺序：显式 preferredRole → preferredBiz/角色 GameBiz 下上次选中角色 → 任意有 Cookie 的角色。
     /// </summary>
-    private static GameRecordRole? ResolveRoleForVerify(GameBiz? preferredBiz)
+    private static GameRecordRole? ResolveRoleForVerify(GameBiz? preferredBiz, GameRecordRole? preferredRole)
     {
+        // 触发风控的请求角色最可靠，避免 FirstOrDefault 跨到其他账号的原神/其他游戏
+        if (preferredRole is not null && !string.IsNullOrWhiteSpace(preferredRole.Cookie))
+        {
+            return preferredRole;
+        }
+
         var service = AppConfig.GetService<GameRecordService>();
 
-        if (preferredBiz is not null && !string.IsNullOrWhiteSpace(preferredBiz.Value.Value))
+        GameBiz? bizHint = preferredBiz;
+        if ((bizHint is null || string.IsNullOrWhiteSpace(bizHint.Value.Value))
+            && preferredRole is not null
+            && !string.IsNullOrWhiteSpace(preferredRole.GameBiz))
         {
-            GameBiz biz = preferredBiz.Value.Value switch
-            {
-                GameBiz.nap_bilibili => GameBiz.nap_cn,
-                GameBiz.hk4e_bilibili => GameBiz.hk4e_cn,
-                GameBiz.hkrpg_bilibili => GameBiz.hkrpg_cn,
-                _ => preferredBiz.Value,
-            };
+            bizHint = preferredRole.GameBiz;
+        }
+
+        if (bizHint is not null && !string.IsNullOrWhiteSpace(bizHint.Value.Value))
+        {
+            GameBiz biz = NormalizeGameBiz(bizHint.Value);
             GameRecordRole? role = service.GetLastSelectGameRecordRoleOrTheFirstOne(biz)
                 ?? service.GetLastSelectGachaSyncRoleOrTheFirstOne(biz);
             if (role is not null && !string.IsNullOrWhiteSpace(role.Cookie))
@@ -113,8 +123,23 @@ internal static class GameRecordAccountRecovery
             }
         }
 
-        // 任意有 Cookie 的角色
+        // 任意有 Cookie 的角色（无上下文时的最后兜底）
         return service.GetAllGameRoles().FirstOrDefault(r => !string.IsNullOrWhiteSpace(r.Cookie));
+    }
+
+
+    /// <summary>
+    /// B 服战绩角色在库中记为对应 _cn。
+    /// </summary>
+    private static GameBiz NormalizeGameBiz(GameBiz gameBiz)
+    {
+        return gameBiz.Value switch
+        {
+            GameBiz.nap_bilibili => GameBiz.nap_cn,
+            GameBiz.hk4e_bilibili => GameBiz.hk4e_cn,
+            GameBiz.hkrpg_bilibili => GameBiz.hkrpg_cn,
+            _ => gameBiz,
+        };
     }
 
 }

@@ -115,7 +115,7 @@ public sealed partial class ImaginariumTheaterPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Refresh theater data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {

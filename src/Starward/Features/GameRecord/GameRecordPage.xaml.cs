@@ -115,8 +115,8 @@ public sealed partial class GameRecordPage : PageBase
         });
         WeakReferenceMessenger.Default.Register<GameRecordVerifyAccountMessage>(this, (r, m) =>
         {
-            // 与 GameRecordAccountRecovery 一致：不依赖本页 CurrentRole 也可打开验证窗
-            GameRecordAccountRecovery.RequestVerifyAccount(CurrentGameBiz);
+            // 优先当前页选中角色，避免多账号时打开错误战绩页
+            GameRecordAccountRecovery.RequestVerifyAccount(CurrentGameBiz, CurrentRole);
         });
         WeakReferenceMessenger.Default.Register<GameRecordOpenLoginMessage>(this, (r, m) =>
         {
@@ -464,7 +464,7 @@ public sealed partial class GameRecordPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Refresh game role info ({gameBiz}, {uid}).", CurrentRole?.GameBiz, CurrentRole?.Uid);
-            HandleMiHoYoApiException(ex);
+            HandleMiHoYoApiException(ex, CurrentGameBiz, CurrentRole);
         }
         catch (HttpRequestException ex)
         {
@@ -568,7 +568,7 @@ public sealed partial class GameRecordPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Input cookie");
-            HandleMiHoYoApiException(ex);
+            HandleMiHoYoApiException(ex, CurrentGameBiz, CurrentRole);
         }
         catch (HttpRequestException ex)
         {
@@ -861,8 +861,9 @@ public sealed partial class GameRecordPage : PageBase
     /// 恢复动作不依赖本页是否已加载（抽卡页、启动器等也可点按钮生效）。
     /// </summary>
     /// <param name="ex">米哈游 API 异常。</param>
-    /// <param name="preferredBiz">验证账号时优先使用的游戏区服；为 null 时自动选取任意角色。</param>
-    public static void HandleMiHoYoApiException(miHoYoApiException ex, GameBiz? preferredBiz = null)
+    /// <param name="preferredBiz">验证账号时优先使用的游戏区服；为 null 时可从 preferredRole 推断。</param>
+    /// <param name="preferredRole">触发错误时的角色；校验时应优先打开该角色的官方战绩页。</param>
+    public static void HandleMiHoYoApiException(miHoYoApiException ex, GameBiz? preferredBiz = null, GameRecordRole? preferredRole = null)
     {
         var feedback = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GameRecord);
         MiHoYoApiErrorFeedbackFactory.Show(feedback, action =>
@@ -873,7 +874,7 @@ public sealed partial class GameRecordPage : PageBase
             }
             else if (action is MiHoYoApiRecoveryAction.VerifyAccount)
             {
-                GameRecordAccountRecovery.RequestVerifyAccount(preferredBiz);
+                GameRecordAccountRecovery.RequestVerifyAccount(preferredBiz, preferredRole);
             }
         });
     }

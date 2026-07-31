@@ -383,7 +383,9 @@ public sealed partial class SignInButton : UserControl
                 ShowApiFeedback(MiHoYoApiErrorFeedbackFactory.Create(new miHoYoApiException(result.ReturnCode ?? SignInReturnCode.NotLoggedIn, result.ResponseMessage), MiHoYoApiContext.SignIn), biz);
                 break;
             case SignInActionResult.RiskControl:
-                toast.ShowWithButton(InfoBarSeverity.Warning, actionTitle, Lang.SignInButton_RiskControl, Lang.HoyolabToolboxPage_VerifyAccount, () => GameRecordAccountRecovery.RequestVerifyAccount(biz));
+                // 捕获当前角色，避免 Toast 停留期间切换游戏后打开错误账号
+                GameRecordRole? roleForVerify = GameRecordRole;
+                toast.ShowWithButton(InfoBarSeverity.Warning, actionTitle, Lang.SignInButton_RiskControl, Lang.HoyolabToolboxPage_VerifyAccount, () => GameRecordAccountRecovery.RequestVerifyAccount(biz, roleForVerify));
                 break;
             case SignInActionResult.NotEnoughCoin:
                 toast.Warning(actionTitle, FormatResultMessage(Lang.SignInButton_NotEnoughCoin, result.ReturnCode));
@@ -410,8 +412,10 @@ public sealed partial class SignInButton : UserControl
     /// </summary>
     /// <param name="feedback">已分类的 API 错误反馈。</param>
     /// <param name="preferredBiz">验证账号时优先使用的游戏区服。</param>
-    private static void ShowApiFeedback(MiHoYoApiErrorFeedback feedback, GameBiz? preferredBiz = null)
+    /// <param name="preferredRole">触发错误时的角色。</param>
+    private void ShowApiFeedback(MiHoYoApiErrorFeedback feedback, GameBiz? preferredBiz = null, GameRecordRole? preferredRole = null)
     {
+        preferredRole ??= GameRecordRole;
         MiHoYoApiErrorFeedbackFactory.Show(feedback, action =>
         {
             if (action is MiHoYoApiRecoveryAction.Relogin)
@@ -420,7 +424,7 @@ public sealed partial class SignInButton : UserControl
             }
             else if (action is MiHoYoApiRecoveryAction.VerifyAccount)
             {
-                GameRecordAccountRecovery.RequestVerifyAccount(preferredBiz);
+                GameRecordAccountRecovery.RequestVerifyAccount(preferredBiz, preferredRole);
             }
         });
     }

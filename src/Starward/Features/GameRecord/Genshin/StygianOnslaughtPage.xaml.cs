@@ -124,7 +124,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
         catch (miHoYoApiException ex)
         {
             _logger.LogError(ex, "Refresh stygian onslaught data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
-            GameRecordPage.HandleMiHoYoApiException(ex);
+            GameRecordPage.HandleMiHoYoApiException(ex, preferredRole: gameRole);
         }
         catch (HttpRequestException ex)
         {
