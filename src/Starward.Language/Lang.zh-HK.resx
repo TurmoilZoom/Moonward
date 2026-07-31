@@ -2459,6 +2459,12 @@
   <data name="DeadlyAssaultPage_TotalScore" xml:space="preserve">
     <value>總分 </value>
   </data>
+  <data name="DeadlyAssaultPage_HardMode" xml:space="preserve">
+    <value>絕境</value>
+  </data>
+  <data name="DeadlyAssaultPage_NormalMode" xml:space="preserve">
+    <value>常規</value>
+  </data>
   <data name="PureFictionPage_Score" xml:space="preserve">
     <value>得分：</value>
   </data>

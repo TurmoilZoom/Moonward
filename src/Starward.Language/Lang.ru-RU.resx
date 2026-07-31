@@ -2461,6 +2461,12 @@ You are welcome to submit exported data to:</value>
   <data name="DeadlyAssaultPage_TotalScore" xml:space="preserve">
     <value>Общий счёт</value>
   </data>
+  <data name="DeadlyAssaultPage_HardMode" xml:space="preserve">
+    <value>Отчаяние</value>
+  </data>
+  <data name="DeadlyAssaultPage_NormalMode" xml:space="preserve">
+    <value>Обычный</value>
+  </data>
   <data name="PureFictionPage_Score" xml:space="preserve">
     <value>Счёт:</value>
   </data>

@@ -1772,6 +1772,24 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Desperate 的本地化字符串。
+        /// </summary>
+        public static string DeadlyAssaultPage_HardMode {
+            get {
+                return ResourceManager.GetString("DeadlyAssaultPage_HardMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Normal 的本地化字符串。
+        /// </summary>
+        public static string DeadlyAssaultPage_NormalMode {
+            get {
+                return ResourceManager.GetString("DeadlyAssaultPage_NormalMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Warning: The selected time period includes gacha records from more than 6 months ago, which cannot be retrieved after deleting. 的本地化字符串。
         /// </summary>
         public static string DeleteGachaLogDialog_6MonthsDeletingWarning {

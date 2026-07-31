@@ -2460,6 +2460,12 @@
   <data name="DeadlyAssaultPage_TotalScore" xml:space="preserve">
     <value>총점</value>
   </data>
+  <data name="DeadlyAssaultPage_HardMode" xml:space="preserve">
+    <value>절경</value>
+  </data>
+  <data name="DeadlyAssaultPage_NormalMode" xml:space="preserve">
+    <value>일반</value>
+  </data>
   <data name="PureFictionPage_Score" xml:space="preserve">
     <value>점수:</value>
   </data>

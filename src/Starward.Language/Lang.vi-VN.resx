@@ -2460,6 +2460,12 @@ You are welcome to submit exported data to:</value>
   <data name="DeadlyAssaultPage_TotalScore" xml:space="preserve">
     <value>Tổng Điểm</value>
   </data>
+  <data name="DeadlyAssaultPage_HardMode" xml:space="preserve">
+    <value>Tuyệt cảnh</value>
+  </data>
+  <data name="DeadlyAssaultPage_NormalMode" xml:space="preserve">
+    <value>Thường</value>
+  </data>
   <data name="PureFictionPage_Score" xml:space="preserve">
     <value>Điểm:</value>
   </data>

@@ -153,5 +153,14 @@ public sealed partial class DeadlyAssaultPage : PageBase
     }
 
 
+    /// <summary>
+    /// 总分展示：有满分时显示「得分 / 满分」。
+    /// </summary>
+    public static string TotalScoreText(int score, int maxScore)
+    {
+        return maxScore > 0 ? $"{score} / {maxScore}" : score.ToString();
+    }
+
+
 
 }

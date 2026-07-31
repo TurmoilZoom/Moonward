@@ -2459,6 +2459,12 @@ You are welcome to submit exported data to:</value>
   <data name="DeadlyAssaultPage_TotalScore" xml:space="preserve">
     <value>คะแนนรวม</value>
   </data>
+  <data name="DeadlyAssaultPage_HardMode" xml:space="preserve">
+    <value>Desperate</value>
+  </data>
+  <data name="DeadlyAssaultPage_NormalMode" xml:space="preserve">
+    <value>Normal</value>
+  </data>
   <data name="PureFictionPage_Score" xml:space="preserve">
     <value>คะแนน:</value>
   </data>

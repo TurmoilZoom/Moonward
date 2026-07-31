@@ -2458,6 +2458,12 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="DeadlyAssaultPage_TotalScore" xml:space="preserve">
     <value>Gesamtpunktzahl</value>
   </data>
+  <data name="DeadlyAssaultPage_HardMode" xml:space="preserve">
+    <value>Verzweifelt</value>
+  </data>
+  <data name="DeadlyAssaultPage_NormalMode" xml:space="preserve">
+    <value>Normal</value>
+  </data>
   <data name="PureFictionPage_Score" xml:space="preserve">
     <value>Punktzahl:</value>
   </data>
