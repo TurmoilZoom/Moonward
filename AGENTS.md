@@ -103,6 +103,7 @@ SDK 见 `global.json`，**不要擅自升级 SDK/NuGet**。改完至少 build �
 - `DropDownButton` 弹出层无法亚克力，不要强行改造
 - 短暂悬停说明用 `InstantTooltip`，勿另起一套
 - **不要升级** `CommunityToolkit.WinUI.Controls.Segmented`（csproj 有说明）
+- **改某页动画/外观时**先判断作用域：改的是共享资源（`FluentAnimations`、通用 Style/Template、基类 `PageBase`、全局主题等）还是仅该页 XAML/代码；**全局改动会影响其他页面视觉**，须评估并手测相关页，避免为单页效果牵连全应用
 - **层级复杂的控件**须考虑命中测试（hit test）与输入路由：装饰层/叠层/透明区域是否误拦指针与键盘；可点区域、`IsHitTestVisible`、事件冒泡/隧道是否与预期一致
 - **可视化控件**（自定义外观、Composition、复杂模板）设计前对照官方文档、社区文档与成熟开源实现，勿凭直觉堆 XAML/视觉层
 

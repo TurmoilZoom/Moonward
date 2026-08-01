@@ -166,6 +166,14 @@ Velopack + GitHub Releases；预览版 = pre-release，按架构分渠道。`Rel
 - **x:Bind 绑定的 `ObservableObject` 属性必须在 UI 线程赋值**；在 `ConfigureAwait(false)` / `Task.Run` 内赋值会 `COMException 0x8001010E` 且易从 catch 逃逸
 - **不要升级** `CommunityToolkit.WinUI.Controls.Segmented`（csproj 有回归说明）
 
+### 页面动画与外观：先分清作用域
+
+修改**某个页面**的动画效果或外观时，**先判断本次改动是否为全局改动**，以及是否会波及其他页面的视觉效果：
+
+- **共享层**（改了即全局）：`FluentAnimations` / 通用动画 helper、App 级或资源字典中的 Style/Template、`PageBase` 与导航壳层、全局主题/画刷/字体等——改一处会影响所有调用方或继承页
+- **页面局部**：仅该页 `.xaml` / code-behind、页面私有资源、未共享的控件实例属性——作用域通常限于当前页
+- 为单页调参时，**优先局部实现**；确需改共享层时，明确列出受影响页面/控件，并手测相关页（含不同游戏、暗亮主题若适用），避免「修好一页、拖垮别处」
+
 ### 复杂控件：命中测试与输入路由
 
 视觉树层级较深（叠层、装饰、遮罩、Popup、自定义模板、Composition 视觉）时，**不能只看效果对不对**，还要验证输入是否落到正确元素：
