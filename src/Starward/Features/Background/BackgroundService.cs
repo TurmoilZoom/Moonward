@@ -163,6 +163,7 @@ public class BackgroundService
             // 没有新背景
             if (backgrounds.FirstOrDefault(x => Path.GetFileName(x.Background.Url) == lastBg) is GameBackground bg1)
             {
+                // 匹配到静态图文件名：旧逻辑下表示用户曾暂停官方视频（或仅使用静态图）。
                 bg1.StopVideo = true;
                 bg = bg1;
             }
@@ -178,6 +179,12 @@ public class BackgroundService
             bg = backgrounds.FirstOrDefault(x => x.Type is GameBackground.BACKGROUND_TYPE_POSTER);
         }
         bg ??= backgrounds.FirstOrDefault();
+        // 上次官方视频为暂停时，本次若落到官方视频背景（含列表更新后的新视频），保持暂停。
+        // 用「或」合并：同列表下靠静态图文件名匹配已置 true 的路径不受影响；显式偏好覆盖「有新背景」等未匹配场景。
+        if (bg?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && AppConfig.GetStopOfficialVideo(gameId.GameBiz))
+        {
+            bg.StopVideo = true;
+        }
         return bg;
     }
 

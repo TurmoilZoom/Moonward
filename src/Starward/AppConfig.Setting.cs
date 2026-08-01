@@ -425,6 +425,24 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 上次官方视频背景是否处于暂停（显示静态图）状态。
+    /// 用于下次启动/切换游戏时，在仍有官方视频背景的情况下恢复暂停。
+    /// </summary>
+    public static bool GetStopOfficialVideo(GameBiz biz)
+    {
+        return GetValue<bool>(default, $"stop_official_video_{biz}");
+    }
+
+    /// <summary>
+    /// 记录官方视频背景是否暂停。仅应在当前显示类型为官方视频时写入。
+    /// </summary>
+    public static void SetStopOfficialVideo(GameBiz biz, bool value)
+    {
+        SetValue(value, $"stop_official_video_{biz}");
+    }
+
+
     public static string? GetVersionPoster(GameBiz biz)
     {
         return GetValue<string>(default, $"version_poster_{biz}");

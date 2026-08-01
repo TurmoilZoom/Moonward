@@ -278,6 +278,11 @@ public sealed partial class AppBackground : UserControl
                         AppConfig.SetBg(CurrentGameId.GameBiz, Path.GetFileName(filePath));
                         // 记录上次是否使用官方版本海报：背景列表更新后据此恢复海报（见 GetSuggestedGameBackgroundAsync）。
                         AppConfig.SetUseVersionPoster(CurrentGameId.GameBiz, gameBackground.Type is GameBackground.BACKGROUND_TYPE_POSTER);
+                        // 官方视频：记忆播放/暂停，列表更新后仍按偏好恢复（见 GetSuggestedGameBackgroundAsync）。
+                        if (gameBackground.Type is GameBackground.BACKGROUND_TYPE_VIDEO)
+                        {
+                            AppConfig.SetStopOfficialVideo(CurrentGameId.GameBiz, gameBackground.StopVideo);
+                        }
                         if (gameBackground.Type is not GameBackground.BACKGROUND_TYPE_CUSTOM)
                         {
                             var list = await _backgroundService.GetGameBackgroundsAsync(CurrentGameId);
