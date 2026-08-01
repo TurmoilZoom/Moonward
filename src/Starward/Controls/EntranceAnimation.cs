@@ -54,7 +54,7 @@ public static class EntranceAnimation
 
 
     /// <summary>
-    /// 对页面内容根面板播放级联入场动画。会自动定位 <c>ScrollViewer &gt; Panel</c> 或直接的 <c>Panel</c> 内容根。
+    /// 对页面内容根面板播放级联入场动画。会自动定位内容根，见 <see cref="ResolveContentPanel"/>。
     /// </summary>
     public static void Play(Page page)
     {
@@ -62,12 +62,7 @@ public static class EntranceAnimation
         {
             return;
         }
-        Panel? panel = page.Content switch
-        {
-            ScrollViewer { Content: Panel p } => p,
-            Panel p => p,
-            _ => null,
-        };
+        Panel? panel = ResolveContentPanel(page.Content);
         if (panel is not null)
         {
             Play(panel);
@@ -115,7 +110,7 @@ public static class EntranceAnimation
 
     /// <summary>
     /// 对页面内容根面板播放「从右滑入 + 淡入」级联入场动画。
-    /// 会自动定位 <c>ScrollViewer &gt; Panel</c> 或直接的 <c>Panel</c> 内容根。
+    /// 会自动定位内容根，见 <see cref="ResolveContentPanel"/>。
     /// </summary>
     /// <param name="page">目标页面；为 null 或内容非 Panel 时直接返回。</param>
     public static void PlayFromRight(Page page)
@@ -124,15 +119,57 @@ public static class EntranceAnimation
         {
             return;
         }
-        Panel? panel = page.Content switch
-        {
-            ScrollViewer { Content: Panel p } => p,
-            Panel p => p,
-            _ => null,
-        };
+        Panel? panel = ResolveContentPanel(page.Content);
         if (panel is not null)
         {
             PlayFromRight(panel);
+        }
+    }
+
+
+    /// <summary>
+    /// 解析页面内容区用于级联入场的面板。
+    /// <list type="bullet">
+    /// <item><c>ScrollViewer &gt; Panel</c>：与原先一致，动画内容区直接子项。</item>
+    /// <item>根为 <see cref="Panel"/> 且仅有「一个可交互的 <c>ScrollViewer &gt; Panel</c> + 装饰层」时
+    /// （装饰层 <see cref="UIElement.IsHitTestVisible"/> 为 false，如「关于」页右下角小猫）：
+    /// 深入到 ScrollViewer 内的 Panel，避免把整页叠层 Grid 的直接子项（整块 ScrollViewer / 装饰）当成级联目标。</item>
+    /// <item>其它 Panel 根（如战绩子页：工具栏 + ScrollViewer 并列）：仍动画根面板直接子项，行为与改前一致。</item>
+    /// </list>
+    /// </summary>
+    /// <param name="content"><see cref="Page.Content"/> 或等价根元素。</param>
+    /// <returns>应对直接子元素播放级联动画的面板；找不到时为 null。</returns>
+    private static Panel? ResolveContentPanel(UIElement? content)
+    {
+        switch (content)
+        {
+            case ScrollViewer { Content: Panel p }:
+                return p;
+            case Panel root:
+                // 仅当根上除装饰层外只有一个 ScrollViewer>Panel 时才下钻，避免误伤战绩等「多区域并列」布局。
+                ScrollViewer? soleScroll = null;
+                foreach (UIElement child in root.Children)
+                {
+                    if (child is ScrollViewer { Content: Panel } sv)
+                    {
+                        if (soleScroll is not null)
+                        {
+                            return root;
+                        }
+                        soleScroll = sv;
+                    }
+                    else if (child is FrameworkElement { Visibility: not Visibility.Collapsed, IsHitTestVisible: true })
+                    {
+                        return root;
+                    }
+                }
+                if (soleScroll is { Content: Panel inner })
+                {
+                    return inner;
+                }
+                return root;
+            default:
+                return null;
         }
     }
 
