@@ -22,14 +22,14 @@
         <BitmapImage x:Key="StarIconLight" UriSource="ms-appx:///Assets/Image/star-icon-light.5a286c6d.png" />
         <BitmapImage x:Key="StarIconDark" UriSource="ms-appx:///Assets/Image/star-icon-dark.28cb98f1.png" />
         <local:ZZZRarityToIconConverter x:Key="ZZZRarityToIconConverter" />
+        <!-- 节点内容模板：无独立背景，由外层分组卡片（绝境/常规）统一铺亚克力；细边框对齐式舆防卫战挑战卡片 -->
         <DataTemplate x:Key="DeadlyAssaultNodeTemplate" x:DataType="fic:DeadlyAssaultNode">
             <Grid Padding="8,12,8,12"
-                  Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                  BorderBrush="{ThemeResource AppBarSeparatorForegroundThemeBrush}"
+                  BorderThickness="1"
                   ColumnSpacing="16"
-                  CornerRadius="12"
-                  RowSpacing="4"
-                  Shadow="{ThemeResource ThemeShadow}"
-                  Translation="0,0,16">
+                  CornerRadius="8"
+                  RowSpacing="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -386,14 +386,19 @@
                     </TextBlock>
                 </Grid>
 
-                <!--  绝境：标题/排名 + 节点 为一组  -->
-                <StackPanel Spacing="8"
-                            Visibility="{x:Bind sh:BindConverter.BoolToVisibility(CurrentDeadlyAssault.HasHard)}">
-                    <Grid Padding="8"
-                          Background="{ThemeResource CustomOverlayAcrylicBrush}"
-                          CornerRadius="8"
-                          Shadow="{ThemeResource ThemeShadow}"
-                          Translation="0,0,16">
+                <!--  绝境：标题/排名 + 节点 合并为同一背景卡片（对齐式舆防卫战第五防线）  -->
+                <Grid Padding="16,12,16,12"
+                      Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                      CornerRadius="8"
+                      RowSpacing="8"
+                      Shadow="{ThemeResource ThemeShadow}"
+                      Translation="0,0,16"
+                      Visibility="{x:Bind sh:BindConverter.BoolToVisibility(CurrentDeadlyAssault.HasHard)}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
                             <ColumnDefinition />
@@ -411,22 +416,29 @@
                             <Run Text="{x:Bind local:DeadlyAssaultPage.RankPercentText(CurrentDeadlyAssault.HardRankPercent)}" />
                         </TextBlock>
                     </Grid>
-                    <ItemsControl ItemTemplate="{StaticResource DeadlyAssaultNodeTemplate}" ItemsSource="{x:Bind CurrentDeadlyAssault.HardList}">
+                    <ItemsControl Grid.Row="1"
+                                  ItemTemplate="{StaticResource DeadlyAssaultNodeTemplate}"
+                                  ItemsSource="{x:Bind CurrentDeadlyAssault.HardList}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Spacing="16" />
+                                <StackPanel Spacing="12" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
-                </StackPanel>
+                </Grid>
 
-                <!--  常规：总分/排名/星级 + 节点 为一组（与绝境拉开间距）  -->
-                <StackPanel Spacing="8">
-                    <Grid Padding="8"
-                          Background="{ThemeResource CustomOverlayAcrylicBrush}"
-                          CornerRadius="8"
-                          Shadow="{ThemeResource ThemeShadow}"
-                          Translation="0,0,16">
+                <!--  常规：总分/排名/星级 + 节点 合并为同一背景卡片（对齐式舆防卫战第四防线）  -->
+                <Grid Padding="16,12,16,12"
+                      Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                      CornerRadius="8"
+                      RowSpacing="8"
+                      Shadow="{ThemeResource ThemeShadow}"
+                      Translation="0,0,16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <!-- Auto：无绝境时标题折叠，不占左侧空白 -->
                             <ColumnDefinition Width="Auto" />
@@ -474,14 +486,16 @@
                             <Run Text="{x:Bind local:DeadlyAssaultPage.TotalScoreText(CurrentDeadlyAssault.TotalScore, CurrentDeadlyAssault.TotalMaxScore)}" />
                         </TextBlock>
                     </Grid>
-                    <ItemsControl ItemTemplate="{StaticResource DeadlyAssaultNodeTemplate}" ItemsSource="{x:Bind CurrentDeadlyAssault.AllNodes}">
+                    <ItemsControl Grid.Row="1"
+                                  ItemTemplate="{StaticResource DeadlyAssaultNodeTemplate}"
+                                  ItemsSource="{x:Bind CurrentDeadlyAssault.AllNodes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Spacing="16" />
+                                <StackPanel Spacing="12" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
-                </StackPanel>
+                </Grid>
 
 
             </StackPanel>
