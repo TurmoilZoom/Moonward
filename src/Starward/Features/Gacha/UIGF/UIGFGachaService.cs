@@ -9,6 +9,7 @@ using Starward.Core.Localization;
 using Starward.Features.Database;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -225,7 +226,7 @@ internal class UIGFGachaService
         {
             Uid = uid,
             List = list.ToList(),
-            Lang = list.LastOrDefault()?.Lang ?? "",
+            Lang = ResolveUigfExportLang(list.LastOrDefault()?.Lang),
         };
         archive.Timezone = uid.ToString()[0] switch
         {
@@ -246,7 +247,7 @@ internal class UIGFGachaService
         {
             Uid = uid,
             List = list.ToList(),
-            Lang = list.LastOrDefault()?.Lang ?? "",
+            Lang = ResolveUigfExportLang(list.LastOrDefault()?.Lang),
         };
         archive.Timezone = uid.ToString()[0] switch
         {
@@ -267,7 +268,7 @@ internal class UIGFGachaService
         {
             Uid = uid,
             List = list.ToList(),
-            Lang = list.LastOrDefault()?.Lang ?? "",
+            Lang = ResolveUigfExportLang(list.LastOrDefault()?.Lang),
         };
         // nap 归档同样需要 timezone（UIGF schema required）
         archive.Timezone = uid.ToString()[0] switch
@@ -280,16 +281,24 @@ internal class UIGFGachaService
     }
 
 
-    /// <summary>导出千星奇域归档（UIGF hk4e_ugc）。time 为库中服务器当地时间，timezone 按 UID 推断。</summary>
+    /// <summary>
+    /// 导出千星奇域归档（UIGF hk4e_ugc）。
+    /// time 为库中服务器当地时间；timezone 按 UID 推断。
+    /// 条目本身无 lang，优先同 UID 原神抽卡记录，否则用当前 UI 语言，保证符合 UIGF enum。
+    /// </summary>
     private UIGF4BeyondGachaArchive GetUIGFGachaArchiveForGenshinBeyond(long uid)
     {
         using var dapper = DatabaseService.CreateConnection();
         IEnumerable<GenshinBeyondGachaItem> list = dapper.Query<GenshinBeyondGachaItem>($"SELECT * FROM GenshinBeyondGachaItem WHERE Uid=@Uid ORDER BY Id;", new { Uid = uid });
+        // 千星奇域表无 Lang 列，借同 UID 原神记录或 UI 语言补齐
+        string? langHint = dapper.QueryFirstOrDefault<string>(
+            "SELECT Lang FROM GenshinGachaItem WHERE Uid=@Uid AND IFNULL(Lang,'') != '' ORDER BY Id DESC LIMIT 1;",
+            new { Uid = uid });
         UIGF4BeyondGachaArchive archive = new()
         {
             Uid = uid,
             List = list.ToList(),
-            Lang = "",
+            Lang = ResolveUigfExportLang(langHint),
         };
         archive.Timezone = uid.ToString()[0] switch
         {
@@ -298,6 +307,19 @@ internal class UIGFGachaService
             _ => 8,
         };
         return archive;
+    }
+
+
+    /// <summary>
+    /// 规范化 UIGF 归档级 <c>lang</c>：必须为 schema enum 合法值（如 zh-cn），禁止空字符串。
+    /// </summary>
+    private static string ResolveUigfExportLang(string? lang)
+    {
+        if (string.IsNullOrWhiteSpace(lang))
+        {
+            lang = CultureInfo.CurrentUICulture.Name;
+        }
+        return LanguageUtil.FilterLanguage(lang);
     }
 
 
