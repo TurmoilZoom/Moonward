@@ -62,6 +62,12 @@ internal partial class GameFeatureConfig
     public bool SupportTimeNode { get; init; }
 
 
+    /// <summary>
+    /// 支持首页兑换码（国服前瞻直播码展示）
+    /// </summary>
+    public bool SupportRedeemCode { get; init; }
+
+
 
     public static GameFeatureConfig FromGameId(GameId? gameId)
     {
@@ -118,6 +124,7 @@ internal partial class GameFeatureConfig
         InGameNoticesWindow = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportRedeemCode = true,
     };
 
 
@@ -154,6 +161,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
+        SupportRedeemCode = true,
     };
 
 
@@ -195,6 +203,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
+        SupportRedeemCode = true,
     };
 
 
@@ -214,6 +223,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
+        SupportRedeemCode = true,
     };
 
 
@@ -252,6 +262,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
+        SupportRedeemCode = true,
     };
 
 
@@ -273,6 +284,7 @@ internal partial class GameFeatureConfig
         SupportSignIn = true,
         SupportCloudGame = true,
         SupportTimeNode = true,
+        SupportRedeemCode = true,
     };
 
 
@@ -311,6 +323,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
+        SupportRedeemCode = true,
     };
 
 

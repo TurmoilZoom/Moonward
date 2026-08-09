@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--  启动页右侧「前瞻直播兑换码」：国服直播码展示（点击单条复制）  -->
+<UserControl x:Class="Starward.Features.RedeemCode.RedeemCodeButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
+             xmlns:local="using:Starward.Features.RedeemCode"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <Button x:Name="Button_RedeemCode"
+            Padding="0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            BorderThickness="0"
+            CornerRadius="8"
+            Loaded="Button_RedeemCode_Loaded"
+            sc:InstantTooltip.Placement="Left"
+            sc:InstantTooltip.Text="{x:Bind lang:Lang.RedeemCodeButton_Title}"
+            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+            Unloaded="Button_RedeemCode_Unloaded">
+
+        <Image Margin="6" Source="ms-appx:///static/redeem_code.png" />
+
+        <Button.Flyout>
+            <Flyout Opened="Flyout_RedeemCode_Opened"
+                    Closed="Flyout_RedeemCode_Closed"
+                    Placement="LeftEdgeAlignedTop">
+                <Grid Width="320"
+                      MaxHeight="400"
+                      MinHeight="80">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!--  标题  -->
+                    <TextBlock Margin="0,0,0,10"
+                               VerticalAlignment="Center"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Text="{x:Bind DisplayTitle}"
+                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="NoWrap" />
+
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollMode="Disabled"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Padding="0,0,4,0">
+                        <StackPanel Padding="0,0,12,0" Spacing="10">
+                            <!--  延迟提示  -->
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind lang:Lang.RedeemCode_HintDelay}"
+                                       TextWrapping="WrapWholeWords"
+                                       Visibility="{x:Bind HasCodes, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                            <!--  码列表：整行可点复制；子元素不命中，保持手型光标  -->
+                            <ItemsControl ItemsSource="{x:Bind Codes}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="local:RedeemCodeItemView">
+                                        <Border Margin="0,0,0,4"
+                                                Padding="10"
+                                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="8"
+                                                Loaded="Item_Border_Loaded"
+                                                PointerEntered="Item_Border_PointerEntered"
+                                                PointerExited="Item_Border_PointerExited"
+                                                Tapped="Item_Tapped"
+                                                Tag="{x:Bind}">
+                                            <Grid ColumnSpacing="10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!--  文案不参与命中，避免 I 型光标与手型切换  -->
+                                                <StackPanel Spacing="4" IsHitTestVisible="False">
+                                                    <TextBlock FontSize="12"
+                                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                               Text="{x:Bind RewardText}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               TextWrapping="NoWrap"
+                                                               Visibility="{x:Bind HasRewardText, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                    <TextBlock FontFamily="Consolas"
+                                                               FontSize="15"
+                                                               FontWeight="SemiBold"
+                                                               Text="{x:Bind Code}"
+                                                               TextWrapping="Wrap" />
+                                                </StackPanel>
+
+                                                <!--  右侧：复制 / 成功对勾  -->
+                                                <Grid Grid.Column="1"
+                                                      Width="20"
+                                                      Height="20"
+                                                      VerticalAlignment="Center"
+                                                      IsHitTestVisible="False">
+                                                    <FontIcon FontSize="16"
+                                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                              Glyph="&#xE8C8;"
+                                                              Visibility="{x:Bind IsCopied, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                                                    <FontIcon FontSize="16"
+                                                              Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                              Glyph="&#xE8FB;"
+                                                              Visibility="{x:Bind IsCopied, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!--  空态 / 未开始  -->
+                            <TextBlock HorizontalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind EmptyMessage}"
+                                       TextWrapping="WrapWholeWords"
+                                       Visibility="{x:Bind ShowEmptyMessage, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!--  加载中  -->
+                    <ProgressRing Grid.RowSpan="2"
+                                  Width="32"
+                                  Height="32"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  IsActive="{x:Bind IsLoading}"
+                                  Visibility="{x:Bind IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </Grid>
+            </Flyout>
+        </Button.Flyout>
+    </Button>
+</UserControl>

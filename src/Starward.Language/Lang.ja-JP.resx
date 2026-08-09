@@ -3443,4 +3443,25 @@
   <data name="TimeNode_LoadFailed" xml:space="preserve">
     <value>Failed to load time nodes</value>
   </data>
+  <data name="RedeemCodeButton_Title" xml:space="preserve">
+    <value>先行配信交換コード</value>
+  </data>
+  <data name="RedeemCode_Empty" xml:space="preserve">
+    <value>配信コードはありません</value>
+  </data>
+  <data name="RedeemCode_NotStarted" xml:space="preserve">
+    <value>先行配信はまだ始まっていません</value>
+  </data>
+  <data name="RedeemCode_LoadFailed" xml:space="preserve">
+    <value>交換コードの読み込みに失敗しました</value>
+  </data>
+  <data name="RedeemCode_Copied" xml:space="preserve">
+    <value>クリップボードにコピーしました</value>
+  </data>
+  <data name="RedeemCode_CopyAll" xml:space="preserve">
+    <value>すべてコピー</value>
+  </data>
+  <data name="RedeemCode_HintDelay" xml:space="preserve">
+    <value>公式 API は配信より約 2 分遅れる場合があります</value>
+  </data>
 </root>

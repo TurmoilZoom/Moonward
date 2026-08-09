@@ -9952,5 +9952,68 @@ namespace Starward.Language {
                 return ResourceManager.GetString("TimeNode_LoadFailed", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Livestream Redeem Codes 的本地化字符串。
+        /// </summary>
+        public static string RedeemCodeButton_Title {
+            get {
+                return ResourceManager.GetString("RedeemCodeButton_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No livestream codes available 的本地化字符串。
+        /// </summary>
+        public static string RedeemCode_Empty {
+            get {
+                return ResourceManager.GetString("RedeemCode_Empty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 The preview livestream has not started yet 的本地化字符串。
+        /// </summary>
+        public static string RedeemCode_NotStarted {
+            get {
+                return ResourceManager.GetString("RedeemCode_NotStarted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Failed to load redeem codes 的本地化字符串。
+        /// </summary>
+        public static string RedeemCode_LoadFailed {
+            get {
+                return ResourceManager.GetString("RedeemCode_LoadFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Copied to clipboard 的本地化字符串。
+        /// </summary>
+        public static string RedeemCode_Copied {
+            get {
+                return ResourceManager.GetString("RedeemCode_Copied", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Copy all 的本地化字符串。
+        /// </summary>
+        public static string RedeemCode_CopyAll {
+            get {
+                return ResourceManager.GetString("RedeemCode_CopyAll", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Official API may lag the livestream by about 2 minutes 的本地化字符串。
+        /// </summary>
+        public static string RedeemCode_HintDelay {
+            get {
+                return ResourceManager.GetString("RedeemCode_HintDelay", resourceCulture);
+            }
+        }
     }
 }

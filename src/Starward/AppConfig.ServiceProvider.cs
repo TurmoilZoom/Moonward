@@ -9,7 +9,9 @@ using Starward.Core.GameNotice;
 using Starward.Core.Blackboard;
 using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
+using Starward.Core.MiyoLive;
 using Starward.Core.SelfQuery;
+using Starward.Features.RedeemCode;
 using Starward.Features.TimeNode;
 using Starward.Features.Background;
 using Starward.Features.Database;
@@ -98,6 +100,10 @@ public static partial class AppConfig
             // 首页时间节点：百科 blackboard 卡池 / 活动倒计时（公开接口，无 Cookie）
             sc.AddSingleton<BlackboardClient>();
             sc.AddSingleton<TimeNodeService>();
+
+            // 首页兑换码：国服前瞻直播 miyolive（公开接口，无 Cookie，只展示）
+            sc.AddSingleton<MiyoLiveClient>();
+            sc.AddSingleton<RedeemCodeService>();
 
             sc.AddSingleton<SelfQueryClient>();
             sc.AddSingleton<SelfQueryService>();
