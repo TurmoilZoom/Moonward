@@ -28,8 +28,10 @@
         <Button.Flyout>
             <Flyout Opened="Flyout_TimeNode_Opened"
                     Closed="Flyout_TimeNode_Closed"
-                    Placement="LeftEdgeAlignedTop">
-                <!--  固定高度上限 400，宽度保持 320；右侧留白避免滚动条压内容  -->
+                    Placement="LeftEdgeAlignedTop"
+                    FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
+                    sc:FlyoutGap.Horizontal="20">
+                <!--  固定高度上限 400，宽度保持 320  -->
                 <Grid Width="320"
                       MaxHeight="400"
                       MinHeight="80">
@@ -38,12 +40,11 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
+                    <!--  隐藏滚动条，仍可用滚轮/触控滚动  -->
                     <ScrollViewer Grid.Row="0"
                                   HorizontalScrollMode="Disabled"
-                                  VerticalScrollBarVisibility="Auto"
-                                  Padding="0,0,4,0">
-                        <!--  右侧 Padding 给滚动条占位，避免遮挡卡片内容  -->
-                        <StackPanel Padding="0,0,12,0" Spacing="16">
+                                  VerticalScrollBarVisibility="Hidden">
+                        <StackPanel Spacing="16">
                             <!--  分段列表  -->
                             <ItemsControl ItemsSource="{x:Bind Sections}">
                                 <ItemsControl.ItemTemplate>
@@ -144,7 +145,7 @@
 
                     <!--  错误  -->
                     <TextBlock Grid.Row="1"
-                               Margin="0,8,12,0"
+                               Margin="0,8,0,0"
                                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                Text="{x:Bind ErrorMessage}"
                                TextWrapping="WrapWholeWords"

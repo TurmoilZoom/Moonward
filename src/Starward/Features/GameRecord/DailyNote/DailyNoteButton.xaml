@@ -43,7 +43,9 @@
 
 
         <Button.Flyout>
-            <Flyout Placement="LeftEdgeAlignedTop">
+            <Flyout Placement="LeftEdgeAlignedTop"
+                    FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
+                    sc:FlyoutGap.Horizontal="20">
                 <Grid MinWidth="160">
                     <Grid.RowDefinitions>
                         <RowDefinition />

@@ -28,7 +28,9 @@
         <Button.Flyout>
             <Flyout Opened="Flyout_RedeemCode_Opened"
                     Closed="Flyout_RedeemCode_Closed"
-                    Placement="LeftEdgeAlignedTop">
+                    Placement="LeftEdgeAlignedTop"
+                    FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
+                    sc:FlyoutGap.Horizontal="20">
                 <Grid Width="320"
                       MaxHeight="400"
                       MinHeight="80">
@@ -46,11 +48,11 @@
                                TextTrimming="CharacterEllipsis"
                                TextWrapping="NoWrap" />
 
+                    <!--  隐藏滚动条，仍可用滚轮/触控滚动  -->
                     <ScrollViewer Grid.Row="1"
                                   HorizontalScrollMode="Disabled"
-                                  VerticalScrollBarVisibility="Auto"
-                                  Padding="0,0,4,0">
-                        <StackPanel Padding="0,0,12,0" Spacing="10">
+                                  VerticalScrollBarVisibility="Hidden">
+                        <StackPanel Spacing="10">
                             <!--  延迟提示  -->
                             <TextBlock FontSize="12"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"

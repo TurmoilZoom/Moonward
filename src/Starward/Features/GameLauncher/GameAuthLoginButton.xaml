@@ -6,6 +6,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameLauncher"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
@@ -41,7 +42,9 @@
                    Visibility="{x:Bind ErrorMessage, Converter={StaticResource ObjectToVisibilityConverter}}" />
         </Grid>
         <Button.Flyout>
-            <Flyout Placement="LeftEdgeAlignedTop">
+            <Flyout Placement="LeftEdgeAlignedTop"
+                    FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
+                    sc:FlyoutGap.Horizontal="20">
                 <StackPanel Spacing="12">
                     <Border Width="60"
                             Height="60"

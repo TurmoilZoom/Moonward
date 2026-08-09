@@ -24,7 +24,10 @@
                Source="ms-appx:///Assets/Image/icon_cloudgame.png" />
 
         <Button.Flyout>
-            <Flyout Opened="Flyout_Opened" Placement="LeftEdgeAlignedTop">
+            <Flyout Opened="Flyout_Opened"
+                    Placement="LeftEdgeAlignedTop"
+                    FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
+                    sc:FlyoutGap.Horizontal="20">
                 <Grid Margin="-12,-12,-8,-12" ColumnSpacing="8">
                     <Grid.RowDefinitions>
                         <RowDefinition />

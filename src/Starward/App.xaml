@@ -62,6 +62,13 @@
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
             </Style>
+            <!--  首页右侧工具栏 Flyout 外观（间距由 sc:FlyoutGap.Horizontal 在 Opened 后偏移，Margin 对 Flyout 定位无效）  -->
+            <Style x:Key="RightToolbarFlyoutPresenterStyle"
+                   BasedOn="{StaticResource DefaultFlyoutPresenterStyle}"
+                   TargetType="FlyoutPresenter">
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
+            </Style>
 
             <FontFamily x:Key="SegoeFluentIcons">ms-appx:///Assets/Font/Segoe Fluent Icons.ttf#Segoe Fluent Icons</FontFamily>
             <Style TargetType="FontIcon">

@@ -705,38 +705,44 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <!--  右边侧栏  -->
-        <StackPanel Margin="4"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    Spacing="4">
-            <!--  云游戏  -->
-            <sfc:CloudGameButton x:Name="Button_CloudGame"
-                                 Width="40"
-                                 Height="40"
-                                 CurrentGameId="{x:Bind CurrentGameId}"
-                                 Visibility="Collapsed" />
-            <!--  每日便笺  -->
-            <sfgd:DailyNoteButton Width="40"
-                                  Height="40"
-                                  CurrentGameId="{x:Bind CurrentGameId}" />
-            <!--  时间节点：百科卡池 / 活动倒计时  -->
-            <sft:TimeNodeButton Width="40"
-                                Height="40"
-                                CurrentGameId="{x:Bind CurrentGameId}" />
-            <!--  兑换码：国服前瞻直播码展示（可复制，不兑换）  -->
-            <sfr:RedeemCodeButton Width="40"
-                                  Height="40"
-                                  CurrentGameId="{x:Bind CurrentGameId}" />
-            <!--  每日签到：图标按钮 + Flyout 卡片（手动签到 / 补签 / 自动签到开关）  -->
-            <sfgs:SignInButton Width="40"
-                               Height="40"
-                               CurrentGameId="{x:Bind CurrentGameId}" />
-            <!--  通行证授权登录  -->
-            <local:GameAuthLoginButton Width="40"
-                                       Height="40"
-                                       CurrentGameId="{x:Bind CurrentGameId}" />
-        </StackPanel>
+        <!--  右边侧栏：靠上 + 亚克力背景栏  -->
+        <Border Margin="8,16,12,0"
+                Padding="4"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                CornerRadius="12"
+                Shadow="{StaticResource ThemeShadow}"
+                Translation="0,0,16">
+            <StackPanel Spacing="4">
+                <!--  云游戏  -->
+                <sfc:CloudGameButton x:Name="Button_CloudGame"
+                                     Width="40"
+                                     Height="40"
+                                     CurrentGameId="{x:Bind CurrentGameId}"
+                                     Visibility="Collapsed" />
+                <!--  每日便笺  -->
+                <sfgd:DailyNoteButton Width="40"
+                                      Height="40"
+                                      CurrentGameId="{x:Bind CurrentGameId}" />
+                <!--  时间节点：百科卡池 / 活动倒计时  -->
+                <sft:TimeNodeButton Width="40"
+                                    Height="40"
+                                    CurrentGameId="{x:Bind CurrentGameId}" />
+                <!--  兑换码：国服前瞻直播码展示（可复制，不兑换）  -->
+                <sfr:RedeemCodeButton Width="40"
+                                      Height="40"
+                                      CurrentGameId="{x:Bind CurrentGameId}" />
+                <!--  每日签到：图标按钮 + Flyout 卡片（手动签到 / 补签 / 自动签到开关）  -->
+                <sfgs:SignInButton Width="40"
+                                   Height="40"
+                                   CurrentGameId="{x:Bind CurrentGameId}" />
+                <!--  通行证授权登录  -->
+                <local:GameAuthLoginButton Width="40"
+                                           Height="40"
+                                           CurrentGameId="{x:Bind CurrentGameId}" />
+            </StackPanel>
+        </Border>
 
     </Grid>
 

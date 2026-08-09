@@ -48,7 +48,10 @@
 
         <Button.Flyout>
             <!--  签到详情卡片，左侧对齐展开  -->
-            <Flyout Opened="Flyout_SignIn_Opened" Placement="LeftEdgeAlignedTop">
+            <Flyout Opened="Flyout_SignIn_Opened"
+                    Placement="LeftEdgeAlignedTop"
+                    FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
+                    sc:FlyoutGap.Horizontal="20">
                 <Grid Width="320" RowSpacing="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -136,10 +139,11 @@
 
 
                     <!--  奖励日历  -->
+                    <!--  隐藏滚动条，仍可用滚轮/触控滚动  -->
                     <ScrollViewer Grid.Row="2"
                                   MaxHeight="240"
                                   HorizontalScrollMode="Disabled"
-                                  VerticalScrollBarVisibility="Auto">
+                                  VerticalScrollBarVisibility="Hidden">
                         <ItemsRepeater ItemsSource="{x:Bind Awards}">
                             <ItemsRepeater.Layout>
                                 <UniformGridLayout MaximumRowsOrColumns="7"
