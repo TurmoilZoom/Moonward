@@ -623,6 +623,15 @@ closing the program during decompression will cause game file corruption.</value
   <data name="LauncherPage_ShowGameAnnouncement" xml:space="preserve">
     <value>Show Game Announcement</value>
   </data>
+  <data name="LauncherPage_HideGameAnnouncement" xml:space="preserve">
+    <value>Hide Game Announcement</value>
+  </data>
+  <data name="LauncherPage_ShowPlayTime" xml:space="preserve">
+    <value>Show Play Time</value>
+  </data>
+  <data name="LauncherPage_HidePlayTime" xml:space="preserve">
+    <value>Hide Play Time</value>
+  </data>
   <data name="LauncherPage_IgnoreRunningGameProcess" xml:space="preserve">
     <value>Ignore Running Game Process</value>
   </data>

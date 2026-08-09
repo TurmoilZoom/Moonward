@@ -564,6 +564,15 @@
   <data name="LauncherPage_ShowGameAnnouncement" xml:space="preserve">
     <value>게임공지 표시하기</value>
   </data>
+  <data name="LauncherPage_HideGameAnnouncement" xml:space="preserve">
+    <value>게임공지 숨기기</value>
+  </data>
+  <data name="LauncherPage_ShowPlayTime" xml:space="preserve">
+    <value>플레이 시간 표시</value>
+  </data>
+  <data name="LauncherPage_HidePlayTime" xml:space="preserve">
+    <value>플레이 시간 숨기기</value>
+  </data>
   <data name="LauncherPage_IgnoreRunningGameProcess" xml:space="preserve">
     <value>실행중인 게임 무시하기</value>
   </data>

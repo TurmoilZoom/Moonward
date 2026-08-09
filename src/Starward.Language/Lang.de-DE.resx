@@ -564,6 +564,15 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="LauncherPage_ShowGameAnnouncement" xml:space="preserve">
     <value>Zeige Spielankündigung</value>
   </data>
+  <data name="LauncherPage_HideGameAnnouncement" xml:space="preserve">
+    <value>Spielankündigung ausblenden</value>
+  </data>
+  <data name="LauncherPage_ShowPlayTime" xml:space="preserve">
+    <value>Spielzeit anzeigen</value>
+  </data>
+  <data name="LauncherPage_HidePlayTime" xml:space="preserve">
+    <value>Spielzeit ausblenden</value>
+  </data>
   <data name="LauncherPage_IgnoreRunningGameProcess" xml:space="preserve">
     <value>Ignoriere laufenden Spielprozess</value>
   </data>

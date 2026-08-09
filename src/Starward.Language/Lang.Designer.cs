@@ -6288,6 +6288,33 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Hide Game Announcement 的本地化字符串。
+        /// </summary>
+        public static string LauncherPage_HideGameAnnouncement {
+            get {
+                return ResourceManager.GetString("LauncherPage_HideGameAnnouncement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Show Play Time 的本地化字符串。
+        /// </summary>
+        public static string LauncherPage_ShowPlayTime {
+            get {
+                return ResourceManager.GetString("LauncherPage_ShowPlayTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hide Play Time 的本地化字符串。
+        /// </summary>
+        public static string LauncherPage_HidePlayTime {
+            get {
+                return ResourceManager.GetString("LauncherPage_HidePlayTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Start Game 的本地化字符串。
         /// </summary>
         public static string LauncherPage_StartGame {

@@ -446,12 +446,32 @@
                         VerticalAlignment="Center"
                         Command="{x:Bind ToggleBannerAndPostCommand}"
                         sc:InstantTooltip.Placement="Top"
-                        sc:InstantTooltip.Text="{x:Bind lang:Lang.LauncherPage_ShowGameAnnouncement}"
+                        sc:InstantTooltip.Text="{x:Bind BannerAndPostTooltip, Mode=OneWay}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="{x:Bind BannerAndPostButtonIcon, Mode=OneWay}"
                               IsTextScaleFactorEnabled="False" />
+                </Button>
+                <!--  显示 / 隐藏游戏时长：显示=StatusCircleBlock；隐藏=History 时钟。不用闭眼图标，避免与公告按钮冲突  -->
+                <Button Padding="4"
+                        VerticalAlignment="Center"
+                        Command="{x:Bind TogglePlayTimeVisibilityCommand}"
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind PlayTimeVisibilityTooltip, Mode=OneWay}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                    <Grid>
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xEA39;"
+                                  IsTextScaleFactorEnabled="False"
+                                  Visibility="{x:Bind EnablePlayTime, Mode=OneWay}" />
+                        <FontIcon FontSize="16"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE823;"
+                                  IsTextScaleFactorEnabled="False"
+                                  Visibility="{x:Bind EnablePlayTime, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                    </Grid>
                 </Button>
                 <!--  图库  -->
                 <Button Padding="4"
@@ -572,7 +592,8 @@
             <!--  游戏时间  -->
             <sfp:PlayTimeButton x:Name="Button_PlayTime"
                                 Grid.Column="1"
-                                CurrentGameBiz="{x:Bind CurrentGameBiz}" />
+                                CurrentGameBiz="{x:Bind CurrentGameBiz}"
+                                Visibility="{x:Bind EnablePlayTime, Mode=OneWay}" />
 
             <!--  启动游戏  -->
             <local:StartGameButton x:Name="Button_StartGame"

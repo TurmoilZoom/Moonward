@@ -623,6 +623,15 @@
   <data name="LauncherPage_ShowGameAnnouncement" xml:space="preserve">
     <value>显示游戏公告</value>
   </data>
+  <data name="LauncherPage_HideGameAnnouncement" xml:space="preserve">
+    <value>隐藏游戏公告</value>
+  </data>
+  <data name="LauncherPage_ShowPlayTime" xml:space="preserve">
+    <value>显示游戏时长</value>
+  </data>
+  <data name="LauncherPage_HidePlayTime" xml:space="preserve">
+    <value>隐藏游戏时长</value>
+  </data>
   <data name="LauncherPage_IgnoreRunningGameProcess" xml:space="preserve">
     <value>忽略正在运行的游戏</value>
   </data>

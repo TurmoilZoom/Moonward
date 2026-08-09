@@ -564,6 +564,15 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="LauncherPage_ShowGameAnnouncement" xml:space="preserve">
     <value>Mostra Annunci Di Gioco</value>
   </data>
+  <data name="LauncherPage_HideGameAnnouncement" xml:space="preserve">
+    <value>Nascondi Annunci Di Gioco</value>
+  </data>
+  <data name="LauncherPage_ShowPlayTime" xml:space="preserve">
+    <value>Mostra tempo di gioco</value>
+  </data>
+  <data name="LauncherPage_HidePlayTime" xml:space="preserve">
+    <value>Nascondi tempo di gioco</value>
+  </data>
   <data name="LauncherPage_IgnoreRunningGameProcess" xml:space="preserve">
     <value>Ignora Processo Di Gioco In Esecuzione</value>
   </data>

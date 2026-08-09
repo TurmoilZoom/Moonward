@@ -564,6 +564,15 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="LauncherPage_ShowGameAnnouncement" xml:space="preserve">
     <value>Hiện thị thông báo trò chơi</value>
   </data>
+  <data name="LauncherPage_HideGameAnnouncement" xml:space="preserve">
+    <value>Ẩn thông báo trò chơi</value>
+  </data>
+  <data name="LauncherPage_ShowPlayTime" xml:space="preserve">
+    <value>Hiển thị thời gian chơi</value>
+  </data>
+  <data name="LauncherPage_HidePlayTime" xml:space="preserve">
+    <value>Ẩn thời gian chơi</value>
+  </data>
   <data name="LauncherPage_IgnoreRunningGameProcess" xml:space="preserve">
     <value>Bỏ qua tiến trình trò chơi đang hoạt động</value>
   </data>

@@ -49,6 +49,15 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 是否在首页显示游戏时长（PlayTimeButton）。默认开启，与原先始终显示的行为一致。
+    /// </summary>
+    public static bool EnablePlayTime
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
+
     public static bool IgnoreRunningGame
     {
         get => GetValue<bool>();

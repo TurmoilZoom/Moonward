@@ -1182,6 +1182,7 @@ public sealed partial class GameLauncherPage : PageBase
             {
                 AppConfig.EnableBannerAndPost = value;
                 OnPropertyChanged(nameof(BannerAndPostButtonIcon));
+                OnPropertyChanged(nameof(BannerAndPostTooltip));
                 // GameBannerAndPost 监听此消息，读取 AppConfig 后自行显隐与刷新内容。
                 WeakReferenceMessenger.Default.Send(new GameAnnouncementSettingChangedMessage());
             }
@@ -1190,15 +1191,61 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// 工具栏「显示游戏公告」按钮图标：显示时为睁眼，隐藏时为带斜杠的闭眼。
+    /// 工具栏「显示游戏公告」按钮图标：显示时为带斜杠的闭眼，隐藏时为睁眼。
     /// </summary>
-    public string BannerAndPostButtonIcon => EnableBannerAndPost ? "\uE890" : "\uED1A";
+    public string BannerAndPostButtonIcon => EnableBannerAndPost ? "\uED1A" : "\uE890";
+
+
+    /// <summary>
+    /// 工具栏公告开关 Tooltip：已显示时为「隐藏」，已隐藏时为「显示」（与图钉文案同一套动作语义）。
+    /// </summary>
+    public string BannerAndPostTooltip => EnableBannerAndPost
+        ? Lang.LauncherPage_HideGameAnnouncement
+        : Lang.LauncherPage_ShowGameAnnouncement;
 
 
     [RelayCommand]
     private void ToggleBannerAndPost()
     {
         EnableBannerAndPost = !EnableBannerAndPost;
+    }
+
+
+    #endregion
+
+
+    #region Play Time Visibility
+
+
+    /// <summary>
+    /// 是否在首页右下角显示游戏时长按钮。由壁纸下方工具栏开关控制，持久化到设置。
+    /// </summary>
+    public bool EnablePlayTime
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.EnablePlayTime = value;
+                OnPropertyChanged(nameof(PlayTimeVisibilityTooltip));
+            }
+        }
+    } = AppConfig.EnablePlayTime;
+
+
+    /// <summary>
+    /// 工具栏游戏时长开关 Tooltip：已显示时为「隐藏游戏时长」，已隐藏时为「显示游戏时长」。
+    /// </summary>
+    public string PlayTimeVisibilityTooltip => EnablePlayTime
+        ? Lang.LauncherPage_HidePlayTime
+        : Lang.LauncherPage_ShowPlayTime;
+
+
+    [RelayCommand]
+    private void TogglePlayTimeVisibility()
+    {
+        EnablePlayTime = !EnablePlayTime;
     }
 
 
