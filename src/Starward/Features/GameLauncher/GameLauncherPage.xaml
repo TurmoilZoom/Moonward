@@ -15,6 +15,7 @@
              xmlns:sfgd="using:Starward.Features.GameRecord.DailyNote"
              xmlns:sfgs="using:Starward.Features.GameRecord.SignIn"
              xmlns:sfp="using:Starward.Features.PlayTime"
+             xmlns:sft="using:Starward.Features.TimeNode"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
@@ -718,6 +719,10 @@
             <sfgd:DailyNoteButton Width="40"
                                   Height="40"
                                   CurrentGameId="{x:Bind CurrentGameId}" />
+            <!--  时间节点：百科卡池 / 活动倒计时  -->
+            <sft:TimeNodeButton Width="40"
+                                Height="40"
+                                CurrentGameId="{x:Bind CurrentGameId}" />
             <!--  每日签到：图标按钮 + Flyout 卡片（手动签到 / 补签 / 自动签到开关）  -->
             <sfgs:SignInButton Width="40"
                                Height="40"

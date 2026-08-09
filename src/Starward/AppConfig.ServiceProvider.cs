@@ -6,9 +6,11 @@ using Starward.Core.Gacha.Genshin;
 using Starward.Core.Gacha.StarRail;
 using Starward.Core.Gacha.ZZZ;
 using Starward.Core.GameNotice;
+using Starward.Core.Blackboard;
 using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
 using Starward.Core.SelfQuery;
+using Starward.Features.TimeNode;
 using Starward.Features.Background;
 using Starward.Features.Database;
 using Starward.Features.Gacha;
@@ -92,6 +94,10 @@ public static partial class AppConfig
             // 每日签到：业务编排 + 启动批量自动签到
             sc.AddSingleton<SignInService>();
             sc.AddSingleton<AutoSignInService>();
+
+            // 首页时间节点：百科 blackboard 卡池 / 活动倒计时（公开接口，无 Cookie）
+            sc.AddSingleton<BlackboardClient>();
+            sc.AddSingleton<TimeNodeService>();
 
             sc.AddSingleton<SelfQueryClient>();
             sc.AddSingleton<SelfQueryService>();

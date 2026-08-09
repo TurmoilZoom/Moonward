@@ -56,6 +56,12 @@ internal partial class GameFeatureConfig
     public bool SupportSignIn { get; init; }
 
 
+    /// <summary>
+    /// 支持首页时间节点（百科卡池 / 活动倒计时）
+    /// </summary>
+    public bool SupportTimeNode { get; init; }
+
+
 
     public static GameFeatureConfig FromGameId(GameId? gameId)
     {
@@ -147,6 +153,7 @@ internal partial class GameFeatureConfig
         SupportCloudGame = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportTimeNode = true,
     };
 
 
@@ -167,6 +174,7 @@ internal partial class GameFeatureConfig
         SupportCloudGame = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportTimeNode = true,
     };
 
 
@@ -186,6 +194,7 @@ internal partial class GameFeatureConfig
         SupportHardLink = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportTimeNode = true,
     };
 
 
@@ -204,6 +213,7 @@ internal partial class GameFeatureConfig
         SupportHardLink = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportTimeNode = true,
     };
 
 
@@ -222,6 +232,7 @@ internal partial class GameFeatureConfig
         SupportHardLink = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportTimeNode = true,
     };
 
 
@@ -240,6 +251,7 @@ internal partial class GameFeatureConfig
         SupportHardLink = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportTimeNode = true,
     };
 
 
@@ -260,6 +272,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportCloudGame = true,
+        SupportTimeNode = true,
     };
 
 
@@ -278,6 +291,7 @@ internal partial class GameFeatureConfig
         SupportHardLink = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportTimeNode = true,
     };
 
 
@@ -296,6 +310,7 @@ internal partial class GameFeatureConfig
         SupportHardLink = true,
         SupportDailyNote = true,
         SupportSignIn = true,
+        SupportTimeNode = true,
     };
 
 

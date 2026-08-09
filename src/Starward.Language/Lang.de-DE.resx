@@ -3397,4 +3397,49 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="CmdArg_SingleInstance_Desc" xml:space="preserve">
     <value>Allow only one game instance (-single-instance).</value>
   </data>
+  <data name="TimeNodeButton_Title" xml:space="preserve">
+    <value>Time Nodes</value>
+  </data>
+  <data name="TimeNode_Section_LimitedWish" xml:space="preserve">
+    <value>Limited Wish</value>
+  </data>
+  <data name="TimeNode_Section_EventWarp" xml:space="preserve">
+    <value>Event Warp</value>
+  </data>
+  <data name="TimeNode_Section_HotEvents" xml:space="preserve">
+    <value>Hot Events</value>
+  </data>
+  <data name="TimeNode_Section_SignalSearch" xml:space="preserve">
+    <value>Signal Search</value>
+  </data>
+  <data name="TimeNode_Ended" xml:space="preserve">
+    <value>Event Ended</value>
+  </data>
+  <data name="TimeNode_NotStarted" xml:space="preserve">
+    <value>Not Started</value>
+  </data>
+  <data name="TimeNode_RemainingPreciseWithDays" xml:space="preserve">
+    <value>{0}d {1}h {2}m {3}s remaining</value>
+  </data>
+  <data name="TimeNode_RemainingPrecise" xml:space="preserve">
+    <value>{0}h {1}m {2}s remaining</value>
+  </data>
+  <data name="TimeNode_RemainingCoarse" xml:space="preserve">
+    <value>{0}d {1}h remaining</value>
+  </data>
+  <data name="TimeNode_RemainingDays" xml:space="preserve">
+    <value>{0}d remaining</value>
+  </data>
+  <data name="TimeNode_RemainingHours" xml:space="preserve">
+    <value>{0}h remaining</value>
+  </data>
+  <data name="TimeNode_RemainingMinutes" xml:space="preserve">
+    <value>{0}m remaining</value>
+  </data>
+  <data name="TimeNode_Empty" xml:space="preserve">
+    <value>No time nodes available</value>
+  </data>
+  <data name="TimeNode_LoadFailed" xml:space="preserve">
+    <value>Failed to load time nodes</value>
+  </data>
 </root>

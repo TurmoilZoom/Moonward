@@ -9817,5 +9817,140 @@ namespace Starward.Language {
                 return ResourceManager.GetString("HoyolabToolboxPage_PleaseReloginInMiyousheToolbox", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Time Nodes 的本地化字符串。
+        /// </summary>
+        public static string TimeNodeButton_Title {
+            get {
+                return ResourceManager.GetString("TimeNodeButton_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Limited Wish 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_Section_LimitedWish {
+            get {
+                return ResourceManager.GetString("TimeNode_Section_LimitedWish", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Event Warp 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_Section_EventWarp {
+            get {
+                return ResourceManager.GetString("TimeNode_Section_EventWarp", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Hot Events 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_Section_HotEvents {
+            get {
+                return ResourceManager.GetString("TimeNode_Section_HotEvents", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Signal Search 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_Section_SignalSearch {
+            get {
+                return ResourceManager.GetString("TimeNode_Section_SignalSearch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Event Ended 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_Ended {
+            get {
+                return ResourceManager.GetString("TimeNode_Ended", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Not Started 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_NotStarted {
+            get {
+                return ResourceManager.GetString("TimeNode_NotStarted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 {0}d {1}h {2}m {3}s remaining 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_RemainingPreciseWithDays {
+            get {
+                return ResourceManager.GetString("TimeNode_RemainingPreciseWithDays", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 {0}h {1}m {2}s remaining 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_RemainingPrecise {
+            get {
+                return ResourceManager.GetString("TimeNode_RemainingPrecise", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 {0}d {1}h remaining 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_RemainingCoarse {
+            get {
+                return ResourceManager.GetString("TimeNode_RemainingCoarse", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 {0}d remaining 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_RemainingDays {
+            get {
+                return ResourceManager.GetString("TimeNode_RemainingDays", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 {0}h remaining 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_RemainingHours {
+            get {
+                return ResourceManager.GetString("TimeNode_RemainingHours", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 {0}m remaining 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_RemainingMinutes {
+            get {
+                return ResourceManager.GetString("TimeNode_RemainingMinutes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No time nodes available 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_Empty {
+            get {
+                return ResourceManager.GetString("TimeNode_Empty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Failed to load time nodes 的本地化字符串。
+        /// </summary>
+        public static string TimeNode_LoadFailed {
+            get {
+                return ResourceManager.GetString("TimeNode_LoadFailed", resourceCulture);
+            }
+        }
     }
 }

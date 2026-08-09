@@ -3399,4 +3399,49 @@
   <data name="CmdArg_SingleInstance_Desc" xml:space="preserve">
     <value>僅允許執行一個遊戲執行個體（-single-instance）。</value>
   </data>
+  <data name="TimeNodeButton_Title" xml:space="preserve">
+    <value>时间节点</value>
+  </data>
+  <data name="TimeNode_Section_LimitedWish" xml:space="preserve">
+    <value>限时祈愿</value>
+  </data>
+  <data name="TimeNode_Section_EventWarp" xml:space="preserve">
+    <value>活动跃迁</value>
+  </data>
+  <data name="TimeNode_Section_HotEvents" xml:space="preserve">
+    <value>热点活动</value>
+  </data>
+  <data name="TimeNode_Section_SignalSearch" xml:space="preserve">
+    <value>调频</value>
+  </data>
+  <data name="TimeNode_Ended" xml:space="preserve">
+    <value>活动已结束</value>
+  </data>
+  <data name="TimeNode_NotStarted" xml:space="preserve">
+    <value>未开始</value>
+  </data>
+  <data name="TimeNode_RemainingPreciseWithDays" xml:space="preserve">
+    <value>还有{0}天{1}小时{2}分钟{3}秒</value>
+  </data>
+  <data name="TimeNode_RemainingPrecise" xml:space="preserve">
+    <value>还有{0}小时{1}分钟{2}秒</value>
+  </data>
+  <data name="TimeNode_RemainingCoarse" xml:space="preserve">
+    <value>还剩{0}天{1}小时</value>
+  </data>
+  <data name="TimeNode_RemainingDays" xml:space="preserve">
+    <value>还剩{0}天</value>
+  </data>
+  <data name="TimeNode_RemainingHours" xml:space="preserve">
+    <value>还剩{0}小时</value>
+  </data>
+  <data name="TimeNode_RemainingMinutes" xml:space="preserve">
+    <value>还剩{0}分钟</value>
+  </data>
+  <data name="TimeNode_Empty" xml:space="preserve">
+    <value>暂无时间节点</value>
+  </data>
+  <data name="TimeNode_LoadFailed" xml:space="preserve">
+    <value>加载时间节点失败</value>
+  </data>
 </root>
