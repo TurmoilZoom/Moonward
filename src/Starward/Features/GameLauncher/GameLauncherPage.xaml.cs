@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
-using Windows.System;
 
 
 namespace Starward.Features.GameLauncher;
@@ -1142,82 +1141,6 @@ public sealed partial class GameLauncherPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Open background view window.");
-        }
-    }
-
-
-    [RelayCommand]
-    private async Task CopyCurrentBackgroundImageAsync()
-    {
-        try
-        {
-            string? path = null;
-            GameBackground? background = AppBackground.Current.CurrentGameBackground;
-            if (background?.Type is GameBackground.BACKGROUND_TYPE_CUSTOM)
-            {
-                path = background.Background.Url;
-            }
-            else if (background?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && !background.StopVideo)
-            {
-                string name = Path.GetFileName(background.Video.Url);
-                path = BackgroundService.GetBgFilePath(name);
-            }
-            else if (background is not null)
-            {
-                string name = Path.GetFileName(background.Background.Url);
-                path = BackgroundService.GetBgFilePath(name);
-            }
-            if (File.Exists(path))
-            {
-                var file = await StorageFile.GetFileFromPathAsync(path);
-                ClipboardHelper.SetStorageItems(DataPackageOperation.Copy, file);
-                InAppToast.MainWindow?.Information(Lang.Common_CopiedToClipboard);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Copy current background image {GameBiz}", CurrentGameBiz);
-        }
-    }
-
-
-    [RelayCommand]
-    private async Task SaveCurrentBackgroundImageAsync()
-    {
-        try
-        {
-            string? path = null;
-            GameBackground? background = AppBackground.Current.CurrentGameBackground;
-            if (background?.Type is GameBackground.BACKGROUND_TYPE_CUSTOM)
-            {
-                path = background.Background.Url;
-            }
-            else if (background?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && !background.StopVideo)
-            {
-                string name = Path.GetFileName(background.Video.Url);
-                path = BackgroundService.GetBgFilePath(name);
-            }
-            else if (background is not null)
-            {
-                string name = Path.GetFileName(background.Background.Url);
-                path = BackgroundService.GetBgFilePath(name);
-            }
-            if (File.Exists(path))
-            {
-                var savePath = await FileDialogHelper.OpenSaveFileDialogAsync(this.XamlRoot, Path.GetFileName(path));
-                if (!string.IsNullOrWhiteSpace(savePath))
-                {
-                    File.Copy(path, savePath, true);
-                    var file = await StorageFile.GetFileFromPathAsync(savePath);
-                    var options = new FolderLauncherOptions();
-                    options.ItemsToSelect.Add(file);
-                    await Launcher.LaunchFolderAsync(await file.GetParentAsync(), options);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Save as current background image {GameBiz}", CurrentGameBiz);
         }
     }
 

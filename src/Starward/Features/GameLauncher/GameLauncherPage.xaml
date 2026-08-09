@@ -477,29 +477,6 @@
                               Glyph="&#xE794;"
                               IsTextScaleFactorEnabled="False" />
                 </Button>
-                <!--  复制  -->
-                <Button Padding="4"
-                        VerticalAlignment="Center"
-                        Command="{x:Bind CopyCurrentBackgroundImageCommand}"
-                        sc:InstantTooltip.Placement="Top"
-                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Copy}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                    <FontIcon FontSize="16"
-                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                              Glyph="&#xE8C8;"
-                              IsTextScaleFactorEnabled="False" />
-                </Button>
-                <!--  另存为  -->
-                <Button Padding="4"
-                        Command="{x:Bind SaveCurrentBackgroundImageCommand}"
-                        sc:InstantTooltip.Placement="Top"
-                        sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_SaveAs}"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                    <FontIcon FontSize="16"
-                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                              Glyph="&#xE74E;"
-                              IsTextScaleFactorEnabled="False" />
-                </Button>
                 <!--  图钉固定  -->
                 <Button Padding="4"
                         VerticalAlignment="Center"
