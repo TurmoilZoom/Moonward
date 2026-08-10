@@ -51,7 +51,7 @@
             <Flyout Opened="Flyout_SignIn_Opened"
                     Placement="LeftEdgeAlignedTop"
                     FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
-                    sc:FlyoutGap.Horizontal="20">
+                    sc:FlyoutGap.Horizontal="12">
                 <Grid Width="320" RowSpacing="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -92,6 +92,7 @@
                                 BorderThickness="0"
                                 Command="{x:Bind RefreshSignInStatusCommand}"
                                 CornerRadius="4"
+                                IsEnabled="{x:Bind IsLoading, Converter={StaticResource BoolReversedConverter}}"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
                                 sc:InstantTooltip.Placement="Top"
                                 sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
@@ -138,64 +139,74 @@
                     </Grid>
 
 
-                    <!--  奖励日历  -->
-                    <!--  隐藏滚动条，仍可用滚轮/触控滚动  -->
-                    <ScrollViewer Grid.Row="2"
-                                  MaxHeight="240"
-                                  HorizontalScrollMode="Disabled"
-                                  VerticalScrollBarVisibility="Hidden">
-                        <ItemsRepeater ItemsSource="{x:Bind Awards}">
-                            <ItemsRepeater.Layout>
-                                <UniformGridLayout MaximumRowsOrColumns="7"
-                                                   MinColumnSpacing="2"
-                                                   MinRowSpacing="2"
-                                                   Orientation="Horizontal" />
-                            </ItemsRepeater.Layout>
-                            <ItemsRepeater.ItemTemplate>
-                                <DataTemplate x:DataType="local:SignInAwardView">
-                                    <Grid Padding="2"
-                                          RowSpacing="2"
-                                          sc:InstantTooltip.Placement="Top"
-                                          sc:InstantTooltip.Text="{x:Bind Name}">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
+                    <!--  奖励日历 + 加载中  -->
+                    <!--  固定高度：首次 Open 时 Awards 仍空，若高度为 Auto 则 Flyout 按矮卡片定位，
+                         数据回填后变高却不重算 Placement，会贴底；占位与满载一致可避免该问题。
+                         隐藏滚动条，仍可用滚轮/触控滚动  -->
+                    <Grid Grid.Row="2" Height="240">
+                        <ScrollViewer HorizontalScrollMode="Disabled"
+                                      VerticalScrollBarVisibility="Hidden">
+                            <ItemsRepeater ItemsSource="{x:Bind Awards}">
+                                <ItemsRepeater.Layout>
+                                    <UniformGridLayout MaximumRowsOrColumns="7"
+                                                       MinColumnSpacing="2"
+                                                       MinRowSpacing="2"
+                                                       Orientation="Horizontal" />
+                                </ItemsRepeater.Layout>
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="local:SignInAwardView">
+                                        <Grid Padding="2"
+                                              RowSpacing="2"
+                                              sc:InstantTooltip.Placement="Top"
+                                              sc:InstantTooltip.Text="{x:Bind Name}">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
 
-                                        <Grid Width="36" Height="36">
-                                            <sc:CachedImage Width="32"
-                                                            Height="32"
-                                                            HorizontalAlignment="Center"
-                                                            VerticalAlignment="Center"
-                                                            Source="{x:Bind Icon}" />
-                                            <StackPanel HorizontalAlignment="Right"
-                                                        VerticalAlignment="Bottom"
-                                                        Orientation="Horizontal">
-                                                <TextBlock FontSize="9" Text="×" />
-                                                <TextBlock FontSize="9" Text="{x:Bind Count}" />
-                                            </StackPanel>
-                                            <!--  已领取遮罩  -->
-                                            <Border Background="#99000000"
-                                                    CornerRadius="4"
-                                                    Visibility="{x:Bind IsClaimed, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                            <FontIcon HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center"
-                                                      FontSize="16"
-                                                      Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                                                      Glyph="&#xE930;"
-                                                      Visibility="{x:Bind IsClaimed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <Grid Width="36" Height="36">
+                                                <sc:CachedImage Width="32"
+                                                                Height="32"
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
+                                                                Source="{x:Bind Icon}" />
+                                                <StackPanel HorizontalAlignment="Right"
+                                                            VerticalAlignment="Bottom"
+                                                            Orientation="Horizontal">
+                                                    <TextBlock FontSize="9" Text="×" />
+                                                    <TextBlock FontSize="9" Text="{x:Bind Count}" />
+                                                </StackPanel>
+                                                <!--  已领取遮罩  -->
+                                                <Border Background="#99000000"
+                                                        CornerRadius="4"
+                                                        Visibility="{x:Bind IsClaimed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                <FontIcon HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"
+                                                          FontSize="16"
+                                                          Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                          Glyph="&#xE930;"
+                                                          Visibility="{x:Bind IsClaimed, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            </Grid>
+
+                                            <TextBlock Grid.Row="1"
+                                                       HorizontalAlignment="Center"
+                                                       FontSize="10"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       Text="{x:Bind Day}" />
                                         </Grid>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </ScrollViewer>
 
-                                        <TextBlock Grid.Row="1"
-                                                   HorizontalAlignment="Center"
-                                                   FontSize="10"
-                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                   Text="{x:Bind Day}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsRepeater.ItemTemplate>
-                        </ItemsRepeater>
-                    </ScrollViewer>
+                        <!--  拉取奖励列表时居中转圈  -->
+                        <ProgressRing Width="36"
+                                      Height="36"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      IsActive="{x:Bind IsLoading}"
+                                      Visibility="{x:Bind IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </Grid>
 
 
                     <!--  错误信息  -->

@@ -30,7 +30,7 @@
                     Closed="Flyout_RedeemCode_Closed"
                     Placement="LeftEdgeAlignedTop"
                     FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
-                    sc:FlyoutGap.Horizontal="20">
+                    sc:FlyoutGap.Horizontal="12">
                 <Grid Width="320"
                       MaxHeight="400"
                       MinHeight="80">

@@ -30,7 +30,7 @@
                     Closed="Flyout_TimeNode_Closed"
                     Placement="LeftEdgeAlignedTop"
                     FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
-                    sc:FlyoutGap.Horizontal="20">
+                    sc:FlyoutGap.Horizontal="12">
                 <!--  固定高度上限 400，宽度保持 320  -->
                 <Grid Width="320"
                       MaxHeight="400"

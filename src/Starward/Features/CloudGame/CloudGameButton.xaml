@@ -27,7 +27,7 @@
             <Flyout Opened="Flyout_Opened"
                     Placement="LeftEdgeAlignedTop"
                     FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
-                    sc:FlyoutGap.Horizontal="20">
+                    sc:FlyoutGap.Horizontal="12">
                 <Grid Margin="-12,-12,-8,-12" ColumnSpacing="8">
                     <Grid.RowDefinitions>
                         <RowDefinition />

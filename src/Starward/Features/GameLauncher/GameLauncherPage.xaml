@@ -704,7 +704,7 @@
         </ComboBox>
 
         <!--  右边侧栏：靠上 + 亚克力背景栏  -->
-        <Border Margin="8,16,12,0"
+        <Border Margin="8,48,12,0"
                 Padding="4"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"

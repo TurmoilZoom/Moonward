@@ -44,7 +44,7 @@
         <Button.Flyout>
             <Flyout Placement="LeftEdgeAlignedTop"
                     FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
-                    sc:FlyoutGap.Horizontal="20">
+                    sc:FlyoutGap.Horizontal="12">
                 <StackPanel Spacing="12">
                     <Border Width="60"
                             Height="60"

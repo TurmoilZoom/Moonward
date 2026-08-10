@@ -17,7 +17,7 @@ namespace Starward.Controls;
 /// </list>
 /// </summary>
 /// <remarks>
-/// XAML：<c>sc:FlyoutGap.Horizontal="20"</c>。启用后同时做垂直边距钳制（默认上下各 24 DIP）。
+/// XAML：<c>sc:FlyoutGap.Horizontal="12"</c>。启用后同时做垂直边距钳制（默认上下各 24 DIP）。
 /// </remarks>
 public static class FlyoutGap
 {

@@ -128,6 +128,10 @@ public sealed partial class SignInButton : UserControl
     public string? ErrorMessage { get; set => SetProperty(ref field, value); }
 
 
+    /// <summary>正在拉取签到状态 / 奖励列表，控制日历区加载动画。</summary>
+    public bool IsLoading { get; set => SetProperty(ref field, value); }
+
+
     /// <summary>
     /// 当前签到对应的游戏（已处理 bilibili→cn 映射），自动签到开关按它区分存储。
     /// </summary>
@@ -173,6 +177,7 @@ public sealed partial class SignInButton : UserControl
         _statusLoaded = false;
         Awards.Clear();
         ErrorMessage = null;
+        IsLoading = false;
     }
 
 
@@ -213,6 +218,7 @@ public sealed partial class SignInButton : UserControl
             this.Visibility = Visibility.Visible;
             _statusLoaded = false;
             ErrorMessage = null;
+            IsLoading = false;
             // 自动签到不再在切换游戏时触发，统一由软件启动后的批量任务完成（AutoSignInService.RunStartupBatchAsync）。
         }
         catch (Exception ex)
@@ -238,10 +244,11 @@ public sealed partial class SignInButton : UserControl
     [RelayCommand]
     private async Task RefreshSignInStatusAsync()
     {
-        if (GameRecordRole is null)
+        if (GameRecordRole is null || IsLoading)
         {
             return;
         }
+        IsLoading = true;
         try
         {
             ErrorMessage = null;
@@ -277,6 +284,10 @@ public sealed partial class SignInButton : UserControl
         {
             ErrorMessage = ex.Message;
             _logger.LogError(ex, "Refresh sign-in status failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 

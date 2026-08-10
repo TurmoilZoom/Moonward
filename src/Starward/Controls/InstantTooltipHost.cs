@@ -103,6 +103,11 @@ internal sealed class InstantTooltipHost
     /// </summary>
     private bool _suppressed;
 
+    /// <summary>
+    /// 用户在锚点上按下后，在指针离开该锚点前不再自动显示 Tooltip（点击打开 Flyout 时指针仍在按钮上，不会 Exited）。
+    /// </summary>
+    private FrameworkElement? _dismissedUntilLeaveAnchor;
+
 
     /// <summary>当前是否无任何挂接元素（为 true 时 <see cref="InstantTooltip"/> 可释放本 Host）。</summary>
     public bool IsEmpty => _elements.Count == 0;
@@ -194,6 +199,7 @@ internal sealed class InstantTooltipHost
 
         element.PointerEntered += Element_PointerEntered;
         element.PointerExited += Element_PointerExited;
+        element.PointerPressed += Element_PointerPressed;
         element.Unloaded += Element_Unloaded;
     }
 
@@ -234,7 +240,13 @@ internal sealed class InstantTooltipHost
 
         element.PointerEntered -= Element_PointerEntered;
         element.PointerExited -= Element_PointerExited;
+        element.PointerPressed -= Element_PointerPressed;
         element.Unloaded -= Element_Unloaded;
+
+        if (ReferenceEquals(_dismissedUntilLeaveAnchor, element))
+        {
+            _dismissedUntilLeaveAnchor = null;
+        }
 
         if (_currentAnchor == element)
         {
@@ -255,6 +267,7 @@ internal sealed class InstantTooltipHost
         {
             element.PointerEntered -= Element_PointerEntered;
             element.PointerExited -= Element_PointerExited;
+            element.PointerPressed -= Element_PointerPressed;
             element.Unloaded -= Element_Unloaded;
         }
 
@@ -267,6 +280,7 @@ internal sealed class InstantTooltipHost
         _hideScheduled = false;
         _currentAnchor = null;
         _currentHasAction = false;
+        _dismissedUntilLeaveAnchor = null;
         _actionButton.Click -= ActionButton_Click;
         _content.PointerEntered -= Content_PointerEntered;
         _content.PointerExited -= Content_PointerExited;
@@ -293,6 +307,7 @@ internal sealed class InstantTooltipHost
 
     /// <summary>
     /// 指针进入锚点：取消待隐藏并立即显示对应文案。
+    /// 若刚在该锚点上点击过且尚未离开，则不重新弹出（配合 Flyout 点击后指针仍停在按钮上）。
     /// </summary>
     /// <param name="sender">锚点元素。</param>
     /// <param name="e">指针事件参数。</param>
@@ -303,24 +318,66 @@ internal sealed class InstantTooltipHost
             return;
         }
 
+        if (sender is not FrameworkElement element)
+        {
+            return;
+        }
+
+        // 点击后指针可能因 Flyout 打开发生短暂 Exit→Enter，在真正离开锚点前保持关闭
+        if (ReferenceEquals(_dismissedUntilLeaveAnchor, element))
+        {
+            return;
+        }
+
+        // 从其它锚点移入时清掉旧的点击抑制
+        _dismissedUntilLeaveAnchor = null;
         _pointerInsideAnyElement = true;
         CancelPendingHide();
-        if (sender is FrameworkElement element)
-        {
-            ShowTooltip(element);
-        }
+        ShowTooltip(element);
     }
 
 
     /// <summary>
     /// 指针离开锚点：延后一拍再决定是否隐藏，避免相邻项切换或移入气泡时闪断。
+    /// 点击后打开 Flyout 时可能短暂 Exit→Enter：延迟清除 dismissed，避免提示立刻又弹出来。
     /// </summary>
     /// <param name="sender">锚点元素。</param>
     /// <param name="e">指针事件参数。</param>
     private void Element_PointerExited(object sender, PointerRoutedEventArgs e)
     {
+        FrameworkElement? exited = sender as FrameworkElement;
         _pointerInsideAnyElement = false;
         ScheduleHideIfPointerLeftSurface();
+
+        if (exited is not null && ReferenceEquals(_dismissedUntilLeaveAnchor, exited))
+        {
+            FrameworkElement dismissed = exited;
+            _dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+            {
+                // 仍在同一锚点上（短暂 Exit→Enter）则保持抑制；真正离开后再允许下次悬停显示
+                if (ReferenceEquals(_dismissedUntilLeaveAnchor, dismissed) && !ReferenceEquals(_currentAnchor, dismissed))
+                {
+                    _dismissedUntilLeaveAnchor = null;
+                }
+            });
+        }
+    }
+
+
+    /// <summary>
+    /// 在锚点上按下：立即关掉 Tooltip，避免点开 Flyout 后提示仍叠在按钮旁。
+    /// </summary>
+    private void Element_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement element)
+        {
+            return;
+        }
+
+        _dismissedUntilLeaveAnchor = element;
+        _pointerInsideAnyElement = false;
+        _pointerInsidePopup = false;
+        ForceClosePopup();
     }
 
 
