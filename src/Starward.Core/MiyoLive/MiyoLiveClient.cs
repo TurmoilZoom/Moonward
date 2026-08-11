@@ -7,7 +7,7 @@ namespace Starward.Core.MiyoLive;
 
 /// <summary>
 /// 米哈游前瞻直播（miyolive）公开接口：发现 act_id、拉直播元数据与兑换码。
-/// 无 Cookie / 无 DS；仅国服活动域。
+/// 无 Cookie；仅国服活动域。
 /// </summary>
 public partial class MiyoLiveClient
 {

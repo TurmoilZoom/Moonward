@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 namespace Starward.Core.Blackboard;
 
 /// <summary>
-/// 米游社百科 blackboard 公开接口（无 Cookie / 无 DS）。
+/// 米游社百科 blackboard 公开接口（无 Cookie，无需鉴权头）。
 /// 数据以国服百科为准；国际服无同构接口。
 /// </summary>
 public class BlackboardClient

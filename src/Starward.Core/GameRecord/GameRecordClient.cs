@@ -6,8 +6,6 @@ using Starward.Core.GameRecord.StarRail.ApocalypticShadow;
 using Starward.Core.GameRecord.StarRail.SimulatedUniverse;
 using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
 using System.Net;
-using System.Security.Cryptography;
-using System.Text;
 using Starward.Core.GameRecord.Genshin.ImaginariumTheater;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
@@ -31,6 +29,7 @@ using Starward.Core.GameRecord.ZZZ.GachaRecord;
 #if !DEBUG
 using System.Net.Http.Json;
 #endif
+using System.Text;
 using System.Text.Json;
 
 namespace Starward.Core.GameRecord;
@@ -45,8 +44,8 @@ public abstract class GameRecordClient
     protected const string Cookie = "Cookie";
     protected const string UserAgent = "User-Agent";
     protected const string X_Request_With = "X-Requested-With";
-    protected const string DS = "DS";
     protected const string Referer = "Referer";
+    protected const string Origin = "Origin";
     protected const string Application_Json = "application/json";
     protected const string com_mihoyo_hyperion = "com.mihoyo.hyperion";
     protected const string com_mihoyo_hoyolab = "com.mihoyo.hoyolab";
@@ -61,11 +60,6 @@ public abstract class GameRecordClient
     /// </summary>
     protected const string CultivateToolUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-    /// <summary>
-    /// 国际服 act 接口 Gen1 DS 盐（与 BBS/HoyolabClient.ApiSalt 不同）。
-    /// </summary>
-    protected const string CultivateToolDsSaltOverseas = "6s25p5ox5y14umn1p61aqyyvbvvl3lrt";
-
     #endregion
 
 
@@ -74,106 +68,19 @@ public abstract class GameRecordClient
 
     public abstract string AppVersion { get; }
 
+    /// <summary>
+    /// H5 活动页默认 Origin（对齐米游社 / HoYoLAB WebView：act.mihoyo.com / act.hoyolab.com）。
+    /// </summary>
+    protected abstract string ActOrigin { get; }
+
+    /// <summary>
+    /// <c>X-Requested-With</c> 包名（国服 <c>com.mihoyo.hyperion</c>，国际服 <c>com.mihoyo.hoyolab</c>）。
+    /// </summary>
+    protected abstract string XRequestedWithValue { get; }
+
     public string DeviceId { get; set; } = Guid.NewGuid().ToString("D");
 
     public string DeviceFp { get; set; } = "0000000000000";
-
-
-
-
-    #region Dynamic Secret
-
-
-    protected abstract string ApiSalt { get; }
-
-    protected abstract string ApiSalt2 { get; }
-
-
-    private static string GetRandomString(int timestamp)
-    {
-        var sb = new StringBuilder(6);
-        var random = new Random(timestamp);
-        for (int i = 0; i < 6; i++)
-        {
-            int v8 = random.Next(0, 32768) % 26;
-            int v9 = 87;
-            if (v8 < 10)
-            {
-                v9 = 48;
-            }
-            _ = sb.Append((char)(v8 + v9));
-        }
-        return sb.ToString();
-    }
-
-
-    /// <summary>
-    /// 生成 Gen1 DS 签名（salt&amp;t&amp;r，无 body/query），使用默认 <see cref="ApiSalt"/>。
-    /// </summary>
-    /// <returns>形如 <c>t,r,md5</c> 的 DS 头值。</returns>
-    protected string CreateSecret()
-    {
-        return CreateSecret(ApiSalt);
-    }
-
-
-    /// <summary>
-    /// 生成 Gen1 DS 签名（salt&amp;t&amp;r），使用指定 salt。
-    /// 用于 genAuthKey 等需 LK2 salt 的接口（与 BBS 默认 X6 salt 不同）。
-    /// </summary>
-    /// <param name="salt">DS 盐值（如 LK2）。</param>
-    /// <returns>形如 <c>t,r,md5</c> 的 DS 头值。</returns>
-    protected string CreateSecret(string salt)
-    {
-        var t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        string r = GetRandomString(t);
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={salt}&t={t}&r={r}"));
-        var check = Convert.ToHexString(bytes).ToLower();
-        return $"{t},{r},{check}";
-    }
-
-
-    protected string CreateSecret2(string url)
-    {
-        int t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        string r = Random.Shared.Next(100000, 200000).ToString();
-        string b = "";
-        string q = "";
-        string[] urls = url.Split('?');
-        if (urls.Length == 2)
-        {
-            string[] queryParams = urls[1].Split('&').OrderBy(x => x).ToArray();
-            q = string.Join("&", queryParams);
-        }
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={ApiSalt2}&t={t}&r={r}&b={b}&q={q}"));
-        var check = Convert.ToHexString(bytes).ToLower();
-        string result = $"{t},{r},{check}";
-        return result;
-    }
-
-
-    protected string CreateSecret2<T>(string url, T postBody)
-    {
-        int t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        string r = Random.Shared.Next(100000, 200000).ToString();
-        string b = JsonSerializer.Serialize(postBody, typeof(T), GameRecordJsonContext.Default);
-        string q = "";
-        string[] urls = url.Split('?');
-        if (urls.Length == 2)
-        {
-            string[] queryParams = urls[1].Split('&').OrderBy(x => x).ToArray();
-            q = string.Join("&", queryParams);
-        }
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={ApiSalt2}&t={t}&r={r}&b={b}&q={q}"));
-        var check = Convert.ToHexString(bytes).ToLower();
-        string result = $"{t},{r},{check}";
-        return result;
-    }
-
-
-    #endregion
-
-
 
 
     protected readonly HttpClient _httpClient;
@@ -194,11 +101,22 @@ public abstract class GameRecordClient
 
 
 
+    /// <summary>
+    /// 补齐与官方 H5 一致的 Origin / X-Requested-With；已存在则不覆盖（如签到 nap 专用 Origin）。
+    /// </summary>
+    protected void EnsureActWebViewHeaders(HttpRequestMessage request)
+    {
+        request.Headers.TryAddWithoutValidation(Origin, ActOrigin);
+        request.Headers.TryAddWithoutValidation(X_Request_With, XRequestedWithValue);
+    }
+
+
     protected virtual async Task<T> CommonSendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default) where T : class
     {
         request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
         request.Headers.Add(Accept, Application_Json);
         request.Headers.Add(UserAgent, UAContent);
+        EnsureActWebViewHeaders(request);
         var response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 #if DEBUG
@@ -236,6 +154,7 @@ public abstract class GameRecordClient
         // 覆盖或补齐为桌面浏览器 UA（勿用 miHoYoBBS 手机 UA）
         request.Headers.Remove(UserAgent);
         request.Headers.TryAddWithoutValidation(UserAgent, CultivateToolUserAgent);
+        EnsureActWebViewHeaders(request);
         var response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 #if DEBUG
@@ -267,6 +186,7 @@ public abstract class GameRecordClient
         request.Headers.TryAddWithoutValidation(Accept, Application_Json);
         request.Headers.Remove(UserAgent);
         request.Headers.TryAddWithoutValidation(UserAgent, CultivateToolUserAgent);
+        EnsureActWebViewHeaders(request);
         var response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -923,11 +843,11 @@ public abstract class GameRecordClient
 
 
     /// <summary>
-    /// 为签到请求添加平台相关请求头（CN 加 DS / signgame，OS 不加）。
+    /// 为签到请求添加平台相关请求头（signgame / Origin / 设备信息等）。
     /// </summary>
     /// <param name="request">待发送的 HTTP 请求。</param>
     /// <param name="config">签到活动配置，提供 signgame / origin 等字段。</param>
-    /// <param name="signData">是否需要 DS 数据签名（home 接口不需要）。</param>
+    /// <param name="signData">是否为数据接口（home 为 false；info/sign/resign 为 true）。</param>
     protected abstract void AddSignInPlatformHeaders(HttpRequestMessage request, SignInActivityConfig config, bool signData);
 
 
@@ -940,7 +860,6 @@ public abstract class GameRecordClient
     public async Task<SignInReward> GetSignInRewardAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
         SignInActivityConfig config = GetSignInConfigOrThrow(role);
-        // home 接口不需要 DS 签名
         var request = new HttpRequestMessage(HttpMethod.Get, config.HomeUrl(SignInLanguage));
         request.Headers.Add(Cookie, role.Cookie);
         AddSignInPlatformHeaders(request, config, signData: false);

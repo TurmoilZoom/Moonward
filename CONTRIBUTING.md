@@ -107,7 +107,7 @@ src/Starward.Setup.Core/  GitHub Release 发行说明拉取
 | DTO | `Starward.Core/GameRecord/<功能>/*.cs` | API 请求/响应模型、返回码枚举 |
 | 活动配置 | `*ActivityConfig.cs`（按需） | 按游戏与区服映射 `act_id`、接口主机等常量 |
 | JsonContext | `GameRecordJsonContext.cs` | 新 DTO 类型必须注册 |
-| Client | `HyperionClient`(CN) / `HoyolabClient`(OS) | HTTP、签名；平台差异放在子类 |
+| Client | `HyperionClient`(CN) / `HoyolabClient`(OS) | HTTP；平台差异放在子类 |
 | Service 门面 | `Features/GameRecord/GameRecordService.cs` | 按区服选择 Client |
 | 业务服务 | `Features/GameRecord/<功能>/<功能>Service.cs` | 缓存、错误映射 |
 | UI | 对应 XAML 控件，挂到 `GameLauncherPage` 等 | 用户交互 |

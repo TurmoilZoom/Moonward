@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -16,9 +15,7 @@ public class MihoyoPassportClient
 
     private const string PassportBase = "https://passport-api.mihoyo.com/";
     private const string AppIdCaptcha = "bll8iq97cem8";
-    private const string AppVersion = "2.90.1";
-    /// <summary>DS salt2 / X4，与 HyperionClient 一致。</summary>
-    private const string ApiSalt2 = "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs";
+    private const string AppVersion = "2.112.0";
 
     private readonly HttpClient _httpClient;
 
@@ -122,13 +119,13 @@ public class MihoyoPassportClient
     /// <exception cref="miHoYoApiException">retcode 非 0。</exception>
     public async Task<string> GetLTokenBySTokenAsync(string stoken, string mid, CancellationToken cancellationToken = default)
     {
-        // query 不预编码，与 TeyvatGuide transParams + DS 计算一致；由 HttpClient 负责传输编码
+        // query 不预编码；由 HttpClient 负责传输编码
         string url = $"{PassportBase}account/auth/api/getLTokenBySToken?stoken={stoken}";
         var request = new HttpRequestMessage(HttpMethod.Get, url)
         {
             VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
         };
-        AddAuthBySTokenHeaders(request, stoken, mid, url);
+        AddAuthBySTokenHeaders(request, stoken, mid);
         var data = await SendThrowingAsync<LTokenBySTokenResult>(request, cancellationToken);
         return data.LToken;
     }
@@ -149,7 +146,7 @@ public class MihoyoPassportClient
         {
             VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
         };
-        AddAuthBySTokenHeaders(request, stoken, mid, url);
+        AddAuthBySTokenHeaders(request, stoken, mid);
         return await SendThrowingAsync<CookieTokenBySTokenResult>(request, cancellationToken);
     }
 
@@ -247,16 +244,16 @@ public class MihoyoPassportClient
     /// <summary>
     /// stoken 换 ltoken / cookie_token 的请求头（对齐 TeyvatGuide <c>getRequestHeader</c>）。
     /// </summary>
-    private void AddAuthBySTokenHeaders(HttpRequestMessage request, string stoken, string mid, string url)
+    private void AddAuthBySTokenHeaders(HttpRequestMessage request, string stoken, string mid)
     {
         // cookie 键顺序与 TeyvatGuide transCookie 排序一致：mid;stoken
         request.Headers.TryAddWithoutValidation("Cookie", $"mid={mid};stoken={stoken}");
-        request.Headers.TryAddWithoutValidation("DS", CreateSecret2(url));
         request.Headers.TryAddWithoutValidation("x-rpc-app_version", AppVersion);
         request.Headers.TryAddWithoutValidation("x-rpc-client_type", "5");
         request.Headers.TryAddWithoutValidation("x-rpc-device_id", DeviceId);
         request.Headers.TryAddWithoutValidation("x-rpc-device_fp", DeviceFp);
         request.Headers.TryAddWithoutValidation("X-Requested-With", "com.mihoyo.hyperion");
+        request.Headers.TryAddWithoutValidation("Origin", "https://act.mihoyo.com");
         request.Headers.TryAddWithoutValidation("Referer", "https://webstatic.mihoyo.com");
         request.Headers.TryAddWithoutValidation("User-Agent", DesktopUA);
         request.Headers.TryAddWithoutValidation("Accept", "application/json");
@@ -342,27 +339,6 @@ public class MihoyoPassportClient
             throw new miHoYoApiException(wrapper.Retcode, wrapper.Message);
         }
         return wrapper.Data ?? throw new miHoYoApiException(-1, "Response data is null.");
-    }
-
-
-    /// <summary>
-    /// 生成 GET 请求 DS（salt2 / 含 query 排序）。
-    /// </summary>
-    private static string CreateSecret2(string url)
-    {
-        int t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        string r = Random.Shared.Next(100000, 200000).ToString();
-        string b = "";
-        string q = "";
-        string[] urls = url.Split('?');
-        if (urls.Length == 2)
-        {
-            string[] queryParams = urls[1].Split('&').OrderBy(x => x).ToArray();
-            q = string.Join("&", queryParams);
-        }
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={ApiSalt2}&t={t}&r={r}&b={b}&q={q}"));
-        var check = Convert.ToHexString(bytes).ToLower();
-        return $"{t},{r},{check}";
     }
 
 }

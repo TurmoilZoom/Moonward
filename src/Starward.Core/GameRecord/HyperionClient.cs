@@ -1,4 +1,4 @@
-using Starward.Core.GameRecord.BH3.DailyNote;
+﻿using Starward.Core.GameRecord.BH3.DailyNote;
 using Starward.Core.GameRecord.Genshin.DailyNote;
 using Starward.Core.GameRecord.Genshin.ImaginariumTheater;
 using Starward.Core.GameRecord.Genshin.SpiralAbyss;
@@ -31,11 +31,13 @@ public class HyperionClient : GameRecordClient
 
     public override string UAContent => $"Mozilla/5.0 (Linux; Android 13; Pixel 5 Build/TQ3A.230901.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/118.0.0.0 Mobile Safari/537.36 miHoYoBBS/{AppVersion}";
 
-    public override string AppVersion => "2.90.1";
+    public override string AppVersion => "2.112.0";
 
-    protected override string ApiSalt => "t0qEgfub6cvueAPgR5m9aQWWVciEer7v";
+    protected override string ActOrigin => "https://act.mihoyo.com";
 
-    protected override string ApiSalt2 => "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs";
+    protected override string XRequestedWithValue => com_mihoyo_hyperion;
+
+
 
 
 
@@ -72,7 +74,6 @@ public class HyperionClient : GameRecordClient
         var request = new HttpRequestMessage(HttpMethod.Get, "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo");
         request.Headers.Add(Cookie, cookie);
         request.Headers.Add(Referer, "https://www.miyoushe.com/");
-        request.Headers.Add(DS, CreateSecret());
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -127,7 +128,6 @@ public class HyperionClient : GameRecordClient
         string url = $"https://passport-api.mihoyo.com/binding/api/getUserGameRolesByCookieToken?game_biz={gameBiz}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, cookie);
-        //request.Headers.Add(DS, CreateSecret2(url));
         //request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
         //request.Headers.Add(x_rpc_app_version, AppVersion);
         //request.Headers.Add(x_rpc_client_type, "5");
@@ -168,7 +168,6 @@ public class HyperionClient : GameRecordClient
         };
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -239,28 +238,22 @@ public class HyperionClient : GameRecordClient
 
 
     /// <summary>
-    /// 米游社签到请求头：DS(Gen1/LK2) + x-rpc-signgame + 设备指纹。
+    /// 米游社签到请求头：x-rpc-signgame + 设备指纹。
     /// </summary>
     /// <param name="request">待发送的 HTTP 请求。</param>
     /// <param name="config">签到活动配置，提供 signgame / origin。</param>
-    /// <param name="signData">true 时附加 DS 签名（info / sign / resign 需要）。</param>
+    /// <param name="signData">是否为数据接口（保留参数，当前与 home 共用相同请求头）。</param>
     protected override void AddSignInPlatformHeaders(HttpRequestMessage request, SignInActivityConfig config, bool signData)
     {
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add("x-rpc-signgame", config.SignGame);
-        if (!string.IsNullOrEmpty(config.Origin))
-        {
-            // 绝区零 CN 的 act-nap-api 主机需要 Origin 头，否则会被风控拒绝
-            request.Headers.Add("Origin", config.Origin);
-        }
+        // 绝区零专用主机用 config.Origin；其它游戏默认 act.mihoyo.com（CommonSendAsync 也会补齐）
+        request.Headers.TryAddWithoutValidation(Origin, string.IsNullOrEmpty(config.Origin) ? ActOrigin : config.Origin);
+        request.Headers.TryAddWithoutValidation(X_Request_With, XRequestedWithValue);
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
         request.Headers.Add(x_rpc_device_id, DeviceId);
         request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        if (signData)
-        {
-            request.Headers.Add(DS, CreateSecret());
-        }
     }
 
 
@@ -281,7 +274,6 @@ public class HyperionClient : GameRecordClient
         string url = $"https://act-api-takumi.mihoyo.com/game_record/appv2/honkai3rd/api/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -316,7 +308,6 @@ public class HyperionClient : GameRecordClient
         var url = "https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_cn";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -339,7 +330,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/spiralAbyss?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -438,7 +428,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/role_combat?server={role.Region}&role_id={role.Uid}&active=1&need_detail=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -472,7 +461,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/hard_challenge?server={role.Region}&role_id={role.Uid}&need_detail=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -505,7 +493,6 @@ public class HyperionClient : GameRecordClient
         string url = $"https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/dailyNote?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -539,7 +526,6 @@ public class HyperionClient : GameRecordClient
         const string url = "https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hkrpg_cn";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -562,7 +548,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/challenge?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -587,7 +572,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/challenge_story?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&isPrev=1&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -627,7 +611,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/challenge_boss?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&isPrev=1&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -672,7 +655,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/rogue?role_id={role.Uid}&server={role.Region}&schedule_type=3&need_detail={detail.ToString().ToLower()}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -771,7 +753,6 @@ public class HyperionClient : GameRecordClient
         string url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -793,7 +774,6 @@ public class HyperionClient : GameRecordClient
         string url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/challenge_peak?server={role.Region}&role_id={role.Uid}&schedule_type={scheduleType}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -828,7 +808,6 @@ public class HyperionClient : GameRecordClient
         var url = "https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=nap_cn";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -869,7 +848,7 @@ public class HyperionClient : GameRecordClient
 
     /// <summary>
     /// 通过 stoken 生成原神/星铁等游戏的抽卡 authkey（Auth Key B）。
-    /// 对齐 TeyvatGuide <c>takumiReq.bind.authKey</c> 与 UIGF 文档：POST binding/api/genAuthKey，DS 使用 LK2 Gen1。
+    /// 对齐 TeyvatGuide <c>takumiReq.bind.authKey</c> 与 UIGF 文档：POST binding/api/genAuthKey。
     /// </summary>
     /// <param name="role">须含有效 stoken+mid 的 Cookie，以及 GameBiz / Uid / Region。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -890,8 +869,6 @@ public class HyperionClient : GameRecordClient
             throw new ArgumentException("GameBiz and Region are required.", nameof(role));
         }
 
-        // genAuthKey 固定要求 LK2 Gen1 DS（与战绩接口的 X4/X6 salt 不同）
-        const string apiSaltLk2 = "d9200c846b10886e8c874fc33c8f308b";
         var body = new GenAuthKeyPostBody("webview_gacha", role.GameBiz, role.Uid, role.Region);
         string json = JsonSerializer.Serialize(body, typeof(GenAuthKeyPostBody), GameRecordJsonContext.Default);
         const string url = "https://api-takumi.mihoyo.com/binding/api/genAuthKey";
@@ -902,7 +879,6 @@ public class HyperionClient : GameRecordClient
         // 仅带 stoken+mid，与社区实现一致，避免无关 cookie 键干扰
         request.Headers.Add(Cookie, stokenCookie);
         request.Headers.Add(Referer, "https://app.mihoyo.com");
-        request.Headers.Add(DS, CreateSecret(apiSaltLk2));
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -961,7 +937,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/hadal_info_v2?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -984,7 +959,6 @@ public class HyperionClient : GameRecordClient
         var url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/hadal_mem_detail_v2?schedule_type={schedule}&region={role.Region}&uid={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -1070,7 +1044,7 @@ public class HyperionClient : GameRecordClient
 
     /// <summary>
     /// 国服养成指南 badge 登录，换取 <c>e_nap_token</c>。
-    /// 对齐 genshin.py：浏览器 UA、Gen2 DS、禁止 x-rpc-device_id（否则 -100 / 易触发 10035）。
+    /// 浏览器 UA；禁止 x-rpc-device_id（否则 -100 / 易触发 10035）。
     /// </summary>
     public override async Task<string> LoginZZZCultivateBadgeAsync(GameRecordRole role, string language, CancellationToken cancellationToken = default)
     {
@@ -1092,14 +1066,12 @@ public class HyperionClient : GameRecordClient
         request.Headers.Add(Cookie, role.Cookie);
         request.Headers.Add(Referer, "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html");
         request.Headers.Add("Origin", "https://act.mihoyo.com");
-        // genshin.py 对 CN act DS 头使用较低 app_version；过高 + BBS UA 易 10035
-        request.Headers.Add(x_rpc_app_version, "2.11.1");
+        request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
         if (!string.IsNullOrWhiteSpace(DeviceFp))
         {
             request.Headers.Add(x_rpc_device_fp, DeviceFp);
         }
-        request.Headers.Add(DS, CreateSecret2(url, body));
         var (wrapper, response) = await SendCultivateBadgeLoginAsync(request, cancellationToken);
         if (wrapper is null)
         {
@@ -1123,13 +1095,12 @@ public class HyperionClient : GameRecordClient
         request.Headers.Add(Cookie, cookie);
         request.Headers.Add(Referer, "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html");
         request.Headers.Add("Origin", "https://act.mihoyo.com");
-        request.Headers.Add(x_rpc_app_version, "2.11.1");
+        request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
         if (!string.IsNullOrWhiteSpace(DeviceFp))
         {
             request.Headers.Add(x_rpc_device_fp, DeviceFp);
         }
-        request.Headers.Add(DS, CreateSecret2(url));
         return await CommonSendCultivateAsync<UpgradeGuideItemList>(request, cancellationToken);
     }
 
@@ -1145,13 +1116,12 @@ public class HyperionClient : GameRecordClient
         request.Headers.Add(Cookie, cookie);
         request.Headers.Add(Referer, "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html");
         request.Headers.Add("Origin", "https://act.mihoyo.com");
-        request.Headers.Add(x_rpc_app_version, "2.11.1");
+        request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
         if (!string.IsNullOrWhiteSpace(DeviceFp))
         {
             request.Headers.Add(x_rpc_device_fp, DeviceFp);
         }
-        request.Headers.Add(DS, CreateSecret2(url));
         return await CommonSendCultivateAsync<UpgradeGuidIconInfo>(request, cancellationToken);
     }
 

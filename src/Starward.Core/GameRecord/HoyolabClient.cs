@@ -1,4 +1,4 @@
-using Starward.Core.GameRecord.BH3.DailyNote;
+﻿using Starward.Core.GameRecord.BH3.DailyNote;
 using Starward.Core.GameRecord.Genshin.DailyNote;
 using Starward.Core.GameRecord.Genshin.ImaginariumTheater;
 using Starward.Core.GameRecord.Genshin.SpiralAbyss;
@@ -31,9 +31,11 @@ public class HoyolabClient : GameRecordClient
 
     public override string AppVersion => "3.13.0";
 
-    protected override string ApiSalt => "okr4obncj8bw5a65hbnn5oo6ixjc3l9w";
+    protected override string ActOrigin => "https://act.hoyolab.com";
 
-    protected override string ApiSalt2 => "h4c1d6ywfq5bsbnbhm1bzq7bxzzv6srt";
+    protected override string XRequestedWithValue => com_mihoyo_hoyolab;
+
+
 
 
     private string language;
@@ -76,7 +78,6 @@ public class HoyolabClient : GameRecordClient
         var request = new HttpRequestMessage(HttpMethod.Get, "https://bbs-api-os.hoyolab.com/community/user/wapi/getUserFullInfo");
         request.Headers.Add(Cookie, cookie);
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
-        request.Headers.Add(DS, CreateSecret());
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -90,21 +91,19 @@ public class HoyolabClient : GameRecordClient
 
 
     /// <summary>
-    /// HoYoLAB 签到请求头：不需要 DS；绝区零专用主机需 x-rpc-signgame 与 Origin；语言由 CommonSendAsync 统一附加。
+    /// HoYoLAB 签到请求头：绝区零专用主机需 x-rpc-signgame 与 Origin；语言由 CommonSendAsync 统一附加。
     /// </summary>
     /// <param name="request">待发送的 HTTP 请求。</param>
     /// <param name="config">签到活动配置（提供 signgame / origin）。</param>
-    /// <param name="signData">保留参数，OS 侧始终不附加 DS。</param>
+    /// <param name="signData">保留参数（OS 侧与 home/数据接口共用相同请求头）。</param>
     protected override void AddSignInPlatformHeaders(HttpRequestMessage request, SignInActivityConfig config, bool signData)
     {
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
         // 官方签到页与多数自动签到工具对 ZZZ 会带 x-rpc-signgame；其它游戏 SignGame 亦无害
         request.Headers.Add("x-rpc-signgame", config.SignGame);
-        if (!string.IsNullOrEmpty(config.Origin))
-        {
-            // 绝区零 OS 的 sg-act-nap-api 与国服 act-nap-api 对称，专用主机需要 Origin
-            request.Headers.Add("Origin", config.Origin);
-        }
+        // 绝区零专用主机用 config.Origin；其它游戏默认 act.hoyolab.com（CommonSendAsync 也会补齐）
+        request.Headers.TryAddWithoutValidation(Origin, string.IsNullOrEmpty(config.Origin) ? ActOrigin : config.Origin);
+        request.Headers.TryAddWithoutValidation(X_Request_With, XRequestedWithValue);
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -194,7 +193,6 @@ public class HoyolabClient : GameRecordClient
         };
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -233,7 +231,6 @@ public class HoyolabClient : GameRecordClient
         string url = $"https://bbs-api-os.hoyolab.com/game_record/app/honkai3rd/api/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.mihoyo.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -286,7 +283,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://bbs-api-os.hoyolab.com/game_record/app/genshin/api/spiralAbyss?role_id={role.Uid}&server={role.Region}&schedule_type={schedule}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -383,7 +379,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://bbs-api-os.hoyolab.com/game_record/app/genshin/api/role_combat?server={role.Region}&role_id={role.Uid}&need_detail=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -418,7 +413,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://bbs-api-os.hoyolab.com/game_record/app/genshin/api/hard_challenge?server={role.Region}&role_id={role.Uid}&need_detail=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -506,7 +500,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://bbs-api-os.hoyolab.com/game_record/app/hkrpg/api/challenge?server={role.Region}&role_id={role.Uid}&schedule_type={schedule}&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -529,7 +522,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://bbs-api-os.hoyolab.com/game_record/app/hkrpg/api/challenge_story?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&isPrev=1&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -567,7 +559,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://bbs-api-os.hoyolab.com/game_record/app/hkrpg/api/challenge_boss?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&isPrev=1&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -610,7 +601,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://bbs-api-os.hoyolab.com/game_record/app/hkrpg/api/rogue?server={role.Region}&role_id={role.Uid}&schedule_type=3&need_detail={detail.ToString().ToLower()}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -707,7 +697,6 @@ public class HoyolabClient : GameRecordClient
         string url = $"https://sg-public-api.hoyolab.com/event/game_record/app/hkrpg/api/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -730,7 +719,6 @@ public class HoyolabClient : GameRecordClient
         string url = $"https://sg-public-api.hoyolab.com/event/game_record/app/hkrpg/api/challenge_peak?server={role.Region}&role_id={role.Uid}&schedule_type={scheduleType}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com/");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -827,7 +815,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://sg-public-api.hoyolab.com/event/game_record_zzz/api/zzz/hadal_info_v2?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -848,7 +835,6 @@ public class HoyolabClient : GameRecordClient
         var url = $"https://sg-public-api.hoyolab.com/event/game_record_zzz/api/zzz/hadal_mem_detail_v2?schedule_type={schedule}&region={role.Region}&uid={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, "https://act.hoyolab.com");
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -928,7 +914,7 @@ public class HoyolabClient : GameRecordClient
 
     /// <summary>
     /// 国际服养成指南 badge 登录，换取 <c>e_nap_token</c>。
-    /// 主机 <c>sg-act-public-api</c>；浏览器 UA + act 专用 Gen1 DS 盐；禁止 x-rpc-device_id。
+    /// 主机 <c>sg-act-public-api</c>；浏览器 UA；禁止 x-rpc-device_id。
     /// </summary>
     public override async Task<string> LoginZZZCultivateBadgeAsync(GameRecordRole role, string language, CancellationToken cancellationToken = default)
     {
@@ -960,8 +946,6 @@ public class HoyolabClient : GameRecordClient
         {
             request.Headers.Add(x_rpc_device_fp, DeviceFp);
         }
-        // 国际服 act 用 genshin.py OVERSEAS Gen1 salt，不是 BBS ApiSalt
-        request.Headers.Add(DS, CreateSecret(CultivateToolDsSaltOverseas));
         var (wrapper, response) = await SendCultivateBadgeLoginAsync(request, cancellationToken);
         if (wrapper is null)
         {
@@ -993,7 +977,6 @@ public class HoyolabClient : GameRecordClient
         {
             request.Headers.Add(x_rpc_device_fp, DeviceFp);
         }
-        request.Headers.Add(DS, CreateSecret(CultivateToolDsSaltOverseas));
         return await CommonSendCultivateAsync<UpgradeGuideItemList>(request, cancellationToken);
     }
 
@@ -1017,7 +1000,6 @@ public class HoyolabClient : GameRecordClient
         {
             request.Headers.Add(x_rpc_device_fp, DeviceFp);
         }
-        request.Headers.Add(DS, CreateSecret(CultivateToolDsSaltOverseas));
         return await CommonSendCultivateAsync<UpgradeGuidIconInfo>(request, cancellationToken);
     }
 

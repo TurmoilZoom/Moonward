@@ -64,7 +64,7 @@ SDK 见 `global.json`，**不要擅自升级 SDK/NuGet**。改完至少 build �
 |----|---------------------|------|
 | DTO / 活动配置 | `Core/GameRecord/SignIn/*` | 模型、返回码；`SignInActivityConfig.FromGame` 映射 act_id/主机/头（**nap/bh3 等 act_id 见该文件注释，可能需核对**） |
 | JsonContext | `GameRecordJsonContext.cs` | 新 DTO **必须注册** |
-| Client | `GameRecordClient` + `HyperionClient`(CN) / `HoyolabClient`(OS) | HTTP、签名、序列化；**CN/OS 差异只放子类** |
+| Client | `GameRecordClient` + `HyperionClient`(CN) / `HoyolabClient`(OS) | HTTP、序列化；**CN/OS 差异只放子类** |
 | Service 门面 | `GameRecordService` | 选 CN/OS Client |
 | 业务 / 后台 | `SignInService` / `AutoSignInService` | 缓存、结果、自动任务（失败冷却等） |
 | UI / 开关 | `SignInButton` → `GameLauncherPage`；`GameFeatureConfig.SupportSignIn` | 交互与按 `GameBiz` 启用 |

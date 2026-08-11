@@ -14,8 +14,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -317,8 +315,8 @@ public sealed partial class BBSWebBridge : UserControl
             //"getActionTicket" => await GetActionTicketAsync(param),
             "getCookieInfo" => GetCookieInfo(param),
             "getCookieToken" => GetCookieToken(param),
-            "getDS" => GetDynamicSecrectV1(param),
-            "getDS2" => GetDynamicSecrectV2(param),
+            "getDS" => GetDynamicSecretUnavailable(param),
+            "getDS2" => GetDynamicSecretUnavailable(param),
             "getHTTPRequestHeaders" => GetHttpRequestHeader(param),
             "getStatusBarHeight" => GetStatusBarHeight(param),
             "getUserInfo" => GetUserInfo(param),
@@ -599,83 +597,16 @@ public sealed partial class BBSWebBridge : UserControl
     #region Dynamic Secret
 
 
-
-
-    private JsResult? GetDynamicSecrectV1(JsParam param)
+    /// <summary>
+    /// 合规起见不再在客户端实现 DS 签名算法；桥接仍响应 getDS/getDS2，返回空串以免 H5 崩溃。
+    /// </summary>
+    private static JsResult? GetDynamicSecretUnavailable(JsParam param)
     {
-        string ApiSalt;
-        if (CurrentGameBiz.IsGlobalServer())
-        {
-            ApiSalt = "okr4obncj8bw5a65hbnn5oo6ixjc3l9w";
-        }
-        else
-        {
-            ApiSalt = "t0qEgfub6cvueAPgR5m9aQWWVciEer7v";
-        }
-
-        var t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        string r = GetRandomString(t);
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={ApiSalt}&t={t}&r={r}"));
-        var check = Convert.ToHexString(bytes).ToLower();
         return new JsResult
         {
             Data = new()
             {
-                ["DS"] = $"{t},{r},{check}",
-            }
-        };
-    }
-
-
-    private static string GetRandomString(int timestamp)
-    {
-        var sb = new StringBuilder(6);
-        var random = new Random(timestamp);
-        for (int i = 0; i < 6; i++)
-        {
-            int v8 = random.Next(0, 32768) % 26;
-            int v9 = 87;
-            if (v8 < 10)
-            {
-                v9 = 48;
-            }
-            _ = sb.Append((char)(v8 + v9));
-        }
-        return sb.ToString();
-    }
-
-
-    private JsResult? GetDynamicSecrectV2(JsParam param)
-    {
-        string ApiSalt2;
-        if (CurrentGameBiz.IsGlobalServer())
-        {
-            ApiSalt2 = "h4c1d6ywfq5bsbnbhm1bzq7bxzzv6srt";
-        }
-        else
-        {
-            ApiSalt2 = "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs";
-        }
-
-        int t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        string r = Random.Shared.Next(100000, 200000).ToString();
-        var d = JsonSerializer.Deserialize<Dictionary<string, object>>(param.Payload?["query"]);
-        string? b = param.Payload?["body"]?.ToString();
-        string? q = null;
-        if (d?.Any() ?? false)
-        {
-            q = string.Join('&', d.OrderBy(x => x.Key).Select(x => $"{x.Key}={x.Value}"));
-        }
-        q = q?.Replace("True", "true").Replace("False", "false");
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={ApiSalt2}&t={t}&r={r}&b={b}&q={q}"));
-        var check = Convert.ToHexString(bytes).ToLower();
-        string result = $"{t},{r},{check}";
-
-        return new()
-        {
-            Data = new()
-            {
-                ["DS"] = result,
+                ["DS"] = string.Empty,
             }
         };
     }
