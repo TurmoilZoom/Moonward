@@ -280,10 +280,11 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         }
         catch (miHoYoApiException ex)
         {
+            // 勿用 ex.Message 再拼 ReturnCode：Message 构造时已是「原文 (retcode)」
             _logger.LogWarning(ex, "Fetch ZZZ gacha info from game record ({retcode})", ex.ReturnCode);
-            StatusMessage = string.IsNullOrWhiteSpace(ex.Message)
+            StatusMessage = string.IsNullOrWhiteSpace(ex.ResponseMessage)
                 ? $"retcode={ex.ReturnCode}"
-                : $"{ex.Message} ({ex.ReturnCode})";
+                : $"{ex.ResponseMessage} ({ex.ReturnCode})";
         }
         catch (Exception ex)
         {

@@ -5,6 +5,9 @@ name: Release
 # - SemVer 预发布 tag（含 '-'，如 1.2.3-beta.1）→ 预览版（GitHub pre-release，对应「加入预览更新」）
 # 每个架构使用独立渠道：win-x64 / win-arm64；安装版(Setup.exe)与便携版(zip)共用同一渠道的更新源。
 # 增量(delta)更新由 Velopack 自动生成（打包前先 vpk download 拉取上一版本作为差分基准）。
+#
+# Release body：优先使用 annotated tag 注释（tag-release 按 release-notes skill 写入的 body），
+# 无注释时回退 gh --generate-notes。
 
 on:
   push:
@@ -30,6 +33,10 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        # 需要完整历史与 annotated tag 对象，以便读取 tag 注释作为 Release notes
+        fetch-depth: 0
+        fetch-tags: true
 
     - name: Install .NET
       uses: actions/setup-dotnet@v4
@@ -103,6 +110,8 @@ jobs:
       shell: pwsh
       run: |
         $ErrorActionPreference = "Stop"
+        # git/gh 非零退出用 $LASTEXITCODE 判断；勿让原生命令直接打断脚本
+        $PSNativeCommandUseErrorActionPreference = $false
         $version = $env:Version
         $pre = $version.Contains("-")
         $repo = $env:GITHUB_REPOSITORY
@@ -144,11 +153,45 @@ jobs:
         Write-Host "Uploading $($files.Count) asset(s) from $releaseDir :"
         $files | ForEach-Object { Write-Host "  $($_.Name)" }
 
+        # 读取 annotated tag 注释作为 Release notes。
+        # tag push + actions/checkout 常把 refs/tags/<ver> 落成 lightweight/peeled（指向 commit），
+        # 此时 %(contents:body) 会变成「commit 说明」而非 tag-release 写入的发布说明。
+        # 因此无论本地是否已有 ref，都强制从 origin 拉取 tag 对象，并校验 objecttype=tag。
+        $tagRef = "refs/tags/$version"
+        Write-Host "Fetching annotated tag object: $version"
+        # PowerShell 中 $tagRef: 会被当成作用域语法，须用 ${tagRef}
+        git fetch origin "${tagRef}:${tagRef}" --force
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "::warning::Could not fetch tag $version; release notes may fall back to generate-notes"
+        }
+
+        $objType = (git for-each-ref $tagRef --format="%(objecttype)" 2>$null | Out-String).Trim()
+        Write-Host "Tag ref objecttype=$objType"
+
+        # tag-release 约定：第一行 subject，空行后为 release-notes 全文 body
+        $notes = ""
+        if ($objType -eq "tag") {
+          $notesBody = (git for-each-ref $tagRef --format="%(contents:body)" 2>$null | Out-String).Trim()
+          $notesAll = (git for-each-ref $tagRef --format="%(contents)" 2>$null | Out-String).Trim()
+          $notes = if ($notesBody) { $notesBody } elseif ($notesAll) { $notesAll } else { "" }
+        } else {
+          Write-Host "::warning::Tag $version is not annotated (objecttype=$objType); refusing commit message as notes"
+        }
+
         $createArgs = @(
           "release", "create", $version,
-          "--title", $version,
-          "--notes", ""
+          "--title", $version
         )
+        if ($notes) {
+          $notesPath = Join-Path $env:RUNNER_TEMP "release-notes-$version.md"
+          $utf8 = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText($notesPath, $notes + "`n", $utf8)
+          Write-Host "Using annotated tag notes ($($notes.Length) chars) -> $notesPath"
+          $createArgs += @("--notes-file", $notesPath)
+        } else {
+          Write-Host "::warning::No annotated tag message for $version; using gh --generate-notes"
+          $createArgs += "--generate-notes"
+        }
         if ($pre) { $createArgs += "--prerelease" }
         $createArgs += $files.FullName
         gh @createArgs
