@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.SignIn;
@@ -164,20 +165,41 @@ public sealed partial class SignInButton : UserControl
     /// <summary>控件加载时按当前游戏初始化可见性与角色。</summary>
     private void SignInButton_Loaded(object sender, RoutedEventArgs e)
     {
+        // 静止显示首帧，避免 AutoPlay 常驻动画
+        Lottie_SignIn.SetProgress(0);
         InitializeForCurrentGame();
     }
-
 
 
     /// <summary>控件卸载时清理状态，避免切换页面后残留旧数据。</summary>
     private void SignInButton_Unloaded(object sender, RoutedEventArgs e)
     {
+        Lottie_SignIn.Stop();
         GameRecordRole = null;
         _resignInfo = null;
         _statusLoaded = false;
         Awards.Clear();
         ErrorMessage = null;
         IsLoading = false;
+    }
+
+
+    /// <summary>
+    /// 悬浮时循环播放 Lottie；离开后停在首帧。
+    /// </summary>
+    private void Button_SignIn_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        _ = Lottie_SignIn.PlayAsync(fromProgress: 0, toProgress: 1, looped: true);
+    }
+
+
+    /// <summary>
+    /// 指针离开后停止动画并回到首帧。
+    /// </summary>
+    private void Button_SignIn_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        Lottie_SignIn.Stop();
+        Lottie_SignIn.SetProgress(0);
     }
 
 

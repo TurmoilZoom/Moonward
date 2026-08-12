@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.BH3.DailyNote;
@@ -92,6 +93,8 @@ public sealed partial class DailyNoteButton : UserControl
 
     private void Button_DailyNote_Loaded(object sender, RoutedEventArgs e)
     {
+        // 静止显示首帧，避免 AutoPlay 常驻动画
+        Lottie_DailyNote.SetProgress(0);
         if (CurrentGameId is null)
         {
             return;
@@ -107,11 +110,31 @@ public sealed partial class DailyNoteButton : UserControl
 
     private void Button_DailyNote_Unloaded(object sender, RoutedEventArgs e)
     {
+        Lottie_DailyNote.Stop();
         GameRecordRole = null;
         BH3DailyNote = null!;
         GenshinDailyNote = null!;
         StarRailDailyNote = null!;
         ZZZDailyNote = null!;
+    }
+
+
+    /// <summary>
+    /// 悬浮时循环播放 Lottie；离开后停在首帧。
+    /// </summary>
+    private void Button_DailyNote_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        _ = Lottie_DailyNote.PlayAsync(fromProgress: 0, toProgress: 1, looped: true);
+    }
+
+
+    /// <summary>
+    /// 指针离开后停止动画并回到首帧。
+    /// </summary>
+    private void Button_DailyNote_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        Lottie_DailyNote.Stop();
+        Lottie_DailyNote.SetProgress(0);
     }
 
 
