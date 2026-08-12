@@ -86,17 +86,39 @@ public sealed partial class TimeNodeButton : UserControl
 
     private void Button_TimeNode_Loaded(object sender, RoutedEventArgs e)
     {
+        // 静止显示首帧，避免 AutoPlay 常驻动画
+        Lottie_TimeNode.SetProgress(0);
         InitializeForCurrentGame();
     }
 
 
     private void Button_TimeNode_Unloaded(object sender, RoutedEventArgs e)
     {
+        Lottie_TimeNode.Stop();
         StopCountdownTimer();
         CancelLoad();
         Sections.Clear();
         ErrorMessage = null;
         IsEmpty = true;
+    }
+
+
+    /// <summary>
+    /// 悬浮时循环播放 Lottie；离开后停在首帧。
+    /// </summary>
+    private void Button_TimeNode_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        _ = Lottie_TimeNode.PlayAsync(fromProgress: 0, toProgress: 1, looped: true);
+    }
+
+
+    /// <summary>
+    /// 指针离开后停止动画并回到首帧。
+    /// </summary>
+    private void Button_TimeNode_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        Lottie_TimeNode.Stop();
+        Lottie_TimeNode.SetProgress(0);
     }
 
 

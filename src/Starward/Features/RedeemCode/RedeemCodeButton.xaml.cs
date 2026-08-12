@@ -101,17 +101,39 @@ public sealed partial class RedeemCodeButton : UserControl
 
     private void Button_RedeemCode_Loaded(object sender, RoutedEventArgs e)
     {
+        // 静止显示首帧，避免 AutoPlay 常驻动画
+        Lottie_RedeemCode.SetProgress(0);
         InitializeForCurrentGame();
     }
 
 
     private void Button_RedeemCode_Unloaded(object sender, RoutedEventArgs e)
     {
+        Lottie_RedeemCode.Stop();
         StopRefreshTimer();
         CancelLoad();
         Codes.Clear();
         HasCodes = false;
         ShowEmptyMessage = false;
+    }
+
+
+    /// <summary>
+    /// 悬浮时循环播放 Lottie；离开后停在首帧。
+    /// </summary>
+    private void Button_RedeemCode_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        _ = Lottie_RedeemCode.PlayAsync(fromProgress: 0, toProgress: 1, looped: true);
+    }
+
+
+    /// <summary>
+    /// 指针离开后停止动画并回到首帧。
+    /// </summary>
+    private void Button_RedeemCode_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        Lottie_RedeemCode.Stop();
+        Lottie_RedeemCode.SetProgress(0);
     }
 
 

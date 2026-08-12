@@ -3,6 +3,7 @@
 <UserControl x:Class="Starward.Features.RedeemCode.RedeemCodeButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:animatedvisuals="using:Starward.AnimatedVisuals"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.RedeemCode"
@@ -18,12 +19,22 @@
             BorderThickness="0"
             CornerRadius="8"
             Loaded="Button_RedeemCode_Loaded"
+            PointerEntered="Button_RedeemCode_PointerEntered"
+            PointerExited="Button_RedeemCode_PointerExited"
             sc:InstantTooltip.Placement="Left"
             sc:InstantTooltip.Text="{x:Bind lang:Lang.RedeemCodeButton_Title}"
             Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
             Unloaded="Button_RedeemCode_Unloaded">
 
-        <Image Margin="6" Source="ms-appx:///static/redeem_code.png" />
+        <!--  Lottie 礼物盒图标：与时间节点一致，32px + Margin 4，默认静止、悬浮播放  -->
+        <AnimatedVisualPlayer x:Name="Lottie_RedeemCode"
+                              Width="32"
+                              Height="32"
+                              Margin="4"
+                              AutoPlay="False"
+                              Stretch="Uniform">
+            <animatedvisuals:Wired_lineal_412_gift_morph_open />
+        </AnimatedVisualPlayer>
 
         <Button.Flyout>
             <Flyout Opened="Flyout_RedeemCode_Opened"
