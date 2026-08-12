@@ -1,9 +1,16 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.WinUI;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Background;
@@ -25,6 +32,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Timers;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 using Windows.Storage;
 
 
@@ -49,6 +57,15 @@ public sealed partial class GameLauncherPage : PageBase
 
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _dispatchTimer;
 
+    /// <summary>右侧功能工具栏离开后自动收起 / 回贴边的延迟。</summary>
+    private static readonly TimeSpan RightToolbarCollapseDelay = TimeSpan.FromSeconds(5);
+
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _rightToolbarCollapseTimer;
+
+    private readonly HashSet<FlyoutBase> _rightToolbarHookedFlyouts = new();
+
+    private bool _rightToolbarInitialized;
+
 
     public GameLauncherPage()
     {
@@ -56,6 +73,10 @@ public sealed partial class GameLauncherPage : PageBase
         _dispatchTimer = DispatcherQueue.CreateTimer();
         _dispatchTimer.Interval = TimeSpan.FromMilliseconds(100);
         _dispatchTimer.Tick += UpdateGameInstallTaskProgress;
+        _rightToolbarCollapseTimer = DispatcherQueue.CreateTimer();
+        _rightToolbarCollapseTimer.IsRepeating = false;
+        _rightToolbarCollapseTimer.Interval = RightToolbarCollapseDelay;
+        _rightToolbarCollapseTimer.Tick += RightToolbarCollapseTimer_Tick;
         if (AppConfig.ToolbarPinned)
         {
             IsToolbarPinned = true;
@@ -91,6 +112,7 @@ public sealed partial class GameLauncherPage : PageBase
         CheckGameVersion();
         UpdateGameInstallTask();
         CheckCloudGame();
+        InitializeRightToolbarCollapse();
         _ = InitializeGameServerAsync();
         _ = InitializeBackgameImageSwitcherAsync();
         WeakReferenceMessenger.Default.Register<GameInstallPathChangedMessage>(this, OnGameInstallPathChanged);
@@ -108,6 +130,7 @@ public sealed partial class GameLauncherPage : PageBase
         WeakReferenceMessenger.Default.UnregisterAll(this);
         _dispatchTimer.Tick -= UpdateGameInstallTaskProgress;
         _dispatchTimer.Stop();
+        TeardownRightToolbarCollapse();
         BackgroundImages = null!;
     }
 
@@ -1271,6 +1294,1371 @@ public sealed partial class GameLauncherPage : PageBase
         }
     }
 
+
+
+    #endregion
+
+
+    #region Right Toolbar State Machine
+
+
+    /// <summary>工具栏按钮统一边长（与 XAML 中 Width/Height 一致）。</summary>
+    private const double RightToolbarButtonSize = 40;
+
+    /// <summary>贴边收纳时统一露出的边缘条宽度（各边一致）。</summary>
+    private const double RightToolbarDockPeek = 6;
+
+    /// <summary>自由态相对窗口的默认边距（右 / 上）。</summary>
+    private const double RightToolbarDefaultMarginRight = 12;
+
+    private const double RightToolbarDefaultMarginTop = 48;
+
+    /// <summary>按住后移动超过该距离才进入拖拽，避免纯点击被吃掉。</summary>
+    private const double RightToolbarDragStartDistance = 4;
+
+    /// <summary>高度 / 贴边位移动画时长。</summary>
+    private static readonly TimeSpan RightToolbarAnimDuration = TimeSpan.FromMilliseconds(280);
+
+
+    /// <summary>右侧工具栏视觉状态。</summary>
+    private enum RightToolbarState
+    {
+        /// <summary>自由位置，仅显示首个按钮。</summary>
+        Collapsed,
+
+        /// <summary>自由位置，完整展开。</summary>
+        Expanded,
+
+        /// <summary>拖拽中：保持当前高度并跟随指针（不收缩）。</summary>
+        Dragging,
+
+        /// <summary>贴边收纳：完整展开尺寸，仅漏出统一宽度的边缘条；不可点功能。</summary>
+        Docked,
+
+        /// <summary>自贴边完整浮出，可点功能 / 提示 / 再拖拽。</summary>
+        DockRevealed,
+    }
+
+
+    /// <summary>贴边方向。</summary>
+    private enum RightToolbarDockEdge
+    {
+        None,
+        Left,
+        Top,
+        Right,
+        Bottom,
+    }
+
+
+    private RightToolbarState _rightToolbarState = RightToolbarState.Collapsed;
+
+    private RightToolbarDockEdge _rightToolbarDockEdge = RightToolbarDockEdge.None;
+
+    private bool _rightToolbarPointerOver;
+
+    private bool _rightToolbarPressed;
+
+    private bool _rightToolbarDragging;
+
+    /// <summary>贴边浮出动画完成前为 false，禁止点击与拖拽。</summary>
+    private bool _rightToolbarRevealInteractive;
+
+    /// <summary>
+    /// 贴边后需等指针先离开再重新进入才允许浮出，避免松手时指针仍在工具栏上立刻弹出。
+    /// </summary>
+    private bool _rightToolbarDockAwaitPointerLeave;
+
+    /// <summary>拖拽松手后短时内禁止按钮点击 / Flyout，避免误触功能。</summary>
+    private bool _rightToolbarSuppressClick;
+
+    private uint _rightToolbarPointerId;
+
+    private Point _rightToolbarPressRootPoint;
+
+    private Point _rightToolbarGrabOffset;
+
+    private double _rightToolbarX;
+
+    private double _rightToolbarY;
+
+    private Storyboard? _rightToolbarHeightStoryboard;
+
+    private Storyboard? _rightToolbarMoveStoryboard;
+
+    // 必须用同一委托实例 RemoveHandler；handledEventsToo 才能在子 Button Handled/捕获后仍收到事件。
+    private PointerEventHandler? _rightToolbarPointerPressedHandler;
+    private PointerEventHandler? _rightToolbarPointerMovedHandler;
+    private PointerEventHandler? _rightToolbarPointerReleasedHandler;
+    private PointerEventHandler? _rightToolbarPointerCanceledHandler;
+    private PointerEventHandler? _rightToolbarPointerCaptureLostHandler;
+    private PointerEventHandler? _rightToolbarRootMovedHandler;
+    private PointerEventHandler? _rightToolbarRootReleasedHandler;
+    private bool _rightToolbarRootHandlersAttached;
+
+
+    /// <summary>
+    /// 初始化右侧工具栏状态机：默认右上角收起，监听尺寸与 Flyout。
+    /// </summary>
+    private void InitializeRightToolbarCollapse()
+    {
+        if (_rightToolbarInitialized)
+        {
+            return;
+        }
+
+        _rightToolbarInitialized = true;
+        StackPanel_RightToolbar.SizeChanged += StackPanel_RightToolbar_SizeChanged;
+        Border_RightToolbar.SizeChanged += Border_RightToolbar_SizeChanged;
+        RootGrid.SizeChanged += RootGrid_RightToolbar_SizeChanged;
+        // 子级 ButtonBase 会把 Pressed 标 Handled 并 Capture，普通 XAML 路由到不了 Border。
+        _rightToolbarPointerPressedHandler = Border_RightToolbar_PointerPressed;
+        _rightToolbarPointerMovedHandler = Border_RightToolbar_PointerMoved;
+        _rightToolbarPointerReleasedHandler = Border_RightToolbar_PointerReleased;
+        _rightToolbarPointerCanceledHandler = Border_RightToolbar_PointerCanceled;
+        _rightToolbarPointerCaptureLostHandler = Border_RightToolbar_PointerCaptureLost;
+        Border_RightToolbar.AddHandler(UIElement.PointerPressedEvent, _rightToolbarPointerPressedHandler, handledEventsToo: true);
+        Border_RightToolbar.AddHandler(UIElement.PointerMovedEvent, _rightToolbarPointerMovedHandler, handledEventsToo: true);
+        Border_RightToolbar.AddHandler(UIElement.PointerReleasedEvent, _rightToolbarPointerReleasedHandler, handledEventsToo: true);
+        Border_RightToolbar.AddHandler(UIElement.PointerCanceledEvent, _rightToolbarPointerCanceledHandler, handledEventsToo: true);
+        Border_RightToolbar.AddHandler(UIElement.PointerCaptureLostEvent, _rightToolbarPointerCaptureLostHandler, handledEventsToo: true);
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            EnsureRightToolbarFlyoutHooks();
+            RestoreRightToolbarLayout();
+            UpdateRightToolbarPopupSide();
+        });
+    }
+
+
+    /// <summary>
+    /// 卸载时解除计时器、动画与事件，恢复 Tooltip。
+    /// </summary>
+    private void TeardownRightToolbarCollapse()
+    {
+        // 离开页面时持久化当前布局。
+        SaveRightToolbarLayout();
+        _rightToolbarCollapseTimer.Tick -= RightToolbarCollapseTimer_Tick;
+        _rightToolbarCollapseTimer.Stop();
+        _rightToolbarHeightStoryboard?.Stop();
+        _rightToolbarHeightStoryboard = null;
+        _rightToolbarMoveStoryboard?.Stop();
+        _rightToolbarMoveStoryboard = null;
+        InstantTooltip.SetSuppressed(XamlRoot, false);
+        DetachRightToolbarRootPointerHandlers();
+        if (_rightToolbarInitialized)
+        {
+            StackPanel_RightToolbar.SizeChanged -= StackPanel_RightToolbar_SizeChanged;
+            Border_RightToolbar.SizeChanged -= Border_RightToolbar_SizeChanged;
+            RootGrid.SizeChanged -= RootGrid_RightToolbar_SizeChanged;
+            if (_rightToolbarPointerPressedHandler is not null)
+            {
+                Border_RightToolbar.RemoveHandler(UIElement.PointerPressedEvent, _rightToolbarPointerPressedHandler);
+                Border_RightToolbar.RemoveHandler(UIElement.PointerMovedEvent, _rightToolbarPointerMovedHandler!);
+                Border_RightToolbar.RemoveHandler(UIElement.PointerReleasedEvent, _rightToolbarPointerReleasedHandler!);
+                Border_RightToolbar.RemoveHandler(UIElement.PointerCanceledEvent, _rightToolbarPointerCanceledHandler!);
+                Border_RightToolbar.RemoveHandler(UIElement.PointerCaptureLostEvent, _rightToolbarPointerCaptureLostHandler!);
+            }
+        }
+
+        foreach (FlyoutBase flyout in _rightToolbarHookedFlyouts)
+        {
+            flyout.Opened -= RightToolbarFlyout_Opened;
+            flyout.Closed -= RightToolbarFlyout_Closed;
+        }
+        _rightToolbarHookedFlyouts.Clear();
+        _rightToolbarInitialized = false;
+    }
+
+
+    /// <summary>
+    /// 窗口尺寸变化：贴边态重新对齐边缘 peek，自由态保证不完全丢失在界外。
+    /// </summary>
+    private void RootGrid_RightToolbar_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (e.NewSize.Width <= 0 || e.NewSize.Height <= 0)
+        {
+            return;
+        }
+
+        if (_rightToolbarState is RightToolbarState.Docked)
+        {
+            ApplyRightToolbarDockedPosition(animate: false);
+        }
+        else if (_rightToolbarState is RightToolbarState.DockRevealed)
+        {
+            Point revealed = GetRightToolbarRevealedPosition(_rightToolbarDockEdge);
+            SetRightToolbarPosition(revealed.X, revealed.Y, animate: false);
+        }
+        else if (_rightToolbarState is not RightToolbarState.Dragging)
+        {
+            ClampRightToolbarIntoSoftBounds();
+            SetRightToolbarPosition(_rightToolbarX, _rightToolbarY, animate: false);
+        }
+    }
+
+
+    /// <summary>
+    /// 子项显隐变化时同步高度（贴边始终展开；自由态保持当前展开/收起意图）。
+    /// </summary>
+    private void StackPanel_RightToolbar_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        try
+        {
+            if (_rightToolbarHeightStoryboard is not null || _rightToolbarState is RightToolbarState.Dragging)
+            {
+                return;
+            }
+
+            EnsureRightToolbarFlyoutHooks();
+            SyncRightToolbarHeightForState(animate: false);
+            UpdateRightToolbarPopupSide();
+
+            if (_rightToolbarState is RightToolbarState.Docked)
+            {
+                ApplyRightToolbarDockedPosition(animate: false);
+            }
+            else if (_rightToolbarState is RightToolbarState.DockRevealed)
+            {
+                Point revealed = GetRightToolbarRevealedPosition(_rightToolbarDockEdge);
+                SetRightToolbarPosition(revealed.X, revealed.Y, animate: false);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Right toolbar size changed");
+        }
+    }
+
+
+    private void Border_RightToolbar_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (e.NewSize.Width > 0 && e.NewSize.Height > 0)
+        {
+            UpdateRightToolbarClip(e.NewSize.Width, e.NewSize.Height);
+        }
+    }
+
+
+    #region Pointer
+
+
+    private void Border_RightToolbar_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        // 贴边松手后指针往往还在条上：等先离开再进入才浮出，否则会「收不进边界、立刻弹出」。
+        if (_rightToolbarState is RightToolbarState.Docked && _rightToolbarDockAwaitPointerLeave)
+        {
+            return;
+        }
+
+        _rightToolbarPointerOver = true;
+        StopRightToolbarCollapseTimer();
+
+        switch (_rightToolbarState)
+        {
+            case RightToolbarState.Collapsed:
+                TransitionRightToolbar(RightToolbarState.Expanded, animate: true);
+                break;
+            case RightToolbarState.Docked:
+                // 贴边时悬停只做浮出；浮出完成前不可点功能。
+                TransitionRightToolbar(RightToolbarState.DockRevealed, animate: true);
+                break;
+            case RightToolbarState.DockRevealed:
+            case RightToolbarState.Expanded:
+            case RightToolbarState.Dragging:
+                break;
+        }
+    }
+
+
+    private void Border_RightToolbar_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        // 拖拽中指针可能短暂离开视觉区域，不触发收起计时。
+        if (_rightToolbarDragging || _rightToolbarPressed)
+        {
+            return;
+        }
+
+        _rightToolbarPointerOver = false;
+        // 指针真正离开贴边条后，允许下一次进入触发浮出。
+        if (_rightToolbarState is RightToolbarState.Docked)
+        {
+            _rightToolbarDockAwaitPointerLeave = false;
+        }
+        ScheduleRightToolbarIdleCollapse();
+    }
+
+
+    private void Border_RightToolbar_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        // 贴边未浮出完成：忽略按下（仅允许悬停触发浮出）。
+        if (_rightToolbarState is RightToolbarState.Docked
+            || (_rightToolbarState is RightToolbarState.DockRevealed && !_rightToolbarRevealInteractive))
+        {
+            return;
+        }
+
+        if (!e.GetCurrentPoint(Border_RightToolbar).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        // 仅左键；触摸/笔亦可（IsLeftButtonPressed 对触控主触点通常为 true）。
+        _rightToolbarPressed = true;
+        _rightToolbarDragging = false;
+        _rightToolbarPointerId = e.Pointer.PointerId;
+        _rightToolbarPressRootPoint = e.GetCurrentPoint(RootGrid).Position;
+        // 抓取点相对工具栏左上角（布局坐标 + 当前位移）。
+        Point rootPoint = _rightToolbarPressRootPoint;
+        _rightToolbarGrabOffset = new Point(rootPoint.X - _rightToolbarX, rootPoint.Y - _rightToolbarY);
+        // 按住即抑制自定义悬浮提示；未过拖拽阈值前不 Capture，保留按钮点击。
+        InstantTooltip.SetSuppressed(XamlRoot, true);
+    }
+
+
+    private void Border_RightToolbar_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_rightToolbarPressed || e.Pointer.PointerId != _rightToolbarPointerId)
+        {
+            return;
+        }
+
+        // 子 Button 可能已 Capture；事件靠 handledEventsToo 冒泡到此。
+        Point rootPoint = e.GetCurrentPoint(RootGrid).Position;
+        if (!_rightToolbarDragging)
+        {
+            double dx = rootPoint.X - _rightToolbarPressRootPoint.X;
+            double dy = rootPoint.Y - _rightToolbarPressRootPoint.Y;
+            if ((dx * dx) + (dy * dy) < RightToolbarDragStartDistance * RightToolbarDragStartDistance)
+            {
+                return;
+            }
+
+            BeginRightToolbarDrag(e.Pointer);
+        }
+
+        // 跟随指针：左上角 = 指针位置 - 按下时的抓取偏移。
+        SetRightToolbarPosition(rootPoint.X - _rightToolbarGrabOffset.X, rootPoint.Y - _rightToolbarGrabOffset.Y, animate: false);
+        e.Handled = true;
+    }
+
+
+    private void Border_RightToolbar_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_rightToolbarPressed && !_rightToolbarDragging)
+        {
+            return;
+        }
+        if (e.Pointer.PointerId != _rightToolbarPointerId)
+        {
+            return;
+        }
+
+        bool wasDragging = _rightToolbarDragging;
+        EndRightToolbarPointer(e.Pointer);
+        // 阻止子 Button 在拖拽松手时再走 Click / 打开 Flyout。
+        if (wasDragging)
+        {
+            e.Handled = true;
+        }
+    }
+
+
+    private void Border_RightToolbar_PointerCanceled(object sender, PointerRoutedEventArgs e)
+    {
+        if (e.Pointer.PointerId != _rightToolbarPointerId)
+        {
+            return;
+        }
+        EndRightToolbarPointer(e.Pointer);
+    }
+
+
+    private void Border_RightToolbar_PointerCaptureLost(object sender, PointerRoutedEventArgs e)
+    {
+        // 仅当我们自己 Capture 后丢失时才结束；拖拽开始前由 Button 持有 Capture，其 CaptureLost 不归我们管。
+        if (_rightToolbarDragging && e.Pointer.PointerId == _rightToolbarPointerId)
+        {
+            EndRightToolbarPointer(e.Pointer, captureAlreadyLost: true);
+        }
+    }
+
+
+    /// <summary>
+    /// 进入拖拽：从子 Button 夺过 Capture；保持当前高度不收缩；禁用按钮命中，抑制 Tooltip。
+    /// </summary>
+    private void BeginRightToolbarDrag(Pointer pointer)
+    {
+        _rightToolbarDragging = true;
+        _rightToolbarSuppressClick = true;
+        StopRightToolbarCollapseTimer();
+        CloseAnyRightToolbarFlyout();
+        InstantTooltip.SetSuppressed(XamlRoot, true);
+        // 先禁用子按钮命中，再 Capture，避免 Button 继续抢指针 / 松手误点。
+        SetRightToolbarButtonsHitTestVisible(false);
+        _rightToolbarState = RightToolbarState.Dragging;
+        _rightToolbarRevealInteractive = false;
+        // 拖动过程中不收缩，保持进入拖拽前的高度（通常为展开）。
+        if (GetRightToolbarCurrentHeight() < MeasureRightToolbarExpandedHeight() - 0.5)
+        {
+            ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate: false);
+        }
+        try
+        {
+            Border_RightToolbar.CapturePointer(pointer);
+        }
+        catch
+        {
+            // ignore
+        }
+
+        AttachRightToolbarRootPointerHandlers();
+    }
+
+
+    /// <summary>拖拽时在 RootGrid 上再挂一层 handledEventsToo，防止丢跟手。</summary>
+    private void AttachRightToolbarRootPointerHandlers()
+    {
+        if (_rightToolbarRootHandlersAttached)
+        {
+            return;
+        }
+
+        _rightToolbarRootMovedHandler ??= RootGrid_RightToolbarDrag_PointerMoved;
+        _rightToolbarRootReleasedHandler ??= RootGrid_RightToolbarDrag_PointerReleased;
+        RootGrid.AddHandler(UIElement.PointerMovedEvent, _rightToolbarRootMovedHandler, handledEventsToo: true);
+        RootGrid.AddHandler(UIElement.PointerReleasedEvent, _rightToolbarRootReleasedHandler, handledEventsToo: true);
+        _rightToolbarRootHandlersAttached = true;
+    }
+
+
+    private void DetachRightToolbarRootPointerHandlers()
+    {
+        if (!_rightToolbarRootHandlersAttached)
+        {
+            return;
+        }
+
+        if (_rightToolbarRootMovedHandler is not null)
+        {
+            RootGrid.RemoveHandler(UIElement.PointerMovedEvent, _rightToolbarRootMovedHandler);
+        }
+        if (_rightToolbarRootReleasedHandler is not null)
+        {
+            RootGrid.RemoveHandler(UIElement.PointerReleasedEvent, _rightToolbarRootReleasedHandler);
+        }
+        _rightToolbarRootHandlersAttached = false;
+    }
+
+
+    private void RootGrid_RightToolbarDrag_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_rightToolbarDragging || e.Pointer.PointerId != _rightToolbarPointerId)
+        {
+            return;
+        }
+
+        Point rootPoint = e.GetCurrentPoint(RootGrid).Position;
+        SetRightToolbarPosition(rootPoint.X - _rightToolbarGrabOffset.X, rootPoint.Y - _rightToolbarGrabOffset.Y, animate: false);
+        e.Handled = true;
+    }
+
+
+    private void RootGrid_RightToolbarDrag_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if ((!_rightToolbarPressed && !_rightToolbarDragging) || e.Pointer.PointerId != _rightToolbarPointerId)
+        {
+            return;
+        }
+        EndRightToolbarPointer(e.Pointer);
+    }
+
+
+    /// <summary>
+    /// 结束按住 / 拖拽：松手时若工具栏已越出窗口边界则贴边收纳，否则在落点展开；
+    /// 拖拽松手不触发按钮功能。
+    /// </summary>
+    private void EndRightToolbarPointer(Pointer pointer, bool captureAlreadyLost = false)
+    {
+        if (!_rightToolbarPressed && !_rightToolbarDragging)
+        {
+            return;
+        }
+
+        bool wasDragging = _rightToolbarDragging;
+        _rightToolbarPressed = false;
+        _rightToolbarDragging = false;
+
+        DetachRightToolbarRootPointerHandlers();
+
+        if (!captureAlreadyLost)
+        {
+            try
+            {
+                Border_RightToolbar.ReleasePointerCapture(pointer);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        if (!wasDragging)
+        {
+            InstantTooltip.SetSuppressed(XamlRoot, false);
+            _rightToolbarSuppressClick = false;
+            // 纯点击：恢复按钮命中，保持当前展开/浮出态。
+            ApplyRightToolbarInteractionGate();
+            return;
+        }
+
+        // 拖拽松手：始终先关掉可能误开的 Flyout，并保持按钮不可点直到本帧事件结束。
+        CloseAnyRightToolbarFlyout();
+        SetRightToolbarButtonsHitTestVisible(false);
+        InstantTooltip.SetSuppressed(XamlRoot, true);
+
+        double width = MeasureRightToolbarWidth();
+        double height = MeasureRightToolbarExpandedHeight();
+        RightToolbarDockEdge edge = DetectRightToolbarDockEdge(_rightToolbarX, _rightToolbarY, width, height);
+        if (edge is not RightToolbarDockEdge.None)
+        {
+            _rightToolbarDockEdge = edge;
+            // 松手时指针多半还在工具栏上，禁止立刻浮出，需先离开再进入。
+            _rightToolbarDockAwaitPointerLeave = true;
+            _rightToolbarPointerOver = false;
+            TransitionRightToolbar(RightToolbarState.Docked, animate: true);
+            // Docked 本身不可点；仍抑制 Tooltip。
+            InstantTooltip.SetSuppressed(XamlRoot, true);
+            SaveRightToolbarLayout();
+        }
+        else
+        {
+            _rightToolbarDockEdge = RightToolbarDockEdge.None;
+            _rightToolbarDockAwaitPointerLeave = false;
+            ClampRightToolbarIntoSoftBounds();
+            SetRightToolbarPosition(_rightToolbarX, _rightToolbarY, animate: false);
+            TransitionRightToolbar(RightToolbarState.Expanded, animate: true);
+            // Expanded 的 Transition 会打开按钮命中——拖拽后需再关一次，延后到 Released 冒泡结束再恢复。
+            SetRightToolbarButtonsHitTestVisible(false);
+            InstantTooltip.SetSuppressed(XamlRoot, true);
+            SaveRightToolbarLayout();
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+            {
+                if (_rightToolbarState is not RightToolbarState.Expanded || _rightToolbarDragging)
+                {
+                    return;
+                }
+
+                CloseAnyRightToolbarFlyout();
+                _rightToolbarSuppressClick = false;
+                InstantTooltip.SetSuppressed(XamlRoot, false);
+                ApplyRightToolbarInteractionGate();
+                if (!_rightToolbarPointerOver)
+                {
+                    ScheduleRightToolbarIdleCollapse();
+                }
+            });
+            return;
+        }
+
+        // 贴边：再关一次 Flyout（松手同步触发的打开）。
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            CloseAnyRightToolbarFlyout();
+            _rightToolbarSuppressClick = false;
+        });
+    }
+
+
+    #endregion
+
+
+    #region State transitions
+
+
+    /// <summary>
+    /// 切换工具栏状态并应用高度、位置与交互门禁。
+    /// </summary>
+    private void TransitionRightToolbar(RightToolbarState state, bool animate)
+    {
+        _rightToolbarState = state;
+
+        switch (state)
+        {
+            case RightToolbarState.Collapsed:
+                _rightToolbarRevealInteractive = true;
+                _rightToolbarDockEdge = RightToolbarDockEdge.None;
+                ApplyRightToolbarHeight(MeasureRightToolbarCollapsedHeight(), animate);
+                SetRightToolbarButtonsHitTestVisible(true);
+                InstantTooltip.SetSuppressed(XamlRoot, false);
+                break;
+
+            case RightToolbarState.Expanded:
+                _rightToolbarRevealInteractive = true;
+                ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
+                SetRightToolbarButtonsHitTestVisible(true);
+                InstantTooltip.SetSuppressed(XamlRoot, false);
+                break;
+
+            case RightToolbarState.Dragging:
+                _rightToolbarRevealInteractive = false;
+                // 拖动保持展开高度，不收缩。
+                ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
+                SetRightToolbarButtonsHitTestVisible(false);
+                InstantTooltip.SetSuppressed(XamlRoot, true);
+                break;
+
+            case RightToolbarState.Docked:
+                _rightToolbarRevealInteractive = false;
+                ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
+                SetRightToolbarButtonsHitTestVisible(false);
+                InstantTooltip.SetSuppressed(XamlRoot, true);
+                ApplyRightToolbarDockedPosition(animate);
+                break;
+
+            case RightToolbarState.DockRevealed:
+                _rightToolbarRevealInteractive = false;
+                ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
+                SetRightToolbarButtonsHitTestVisible(false);
+                InstantTooltip.SetSuppressed(XamlRoot, true);
+                Point revealed = GetRightToolbarRevealedPosition(_rightToolbarDockEdge);
+                SetRightToolbarPosition(revealed.X, revealed.Y, animate, onCompleted: () =>
+                {
+                    if (_rightToolbarState is RightToolbarState.DockRevealed)
+                    {
+                        _rightToolbarRevealInteractive = true;
+                        SetRightToolbarButtonsHitTestVisible(true);
+                        InstantTooltip.SetSuppressed(XamlRoot, false);
+                    }
+                });
+                if (!animate)
+                {
+                    _rightToolbarRevealInteractive = true;
+                    SetRightToolbarButtonsHitTestVisible(true);
+                    InstantTooltip.SetSuppressed(XamlRoot, false);
+                }
+                break;
+        }
+
+        UpdateRightToolbarPopupSide();
+    }
+
+
+    /// <summary>
+    /// 按当前状态刷新高度（子按钮异步显隐后调用）。
+    /// </summary>
+    private void SyncRightToolbarHeightForState(bool animate)
+    {
+        switch (_rightToolbarState)
+        {
+            case RightToolbarState.Collapsed:
+                ApplyRightToolbarHeight(MeasureRightToolbarCollapsedHeight(), animate);
+                break;
+            case RightToolbarState.Dragging:
+            case RightToolbarState.Expanded:
+            case RightToolbarState.Docked:
+            case RightToolbarState.DockRevealed:
+                ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
+                break;
+        }
+    }
+
+
+    /// <summary>
+    /// 空闲 5 秒后：贴边浮出 → 回到贴边；自由展开 → 单按钮收起。
+    /// </summary>
+    private void ScheduleRightToolbarIdleCollapse()
+    {
+        StopRightToolbarCollapseTimer();
+        if (_rightToolbarPointerOver
+            || _rightToolbarDragging
+            || _rightToolbarPressed
+            || IsAnyRightToolbarFlyoutOpen())
+        {
+            return;
+        }
+
+        if (_rightToolbarState is RightToolbarState.Collapsed or RightToolbarState.Docked or RightToolbarState.Dragging)
+        {
+            return;
+        }
+
+        _rightToolbarCollapseTimer.Interval = RightToolbarCollapseDelay;
+        _rightToolbarCollapseTimer.Start();
+    }
+
+
+    private void StopRightToolbarCollapseTimer()
+    {
+        _rightToolbarCollapseTimer.Stop();
+    }
+
+
+    private void RightToolbarCollapseTimer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        if (_rightToolbarPointerOver
+            || _rightToolbarDragging
+            || _rightToolbarPressed
+            || IsAnyRightToolbarFlyoutOpen())
+        {
+            return;
+        }
+
+        if (_rightToolbarState is RightToolbarState.DockRevealed)
+        {
+            TransitionRightToolbar(RightToolbarState.Docked, animate: true);
+            SaveRightToolbarLayout();
+        }
+        else if (_rightToolbarState is RightToolbarState.Expanded)
+        {
+            TransitionRightToolbar(RightToolbarState.Collapsed, animate: true);
+            SaveRightToolbarLayout();
+        }
+    }
+
+
+    private void ApplyRightToolbarInteractionGate()
+    {
+        bool interactive = _rightToolbarState switch
+        {
+            RightToolbarState.Collapsed => true,
+            RightToolbarState.Expanded => true,
+            RightToolbarState.DockRevealed => _rightToolbarRevealInteractive,
+            _ => false,
+        };
+        SetRightToolbarButtonsHitTestVisible(interactive);
+        if (!interactive)
+        {
+            InstantTooltip.SetSuppressed(XamlRoot, true);
+        }
+        else if (_rightToolbarState is not RightToolbarState.Dragging)
+        {
+            InstantTooltip.SetSuppressed(XamlRoot, false);
+        }
+    }
+
+
+    private void SetRightToolbarButtonsHitTestVisible(bool visible)
+    {
+        StackPanel_RightToolbar.IsHitTestVisible = visible;
+    }
+
+
+    #endregion
+
+
+    #region Position / Dock
+
+
+    /// <summary>默认放在窗口右上（对齐原 Margin 右 12、上 48）。</summary>
+    private void PlaceRightToolbarDefaultPosition()
+    {
+        double width = MeasureRightToolbarWidth();
+        double x = Math.Max(0, RootGrid.ActualWidth - RightToolbarDefaultMarginRight - width);
+        double y = RightToolbarDefaultMarginTop;
+        SetRightToolbarPosition(x, y, animate: false);
+    }
+
+
+    /// <summary>
+    /// 从设置恢复工具栏位置与贴边状态；无记录时使用默认右上角收起。
+    /// 布局串：<c>docked|left|y</c> / <c>docked|right|y</c> / <c>free|x|y</c>
+    /// </summary>
+    private void RestoreRightToolbarLayout()
+    {
+        string? raw = AppConfig.GameLauncherRightToolbarLayout;
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            PlaceRightToolbarDefaultPosition();
+            TransitionRightToolbar(RightToolbarState.Collapsed, animate: false);
+            return;
+        }
+
+        try
+        {
+            string[] parts = raw.Split('|');
+            if (parts.Length >= 3
+                && parts[0].Equals("docked", StringComparison.OrdinalIgnoreCase)
+                && Enum.TryParse(parts[1], ignoreCase: true, out RightToolbarDockEdge edge)
+                && edge is RightToolbarDockEdge.Left or RightToolbarDockEdge.Right
+                && double.TryParse(parts[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double dockY))
+            {
+                _rightToolbarDockEdge = edge;
+                _rightToolbarY = dockY;
+                _rightToolbarDockAwaitPointerLeave = false;
+                ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate: false);
+                ApplyRightToolbarDockedPosition(animate: false);
+                TransitionRightToolbar(RightToolbarState.Docked, animate: false);
+                return;
+            }
+
+            if (parts.Length >= 3
+                && parts[0].Equals("free", StringComparison.OrdinalIgnoreCase)
+                && double.TryParse(parts[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double freeX)
+                && double.TryParse(parts[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double freeY))
+            {
+                _rightToolbarDockEdge = RightToolbarDockEdge.None;
+                SetRightToolbarPosition(freeX, freeY, animate: false);
+                ClampRightToolbarIntoSoftBounds();
+                SetRightToolbarPosition(_rightToolbarX, _rightToolbarY, animate: false);
+                TransitionRightToolbar(RightToolbarState.Collapsed, animate: false);
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Restore right toolbar layout");
+        }
+
+        PlaceRightToolbarDefaultPosition();
+        TransitionRightToolbar(RightToolbarState.Collapsed, animate: false);
+    }
+
+
+    /// <summary>
+    /// 持久化工具栏自由位置或左右贴边状态（Y 坐标）。
+    /// </summary>
+    private void SaveRightToolbarLayout()
+    {
+        try
+        {
+            if (_rightToolbarState is RightToolbarState.Docked or RightToolbarState.DockRevealed
+                && _rightToolbarDockEdge is RightToolbarDockEdge.Left or RightToolbarDockEdge.Right)
+            {
+                string edge = _rightToolbarDockEdge is RightToolbarDockEdge.Left ? "left" : "right";
+                AppConfig.GameLauncherRightToolbarLayout =
+                    $"docked|{edge}|{_rightToolbarY.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+                return;
+            }
+
+            if (_rightToolbarState is RightToolbarState.Dragging)
+            {
+                return;
+            }
+
+            AppConfig.GameLauncherRightToolbarLayout =
+                $"free|{_rightToolbarX.ToString(System.Globalization.CultureInfo.InvariantCulture)}|{_rightToolbarY.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Save right toolbar layout");
+        }
+    }
+
+
+    private void SetRightToolbarPosition(double x, double y, bool animate, Action? onCompleted = null)
+    {
+        _rightToolbarX = x;
+        _rightToolbarY = y;
+
+        _rightToolbarMoveStoryboard?.Stop();
+        _rightToolbarMoveStoryboard = null;
+
+        void Finish()
+        {
+            UpdateRightToolbarPopupSide();
+            onCompleted?.Invoke();
+        }
+
+        if (!animate || !EntranceAnimation.AnimationsEnabled())
+        {
+            Transform_RightToolbar.X = x;
+            Transform_RightToolbar.Y = y;
+            Finish();
+            return;
+        }
+
+        double fromX = Transform_RightToolbar.X;
+        double fromY = Transform_RightToolbar.Y;
+
+        var animX = new DoubleAnimation
+        {
+            From = fromX,
+            To = x,
+            Duration = RightToolbarAnimDuration,
+            EnableDependentAnimation = true,
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+        };
+        var animY = new DoubleAnimation
+        {
+            From = fromY,
+            To = y,
+            Duration = RightToolbarAnimDuration,
+            EnableDependentAnimation = true,
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+        };
+        Storyboard.SetTarget(animX, Transform_RightToolbar);
+        Storyboard.SetTargetProperty(animX, "X");
+        Storyboard.SetTarget(animY, Transform_RightToolbar);
+        Storyboard.SetTargetProperty(animY, "Y");
+
+        var storyboard = new Storyboard();
+        storyboard.Children.Add(animX);
+        storyboard.Children.Add(animY);
+        storyboard.Completed += (_, _) =>
+        {
+            if (ReferenceEquals(_rightToolbarMoveStoryboard, storyboard))
+            {
+                Transform_RightToolbar.X = x;
+                Transform_RightToolbar.Y = y;
+                _rightToolbarMoveStoryboard = null;
+                Finish();
+            }
+        };
+        _rightToolbarMoveStoryboard = storyboard;
+        storyboard.Begin();
+    }
+
+
+    /// <summary>
+    /// 工具栏在窗口左侧时，Flyout / Tooltip 向右弹出；在右侧时向左弹出（左右贴边对称）。
+    /// </summary>
+    private void UpdateRightToolbarPopupSide()
+    {
+        bool onLeft = IsRightToolbarOnLeftSide();
+        FlyoutPlacementMode flyoutPlacement = onLeft
+            ? FlyoutPlacementMode.RightEdgeAlignedTop
+            : FlyoutPlacementMode.LeftEdgeAlignedTop;
+        InstantTooltipPlacement tipPlacement = onLeft
+            ? InstantTooltipPlacement.Right
+            : InstantTooltipPlacement.Left;
+
+        foreach (UIElement child in StackPanel_RightToolbar.Children)
+        {
+            if (child is not FrameworkElement fe)
+            {
+                continue;
+            }
+
+            Button? button = fe as Button ?? fe.FindDescendant<Button>();
+            if (button is null)
+            {
+                continue;
+            }
+
+            if (button.Flyout is Flyout flyout)
+            {
+                flyout.Placement = flyoutPlacement;
+            }
+
+            // 图标按钮上的即时提示；内部子项（如签到格子）的 Top 提示不改。
+            if (!string.IsNullOrEmpty(InstantTooltip.GetText(button)))
+            {
+                InstantTooltip.SetPlacement(button, tipPlacement);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 贴边左 / 自由位置中心在窗口左半 → 视为左侧；否则右侧。
+    /// </summary>
+    private bool IsRightToolbarOnLeftSide()
+    {
+        if (_rightToolbarState is RightToolbarState.Docked or RightToolbarState.DockRevealed)
+        {
+            return _rightToolbarDockEdge is RightToolbarDockEdge.Left;
+        }
+
+        double rootW = RootGrid.ActualWidth;
+        if (rootW <= 0)
+        {
+            return false;
+        }
+
+        double centerX = _rightToolbarX + MeasureRightToolbarWidth() / 2;
+        return centerX < rootW / 2;
+    }
+
+
+    /// <summary>
+    /// 按贴边方向把工具栏移到「仅漏出 <see cref="RightToolbarDockPeek"/> 宽」的位置。
+    /// 始终使用展开尺寸，保证各边露出宽度统一。
+    /// </summary>
+    private void ApplyRightToolbarDockedPosition(bool animate)
+    {
+        if (_rightToolbarDockEdge is RightToolbarDockEdge.None)
+        {
+            return;
+        }
+
+        double width = MeasureRightToolbarWidth();
+        double height = MeasureRightToolbarExpandedHeight();
+        double rootW = RootGrid.ActualWidth;
+        double rootH = RootGrid.ActualHeight;
+        double x = _rightToolbarX;
+        double y = _rightToolbarY;
+
+        switch (_rightToolbarDockEdge)
+        {
+            case RightToolbarDockEdge.Left:
+                x = RightToolbarDockPeek - width;
+                y = Clamp(y, 0, Math.Max(0, rootH - height));
+                break;
+            case RightToolbarDockEdge.Right:
+                x = rootW - RightToolbarDockPeek;
+                y = Clamp(y, 0, Math.Max(0, rootH - height));
+                break;
+            case RightToolbarDockEdge.Top:
+                x = Clamp(x, 0, Math.Max(0, rootW - width));
+                y = RightToolbarDockPeek - height;
+                break;
+            case RightToolbarDockEdge.Bottom:
+                x = Clamp(x, 0, Math.Max(0, rootW - width));
+                y = rootH - RightToolbarDockPeek;
+                break;
+        }
+
+        SetRightToolbarPosition(x, y, animate);
+    }
+
+
+    /// <summary>
+    /// 贴边浮出后的完整可见位置（贴在对应边内侧，保留默认边距）。
+    /// </summary>
+    private Point GetRightToolbarRevealedPosition(RightToolbarDockEdge edge)
+    {
+        double width = MeasureRightToolbarWidth();
+        double height = MeasureRightToolbarExpandedHeight();
+        double rootW = RootGrid.ActualWidth;
+        double rootH = RootGrid.ActualHeight;
+        const double inset = 12;
+        double x = _rightToolbarX;
+        double y = _rightToolbarY;
+
+        switch (edge)
+        {
+            case RightToolbarDockEdge.Left:
+                x = inset;
+                y = Clamp(y, inset, Math.Max(inset, rootH - height - inset));
+                break;
+            case RightToolbarDockEdge.Right:
+                x = rootW - inset - width;
+                y = Clamp(y, inset, Math.Max(inset, rootH - height - inset));
+                break;
+            case RightToolbarDockEdge.Top:
+                x = Clamp(x, inset, Math.Max(inset, rootW - width - inset));
+                y = inset;
+                break;
+            case RightToolbarDockEdge.Bottom:
+                x = Clamp(x, inset, Math.Max(inset, rootW - width - inset));
+                y = rootH - inset - height;
+                break;
+            default:
+                x = Clamp(x, 0, Math.Max(0, rootW - width));
+                y = Clamp(y, 0, Math.Max(0, rootH - height));
+                break;
+        }
+
+        return new Point(x, y);
+    }
+
+
+    /// <summary>
+    /// 仅当工具栏已越出窗口左右边界一定距离时才贴边（只支持左/右，不支持上下）。
+    /// 内侧贴近不收纳，避免默认靠右就误贴边；取左右越界更深的一侧。
+    /// </summary>
+    private RightToolbarDockEdge DetectRightToolbarDockEdge(double x, double y, double width, double height)
+    {
+        double rootW = RootGrid.ActualWidth;
+        if (rootW <= 0)
+        {
+            return RightToolbarDockEdge.None;
+        }
+
+        // 仅左右越界深度：>0 表示该侧已伸出窗口外。
+        double overflowLeft = Math.Max(0, -x);
+        double overflowRight = Math.Max(0, x + width - rootW);
+
+        // 至少伸出这么多才收纳，避免擦边误触。
+        const double minOverflow = 8;
+        if (overflowLeft < minOverflow && overflowRight < minOverflow)
+        {
+            return RightToolbarDockEdge.None;
+        }
+
+        return overflowLeft >= overflowRight
+            ? RightToolbarDockEdge.Left
+            : RightToolbarDockEdge.Right;
+    }
+
+
+    /// <summary>
+    /// 自由态时把工具栏至少保留一截在窗口内，避免完全拖丢。
+    /// </summary>
+    private void ClampRightToolbarIntoSoftBounds()
+    {
+        double width = MeasureRightToolbarWidth();
+        double height = Math.Max(GetRightToolbarCurrentHeight(), MeasureRightToolbarCollapsedHeight());
+        double rootW = RootGrid.ActualWidth;
+        double rootH = RootGrid.ActualHeight;
+        const double keep = 24;
+        _rightToolbarX = Clamp(_rightToolbarX, keep - width, rootW - keep);
+        _rightToolbarY = Clamp(_rightToolbarY, keep - height, rootH - keep);
+    }
+
+
+    private static double Clamp(double value, double min, double max)
+    {
+        if (max < min)
+        {
+            return min;
+        }
+        return Math.Min(max, Math.Max(min, value));
+    }
+
+
+    #endregion
+
+
+    #region Height / Measure
+
+
+    private void ApplyRightToolbarHeight(double height, bool animate)
+    {
+        if (height <= 0 || double.IsNaN(height))
+        {
+            return;
+        }
+
+        double current = GetRightToolbarCurrentHeight();
+        double width = Math.Max(Border_RightToolbar.ActualWidth, MeasureRightToolbarWidth());
+        if (Math.Abs(current - height) < 0.5)
+        {
+            Border_RightToolbar.Height = height;
+            UpdateRightToolbarClip(width, height);
+            return;
+        }
+
+        _rightToolbarHeightStoryboard?.Stop();
+        _rightToolbarHeightStoryboard = null;
+
+        if (!animate || !EntranceAnimation.AnimationsEnabled())
+        {
+            Border_RightToolbar.Height = height;
+            UpdateRightToolbarClip(width, height);
+            return;
+        }
+
+        Border_RightToolbar.Height = current;
+        var animation = new DoubleAnimation
+        {
+            From = current,
+            To = height,
+            Duration = RightToolbarAnimDuration,
+            EnableDependentAnimation = true,
+            EasingFunction = new CubicEase
+            {
+                EasingMode = _rightToolbarState is RightToolbarState.Collapsed or RightToolbarState.Dragging
+                    ? EasingMode.EaseIn
+                    : EasingMode.EaseOut,
+            },
+        };
+        Storyboard.SetTarget(animation, Border_RightToolbar);
+        Storyboard.SetTargetProperty(animation, "Height");
+
+        var storyboard = new Storyboard();
+        storyboard.Children.Add(animation);
+        storyboard.Completed += (_, _) =>
+        {
+            if (ReferenceEquals(_rightToolbarHeightStoryboard, storyboard))
+            {
+                Border_RightToolbar.Height = height;
+                UpdateRightToolbarClip(Math.Max(Border_RightToolbar.ActualWidth, MeasureRightToolbarWidth()), height);
+                _rightToolbarHeightStoryboard = null;
+            }
+        };
+        _rightToolbarHeightStoryboard = storyboard;
+        storyboard.Begin();
+    }
+
+
+    private double GetRightToolbarCurrentHeight()
+    {
+        if (!double.IsNaN(Border_RightToolbar.Height) && Border_RightToolbar.Height > 0)
+        {
+            return Border_RightToolbar.Height;
+        }
+        if (Border_RightToolbar.ActualHeight > 0)
+        {
+            return Border_RightToolbar.ActualHeight;
+        }
+        return MeasureRightToolbarCollapsedHeight();
+    }
+
+
+    private void UpdateRightToolbarClip(double width, double height)
+    {
+        if (width <= 0)
+        {
+            width = MeasureRightToolbarWidth();
+        }
+        if (height <= 0)
+        {
+            return;
+        }
+
+        // 贴边时用完整矩形，peek 靠位移实现，避免再被 clip 裁成非统一宽度。
+        Border_RightToolbar.Clip = new RectangleGeometry
+        {
+            Rect = new Rect(0, 0, width, height),
+        };
+    }
+
+
+    private int CountVisibleRightToolbarButtons()
+    {
+        int count = 0;
+        foreach (UIElement child in StackPanel_RightToolbar.Children)
+        {
+            if (child is FrameworkElement fe && fe.Visibility == Visibility.Visible)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+
+    private double MeasureRightToolbarWidth()
+    {
+        double padding = Border_RightToolbar.Padding.Left + Border_RightToolbar.Padding.Right;
+        if (Border_RightToolbar.ActualWidth > 0)
+        {
+            return Border_RightToolbar.ActualWidth;
+        }
+        return padding + RightToolbarButtonSize;
+    }
+
+
+    private double MeasureRightToolbarCollapsedHeight()
+    {
+        double padding = Border_RightToolbar.Padding.Top + Border_RightToolbar.Padding.Bottom;
+        return padding + RightToolbarButtonSize;
+    }
+
+
+    private double MeasureRightToolbarExpandedHeight()
+    {
+        double padding = Border_RightToolbar.Padding.Top + Border_RightToolbar.Padding.Bottom;
+        int visible = CountVisibleRightToolbarButtons();
+        if (visible <= 0)
+        {
+            return padding + RightToolbarButtonSize;
+        }
+
+        return padding
+               + visible * RightToolbarButtonSize
+               + Math.Max(0, visible - 1) * StackPanel_RightToolbar.Spacing;
+    }
+
+
+    #endregion
+
+
+    #region Flyout hooks
+
+
+    private bool IsAnyRightToolbarFlyoutOpen()
+    {
+        foreach (UIElement child in StackPanel_RightToolbar.Children)
+        {
+            if (child is not FrameworkElement fe || fe.Visibility != Visibility.Visible)
+            {
+                continue;
+            }
+
+            Button? button = fe as Button ?? fe.FindDescendant<Button>();
+            if (button?.Flyout is FlyoutBase flyout && flyout.IsOpen)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private void CloseAnyRightToolbarFlyout()
+    {
+        foreach (UIElement child in StackPanel_RightToolbar.Children)
+        {
+            if (child is not FrameworkElement fe)
+            {
+                continue;
+            }
+
+            Button? button = fe as Button ?? fe.FindDescendant<Button>();
+            if (button?.Flyout is FlyoutBase flyout && flyout.IsOpen)
+            {
+                flyout.Hide();
+            }
+        }
+    }
+
+
+    private void EnsureRightToolbarFlyoutHooks()
+    {
+        foreach (UIElement child in StackPanel_RightToolbar.Children)
+        {
+            if (child is not FrameworkElement fe)
+            {
+                continue;
+            }
+
+            Button? button = fe as Button ?? fe.FindDescendant<Button>();
+            if (button?.Flyout is not FlyoutBase flyout || _rightToolbarHookedFlyouts.Contains(flyout))
+            {
+                continue;
+            }
+
+            flyout.Opened += RightToolbarFlyout_Opened;
+            flyout.Closed += RightToolbarFlyout_Closed;
+            _rightToolbarHookedFlyouts.Add(flyout);
+        }
+    }
+
+
+    private void RightToolbarFlyout_Opened(object? sender, object e)
+    {
+        // 拖拽松手同一帧可能误开 Flyout：立刻关掉。
+        if (_rightToolbarSuppressClick || _rightToolbarDragging || _rightToolbarState is RightToolbarState.Dragging or RightToolbarState.Docked)
+        {
+            if (sender is FlyoutBase flyout)
+            {
+                flyout.Hide();
+            }
+            return;
+        }
+
+        StopRightToolbarCollapseTimer();
+        if (_rightToolbarState is RightToolbarState.Collapsed)
+        {
+            TransitionRightToolbar(RightToolbarState.Expanded, animate: true);
+        }
+        else if (_rightToolbarState is RightToolbarState.Docked)
+        {
+            // 贴边等待离开期间不允许借 Flyout 浮出。
+            if (_rightToolbarDockAwaitPointerLeave)
+            {
+                if (sender is FlyoutBase flyout)
+                {
+                    flyout.Hide();
+                }
+                return;
+            }
+            TransitionRightToolbar(RightToolbarState.DockRevealed, animate: true);
+        }
+    }
+
+
+    private void RightToolbarFlyout_Closed(object? sender, object e)
+    {
+        ScheduleRightToolbarIdleCollapse();
+    }
+
+
+    #endregion
 
 
     #endregion

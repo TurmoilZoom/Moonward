@@ -151,6 +151,15 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 首页功能工具栏布局（位置 / 贴边）。格式见 GameLauncherPage 中 Right Toolbar 区域的读写逻辑。
+    /// </summary>
+    public static string? GameLauncherRightToolbarLayout
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
     public static StartGameAction StartGameAction
     {
         get => GetValue(Starward.Features.GameLauncher.StartGameAction.Minimize);

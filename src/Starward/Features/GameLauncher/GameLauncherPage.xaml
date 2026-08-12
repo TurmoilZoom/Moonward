@@ -703,17 +703,25 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <!--  右边侧栏：靠上 + 亚克力背景栏  -->
-        <Border Margin="8,48,12,0"
+        <!--  右侧功能工具栏：状态机见 GameLauncherPage 中 Right Toolbar 区域
+              Collapsed / Expanded / Dragging / Docked / DockRevealed；位置由 TranslateTransform 控制  -->
+        <!--  Pressed/Moved/Released 在 code-behind 用 AddHandler(handledEventsToo) 挂接：子 Button 会 Handled 并捕获指针，XAML 路由收不到  -->
+        <Border x:Name="Border_RightToolbar"
                 Padding="4"
-                HorizontalAlignment="Right"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Background="{ThemeResource CustomOverlayAcrylicBrush}"
                 CornerRadius="12"
+                ManipulationMode="None"
+                PointerEntered="Border_RightToolbar_PointerEntered"
+                PointerExited="Border_RightToolbar_PointerExited"
                 Shadow="{StaticResource ThemeShadow}"
                 Translation="0,0,16">
-            <StackPanel Spacing="4">
-                <!--  云游戏  -->
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="Transform_RightToolbar" X="0" Y="48" />
+            </Border.RenderTransform>
+            <StackPanel x:Name="StackPanel_RightToolbar" Spacing="4">
+                <!--  云游戏（收起态锚定项）  -->
                 <sfc:CloudGameButton x:Name="Button_CloudGame"
                                      Width="40"
                                      Height="40"

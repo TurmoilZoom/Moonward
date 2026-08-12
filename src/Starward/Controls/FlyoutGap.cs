@@ -29,7 +29,7 @@ public static class FlyoutGap
 
 
     /// <summary>
-    /// 水平间距（DIP）。左侧弹出时向左偏移该值；非 0 时同时启用垂直边距校正。
+    /// 水平间距（DIP）。左侧弹出时向左偏移、右侧弹出时向右偏移该值；非 0 时同时启用垂直边距校正。
     /// </summary>
     public static readonly DependencyProperty HorizontalProperty =
         DependencyProperty.RegisterAttached(
@@ -130,7 +130,10 @@ public static class FlyoutGap
     private static void ApplyOffset(Flyout flyout, FlyoutPresenter presenter)
     {
         double gap = GetHorizontal(flyout);
-        float offsetX = IsLeftPlacement(flyout.Placement) ? (float)-gap : 0f;
+        // 左弹出向左让出间距；右弹出向右让出，与工具栏左右贴边对称。
+        float offsetX = IsLeftPlacement(flyout.Placement)
+            ? (float)-gap
+            : IsRightPlacement(flyout.Placement) ? (float)gap : 0f;
 
         // 先只设水平偏移，再以此时的屏幕位置计算垂直修正
         presenter.Translation = new Vector3(offsetX, 0, presenter.Translation.Z);
@@ -199,6 +202,14 @@ public static class FlyoutGap
         return placement is FlyoutPlacementMode.Left
             or FlyoutPlacementMode.LeftEdgeAlignedTop
             or FlyoutPlacementMode.LeftEdgeAlignedBottom;
+    }
+
+
+    private static bool IsRightPlacement(FlyoutPlacementMode placement)
+    {
+        return placement is FlyoutPlacementMode.Right
+            or FlyoutPlacementMode.RightEdgeAlignedTop
+            or FlyoutPlacementMode.RightEdgeAlignedBottom;
     }
 
 
