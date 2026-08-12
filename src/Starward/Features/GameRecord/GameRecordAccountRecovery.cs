@@ -17,27 +17,55 @@ internal static class GameRecordAccountRecovery
     private static BattleChronicleWindow? _battleChronicleWindow;
 
     /// <summary>
-    /// 导航到战绩页后是否应自动弹出登录菜单。
-    /// 由 <see cref="RequestOpenLogin"/> 置位，<see cref="GameRecordPage"/> 在 Loaded 后消费。
+    /// 当前是否存在已 Loaded 且已注册消息的战绩页实例。
+    /// 由 <see cref="GameRecordPage"/> 在注册/卸载时维护，用于避免「已在工具箱时再 Navigate 同页」导致实例重建与登录跳转竞态。
+    /// </summary>
+    private static bool _gameRecordPageAlive;
+
+    /// <summary>
+    /// 跨页导航到战绩页后是否应自动打开登录。
+    /// 仅在战绩页尚未存活时由 <see cref="RequestOpenLogin"/> 置位，由新页 <c>OnLoaded</c> 消费；
+    /// 消息处理器不消费该标志（避免旧实例抢消费后登录落在即将卸载的页面上）。
     /// </summary>
     public static bool PendingOpenLogin { get; private set; }
 
 
     /// <summary>
-    /// 请求重新登录：导航到战绩页并打开登录菜单。
-    /// 若战绩页已在内存中会立即弹菜单；否则在页面 Loaded 后弹。
+    /// 标记战绩页是否处于可接收「打开登录」消息的存活状态。
+    /// </summary>
+    /// <param name="alive">为 true 表示已注册消息并可打开登录 UI；卸载时为 false。</param>
+    public static void SetGameRecordPageAlive(bool alive)
+    {
+        _gameRecordPageAlive = alive;
+    }
+
+
+    /// <summary>
+    /// 请求重新登录：打开战绩登录入口。
+    /// <list type="bullet">
+    /// <item>已在战绩页：只发 <see cref="GameRecordOpenLoginMessage"/>，禁止再主 Frame Navigate 同页。</item>
+    /// <item>不在战绩页：置 <see cref="PendingOpenLogin"/> 并导航到战绩页，由新页 Loaded 打开登录。</item>
+    /// </list>
     /// </summary>
     public static void RequestOpenLogin()
     {
+        // 已在工具箱：勿 Navigate 到同类型页（会 new 实例并与消息竞态，登录可能打在即将卸载的旧页上）
+        if (_gameRecordPageAlive)
+        {
+            WeakReferenceMessenger.Default.Send(new GameRecordOpenLoginMessage());
+            return;
+        }
+
         PendingOpenLogin = true;
         WeakReferenceMessenger.Default.Send(new MainViewNavigateMessage(typeof(GameRecordPage)));
-        // 战绩页已加载时同步通知（OnLoaded 注册后才有效）；未加载时依赖 PendingOpenLogin
+        // 新页通常尚未注册；若极端情况下已有订阅者会立即打开，否则靠 OnLoaded 消费 PendingOpenLogin
         WeakReferenceMessenger.Default.Send(new GameRecordOpenLoginMessage());
     }
 
 
     /// <summary>
-    /// 消费「打开登录」挂起标志；仅应在战绩页成功弹出登录菜单后调用。
+    /// 消费「打开登录」挂起标志；仅应由新战绩页在 <c>OnLoaded</c> 成功打开登录前调用。
+    /// 消息处理器不得调用，以免跨页导航时旧实例抢先清掉标志。
     /// </summary>
     /// <returns>若此前有挂起请求则为 true。</returns>
     public static bool ConsumePendingOpenLogin()

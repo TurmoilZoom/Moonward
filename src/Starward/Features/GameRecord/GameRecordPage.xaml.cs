@@ -120,10 +120,11 @@ public sealed partial class GameRecordPage : PageBase
         });
         WeakReferenceMessenger.Default.Register<GameRecordOpenLoginMessage>(this, (r, m) =>
         {
-            // 消费跨页挂起标志；国服弹出登录菜单，国际服无验证码则直接进网页登录。
-            GameRecordAccountRecovery.ConsumePendingOpenLogin();
+            // 仅打开登录，不消费 PendingOpenLogin（该标志专供跨页导航后 OnLoaded 使用，避免旧实例抢消费）
             OpenLoginForRecovery();
         });
+        // 须在注册消息之后再标记存活，保证「已在工具箱」路径发出的 OpenLogin 消息能被收到
+        GameRecordAccountRecovery.SetGameRecordPageAlive(true);
 
         await Task.Delay(16);
         NavigateTo(typeof(BlankPage));
@@ -137,7 +138,7 @@ public sealed partial class GameRecordPage : PageBase
             NavigateToDefaultPage();
         }
 
-        // 从抽卡页等非战绩页触发「重新登录」时：导航后挂起标志在此消费并打开登录
+        // 从抽卡页等非战绩页触发「重新登录」：新页 Loaded 后消费挂起标志并打开登录
         if (GameRecordAccountRecovery.ConsumePendingOpenLogin())
         {
             OpenLoginForRecovery();
@@ -148,6 +149,8 @@ public sealed partial class GameRecordPage : PageBase
 
     protected override void OnUnloaded()
     {
+        // 先取消存活标记，避免卸载过程中 RequestOpenLogin 误判「已在工具箱」而只发消息
+        GameRecordAccountRecovery.SetGameRecordPageAlive(false);
         WeakReferenceMessenger.Default.UnregisterAll(this);
         NavigationViewItem_BattleChronicle.Tapped -= NavigationViewItem_BattleChronicle_Tapped;
         _navHoverEffect.Detach();
