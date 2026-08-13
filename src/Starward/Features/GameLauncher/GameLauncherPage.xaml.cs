@@ -112,6 +112,9 @@ public sealed partial class GameLauncherPage : PageBase
         CheckGameVersion();
         UpdateGameInstallTask();
         CheckCloudGame();
+        // 工具栏始终可用；不要等背景列表异步返回才 Visible，否则 InstantTooltip 可能错过 Loaded 挂接。
+        Border_SwitchBackgroundImage.Visibility = Visibility.Visible;
+        Border_SwitchBackgroundImage.Opacity = AppConfig.ToolbarPinned ? 1 : 0;
         InitializeRightToolbarCollapse();
         _ = InitializeGameServerAsync();
         _ = InitializeBackgameImageSwitcherAsync();
@@ -1413,6 +1416,9 @@ public sealed partial class GameLauncherPage : PageBase
     private PointerEventHandler? _rightToolbarRootReleasedHandler;
     private bool _rightToolbarRootHandlersAttached;
 
+    /// <summary>进页时记下的 XamlRoot；卸载时 XamlRoot 可能已空，仍要靠它解除 Tooltip 抑制。</summary>
+    private XamlRoot? _instantTooltipXamlRoot;
+
 
     /// <summary>
     /// 初始化右侧工具栏状态机：默认右上角收起，监听尺寸与 Flyout。
@@ -1425,6 +1431,7 @@ public sealed partial class GameLauncherPage : PageBase
         }
 
         _rightToolbarInitialized = true;
+        _instantTooltipXamlRoot = XamlRoot;
         StackPanel_RightToolbar.SizeChanged += StackPanel_RightToolbar_SizeChanged;
         Border_RightToolbar.SizeChanged += Border_RightToolbar_SizeChanged;
         RootGrid.SizeChanged += RootGrid_RightToolbar_SizeChanged;
@@ -1461,7 +1468,8 @@ public sealed partial class GameLauncherPage : PageBase
         _rightToolbarHeightStoryboard = null;
         _rightToolbarMoveStoryboard?.Stop();
         _rightToolbarMoveStoryboard = null;
-        InstantTooltip.SetSuppressed(XamlRoot, false);
+        InstantTooltip.SetSuppressed(_instantTooltipXamlRoot ?? XamlRoot, false);
+        _instantTooltipXamlRoot = null;
         DetachRightToolbarRootPointerHandlers();
         if (_rightToolbarInitialized)
         {
@@ -1844,8 +1852,6 @@ public sealed partial class GameLauncherPage : PageBase
             _rightToolbarDockAwaitPointerLeave = true;
             _rightToolbarPointerOver = false;
             TransitionRightToolbar(RightToolbarState.Docked, animate: true);
-            // Docked 本身不可点；仍抑制 Tooltip。
-            InstantTooltip.SetSuppressed(XamlRoot, true);
             SaveRightToolbarLayout();
         }
         else
@@ -1929,7 +1935,9 @@ public sealed partial class GameLauncherPage : PageBase
                 _rightToolbarRevealInteractive = false;
                 ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
                 SetRightToolbarButtonsHitTestVisible(false);
-                InstantTooltip.SetSuppressed(XamlRoot, true);
+                // 贴边只关本条按钮命中；不要保持窗口级抑制，
+                // 否则下侧工具栏 / 导航栏的 InstantTooltip 也会一起消失。
+                InstantTooltip.SetSuppressed(XamlRoot, false);
                 ApplyRightToolbarDockedPosition(animate);
                 break;
 
@@ -1937,7 +1945,6 @@ public sealed partial class GameLauncherPage : PageBase
                 _rightToolbarRevealInteractive = false;
                 ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
                 SetRightToolbarButtonsHitTestVisible(false);
-                InstantTooltip.SetSuppressed(XamlRoot, true);
                 Point revealed = GetRightToolbarRevealedPosition(_rightToolbarDockEdge);
                 SetRightToolbarPosition(revealed.X, revealed.Y, animate, onCompleted: () =>
                 {
@@ -1945,14 +1952,12 @@ public sealed partial class GameLauncherPage : PageBase
                     {
                         _rightToolbarRevealInteractive = true;
                         SetRightToolbarButtonsHitTestVisible(true);
-                        InstantTooltip.SetSuppressed(XamlRoot, false);
                     }
                 });
                 if (!animate)
                 {
                     _rightToolbarRevealInteractive = true;
                     SetRightToolbarButtonsHitTestVisible(true);
-                    InstantTooltip.SetSuppressed(XamlRoot, false);
                 }
                 break;
         }
@@ -2045,11 +2050,9 @@ public sealed partial class GameLauncherPage : PageBase
             _ => false,
         };
         SetRightToolbarButtonsHitTestVisible(interactive);
-        if (!interactive)
-        {
-            InstantTooltip.SetSuppressed(XamlRoot, true);
-        }
-        else if (_rightToolbarState is not RightToolbarState.Dragging)
+        // 仅拖拽时窗口级抑制 Tooltip（指针会划过下侧工具栏 / 导航）。
+        // 贴边不可点靠 IsHitTestVisible=false 即可，不能用 SetSuppressed。
+        if (_rightToolbarState is not RightToolbarState.Dragging)
         {
             InstantTooltip.SetSuppressed(XamlRoot, false);
         }

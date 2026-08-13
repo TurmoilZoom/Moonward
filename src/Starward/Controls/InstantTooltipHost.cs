@@ -162,8 +162,11 @@ internal sealed class InstantTooltipHost
             Background = GetThemeBrush("CustomOverlayAcrylicBrush"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(6),
-            // 允许命中气泡与按钮；指针进入气泡时保持打开
-            IsHitTestVisible = true,
+            // 默认不命中：纯文案提示应点击穿透，避免退场后透明 Popup 挡在下侧工具栏上。
+            // 带操作按钮时由 ShowTooltip 打开命中，便于移入气泡点击。
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            IsHitTestVisible = false,
             Child = _body,
         };
         _content.PointerEntered += Content_PointerEntered;
@@ -228,7 +231,7 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 解除元素注册并清理事件订阅；若正是当前展示锚点则隐藏 Tooltip。
+    /// 解除元素注册并清理事件订阅；若正是当前展示锚点则立即关闭 Tooltip（不走退场动画）。
     /// </summary>
     /// <param name="element">待注销的锚点元素。</param>
     public void Unregister(FrameworkElement element)
@@ -250,10 +253,23 @@ internal sealed class InstantTooltipHost
 
         if (_currentAnchor == element)
         {
+            // 页面导航时锚点直接卸树，收不到 PointerExited；必须立刻关 Popup。
+            // 走 HideTooltip 退场动画会把已透明的 Popup 留在原处挡命中。
             _pointerInsideAnyElement = false;
             _pointerInsidePopup = false;
-            CancelPendingHide();
-            HideTooltip();
+            ForceClosePopup();
+            return;
+        }
+
+        // 其它锚点卸树时也清掉“仍在表面内”的误判，并收掉无主 Popup。
+        if (_currentAnchor is null)
+        {
+            _pointerInsideAnyElement = false;
+            _pointerInsidePopup = false;
+            if (_popup.IsOpen)
+            {
+                ForceClosePopup();
+            }
         }
     }
 
@@ -504,6 +520,8 @@ internal sealed class InstantTooltipHost
         string? actionText = InstantTooltip.GetActionText(element);
         bool hasAction = !string.IsNullOrEmpty(actionText) && InstantTooltip.GetActionCallback(element) is not null;
         _currentHasAction = hasAction;
+        // 仅可交互气泡需要命中；纯文案必须穿透，否则退场后透明层会挡住下方工具栏。
+        _content.IsHitTestVisible = hasAction;
         if (hasAction)
         {
             _actionButton.Content = actionText;
@@ -543,6 +561,7 @@ internal sealed class InstantTooltipHost
     {
         CancelPendingHide();
         NotifyOpenChanged(false);
+        _content.IsHitTestVisible = false;
         _popup.IsOpen = false;
         _currentAnchor = null;
         _currentHasAction = false;
@@ -713,11 +732,7 @@ internal sealed class InstantTooltipHost
 
         if (!EntranceAnimation.AnimationsEnabled())
         {
-            NotifyOpenChanged(false);
-            _popup.IsOpen = false;
-            _hideScheduled = false;
-            _currentAnchor = null;
-            _currentHasAction = false;
+            ForceClosePopup();
             return;
         }
 
@@ -742,13 +757,12 @@ internal sealed class InstantTooltipHost
             _dispatcherQueue.TryEnqueue(() =>
             {
                 _hideScheduled = false;
-                // 退场过程中若已 Entered 新锚点或气泡，保留 Popup 由 ShowTooltip 接管
-                if (!IsPointerOverTooltipSurface)
+                // 退场过程中若已 Entered 新锚点或气泡，保留 Popup 由 ShowTooltip 接管。
+                // 锚点已卸树（页面导航）时必须关，否则透明 Popup 会留在原处挡命中。
+                bool anchorAlive = _currentAnchor is not null && _currentAnchor.XamlRoot is not null;
+                if (!IsPointerOverTooltipSurface || !anchorAlive)
                 {
-                    NotifyOpenChanged(false);
-                    _popup.IsOpen = false;
-                    _currentAnchor = null;
-                    _currentHasAction = false;
+                    ForceClosePopup();
                 }
             });
         };
