@@ -3532,4 +3532,37 @@
   <data name="RedeemCode_HintDelay" xml:space="preserve">
     <value>官方接口可能比直播晚约 2 分钟</value>
   </data>
+  <data name="FavorWallpaper_Title" xml:space="preserve">
+    <value>好感壁纸</value>
+  </data>
+  <data name="FavorWallpaper_UseAsBackground" xml:space="preserve">
+    <value>设为背景</value>
+  </data>
+  <data name="FavorWallpaper_DownloadCompleted" xml:space="preserve">
+    <value>下载完成</value>
+  </data>
+  <data name="FavorWallpaper_DownloadFailed" xml:space="preserve">
+    <value>下载失败</value>
+  </data>
+  <data name="FavorWallpaper_SetSuccess" xml:space="preserve">
+    <value>已设为背景</value>
+  </data>
+  <data name="FavorWallpaper_LoadFailed" xml:space="preserve">
+    <value>加载好感壁纸失败</value>
+  </data>
+  <data name="FavorWallpaper_InUse" xml:space="preserve">
+    <value>使用中</value>
+  </data>
+  <data name="FavorWallpaper_Loading" xml:space="preserve">
+    <value>正在加载好感壁纸…</value>
+  </data>
+  <data name="FavorWallpaper_LoadingProgress" xml:space="preserve">
+    <value>正在加载 {0}/{1}</value>
+  </data>
+  <data name="FavorWallpaper_Deleted" xml:space="preserve">
+    <value>已从本地删除</value>
+  </data>
+  <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
+    <value>删除失败</value>
+  </data>
 </root>

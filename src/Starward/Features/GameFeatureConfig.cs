@@ -68,6 +68,12 @@ internal partial class GameFeatureConfig
     public bool SupportRedeemCode { get; init; }
 
 
+    /// <summary>
+    /// 支持百科好感壁纸（绝区零自定义背景）
+    /// </summary>
+    public bool SupportFavorWallpaper { get; init; }
+
+
 
     public static GameFeatureConfig FromGameId(GameId? gameId)
     {
@@ -285,6 +291,7 @@ internal partial class GameFeatureConfig
         SupportCloudGame = true,
         SupportTimeNode = true,
         SupportRedeemCode = true,
+        SupportFavorWallpaper = true,
     };
 
 
@@ -304,6 +311,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
+        SupportFavorWallpaper = true,
     };
 
 
@@ -324,6 +332,7 @@ internal partial class GameFeatureConfig
         SupportSignIn = true,
         SupportTimeNode = true,
         SupportRedeemCode = true,
+        SupportFavorWallpaper = true,
     };
 
 

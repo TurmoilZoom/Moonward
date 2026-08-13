@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Net.Http;
 
 namespace Starward.Core.Blackboard;
 
@@ -11,6 +12,11 @@ public class BlackboardClient
 {
 
     private const string ApiHost = "https://api-static.mihoyo.com";
+
+    /// <summary>
+    /// 百科前端使用的静态 CDN（词条 / 频道列表）。
+    /// </summary>
+    private const string WikiStaticHost = "https://act-api-takumi-static.mihoyo.com";
 
     private readonly HttpClient _httpClient;
 
@@ -70,9 +76,55 @@ public class BlackboardClient
     }
 
 
-    private async Task<T> CommonGetAsync<T>(string url, System.Text.Json.Serialization.Metadata.JsonTypeInfo<miHoYoApiWrapper<T>> typeInfo, CancellationToken cancellationToken)
+    /// <summary>
+    /// 拉取百科首页内容列表（频道树，含子频道条目）。
+    /// </summary>
+    /// <param name="appSn">百科应用标识（如 <c>zzz_wiki</c>）。</param>
+    /// <param name="channelId">频道 id（绝区零档案为 13）。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>频道树。</returns>
+    public async Task<BlackboardContentListData> GetHomeContentListAsync(string appSn, int channelId, CancellationToken cancellationToken = default)
     {
-        using var response = await _httpClient.GetAsync(url, cancellationToken);
+        string url = $"{WikiStaticHost}/common/blackboard/{appSn}/v1/home/content/list?app_sn={Uri.EscapeDataString(appSn)}&channel_id={channelId}";
+        return await CommonGetAsync(url, BlackboardJsonContext.Default.miHoYoApiWrapperBlackboardContentListData, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 拉取百科词条正文（含富文本中的视频地址）。
+    /// </summary>
+    /// <param name="wikiApp">词条路径与 <c>x-rpc-wiki_app</c> 用的短名（绝区零为 <c>zzz</c>）。</param>
+    /// <param name="appSn">百科应用标识。</param>
+    /// <param name="entryPageId">词条 / 内容 id。</param>
+    /// <param name="lang">语言参数。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>词条数据。</returns>
+    public async Task<WikiEntryPageData> GetEntryPageAsync(string wikiApp, string appSn, int entryPageId, string lang = "zh-cn", CancellationToken cancellationToken = default)
+    {
+        string url = $"{WikiStaticHost}/hoyowiki/{wikiApp}/wapi/entry_page?entry_page_id={entryPageId}&lang={Uri.EscapeDataString(lang)}&app_sn={Uri.EscapeDataString(appSn)}";
+        return await CommonGetAsync(
+            url,
+            BlackboardJsonContext.Default.miHoYoApiWrapperWikiEntryPageData,
+            cancellationToken,
+            [("x-rpc-wiki_app", wikiApp), ("Referer", "https://baike.mihoyo.com/")]);
+    }
+
+
+    private async Task<T> CommonGetAsync<T>(
+        string url,
+        System.Text.Json.Serialization.Metadata.JsonTypeInfo<miHoYoApiWrapper<T>> typeInfo,
+        CancellationToken cancellationToken,
+        IReadOnlyList<(string Name, string Value)>? extraHeaders = null)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        if (extraHeaders is not null)
+        {
+            foreach ((string name, string value) in extraHeaders)
+            {
+                request.Headers.TryAddWithoutValidation(name, value);
+            }
+        }
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
         var wrapper = await response.Content.ReadFromJsonAsync(typeInfo, cancellationToken);
         if (wrapper is null)

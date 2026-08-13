@@ -3474,4 +3474,37 @@ You are welcome to submit exported data to:</value>
   <data name="RedeemCode_HintDelay" xml:space="preserve">
     <value>Official API may lag the livestream by about 2 minutes</value>
   </data>
+  <data name="FavorWallpaper_Title" xml:space="preserve">
+    <value>Trust Wallpapers</value>
+  </data>
+  <data name="FavorWallpaper_UseAsBackground" xml:space="preserve">
+    <value>Use as Background</value>
+  </data>
+  <data name="FavorWallpaper_DownloadCompleted" xml:space="preserve">
+    <value>Download completed</value>
+  </data>
+  <data name="FavorWallpaper_DownloadFailed" xml:space="preserve">
+    <value>Download failed</value>
+  </data>
+  <data name="FavorWallpaper_SetSuccess" xml:space="preserve">
+    <value>Background updated</value>
+  </data>
+  <data name="FavorWallpaper_LoadFailed" xml:space="preserve">
+    <value>Failed to load trust wallpapers</value>
+  </data>
+  <data name="FavorWallpaper_InUse" xml:space="preserve">
+    <value>In Use</value>
+  </data>
+  <data name="FavorWallpaper_Loading" xml:space="preserve">
+    <value>Loading wallpapers...</value>
+  </data>
+  <data name="FavorWallpaper_LoadingProgress" xml:space="preserve">
+    <value>Loading {0}/{1}</value>
+  </data>
+  <data name="FavorWallpaper_Deleted" xml:space="preserve">
+    <value>Removed from device</value>
+  </data>
+  <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
+    <value>Failed to delete</value>
+  </data>
 </root>

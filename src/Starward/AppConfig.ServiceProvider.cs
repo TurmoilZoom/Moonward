@@ -68,6 +68,7 @@ public static partial class AppConfig
             sc.AddSingleton<GameNoticeClient>();
             sc.AddSingleton<HoYoPlayService>();
             sc.AddSingleton<BackgroundService>();
+            sc.AddSingleton<FavorWallpaperService>();
             sc.AddSingleton<GameLauncherService>();
             sc.AddSingleton<GamePackageService>();
             sc.AddSingleton<PlayTimeService>();

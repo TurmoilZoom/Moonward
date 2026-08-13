@@ -497,6 +497,19 @@
                               Glyph="&#xE794;"
                               IsTextScaleFactorEnabled="False" />
                 </Button>
+                <!--  好感壁纸（所选视频仍作为自定义背景）  -->
+                <Button Padding="4"
+                        VerticalAlignment="Center"
+                        Command="{x:Bind OpenFavorWallpaperDialogCommand}"
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.FavorWallpaper_Title}"
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                        Visibility="{x:Bind ShowFavorWallpaper, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <FontIcon FontSize="16"
+                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                              Glyph="&#xE125;"
+                              IsTextScaleFactorEnabled="False" />
+                </Button>
                 <!--  图钉固定  -->
                 <Button Padding="4"
                         VerticalAlignment="Center"

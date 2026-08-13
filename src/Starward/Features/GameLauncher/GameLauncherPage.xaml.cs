@@ -137,9 +137,16 @@ public sealed partial class GameLauncherPage : PageBase
 
 
 
+    /// <summary>
+    /// 当前游戏是否在下侧工具栏显示好感壁纸入口。
+    /// </summary>
+    public bool ShowFavorWallpaper { get; set => SetProperty(ref field, value); }
+
+
     private void InitializeGameFeature()
     {
         GameFeatureConfig feature = GameFeatureConfig.FromGameId(CurrentGameId);
+        ShowFavorWallpaper = feature.SupportFavorWallpaper;
         if (feature.SupportCloudGame)
         {
             Button_CloudGame.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
@@ -956,6 +963,16 @@ public sealed partial class GameLauncherPage : PageBase
     private async Task OpenCustomBackgroundDialogAsync()
     {
         await new CustomBackgroundDialog { CurrentGameId = this.CurrentGameId, XamlRoot = this.XamlRoot }.ShowAsync();
+    }
+
+
+    /// <summary>
+    /// 打开好感壁纸对话框（独立图标）；所选视频仍写入自定义背景。
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenFavorWallpaperDialogAsync()
+    {
+        await new FavorWallpaperDialog { CurrentGameId = this.CurrentGameId, XamlRoot = this.XamlRoot }.ShowAsync();
     }
 
 

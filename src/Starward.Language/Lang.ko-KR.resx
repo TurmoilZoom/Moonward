@@ -3474,4 +3474,37 @@
   <data name="RedeemCode_HintDelay" xml:space="preserve">
     <value>공식 API는 라이브보다 약 2분 늦을 수 있습니다</value>
   </data>
+  <data name="FavorWallpaper_Title" xml:space="preserve">
+    <value>호감 벽지</value>
+  </data>
+  <data name="FavorWallpaper_UseAsBackground" xml:space="preserve">
+    <value>배경으로 사용</value>
+  </data>
+  <data name="FavorWallpaper_DownloadCompleted" xml:space="preserve">
+    <value>다운로드 완료</value>
+  </data>
+  <data name="FavorWallpaper_DownloadFailed" xml:space="preserve">
+    <value>다운로드 실패</value>
+  </data>
+  <data name="FavorWallpaper_SetSuccess" xml:space="preserve">
+    <value>배경이 변경되었습니다</value>
+  </data>
+  <data name="FavorWallpaper_LoadFailed" xml:space="preserve">
+    <value>호감 벽지를 불러오지 못했습니다</value>
+  </data>
+  <data name="FavorWallpaper_InUse" xml:space="preserve">
+    <value>사용 중</value>
+  </data>
+  <data name="FavorWallpaper_Loading" xml:space="preserve">
+    <value>벽지를 불러오는 중…</value>
+  </data>
+  <data name="FavorWallpaper_LoadingProgress" xml:space="preserve">
+    <value>불러오는 중 {0}/{1}</value>
+  </data>
+  <data name="FavorWallpaper_Deleted" xml:space="preserve">
+    <value>기기에서 삭제됨</value>
+  </data>
+  <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
+    <value>삭제 실패</value>
+  </data>
 </root>

@@ -3473,4 +3473,37 @@
   <data name="RedeemCode_HintDelay" xml:space="preserve">
     <value>公式 API は配信より約 2 分遅れる場合があります</value>
   </data>
+  <data name="FavorWallpaper_Title" xml:space="preserve">
+    <value>好感度壁紙</value>
+  </data>
+  <data name="FavorWallpaper_UseAsBackground" xml:space="preserve">
+    <value>背景に設定</value>
+  </data>
+  <data name="FavorWallpaper_DownloadCompleted" xml:space="preserve">
+    <value>ダウンロードが完了しました</value>
+  </data>
+  <data name="FavorWallpaper_DownloadFailed" xml:space="preserve">
+    <value>ダウンロードに失敗しました</value>
+  </data>
+  <data name="FavorWallpaper_SetSuccess" xml:space="preserve">
+    <value>背景を更新しました</value>
+  </data>
+  <data name="FavorWallpaper_LoadFailed" xml:space="preserve">
+    <value>好感度壁紙の読み込みに失敗しました</value>
+  </data>
+  <data name="FavorWallpaper_InUse" xml:space="preserve">
+    <value>使用中</value>
+  </data>
+  <data name="FavorWallpaper_Loading" xml:space="preserve">
+    <value>壁紙を読み込み中…</value>
+  </data>
+  <data name="FavorWallpaper_LoadingProgress" xml:space="preserve">
+    <value>読み込み中 {0}/{1}</value>
+  </data>
+  <data name="FavorWallpaper_Deleted" xml:space="preserve">
+    <value>端末から削除しました</value>
+  </data>
+  <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
+    <value>削除に失敗しました</value>
+  </data>
 </root>

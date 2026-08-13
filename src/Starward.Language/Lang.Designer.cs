@@ -10042,5 +10042,104 @@ namespace Starward.Language {
                 return ResourceManager.GetString("RedeemCode_HintDelay", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Trust Wallpapers 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_Title {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Use as Background 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_UseAsBackground {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_UseAsBackground", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Download completed 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_DownloadCompleted {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_DownloadCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Download failed 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_DownloadFailed {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_DownloadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Background updated 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_SetSuccess {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_SetSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to load trust wallpapers 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_LoadFailed {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_LoadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 In Use 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_InUse {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_InUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Loading wallpapers... 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_Loading {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Loading {0}/{1} 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_LoadingProgress {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_LoadingProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Removed from device 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_Deleted {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_Deleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to delete 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_DeleteFailed {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_DeleteFailed", resourceCulture);
+            }
+        }
     }
 }
