@@ -229,6 +229,20 @@ public static class InstantTooltip
 
 
     /// <summary>
+    /// 立即关闭当前气泡，不进入抑制状态，也不会在指针未离开时自动再弹出。
+    /// 用于锚点容器已不可见（如下侧工具栏取消固定后淡出）但指针仍停在原处的情况。
+    /// </summary>
+    /// <param name="xamlRoot">目标视觉树根；为 <see langword="null"/> 时无操作。</param>
+    public static void Dismiss(XamlRoot? xamlRoot)
+    {
+        if (xamlRoot is not null && Hosts.TryGetValue(xamlRoot, out InstantTooltipHost? host))
+        {
+            host.Dismiss();
+        }
+    }
+
+
+    /// <summary>
     /// <see cref="TextProperty"/> 变更回调：空文案解绑；有文案则立即挂接，或等 <c>Loaded</c> 后再挂接。
     /// </summary>
     /// <param name="d">附加属性目标。</param>

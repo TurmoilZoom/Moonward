@@ -223,10 +223,19 @@ internal sealed class InstantTooltipHost
         if (suppressed)
         {
             // 拖拽中指针仍可能落在锚点上，清掉“在表面内”状态，避免解除抑制后误判保持打开。
-            _pointerInsideAnyElement = false;
-            _pointerInsidePopup = false;
-            ForceClosePopup();
+            Dismiss();
         }
+    }
+
+
+    /// <summary>
+    /// 立即关闭当前气泡，不进入抑制；需新的 PointerEntered 才会再显示。
+    /// </summary>
+    public void Dismiss()
+    {
+        _pointerInsideAnyElement = false;
+        _pointerInsidePopup = false;
+        ForceClosePopup();
     }
 
 
@@ -335,6 +344,12 @@ internal sealed class InstantTooltipHost
         }
 
         if (sender is not FrameworkElement element)
+        {
+            return;
+        }
+
+        // 父级已淡出/折叠时仍可能命中（如下侧工具栏取消固定后 Opacity=0），不要再弹出。
+        if (IsEffectivelyHidden(element))
         {
             return;
         }
@@ -496,10 +511,10 @@ internal sealed class InstantTooltipHost
     /// <summary>
     /// 显示并定位指定元素的 Tooltip，同时播放入场动画。
     /// </summary>
-    /// <param name="element">当前悬停的锚点；不可见或文案为空时直接返回。</param>
+    /// <param name="element">当前悬停的锚点；自身或祖先已隐藏、文案为空时直接返回。</param>
     private void ShowTooltip(FrameworkElement element)
     {
-        if (_suppressed || element.Visibility != Visibility.Visible)
+        if (_suppressed || IsEffectivelyHidden(element))
         {
             return;
         }
@@ -551,6 +566,26 @@ internal sealed class InstantTooltipHost
         {
             InstantTooltip.GetOpenChangedCallback(previousAnchor)?.Invoke(false);
         }
+    }
+
+
+    /// <summary>
+    /// 元素或其祖先不可见、透明时视为已隐藏，不应再弹出 Tooltip。
+    /// </summary>
+    private static bool IsEffectivelyHidden(UIElement element)
+    {
+        DependencyObject? current = element;
+        while (current is not null)
+        {
+            if (current is UIElement ui && (ui.Visibility != Visibility.Visible || ui.Opacity <= 0))
+            {
+                return true;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
     }
 
 

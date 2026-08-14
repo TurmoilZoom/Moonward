@@ -423,11 +423,13 @@
                 PointerExited="Border_SwitchBackgroundImage_PointerExited"
                 PointerWheelChanged="Border_SwitchBackgroundImage_PointerWheelChanged"
                 Visibility="Collapsed">
-            <StackPanel Margin="16,0,0,4"
+            <StackPanel x:Name="StackPanel_SwitchBackgroundImage"
+                        Margin="16,0,0,4"
                         Padding="4"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Bottom"
                         Background="Transparent"
+                        IsHitTestVisible="False"
                         Orientation="Horizontal"
                         Spacing="4">
                 <!--  index 指示器（仅多张背景时可用）  -->

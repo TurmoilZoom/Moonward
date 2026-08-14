@@ -114,7 +114,7 @@ public sealed partial class GameLauncherPage : PageBase
         CheckCloudGame();
         // 工具栏始终可用；不要等背景列表异步返回才 Visible，否则 InstantTooltip 可能错过 Loaded 挂接。
         Border_SwitchBackgroundImage.Visibility = Visibility.Visible;
-        Border_SwitchBackgroundImage.Opacity = AppConfig.ToolbarPinned ? 1 : 0;
+        SetBottomToolbarRevealed(AppConfig.ToolbarPinned);
         InitializeRightToolbarCollapse();
         _ = InitializeGameServerAsync();
         _ = InitializeBackgameImageSwitcherAsync();
@@ -1078,7 +1078,7 @@ public sealed partial class GameLauncherPage : PageBase
             // 工具栏始终可用（承载「显示游戏公告」开关等），仅页码指示器与分隔符随是否多图显隐。
             CanSwitchBackgroundImage = BackgroundImages.Count > 1;
             Border_SwitchBackgroundImage.Visibility = Visibility.Visible;
-            Border_SwitchBackgroundImage.Opacity = AppConfig.ToolbarPinned ? 1 : 0;
+            SetBottomToolbarRevealed(AppConfig.ToolbarPinned);
             if (CanSwitchBackgroundImage)
             {
                 GameBackground? currentBackground = await _backgroundService.GetSuggestedGameBackgroundAsync(CurrentGameId);
@@ -1124,7 +1124,7 @@ public sealed partial class GameLauncherPage : PageBase
 
     private void Border_SwitchBackgroundImage_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        Border_SwitchBackgroundImage.Opacity = 1;
+        SetBottomToolbarRevealed(true);
     }
 
 
@@ -1132,7 +1132,7 @@ public sealed partial class GameLauncherPage : PageBase
     {
         if (!AppConfig.ToolbarPinned)
         {
-            Border_SwitchBackgroundImage.Opacity = 0;
+            SetBottomToolbarRevealed(false);
         }
     }
 
@@ -1145,13 +1145,34 @@ public sealed partial class GameLauncherPage : PageBase
         if (AppConfig.ToolbarPinned)
         {
             ToolbarPinTooltip = Lang.GameLauncherPage_UnpinToolbar;
-            Border_SwitchBackgroundImage.Opacity = 1;
+            SetBottomToolbarRevealed(true);
         }
         else
         {
             ToolbarPinTooltip = Lang.GameLauncherPage_PinToolbar;
-            Border_SwitchBackgroundImage.Opacity = 0;
+            // 指针多半还停在图钉上：先藏栏并关掉命中，避免透明按钮继续弹出 InstantTooltip。
+            SetBottomToolbarRevealed(false);
+            InstantTooltip.Dismiss(XamlRoot);
         }
+    }
+
+
+    /// <summary>
+    /// 下侧工具栏显隐。隐藏时先关掉按钮命中，避免透明按钮仍弹出 InstantTooltip。
+    /// 不在此处 Dismiss：页面加载 / 指针离开时关气泡会误伤右侧工具栏和左侧导航正在显示的提示。
+    /// </summary>
+    /// <param name="revealed">是否以可见、可交互状态展示工具栏。</param>
+    private void SetBottomToolbarRevealed(bool revealed)
+    {
+        if (revealed)
+        {
+            Border_SwitchBackgroundImage.Opacity = 1;
+            StackPanel_SwitchBackgroundImage.IsHitTestVisible = true;
+            return;
+        }
+
+        StackPanel_SwitchBackgroundImage.IsHitTestVisible = false;
+        Border_SwitchBackgroundImage.Opacity = 0;
     }
 
 
