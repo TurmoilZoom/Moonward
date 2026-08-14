@@ -75,6 +75,16 @@ internal sealed class InstantTooltipHost
     private readonly HashSet<FrameworkElement> _elements = [];
 
     /// <summary>
+    /// 锚点 Visibility 回调令牌；元素折叠时不会 Unloaded，需单独解绑。
+    /// </summary>
+    private readonly Dictionary<FrameworkElement, long> _visibilityTokens = [];
+
+    /// <summary>
+    /// 按下处理（handledEventsToo）：Button 会把 PointerPressed 标成已处理，CLR 的 += 收不到。
+    /// </summary>
+    private readonly PointerEventHandler _pointerPressedHandler;
+
+    /// <summary>
     /// 指针是否仍在任一已注册锚点内。
     /// 相邻项切换时 Exited→Entered 之间短暂为 false，配合延后隐藏避免闪烁。
     /// </summary>
@@ -185,6 +195,7 @@ internal sealed class InstantTooltipHost
         _interactiveHideTimer.Interval = TimeSpan.FromMilliseconds(InteractiveHideGraceMs);
         _interactiveHideTimer.Tick += InteractiveHideTimer_Tick;
 
+        _pointerPressedHandler = Element_PointerPressed;
         _compositor = ElementCompositionPreview.GetElementVisual(_content).Compositor;
     }
 
@@ -202,8 +213,12 @@ internal sealed class InstantTooltipHost
 
         element.PointerEntered += Element_PointerEntered;
         element.PointerExited += Element_PointerExited;
-        element.PointerPressed += Element_PointerPressed;
+        // Button / ButtonBase 会在内部把 PointerPressed 标 Handled，普通 += 收不到，点击后提示关不掉。
+        element.AddHandler(UIElement.PointerPressedEvent, _pointerPressedHandler, handledEventsToo: true);
         element.Unloaded += Element_Unloaded;
+        _visibilityTokens[element] = element.RegisterPropertyChangedCallback(
+            UIElement.VisibilityProperty,
+            OnElementVisibilityChanged);
     }
 
 
@@ -250,10 +265,7 @@ internal sealed class InstantTooltipHost
             return;
         }
 
-        element.PointerEntered -= Element_PointerEntered;
-        element.PointerExited -= Element_PointerExited;
-        element.PointerPressed -= Element_PointerPressed;
-        element.Unloaded -= Element_Unloaded;
+        UnhookElement(element);
 
         if (ReferenceEquals(_dismissedUntilLeaveAnchor, element))
         {
@@ -284,19 +296,57 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
+    /// 卸掉锚点上的指针、卸载与 Visibility 订阅（集合项本身由调用方移除）。
+    /// </summary>
+    private void UnhookElement(FrameworkElement element)
+    {
+        element.PointerEntered -= Element_PointerEntered;
+        element.PointerExited -= Element_PointerExited;
+        element.RemoveHandler(UIElement.PointerPressedEvent, _pointerPressedHandler);
+        element.Unloaded -= Element_Unloaded;
+        if (_visibilityTokens.Remove(element, out long token))
+        {
+            element.UnregisterPropertyChangedCallback(UIElement.VisibilityProperty, token);
+        }
+    }
+
+
+    /// <summary>
+    /// 锚点被折叠时不会 Unloaded，PointerExited 也经常不发；当前气泡必须立刻关掉。
+    /// </summary>
+    private void OnElementVisibilityChanged(DependencyObject sender, DependencyProperty dp)
+    {
+        if (sender is not FrameworkElement element || element.Visibility == Visibility.Visible)
+        {
+            return;
+        }
+
+        if (ReferenceEquals(_dismissedUntilLeaveAnchor, element))
+        {
+            _dismissedUntilLeaveAnchor = null;
+        }
+
+        if (ReferenceEquals(_currentAnchor, element))
+        {
+            _pointerInsideAnyElement = false;
+            _pointerInsidePopup = false;
+            ForceClosePopup();
+        }
+    }
+
+
+    /// <summary>
     /// 关闭 Popup、解绑全部锚点并清空状态（Host 从字典移除前调用）。
     /// </summary>
     public void Dispose()
     {
         foreach (FrameworkElement element in _elements)
         {
-            element.PointerEntered -= Element_PointerEntered;
-            element.PointerExited -= Element_PointerExited;
-            element.PointerPressed -= Element_PointerPressed;
-            element.Unloaded -= Element_Unloaded;
+            UnhookElement(element);
         }
 
         _elements.Clear();
+        _visibilityTokens.Clear();
         CancelInteractiveHideTimer();
         NotifyOpenChanged(false);
         _popup.IsOpen = false;
@@ -396,7 +446,8 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 在锚点上按下：立即关掉 Tooltip，避免点开 Flyout 后提示仍叠在按钮旁。
+    /// 在锚点上按下：立即关掉 Tooltip，避免点开 Flyout 或按钮随后折叠后提示仍叠在原处。
+    /// 经 AddHandler(handledEventsToo) 注册，才能收到 Button 已处理的 PointerPressed。
     /// </summary>
     private void Element_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
