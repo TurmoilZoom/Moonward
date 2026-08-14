@@ -16,6 +16,11 @@
           Margin="4"
           Background="#CC1A1A1A"
           CornerRadius="8"
+          PointerCanceled="Root_PointerCanceled"
+          PointerCaptureLost="Root_PointerCaptureLost"
+          PointerEntered="Root_PointerEntered"
+          PointerExited="Root_PointerExited"
+          PointerMoved="Root_PointerMoved"
           sh:PointerCursor.CursorShape="Hand"
           ui:UIElementExtensions.ClipToBounds="True">
 
@@ -25,6 +30,15 @@
                         DecodeWidth="490"
                         Source="{x:Bind View.CoverUrl, Mode=OneWay}"
                         Stretch="Uniform" />
+
+        <MediaPlayerElement x:Name="Player_Preview"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            AreTransportControlsEnabled="False"
+                            AutoPlay="False"
+                            IsHitTestVisible="False"
+                            Stretch="Uniform"
+                            Visibility="Collapsed" />
 
         <Border Height="36"
                 VerticalAlignment="Bottom"
