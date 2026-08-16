@@ -953,7 +953,8 @@ public sealed partial class GachaLogPage : PageBase
         bool keepProgressInfoBar = false;
         try
         {
-            var uid = await _gachaLogService.GetUidFromGachaLogUrl(url);
+            // 有效 authkey 时按 UID 缓存 URL；近 6 个月无记录则返回 0 且不落库
+            await _gachaLogService.GetUidFromGachaLogUrl(url);
             var cancelSource = new CancellationTokenSource();
             var button = new Button
             {
@@ -978,22 +979,12 @@ public sealed partial class GachaLogPage : PageBase
             InAppToast.MainWindow?.Show(infoBar);
             var progress = new Progress<string>((str) => infoBar.Message = str);
             var newUid = await _gachaLogService.GetGachaLogAsync(url, all, CurrentLanguage, progress, cancelSource.Token);
-            infoBar.Title = $"Uid {newUid}";
+            // 近 6 个月无记录时服务返回 0，不要写成「Uid 0」
+            infoBar.Title = newUid > 0 ? $"Uid {newUid}" : null;
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
             keepProgressInfoBar = true;
-            if (SelectUid == uid)
-            {
-                UpdateGachaTypeStats(uid);
-            }
-            else
-            {
-                if (!UidList.Contains(uid))
-                {
-                    UidList.Add(uid);
-                }
-                SelectUid = uid;
-            }
+            ApplyFetchedGachaUid(newUid);
         }
         catch (TaskCanceledException)
         {
@@ -1040,6 +1031,31 @@ public sealed partial class GachaLogPage : PageBase
                 DismissProgressInfoBar(progressInfoBar);
             }
         }
+    }
+
+
+    /// <summary>
+    /// 将拉取到的 UID 加入列表并选中。
+    /// <para><paramref name="uid"/> ≤ 0 表示接口近 6 个月无记录，无法解析玩家 UID，不写入列表。</para>
+    /// </summary>
+    /// <param name="uid">本次拉取得到的 UID。</param>
+    private void ApplyFetchedGachaUid(long uid)
+    {
+        if (uid <= 0)
+        {
+            return;
+        }
+        UidList ??= [];
+        if (SelectUid == uid)
+        {
+            UpdateGachaTypeStats(uid);
+            return;
+        }
+        if (!UidList.Contains(uid))
+        {
+            UidList.Add(uid);
+        }
+        SelectUid = uid;
     }
 
 
@@ -1149,28 +1165,25 @@ public sealed partial class GachaLogPage : PageBase
                 var authKey = await _gameRecordService.GenAuthKeyAsync(role, cancelSource.Token);
                 string url = GameRecordService.BuildGachaLogUrlFromAuthKey(CurrentGameBiz, role, authKey, CurrentLanguage);
                 uid = await _gachaLogService.GetGachaLogAsync(url, param is "all", CurrentLanguage, progress, cancelSource.Token);
-                // 拉取成功后缓存 URL，便于短时内增量更新复用（authkey 仍会过期）
-                if (uid > 0)
+                // 战绩角色已有真实 UID：无记录时仍缓存 URL，便于短时内增量更新
+                long urlUid = uid > 0 ? uid : role.Uid;
+                if (urlUid > 0)
                 {
-                    _gachaLogService.SaveGachaLogUrl(uid, url);
+                    _gachaLogService.SaveGachaLogUrl(urlUid, url);
                 }
             }
 
-            infoBar.Title = $"Uid {uid}";
+            // 接口无记录时 GetGachaLogAsync 返回 0，标题改用战绩角色 UID
+            long displayUid = uid > 0 ? uid : role.Uid;
+            infoBar.Title = displayUid > 0 ? $"Uid {displayUid}" : null;
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
             keepProgressInfoBar = true;
-            if (SelectUid == uid)
+            ApplyFetchedGachaUid(uid);
+            // 本地已有该 UID 时刷新统计（增量 0 条也要更新当前页）
+            if (uid <= 0 && role.Uid > 0 && SelectUid == role.Uid)
             {
-                UpdateGachaTypeStats(uid);
-            }
-            else
-            {
-                if (!UidList.Contains(uid))
-                {
-                    UidList.Add(uid);
-                }
-                SelectUid = uid;
+                UpdateGachaTypeStats(role.Uid);
             }
         }
         catch (OperationCanceledException)
@@ -1849,7 +1862,7 @@ public sealed partial class GachaLogPage : PageBase
         try
         {
             var uids = message.ImportedUids
-                              .Where(x => x.Game == CurrentGameBiz.Game)
+                              .Where(x => x.Game == CurrentGameBiz.Game && x.Uid > 0)
                               .Select(x => x.Uid)
                               .Distinct()
                               .ToList();

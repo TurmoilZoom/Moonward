@@ -105,7 +105,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         try
         {
             var uids = message.ImportedUids
-                              .Where(x => x.Game.Value == "hk4eugc")
+                              .Where(x => x.Game.Value == "hk4eugc" && x.Uid > 0)
                               .Select(x => x.Uid)
                               .Distinct()
                               .ToList();
@@ -343,7 +343,8 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         bool keepProgressInfoBar = false;
         try
         {
-            var uid = await _gachaLogService.GetUidFromGachaLogUrl(url);
+            // 有效 authkey 时按 UID 缓存 URL；近 6 个月无记录则返回 0 且不落库
+            await _gachaLogService.GetUidFromGachaLogUrl(url);
             var cancelSource = new CancellationTokenSource();
             var button = new Button
             {
@@ -368,22 +369,11 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
             InAppToast.MainWindow?.Show(infoBar);
             var progress = new Progress<string>((str) => infoBar.Message = str);
             var newUid = await _gachaLogService.GetGachaLogAsync(url, all, System.Globalization.CultureInfo.CurrentUICulture.Name, progress, cancelSource.Token);
-            infoBar.Title = $"Uid {newUid}";
+            infoBar.Title = newUid > 0 ? $"Uid {newUid}" : null;
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
             keepProgressInfoBar = true;
-            if (SelectUid == uid)
-            {
-                UpdateGachaTypeStats(uid);
-            }
-            else
-            {
-                if (!UidList.Contains(uid))
-                {
-                    UidList.Add(uid);
-                }
-                SelectUid = uid;
-            }
+            ApplyFetchedGachaUid(newUid);
         }
         catch (TaskCanceledException)
         {
@@ -442,6 +432,30 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
                 }
             }
         }
+    }
+
+
+    /// <summary>
+    /// 将拉取到的 UID 加入列表并选中。uid ≤ 0 表示近 6 个月无记录，不写入列表。
+    /// </summary>
+    /// <param name="uid">本次拉取得到的 UID。</param>
+    private void ApplyFetchedGachaUid(long uid)
+    {
+        if (uid <= 0)
+        {
+            return;
+        }
+        UidList ??= [];
+        if (SelectUid == uid)
+        {
+            UpdateGachaTypeStats(uid);
+            return;
+        }
+        if (!UidList.Contains(uid))
+        {
+            UidList.Add(uid);
+        }
+        SelectUid = uid;
     }
 
 

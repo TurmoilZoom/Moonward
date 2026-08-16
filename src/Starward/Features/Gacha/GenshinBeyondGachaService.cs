@@ -41,7 +41,7 @@ internal class GenshinBeyondGachaService
     public virtual List<long> GetUids()
     {
         using var dapper = DatabaseService.CreateConnection();
-        return dapper.Query<long>($"SELECT DISTINCT Uid FROM {GachaTableName};").ToList();
+        return dapper.Query<long>($"SELECT DISTINCT Uid FROM {GachaTableName} WHERE Uid > 0;").ToList();
     }
 
 

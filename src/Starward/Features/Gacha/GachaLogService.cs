@@ -100,13 +100,13 @@ internal abstract class GachaLogService
 
 
     /// <summary>
-    /// 获取当前游戏所有拥有抽卡记录的 UID 列表（去重）。
+    /// 获取当前游戏所有拥有抽卡记录的 UID 列表（去重，排除 0）。
     /// </summary>
     /// <returns>UID 列表，按数据库 DISTINCT 查询顺序返回。</returns>
     public virtual List<long> GetUids()
     {
         using var dapper = DatabaseService.CreateConnection();
-        return dapper.Query<long>($"SELECT DISTINCT Uid FROM {GachaTableName};").ToList();
+        return dapper.Query<long>($"SELECT DISTINCT Uid FROM {GachaTableName} WHERE Uid > 0;").ToList();
     }
 
 

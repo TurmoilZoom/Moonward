@@ -286,6 +286,12 @@ internal class ZZZGachaService : GachaLogService
         }
 
         var oldCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
+        if (list.Count == 0 && oldCount == 0)
+        {
+            // 与 URL 拉取一致：本地与接口都无记录时返回 0，避免 UI 创建空账号
+            progress?.Report(Lang.GachaLogService_ThisAccountHasNoGachaRecordsInTheLast6Months);
+            return 0;
+        }
         InsertGachaLogItems(list);
         var newCount = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM {GachaTableName} WHERE Uid = @Uid;", new { Uid = uid });
         // 获取 {list.Count} 条记录，新增 {newCount - oldCount} 条记录
