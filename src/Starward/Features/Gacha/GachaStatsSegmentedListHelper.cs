@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Hosting;
 using Starward.Controls;
 using System;
 using System.Numerics;
+using Windows.Foundation;
 
 
 namespace Starward.Features.Gacha;
@@ -32,7 +33,7 @@ internal static class GachaStatsSegmentedListHelper
     /// 绑定 Segmented 与两个互斥列表。返回的句柄须在控件 <c>Unloaded</c> 时调用 <see cref="GachaStatsSegmentedListBinding.Dispose"/> 解除绑定。
     /// </summary>
     /// <param name="listScrollViewer">包裹两个列表的竖直滚动容器；切换 tab 时将其滚动位置复位到顶部。</param>
-    public static GachaStatsSegmentedListBinding Bind(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList, ScrollViewer? listScrollViewer = null)
+    public static GachaStatsSegmentedListBinding Bind(Segmented segmented, FrameworkElement firstList, FrameworkElement secondList, ScrollViewer? listScrollViewer = null)
     {
         return new GachaStatsSegmentedListBinding(segmented, firstList, secondList, listScrollViewer);
     }
@@ -153,16 +154,19 @@ internal static class GachaStatsSegmentedListHelper
     internal sealed class GachaStatsSegmentedListBinding : IDisposable
     {
         private readonly Segmented _segmented;
-        private readonly ItemsRepeater _firstList;
-        private readonly ItemsRepeater _secondList;
+        private readonly FrameworkElement _firstList;
+        private readonly FrameworkElement _secondList;
         private readonly ScrollViewer? _listScrollViewer;
         private readonly long _callbackToken;
         private readonly DependencyPropertyChangedCallback _selectedIndexChanged;
+        private readonly TypedEventHandler<XamlRoot, XamlRootChangedEventArgs> _xamlRootChanged;
+        private XamlRoot? _xamlRoot;
+        private double _lastRasterizationScale;
         private int _previousIndex;
         private int _generation;
         private bool _disposed;
 
-        internal GachaStatsSegmentedListBinding(Segmented segmented, ItemsRepeater firstList, ItemsRepeater secondList, ScrollViewer? listScrollViewer)
+        internal GachaStatsSegmentedListBinding(Segmented segmented, FrameworkElement firstList, FrameworkElement secondList, ScrollViewer? listScrollViewer)
         {
             _segmented = segmented;
             _firstList = firstList;
@@ -171,7 +175,52 @@ internal static class GachaStatsSegmentedListHelper
             _previousIndex = Math.Max(0, segmented.SelectedIndex);
             _selectedIndexChanged = (_, _) => Apply(true);
             _callbackToken = segmented.RegisterPropertyChangedCallback(Selector.SelectedIndexProperty, _selectedIndexChanged);
+            _xamlRootChanged = OnXamlRootChanged;
+            firstList.Loaded += OnListLoaded;
             Apply(false);
+        }
+
+        /// <summary>
+        /// 跨显示器 DPI / <see cref="XamlRoot.RasterizationScale"/> 变化时，停掉进行中的滑入滑出动画并复位视觉。
+        /// 拖窗换分辨率会走 WinUI 全树 Measure；若 Composition 变换还在跑，容易和布局叠在一起。
+        /// </summary>
+        private void OnXamlRootChanged(XamlRoot sender, XamlRootChangedEventArgs args)
+        {
+            if (_disposed || _lastRasterizationScale == sender.RasterizationScale)
+            {
+                return;
+            }
+            _lastRasterizationScale = sender.RasterizationScale;
+            _generation++;
+            sender.Content?.DispatcherQueue.TryEnqueue(() =>
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+                ResetVisual(_firstList);
+                ResetVisual(_secondList);
+            });
+        }
+
+        private void OnListLoaded(object sender, RoutedEventArgs e)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            XamlRoot? root = _firstList.XamlRoot;
+            if (root is null || ReferenceEquals(_xamlRoot, root))
+            {
+                return;
+            }
+            if (_xamlRoot is not null)
+            {
+                _xamlRoot.Changed -= _xamlRootChanged;
+            }
+            _xamlRoot = root;
+            _lastRasterizationScale = root.RasterizationScale;
+            root.Changed += _xamlRootChanged;
         }
 
         public void Dispose()
@@ -183,11 +232,23 @@ internal static class GachaStatsSegmentedListHelper
             _disposed = true;
             // 使进行中的切换动画回调失效，避免卸载后仍持有 UI 引用。
             _generation++;
+            _firstList.Loaded -= OnListLoaded;
+            if (_xamlRoot is not null)
+            {
+                _xamlRoot.Changed -= _xamlRootChanged;
+                _xamlRoot = null;
+            }
             _segmented.UnregisterPropertyChangedCallback(Selector.SelectedIndexProperty, _callbackToken);
             ResetVisual(_firstList);
             ResetVisual(_secondList);
-            _firstList.ItemsSource = null;
-            _secondList.ItemsSource = null;
+            if (_firstList is ItemsControl first)
+            {
+                first.ItemsSource = null;
+            }
+            if (_secondList is ItemsControl second)
+            {
+                second.ItemsSource = null;
+            }
         }
 
         private void Apply(bool animate)
@@ -198,8 +259,8 @@ internal static class GachaStatsSegmentedListHelper
             }
             int index = Math.Max(0, _segmented.SelectedIndex);
             bool showFirst = index == 0;
-            ItemsRepeater incoming = showFirst ? _firstList : _secondList;
-            ItemsRepeater outgoing = showFirst ? _secondList : _firstList;
+            UIElement incoming = showFirst ? _firstList : _secondList;
+            UIElement outgoing = showFirst ? _secondList : _firstList;
 
             if (animate && index != _previousIndex)
             {

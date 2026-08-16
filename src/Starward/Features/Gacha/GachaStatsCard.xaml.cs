@@ -8,16 +8,13 @@ namespace Starward.Features.Gacha;
 /// <summary>
 /// 单卡池抽卡统计卡片（原神 / 星铁等非绝区零布局）。
 /// <para>承载统计摘要、5/4 星记录列表切换、保底进度条，并实现 <see cref="IGachaStatsDragCard"/> 供页面级横向换位拖拽。</para>
-/// <para>列表内鼠标拖拽滚动、分段列表联动、保底条动画分别由 Helper 注入，本类负责构造时 Bind、卸载时 Dispose。</para>
+/// <para>列表内鼠标拖拽滚动、分段列表联动由 Helper 注入；保底条动画由 <see cref="GachaPityBarAnimation.AnimateOnLoadProperty"/> 在项 Loaded 时播放。</para>
 /// </summary>
 public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
 {
 
-    /// <summary>5/4 星分段控件与对应 <see cref="ItemsRepeater"/> / <see cref="ScrollViewer"/> 的联动绑定。</summary>
+    /// <summary>5/4 星分段控件与对应列表 / <see cref="ScrollViewer"/> 的联动绑定。</summary>
     private GachaStatsSegmentedListHelper.GachaStatsSegmentedListBinding? _segmentedListBinding;
-
-    /// <summary>5 星列表保底进度条的 Composition 动画绑定。</summary>
-    private GachaPityBarAnimation.GachaPityBarBinding? _pityBarBinding;
 
     /// <summary>记录列表的鼠标拖拽滚动 + 顶底过拉回弹绑定。</summary>
     private GachaStatsListDragScrollHelper.GachaStatsListDragScrollBinding? _dragScrollBinding;
@@ -29,9 +26,8 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
     public GachaStatsCard()
     {
         this.InitializeComponent();
-        // 三个 Bind 均返回需 Dispose 的句柄；卡片从视觉树移除时在 OnCardUnloaded 统一释放。
+        // Bind 返回需 Dispose 的句柄；卡片从视觉树移除时在 OnCardUnloaded 统一释放。
         _segmentedListBinding = GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList, ItemsRepeater_List_5, ItemsRepeater_List_4, ScrollViewer_GachaItemList);
-        _pityBarBinding = GachaPityBarAnimation.Bind(ItemsRepeater_List_5);
         _dragScrollBinding = GachaStatsListDragScrollHelper.Bind(ScrollViewer_GachaItemList);
         Unloaded += OnCardUnloaded;
     }
@@ -47,8 +43,6 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
         Unloaded -= OnCardUnloaded;
         _segmentedListBinding?.Dispose();
         _segmentedListBinding = null;
-        _pityBarBinding?.Dispose();
-        _pityBarBinding = null;
         _dragScrollBinding?.Dispose();
         _dragScrollBinding = null;
     }

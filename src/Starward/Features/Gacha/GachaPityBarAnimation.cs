@@ -6,8 +6,6 @@ using Microsoft.UI.Xaml.Media;
 using Starward.Controls;
 using System;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using Windows.Foundation;
 
 
 namespace Starward.Features.Gacha;
@@ -17,8 +15,13 @@ namespace Starward.Features.Gacha;
 /// 柱条本身是一条左对齐的渐变 <see cref="Border"/>（彩色区间从 offset 0 起向右延伸到 pity/保底）。
 /// 因此只需把整条 Border 的 Composition 缩放以**左边缘为支点**从 <c>Scale.X=0</c> 放大到 1，
 /// 缩放走 Composition（渲染变换），不参与布局，故不影响行高 / 不引发滚动跳动。
+/// <para>
+/// 入场由附加属性 <see cref="AnimateOnLoadProperty"/> 在元素 <see cref="FrameworkElement.Loaded"/> 时触发。
+/// 动画提交推迟到当前布局之后，避免在 Measure 过程中触碰 Composition 造成布局重入。
+/// </para>
+/// <para>类型必须为 public：WinUI 运行时按 XamlTypeInfo 赋值附加属性，internal 类会报 0x802B000A（Failed to assign to property）。</para>
 /// </summary>
-internal static class GachaPityBarAnimation
+public static class GachaPityBarAnimation
 {
     /// <summary>柱条生长时长（毫秒）。对应 LiveCharts 主题默认 <c>AnimationsSpeed</c> = 800ms。</summary>
     private const int DurationMs = 800;
@@ -32,77 +35,99 @@ internal static class GachaPityBarAnimation
     /// <summary>对 ExponentialOut 曲线采样的关键帧数量（越多越平滑）。</summary>
     private const int SampleCount = 24;
 
-    /// <summary>柱条 <see cref="Border"/> 在数据模板中的 x:Name。</summary>
-    private const string DefaultBarName = "PityBar";
 
-    private static readonly ConditionalWeakTable<FrameworkElement, PendingElement> PendingElements = new();
+    /// <summary>
+    /// 为 true 时，柱条进入视觉树后播放一次自左生长动画。
+    /// 用于非虚拟化列表（<see cref="ItemsControl"/>）：每项只 Loaded 一次，无需 ItemsRepeater 的 ElementPrepared。
+    /// </summary>
+    public static readonly DependencyProperty AnimateOnLoadProperty =
+        DependencyProperty.RegisterAttached(
+            "AnimateOnLoad",
+            typeof(bool),
+            typeof(GachaPityBarAnimation),
+            new PropertyMetadata(false, OnAnimateOnLoadChanged));
+
+
+    /// <summary>取得 <see cref="AnimateOnLoadProperty"/>。</summary>
+    public static bool GetAnimateOnLoad(DependencyObject element)
+    {
+        return (bool)element.GetValue(AnimateOnLoadProperty);
+    }
+
+
+    /// <summary>设置 <see cref="AnimateOnLoadProperty"/>。</summary>
+    public static void SetAnimateOnLoad(DependencyObject element, bool value)
+    {
+        element.SetValue(AnimateOnLoadProperty, value);
+    }
+
+
+    private static void OnAnimateOnLoadChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not FrameworkElement bar)
+        {
+            return;
+        }
+        bar.Loaded -= OnBarLoaded;
+        bar.Unloaded -= OnBarUnloaded;
+        if (e.NewValue is true)
+        {
+            bar.Loaded += OnBarLoaded;
+            bar.Unloaded += OnBarUnloaded;
+        }
+    }
+
+
+    private static void OnBarLoaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement bar)
+        {
+            return;
+        }
+        int index = GetItemIndex(bar);
+        // 推迟到本次布局/绘制之后再开动画，避免在 ItemsControl 生成子项的 Measure 栈上启动 Composition。
+        bar.DispatcherQueue.TryEnqueue(() =>
+        {
+            if (bar.XamlRoot is null)
+            {
+                return;
+            }
+            Play(bar, index);
+        });
+    }
+
+
+    private static void OnBarUnloaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement bar)
+        {
+            ResetBar(bar);
+        }
+    }
 
 
     /// <summary>
-    /// 绑定一个 <see cref="ItemsRepeater"/>：其每个表项被实现（<see cref="ItemsRepeater.ElementPrepared"/>）时，
-    /// 找到名为 <paramref name="barName"/> 的柱条并播放「自左生长」入场动画，按表项索引错峰。
-    /// 返回的句柄须在控件 <c>Unloaded</c> 时调用 <see cref="GachaPityBarBinding.Dispose"/> 解除绑定。
+    /// 沿视觉树向上找到 <see cref="ItemsControl"/> 的 <see cref="StackPanel"/> 面板，用其中的序号做错峰。
     /// </summary>
-    public static GachaPityBarBinding Bind(ItemsRepeater repeater, string barName = DefaultBarName)
+    private static int GetItemIndex(FrameworkElement bar)
     {
-        return new GachaPityBarBinding(repeater, barName);
-    }
-
-
-    private static void OnElementPrepared(ItemsRepeaterElementPreparedEventArgs e, string barName)
-    {
-        if (e.Element is not FrameworkElement root)
+        DependencyObject current = bar;
+        while (VisualTreeHelper.GetParent(current) is DependencyObject parent)
         {
-            return;
-        }
-        int index = e.Index;
-        // 模板树通常此刻已实现，直接定位柱条；个别情况下延迟到 Loaded 再找一次，避免漏播。
-        if (FindByName(root, barName) is FrameworkElement bar)
-        {
-            Play(bar, index);
-            return;
-        }
-        void OnLoaded(object sender, RoutedEventArgs args)
-        {
-            CleanupPending(root);
-            if (FindByName(root, barName) is FrameworkElement b)
+            if (parent is StackPanel panel)
             {
-                Play(b, index);
+                int index = panel.Children.IndexOf((UIElement)current);
+                return index < 0 ? 0 : index;
             }
+            current = parent;
         }
-        PendingElements.Add(root, new PendingElement(OnLoaded, barName));
-        root.Loaded += OnLoaded;
+        return 0;
     }
 
 
-    private static void OnElementClearing(ItemsRepeaterElementClearingEventArgs e, string barName)
+    /// <summary>停止柱条动画并复位缩放。</summary>
+    private static void ResetBar(FrameworkElement bar)
     {
-        if (e.Element is not FrameworkElement root)
-        {
-            return;
-        }
-        CleanupPending(root);
-        ResetBar(root, barName);
-    }
-
-
-    private static void CleanupPending(FrameworkElement root)
-    {
-        if (PendingElements.TryGetValue(root, out PendingElement? pending))
-        {
-            root.Loaded -= pending.LoadedHandler;
-            PendingElements.Remove(root);
-        }
-    }
-
-
-    /// <summary>停止柱条动画并复位缩放，供元素回收或控件卸载时调用。</summary>
-    private static void ResetBar(FrameworkElement root, string barName)
-    {
-        if (FindByName(root, barName) is not FrameworkElement bar)
-        {
-            return;
-        }
         Visual visual = ElementCompositionPreview.GetElementVisual(bar);
         try
         {
@@ -172,66 +197,6 @@ internal static class GachaPityBarAnimation
     private static float EaseOutExpo(float t)
     {
         return (float)(1.0 - (Math.Pow(2, -10 * t) - 0.0009765625) * 1.0009775171065494);
-    }
-
-
-    /// <summary>在可视化树中按名称递归查找子元素。</summary>
-    private static FrameworkElement? FindByName(DependencyObject root, string name)
-    {
-        int count = VisualTreeHelper.GetChildrenCount(root);
-        for (int i = 0; i < count; i++)
-        {
-            DependencyObject child = VisualTreeHelper.GetChild(root, i);
-            if (child is FrameworkElement fe && fe.Name == name)
-            {
-                return fe;
-            }
-            if (FindByName(child, name) is FrameworkElement found)
-            {
-                return found;
-            }
-        }
-        return null;
-    }
-
-
-    private sealed class PendingElement(RoutedEventHandler loadedHandler, string barName)
-    {
-        public RoutedEventHandler LoadedHandler { get; } = loadedHandler;
-
-        public string BarName { get; } = barName;
-    }
-
-
-    internal sealed class GachaPityBarBinding : IDisposable
-    {
-        private readonly ItemsRepeater _repeater;
-        private readonly string _barName;
-        private readonly TypedEventHandler<ItemsRepeater, ItemsRepeaterElementPreparedEventArgs> _preparedHandler;
-        private readonly TypedEventHandler<ItemsRepeater, ItemsRepeaterElementClearingEventArgs> _clearingHandler;
-        private bool _disposed;
-
-        internal GachaPityBarBinding(ItemsRepeater repeater, string barName)
-        {
-            _repeater = repeater;
-            _barName = barName;
-            _preparedHandler = (_, e) => OnElementPrepared(e, barName);
-            _clearingHandler = (_, e) => OnElementClearing(e, barName);
-            _repeater.ElementPrepared += _preparedHandler;
-            _repeater.ElementClearing += _clearingHandler;
-        }
-
-        public void Dispose()
-        {
-            if (_disposed)
-            {
-                return;
-            }
-            _disposed = true;
-            _repeater.ElementPrepared -= _preparedHandler;
-            _repeater.ElementClearing -= _clearingHandler;
-            _repeater.ItemsSource = null;
-        }
     }
 
 }

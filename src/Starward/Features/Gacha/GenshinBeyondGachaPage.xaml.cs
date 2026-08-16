@@ -41,18 +41,12 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
 
     private GachaStatsSegmentedListHelper.GachaStatsSegmentedListBinding? _segmentedListBinding2000;
 
-    private GachaPityBarAnimation.GachaPityBarBinding? _pityBarBinding1000;
-
-    private GachaPityBarAnimation.GachaPityBarBinding? _pityBarBinding2000;
-
 
     public GenshinBeyondGachaPage()
     {
         InitializeComponent();
         _segmentedListBinding1000 = GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList1000, ItemsRepeater_List_4_1000, ItemsRepeater_List_3_1000);
         _segmentedListBinding2000 = GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList2000, ItemsRepeater_List_5_2000, ItemsRepeater_List_4_2000);
-        _pityBarBinding1000 = GachaPityBarAnimation.Bind(ItemsRepeater_List_4_1000);
-        _pityBarBinding2000 = GachaPityBarAnimation.Bind(ItemsRepeater_List_5_2000);
     }
 
 
@@ -87,10 +81,6 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         _segmentedListBinding1000 = null;
         _segmentedListBinding2000?.Dispose();
         _segmentedListBinding2000 = null;
-        _pityBarBinding1000?.Dispose();
-        _pityBarBinding1000 = null;
-        _pityBarBinding2000?.Dispose();
-        _pityBarBinding2000 = null;
         GachaStatsType1000 = null;
         GachaStatsType2000 = null;
         GachaItemStats = null;

@@ -10,8 +10,6 @@ public sealed partial class ZZZGachaStatsCard : UserControl, IGachaStatsDragCard
 
     private GachaStatsSegmentedListHelper.GachaStatsSegmentedListBinding? _segmentedListBinding;
 
-    private GachaPityBarAnimation.GachaPityBarBinding? _pityBarBinding;
-
     private GachaStatsListDragScrollHelper.GachaStatsListDragScrollBinding? _dragScrollBinding;
 
 
@@ -19,7 +17,6 @@ public sealed partial class ZZZGachaStatsCard : UserControl, IGachaStatsDragCard
     {
         this.InitializeComponent();
         _segmentedListBinding = GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList, ItemsRepeater_List_5, ItemsRepeater_List_4, ScrollViewer_GachaItemList);
-        _pityBarBinding = GachaPityBarAnimation.Bind(ItemsRepeater_List_5);
         _dragScrollBinding = GachaStatsListDragScrollHelper.Bind(ScrollViewer_GachaItemList);
         Unloaded += OnCardUnloaded;
     }
@@ -30,8 +27,6 @@ public sealed partial class ZZZGachaStatsCard : UserControl, IGachaStatsDragCard
         Unloaded -= OnCardUnloaded;
         _segmentedListBinding?.Dispose();
         _segmentedListBinding = null;
-        _pityBarBinding?.Dispose();
-        _pityBarBinding = null;
         _dragScrollBinding?.Dispose();
         _dragScrollBinding = null;
     }

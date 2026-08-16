@@ -201,9 +201,10 @@
                           VerticalScrollBarVisibility="Hidden"
                           VerticalScrollMode="Enabled">
                 <Grid>
-            <ItemsRepeater x:Name="ItemsRepeater_List_5"
+            <!--  行高固定、数量有限：用 ItemsControl 避免 ItemsRepeater 虚拟化在跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+            <ItemsControl x:Name="ItemsRepeater_List_5"
                            ItemsSource="{x:Bind WarpTypeStats.List_5}">
-                <ItemsRepeater.ItemTemplate>
+                <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="local:GachaLogItemEx">
                         <Grid Name="Grid_Rarity5Item"
                               Height="28"
@@ -225,7 +226,8 @@
                                     Margin="-4,0,-4,0"
                                     VerticalAlignment="Center"
                                     Background="{x:Bind Converter={StaticResource GachaPityProgressBackgroundBrushConverter}}"
-                                    CornerRadius="4" />
+                                    CornerRadius="4"
+                                    local:GachaPityBarAnimation.AnimateOnLoad="True" />
                             <sc:CachedImage Width="28"
                                             Height="28"
                                             DecodeWidth="28"
@@ -268,12 +270,12 @@
                                        Visibility="{x:Bind HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
                         </Grid>
                     </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
-            <ItemsRepeater x:Name="ItemsRepeater_List_4"
+            <ItemsControl x:Name="ItemsRepeater_List_4"
                            ItemsSource="{x:Bind WarpTypeStats.List_4}">
-                <ItemsRepeater.ItemTemplate>
+                <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="local:GachaLogItemEx">
                         <Grid Name="Grid_Rarity4Item"
                               Height="28"
@@ -318,8 +320,8 @@
                                        Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
                         </Grid>
                     </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
                 </Grid>
             </ScrollViewer>
         </Grid>
