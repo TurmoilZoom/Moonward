@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Starward.Controls;
 using System;
 using System.Diagnostics;
@@ -17,6 +18,12 @@ namespace Starward.Features.Gacha;
 /// 让抽卡统计卡片内的记录列表支持鼠标左键拖拽滚动：跟手拖动、松手惯性甩动、拖到边界时内容可被「拉出」一段距离并松手回弹。
 /// <para>通过 <see cref="Bind"/> 为指定 <see cref="ScrollViewer"/> 注入该行为，返回绑定句柄（需在控件 Unloaded 时 Dispose）。</para>
 /// <para>仅接管 <see cref="PointerDeviceType.Mouse"/> 的左键拖拽；触屏/笔的原生 manipulation 完全保留。</para>
+/// <para>
+/// 惯性不能交给 <see cref="ScrollViewer.ChangeView"/> 的原生缓动：拖拽跟手必须连续
+/// <c>ChangeView(disableAnimation: true)</c>，紧接着再发一次带动画的 <c>ChangeView</c>
+/// 会被 ScrollViewer 直接丢掉（返回 <c>false</c>）。因此甩动与跟手共用同一套虚拟偏移，
+/// 由 <see cref="CompositionTarget.Rendering"/> 按帧积分。
+/// </para>
 /// </summary>
 internal static class GachaStatsListDragScrollHelper
 {
@@ -26,11 +33,17 @@ internal static class GachaStatsListDragScrollHelper
     /// <summary>松手回弹动画时长（毫秒）。</summary>
     private const int SpringBackDurationMs = 300;
 
-    /// <summary>甩动目标的外推时间常数（秒）。<c>targetOffset = currentOffset - vel * tau</c>，值越大惯性距离越长。</summary>
-    private const double FlingTimeConstant = 0.3;
+    /// <summary>甩动速度的指数衰减时间常数（秒）。剩余路程约为 <c>|vel| * tau</c>，值越大滑得越远。</summary>
+    private const double FlingTimeConstant = 0.35;
 
     /// <summary>甩动触发的最低速度阈值（像素/秒）。低于此值视为停住，不触发惯性滚动。</summary>
     private const double MinFlingVelocity = 150d;
+
+    /// <summary>甩动过程中速度衰减到此阈值（像素/秒）即停止，避免无限逼近。</summary>
+    private const double FlingStopVelocity = 40d;
+
+    /// <summary>判定仍存在过拉位移的最小绝对值（像素），避免浮点残差挡住甩动。</summary>
+    private const double OverscrollEpsilon = 0.5;
 
 
     /// <summary>
@@ -60,9 +73,10 @@ internal static class GachaStatsListDragScrollHelper
 
         // 拖拽状态
         private bool _isDragging;
+        private Pointer? _capturedPointer;
         private Point _lastPosition;
         private long _lastTimestamp;   // Stopwatch.GetTimestamp()
-        private double _velocity;      // px/s，EMA 平滑后的速度
+        private double _velocity;      // px/s，EMA 平滑后的速度（指针向下为正）
 
         // 回弹位移（Content 的 Composition Translation.Y）：正 = 下拉（顶部拉出），负 = 上推（底部拉出）。
         private double _overscrollY;
@@ -70,8 +84,13 @@ internal static class GachaStatsListDragScrollHelper
         // 权威逻辑偏移：不每帧读 VerticalOffset（ChangeView 异步生效，会读到过期值导致抖动），
         // 而是自己维持一个与用户手指严格一致的虚拟偏移，再分摊给 ChangeView（clamped 部分）与 Composition Translation（overflow 部分）。
         private double _virtualOffset;
+        private double _lastAppliedClamped;
 
-        // ----- 常量 -----
+        // 松手后的惯性积分
+        private bool _flinging;
+        private bool _renderingHooked;
+        private TimeSpan _lastRenderTime;
+
         private static readonly double TickToSeconds = 1.0 / Stopwatch.Frequency;
 
 
@@ -87,6 +106,7 @@ internal static class GachaStatsListDragScrollHelper
             _scrollViewer.PointerMoved += OnPointerMoved;
             _scrollViewer.PointerReleased += OnPointerReleased;
             _scrollViewer.PointerCaptureLost += OnPointerCaptureLost;
+            _scrollViewer.PointerCanceled += OnPointerCaptureLost;
         }
 
 
@@ -105,16 +125,18 @@ internal static class GachaStatsListDragScrollHelper
                 return;
             }
 
+            // 新按下打断进行中的甩动，并以当前真实偏移重新锚定。
+            StopFling();
             double seed = _scrollViewer.VerticalOffset;
             try
             {
-                // 鼠标按下时，立即停止 ScrollViewer 的原生缓动（若存在），并记录当前 offset 作为虚拟偏移的起点。
                 _scrollViewer.ChangeView(null, seed, null, disableAnimation: true);
             }
             catch { }
 
             _virtualOffset = seed;
-            //scrollViewer独占鼠标指针，避免拖拽过程中鼠标离开 ScrollViewer 导致 PointerCaptureLost。
+            _lastAppliedClamped = seed;
+            _capturedPointer = e.Pointer;
             _scrollViewer.CapturePointer(e.Pointer);
             _lastPosition = e.GetCurrentPoint(_scrollViewer).Position;
             _lastTimestamp = Stopwatch.GetTimestamp();
@@ -134,56 +156,24 @@ internal static class GachaStatsListDragScrollHelper
             var point = e.GetCurrentPoint(_scrollViewer);
             if (!point.Properties.IsLeftButtonPressed)
             {
-                // 左键意外松开则终止拖拽
-                FinishDrag(restoreOverscroll: true);
+                // 部分设备会在 PointerReleased 之前先送来「左键已抬起」的 Moved，这里按松手处理，否则会跳过甩动。
+                TryFlingOrRestore();
                 return;
             }
 
             Point pos = point.Position;
-            // 单位：像素
-            //鼠标相对上一采样点，指针在竖直方向上移动了多少（屏幕坐标：Y 向下为正）
             double deltaY = pos.Y - _lastPosition.Y;
             long now = Stopwatch.GetTimestamp();
-            //GetTimestamp是硬件/高精度计数器的 tick，所以必须除以 Frequency（每秒多少 tick）才得到秒
             double dt = (now - _lastTimestamp) * TickToSeconds;
             if (dt > 0)
             {
                 double instant = deltaY / dt;
-                // EMA 平滑速度，计算公式：v = v * (1 - α) + v_instant * α，α 越大响应越快但抖动越明显，α 越小响应越慢但平滑。
+                // EMA 平滑速度：α 越大跟手越快、抖动越明显。
                 _velocity = _velocity * 0.7 + instant * 0.3;
             }
 
-            double maxOffset = _scrollViewer.ScrollableHeight;
-
-            //开始计算累计值
-            // 不相信 ScrollViewer 自己返回的 VerticalOffset，因为它更新是异步的，读回来经常是旧值，会导致画面抖动
-            // 鼠标移动的方向和_scrollViewer相反
-            // 可以为负数，表示本次采样点相对于上次采样点的变化过程
-            //_virtualOffset为累计采样，deltaY为瞬时变化
             _virtualOffset -= deltaY;
-            //_virtualOffset为相对偏移，相对于ScrollViewer的起点0的总偏移
-            double clamped = Math.Clamp(_virtualOffset, 0, maxOffset);
-            double overflow = _virtualOffset - clamped; // >0 底部过拉，<0 顶部过拉。溢出的像素点个数
-
-            // 计算上次采样点的 clamped 值
-            double prevScrollOffset = _virtualOffset + deltaY; 
-            double prevClamped = Math.Clamp(prevScrollOffset, 0, maxOffset);
-
-            //鼠标光点击但不动时，无需响应
-            if (Math.Abs(clamped - prevClamped) > 0.01)
-            {
-                try
-                {
-                    //前提：ScrollViewer.ChangeView() 不允许传负数或超过最大值
-                    //每次采样都让 ScrollViewer 立即跳到 clamped 位置
-                    _scrollViewer.ChangeView(null, clamped, null, disableAnimation: true);
-                }
-                catch { }
-            }
-
-            // 过拉的情况下，计算阻尼之后的真实位移
-            _overscrollY = -Math.Sign(overflow) * Rubber(Math.Abs(overflow), MaxOverscrollPull);
-            ApplyOverscrollInstant();
+            ApplyVirtualOffset();
 
             _lastPosition = pos;
             _lastTimestamp = now;
@@ -206,8 +196,8 @@ internal static class GachaStatsListDragScrollHelper
             {
                 return;
             }
-            // 捕获丢失视为中断：必须恢复回弹位移。
-            FinishDrag(restoreOverscroll: true);
+            // 捕获丢失与正常松手走同一条路径：有速度就甩，没有则回弹/停住。
+            TryFlingOrRestore();
         }
 
         #endregion
@@ -216,74 +206,177 @@ internal static class GachaStatsListDragScrollHelper
         #region Drag End — Fling / Overscroll Restore
 
         /// <summary>
-        /// 结束拖拽：优先回弹（若存在过拉位移），否则尝试惯性甩动。
+        /// 结束拖拽：优先回弹（若存在过拉位移），否则按当前速度启动自管惯性积分。
         /// </summary>
         private void TryFlingOrRestore()
         {
+            if (!_isDragging)
+            {
+                return;
+            }
             EndDragSession();
 
-            // 存在回弹位移，忽略速度，播放回弹动画
-            if (_overscrollY != 0)
+            if (Math.Abs(_overscrollY) > OverscrollEpsilon)
             {
                 PlaySpringBackAnimation();
+                RestoreTooltip();
                 return;
             }
 
-            // 无回弹，尝试惯性
-            double absVel = Math.Abs(_velocity);
-            if (absVel > MinFlingVelocity)//阈值：150 px/s
+            if (Math.Abs(_velocity) > MinFlingVelocity)
             {
-                double current = _scrollViewer.VerticalOffset;
-                double target = current - _velocity * FlingTimeConstant;
-                double max = _scrollViewer.ScrollableHeight;
-                target = Math.Clamp(target, 0, max);
-                // 逐个采样点控制
-                try
-                {
-                    _scrollViewer.ChangeView(null, target, null, disableAnimation: false);
-                }
-                catch { }
+                StartFling();
+                return;
             }
+
+            RestoreTooltip();
         }
 
 
-        /// <summary>强制结束拖拽，确保回弹位移被还原。</summary>
-        private void FinishDrag(bool restoreOverscroll)
-        {
-            EndDragSession();
-
-            if (restoreOverscroll && _overscrollY != 0)
-            {
-                PlaySpringBackAnimation();
-            }
-        }
-
-
-        /// <summary>结束拖拽会话：清状态、释放指针捕获、恢复 InstantTooltip。</summary>
+        /// <summary>结束拖拽会话：清状态并释放指针捕获。Tooltip 抑制保持到甩动/回弹结束。</summary>
         private void EndDragSession()
         {
             _isDragging = false;
             try
             {
-                //释放指针捕获
-                _scrollViewer.ReleasePointerCapture(null);
+                if (_capturedPointer is not null)
+                {
+                    _scrollViewer.ReleasePointerCapture(_capturedPointer);
+                }
             }
             catch { }
-
-            InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, false);
+            _capturedPointer = null;
         }
 
         #endregion
 
 
-        #region Overscroll Visuals
+        #region Self-driven fling
+
+        /// <summary>开始按帧积分甩动。必须自管：ScrollViewer 带动画的 ChangeView 在无动画 ChangeView 之后会被丢掉。</summary>
+        private void StartFling()
+        {
+            _flinging = true;
+            HookRendering();
+        }
+
+
+        /// <summary>停止甩动积分并卸掉渲染回调。</summary>
+        private void StopFling()
+        {
+            _flinging = false;
+            UnhookRendering();
+        }
+
+
+        private void HookRendering()
+        {
+            if (_renderingHooked)
+            {
+                return;
+            }
+            _renderingHooked = true;
+            _lastRenderTime = TimeSpan.Zero;
+            CompositionTarget.Rendering += OnFlingRendering;
+        }
+
+
+        private void UnhookRendering()
+        {
+            if (!_renderingHooked)
+            {
+                return;
+            }
+            _renderingHooked = false;
+            CompositionTarget.Rendering -= OnFlingRendering;
+        }
+
+
+        /// <summary>
+        /// 每帧把速度按指数衰减积分进虚拟偏移，再写回 ScrollViewer。
+        /// 冲出边界时把剩余位移交给橡皮筋，然后回弹。
+        /// </summary>
+        private void OnFlingRendering(object? sender, object e)
+        {
+            if (!_flinging || _disposed)
+            {
+                return;
+            }
+
+            double dt = 1.0 / 60;
+            if (e is RenderingEventArgs args)
+            {
+                if (_lastRenderTime > TimeSpan.Zero)
+                {
+                    dt = (args.RenderingTime - _lastRenderTime).TotalSeconds;
+                }
+                _lastRenderTime = args.RenderingTime;
+            }
+            if (dt <= 0 || dt > 0.1)
+            {
+                dt = 1.0 / 60;
+            }
+
+            // v(t)=v0*e^{-t/τ}，剩余路程 |v|τ，与原先 targetOffset = current - vel * tau 一致。
+            _virtualOffset -= _velocity * dt;
+            _velocity *= Math.Exp(-dt / FlingTimeConstant);
+            ApplyVirtualOffset();
+
+            double maxOffset = _scrollViewer.ScrollableHeight;
+            bool pastEdge = _virtualOffset < 0 || _virtualOffset > maxOffset;
+            if (pastEdge)
+            {
+                StopFling();
+                _virtualOffset = Math.Clamp(_virtualOffset, 0, maxOffset);
+                if (Math.Abs(_overscrollY) > OverscrollEpsilon)
+                {
+                    PlaySpringBackAnimation();
+                }
+                RestoreTooltip();
+                return;
+            }
+
+            if (Math.Abs(_velocity) < FlingStopVelocity)
+            {
+                StopFling();
+                RestoreTooltip();
+            }
+        }
+
+        #endregion
+
+
+        #region Virtual offset → ScrollViewer + overscroll
+
+        /// <summary>
+        /// 把 <see cref="_virtualOffset"/> 拆成 clamped（<see cref="ScrollViewer.ChangeView"/>）与 overflow（Composition Translation）。
+        /// </summary>
+        private void ApplyVirtualOffset()
+        {
+            double maxOffset = _scrollViewer.ScrollableHeight;
+            double clamped = Math.Clamp(_virtualOffset, 0, maxOffset);
+            double overflow = _virtualOffset - clamped;
+
+            if (Math.Abs(clamped - _lastAppliedClamped) > 0.01)
+            {
+                try
+                {
+                    _scrollViewer.ChangeView(null, clamped, null, disableAnimation: true);
+                    _lastAppliedClamped = clamped;
+                }
+                catch { }
+            }
+
+            _overscrollY = -Math.Sign(overflow) * Rubber(Math.Abs(overflow), MaxOverscrollPull);
+            ApplyOverscrollInstant();
+        }
+
 
         /// <summary>直接（无动画）将 <see cref="_overscrollY"/> 写到 Content 的 Composition Translation.Y。</summary>
         private void ApplyOverscrollInstant()
         {
             try
             {
-                //底层视觉对象 composition api
                 _contentVisual.Properties.InsertVector3("Translation", new Vector3(0, (float)_overscrollY, 0));
             }
             catch { }
@@ -326,9 +419,14 @@ internal static class GachaStatsListDragScrollHelper
             }
             catch
             {
-                // 回退：直接赋值
                 ClearOverscrollInstant();
             }
+        }
+
+
+        private void RestoreTooltip()
+        {
+            InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, false);
         }
 
         #endregion
@@ -344,19 +442,20 @@ internal static class GachaStatsListDragScrollHelper
             }
             _disposed = true;
 
+            StopFling();
+
             _scrollViewer.PointerPressed -= OnPointerPressed;
             _scrollViewer.PointerMoved -= OnPointerMoved;
             _scrollViewer.PointerReleased -= OnPointerReleased;
             _scrollViewer.PointerCaptureLost -= OnPointerCaptureLost;
+            _scrollViewer.PointerCanceled -= OnPointerCaptureLost;
 
-            // 卸载时若仍在拖拽，勿留下全局 Tooltip 抑制状态。
             if (_isDragging)
             {
                 InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, false);
                 _isDragging = false;
             }
 
-            // 若有残留过拉位移，直接清零
             if (_overscrollY != 0)
             {
                 ClearOverscrollInstant();
