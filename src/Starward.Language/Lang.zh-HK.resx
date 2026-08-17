@@ -2965,6 +2965,9 @@
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>卡池篩選</value>
   </data>
+  <data name="GachaLogPage_GachaBannerFilterDragHint" xml:space="preserve">
+    <value>卡池卡片可拖曳調整展示位置</value>
+  </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>分享</value>
   </data>

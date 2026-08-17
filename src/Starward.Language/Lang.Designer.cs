@@ -1088,6 +1088,15 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Banner cards can be dragged to adjust their display position. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_GachaBannerFilterDragHint {
+            get {
+                return ResourceManager.GetString("GachaLogPage_GachaBannerFilterDragHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Share 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_ShareImage {

@@ -2964,6 +2964,9 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>Bannerfilter</value>
   </data>
+  <data name="GachaLogPage_GachaBannerFilterDragHint" xml:space="preserve">
+    <value>Banner cards can be dragged to adjust their display position.</value>
+  </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>Teilen</value>
   </data>

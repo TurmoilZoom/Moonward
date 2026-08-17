@@ -2965,6 +2965,9 @@
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>バナーフィルター</value>
   </data>
+  <data name="GachaLogPage_GachaBannerFilterDragHint" xml:space="preserve">
+    <value>カードをドラッグして表示位置を調整できます</value>
+  </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>共有</value>
   </data>

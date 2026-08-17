@@ -2960,6 +2960,9 @@ You are welcome to submit exported data to:</value>
   <data name="GachaLogPage_GachaBannerFilter" xml:space="preserve">
     <value>ตัวกรองแบนเนอร์</value>
   </data>
+  <data name="GachaLogPage_GachaBannerFilterDragHint" xml:space="preserve">
+    <value>Banner cards can be dragged to adjust their display position.</value>
+  </data>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>แชร์</value>
   </data>

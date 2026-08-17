@@ -46,11 +46,28 @@
                           Glyph="&#xE71C;" />
                 <DropDownButton.Flyout>
                     <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
-                        <StackPanel MinWidth="248" Spacing="8">
-                            <!--  卡池筛选  -->
-                            <TextBlock FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}" />
+                        <StackPanel MinWidth="220" Spacing="8">
+                            <!--  卡池筛选 + 右上角拖拽说明  -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock FontSize="16"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}" />
+                                <Border Grid.Column="1"
+                                        Padding="4"
+                                        VerticalAlignment="Center"
+                                        helpers:PointerCursor.CursorShape="Hand"
+                                        sc:InstantTooltip.Placement="Top"
+                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilterDragHint}">
+                                    <FontIcon FontSize="14"
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              Glyph="&#xE9CE;" />
+                                </Border>
+                            </Grid>
                             <!--  全选 / 清除 / 反选  -->
                             <StackPanel Orientation="Horizontal" Spacing="16">
                                 <HyperlinkButton Padding="0"
@@ -80,13 +97,21 @@
                                                 <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                                         CornerRadius="4"
                                                         Visibility="{x:Bind IsSelected, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                                <CheckBox MinWidth="180"
-                                                          Margin="8,0,0,0"
+                                                <!--  不用 MinWidth + 字符串 Content：默认模板 TextWrapping=Wrap，会按 MinWidth 在行内换行，再被 Height=36 裁成「内部截断」。  -->
+                                                <CheckBox MinWidth="0"
+                                                          Margin="4,0,0,0"
+                                                          Padding="8,0,10,0"
+                                                          HorizontalAlignment="Stretch"
                                                           VerticalAlignment="Center"
+                                                          VerticalContentAlignment="Center"
                                                           helpers:FluentAnimations.HoverTranslateX="6"
                                                           Click="GachaBannerCheckBox_Click"
-                                                          Content="{x:Bind ToLocalization()}"
-                                                          IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                                                          IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
+                                                    <TextBlock VerticalAlignment="Center"
+                                                               Text="{x:Bind ToLocalization()}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               TextWrapping="NoWrap" />
+                                                </CheckBox>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
