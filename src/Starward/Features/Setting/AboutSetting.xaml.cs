@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml.Input;
 using Starward.Features.Update;
 using Starward.Frameworks;
 using System;
@@ -18,6 +19,39 @@ public sealed partial class AboutSetting : PageBase
     public AboutSetting()
     {
         this.InitializeComponent();
+    }
+
+
+    /// <summary>静止显示首帧，避免 AutoPlay 常驻循环。</summary>
+    protected override void OnLoaded()
+    {
+        Lottie_AboutLogo.SetProgress(0);
+    }
+
+
+    /// <summary>离开页面时停止动画，避免卸载后仍占用合成资源。</summary>
+    protected override void OnUnloaded()
+    {
+        Lottie_AboutLogo.Stop();
+    }
+
+
+    /// <summary>
+    /// 悬浮时播放一次 Lottie 后停在末帧；离开后回到首帧。
+    /// </summary>
+    private void Lottie_AboutLogo_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        _ = Lottie_AboutLogo.PlayAsync(fromProgress: 0, toProgress: 1, looped: false);
+    }
+
+
+    /// <summary>
+    /// 指针离开后停止动画并回到首帧。
+    /// </summary>
+    private void Lottie_AboutLogo_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        Lottie_AboutLogo.Stop();
+        Lottie_AboutLogo.SetProgress(0);
     }
 
 

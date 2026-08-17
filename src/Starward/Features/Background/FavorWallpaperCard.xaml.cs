@@ -111,7 +111,7 @@ public sealed partial class FavorWallpaperCard : UserControl
         {
             return;
         }
-        _ = player.PlayAsync(fromProgress: 0, toProgress: 1, looped: true);
+        _ = player.PlayAsync(fromProgress: 0, toProgress: 1, looped: false);
     }
 
 

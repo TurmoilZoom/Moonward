@@ -12,7 +12,8 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
-    <Grid>
+    <Grid PointerEntered="Lottie_AboutLogo_PointerEntered"
+          PointerExited="Lottie_AboutLogo_PointerExited">
         <ScrollViewer>
             <StackPanel Padding="0,0,24,0">
 
@@ -124,13 +125,14 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!--  Logo：LottieGen 生成的 C# 动画源（源 JSON：static/cat_playing_animation.json），固定在页面右下角  -->
-        <AnimatedVisualPlayer Width="376"
+        <!--  Logo：LottieGen 生成的 C# 动画源（源 JSON：static/cat_playing_animation.json），固定在页面右下角。叠层不接收命中，以免挡住左侧链接与滚动  -->
+        <AnimatedVisualPlayer x:Name="Lottie_AboutLogo"
+                              Width="376"
                               Height="160"
                               Margin="0,0,0,12"
                               HorizontalAlignment="Right"
                               VerticalAlignment="Bottom"
-                              AutoPlay="True"
+                              AutoPlay="False"
                               IsHitTestVisible="False"
                               Stretch="Uniform">
             <animatedvisuals:Cat_playing_animation />

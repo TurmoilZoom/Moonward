@@ -104,11 +104,11 @@ public sealed partial class TimeNodeButton : UserControl
 
 
     /// <summary>
-    /// 悬浮时循环播放 Lottie；离开后停在首帧。
+    /// 悬浮时播放一次 Lottie 后停在末帧；离开后回到首帧。
     /// </summary>
     private void Button_TimeNode_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
-        _ = Lottie_TimeNode.PlayAsync(fromProgress: 0, toProgress: 1, looped: true);
+        _ = Lottie_TimeNode.PlayAsync(fromProgress: 0, toProgress: 1, looped: false);
     }
 
 
