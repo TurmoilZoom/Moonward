@@ -3158,6 +3158,12 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
     <value>Desfijar barra de herramientas</value>
   </data>
+  <data name="GameLauncherPage_RightToolbarDragTipTitle" xml:space="preserve">
+    <value>Consejo</value>
+  </data>
+  <data name="GameLauncherPage_RightToolbarDragTipSubtitle" xml:space="preserve">
+    <value>Mantén pulsada la barra y arrástrala a un borde para acoplarla.</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>Gestión del color</value>
   </data>

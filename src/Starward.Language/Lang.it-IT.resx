@@ -3158,6 +3158,12 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
     <value>Sblocca barra degli strumenti</value>
   </data>
+  <data name="GameLauncherPage_RightToolbarDragTipTitle" xml:space="preserve">
+    <value>Suggerimento</value>
+  </data>
+  <data name="GameLauncherPage_RightToolbarDragTipSubtitle" xml:space="preserve">
+    <value>Tieni premuta la barra e trascinala sul bordo per agganciarla.</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>Gestione colore</value>
   </data>

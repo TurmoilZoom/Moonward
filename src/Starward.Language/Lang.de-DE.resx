@@ -3156,6 +3156,12 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
     <value>Symbolleiste lösen</value>
   </data>
+  <data name="GameLauncherPage_RightToolbarDragTipTitle" xml:space="preserve">
+    <value>Tipp</value>
+  </data>
+  <data name="GameLauncherPage_RightToolbarDragTipSubtitle" xml:space="preserve">
+    <value>Halten und an den Fensterrand ziehen, um anzudocken.</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>Farbverwaltung</value>
   </data>

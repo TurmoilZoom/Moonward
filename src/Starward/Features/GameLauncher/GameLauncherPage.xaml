@@ -765,6 +765,18 @@
             </StackPanel>
         </Border>
 
+        <!--  首次进入：指向功能条，说明可按住拖动、拖到边缘可贴边；看过或拖过后不再出  -->
+        <TeachingTip x:Name="TeachingTip_RightToolbarDrag"
+                     Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                     Closed="TeachingTip_RightToolbarDrag_Closed"
+                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                     IsLightDismissEnabled="False"
+                     PreferredPlacement="Left"
+                     ShouldConstrainToRootBounds="True"
+                     Subtitle="{x:Bind lang:Lang.GameLauncherPage_RightToolbarDragTipSubtitle}"
+                     Target="{x:Bind Border_RightToolbar}"
+                     Title="{x:Bind lang:Lang.GameLauncherPage_RightToolbarDragTipTitle}" />
+
     </Grid>
 
 </sf:PageBase>

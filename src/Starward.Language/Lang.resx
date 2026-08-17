@@ -3216,6 +3216,12 @@ Repository:</value>
   <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
     <value>Unpin Toolbar</value>
   </data>
+  <data name="GameLauncherPage_RightToolbarDragTipTitle" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="GameLauncherPage_RightToolbarDragTipSubtitle" xml:space="preserve">
+    <value>Hold the bar and drag it to an edge to dock.</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>Color Management</value>
   </data>

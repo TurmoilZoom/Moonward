@@ -3178,6 +3178,12 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
     <value>Открепить панель</value>
   </data>
+  <data name="GameLauncherPage_RightToolbarDragTipTitle" xml:space="preserve">
+    <value>Подсказка</value>
+  </data>
+  <data name="GameLauncherPage_RightToolbarDragTipSubtitle" xml:space="preserve">
+    <value>Удерживайте панель и перетащите к краю, чтобы закрепить.</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>Управление цветом</value>
   </data>

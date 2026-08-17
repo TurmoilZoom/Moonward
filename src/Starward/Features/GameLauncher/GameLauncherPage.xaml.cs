@@ -1413,6 +1413,9 @@ public sealed partial class GameLauncherPage : PageBase
     /// <summary>拖拽松手后短时内禁止按钮点击 / Flyout，避免误触功能。</summary>
     private bool _rightToolbarSuppressClick;
 
+    /// <summary>TeachingTip.Closed 时是否记「已看过」；卸载强关为 false。</summary>
+    private bool _rightToolbarDragTipMarkSeenOnClose = true;
+
     private uint _rightToolbarPointerId;
 
     private Point _rightToolbarPressRootPoint;
@@ -1472,6 +1475,7 @@ public sealed partial class GameLauncherPage : PageBase
             EnsureRightToolbarFlyoutHooks();
             RestoreRightToolbarLayout();
             UpdateRightToolbarPopupSide();
+            TryShowRightToolbarDragTip();
         });
     }
 
@@ -1481,7 +1485,8 @@ public sealed partial class GameLauncherPage : PageBase
     /// </summary>
     private void TeardownRightToolbarCollapse()
     {
-        // 离开页面时持久化当前布局。
+        // 离开页面时持久化当前布局；未关掉的引导下次再出。
+        DismissRightToolbarDragTip(markSeen: false);
         SaveRightToolbarLayout();
         _rightToolbarCollapseTimer.Tick -= RightToolbarCollapseTimer_Tick;
         _rightToolbarCollapseTimer.Stop();
@@ -1738,6 +1743,7 @@ public sealed partial class GameLauncherPage : PageBase
         _rightToolbarDragging = true;
         _rightToolbarSuppressClick = true;
         StopRightToolbarCollapseTimer();
+        DismissRightToolbarDragTip(markSeen: true);
         CloseAnyRightToolbarFlyout();
         InstantTooltip.SetSuppressed(XamlRoot, true);
         // 先禁用子按钮命中，再 Capture，避免 Button 继续抢指针 / 松手误点。
@@ -2016,6 +2022,7 @@ public sealed partial class GameLauncherPage : PageBase
         if (_rightToolbarPointerOver
             || _rightToolbarDragging
             || _rightToolbarPressed
+            || TeachingTip_RightToolbarDrag.IsOpen
             || IsAnyRightToolbarFlyoutOpen())
         {
             return;
@@ -2037,12 +2044,84 @@ public sealed partial class GameLauncherPage : PageBase
     }
 
 
+    /// <summary>
+    /// 首次进入且功能条在自由态时展开并弹出拖拽引导；已看过或已贴边则跳过。
+    /// </summary>
+    private void TryShowRightToolbarDragTip()
+    {
+        if (!_rightToolbarInitialized || AppConfig.HasSeenRightToolbarDragHint)
+        {
+            return;
+        }
+        if (_rightToolbarState is RightToolbarState.Docked or RightToolbarState.DockRevealed)
+        {
+            return;
+        }
+        if (_rightToolbarState is RightToolbarState.Collapsed)
+        {
+            TransitionRightToolbar(RightToolbarState.Expanded, animate: false);
+        }
+        StopRightToolbarCollapseTimer();
+        InstantTooltip.SetSuppressed(XamlRoot, true);
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            if (!_rightToolbarInitialized || AppConfig.HasSeenRightToolbarDragHint)
+            {
+                return;
+            }
+            if (Border_RightToolbar.ActualHeight <= 0)
+            {
+                return;
+            }
+            TeachingTip_RightToolbarDrag.IsOpen = true;
+        });
+    }
+
+
+    /// <summary>
+    /// 关掉拖拽引导。<paramref name="markSeen"/> 为 true 时写入设置，卸载离开时传 false 以便下次再出。
+    /// </summary>
+    /// <param name="markSeen">是否记为已看过。</param>
+    private void DismissRightToolbarDragTip(bool markSeen)
+    {
+        if (!TeachingTip_RightToolbarDrag.IsOpen)
+        {
+            if (markSeen)
+            {
+                AppConfig.HasSeenRightToolbarDragHint = true;
+            }
+            return;
+        }
+        _rightToolbarDragTipMarkSeenOnClose = markSeen;
+        TeachingTip_RightToolbarDrag.IsOpen = false;
+    }
+
+
+    /// <summary>
+    /// TeachingTip 关闭后：按需记「已看过」，恢复 InstantTooltip，并允许空闲收起。
+    /// </summary>
+    private void TeachingTip_RightToolbarDrag_Closed(TeachingTip sender, TeachingTipClosedEventArgs args)
+    {
+        if (_rightToolbarDragTipMarkSeenOnClose)
+        {
+            AppConfig.HasSeenRightToolbarDragHint = true;
+        }
+        _rightToolbarDragTipMarkSeenOnClose = true;
+        if (!_rightToolbarDragging && !_rightToolbarPressed)
+        {
+            InstantTooltip.SetSuppressed(XamlRoot, false);
+        }
+        ScheduleRightToolbarIdleCollapse();
+    }
+
+
     private void RightToolbarCollapseTimer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
     {
         sender.Stop();
         if (_rightToolbarPointerOver
             || _rightToolbarDragging
             || _rightToolbarPressed
+            || TeachingTip_RightToolbarDrag.IsOpen
             || IsAnyRightToolbarFlyoutOpen())
         {
             return;
@@ -2672,6 +2751,7 @@ public sealed partial class GameLauncherPage : PageBase
             return;
         }
 
+        DismissRightToolbarDragTip(markSeen: true);
         StopRightToolbarCollapseTimer();
         if (_rightToolbarState is RightToolbarState.Collapsed)
         {

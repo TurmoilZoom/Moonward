@@ -3157,6 +3157,12 @@
   <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
     <value>取消固定</value>
   </data>
+  <data name="GameLauncherPage_RightToolbarDragTipTitle" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="GameLauncherPage_RightToolbarDragTipSubtitle" xml:space="preserve">
+    <value>按住功能列拖到視窗邊緣即可收納。</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>色彩管理</value>
   </data>

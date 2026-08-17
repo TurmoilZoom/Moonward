@@ -3483,6 +3483,24 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Tip 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherPage_RightToolbarDragTipTitle {
+            get {
+                return ResourceManager.GetString("GameLauncherPage_RightToolbarDragTipTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hold the bar and drag it to an edge to dock. 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherPage_RightToolbarDragTipSubtitle {
+            get {
+                return ResourceManager.GetString("GameLauncherPage_RightToolbarDragTipSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Unpin Toolbar 的本地化字符串。
         /// </summary>
         public static string GameLauncherPage_UnpinToolbar {

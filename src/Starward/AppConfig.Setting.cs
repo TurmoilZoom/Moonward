@@ -160,6 +160,16 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 是否已看过（或用过）首页右侧功能栏拖拽引导。默认 false。
+    /// 不能用 <see cref="GameLauncherRightToolbarLayout"/> 是否有值代替：进过首页就会写出 free|x|y。
+    /// </summary>
+    public static bool HasSeenRightToolbarDragHint
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
+
     public static StartGameAction StartGameAction
     {
         get => GetValue(Starward.Features.GameLauncher.StartGameAction.Minimize);

@@ -3157,6 +3157,12 @@
   <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
     <value>ツールバーの固定を解除</value>
   </data>
+  <data name="GameLauncherPage_RightToolbarDragTipTitle" xml:space="preserve">
+    <value>ヒント</value>
+  </data>
+  <data name="GameLauncherPage_RightToolbarDragTipSubtitle" xml:space="preserve">
+    <value>バーをつかんで端までドラッグすると収納できます。</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>カラーマネジメント</value>
   </data>

@@ -3152,6 +3152,12 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherPage_UnpinToolbar" xml:space="preserve">
     <value>เลิกปักหมุดแถบเครื่องมือ</value>
   </data>
+  <data name="GameLauncherPage_RightToolbarDragTipTitle" xml:space="preserve">
+    <value>เคล็ดลับ</value>
+  </data>
+  <data name="GameLauncherPage_RightToolbarDragTipSubtitle" xml:space="preserve">
+    <value>กดค้างที่แถบแล้วลากไปที่ขอบหน้าต่างเพื่อเก็บ</value>
+  </data>
   <data name="ScreenshotSetting_ColorManagement" xml:space="preserve">
     <value>การจัดการสี</value>
   </data>
