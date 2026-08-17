@@ -24,10 +24,10 @@
         <GridView x:Name="GridView_Items"
                   Grid.Row="1"
                   Padding="0"
+                  HorizontalAlignment="Center"
                   IsItemClickEnabled="False"
                   ItemsSource="{x:Bind Items, Mode=OneWay}"
-                  SelectionMode="None"
-                  SizeChanged="GridView_Items_SizeChanged">
+                  SelectionMode="None">
             <GridView.ItemContainerStyle>
                 <Style BasedOn="{StaticResource DefaultGridViewItemStyle}" TargetType="GridViewItem">
                     <Setter Property="Margin" Value="0" />
@@ -40,6 +40,7 @@
             </GridView.ItemContainerStyle>
             <GridView.ItemsPanel>
                 <ItemsPanelTemplate>
+                    <!-- 封面 245×153 + 卡片 Margin 8；与抽卡 Pane 一样固定格子、靠容器宽度换行。 -->
                     <ItemsWrapGrid ItemHeight="145"
                                    ItemWidth="228"
                                    Orientation="Horizontal" />

@@ -22,7 +22,8 @@
     </ContentDialog.Resources>
 
 
-    <Grid Width="960"
+    <!-- 4×228=912，左右各留约 12，避免刚好铺满时差 1px 掉成 3 列。 -->
+    <Grid Width="984"
           MinHeight="200"
           Padding="24">
         <Grid.RowDefinitions>

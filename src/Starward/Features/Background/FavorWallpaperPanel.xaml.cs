@@ -21,8 +21,6 @@ namespace Starward.Features.Background;
 public sealed partial class FavorWallpaperPanel : UserControl
 {
 
-    private const int Columns = 4;
-
     private readonly ILogger<FavorWallpaperPanel> _logger = AppConfig.GetLogger<FavorWallpaperPanel>();
 
     private readonly FavorWallpaperService _service = AppConfig.GetService<FavorWallpaperService>();
@@ -33,7 +31,6 @@ public sealed partial class FavorWallpaperPanel : UserControl
     public FavorWallpaperPanel()
     {
         this.InitializeComponent();
-        this.Loaded += FavorWallpaperPanel_Loaded;
         this.Unloaded += FavorWallpaperPanel_Unloaded;
     }
 
@@ -70,7 +67,6 @@ public sealed partial class FavorWallpaperPanel : UserControl
         if (!forceRefresh && Items.Count > 0)
         {
             RefreshInUseState();
-            UpdateItemLayout(GridView_Items.ActualWidth);
             return;
         }
         await LoadAsync(forceRefresh);
@@ -115,7 +111,6 @@ public sealed partial class FavorWallpaperPanel : UserControl
                 });
             }
             StatusText = null;
-            UpdateItemLayout(GridView_Items.ActualWidth);
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
@@ -226,38 +221,6 @@ public sealed partial class FavorWallpaperPanel : UserControl
     }
 
 
-    private void GridView_Items_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        UpdateItemLayout(e.NewSize.Width);
-    }
-
-
-    /// <summary>
-    /// 按容器宽度把格子均分成 4 列；格子高度按密友同行图 245×153，并扣掉卡片内边距，使封面框贴合原图。
-    /// </summary>
-    private void UpdateItemLayout(double viewportWidth)
-    {
-        if (viewportWidth <= 0 || GridView_Items.ItemsPanelRoot is not ItemsWrapGrid wrap)
-        {
-            return;
-        }
-        double itemWidth = Math.Floor(viewportWidth / Columns);
-        if (itemWidth < 80)
-        {
-            return;
-        }
-        double inset = FavorWallpaperCard.ContentInset * 2;
-        double innerWidth = Math.Max(1, itemWidth - inset);
-        double itemHeight = Math.Round(innerWidth * FavorWallpaperCard.CellAspect) + inset;
-        if (Math.Abs(wrap.ItemWidth - itemWidth) < 0.5 && Math.Abs(wrap.ItemHeight - itemHeight) < 0.5)
-        {
-            return;
-        }
-        wrap.ItemWidth = itemWidth;
-        wrap.ItemHeight = itemHeight;
-    }
-
-
     private void RefreshInUseState()
     {
         string? currentBg = AppConfig.GetCustomBg(CurrentGameBiz);
@@ -268,12 +231,6 @@ public sealed partial class FavorWallpaperPanel : UserControl
             item.IsInUse = enabled && string.Equals(currentBg, fileName, StringComparison.OrdinalIgnoreCase);
             item.IsDownloaded = FavorWallpaperService.IsCached(item.Record);
         }
-    }
-
-
-    private void FavorWallpaperPanel_Loaded(object sender, RoutedEventArgs e)
-    {
-        UpdateItemLayout(GridView_Items.ActualWidth);
     }
 
 
