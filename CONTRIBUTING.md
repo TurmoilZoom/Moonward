@@ -146,6 +146,8 @@ src/Starward.Setup.Core/  GitHub Release 发行说明拉取
 2. 追加到 `DatabaseSqls` 列表。
 3. 以 `PRAGMA USER_VERSION = N` 结尾。
 
+从上游 Starward 导入：上游每多一个 `Sql_vN`，先补 `StarwardOnlyRollbacks`（或 `// import-keep: N`），再提高 `KnownMaxStarwardUserVersion`。GitHub Actions「Check Starward Import Compat」只对照上游 `main` 做检查，不自动改代码。本地：`python .github/scripts/check-starward-import-compat.py`。
+
 ### 禁止事项
 
 - `Starward.Core` 引用 WinUI。

@@ -540,6 +540,7 @@ public sealed partial class WelcomeWindow : WindowEx
                 {
                     IsMigrating = false;
                     CanOperate = true;
+                    // 过新源在拷库前已拒绝，或服务已删掉误落的 dest；空目录仍可开始。
                     CheckWritePermission();
                     UserDataFolderErrorMessage = ex.Message;
                     return;

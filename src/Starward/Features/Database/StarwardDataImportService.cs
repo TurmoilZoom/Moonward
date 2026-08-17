@@ -23,13 +23,14 @@ namespace Starward.Features.Database;
 /// 共同祖先是 <see cref="CommonUserVersion"/>（v1–v18 脚本一致）。此后编号分叉——
 /// Starward v19 = ExtraStarNum，v20 = ZZZ HasHard；
 /// Moonward v19 = GachaItemName，v20 = ExtraStarNum，v21 = DROP GameAccount。
-/// 导入时在<b>副本</b>上回退 Starward 独有变更，把 USER_VERSION 拉回共同祖先，
+/// 先只读探测源库：无 GachaItemName 且 USER_VERSION &gt; <see cref="KnownMaxStarwardUserVersion"/> 视为未知 Starward，拒绝导入且不落副本。
+/// 导入时在<b>副本</b>上回退 Starward 独有变更；仅当副本版本 &gt; 共同祖先时才把 USER_VERSION 盖回祖先（绝不把 v1–v17 盖成 18），
 /// 再交给 Moonward 的 <c>DatabaseSqls</c> 往下跑。两边都有的列（ExtraStarNum）保留，
 /// 由 <see cref="DatabaseService"/> 在执行对应脚本前跳过，以免 ALTER 失败并丢掉已有数据。
 /// </para>
 /// <para>
 /// 上游每新增一个 <c>Sql_vN</c>：在 <see cref="StarwardOnlyRollbacks"/> 补反向 SQL，
-/// 并更新 <see cref="KnownMaxStarwardUserVersion"/>。更高未知版本拒绝导入。
+/// 并更新 <see cref="KnownMaxStarwardUserVersion"/>。更高未知版本（无 GachaItemName 且版本 &gt; KnownMax）拒绝导入。
 /// 若该变更 Moonward 也需要，追加 Moonward 自己的新 <c>Sql_vN</c>（禁止改已发布脚本）。
 /// 变基后若某段脚本重新对齐，提高 <see cref="CommonUserVersion"/> 并删掉对应回退项。
 /// </para>
@@ -69,7 +70,9 @@ internal static class StarwardDataImportService
     /// <summary>
     /// 回退 Starward 在共同祖先之后、且 Moonward 脚本里没有对等编号的变更。
     /// ExtraStarNum（Starward v19 / Moonward v20）是两边共有列，不在此删除。
+    /// 保留版本须用 <c>import-keep: N</c> 标出，供 CI 对照上游，不要只改 <see cref="KnownMaxStarwardUserVersion"/>。
     /// </summary>
+    // import-keep: 19
     private static readonly (int Version, string ReverseSql)[] StarwardOnlyRollbacks =
     [
         (20, """
@@ -82,7 +85,8 @@ internal static class StarwardDataImportService
 
 
     /// <summary>
-    /// 自动探测本机 Starward 数据：注册表 <c>UserDataFolder</c>，以及 <c>%LocalAppData%\Starward</c>。
+    /// 自动探测本机 Starward 数据：注册表 <c>UserDataFolder</c>、
+    /// <c>%LocalAppData%\Starward</c>，以及 <c>我的文档\Starward</c>。
     /// 只读注册表，不创建 <c>Software\Starward</c>。
     /// </summary>
     public static bool TryDetect(out StarwardInstallInfo info)
@@ -97,6 +101,9 @@ internal static class StarwardDataImportService
         string cacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Starward");
         extraRoots.Add(cacheFolder);
         dataFolders.Add(cacheFolder);
+        string documentsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Starward");
+        extraRoots.Add(documentsFolder);
+        dataFolders.Add(documentsFolder);
         info = BuildInstallInfo(dataFolders, extraRoots);
         return info.HasDatabase;
     }
@@ -181,15 +188,39 @@ internal static class StarwardDataImportService
         if (!File.Exists(destDb))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            CopyDatabaseReadOnly(install.DatabasePath!, destDb);
-            ReconcileCopiedDatabase(destDb);
+            // 过新源必须在拷库前拒绝，否则欢迎页会留下一份无法回退的 dest。
+            ThrowIfUnknownStarwardDatabase(install.DatabasePath!);
+            CopyAndReconcileFromSource(install.DatabasePath!, destDb);
             importedDatabase = true;
         }
         else if (IsIncompleteStarwardImport(destDb))
         {
-            // 上次回退失败时副本已落盘；补完回退，避免跳过库文件后按错误的 USER_VERSION 启动。
+            // 上次回退失败时副本已落盘；过新则删掉，错误盖成 v18 的必须重拷，其余补完回退。
             cancellationToken.ThrowIfCancellationRequested();
-            ReconcileCopiedDatabase(destDb);
+            (int destVersion, bool destMoonward) = ProbeDatabaseReadOnly(destDb);
+            if (IsUnknownStarwardDatabase(destVersion, destMoonward))
+            {
+                TryDeleteSqliteFiles(destDb);
+                throw CreateVersionTooNewException(destVersion);
+            }
+            if (IsBrokenAncestorStamp(destDb))
+            {
+                TryDeleteSqliteFiles(destDb);
+                ThrowIfUnknownStarwardDatabase(install.DatabasePath!);
+                CopyAndReconcileFromSource(install.DatabasePath!, destDb);
+            }
+            else
+            {
+                try
+                {
+                    ReconcileCopiedDatabase(destDb);
+                }
+                catch
+                {
+                    TryDeleteSqliteFiles(destDb);
+                    throw;
+                }
+            }
             importedDatabase = true;
         }
         done += dbSize;
@@ -248,8 +279,75 @@ internal static class StarwardDataImportService
 
 
     /// <summary>
+    /// 拷库后回退；失败则删掉 dest（含 -wal/-shm），避免欢迎页带着半成品库启动。
+    /// </summary>
+    private static void CopyAndReconcileFromSource(string sourcePath, string destPath)
+    {
+        try
+        {
+            CopyDatabaseReadOnly(sourcePath, destPath);
+            ReconcileCopiedDatabase(destPath);
+        }
+        catch
+        {
+            TryDeleteSqliteFiles(destPath);
+            throw;
+        }
+    }
+
+
+    /// <summary>
+    /// 只读打开库，返回 USER_VERSION 以及是否已有 Moonward 的 GachaItemName。
+    /// </summary>
+    private static (int Version, bool HasGachaItemName) ProbeDatabaseReadOnly(string databasePath)
+    {
+        try
+        {
+            using var con = new SqliteConnection($"Data Source={databasePath};Mode=ReadOnly;Pooling=False;");
+            con.Open();
+            int version = con.QueryFirstOrDefault<int>("PRAGMA USER_VERSION;");
+            bool hasGachaItemName = TableExists(con, "GachaItemName");
+            return (version, hasGachaItemName);
+        }
+        catch (SqliteException ex)
+        {
+            throw new InvalidOperationException(Lang.WelcomeView_StarwardDatabaseInUse, ex);
+        }
+        catch (IOException ex)
+        {
+            throw new InvalidOperationException(Lang.WelcomeView_StarwardDatabaseInUse, ex);
+        }
+    }
+
+
+    /// <summary>
+    /// 未知 Starward：无 GachaItemName 且版本高于已编写回退的上限。
+    /// </summary>
+    private static bool IsUnknownStarwardDatabase(int version, bool hasGachaItemName)
+    {
+        return !hasGachaItemName && version > KnownMaxStarwardUserVersion;
+    }
+
+
+    private static void ThrowIfUnknownStarwardDatabase(string databasePath)
+    {
+        (int version, bool hasGachaItemName) = ProbeDatabaseReadOnly(databasePath);
+        if (IsUnknownStarwardDatabase(version, hasGachaItemName))
+        {
+            throw CreateVersionTooNewException(version);
+        }
+    }
+
+
+    private static InvalidOperationException CreateVersionTooNewException(int version)
+    {
+        return new InvalidOperationException(string.Format(Lang.WelcomeView_StarwardDatabaseVersionTooNew, version, KnownMaxStarwardUserVersion));
+    }
+
+
+    /// <summary>
     /// 上次从 Starward 拷库后回退未完成：还没有 Moonward 的 GachaItemName，
-    /// 但 USER_VERSION 仍是 Starward 的编号，或已被 InitializeDatabase 按错误版本号往上推。
+    /// 但 USER_VERSION 仍是 Starward 的编号、仍留着 HasHard，或被错误盖成共同祖先版本。
     /// </summary>
     private static bool IsIncompleteStarwardImport(string databasePath)
     {
@@ -260,16 +358,52 @@ internal static class StarwardDataImportService
             return false;
         }
         int version = con.QueryFirstOrDefault<int>("PRAGMA USER_VERSION;");
+        if (version > KnownMaxStarwardUserVersion)
+        {
+            return true;
+        }
         if (version > CommonUserVersion)
         {
             return true;
         }
-        return ColumnExists(con, "ZZZDeadlyAssaultInfo", "HasHard");
+        if (ColumnExists(con, "ZZZDeadlyAssaultInfo", "HasHard"))
+        {
+            return true;
+        }
+        // 旧逻辑会把 v1–v17 盖成 18；真 v18 这三张表都在，缺任一就不能只靠再 Reconcile。
+        return version == CommonUserVersion && !HasCommonAncestorSchema(con);
     }
 
 
     /// <summary>
-    /// 在副本上回退 Starward 独有变更，并把 USER_VERSION 拉回共同祖先。
+    /// 被错误盖上 USER_VERSION=18 的祖先库：schema 还没跑到 v18，只能删 dest 后从源重拷。
+    /// </summary>
+    private static bool IsBrokenAncestorStamp(string databasePath)
+    {
+        using var con = new SqliteConnection($"Data Source={databasePath};Mode=ReadOnly;Pooling=False;");
+        con.Open();
+        if (TableExists(con, "GachaItemName"))
+        {
+            return false;
+        }
+        int version = con.QueryFirstOrDefault<int>("PRAGMA USER_VERSION;");
+        return version == CommonUserVersion && !HasCommonAncestorSchema(con);
+    }
+
+
+    /// <summary>
+    /// 真正跑完 v18 的共同祖先应同时有这三张表。
+    /// </summary>
+    private static bool HasCommonAncestorSchema(SqliteConnection con)
+    {
+        return TableExists(con, "StarRailForgottenHallInfo")
+            && TableExists(con, "GenshinBeyondGachaInfo")
+            && TableExists(con, "StarRailChallengePeakData");
+    }
+
+
+    /// <summary>
+    /// 在副本上回退 Starward 独有变更，并把高于共同祖先的 USER_VERSION 拉回祖先。
     /// 之后由 <see cref="DatabaseService.SetDatabase"/> 按 Moonward 脚本补齐。
     /// </summary>
     private static void ReconcileCopiedDatabase(string databasePath)
@@ -278,11 +412,9 @@ internal static class StarwardDataImportService
         con.Open();
         int version = con.QueryFirstOrDefault<int>("PRAGMA USER_VERSION;");
         bool moonwardMigrated = TableExists(con, "GachaItemName");
-        // 回退失败后再点开始，InitializeDatabase 可能把 USER_VERSION 推到 Moonward 当前值。
-        // 更高才是未知的新版 Starward。
-        if (version > KnownMaxStarwardUserVersion && !moonwardMigrated && version > DatabaseService.CurrentUserVersion)
+        if (IsUnknownStarwardDatabase(version, moonwardMigrated))
         {
-            throw new InvalidOperationException(string.Format(Lang.WelcomeView_StarwardDatabaseVersionTooNew, version, KnownMaxStarwardUserVersion));
+            throw CreateVersionTooNewException(version);
         }
 
         using (var tx = con.BeginTransaction())
@@ -301,7 +433,11 @@ internal static class StarwardDataImportService
                 // 不把 Starward 的米游社 / HoYoLAB 账号带进 Moonward，需在本应用内重新登录。
                 // 只清空 Cookie 会留下「已登录」角色行，刷新战绩时 Headers.Add(Cookie, null) 会 FormatException。
                 RemoveImportedAccounts(con);
-                con.Execute($"PRAGMA USER_VERSION = {CommonUserVersion};");
+                if (version > CommonUserVersion)
+                {
+                    // 只把分叉后的 Starward 编号拉回祖先；v1–v17 必须留给 InitializeDatabase 接着跑。
+                    con.Execute($"PRAGMA USER_VERSION = {CommonUserVersion};");
+                }
             }
 
             tx.Commit();

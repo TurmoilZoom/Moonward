@@ -1,0 +1,108 @@
+# 对照上游 Scighost/Starward 的 DatabaseSqls，检查本仓导入规则是否跟上。
+# 只检查、不改业务代码。定时跑在 rebase/develop 上（main 是上游镜像，没有导入适配）。
+
+name: Check Starward Import Compat
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  pull_request:
+    paths:
+      - "src/Starward/Features/Database/**"
+      - ".github/scripts/check-starward-import-compat.py"
+      - ".github/workflows/check-starward-import-compat.yml"
+  push:
+    branches: ["rebase/develop", "dev/*"]
+    paths:
+      - "src/Starward/Features/Database/**"
+      - ".github/scripts/check-starward-import-compat.py"
+      - ".github/workflows/check-starward-import-compat.yml"
+  workflow_dispatch:
+
+env:
+  UPSTREAM_REPO: Scighost/Starward
+  UPSTREAM_REF: main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout rebase/develop
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v5
+        with:
+          ref: rebase/develop
+
+      - name: Checkout
+        if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
+        uses: actions/checkout@v5
+
+      - name: Check import rules against upstream
+        id: check
+        continue-on-error: true
+        run: python3 .github/scripts/check-starward-import-compat.py
+
+      - name: Open or update issue when scheduled check fails
+        if: steps.check.outcome == 'failure' && steps.check.outputs.failed == 'true' && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FINGERPRINT: ${{ steps.check.outputs.fingerprint }}
+          REPORT: ${{ steps.check.outputs.report }}
+        run: |
+          marker="<!-- starward-import-compat-check -->"
+          fp_tag="<!-- fingerprint: ${FINGERPRINT} -->"
+          existing="$(gh issue list --state open --search "starward-import-compat-check in:body" --json number --jq '.[0].number')"
+
+          body="${marker}
+          ${fp_tag}
+
+          上游 \`${UPSTREAM_REPO}@${UPSTREAM_REF}\` 的数据库版本与本仓导入规则不一致。检查**不会改代码**，需要开发者在 \`rebase/develop\` 上手动补。
+
+          ## 检查结果
+
+          ${REPORT}
+
+          ## 该改什么
+
+          1. Starward 独有变更：在 \`StarwardOnlyRollbacks\` 写反向 SQL，再提高 \`KnownMaxStarwardUserVersion\`。
+          2. Moonward 也要的变更：追加本仓 \`Sql_vN\`（不要改已发布脚本）；列已经存在则加 \`IsMigrationAlreadySatisfied\`，并写 \`// import-keep: N\`。
+          3. 变基后脚本又对齐：提高 \`CommonUserVersion\`，删掉对应回退。
+          4. 不要只改 KnownMax。
+
+          本地复现：
+
+          \`\`\`
+          python3 .github/scripts/check-starward-import-compat.py
+          \`\`\`
+          "
+
+          if [ -z "$existing" ]; then
+            gh issue create \
+              --title "Starward 导入兼容：上游数据库版本需要跟进" \
+              --label "triage" \
+              --body "$body"
+            exit 0
+          fi
+
+          current="$(gh issue view "$existing" --json body --jq .body)"
+          if echo "$current" | grep -q "<!-- fingerprint: ${FINGERPRINT} -->"; then
+            echo "已有 Issue #${existing}，结论未变，不重复评论"
+          else
+            gh issue comment "$existing" --body "$body"
+          fi
+
+      - name: Fail the job when the check found a real drift
+        if: steps.check.outputs.failed == 'true'
+        run: |
+          echo "导入规则与上游不一致，见上一步日志。"
+          exit 1
+
+      - name: Fail the job when the check could not run
+        if: steps.check.outcome == 'failure' && steps.check.outputs.failed != 'true'
+        run: |
+          echo "检查脚本自己失败了（拉上游或解析出错），不是导入规则判定。"
+          exit 1
