@@ -298,8 +298,9 @@ internal static class StarwardDataImportService
 
             if (!moonwardMigrated)
             {
-                // 不把 Starward 的米游社 / HoYoLAB Cookie 带进 Moonward，需在本应用内重新登录。
-                ClearImportedCookies(con);
+                // 不把 Starward 的米游社 / HoYoLAB 账号带进 Moonward，需在本应用内重新登录。
+                // 只清空 Cookie 会留下「已登录」角色行，刷新战绩时 Headers.Add(Cookie, null) 会 FormatException。
+                RemoveImportedAccounts(con);
                 con.Execute($"PRAGMA USER_VERSION = {CommonUserVersion};");
             }
 
@@ -331,15 +332,15 @@ internal static class StarwardDataImportService
     }
 
 
-    private static void ClearImportedCookies(SqliteConnection con)
+    private static void RemoveImportedAccounts(SqliteConnection con)
     {
-        if (TableExists(con, "GameRecordUser"))
-        {
-            con.Execute("UPDATE GameRecordUser SET Cookie = NULL;");
-        }
         if (TableExists(con, "GameRecordRole"))
         {
-            con.Execute("UPDATE GameRecordRole SET Cookie = NULL;");
+            con.Execute("DELETE FROM GameRecordRole;");
+        }
+        if (TableExists(con, "GameRecordUser"))
+        {
+            con.Execute("DELETE FROM GameRecordUser;");
         }
     }
 

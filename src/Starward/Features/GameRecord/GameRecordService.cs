@@ -126,6 +126,7 @@ internal class GameRecordService
     /// <returns>首次请求或一次恢复重试后的结果。</returns>
     private async Task<T> ExecuteWithRequestRecoveryAsync<T>(GameRecordRole role, Func<GameRecordClient, Task<T>> action, CancellationToken cancellationToken = default)
     {
+        EnsureCookiePresent(role.Cookie);
         GameRecordClient client = GetClient(role);
         string failedDeviceFp = _hyperionClient.DeviceFp;
         try
@@ -175,6 +176,7 @@ internal class GameRecordService
     /// <returns>首次请求或一次恢复重试后的结果。</returns>
     private async Task<T> ExecuteWithRequestRecoveryAsync<T>(string cookie, bool isHoyolab, Func<GameRecordClient, string, Task<T>> action, CancellationToken cancellationToken = default)
     {
+        EnsureCookiePresent(cookie);
         GameRecordClient client = isHoyolab ? _hoyolabClient : _hyperionClient;
         string failedDeviceFp = _hyperionClient.DeviceFp;
         try
@@ -325,6 +327,22 @@ internal class GameRecordService
     }
 
 
+    /// <summary>
+    /// 空 Cookie 写入 HTTP 头会抛 <c>FormatException</c>（value '&lt;null&gt;'），改成登录失效以便 UI 引导重新登录。
+    /// </summary>
+    private static void EnsureCookiePresent(string? cookie)
+    {
+        if (string.IsNullOrWhiteSpace(cookie))
+        {
+            throw new miHoYoApiException(-100, "Cookie is empty.");
+        }
+    }
+
+
+    private static bool HasCookie(GameRecordRole? role) => !string.IsNullOrWhiteSpace(role?.Cookie);
+
+
+    private static bool HasCookie(GameRecordUser? user) => !string.IsNullOrWhiteSpace(user?.Cookie);
 
 
 
@@ -349,7 +367,7 @@ internal class GameRecordService
     {
         using var dapper = DatabaseService.CreateConnection();
         var list = dapper.Query<GameRecordUser>("SELECT * FROM GameRecordUser WHERE IsHoyolab = @IsHoyolab;", new { IsHoyolab });
-        return list.ToList();
+        return list.Where(HasCookie).ToList();
     }
 
 
@@ -374,7 +392,7 @@ internal class GameRecordService
     {
         using var dapper = DatabaseService.CreateConnection();
         var list = dapper.Query<GameRecordRole>("SELECT * FROM GameRecordRole WHERE GameBiz = @gameBiz;", new { gameBiz });
-        return list.ToList();
+        return list.Where(HasCookie).ToList();
     }
 
 
@@ -386,7 +404,7 @@ internal class GameRecordService
     {
         using var dapper = DatabaseService.CreateConnection();
         var list = dapper.Query<GameRecordRole>("SELECT * FROM GameRecordRole ORDER BY Cookie, GameBiz;");
-        return list.ToList();
+        return list.Where(HasCookie).ToList();
     }
 
 
@@ -397,7 +415,12 @@ internal class GameRecordService
         var role = dapper.QueryFirstOrDefault<GameRecordRole>("""
             SELECT r.* FROM GameRecordRole r INNER JOIN Setting s ON s.Value = r.Uid WHERE r.GameBiz = @gameBiz AND s.Key = @key LIMIT 1;
             """, new { gameBiz, key = $"last_select_game_record_role_{gameBiz}" });
-        return role ??= dapper.QueryFirstOrDefault<GameRecordRole>("SELECT * FROM GameRecordRole WHERE GameBiz = @gameBiz LIMIT 1;", new { gameBiz });
+        if (role is not null && HasCookie(role))
+        {
+            return role;
+        }
+        return dapper.Query<GameRecordRole>("SELECT * FROM GameRecordRole WHERE GameBiz = @gameBiz;", new { gameBiz })
+            .FirstOrDefault(HasCookie);
     }
 
 
@@ -415,19 +438,20 @@ internal class GameRecordService
         GameRecordRole? role = dapper.QueryFirstOrDefault<GameRecordRole>("""
             SELECT r.* FROM GameRecordRole r INNER JOIN Setting s ON s.Value = r.Uid WHERE r.GameBiz = @gameBiz AND s.Key = @key LIMIT 1;
             """, new { gameBiz, key = $"last_select_gacha_sync_role_{gameBiz}" });
-        if (role is not null)
+        if (role is not null && HasCookie(role))
         {
             return role;
         }
         role = dapper.QueryFirstOrDefault<GameRecordRole>("""
             SELECT r.* FROM GameRecordRole r INNER JOIN Setting s ON s.Value = r.Uid WHERE r.GameBiz = @gameBiz AND s.Key = @key LIMIT 1;
             """, new { gameBiz, key = $"last_select_game_record_role_{gameBiz}" });
-        if (role is not null)
+        if (role is not null && HasCookie(role))
         {
             dapper.Execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (@key, @value);", new { key = $"last_select_gacha_sync_role_{gameBiz}", value = role.Uid.ToString() });
             return role;
         }
-        return dapper.QueryFirstOrDefault<GameRecordRole>("SELECT * FROM GameRecordRole WHERE GameBiz = @gameBiz LIMIT 1;", new { gameBiz });
+        return dapper.Query<GameRecordRole>("SELECT * FROM GameRecordRole WHERE GameBiz = @gameBiz;", new { gameBiz })
+            .FirstOrDefault(HasCookie);
     }
 
 

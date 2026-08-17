@@ -80,6 +80,8 @@ internal static class DatabaseService
                 }
                 con.Execute(DatabaseSqls[i]);
             }
+            // 从 Starward 导入曾只把 Cookie 置空而留下账号行；无凭据的角色不能当已登录。
+            PurgeGameRecordAccountsWithoutCookie(con);
         }
     }
 
@@ -104,6 +106,30 @@ internal static class DatabaseService
         return con.QueryFirstOrDefault<int>(
             $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = @column COLLATE NOCASE;",
             new { column }) > 0;
+    }
+
+
+    private static bool TableExists(SqliteConnection con, string table)
+    {
+        return con.QueryFirstOrDefault<int>(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = @table;",
+            new { table }) > 0;
+    }
+
+
+    /// <summary>
+    /// 删除 Cookie 为空的米游社 / HoYoLAB 账号与角色，避免工具箱显示已登录但请求时写入空 Cookie 头。
+    /// </summary>
+    private static void PurgeGameRecordAccountsWithoutCookie(SqliteConnection con)
+    {
+        if (TableExists(con, "GameRecordRole"))
+        {
+            con.Execute("DELETE FROM GameRecordRole WHERE Cookie IS NULL OR TRIM(Cookie) = '';");
+        }
+        if (TableExists(con, "GameRecordUser"))
+        {
+            con.Execute("DELETE FROM GameRecordUser WHERE Cookie IS NULL OR TRIM(Cookie) = '';");
+        }
     }
 
 
