@@ -2084,7 +2084,7 @@
     <value>Import data from Starward</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
-    <value>When selected, wish history, playtime, settings, and custom backgrounds are copied into the data folder chosen above. Files in Starward are read only; nothing in the original folder is modified or deleted. miHoYo / HoYoLAB login is not copied. A detected location can be used, or a data folder or portable install folder can be specified.</value>
+    <value>自動検出された場所を使うか、データフォルダーまたはポータブル版のインストールフォルダーを指定できます。取り込み前に Starward を完全に終了し、保存先ディスクの空き容量を確保してください。取り込みが終わるまで、このアプリを閉じたり、関係するディスクを取り外したり切断したりしないでください。</value>
   </data>
   <data name="WelcomeView_StarwardDataNotFound" xml:space="preserve">
     <value>Not detected automatically</value>

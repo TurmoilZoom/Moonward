@@ -9387,7 +9387,7 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 When selected, wish history, playtime, settings, and custom backgrounds are copied into the data folder chosen above. miHoYo / HoYoLAB login is not copied. 的本地化字符串。
+        ///   查找类似 A detected location can be used, or a data folder or portable install folder can be specified. Fully quit Starward before importing. 的本地化字符串。
         /// </summary>
         public static string WelcomeView_MigrateFromStarwardDescription {
             get {

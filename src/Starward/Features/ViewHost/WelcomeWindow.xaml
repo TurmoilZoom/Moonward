@@ -44,11 +44,17 @@
                        IsTextScaleFactorEnabled="False"
                        Text="{x:Bind lang:Lang.WelcomeView_SelectUserDataFolderDescription}"
                        TextWrapping="Wrap" />
-            <Grid Margin="0,12,0,0" ColumnSpacing="12">
+            <Grid Margin="0,12,0,0"
+                  ColumnSpacing="12"
+                  RowSpacing="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" MinHeight="16" />
+                </Grid.RowDefinitions>
                 <Button VerticalAlignment="Center"
                         BorderThickness="0"
                         Command="{x:Bind ChangeUserDataFolderCommand}"
@@ -56,20 +62,23 @@
                         IsEnabled="{x:Bind CanChangeUserDataFolder}"
                         IsTextScaleFactorEnabled="False"
                         Style="{ThemeResource AccentButtonStyle}" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock FontSize="12"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               IsTextScaleFactorEnabled="False"
-                               Text="{x:Bind UserDataFolder}"
-                               TextWrapping="Wrap"
-                               Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(UserDataFolder)}" />
-                    <TextBlock FontSize="12"
-                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                               IsTextScaleFactorEnabled="False"
-                               Text="{x:Bind UserDataFolderErrorMessage}"
-                               TextWrapping="Wrap"
-                               Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(UserDataFolderErrorMessage)}" />
-                </StackPanel>
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind UserDataFolder}"
+                           TextTrimming="CharacterEllipsis"
+                           Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(UserDataFolder)}" />
+                <!--  单独占一行并预留高度，避免报错把路径顶离按钮中线  -->
+                <TextBlock Grid.Row="1"
+                           Grid.ColumnSpan="2"
+                           MinHeight="16"
+                           FontSize="12"
+                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind UserDataFolderErrorMessage}"
+                           TextWrapping="Wrap" />
             </Grid>
 
             <!--  从 Starward 导入  -->
@@ -88,11 +97,17 @@
                        IsTextScaleFactorEnabled="False"
                        Text="{x:Bind lang:Lang.WelcomeView_MigrateFromStarwardDescription}"
                        TextWrapping="Wrap" />
-            <Grid Margin="0,8,0,0" ColumnSpacing="12">
+            <Grid Margin="0,8,0,0"
+                  ColumnSpacing="12"
+                  RowSpacing="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" MinHeight="16" />
+                </Grid.RowDefinitions>
                 <Button VerticalAlignment="Center"
                         BorderThickness="0"
                         Command="{x:Bind SelectStarwardFolderCommand}"
@@ -100,26 +115,28 @@
                         IsEnabled="{x:Bind CanPickStarwardFolder}"
                         IsTextScaleFactorEnabled="False"
                         Style="{ThemeResource AccentButtonStyle}" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <Grid Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock FontSize="12"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                IsTextScaleFactorEnabled="False"
                                Text="{x:Bind StarwardSourcePath}"
-                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis"
                                Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardSourcePath)}" />
                     <TextBlock FontSize="12"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                IsTextScaleFactorEnabled="False"
                                Text="{x:Bind lang:Lang.WelcomeView_StarwardDataNotFound}"
-                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis"
                                Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowStarwardNotFoundHint)}" />
-                    <TextBlock FontSize="12"
-                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                               IsTextScaleFactorEnabled="False"
-                               Text="{x:Bind StarwardFolderErrorMessage}"
-                               TextWrapping="Wrap"
-                               Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardFolderErrorMessage)}" />
-                </StackPanel>
+                </Grid>
+                <TextBlock Grid.Row="1"
+                           Grid.ColumnSpan="2"
+                           MinHeight="16"
+                           FontSize="12"
+                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind StarwardFolderErrorMessage}"
+                           TextWrapping="Wrap" />
             </Grid>
 
             <!--  旧版本数据迁移提示  -->

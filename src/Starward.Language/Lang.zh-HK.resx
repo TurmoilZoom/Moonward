@@ -2084,7 +2084,7 @@
     <value>從 Starward 匯入資料</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
-    <value>剔選之後，會將抽卡紀錄、遊戲時長、設定同自訂背景複製去上面揀嘅資料資料夾。只會讀取 Starward 入面嘅檔案，唔會修改、刪除原有資料。米遊社 / HoYoLAB 登入狀態唔會複製。可以用自動識別嘅位置，或者自行指定資料目錄、便攜版安裝目錄。</value>
+    <value>可以用自動識別嘅位置，或者自行指定資料目錄、便攜版安裝目錄。匯入前請完全退出 Starward，並確保目標磁碟空間充足；匯入過程中唔好關閉本程式，亦唔好拔出或中斷相關磁碟。</value>
   </data>
   <data name="WelcomeView_StarwardDataNotFound" xml:space="preserve">
     <value>未自動偵測到</value>

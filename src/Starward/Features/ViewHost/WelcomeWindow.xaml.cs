@@ -323,6 +323,7 @@ public sealed partial class WelcomeWindow : WindowEx
     {
         try
         {
+            StarwardFolderErrorMessage = null;
             string? folder = await FileDialogHelper.PickFolderAsync(Content.XamlRoot, StarwardSourcePath);
             if (string.IsNullOrWhiteSpace(folder))
             {
@@ -425,6 +426,7 @@ public sealed partial class WelcomeWindow : WindowEx
         }
         try
         {
+            UserDataFolderErrorMessage = null;
             string? folder = await FileDialogHelper.PickFolderAsync(Content.XamlRoot);
             if (Directory.Exists(folder))
             {

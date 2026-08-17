@@ -2143,7 +2143,7 @@
     <value>从 Starward 导入数据</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
-    <value>勾选后，将抽卡记录、游戏时长、设置和自定义背景复制到上方所选的数据文件夹。仅读取 Starward 中的文件，不修改、不删除其原有数据。米游社 / HoYoLAB 登录状态不会复制。可使用自动识别的位置，或指定数据目录、便携版安装目录。</value>
+    <value>可使用自动识别的位置，或指定数据目录、便携版安装目录。导入前请完全退出 Starward，并确保目标磁盘空间充足；导入过程中请勿关闭本程序，也不要拔出或断开相关磁盘。</value>
   </data>
   <data name="WelcomeView_StarwardDataNotFound" xml:space="preserve">
     <value>未自动检测到</value>
