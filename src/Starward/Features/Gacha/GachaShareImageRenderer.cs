@@ -28,45 +28,76 @@ namespace Starward.Features.Gacha;
 
 /// <summary>
 /// 使用 Win2D 离屏绘制抽卡统计分享图（统计头 + 完整 5★/S 列表），保存为 PNG。
-/// 快照提供“实际样子”（官方视频无 overlay）；整个大背景应用浅亚克力（轻模糊+浅tint），卡片使用较强亚克力；名称默认用未选中时的次要白色。
+/// 壁纸经降饱和、曝光与暗角后再做磨砂；卡片为等高玻璃板（投影 + 细顶缘 + 主题色薄雾），字色分主/次/辅三级。
 /// </summary>
 internal static class GachaShareImageRenderer
 {
 
-    private const float Dpi = 192f;
+    // 3× 逻辑像素，分享到社交软件放大时文字/图标仍清楚
+    private const float Dpi = 288f;
 
-    private const float CardWidth = 262f;
-    private const float CardSpacing = 12f;
-    private const float OuterMargin = 20f;
-    private const float CardPaddingH = 12f;
-    private const float CardPaddingV = 8f;
-    private const float CardCornerRadius = 8f;
+    private const float CardWidth = 270f;
+    private const float CardSpacing = 16f;
+    private const float OuterMargin = 28f;
+    private const float CardPaddingH = 14f;
+    private const float CardPaddingV = 12f;
+    private const float CardCornerRadius = 12f;
     private const float RowSpacing = 4f;
-    private const float ListSectionSpacing = 8f;
+    private const float ListSectionSpacing = 10f;
     private const float ItemRowHeight = 28f;
     private const float IconSize = 28f;
     private const float IconColumnWidth = 40f;
+    private const float IconCornerRadius = 6f;
+    private const float ItemPityBarCornerRadius = 4f;
+    private const float FooterHeight = 16f;
+    private const float FooterGap = 12f;
 
-    private static readonly Color CardBackground = Color.FromArgb(0xBF, 0x2C, 0x2C, 0x2C);
-    private static readonly Color SecondaryText = Color.FromArgb(0xFF, 0xC5, 0xC5, 0xC5);
+    // 卡片级当前垫数进度块（对齐 GachaStatsCard / ZZZGachaStatsCard Grid.Row=5：Margin 0,2,0,4，RowSpacing 3）
+    private const float PityProgressMarginTop = 2f;
+    private const float PityProgressMarginBottom = 4f;
+    private const float PityProgressRowSpacing = 3f;
+    private const float PityProgressBarHeight = 6f;
+    private const float PityProgressCornerRadius = 3f;
+    private const float PityProgressLabelHeight = 16f;
+    private const float PityProgressBlockHeight = PityProgressMarginTop + PityProgressLabelHeight + PityProgressRowSpacing + PityProgressBarHeight + PityProgressMarginBottom;
+
+    private static readonly Color PrimaryText = Color.FromArgb(0xFF, 0xF7, 0xF7, 0xF7);
+    private static readonly Color SecondaryText = Color.FromArgb(0xFF, 0xD8, 0xD8, 0xD8);
+    private static readonly Color TertiaryText = Color.FromArgb(0xFF, 0xA3, 0xA3, 0xA3);
     private static readonly Color OnAccentText = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
-    private static readonly Color Rarity5 = Color.FromArgb(0xFF, 0xFF, 0xA5, 0x00);
-    private static readonly Color RarityAverage = Color.FromArgb(0xFF, 0x3B, 0xA2, 0x72);
-    private static readonly Color PityGreen = Color.FromArgb(0xFF, 0x00, 0xE0, 0x79);
-    private static readonly Color PityRed = Color.FromArgb(0xFF, 0xC8, 0x3C, 0x23);
-    private static readonly Color SeparatorColor = Color.FromArgb(0x66, 0xFF, 0xFF, 0xFF);
+    // 略提亮，暗底上比纯 #FFA500 更干净
+    private static readonly Color Rarity5 = Color.FromArgb(0xFF, 0xFF, 0xB4, 0x2E);
+    private static readonly Color Rarity5Hi = Color.FromArgb(0xFF, 0xFF, 0xD0, 0x70);
+    private static readonly Color RarityAverage = Color.FromArgb(0xFF, 0x4E, 0xC4, 0x8C);
+    // 比页面 0.4 更实；绿/红略压暗，浅色角色名才压得住
+    private const float PityBarFillOpacity = 0.58f;
+    private const float PityBarTailOpacityScale = 0.80f;
+    private static readonly Color PityGreen = Color.FromArgb(0xFF, 0x14, 0xC4, 0x74);
+    private static readonly Color PityRed = Color.FromArgb(0xFF, 0xCC, 0x42, 0x2E);
+    private static readonly Color SeparatorColor = Color.FromArgb(0x3D, 0xFF, 0xFF, 0xFF);
+    private static readonly Color PityProgressTrack = Color.FromArgb(0x2E, 0xFF, 0xFF, 0xFF);
 
-    // 预暗化叠加层，统一原始背景亮度基线，避免浅色背景在亚克力仿真中泛白
-    private static readonly Color BgPreDarkenOverlay = Color.FromArgb(0x40, 0x00, 0x00, 0x00);
+    // 预暗化只压高光，避免浅壁纸把亚克力洗白，同时保留更多原图颜色
+    private static readonly Color BgPreDarkenOverlay = Color.FromArgb(0x28, 0x00, 0x00, 0x00);
 
-    // 卡片亚克力效果参数（模拟 CustomOverlayAcrylicBrush 风格，较强）
-    private const float CardAcrylicBlurAmount = 22f;
-    private static readonly Color CardAcrylicTint = Color.FromArgb(0x99, 0x24, 0x24, 0x24);
-    private static readonly Color CardBorderColor = Color.FromArgb(0x33, 0xFF, 0xFF, 0xFF);
+    // 卡片单独对原始壁纸再糊一层；比大背景 32 更散，玻璃底更软
+    private const float CardAcrylicBlurAmount = 40f;
+    // 半透明黑压暗，避免深灰罩把壁纸染成炭灰色
+    private static readonly Color CardAcrylicTint = Color.FromArgb(0x7A, 0x00, 0x00, 0x00);
+    private static readonly Color CardBorderColor = Color.FromArgb(0x26, 0xFF, 0xFF, 0xFF);
+    // 顶缘只留一根细线，不再铺大面积白雾
+    private static readonly Color CardHairlineColor = Color.FromArgb(0x22, 0xFF, 0xFF, 0xFF);
+    private const float CardShadowBlur = 16f;
+    private const float CardShadowOffsetY = 6f;
+    private static readonly Color CardShadowColor = Color.FromArgb(0x66, 0x00, 0x00, 0x00);
 
-    // 大背景亚克力参数（较深的磨砂，区别于卡片；中等模糊 + 较高不透明度 tint）
-    private const float BgLightAcrylicBlurAmount = 18f;
-    private static readonly Color BgLightAcrylicTint = Color.FromArgb(0x80, 0x1A, 0x1A, 0x1A);
+    // 大背景：保持较强模糊，但降低实色罩，用暗角 + 主题色薄雾替代“一层灰”
+    private const float BgLightAcrylicBlurAmount = 32f;
+    private const float BgSaturation = 0.88f;
+    private const float BgExposure = -0.04f;
+    private const float BgVignetteAmount = 0.30f;
+    private static readonly Color BgLightAcrylicTint = Color.FromArgb(0x33, 0x00, 0x00, 0x00);
+    private static readonly Color BgVignetteColor = Color.FromArgb(0xFF, 0x08, 0x08, 0x0C);
 
     private static readonly FontWeight NormalFontWeight = new() { Weight = 400 };
     private static readonly FontWeight SemiBoldFontWeight = new() { Weight = 600 };
@@ -74,12 +105,12 @@ internal static class GachaShareImageRenderer
 
     /// <summary>
     /// 离屏渲染当前所选卡池统计卡片并保存 PNG。
-    /// 使用原始快照绘制整个大背景的浅亚克力效果，卡片叠加较强亚克力。
+    /// 壁纸先调色再磨砂；各卡拉齐到同一高度，叠投影与细顶缘。
     /// </summary>
     /// <param name="stats">要绘制的卡池统计列表（横向排列，顺序由调用方决定）。</param>
     /// <param name="gameBiz">当前游戏区服，用于 5★/S 文案与 pity 规则分支。</param>
     /// <param name="backgroundFile">背景图/快照本地路径（由调用方确保视频已转为当前帧快照 PNG）；为 null 或不存在时使用纯色背景。</param>
-    /// <param name="uid">玩家 UID，用于输出文件名。</param>
+    /// <param name="uid">玩家 UID，用于输出文件名与图脚标。</param>
     /// <param name="accentColor">主题强调色（须在 UI 线程读取后传入，渲染在后台线程执行）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>已保存 PNG 的完整路径。</returns>
@@ -110,50 +141,45 @@ internal static class GachaShareImageRenderer
             await PreloadIconsAsync(stats, iconLoads, disposableBitmaps, cancellationToken);
 
             using var titleFormat = CreateTextFormat(16f, SemiBoldFontWeight);
-            using var bodyFormat = CreateTextFormat(14f);
+            using var bodyFormat = CreateTextFormat(14f, trimming: true);
             using var smallFormat = CreateTextFormat(12f);
-            using var capsuleFormat = CreateTextFormat(11f);
+            using var capsuleFormat = CreateTextFormat(11f, SemiBoldFontWeight);
             using var upFormat = CreateTextFormat(12f, NormalFontWeight, FontStyle.Italic);
 
             var cardHeights = stats.Select(MeasureCardHeight).ToArray();
             var iconBitmaps = iconLoads.ToDictionary(x => x.Key, x => x.Value.Result, StringComparer.Ordinal);
             float contentHeight = cardHeights.Max();
             float canvasWidth = OuterMargin * 2 + stats.Count * CardWidth + Math.Max(0, stats.Count - 1) * CardSpacing;
-            float canvasHeight = OuterMargin * 2 + contentHeight;
+            float canvasHeight = OuterMargin + contentHeight + FooterGap + FooterHeight + OuterMargin;
 
             using var renderTarget = new CanvasRenderTarget(device, canvasWidth, canvasHeight, Dpi);
             using (CanvasDrawingSession ds = renderTarget.CreateDrawingSession())
             {
                 ds.Clear(Colors.Transparent);
+                ds.Antialiasing = CanvasAntialiasing.Antialiased;
+                // 离屏 PNG 没有稳定底色，ClearType 会带彩边、发糊；灰度抗锯齿更利落
+                ds.TextAntialiasing = CanvasTextAntialiasing.Grayscale;
 
-                // 先生成原始背景层（raw snapshot 内容，用于采样和“实际样子”）
                 using var bgLayer = new CanvasRenderTarget(device, canvasWidth, canvasHeight, Dpi);
                 using (CanvasDrawingSession bgDs = bgLayer.CreateDrawingSession())
                 {
                     await DrawRawBackgroundAsync(bgDs, device, canvasWidth, canvasHeight, backgroundFile, accentColor, cancellationToken);
-                    // 预暗化原始背景，统一亮度基线，避免浅色背景导致亚克力仿真泛白
                     bgDs.FillRectangle(0, 0, canvasWidth, canvasHeight, BgPreDarkenOverlay);
                 }
 
-                // 绘制整个大背景的浅亚克力效果（轻模糊 + 浅 tint），卡片会覆盖其区域
-                using var bgLightBlur = new GaussianBlurEffect
-                {
-                    Source = bgLayer,
-                    BlurAmount = BgLightAcrylicBlurAmount,
-                    BorderMode = EffectBorderMode.Soft,
-                };
-                ds.DrawImage(bgLightBlur);
-                ds.FillRectangle(0, 0, canvasWidth, canvasHeight, BgLightAcrylicTint);
+                DrawGradedBackground(ds, bgLayer, canvasWidth, canvasHeight, accentColor);
 
                 float cardTop = OuterMargin;
                 float cardLeft = OuterMargin;
                 for (int i = 0; i < stats.Count; i++)
                 {
                     GachaTypeStats stat = stats[i];
-                    DrawCard(ds, device, stat, cardLeft, cardTop, cardHeights[i], rarityLabel, accentColor,
+                    DrawCard(ds, device, stat, cardLeft, cardTop, contentHeight, rarityLabel, accentColor,
                              titleFormat, bodyFormat, smallFormat, capsuleFormat, upFormat, iconBitmaps, bgLayer);
                     cardLeft += CardWidth + CardSpacing;
                 }
+
+                DrawFooter(ds, uid, cardTop + contentHeight + FooterGap, smallFormat);
             }
 
             string folder = Path.Combine(AppConfig.CacheFolder, "cache", "share");
@@ -206,7 +232,7 @@ internal static class GachaShareImageRenderer
 
 
     /// <summary>
-    /// 按单张卡的内容测量高度（顶对齐，列表区随 5★ 条数伸缩）。
+    /// 按单张卡的内容测量高度（顶对齐，列表区随 5★ 条数伸缩）。绘制时会拉齐到本批最高卡。
     /// </summary>
     private static float MeasureCardHeight(GachaTypeStats stats)
     {
@@ -216,6 +242,10 @@ internal static class GachaShareImageRenderer
         height += RowSpacing + 1 + RowSpacing;
         height += 20f + RowSpacing;
         height += 20f + RowSpacing;
+        if (stats.ShowPityProgress)
+        {
+            height += PityProgressBlockHeight;
+        }
         height += ListSectionSpacing;
         height += (stats.List_5?.Count ?? 0) * ItemRowHeight;
         return height;
@@ -223,8 +253,8 @@ internal static class GachaShareImageRenderer
 
 
     /// <summary>
-    /// 绘制单张统计卡片（先绘制亚克力卡片背景，再绘制头部 + 5★ 列表文字）。
-    /// 背景层 bgLayer 用于对卡片区域做局部高斯模糊 + 磨砂着色，实现“对卡片本身做亚克力”。
+    /// 绘制单张统计卡片（投影 → 玻璃底 → 头部统计 → 5★ 列表）。
+    /// 背景层 bgLayer 用于对卡片区域做局部高斯模糊 + 磨砂着色。
     /// </summary>
     private static void DrawCard(
         CanvasDrawingSession ds,
@@ -243,21 +273,21 @@ internal static class GachaShareImageRenderer
         IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps,
         CanvasBitmap bgLayer)
     {
-        // 先绘制本卡片的亚克力磨砂背景（基于原始 bgLayer 的局部模糊 + 着色）
-        DrawAcrylicCardBackground(ds, device, bgLayer, left, top, CardWidth, height, CardCornerRadius);
+        DrawCardShadow(ds, device, left, top, CardWidth, height, CardCornerRadius);
+        DrawAcrylicCardBackground(ds, device, bgLayer, left, top, CardWidth, height, CardCornerRadius, accentColor);
 
         float x = left + CardPaddingH;
         float y = top + CardPaddingV;
         float innerWidth = CardWidth - CardPaddingH * 2;
         float rightX = x + innerWidth;
 
-        // 标题行：卡池名 + 可选胶囊 + 总抽数
         float titleBlockRight = rightX;
-        if (!string.IsNullOrEmpty(stats.Count.ToString()))
+        string countText = stats.Count.ToString();
+        if (!string.IsNullOrEmpty(countText))
         {
-            string countText = stats.Count.ToString();
-            DrawText(ds, countText, rightX - MeasureTextWidth(ds, countText, titleFormat), y, titleFormat, SecondaryText);
-            titleBlockRight -= MeasureTextWidth(ds, countText, titleFormat) + 8f;
+            float countWidth = MeasureTextWidth(ds, countText, titleFormat);
+            DrawText(ds, countText, rightX - countWidth, y, titleFormat, PrimaryText);
+            titleBlockRight -= countWidth + 8f;
         }
 
         if (stats.ShowFiftyFiftyStreakCapsules)
@@ -276,25 +306,21 @@ internal static class GachaShareImageRenderer
             titleBlockRight = Math.Min(titleBlockRight, capsuleRight - 120f);
         }
 
-        DrawText(ds, stats.GachaTypeText, x, y, titleFormat, SecondaryText, titleBlockRight - x);
+        DrawText(ds, stats.GachaTypeText, x, y, titleFormat, PrimaryText, titleBlockRight - x);
         y += 22f;
 
-        // 时间范围
-        DrawText(ds, FormatTimeRange(stats), x, y, smallFormat, SecondaryText);
+        DrawText(ds, FormatTimeRange(stats), x, y, smallFormat, TertiaryText);
         y += 16f + RowSpacing;
 
-        // 分割线
-        ds.DrawLine(x, y, rightX, y, SeparatorColor, 1f);
+        DrawFadeSeparator(ds, x, rightX, y, SeparatorColor);
         y += 1f + RowSpacing;
 
-        // 5★/S 平均
         string averageLeft = $"{rarityLabel}{Lang.GachaStatsCard_Average}{stats.Avarage_5_Desc_Text}";
         string averageRight = $"{stats.Average_5_Text}{stats.Avarage_5_Up_Text}";
         DrawText(ds, averageLeft, x, y, bodyFormat, RarityAverage);
         DrawText(ds, averageRight, rightX - MeasureTextWidth(ds, averageRight, bodyFormat), y, bodyFormat, RarityAverage);
         y += 20f + RowSpacing;
 
-        // 5★/S 统计 或 不歪概率
         if (stats.HasUpItem)
         {
             DrawText(ds, Lang.GachaStatsCard_NoUpProbability, x, y, bodyFormat, Rarity5);
@@ -307,24 +333,60 @@ internal static class GachaShareImageRenderer
             DrawText(ds, statsLeft, x, y, bodyFormat, Rarity5);
             DrawText(ds, statsRight, rightX - MeasureTextWidth(ds, statsRight, bodyFormat), y, bodyFormat, Rarity5);
         }
-        y += 20f + RowSpacing + ListSectionSpacing;
+        y += 20f + RowSpacing;
 
-        // 5★/S 列表（不含 UI 中的 Segmented 选项卡标签）
+        if (stats.ShowPityProgress)
+        {
+            y = DrawPityProgress(ds, device, stats, x, y, innerWidth, rightX, smallFormat);
+        }
+
+        y += ListSectionSpacing;
+
         if (stats.List_5 is { Count: > 0 })
         {
             float nameX = x + IconColumnWidth;
             float nameWidth = innerWidth - IconColumnWidth - 48f;
             foreach (GachaLogItemEx item in stats.List_5)
             {
-                DrawListItem(ds, item, x, y, nameX, nameWidth, rightX, bodyFormat, upFormat, iconBitmaps);
+                DrawListItem(ds, device, item, x, y, nameX, nameWidth, rightX, bodyFormat, upFormat, iconBitmaps);
                 y += ItemRowHeight;
             }
         }
     }
 
+
     /// <summary>
-    /// 绘制卡片的亚克力背景：从 raw bgLayer 局部采样 → 高斯模糊（CreateLayer 限制到圆角）→ 着色 tint → 轻边框。
-    /// 实现“对卡片本身做亚克力”（较强），大背景已单独应用浅亚克力。
+    /// 在卡片下方画一层软投影，让玻璃板从壁纸上浮起来。
+    /// </summary>
+    private static void DrawCardShadow(
+        CanvasDrawingSession ds,
+        CanvasDevice device,
+        float left,
+        float top,
+        float width,
+        float height,
+        float cornerRadius)
+    {
+        const float pad = 28f;
+        using var mask = new CanvasRenderTarget(device, width + pad * 2, height + pad * 2, Dpi);
+        using (CanvasDrawingSession maskDs = mask.CreateDrawingSession())
+        {
+            maskDs.Clear(Colors.Transparent);
+            maskDs.FillRoundedRectangle(pad, pad, width, height, cornerRadius, cornerRadius, Colors.White);
+        }
+
+        using var shadow = new ShadowEffect
+        {
+            Source = mask,
+            BlurAmount = CardShadowBlur,
+            ShadowColor = CardShadowColor,
+        };
+        ds.DrawImage(shadow, left - pad, top - pad + CardShadowOffsetY);
+    }
+
+
+    /// <summary>
+    /// 绘制卡片的亚克力背景：局部模糊 → 着色 → 很薄的主题色顶雾 → 1px 顶缘 → 细边框。
     /// </summary>
     private static void DrawAcrylicCardBackground(
         CanvasDrawingSession ds,
@@ -334,11 +396,11 @@ internal static class GachaShareImageRenderer
         float top,
         float width,
         float height,
-        float cornerRadius)
+        float cornerRadius,
+        Color accentColor)
     {
         using var cardGeometry = CanvasGeometry.CreateRoundedRectangle(device, left, top, width, height, cornerRadius, cornerRadius);
 
-        // 局部模糊背景内容（只影响卡片区域）
         using var blur = new GaussianBlurEffect
         {
             Source = bgLayer,
@@ -346,25 +408,119 @@ internal static class GachaShareImageRenderer
             BorderMode = EffectBorderMode.Soft,
         };
 
-        using (var layer = ds.CreateLayer(1f, cardGeometry))
+        using (ds.CreateLayer(1f, cardGeometry))
         {
-            // 仅绘制卡片矩形对应的模糊区域
             ds.DrawImage(blur, left, top, new Rect(left, top, width, height));
         }
 
-        // 亚克力着色层（半透明深色磨砂）
         ds.FillGeometry(cardGeometry, CardAcrylicTint);
 
-        // 轻微边框增强玻璃质感（可选，极低不透明度）
+        using (ds.CreateLayer(1f, cardGeometry))
+        {
+            Color washTop = Color.FromArgb(0x14, accentColor.R, accentColor.G, accentColor.B);
+            var washStops = new[]
+            {
+                new CanvasGradientStop { Position = 0f, Color = washTop },
+                new CanvasGradientStop { Position = 0.16f, Color = Colors.Transparent },
+                new CanvasGradientStop { Position = 1f, Color = Colors.Transparent },
+            };
+            using var wash = new CanvasLinearGradientBrush(ds, washStops)
+            {
+                StartPoint = new Vector2(left, top),
+                EndPoint = new Vector2(left, top + height),
+            };
+            ds.FillRectangle(left, top, width, height, wash);
+
+            ds.DrawLine(
+                left + cornerRadius,
+                top + 0.6f,
+                left + width - cornerRadius,
+                top + 0.6f,
+                CardHairlineColor,
+                1f);
+        }
+
         ds.DrawGeometry(cardGeometry, CardBorderColor, 1f);
     }
 
 
     /// <summary>
-    /// 绘制单行 5★ 记录：保底色条、图标、名称、pity、up! 标记。
+    /// 绘制卡片级当前最高稀有度垫数进度（对应 <c>GachaStatsCard</c> / <c>ZZZGachaStatsCard</c> 第 5 行 ProgressBar）。
+    /// 仅由调用方在 <see cref="GachaTypeStats.ShowPityProgress"/> 为 true 时调用；
+    /// 非 UP 卡池不绘制右侧大小保底文案。与列表行内的 <see cref="DrawPityBar"/> 无关。
+    /// </summary>
+    /// <param name="ds">绘制会话。</param>
+    /// <param name="device">用于创建圆角轨道几何。</param>
+    /// <param name="stats">当前卡池统计（文案与进度值）。</param>
+    /// <param name="x">内容区左缘。</param>
+    /// <param name="y">本块顶部（尚未计入上边距）。</param>
+    /// <param name="innerWidth">内容区宽度，进度条拉满该宽度。</param>
+    /// <param name="rightX">内容区右缘，用于右对齐保底文案。</param>
+    /// <param name="labelFormat">12pt 标签字体。</param>
+    /// <returns>本块底部 Y（已含底边距），供后续 5★/S 列表接着排。</returns>
+    private static float DrawPityProgress(
+        CanvasDrawingSession ds,
+        CanvasDevice device,
+        GachaTypeStats stats,
+        float x,
+        float y,
+        float innerWidth,
+        float rightX,
+        CanvasTextFormat labelFormat)
+    {
+        y += PityProgressMarginTop;
+
+        DrawText(ds, stats.PityProgressText, x, y, labelFormat, TertiaryText);
+        if (stats.HasUpItem)
+        {
+            string guaranteeText = stats.PityGuaranteeText;
+            DrawText(ds, guaranteeText, rightX - MeasureTextWidth(ds, guaranteeText, labelFormat), y, labelFormat, Rarity5);
+        }
+        y += PityProgressLabelHeight + PityProgressRowSpacing;
+
+        using var trackGeometry = CanvasGeometry.CreateRoundedRectangle(
+            device, x, y, innerWidth, PityProgressBarHeight, PityProgressCornerRadius, PityProgressCornerRadius);
+        ds.FillGeometry(trackGeometry, PityProgressTrack);
+
+        int max = stats.Pity_5_Max;
+        int value = stats.Pity_5;
+        if (max > 0 && value > 0)
+        {
+            float fillWidth = innerWidth * Math.Clamp(value / (float)max, 0f, 1f);
+            if (fillWidth > 0f)
+            {
+                using (ds.CreateLayer(1f, trackGeometry))
+                {
+                    using var fillGeometry = CanvasGeometry.CreateRoundedRectangle(
+                        device, x, y, fillWidth, PityProgressBarHeight, PityProgressCornerRadius, PityProgressCornerRadius);
+                    var fillStops = new[]
+                    {
+                        new CanvasGradientStop { Position = 0f, Color = Rarity5Hi },
+                        new CanvasGradientStop { Position = 1f, Color = Rarity5 },
+                    };
+                    using var fillBrush = new CanvasLinearGradientBrush(ds, fillStops)
+                    {
+                        StartPoint = new Vector2(x, y),
+                        EndPoint = new Vector2(x + innerWidth, y),
+                    };
+                    ds.FillGeometry(fillGeometry, fillBrush);
+
+                    ds.FillRectangle(x, y, fillWidth, 0.8f, Color.FromArgb(0x24, 0xFF, 0xFF, 0xFF));
+                }
+            }
+        }
+
+        y += PityProgressBarHeight + PityProgressMarginBottom;
+        return y;
+    }
+
+
+    /// <summary>
+    /// 绘制单行 5★ 记录：圆角保底色条、圆角图标、名称、pity、up! 标记。
     /// </summary>
     private static void DrawListItem(
         CanvasDrawingSession ds,
+        CanvasDevice device,
         GachaLogItemEx item,
         float rowLeft,
         float rowTop,
@@ -376,20 +532,24 @@ internal static class GachaShareImageRenderer
         IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps)
     {
         float barTop = rowTop + 2f;
-        DrawPityBar(ds, item, nameX - 4f, barTop, nameWidth + 8f, 24f);
+        DrawPityBar(ds, device, item, nameX - 4f, barTop, nameWidth + 8f, 24f);
 
         if (!string.IsNullOrWhiteSpace(item.Icon)
             && iconBitmaps.TryGetValue(item.Icon, out CanvasBitmap? icon)
             && icon is not null)
         {
-            ds.DrawImage(icon, new Rect(rowLeft, rowTop, IconSize, IconSize));
+            using var iconClip = CanvasGeometry.CreateRoundedRectangle(
+                device, rowLeft, rowTop, IconSize, IconSize, IconCornerRadius, IconCornerRadius);
+            using (ds.CreateLayer(1f, iconClip))
+            {
+                DrawImageHighQuality(ds, icon, new Rect(rowLeft, rowTop, IconSize, IconSize));
+            }
         }
 
         string name = item.Name ?? string.Empty;
         string pityText = item.Pity.ToString();
-        // 名称默认使用未选中时的白色（SecondaryText），与 UI 中非 hover 状态一致。
-        // pity 数字也使用次要色；up! 保留金色以突出。
-        DrawText(ds, name, nameX, rowTop + 4f, bodyFormat, SecondaryText, nameWidth);
+        // 叠在色条上，主字色比次要白更能压住实色绿/红
+        DrawText(ds, name, nameX, rowTop + 4f, bodyFormat, PrimaryText, nameWidth);
 
         if (item.HasUpItem && item.IsUp)
         {
@@ -398,14 +558,21 @@ internal static class GachaShareImageRenderer
             DrawText(ds, upText, rightX - upWidth - 28f, rowTop + 6f, upFormat, Rarity5);
         }
 
-        DrawText(ds, pityText, rightX - MeasureTextWidth(ds, pityText, bodyFormat), rowTop + 4f, bodyFormat, SecondaryText);
+        DrawText(ds, pityText, rightX - MeasureTextWidth(ds, pityText, bodyFormat), rowTop + 4f, bodyFormat, TertiaryText);
     }
 
 
     /// <summary>
-    /// 按 <see cref="GachaPityProgressBackgroundBrushConverter"/> 规则绘制保底进度色条。
+    /// 按 <see cref="GachaPityProgressBackgroundBrushConverter"/> 规则绘制保底进度色条（圆角，与页面 CornerRadius=4 对齐）。
     /// </summary>
-    private static void DrawPityBar(CanvasDrawingSession ds, GachaLogItemEx item, float x, float y, float width, float height)
+    private static void DrawPityBar(
+        CanvasDrawingSession ds,
+        CanvasDevice device,
+        GachaLogItemEx item,
+        float x,
+        float y,
+        float width,
+        float height)
     {
         int pity = item.Pity;
         int point = 74;
@@ -422,27 +589,29 @@ internal static class GachaShareImageRenderer
         }
 
         Color baseColor = pity < point ? PityGreen : PityRed;
-        byte alpha = (byte)(0.4 * 255);
-        Color fillColor = Color.FromArgb(alpha, baseColor.R, baseColor.G, baseColor.B);
+        Color fillColor = Color.FromArgb((byte)(PityBarFillOpacity * 255f), baseColor.R, baseColor.G, baseColor.B);
         float offset = Math.Clamp((float)(pity / guarantee), 0f, 1f);
         if (offset <= 0f)
         {
             return;
         }
 
-        var stops = new[]
+        using var clip = CanvasGeometry.CreateRoundedRectangle(device, x, y, width, height, ItemPityBarCornerRadius, ItemPityBarCornerRadius);
+        using (ds.CreateLayer(1f, clip))
         {
-            new CanvasGradientStop { Position = 0, Color = fillColor },
-            new CanvasGradientStop { Position = offset, Color = fillColor },
-            new CanvasGradientStop { Position = offset, Color = Colors.Transparent },
-            new CanvasGradientStop { Position = 1, Color = Colors.Transparent },
-        };
-        using var brush = new CanvasLinearGradientBrush(ds.Device, stops)
-        {
-            StartPoint = new Vector2(x, y),
-            EndPoint = new Vector2(x + width, y),
-        };
-        ds.FillRectangle(x, y, width * offset, height, brush);
+            Color tail = Color.FromArgb((byte)(fillColor.A * PityBarTailOpacityScale), fillColor.R, fillColor.G, fillColor.B);
+            var stops = new[]
+            {
+                new CanvasGradientStop { Position = 0f, Color = fillColor },
+                new CanvasGradientStop { Position = 1f, Color = tail },
+            };
+            using var brush = new CanvasLinearGradientBrush(ds, stops)
+            {
+                StartPoint = new Vector2(x, y),
+                EndPoint = new Vector2(x + width * offset, y),
+            };
+            ds.FillRectangle(x, y, width * offset, height, brush);
+        }
     }
 
 
@@ -464,7 +633,7 @@ internal static class GachaShareImageRenderer
         }
 
         float textWidth = MeasureTextWidth(ds, text, format);
-        float paddingH = 6f;
+        float paddingH = 7f;
         float paddingV = 1f;
         float capsuleWidth = textWidth + paddingH * 2;
         float capsuleHeight = 18f;
@@ -473,15 +642,16 @@ internal static class GachaShareImageRenderer
 
         using var geometry = CanvasGeometry.CreateRoundedRectangle(device, left, capsuleTop, capsuleWidth, capsuleHeight, 9f, 9f);
         ds.FillGeometry(geometry, accentColor);
+        ds.DrawGeometry(geometry, Color.FromArgb(0x22, 0xFF, 0xFF, 0xFF), 1f);
         DrawText(ds, text, left + paddingH, capsuleTop + paddingV, format, OnAccentText);
         return left;
     }
 
 
     /// <summary>
-    /// 将快照绘制为原始背景内容层（raw，用于后续浅亚克力可见背景 + 卡片采样）。
+    /// 将快照绘制为原始背景内容层（raw，用于后续调色磨砂 + 卡片采样）。
     /// 由调用方保证若为视频则已提前快照为静态图片路径（官方视频已移除 overlay）。
-    /// 图片使用 cover 填充；无背景时使用强调色深色变体。
+    /// 图片使用 cover 填充；无背景时使用强调色对角渐变。
     /// </summary>
     private static async Task DrawRawBackgroundAsync(
         CanvasDrawingSession ds,
@@ -500,12 +670,105 @@ internal static class GachaShareImageRenderer
             ImageInfo info = await ImageLoader.LoadImageAsync(backgroundFile!, cancellationToken);
             using CanvasBitmap source = info.CanvasBitmap;
             DrawCoverImage(ds, source, width, height);
-            // 按需可在此加极轻微 overlay 提升文字可读性，但保持“实际样子”优先，不做明显压暗。
-            // ds.FillRectangle(0, 0, width, height, Color.FromArgb(0x10, 0, 0, 0));
             return;
         }
 
-        ds.FillRectangle(0, 0, width, height, GetSolidBackgroundColor(accentColor));
+        Color deep = Color.FromArgb(0xFF, (byte)(accentColor.R * 0.14), (byte)(accentColor.G * 0.14), (byte)(accentColor.B * 0.16));
+        Color lift = Color.FromArgb(0xFF, (byte)(accentColor.R * 0.28), (byte)(accentColor.G * 0.26), (byte)(accentColor.B * 0.32));
+        var stops = new[]
+        {
+            new CanvasGradientStop { Position = 0f, Color = lift },
+            new CanvasGradientStop { Position = 1f, Color = deep },
+        };
+        using var brush = new CanvasLinearGradientBrush(ds, stops)
+        {
+            StartPoint = new Vector2(0, 0),
+            EndPoint = new Vector2(width, height),
+        };
+        ds.FillRectangle(0, 0, width, height, brush);
+    }
+
+
+    /// <summary>
+    /// 大背景调色：降饱和 → 略压曝光 → 高斯模糊 → 暗角 → 薄 tint → 主题色顶雾。
+    /// 让壁纸仍可辨认，同时把对比度让给卡片。
+    /// </summary>
+    private static void DrawGradedBackground(
+        CanvasDrawingSession ds,
+        CanvasBitmap bgLayer,
+        float width,
+        float height,
+        Color accentColor)
+    {
+        using var saturate = new SaturationEffect
+        {
+            Source = bgLayer,
+            Saturation = BgSaturation,
+        };
+        using var exposure = new ExposureEffect
+        {
+            Source = saturate,
+            Exposure = BgExposure,
+        };
+        using var blur = new GaussianBlurEffect
+        {
+            Source = exposure,
+            BlurAmount = BgLightAcrylicBlurAmount,
+            BorderMode = EffectBorderMode.Soft,
+        };
+        using var vignette = new VignetteEffect
+        {
+            Source = blur,
+            Amount = BgVignetteAmount,
+            Color = BgVignetteColor,
+            Curve = 0.55f,
+        };
+        ds.DrawImage(vignette);
+        ds.FillRectangle(0, 0, width, height, BgLightAcrylicTint);
+
+        Color wash = Color.FromArgb(0x14, accentColor.R, accentColor.G, accentColor.B);
+        var stops = new[]
+        {
+            new CanvasGradientStop { Position = 0f, Color = wash },
+            new CanvasGradientStop { Position = 0.32f, Color = Colors.Transparent },
+            new CanvasGradientStop { Position = 1f, Color = Colors.Transparent },
+        };
+        using var accentWash = new CanvasLinearGradientBrush(ds, stops)
+        {
+            StartPoint = new Vector2(0, 0),
+            EndPoint = new Vector2(0, height),
+        };
+        ds.FillRectangle(0, 0, width, height, accentWash);
+    }
+
+
+    /// <summary>
+    /// 图脚：左下 UID，给分享图一个轻锚点，不抢卡片内容。
+    /// </summary>
+    private static void DrawFooter(CanvasDrawingSession ds, long uid, float y, CanvasTextFormat format)
+    {
+        DrawText(ds, $"UID {uid}", OuterMargin, y, format, TertiaryText);
+    }
+
+
+    /// <summary>
+    /// 两端淡出的分割线，避免硬切一刀。
+    /// </summary>
+    private static void DrawFadeSeparator(CanvasDrawingSession ds, float x1, float x2, float y, Color color)
+    {
+        var stops = new[]
+        {
+            new CanvasGradientStop { Position = 0f, Color = Color.FromArgb(0, color.R, color.G, color.B) },
+            new CanvasGradientStop { Position = 0.1f, Color = color },
+            new CanvasGradientStop { Position = 0.9f, Color = color },
+            new CanvasGradientStop { Position = 1f, Color = Color.FromArgb(0, color.R, color.G, color.B) },
+        };
+        using var brush = new CanvasLinearGradientBrush(ds, stops)
+        {
+            StartPoint = new Vector2(x1, y),
+            EndPoint = new Vector2(x2, y),
+        };
+        ds.DrawLine(x1, y, x2, y, brush, 1f);
     }
 
 
@@ -526,7 +789,16 @@ internal static class GachaShareImageRenderer
         float drawH = imgH * scale;
         float drawX = (targetWidth - drawW) / 2f;
         float drawY = (targetHeight - drawH) / 2f;
-        ds.DrawImage(bitmap, new Rect(drawX, drawY, drawW, drawH));
+        DrawImageHighQuality(ds, bitmap, new Rect(drawX, drawY, drawW, drawH));
+    }
+
+
+    /// <summary>
+    /// 按目标矩形高质量缩放绘制位图（三次插值，避免默认线性缩放发糊）。
+    /// </summary>
+    private static void DrawImageHighQuality(CanvasDrawingSession ds, CanvasBitmap bitmap, Rect dest)
+    {
+        ds.DrawImage(bitmap, dest, bitmap.Bounds, 1f, CanvasImageInterpolation.HighQualityCubic);
     }
 
 
@@ -537,7 +809,6 @@ internal static class GachaShareImageRenderer
     {
         try
         {
-            var device = CanvasDevice.GetSharedDevice();
             string? localPath = ResolveIconLocalPath(icon);
             if (localPath is not null && File.Exists(localPath))
             {
@@ -568,7 +839,8 @@ internal static class GachaShareImageRenderer
     private static CanvasTextFormat CreateTextFormat(
         float fontSize,
         FontWeight? weight = null,
-        FontStyle style = FontStyle.Normal)
+        FontStyle style = FontStyle.Normal,
+        bool trimming = false)
     {
         return new CanvasTextFormat
         {
@@ -577,6 +849,8 @@ internal static class GachaShareImageRenderer
             FontWeight = weight ?? NormalFontWeight,
             FontStyle = style,
             WordWrapping = CanvasWordWrapping.NoWrap,
+            TrimmingGranularity = trimming ? CanvasTextTrimmingGranularity.Character : CanvasTextTrimmingGranularity.None,
+            TrimmingSign = trimming ? CanvasTrimmingSign.Ellipsis : CanvasTrimmingSign.None,
         };
     }
 
@@ -614,7 +888,7 @@ internal static class GachaShareImageRenderer
 
 
     private static string FormatTimeRange(GachaTypeStats stats)
-        => $"{stats.StartTime:yyyy/MM/dd HH:mm:ss} - {stats.EndTime:yyyy/MM/dd HH:mm:ss}";
+        => $"{stats.StartTime:yyyy/MM/dd HH:mm}  –  {stats.EndTime:yyyy/MM/dd HH:mm}";
 
 
     /// <summary>
@@ -645,10 +919,5 @@ internal static class GachaShareImageRenderer
 
         return null;
     }
-
-
-    /// <summary>无图片背景时使用强调色的深色变体。</summary>
-    private static Color GetSolidBackgroundColor(Color accent)
-        => Color.FromArgb(0xFF, (byte)(accent.R * 0.22), (byte)(accent.G * 0.22), (byte)(accent.B * 0.22));
 
 }
