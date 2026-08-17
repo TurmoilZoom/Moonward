@@ -274,6 +274,7 @@
                   Grid.Column="1"
                   Margin="0,32,0,0"
                   DefaultBackgroundColor="Transparent"
+                  IsTabStop="False"
                   Visibility="Collapsed">
             <WebView2.Resources>
                 <SolidColorBrush x:Key="BrushForThemeBackgroundColor" Color="Transparent" />

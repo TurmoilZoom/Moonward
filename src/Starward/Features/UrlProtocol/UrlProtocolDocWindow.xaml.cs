@@ -37,7 +37,8 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
 
 
     /// <summary>
-    /// 拉取失败（网络异常）兜底时在 WebView 中打开的 GitHub 页面地址，命中后更新为实际来源与语言。
+    /// 拉取失败时外开浏览器的 GitHub 页面地址；命中 raw 文档后更新为实际来源与语言。
+    /// 不在 WebView 内打开 GitHub，避免搜索/登录框激活 Chromium TSF（issue #1）。
     /// </summary>
     private string _browserUrl = $"https://github.com/{DocSources[0].Repository}/blob/{DocSources[0].Branch}/{DocPath}";
 
@@ -125,10 +126,15 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
         catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
         {
             _logger.LogError(ex, "Load url protocol document");
-            webview.Source = new Uri(_browserUrl);
-            webview.Visibility = Visibility.Visible;
+            try
+            {
+                _ = Launcher.LaunchUriAsync(new Uri(_browserUrl));
+            }
+            catch { }
+            TextBlock_Error.Text = Lang.Common_NetworkError;
+            webview.Visibility = Visibility.Collapsed;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
-            StackPanel_Error.Visibility = Visibility.Collapsed;
+            StackPanel_Error.Visibility = Visibility.Visible;
         }
         catch (Exception ex)
         {
@@ -226,7 +232,7 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
 
     private void CoreWebView2_DOMContentLoaded(CoreWebView2 sender, CoreWebView2DOMContentLoadedEventArgs args)
     {
-        webview.Focus(FocusState.Programmatic);
+        // 只读 markdown，不抢焦点，避免把微信输入法推进 Chromium TSF（issue #1）
         webview.Visibility = Visibility.Visible;
         StackPanel_Loading.Visibility = Visibility.Collapsed;
         StackPanel_Error.Visibility = Visibility.Collapsed;

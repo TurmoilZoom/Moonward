@@ -495,11 +495,17 @@ public sealed partial class UpdateWindow : WindowEx
         catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
         {
             _logger.LogError(ex, "Load recent update content");
+            // 内嵌 GitHub 发行页带搜索/登录框，会激活 Chromium TSF（issue #1）
             string tag = NewVersionText ?? AppConfig.AppVersion;
-            webview.Source = new Uri($"https://github.com/{ReleaseClient.Repository}/releases/tag/{tag}");
-            webview.Visibility = Visibility.Visible;
+            try
+            {
+                _ = Launcher.LaunchUriAsync(new Uri($"https://github.com/{ReleaseClient.Repository}/releases/tag/{tag}"));
+            }
+            catch { }
+            TextBlock_Error.Text = Lang.Common_NetworkError;
+            webview.Visibility = Visibility.Collapsed;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
-            StackPanel_Error.Visibility = Visibility.Collapsed;
+            StackPanel_Error.Visibility = Visibility.Visible;
         }
         catch (Exception ex)
         {
@@ -678,7 +684,7 @@ public sealed partial class UpdateWindow : WindowEx
 
     private void CoreWebView2_DOMContentLoaded(CoreWebView2 sender, CoreWebView2DOMContentLoadedEventArgs args)
     {
-        webview.Focus(FocusState.Programmatic);
+        // 只读 markdown，不抢焦点，避免把微信输入法推进 Chromium TSF（issue #1）
         webview.Visibility = Visibility.Visible;
         StackPanel_Loading.Visibility = Visibility.Collapsed;
         StackPanel_Error.Visibility = Visibility.Collapsed;

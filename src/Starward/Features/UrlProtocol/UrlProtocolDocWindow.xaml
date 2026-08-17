@@ -42,6 +42,7 @@
 
         <WebView2 x:Name="webview"
                   DefaultBackgroundColor="Transparent"
+                  IsTabStop="False"
                   Visibility="Collapsed">
             <WebView2.Resources>
                 <SolidColorBrush x:Key="BrushForThemeBackgroundColor" Color="Transparent" />
