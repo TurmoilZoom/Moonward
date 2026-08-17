@@ -14,6 +14,10 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<Platforms>x86;x64;ARM64</Platforms>
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+		<!-- 本地 F5 / dotnet build -p:Platform=x64 也按 RID 输出可双击的自包含 exe；命令行已指定 -r 时不覆盖 -->
+		<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' And '$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
+		<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' And '$(Platform)' == 'x86'">win-x86</RuntimeIdentifier>
+		<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' And ('$(Platform)' == 'ARM64' Or '$(Platform)' == 'arm64')">win-arm64</RuntimeIdentifier>
 		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<EnableMsixTooling>true</EnableMsixTooling>
@@ -27,6 +31,10 @@
 		<CsWinRTAotOptimizerEnabled Condition="'$(Configuration)' == 'Debug'">false</CsWinRTAotOptimizerEnabled>
 		<CsWinRTAotOptimizerEnabled Condition="'$(Configuration)' != 'Debug'">true</CsWinRTAotOptimizerEnabled>
 		<CETCompat>false</CETCompat>
+		<!-- 仅当显式指定 PackLocalSetup=true 时，生成结束后才打 Velopack Setup.exe。默认 false，F5 不受影响。
+		     VS：编辑本项目的 Starward.csproj.user，把 PackLocalSetup 改为 true，再点「生成」。
+		     命令行：dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:PackLocalSetup=true -->
+		<PackLocalSetup Condition="'$(PackLocalSetup)' == ''">false</PackLocalSetup>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -92,5 +100,26 @@
 		<Delete Files="$(PublishDir)DirectML.dll" />
 		<Delete Files="$(PublishDir)onnxruntime.dll" />
 	</Target>
+
+	<Target Name="PackLocalSetupCore">
+		<PropertyGroup>
+			<_SetupScript>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\build-setup.ps1'))</_SetupScript>
+			<_SetupArch Condition="'$(Platform)' == 'ARM64' Or '$(Platform)' == 'arm64'">arm64</_SetupArch>
+			<_SetupArch Condition="'$(_SetupArch)' == ''">x64</_SetupArch>
+		</PropertyGroup>
+		<Message Importance="high" Text="PackLocalSetup: packing Velopack Setup.exe ($(_SetupArch))" />
+		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(_SetupScript)&quot; -Architecture $(_SetupArch)"
+		      WorkingDirectory="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..'))"
+		      ConsoleToMSBuild="true" />
+	</Target>
+
+	<!-- 显式目标：dotnet build -t:PackLocalSetup -->
+	<Target Name="PackLocalSetup" DependsOnTargets="PackLocalSetupCore" />
+
+	<!-- VS / 命令行指定 -p:PackLocalSetup=true 时，在生成成功后打包。不指定则跳过。 -->
+	<Target Name="PackLocalSetupAfterBuild"
+	        AfterTargets="Build"
+	        Condition="'$(DesignTimeBuild)' != 'true' And '$(PackLocalSetup)' == 'true'"
+	        DependsOnTargets="PackLocalSetupCore" />
 
 </Project>

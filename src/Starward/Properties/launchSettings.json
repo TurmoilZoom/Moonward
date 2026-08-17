@@ -8,6 +8,13 @@
       "commandName": "Project",
       "commandLineArgs": "--welcome",
       "nativeDebugging": false
+    },
+    "Moonward (Pack Setup)": {
+      "commandName": "Executable",
+      "executablePath": "powershell.exe",
+      "commandLineArgs": "-NoProfile -ExecutionPolicy Bypass -File .\\build-setup.ps1 -Architecture x64 -OpenOutput",
+      "workingDirectory": "$(ProjectDir)..\\..",
+      "nativeDebugging": false
     }
   }
 }
