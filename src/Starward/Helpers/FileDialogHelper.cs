@@ -248,8 +248,14 @@ internal static class FileDialogHelper
 
 
 
-    public static async Task<string?> PickFolderAsync(nint parentWindow)
+    public static async Task<string?> PickFolderAsync(nint parentWindow, string? startFolder = null)
     {
+        // WinRT FolderPicker 不能指定任意路径；需要落到已有目录时走 IFileDialog.SetFolder。
+        if (Directory.Exists(startFolder))
+        {
+            return await PickFolderWithStartPathAsync(parentWindow, startFolder);
+        }
+
         try
         {
             var picker = new FolderPicker
@@ -263,44 +269,72 @@ internal static class FileDialogHelper
         }
         catch (COMException)
         {
-            return await Task.Run(() =>
-            {
-                IFileDialog? dialog = null;
-                IShellItem? shell = null;
-
-                try
-                {
-                    dialog = new NativeFileOpenDialog();
-                    dialog.GetOptions(out var options);
-                    options |= FOS.FOS_NOREADONLYRETURN;
-                    options |= FOS.FOS_DONTADDTORECENT;
-                    options |= FOS.FOS_PICKFOLDERS;
-                    dialog.SetOptions(options);
-                    try
-                    {
-                        ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
-                    }
-                    catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
-                    {
-                        return null;
-                    }
-                    dialog.GetResult(out shell);
-                    shell.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
-                    return name;
-                }
-                finally
-                {
-                    if (dialog != null) Marshal.FinalReleaseComObject(dialog);
-                    if (shell != null) Marshal.FinalReleaseComObject(shell);
-                }
-            }).ConfigureAwait(false);
+            return await PickFolderWithStartPathAsync(parentWindow, startFolder);
         }
     }
 
 
-    public static async Task<string?> PickFolderAsync(XamlRoot xamlRoot)
+    public static async Task<string?> PickFolderAsync(XamlRoot xamlRoot, string? startFolder = null)
     {
-        return await PickFolderAsync((nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value);
+        return await PickFolderAsync((nint)xamlRoot.ContentIslandEnvironment.AppWindowId.Value, startFolder);
+    }
+
+
+    private static async Task<string?> PickFolderWithStartPathAsync(nint parentWindow, string? startFolder)
+    {
+        return await Task.Run(() =>
+        {
+            IFileDialog? dialog = null;
+            IShellItem? resultItem = null;
+            IShellItem? startItem = null;
+
+            try
+            {
+                dialog = new NativeFileOpenDialog();
+                dialog.GetOptions(out var options);
+                options |= FOS.FOS_NOREADONLYRETURN;
+                options |= FOS.FOS_DONTADDTORECENT;
+                options |= FOS.FOS_PICKFOLDERS;
+                dialog.SetOptions(options);
+                startItem = TryCreateShellItem(startFolder);
+                if (startItem is not null)
+                {
+                    dialog.SetFolder(startItem);
+                }
+                try
+                {
+                    ((HRESULT)dialog.Show(parentWindow)).ThrowIfFailed();
+                }
+                catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
+                {
+                    return null;
+                }
+                dialog.GetResult(out resultItem);
+                resultItem.GetDisplayName(SIGDN.SIGDN_FILESYSPATH, out var name);
+                return name;
+            }
+            finally
+            {
+                if (dialog != null) Marshal.FinalReleaseComObject(dialog);
+                if (resultItem != null) Marshal.FinalReleaseComObject(resultItem);
+                if (startItem != null) Marshal.FinalReleaseComObject(startItem);
+            }
+        }).ConfigureAwait(false);
+    }
+
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SHCreateItemFromParsingName(string pszPath, nint pbc, [MarshalAs(UnmanagedType.LPStruct)] Guid riid, out IShellItem ppv);
+
+
+    private static IShellItem? TryCreateShellItem(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+        {
+            return null;
+        }
+        int hr = SHCreateItemFromParsingName(path, 0, new Guid(IIDGuid.IShellItem), out IShellItem item);
+        return hr >= 0 ? item : null;
     }
 
 

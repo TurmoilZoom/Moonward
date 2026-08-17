@@ -9378,6 +9378,87 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Import data from Starward 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_MigrateFromStarward {
+            get {
+                return ResourceManager.GetString("WelcomeView_MigrateFromStarward", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 When selected, wish history, playtime, settings, and custom backgrounds are copied into the data folder chosen above. miHoYo / HoYoLAB login is not copied. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_MigrateFromStarwardDescription {
+            get {
+                return ResourceManager.GetString("WelcomeView_MigrateFromStarwardDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Not detected automatically 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_StarwardDataNotFound {
+            get {
+                return ResourceManager.GetString("WelcomeView_StarwardDataNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Data imported from Starward 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_StarwardImportCompleted {
+            get {
+                return ResourceManager.GetString("WelcomeView_StarwardImportCompleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Import finished. miHoYo / HoYoLAB login was not copied. Please sign in again to use game records and related features. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_StarwardImportReloginHint {
+            get {
+                return ResourceManager.GetString("WelcomeView_StarwardImportReloginHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 This Starward database (version {0}) is newer than Moonward can import (up to {1}). 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_StarwardDatabaseVersionTooNew {
+            get {
+                return ResourceManager.GetString("WelcomeView_StarwardDatabaseVersionTooNew", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Could not read the Starward database. Close Starward and try again. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_StarwardDatabaseInUse {
+            get {
+                return ResourceManager.GetString("WelcomeView_StarwardDatabaseInUse", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Choose Starward folder 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_SelectStarwardFolder {
+            get {
+                return ResourceManager.GetString("WelcomeView_SelectStarwardFolder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No Starward database was found in this folder. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_StarwardFolderHasNoDatabase {
+            get {
+                return ResourceManager.GetString("WelcomeView_StarwardFolderHasNoDatabase", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 The software will restart to migrate data to the new location. 的本地化字符串。
         /// </summary>
         public static string SettingPage_TheSoftwareWillRestartToMigrateData {

@@ -5,6 +5,7 @@ using Starward.Helpers;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
 using System.Text;
@@ -148,11 +149,25 @@ public static partial class AppConfig
             }
 
 #if DEBUG
-            // 开发调试环境：不做迁移检查，数据固定放在程序根目录的 data 文件夹下（没有则创建）。
+            // 开发调试：数据固定在程序目录 \ data。仅带 --welcome 时弹出引导页做迁移调试。
             string debugDataFolder = Path.Combine(AppContext.BaseDirectory, DataSubFolderName);
             Directory.CreateDirectory(debugDataFolder);
-            UseDataFolder(debugDataFolder);
-            LoadConfiguration();
+            if (HasCommandLineFlag("--welcome"))
+            {
+                if (await new WelcomeWindow(presetTarget: debugDataFolder, presetIsDataDirectory: true).WaitAsync())
+                {
+                    LoadConfiguration();
+                }
+                else
+                {
+                    Environment.Exit(0);
+                }
+            }
+            else
+            {
+                UseDataFolder(debugDataFolder);
+                LoadConfiguration();
+            }
 #else
             // 读取已持久化的统一数据目录 DataFolder，以及旧版 UserDataFolder（升级迁移源之一）。
             (string? dataFolder, string? legacyUserDataFolder) = ReadPersistedDataFolders();
@@ -231,6 +246,12 @@ public static partial class AppConfig
     /// <summary>
     /// 从命令行参数读取指定开关后紧跟的值（如 <c>--data-folder "D:\xxx"</c>）。未找到返回 null。
     /// </summary>
+    private static bool HasCommandLineFlag(string name)
+    {
+        return Environment.GetCommandLineArgs().Any(a => string.Equals(a, name, StringComparison.OrdinalIgnoreCase));
+    }
+
+
     private static string? GetCommandLineArgValue(string name)
     {
         string[] args = Environment.GetCommandLineArgs();

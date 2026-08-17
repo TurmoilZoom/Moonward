@@ -68,11 +68,42 @@ internal static class DatabaseService
             {
                 con.Execute("PRAGMA JOURNAL_MODE = WAL;");
             }
-            foreach (var sql in DatabaseSqls.Skip(version))
+            // 不能只按 USER_VERSION Skip：Starward 与 Moonward 在 v18 之后编号分叉，
+            // 导入后的库会被拉回共同祖先再跑本列表。已存在的等价变更（如 ExtraStarNum）要跳过对应脚本。
+            for (int i = version; i < DatabaseSqls.Count; i++)
             {
-                con.Execute(sql);
+                int next = i + 1;
+                if (IsMigrationAlreadySatisfied(con, next))
+                {
+                    con.Execute($"PRAGMA USER_VERSION = {next};");
+                    continue;
+                }
+                con.Execute(DatabaseSqls[i]);
             }
         }
+    }
+
+
+    /// <summary>
+    /// 目标版本对应的 schema 是否已经存在。
+    /// 用于从 Starward 导入后跳过编号冲突但语义相同的脚本（目前仅 v20 ExtraStarNum）。
+    /// 以后若再与上游撞号，在此按表/列探测追加，不要改已发布的 <c>Sql_vN</c> 文本。
+    /// </summary>
+    private static bool IsMigrationAlreadySatisfied(SqliteConnection con, int targetVersion)
+    {
+        return targetVersion switch
+        {
+            20 => ColumnExists(con, "StarRailForgottenHallInfo", "ExtraStarNum"),
+            _ => false,
+        };
+    }
+
+
+    private static bool ColumnExists(SqliteConnection con, string table, string column)
+    {
+        return con.QueryFirstOrDefault<int>(
+            $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = @column COLLATE NOCASE;",
+            new { column }) > 0;
     }
 
 

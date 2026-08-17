@@ -2080,6 +2080,33 @@
   <data name="WelcomeView_AdminPermissionRequiredToMigrate" xml:space="preserve">
     <value>需要管理員權限先可以完成遷移</value>
   </data>
+  <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
+    <value>從 Starward 匯入資料</value>
+  </data>
+  <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
+    <value>剔選之後，會將抽卡紀錄、遊戲時長、設定同自訂背景複製去上面揀嘅資料資料夾。只會讀取 Starward 入面嘅檔案，唔會修改、刪除原有資料。米遊社 / HoYoLAB 登入狀態唔會複製。可以用自動識別嘅位置，或者自行指定資料目錄、便攜版安裝目錄。</value>
+  </data>
+  <data name="WelcomeView_StarwardDataNotFound" xml:space="preserve">
+    <value>未自動偵測到</value>
+  </data>
+  <data name="WelcomeView_StarwardImportCompleted" xml:space="preserve">
+    <value>已從 Starward 匯入資料</value>
+  </data>
+  <data name="WelcomeView_StarwardImportReloginHint" xml:space="preserve">
+    <value>匯入已完成。米遊社 / HoYoLAB 登入狀態未複製，請重新登入之後再用戰績等相關功能。</value>
+  </data>
+  <data name="WelcomeView_StarwardDatabaseVersionTooNew" xml:space="preserve">
+    <value>Starward 資料庫版本係 {0}，而家 Moonward 最高支援匯入 {1}。請更新 Moonward 之後再試。</value>
+  </data>
+  <data name="WelcomeView_StarwardDatabaseInUse" xml:space="preserve">
+    <value>讀唔到 Starward 資料庫。請先退出 Starward 再試。</value>
+  </data>
+  <data name="WelcomeView_SelectStarwardFolder" xml:space="preserve">
+    <value>選擇 Starward 資料夾</value>
+  </data>
+  <data name="WelcomeView_StarwardFolderHasNoDatabase" xml:space="preserve">
+    <value>呢個資料夾搵唔到 Starward 資料庫。請揀包含 StarwardDatabase.db 嘅資料目錄，或者便攜版 Starward 嘅安裝目錄（含 config.ini）。</value>
+  </data>
   <data name="SettingPage_TheSoftwareWillRestartToMigrateData" xml:space="preserve">
     <value>軟件將重新啟動以將資料遷移到新位置。</value>
   </data>

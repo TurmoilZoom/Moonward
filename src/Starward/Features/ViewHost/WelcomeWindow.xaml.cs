@@ -2,7 +2,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
+using Starward.Features.Database;
 using Starward.Features.Setting;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -32,7 +34,13 @@ public sealed partial class WelcomeWindow : WindowEx
 
     private readonly string? _presetTarget;
 
+    private readonly bool _presetIsDataDirectory;
+
     private readonly List<string?> _sourceRoots;
+
+    private readonly bool _importStarwardPreset;
+
+    private StarwardDataImportService.StarwardInstallInfo? _starwardSource;
 
     private bool _needsElevation;
 
@@ -40,16 +48,23 @@ public sealed partial class WelcomeWindow : WindowEx
 
     /// <param name="legacyUserDataFolder">旧版本 UserDataFolder（数据库所在目录），升级迁移源之一。</param>
     /// <param name="legacyCacheFolder">旧版本缓存根（%LocalAppData%\Moonward 等），升级迁移源之一。</param>
-    /// <param name="presetTarget">提权迁移子进程的预设目标目录（带 --migrate-to 时），将自动开始迁移。</param>
-    public WelcomeWindow(string? legacyUserDataFolder = null, string? legacyCacheFolder = null, string? presetTarget = null)
+    /// <param name="presetTarget">预设目标目录。提权迁移时是用户所选父目录；调试固定数据目录时是真正的 data 目录。</param>
+    /// <param name="presetIsDataDirectory"><paramref name="presetTarget"/> 已是统一数据目录（调试用），不再拼接 data 子目录，也不自动开始。</param>
+    public WelcomeWindow(string? legacyUserDataFolder = null, string? legacyCacheFolder = null, string? presetTarget = null, bool presetIsDataDirectory = false)
     {
         _legacyUserDataFolder = legacyUserDataFolder;
         _legacyCacheFolder = legacyCacheFolder;
         _presetTarget = presetTarget;
+        _presetIsDataDirectory = presetIsDataDirectory;
+        _importStarwardPreset = HasCommandLineFlag("--import-starward");
         // 权威的 UserDataFolder 在前（数据库以它为准），缓存根在后。
         _sourceRoots = new List<string?> { legacyUserDataFolder, legacyCacheFolder };
         InitializeComponent();
         InitializeWindow();
+        if (_presetIsDataDirectory)
+        {
+            CanChangeUserDataFolder = false;
+        }
         _taskCompletionSource = new();
     }
 
@@ -110,8 +125,72 @@ public sealed partial class WelcomeWindow : WindowEx
     public bool HasLegacyData { get; set => SetProperty(ref field, value); }
 
 
+    /// <summary>是否探测到本机 Starward 数据库。</summary>
+    public bool HasStarwardData { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>用户是否选择从 Starward 导入（仅探测到源库时可选）。</summary>
+    public bool MigrateFromStarward
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                UpdateStartButtonText();
+            }
+        }
+    }
+
+
+    /// <summary>勾选框是否可操作：已解析到 Starward 库且当前未在迁移。</summary>
+    public bool CanMigrateFromStarward { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>是否允许浏览选择 Starward 数据/便携安装目录。</summary>
+    public bool CanPickStarwardFolder { get; set => SetProperty(ref field, value); } = true;
+
+
+    /// <summary>手动选择 Starward 目录失败时的提示。</summary>
+    public string? StarwardFolderErrorMessage
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                UpdateStarwardNotFoundHint();
+            }
+        }
+    }
+
+
+    /// <summary>已解析到的 Starward 数据目录，显示在选择按钮右侧。</summary>
+    public string? StarwardSourcePath { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>未指定来源且没有选目录错误时，在按钮右侧显示未检测到提示。</summary>
+    public bool ShowStarwardNotFoundHint { get; set => SetProperty(ref field, value); } = true;
+
+
+    /// <summary>是否允许改选数据文件夹。调试固定目录时为 false。</summary>
+    public bool CanChangeUserDataFolder { get; set => SetProperty(ref field, value); } = true;
+
+
     /// <summary>当前是否允许操作（迁移进行中时为 false，禁用选择/启动）。</summary>
-    public bool CanOperate { get; set => SetProperty(ref field, value); } = true;
+    public bool CanOperate
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                UpdateStarwardImportEnabled();
+                CanChangeUserDataFolder = value && !_presetIsDataDirectory;
+                CanPickStarwardFolder = value;
+            }
+        }
+    } = true;
 
 
     /// <summary>迁移是否进行中。</summary>
@@ -138,17 +217,21 @@ public sealed partial class WelcomeWindow : WindowEx
     {
         IsWin11 = Environment.OSVersion.Version >= new Version(10, 0, 22000);
         DetectLegacyData();
+        DetectStarwardData();
         if (!string.IsNullOrEmpty(_presetTarget))
         {
-            // 提权迁移子进程：使用预设目标目录。
             UserDataFolder = _presetTarget;
+        }
+        if (_presetIsDataDirectory)
+        {
+            CanChangeUserDataFolder = false;
         }
         CheckWritePermission();
         CheckWebView2Support();
         await CheckWebpDecoderSupportAsync();
-        if (!string.IsNullOrEmpty(_presetTarget) && CanStartStarward)
+        if (!string.IsNullOrEmpty(_presetTarget) && !_presetIsDataDirectory && CanStartStarward)
         {
-            // 已提权，自动开始迁移到预设目标。
+            // 提权迁移子进程：自动开始迁移到预设目标。调试固定目录不自动开始，以便勾选导入。
             await StartAsync();
         }
     }
@@ -179,6 +262,108 @@ public sealed partial class WelcomeWindow : WindowEx
     }
 
 
+    /// <summary>
+    /// 解析 Starward 数据：命令行指定目录优先，否则自动探测。
+    /// 提权子进程带 <c>--import-starward</c> 时强制勾选。
+    /// 已有旧版 Moonward 数据时默认不勾；即使用户再勾选，目标里已有的库也不会被覆盖。
+    /// </summary>
+    private void DetectStarwardData()
+    {
+        try
+        {
+            string? fromArg = GetCommandLineArgValue("--import-starward-from");
+            if (!string.IsNullOrWhiteSpace(fromArg)
+                && StarwardDataImportService.TryResolveFromDirectory(fromArg, out StarwardDataImportService.StarwardInstallInfo fromFolder))
+            {
+                ApplyStarwardSource(fromFolder, checkByDefault: true);
+                return;
+            }
+
+            if (StarwardDataImportService.TryDetect(out StarwardDataImportService.StarwardInstallInfo detected))
+            {
+                ApplyStarwardSource(detected, checkByDefault: _importStarwardPreset || !HasLegacyData);
+                return;
+            }
+
+            ClearStarwardSource();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+            ClearStarwardSource();
+        }
+    }
+
+
+    private void ApplyStarwardSource(StarwardDataImportService.StarwardInstallInfo install, bool checkByDefault)
+    {
+        _starwardSource = install;
+        HasStarwardData = install.HasDatabase;
+        StarwardFolderErrorMessage = null;
+        StarwardSourcePath = install.UserDataFolder ?? Path.GetDirectoryName(install.DatabasePath);
+        MigrateFromStarward = checkByDefault;
+        UpdateStarwardImportEnabled();
+        UpdateStartButtonText();
+    }
+
+
+    private void ClearStarwardSource()
+    {
+        _starwardSource = null;
+        HasStarwardData = false;
+        MigrateFromStarward = false;
+        StarwardSourcePath = null;
+        UpdateStarwardImportEnabled();
+        UpdateStartButtonText();
+    }
+
+
+    [RelayCommand]
+    private async Task SelectStarwardFolderAsync()
+    {
+        try
+        {
+            string? folder = await FileDialogHelper.PickFolderAsync(Content.XamlRoot, StarwardSourcePath);
+            if (string.IsNullOrWhiteSpace(folder))
+            {
+                return;
+            }
+            if (StarwardDataImportService.TryResolveFromDirectory(folder, out StarwardDataImportService.StarwardInstallInfo install))
+            {
+                ApplyStarwardSource(install, checkByDefault: true);
+            }
+            else
+            {
+                StarwardFolderErrorMessage = Lang.WelcomeView_StarwardFolderHasNoDatabase;
+            }
+        }
+        catch (Exception ex)
+        {
+            StarwardFolderErrorMessage = ex.Message;
+            Debug.WriteLine(ex);
+        }
+    }
+
+
+    private void UpdateStarwardImportEnabled()
+    {
+        CanMigrateFromStarward = HasStarwardData && CanOperate;
+        UpdateStarwardNotFoundHint();
+    }
+
+
+    private void UpdateStarwardNotFoundHint()
+    {
+        ShowStarwardNotFoundHint = !HasStarwardData && string.IsNullOrWhiteSpace(StarwardFolderErrorMessage);
+    }
+
+
+    private void UpdateStartButtonText()
+    {
+        StartButtonText = (HasLegacyData || MigrateFromStarward) ? Lang.WelcomeView_MigrateAndStart : Lang.WelcomeView_StarwardStart;
+    }
+
+
 
     private void CheckWritePermission()
     {
@@ -199,11 +384,15 @@ public sealed partial class WelcomeWindow : WindowEx
                 UserDataFolderErrorMessage = Lang.LauncherPage_PleaseDoNotSelectTheRootDirectoryOfADrive;
                 return;
             }
-            string baseDir = AppContext.BaseDirectory.TrimEnd('/', '\\');
-            if (folder.StartsWith(baseDir))
+            // 调试固定目录就在程序目录 \ data 下，正式安装才禁止选安装目录（更新会删）。
+            if (!_presetIsDataDirectory)
             {
-                UserDataFolderErrorMessage = Lang.SelectDirectoryPage_AutoDeleteAfterUpdate;
-                return;
+                string baseDir = AppContext.BaseDirectory.TrimEnd('/', '\\');
+                if (folder.StartsWith(baseDir))
+                {
+                    UserDataFolderErrorMessage = Lang.SelectDirectoryPage_AutoDeleteAfterUpdate;
+                    return;
+                }
             }
             var file = Path.Combine(folder, Guid.CreateVersion7().ToString());
             File.WriteAllBytes(file, "Write permission test."u8);
@@ -230,6 +419,10 @@ public sealed partial class WelcomeWindow : WindowEx
     [RelayCommand]
     private async Task ChangeUserDataFolderAsync()
     {
+        if (_presetIsDataDirectory)
+        {
+            return;
+        }
         try
         {
             string? folder = await FileDialogHelper.PickFolderAsync(Content.XamlRoot);
@@ -315,11 +508,13 @@ public sealed partial class WelcomeWindow : WindowEx
                 return;
             }
 
-            // 统一数据目录 = 用户所选目录 \ data，迁移过来的数据文件统一放在里面。
-            string dataDir = Path.Combine(selected, AppConfig.DataSubFolderName);
+            // 正式安装：所选目录 \ data。调试固定目录已经是 data，不再套一层。
+            string dataDir = _presetIsDataDirectory ? selected : Path.Combine(selected, AppConfig.DataSubFolderName);
             Directory.CreateDirectory(dataDir);
 
-            if (HasLegacyData)
+            bool importedStarwardDatabase = false;
+            bool needTransfer = HasLegacyData || MigrateFromStarward;
+            if (needTransfer)
             {
                 IsMigrating = true;
                 CanOperate = false;
@@ -329,7 +524,15 @@ public sealed partial class WelcomeWindow : WindowEx
                 var progress = new Progress<DataMigrationService.MigrationProgress>(OnMigrationProgress);
                 try
                 {
-                    await DataMigrationService.MigrateAsync(_sourceRoots, dataDir, progress);
+                    if (HasLegacyData)
+                    {
+                        await DataMigrationService.MigrateAsync(_sourceRoots, dataDir, progress);
+                    }
+                    if (MigrateFromStarward)
+                    {
+                        StarwardDataImportService.ImportResult import = await StarwardDataImportService.ImportAsync(dataDir, _starwardSource, progress);
+                        importedStarwardDatabase = import.ImportedDatabase;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -343,6 +546,13 @@ public sealed partial class WelcomeWindow : WindowEx
 
             AppConfig.UseDataFolder(dataDir);
             AppConfig.SaveConfiguration();
+
+            if (importedStarwardDatabase)
+            {
+                IsMigrating = false;
+                await ShowStarwardImportReloginDialogAsync();
+            }
+
             _taskCompletionSource.TrySetResult(true);
             this.Close();
         }
@@ -395,20 +605,35 @@ public sealed partial class WelcomeWindow : WindowEx
                 UseShellExecute = true,
                 Verb = "runas",
             };
-            // 复制现有参数，但去掉旧的 --migrate-to / --data-folder（及其值），避免重复。
+            // 复制现有参数，但去掉旧的 --migrate-to / --data-folder（及其值）和 --import-starward，避免重复。
             string[] existing = Environment.GetCommandLineArgs().Skip(1).ToArray();
             for (int i = 0; i < existing.Length; i++)
             {
                 if (string.Equals(existing[i], "--migrate-to", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(existing[i], "--data-folder", StringComparison.OrdinalIgnoreCase))
+                    || string.Equals(existing[i], "--data-folder", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(existing[i], "--import-starward-from", StringComparison.OrdinalIgnoreCase))
                 {
                     i++; // 跳过其后紧跟的值
+                    continue;
+                }
+                if (string.Equals(existing[i], "--import-starward", StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
                 }
                 info.ArgumentList.Add(existing[i]);
             }
             info.ArgumentList.Add("--migrate-to");
             info.ArgumentList.Add(target);
+            if (MigrateFromStarward)
+            {
+                info.ArgumentList.Add("--import-starward");
+                string? starwardFolder = _starwardSource?.UserDataFolder ?? Path.GetDirectoryName(_starwardSource?.DatabasePath);
+                if (!string.IsNullOrWhiteSpace(starwardFolder))
+                {
+                    info.ArgumentList.Add("--import-starward-from");
+                    info.ArgumentList.Add(starwardFolder);
+                }
+            }
             Process.Start(info);
             _taskCompletionSource.TrySetResult(false);
             this.Close();
@@ -426,6 +651,49 @@ public sealed partial class WelcomeWindow : WindowEx
         }
     }
 
+
+    /// <summary>
+    /// 从 Starward 导入成功后提醒重新登录米游社 / HoYoLAB，以便使用签到等新增功能。
+    /// </summary>
+    private async Task ShowStarwardImportReloginDialogAsync()
+    {
+        try
+        {
+            var dialog = new ContentDialog
+            {
+                Title = Lang.WelcomeView_StarwardImportCompleted,
+                Content = Lang.WelcomeView_StarwardImportReloginHint,
+                CloseButtonText = Lang.Common_Confirm,
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = Content.XamlRoot,
+            };
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+
+    private static bool HasCommandLineFlag(string name)
+    {
+        return Environment.GetCommandLineArgs().Any(a => string.Equals(a, name, StringComparison.OrdinalIgnoreCase));
+    }
+
+
+    private static string? GetCommandLineArgValue(string name)
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase))
+            {
+                return args[i + 1]?.Trim();
+            }
+        }
+        return null;
+    }
 
 
 }

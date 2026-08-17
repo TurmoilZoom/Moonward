@@ -2081,6 +2081,33 @@ Accetti il rischio e desideri continuare?</value>
   <data name="WelcomeView_AdminPermissionRequiredToMigrate" xml:space="preserve">
     <value>Sono richiesti permessi di amministratore per completare la migrazione</value>
   </data>
+  <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
+    <value>Import data from Starward</value>
+  </data>
+  <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
+    <value>When selected, wish history, playtime, settings, and custom backgrounds are copied into the data folder chosen above. Files in Starward are read only; nothing in the original folder is modified or deleted. miHoYo / HoYoLAB login is not copied. A detected location can be used, or a data folder or portable install folder can be specified.</value>
+  </data>
+  <data name="WelcomeView_StarwardDataNotFound" xml:space="preserve">
+    <value>Not detected automatically</value>
+  </data>
+  <data name="WelcomeView_StarwardImportCompleted" xml:space="preserve">
+    <value>Data imported from Starward</value>
+  </data>
+  <data name="WelcomeView_StarwardImportReloginHint" xml:space="preserve">
+    <value>Import finished. miHoYo / HoYoLAB login was not copied. Please sign in again to use game records and related features.</value>
+  </data>
+  <data name="WelcomeView_StarwardDatabaseVersionTooNew" xml:space="preserve">
+    <value>This Starward database (version {0}) is newer than Moonward can import (up to {1}). Please update Moonward and try again.</value>
+  </data>
+  <data name="WelcomeView_StarwardDatabaseInUse" xml:space="preserve">
+    <value>Could not read the Starward database. Close Starward and try again.</value>
+  </data>
+  <data name="WelcomeView_SelectStarwardFolder" xml:space="preserve">
+    <value>Choose Starward folder</value>
+  </data>
+  <data name="WelcomeView_StarwardFolderHasNoDatabase" xml:space="preserve">
+    <value>No Starward database was found in this folder. Select the folder that contains StarwardDatabase.db, or a portable Starward install folder (with config.ini).</value>
+  </data>
   <data name="SettingPage_TheSoftwareWillRestartToMigrateData" xml:space="preserve">
     <value>Il software verrà riavviato per migrare i dati nella nuova posizione.</value>
   </data>

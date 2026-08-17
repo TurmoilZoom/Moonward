@@ -44,35 +44,83 @@
                        IsTextScaleFactorEnabled="False"
                        Text="{x:Bind lang:Lang.WelcomeView_SelectUserDataFolderDescription}"
                        TextWrapping="Wrap" />
-            <StackPanel Margin="0,12,0,0"
-                        Orientation="Horizontal"
-                        Spacing="8">
-                <FontIcon FontSize="16"
-                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                          Glyph="&#xE838;"
-                          IsTextScaleFactorEnabled="False" />
-                <TextBlock VerticalAlignment="Center"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           IsTextScaleFactorEnabled="False"
-                           Text="{x:Bind UserDataFolder}" />
-            </StackPanel>
-            <!--  选择文件夹  -->
-            <StackPanel Margin="0,16,0,0"
-                        Orientation="Horizontal"
-                        Spacing="12">
-                <Button BorderThickness="0"
+            <Grid Margin="0,12,0,0" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button VerticalAlignment="Center"
+                        BorderThickness="0"
                         Command="{x:Bind ChangeUserDataFolderCommand}"
                         Content="{x:Bind lang:Lang.SelectDirectoryPage_SelectFolder}"
-                        IsEnabled="{x:Bind CanOperate}"
+                        IsEnabled="{x:Bind CanChangeUserDataFolder}"
                         IsTextScaleFactorEnabled="False"
                         Style="{ThemeResource AccentButtonStyle}" />
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="12"
-                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind UserDataFolder}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(UserDataFolder)}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind UserDataFolderErrorMessage}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(UserDataFolderErrorMessage)}" />
+                </StackPanel>
+            </Grid>
+
+            <!--  从 Starward 导入  -->
+            <CheckBox Margin="0,16,0,0"
+                      IsChecked="{x:Bind MigrateFromStarward, Mode=TwoWay}"
+                      IsEnabled="{x:Bind CanMigrateFromStarward}"
+                      IsTextScaleFactorEnabled="False">
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            IsTextScaleFactorEnabled="False"
-                           Text="{x:Bind UserDataFolderErrorMessage}"
+                           Text="{x:Bind lang:Lang.WelcomeView_MigrateFromStarward}"
                            TextWrapping="Wrap" />
-            </StackPanel>
+            </CheckBox>
+            <TextBlock Margin="0,4,0,0"
+                       FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       IsTextScaleFactorEnabled="False"
+                       Text="{x:Bind lang:Lang.WelcomeView_MigrateFromStarwardDescription}"
+                       TextWrapping="Wrap" />
+            <Grid Margin="0,8,0,0" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button VerticalAlignment="Center"
+                        BorderThickness="0"
+                        Command="{x:Bind SelectStarwardFolderCommand}"
+                        Content="{x:Bind lang:Lang.WelcomeView_SelectStarwardFolder}"
+                        IsEnabled="{x:Bind CanPickStarwardFolder}"
+                        IsTextScaleFactorEnabled="False"
+                        Style="{ThemeResource AccentButtonStyle}" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind StarwardSourcePath}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardSourcePath)}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind lang:Lang.WelcomeView_StarwardDataNotFound}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowStarwardNotFoundHint)}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind StarwardFolderErrorMessage}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardFolderErrorMessage)}" />
+                </StackPanel>
+            </Grid>
 
             <!--  旧版本数据迁移提示  -->
             <TextBlock Margin="0,12,0,0"

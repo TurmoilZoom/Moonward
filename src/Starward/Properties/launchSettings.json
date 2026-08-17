@@ -3,6 +3,11 @@
     "Moonward": {
       "commandName": "Project",
       "nativeDebugging": false
+    },
+    "Moonward (Welcome)": {
+      "commandName": "Project",
+      "commandLineArgs": "--welcome",
+      "nativeDebugging": false
     }
   }
 }
