@@ -185,6 +185,13 @@ internal static class StarwardDataImportService
             ReconcileCopiedDatabase(destDb);
             importedDatabase = true;
         }
+        else if (IsIncompleteStarwardImport(destDb))
+        {
+            // 上次回退失败时副本已落盘；补完回退，避免跳过库文件后按错误的 USER_VERSION 启动。
+            cancellationToken.ThrowIfCancellationRequested();
+            ReconcileCopiedDatabase(destDb);
+            importedDatabase = true;
+        }
         done += dbSize;
         progress?.Report(new DataMigrationService.MigrationProgress(done, total, DatabaseFileName));
 
@@ -241,6 +248,27 @@ internal static class StarwardDataImportService
 
 
     /// <summary>
+    /// 上次从 Starward 拷库后回退未完成：还没有 Moonward 的 GachaItemName，
+    /// 但 USER_VERSION 仍是 Starward 的编号，或已被 InitializeDatabase 按错误版本号往上推。
+    /// </summary>
+    private static bool IsIncompleteStarwardImport(string databasePath)
+    {
+        using var con = new SqliteConnection($"Data Source={databasePath};Mode=ReadOnly;Pooling=False;");
+        con.Open();
+        if (TableExists(con, "GachaItemName"))
+        {
+            return false;
+        }
+        int version = con.QueryFirstOrDefault<int>("PRAGMA USER_VERSION;");
+        if (version > CommonUserVersion)
+        {
+            return true;
+        }
+        return ColumnExists(con, "ZZZDeadlyAssaultInfo", "HasHard");
+    }
+
+
+    /// <summary>
     /// 在副本上回退 Starward 独有变更，并把 USER_VERSION 拉回共同祖先。
     /// 之后由 <see cref="DatabaseService.SetDatabase"/> 按 Moonward 脚本补齐。
     /// </summary>
@@ -249,7 +277,10 @@ internal static class StarwardDataImportService
         using var con = new SqliteConnection($"Data Source={databasePath};Pooling=False;");
         con.Open();
         int version = con.QueryFirstOrDefault<int>("PRAGMA USER_VERSION;");
-        if (version > KnownMaxStarwardUserVersion)
+        bool moonwardMigrated = TableExists(con, "GachaItemName");
+        // 回退失败后再点开始，InitializeDatabase 可能把 USER_VERSION 推到 Moonward 当前值。
+        // 更高才是未知的新版 Starward。
+        if (version > KnownMaxStarwardUserVersion && !moonwardMigrated && version > DatabaseService.CurrentUserVersion)
         {
             throw new InvalidOperationException(string.Format(Lang.WelcomeView_StarwardDatabaseVersionTooNew, version, KnownMaxStarwardUserVersion));
         }
@@ -265,12 +296,21 @@ internal static class StarwardDataImportService
                 ApplyStarwardRollback(con, rollbackVersion, sql);
             }
 
-            // 不把 Starward 的米游社 / HoYoLAB Cookie 带进 Moonward，需在本应用内重新登录。
-            ClearImportedCookies(con);
+            if (!moonwardMigrated)
+            {
+                // 不把 Starward 的米游社 / HoYoLAB Cookie 带进 Moonward，需在本应用内重新登录。
+                ClearImportedCookies(con);
+                con.Execute($"PRAGMA USER_VERSION = {CommonUserVersion};");
+            }
 
-            con.Execute($"PRAGMA USER_VERSION = {CommonUserVersion};");
-            con.Execute("PRAGMA wal_checkpoint(TRUNCATE);");
             tx.Commit();
+        }
+
+        // 写事务未提交时 checkpoint 会 SQLITE_LOCKED（Error 6）。
+        using (var cmd = con.CreateCommand())
+        {
+            cmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+            cmd.ExecuteNonQuery();
         }
 
         SqliteConnection.ClearPool(con);

@@ -272,6 +272,10 @@ internal static class DatabaseService
     #region Database Structure
 
 
+    /// <summary>当前 Moonward 库的目标 USER_VERSION（<see cref="DatabaseSqls"/> 条数）。</summary>
+    internal static int CurrentUserVersion => DatabaseSqls.Count;
+
+
     private static readonly List<string> DatabaseSqls =
     [
         Sql_v1,
