@@ -44,9 +44,10 @@
                     sc:FlyoutGap.Horizontal="12">
                 <Grid MinWidth="160">
                     <Grid.RowDefinitions>
-                        <RowDefinition />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <!--  刷新  -->
@@ -85,13 +86,26 @@
                     <MenuFlyoutSeparator Grid.Row="1" Margin="0,8,0,8" />
 
 
-                    <!--  错误信息  -->
-                    <TextBlock Grid.Row="2"
-                               HorizontalAlignment="Center"
-                               FontSize="12"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind ErrorMessage}"
-                               TextWrapping="Wrap" />
+                    <!--  错误信息 + 恢复按钮（与便签内容分行，避免重叠）  -->
+                    <StackPanel Grid.Row="3"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Stretch"
+                                Spacing="8"
+                                Visibility="{x:Bind ErrorMessage, Converter={StaticResource WhiteSpaceStringToVisibilityConverter}}">
+                        <TextBlock HorizontalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                   Text="{x:Bind ErrorMessage}"
+                                   TextWrapping="Wrap" />
+                        <Button HorizontalAlignment="Stretch"
+                                Command="{x:Bind VerifyAccountCommand}"
+                                Content="{x:Bind lang:Lang.HoyolabToolboxPage_VerifyAccount}"
+                                Visibility="{x:Bind ShowVerifyAccount, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <Button HorizontalAlignment="Stretch"
+                                Command="{x:Bind ReloginCommand}"
+                                Content="{x:Bind ReloginButtonText}"
+                                Visibility="{x:Bind ShowRelogin, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </StackPanel>
 
 
                     <!--  崩坏3  -->

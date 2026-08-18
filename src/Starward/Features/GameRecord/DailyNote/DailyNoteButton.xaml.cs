@@ -14,6 +14,7 @@ using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Setting;
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 
@@ -90,6 +91,35 @@ public sealed partial class DailyNoteButton : UserControl
     public string? ErrorMessage { get; set => SetProperty(ref field, value); }
 
 
+    /// <summary>
+    /// 便签请求失败后由 Factory 给出的恢复动作；成功刷新或卸载时清空。
+    /// </summary>
+    private MiHoYoApiRecoveryAction RecoveryAction
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(ShowVerifyAccount));
+                OnPropertyChanged(nameof(ShowRelogin));
+            }
+        }
+    }
+
+
+    /// <summary>战绩风控（如 10035）时在 Flyout 显示「验证账号」。</summary>
+    public bool ShowVerifyAccount => RecoveryAction is MiHoYoApiRecoveryAction.VerifyAccount;
+
+
+    /// <summary>登录失效时在 Flyout 显示「重新登录」。</summary>
+    public bool ShowRelogin => RecoveryAction is MiHoYoApiRecoveryAction.Relogin;
+
+
+    /// <summary>重新登录按钮文案；该键未进 Designer，经 ResourceManager 读取。</summary>
+    public string ReloginButtonText => Lang.ResourceManager.GetString("MiHoYoApiError_Relogin", Lang.Culture) ?? "MiHoYoApiError_Relogin";
+
+
 
     private void Button_DailyNote_Loaded(object sender, RoutedEventArgs e)
     {
@@ -116,6 +146,7 @@ public sealed partial class DailyNoteButton : UserControl
         GenshinDailyNote = null!;
         StarRailDailyNote = null!;
         ZZZDailyNote = null!;
+        ClearRecoveryState();
     }
 
 
@@ -158,7 +189,7 @@ public sealed partial class DailyNoteButton : UserControl
             if (GameRecordRole is not null)
             {
                 this.Visibility = Visibility.Visible;
-                ErrorMessage = null;
+                ClearRecoveryState();
                 await _gameRecordService.UpdateDeviceFpAsync();
                 if (IsBH3Enabled)
                 {
@@ -180,16 +211,45 @@ public sealed partial class DailyNoteButton : UserControl
         }
         catch (Exception ex)
         {
-            if (ex is miHoYoApiException or System.Net.Http.HttpRequestException)
+            if (ex is miHoYoApiException or HttpRequestException)
             {
-                ErrorMessage = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GameRecord).Message;
+                var feedback = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.GameRecord);
+                ErrorMessage = feedback.Message;
+                RecoveryAction = feedback.RecoveryAction;
             }
             _logger.LogError(ex, "Refresh daily note failed (Biz: {GameBiz}, Server: {GameServer}, Uid: {Uid})", CurrentGameId?.GameBiz, GameRecordRole?.Region, GameRecordRole?.Uid);
         }
     }
 
 
+    /// <summary>
+    /// 打开官方战绩页，使用触发失败的角色完成风控校验。
+    /// </summary>
+    [RelayCommand]
+    private void VerifyAccount()
+    {
+        GameRecordAccountRecovery.RequestVerifyAccount(CurrentGameId?.GameBiz, GameRecordRole);
+    }
 
+
+    /// <summary>
+    /// 打开战绩登录入口以恢复登录态。
+    /// </summary>
+    [RelayCommand]
+    private void Relogin()
+    {
+        GameRecordAccountRecovery.RequestOpenLogin();
+    }
+
+
+    /// <summary>
+    /// 清空错误文案与恢复按钮状态。
+    /// </summary>
+    private void ClearRecoveryState()
+    {
+        ErrorMessage = null;
+        RecoveryAction = MiHoYoApiRecoveryAction.None;
+    }
 
 
     public static string ZZZMemberCardRemainingDaysToString(int remainingDays)
