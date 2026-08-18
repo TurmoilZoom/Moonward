@@ -3537,4 +3537,19 @@ You are welcome to submit exported data to:</value>
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>Failed to delete</value>
   </data>
+  <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Start at login</value>
+  </data>
+  <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">
+    <value>Start Moonward in the system tray when you sign in to Windows. You can also turn this off in Windows Settings &gt; Apps &gt; Startup.</value>
+  </data>
+  <data name="SettingPage_StartAtLoginRemovableHint" xml:space="preserve">
+    <value>Not available when running from removable storage.</value>
+  </data>
+  <data name="SettingPage_StartAtLoginFailed" xml:space="preserve">
+    <value>Failed to update the start-at-login setting</value>
+  </data>
+  <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
+    <value>Windows Startup apps</value>
+  </data>
 </root>

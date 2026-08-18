@@ -2,6 +2,8 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using Starward.Features.GamepadControl;
+using Starward.Features.GameRecord.SignIn;
+using Starward.Features.Setting;
 using Starward.Features.Startup;
 using Starward.Features.UrlProtocol;
 using Starward.Features.ViewHost;
@@ -90,8 +92,8 @@ public partial class App : Application
     /// <summary>
     /// 应用启动入口。解析命令行参数，处理测试/特殊启动模式，并确保单实例运行。
     /// </summary>
-    /// <param name="_">启动激活事件参数（WinUI 框架传入，本方法未使用）。</param>
-    protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs _)
+    /// <param name="launchArgs">启动激活事件参数（WinUI 框架传入，本方法未使用）。</param>
+    protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs launchArgs)
     {
         // 去掉可执行文件路径，仅保留用户传入的参数，那么args[0]为第一个参数
         string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
@@ -106,6 +108,9 @@ public partial class App : Application
 
         // 环境检查：数据目录、配置、服务等初始化
         await AppConfig.CheckEnviromentAsync();
+
+        // 便携目录挪过之后，把仍启用的开机启动项路径改到当前 exe；用户已删除/禁用则不动
+        AutoStartService.RepairIfNeeded();
 
         // 特殊启动模式（rpc / playtime / startgame / moonward://）：交由启动处理器职责链分发；若已接管则直接返回
         if (await DispatchStartupAsync(new StartupContext(args)))
@@ -125,9 +130,11 @@ public partial class App : Application
         }
 
         // --hide 参数：仅启动系统托盘，不显示主窗口
-        if (args.Contains("--hide"))
+        if (args.Contains(StartupVerbs.Hide))
         {
             m_SystemTrayWindow = new SystemTrayWindow();
+            // 批量签到挂在主界面 Loaded 上；托盘启动也要跑，否则开机静默驻留不会签到
+            _ = Task.Run(() => AppConfig.GetService<AutoSignInService>().RunStartupBatchAsync());
         }
         else
         {

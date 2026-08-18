@@ -3601,4 +3601,19 @@
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>删除失败</value>
   </data>
+  <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>开机时自动启动</value>
+  </data>
+  <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">
+    <value>登录 Windows 后自动在系统托盘启动 Moonward。也可在 Windows「设置 → 应用 → 启动」中关闭。</value>
+  </data>
+  <data name="SettingPage_StartAtLoginRemovableHint" xml:space="preserve">
+    <value>从可移动存储运行时不可用。</value>
+  </data>
+  <data name="SettingPage_StartAtLoginFailed" xml:space="preserve">
+    <value>无法更新开机启动设置</value>
+  </data>
+  <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
+    <value>Windows 启动应用</value>
+  </data>
 </root>

@@ -3543,4 +3543,19 @@ You are welcome to submit exported data to:</value>
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>Failed to delete</value>
   </data>
+  <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Iniciar al iniciar sesión</value>
+  </data>
+  <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">
+    <value>Inicia Moonward en la bandeja del sistema al iniciar sesión en Windows. También puedes desactivarlo en Configuración de Windows &gt; Aplicaciones &gt; Inicio.</value>
+  </data>
+  <data name="SettingPage_StartAtLoginRemovableHint" xml:space="preserve">
+    <value>No disponible al ejecutarse desde un almacenamiento extraíble.</value>
+  </data>
+  <data name="SettingPage_StartAtLoginFailed" xml:space="preserve">
+    <value>No se pudo actualizar el inicio automático</value>
+  </data>
+  <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
+    <value>Aplicaciones de inicio de Windows</value>
+  </data>
 </root>

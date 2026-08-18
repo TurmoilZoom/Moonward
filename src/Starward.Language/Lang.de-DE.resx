@@ -3541,4 +3541,19 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>Failed to delete</value>
   </data>
+  <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Beim Anmelden starten</value>
+  </data>
+  <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">
+    <value>Moonward nach der Windows-Anmeldung im Infobereich starten. Kann auch unter Windows-Einstellungen &gt; Apps &gt; Autostart deaktiviert werden.</value>
+  </data>
+  <data name="SettingPage_StartAtLoginRemovableHint" xml:space="preserve">
+    <value>Nicht verfügbar, wenn von einem Wechseldatenträger ausgeführt.</value>
+  </data>
+  <data name="SettingPage_StartAtLoginFailed" xml:space="preserve">
+    <value>Autostart-Einstellung konnte nicht aktualisiert werden</value>
+  </data>
+  <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
+    <value>Windows-Autostart-Apps</value>
+  </data>
 </root>

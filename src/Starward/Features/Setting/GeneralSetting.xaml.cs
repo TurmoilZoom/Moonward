@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Features.ViewHost;
 using Starward.Frameworks;
+using Starward.Helpers;
 using System;
 using System.Globalization;
 using Windows.System;
@@ -28,6 +29,7 @@ public sealed partial class GeneralSetting : PageBase
     {
         InitializeLanguageSelector();
         InitializeCloseWindowOption();
+        InitializeStartAtLogin();
     }
 
 
@@ -226,6 +228,103 @@ public sealed partial class GeneralSetting : PageBase
         catch { }
     }
 
+
+
+    #endregion
+
+
+
+    #region 开机启动
+
+
+    private bool _startAtLoginInitialized;
+
+
+    /// <summary>
+    /// 可移动存储上不允许注册开机启动。
+    /// </summary>
+    public bool StartAtLoginAvailable { get; } = AutoStartService.IsAvailable;
+
+
+    /// <summary>可移动存储上显示不可用说明。</summary>
+    public Visibility StartAtLoginUnavailableVisibility => StartAtLoginAvailable ? Visibility.Collapsed : Visibility.Visible;
+
+
+    /// <summary>
+    /// 是否已在系统中启用开机启动（以 Run 键 + StartupApproved 为准）。
+    /// </summary>
+    public bool StartAtLogin
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value) && _startAtLoginInitialized)
+            {
+                ApplyStartAtLogin(value);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 从系统注册状态同步开关，不在此时写回注册表。
+    /// </summary>
+    private void InitializeStartAtLogin()
+    {
+        try
+        {
+            StartAtLogin = StartAtLoginAvailable && AutoStartService.IsEnabled();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Initialize start-at-login");
+        }
+        finally
+        {
+            _startAtLoginInitialized = true;
+        }
+    }
+
+
+    /// <summary>
+    /// 把开关写到系统 Run 键；失败时拨回开关并提示。
+    /// </summary>
+    /// <param name="value">是否启用开机启动。</param>
+    private void ApplyStartAtLogin(bool value)
+    {
+        try
+        {
+            if (!StartAtLoginAvailable)
+            {
+                return;
+            }
+            if (value)
+            {
+                AutoStartService.Enable();
+            }
+            else
+            {
+                AutoStartService.Disable();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Apply start-at-login");
+            _startAtLoginInitialized = false;
+            StartAtLogin = !value;
+            _startAtLoginInitialized = true;
+            InAppToast.MainWindow?.Error(Lang.SettingPage_StartAtLoginFailed, ex.Message);
+        }
+    }
+
+
+    /// <summary>
+    /// 打开 Windows「启动应用」设置页。
+    /// </summary>
+    private async void Hyperlink_StartupApps_Click(Microsoft.UI.Xaml.Documents.Hyperlink sender, Microsoft.UI.Xaml.Documents.HyperlinkClickEventArgs args)
+    {
+        await Launcher.LaunchUriAsync(new Uri("ms-settings:startupapps"));
+    }
 
 
     #endregion

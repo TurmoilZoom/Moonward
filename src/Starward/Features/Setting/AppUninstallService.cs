@@ -10,8 +10,8 @@ namespace Starward.Features.Setting;
 /// 应用卸载相关的数据清理。
 /// <para>
 /// Velopack（控制面板卸载或自身 <c>Update.exe uninstall</c>）只会移除 <c>current\</c>、<c>Update.exe</c>、快捷方式与它自己注册的卸载项，
-/// <b>不会</b>触碰用户数据目录（<c>&lt;所选目录&gt;\data</c>）、Moonward 自己的注册表键（<c>HKCU\Software\Moonward</c>）
-/// 以及 <c>moonward://</c> 协议注册（<c>HKCU\Software\Classes\Moonward</c>）。
+/// <b>不会</b>触碰用户数据目录（<c>&lt;所选目录&gt;\data</c>）、Moonward 自己的注册表键（<c>HKCU\Software\Moonward</c>）、
+/// <c>moonward://</c> 协议注册（<c>HKCU\Software\Classes\Moonward</c>），以及开机启动 Run 键。
 /// </para>
 /// <para>
 /// 本类负责清理这三处残留。是否清理由注册表标记 <see cref="FlagValueName"/> 控制，
@@ -80,12 +80,16 @@ internal static class AppUninstallService
     /// <summary>
     /// 在 Velopack 卸载钩子（<c>OnBeforeUninstallFastCallback</c>）中调用：
     /// 根据 <see cref="FlagValueName"/> 标记决定是否删除用户数据目录、<c>moonward://</c> 协议键与 Moonward 注册表键。
+    /// 开机启动 Run 键始终删除（与是否保留数据无关）。
     /// 必须保持静默、无 UI、尽快返回（钩子 30 秒超时）。
     /// </summary>
     public static void PerformUninstallCleanup()
     {
         try
         {
+            // exe 已卸载，残留启动项只会在下次登录失败；与「保留数据」无关。
+            AutoStartService.RemoveRegistration();
+
             bool deleteData;
             string? dataFolder = null;
             using (RegistryKey? key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
@@ -99,7 +103,7 @@ internal static class AppUninstallService
             if (!deleteData)
             {
                 // 用户选择保留：数据目录、协议键与设置（含登录信息）都不动，方便重装续用。
-                Log("Preserve user data (flag = 0).");
+                Log("Preserve user data (flag = 0). Start-at-login registration removed.");
                 return;
             }
 

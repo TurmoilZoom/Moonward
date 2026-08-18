@@ -7747,6 +7747,51 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Start at login 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_StartAtLogin {
+            get {
+                return ResourceManager.GetString("SettingPage_StartAtLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start Moonward in the system tray when you sign in to Windows. You can also turn this off in Windows Settings &gt; Apps &gt; Startup. 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_StartAtLoginDesc {
+            get {
+                return ResourceManager.GetString("SettingPage_StartAtLoginDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to update the start-at-login setting 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_StartAtLoginFailed {
+            get {
+                return ResourceManager.GetString("SettingPage_StartAtLoginFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not available when running from removable storage. 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_StartAtLoginRemovableHint {
+            get {
+                return ResourceManager.GetString("SettingPage_StartAtLoginRemovableHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Windows Startup apps 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_StartAtLoginWindowsSettings {
+            get {
+                return ResourceManager.GetString("SettingPage_StartAtLoginWindowsSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Stop Service 的本地化字符串。
         /// </summary>
         public static string SettingPage_StopService {

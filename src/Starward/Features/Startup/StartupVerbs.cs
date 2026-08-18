@@ -24,4 +24,7 @@ internal static class StartupVerbs
     /// 由 <see cref="App.OnLaunched"/> 直接处理，故不进入职责链。
     /// </summary>
     public const string TestUrlProtocolPrefix = "moonward://test/";
+
+    /// <summary>仅启动系统托盘、不显示主窗口：<c>Moonward.exe --hide</c>。</summary>
+    public const string Hide = "--hide";
 }

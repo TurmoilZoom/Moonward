@@ -72,6 +72,35 @@
             </StackPanel>
 
 
+            <!--  开机启动  -->
+            <TextBlock Margin="0,20,0,0"
+                       FontSize="20"
+                       Text="{x:Bind lang:Lang.SettingPage_StartAtLogin}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="14"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.SettingPage_StartAtLoginDesc}"
+                       TextWrapping="Wrap" />
+            <ToggleSwitch Margin="0,8,0,0"
+                          IsEnabled="{x:Bind StartAtLoginAvailable}"
+                          IsOn="{x:Bind StartAtLogin, Mode=TwoWay}"
+                          OffContent="{x:Bind lang:Lang.SettingPage_StartAtLogin}"
+                          OnContent="{x:Bind lang:Lang.SettingPage_StartAtLogin}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="14"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.SettingPage_StartAtLoginRemovableHint}"
+                       TextWrapping="Wrap"
+                       Visibility="{x:Bind StartAtLoginUnavailableVisibility}" />
+            <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                <Hyperlink Click="Hyperlink_StartupApps_Click"
+                           NavigateUri="ms-settings:startupapps"
+                           UnderlineStyle="None">
+                    <Run Text="{x:Bind lang:Lang.SettingPage_StartAtLoginWindowsSettings}" />
+                </Hyperlink>
+            </TextBlock>
+
+
             <MenuFlyoutSeparator Margin="0,20,0,0" />
 
             <!--  透明/动画效果  -->

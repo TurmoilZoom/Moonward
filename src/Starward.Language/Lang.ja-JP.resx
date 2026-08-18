@@ -3542,4 +3542,19 @@
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>削除に失敗しました</value>
   </data>
+  <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>サインイン時に起動</value>
+  </data>
+  <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">
+    <value>Windows にサインインしたときに Moonward をシステムトレイで起動します。Windows の「設定 → アプリ → スタートアップ」でもオフにできます。</value>
+  </data>
+  <data name="SettingPage_StartAtLoginRemovableHint" xml:space="preserve">
+    <value>リムーバブルストレージから実行しているときは利用できません。</value>
+  </data>
+  <data name="SettingPage_StartAtLoginFailed" xml:space="preserve">
+    <value>スタートアップ設定を更新できませんでした</value>
+  </data>
+  <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
+    <value>Windows のスタートアップアプリ</value>
+  </data>
 </root>

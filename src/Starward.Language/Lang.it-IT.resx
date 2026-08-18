@@ -3543,4 +3543,19 @@ You are welcome to submit exported data to:</value>
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>Failed to delete</value>
   </data>
+  <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Avvia all'accesso</value>
+  </data>
+  <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">
+    <value>Avvia Moonward nell'area di notifica all'accesso a Windows. Puoi disattivarlo anche in Impostazioni Windows &gt; App &gt; Avvio.</value>
+  </data>
+  <data name="SettingPage_StartAtLoginRemovableHint" xml:space="preserve">
+    <value>Non disponibile se eseguito da un'unità rimovibile.</value>
+  </data>
+  <data name="SettingPage_StartAtLoginFailed" xml:space="preserve">
+    <value>Impossibile aggiornare l'avvio automatico</value>
+  </data>
+  <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
+    <value>App di avvio di Windows</value>
+  </data>
 </root>
