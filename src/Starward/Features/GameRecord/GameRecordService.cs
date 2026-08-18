@@ -1210,7 +1210,8 @@ internal class GameRecordService
             return 0;
         }
         using var dapper = DatabaseService.CreateConnection();
-        var existCount = dapper.QuerySingleOrDefault<int>("SELECT COUNT(*) FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @Uid AND Month = @month AND Type = @type;", new { role.Uid, month, type });
+        // Microsoft.Data.Sqlite 区分参数名大小写；必须与 SQL 占位符一致（@Uid/@Month/@Type）
+        var existCount = dapper.QuerySingleOrDefault<int>("SELECT COUNT(*) FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @Uid AND Month = @Month AND Type = @Type;", new { Uid = role.Uid, Month = month, Type = type });
         if (existCount == total && existCount > 0)
         {
             // 总数未变，仅刷新最新一条记录
@@ -1242,8 +1243,8 @@ internal class GameRecordService
         var detail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailAsync(role, month, type));
         var list = detail.List;
         var existTimes = new HashSet<DateTime>(dapper.Query<DateTime>(
-            "SELECT Time FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @uid AND Month = @month AND Type = @type;",
-            new { uid = role.Uid, month, type }));
+            "SELECT Time FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @Uid AND Month = @Month AND Type = @Type;",
+            new { Uid = role.Uid, Month = month, Type = type }));
         var newItems = list.Where(x => !existTimes.Contains(x.Time)).ToList();
         if (newItems.Count > 0)
         {
@@ -1280,7 +1281,7 @@ internal class GameRecordService
     public List<TrailblazeCalendarDetailItem> GetTrailblazeCalendarDetailItems(long uid, string month, int type)
     {
         using var dapper = DatabaseService.CreateConnection();
-        return dapper.Query<TrailblazeCalendarDetailItem>("SELECT * FROM StarRailTrailblazeCalendarDetailItem WHERE Uid=@uid AND Month=@month AND Type=@type ORDER BY Time;", new { uid, month, type }).ToList();
+        return dapper.Query<TrailblazeCalendarDetailItem>("SELECT * FROM StarRailTrailblazeCalendarDetailItem WHERE Uid=@Uid AND Month=@Month AND Type=@Type ORDER BY Time;", new { Uid = uid, Month = month, Type = type }).ToList();
     }
 
 
@@ -1293,7 +1294,7 @@ internal class GameRecordService
     public List<TrailblazeCalendarDetailItem> GetTrailblazeCalendarDetailItems(long uid, string month)
     {
         using var dapper = DatabaseService.CreateConnection();
-        return dapper.Query<TrailblazeCalendarDetailItem>("SELECT * FROM StarRailTrailblazeCalendarDetailItem WHERE Uid=@uid AND Month=@month ORDER BY Time;", new { uid, month }).ToList();
+        return dapper.Query<TrailblazeCalendarDetailItem>("SELECT * FROM StarRailTrailblazeCalendarDetailItem WHERE Uid=@Uid AND Month=@Month ORDER BY Time;", new { Uid = uid, Month = month }).ToList();
     }
 
 
