@@ -42,7 +42,7 @@ public class WeeklyResourceRow
     /// <summary>数据类型标识（用于区分不同资源）。</summary>
     public string DataType { get; set; } = "";
 
-    /// <summary>显示名称（来自 Lang 或映射）。</summary>
+    /// <summary>显示名称（来自 Lang 或映射；表格左侧仅显示图标，名称用于 InstantTooltip）。</summary>
     public string Name { get; set; } = "";
 
     /// <summary>资源图标。</summary>
