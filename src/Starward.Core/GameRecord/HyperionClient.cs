@@ -33,6 +33,10 @@ public class HyperionClient : GameRecordClient
 
     public override string AppVersion => "2.112.0";
 
+    protected override string ApiSalt => "t0qEgfub6cvueAPgR5m9aQWWVciEer7v";
+
+    protected override string ApiSalt2 => "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs";
+
     protected override string ActOrigin => "https://act.mihoyo.com";
 
     protected override string XRequestedWithValue => com_mihoyo_hyperion;
@@ -74,6 +78,7 @@ public class HyperionClient : GameRecordClient
         var request = new HttpRequestMessage(HttpMethod.Get, "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo");
         request.Headers.Add(Cookie, cookie);
         request.Headers.Add(Referer, "https://www.miyoushe.com/");
+        request.Headers.Add(DS, CreateSecret());
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_device_id, DeviceId);
         request.Headers.Add(x_rpc_client_type, "5");
@@ -167,12 +172,7 @@ public class HyperionClient : GameRecordClient
             _ => throw new ArgumentOutOfRangeException($"Unsupport GameBiz: {role.GameBiz}"),
         };
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         var data = await CommonSendAsync<GameRecordIndex>(request, cancellationToken);
         return data.HeadIcon;
     }
@@ -273,12 +273,7 @@ public class HyperionClient : GameRecordClient
     {
         string url = $"https://act-api-takumi.mihoyo.com/game_record/appv2/honkai3rd/api/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddGameRecordAppHeaders(request, role.Cookie, url, "https://act.mihoyo.com/");
         return await CommonSendAsync<BH3DailyNote>(request, cancellationToken);
     }
 
@@ -329,13 +324,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/spiralAbyss?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         var data = await CommonSendAsync<SpiralAbyssInfo>(request, cancellationToken);
         data.Uid = role.Uid;
         return data;
@@ -427,13 +416,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/role_combat?server={role.Region}&role_id={role.Uid}&active=1&need_detail=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         var warpper = await CommonSendAsync<ImaginariumTheaterWarpper>(request, cancellationToken);
         foreach (var item in warpper.Data)
         {
@@ -460,13 +443,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/hard_challenge?server={role.Region}&role_id={role.Uid}&need_detail=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         var warpper = await CommonSendAsync<StygianOnslaughtWrapper>(request, cancellationToken);
         foreach (var item in warpper.Data)
         {
@@ -492,12 +469,7 @@ public class HyperionClient : GameRecordClient
     {
         string url = $"https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/dailyNote?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         return await CommonSendAsync<GenshinDailyNote>(request, cancellationToken);
     }
 
@@ -547,13 +519,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/challenge?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         var data = await CommonSendAsync<ForgottenHallInfo>(request, cancellationToken);
         data.Uid = role.Uid;
         return data;
@@ -571,13 +537,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/challenge_story?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&isPrev=1&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         var data = await CommonSendAsync<PureFictionInfo>(request, cancellationToken);
         data.Uid = role.Uid;
         if (data.Metas?.Count > 0)
@@ -610,13 +570,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/challenge_boss?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&isPrev=1&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         var data = await CommonSendAsync<ApocalypticShadowInfo>(request, cancellationToken);
         data.Uid = role.Uid;
         if (data.Metas?.Count > 0)
@@ -654,13 +608,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/rogue?role_id={role.Uid}&server={role.Region}&schedule_type=3&need_detail={detail.ToString().ToLower()}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         var data = await CommonSendAsync<SimulatedUniverseInfo>(request, cancellationToken);
         return data;
     }
@@ -752,12 +700,7 @@ public class HyperionClient : GameRecordClient
     {
         string url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         return await CommonSendAsync<StarRailDailyNote>(request, cancellationToken);
     }
 
@@ -773,12 +716,7 @@ public class HyperionClient : GameRecordClient
     {
         string url = $"https://api-takumi-record.mihoyo.com/game_record/app/hkrpg/api/challenge_peak?server={role.Region}&role_id={role.Uid}&schedule_type={scheduleType}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         return await CommonSendAsync<ChallengePeakData>(request, cancellationToken);
     }
 
@@ -879,6 +817,7 @@ public class HyperionClient : GameRecordClient
         // 仅带 stoken+mid，与社区实现一致，避免无关 cookie 键干扰
         request.Headers.Add(Cookie, stokenCookie);
         request.Headers.Add(Referer, "https://app.mihoyo.com");
+        request.Headers.Add(DS, CreateSecret("d9200c846b10886e8c874fc33c8f308b"));
         request.Headers.Add(x_rpc_app_version, AppVersion);
         request.Headers.Add(x_rpc_client_type, "5");
         request.Headers.Add(x_rpc_device_id, DeviceId);
@@ -936,13 +875,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/hadal_info_v2?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         return await CommonSendAsync<ShiyuDefenseWrapper>(request, cancellationToken);
     }
 
@@ -958,13 +891,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/hadal_mem_detail_v2?schedule_type={schedule}&region={role.Region}&uid={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://webstatic.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(X_Request_With, com_mihoyo_hyperion);
+        AddGameRecordAppHeaders(request, role.Cookie, url);
         return await CommonSendAsync<DeadlyAssaultInfo>(request, cancellationToken);
     }
 
@@ -1137,12 +1064,7 @@ public class HyperionClient : GameRecordClient
     {
         string url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddGameRecordAppHeaders(request, role.Cookie, url, "https://act.mihoyo.com/");
         return await CommonSendAsync<ZZZDailyNote>(request, cancellationToken);
     }
 

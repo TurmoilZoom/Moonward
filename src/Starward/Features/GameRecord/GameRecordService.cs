@@ -1193,7 +1193,7 @@ internal class GameRecordService
             fwDapper.Execute("""
                 DELETE FROM StarRailTrailblazeCalendarDetailItem
                 WHERE Uid = @Uid AND Month = @Month AND Type = @Type;
-                """, new { role.Uid, month, type }, fwTx);
+                """, new { Uid = role.Uid, Month = month, Type = type }, fwTx);
             fwDapper.Execute("""
                 INSERT INTO StarRailTrailblazeCalendarDetailItem (Uid, Month, Type, Action, ActionName, Time, Number)
                 VALUES (@Uid, @Month, @Type, @Action, @ActionName, @Time, @Number);

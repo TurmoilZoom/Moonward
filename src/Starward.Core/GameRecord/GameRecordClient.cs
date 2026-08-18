@@ -29,6 +29,7 @@ using Starward.Core.GameRecord.ZZZ.GachaRecord;
 #if !DEBUG
 using System.Net.Http.Json;
 #endif
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -44,6 +45,7 @@ public abstract class GameRecordClient
     protected const string Cookie = "Cookie";
     protected const string UserAgent = "User-Agent";
     protected const string X_Request_With = "X-Requested-With";
+    protected const string DS = "DS";
     protected const string Referer = "Referer";
     protected const string Origin = "Origin";
     protected const string Application_Json = "application/json";
@@ -52,8 +54,19 @@ public abstract class GameRecordClient
     protected const string x_rpc_app_version = "x-rpc-app_version";
     protected const string x_rpc_device_id = "x-rpc-device_id";
     protected const string x_rpc_device_fp = "x-rpc-device_fp";
+    protected const string x_rpc_device_name = "x-rpc-device_name";
     protected const string x_rpc_client_type = "x-rpc-client_type";
     protected const string x_rpc_language = "X-Rpc-Language";
+    protected const string x_rpc_platform = "x-rpc-platform";
+    protected const string x_rpc_sys_version = "x-rpc-sys_version";
+    protected const string x_rpc_page = "x-rpc-page";
+    protected const string x_rpc_tool_verison = "x-rpc-tool_verison";
+
+    /// <summary>与 <see cref="UAContent"/> 中 Pixel 5 / Android 13 对齐，供战绩 H5 头使用。</summary>
+    public const string RpcDeviceName = "Pixel 5";
+
+    /// <summary>与 <see cref="UAContent"/> 中 Android 13 对齐。</summary>
+    public const string RpcSysVersion = "13";
 
     /// <summary>
     /// 养成指南 H5 接口使用桌面浏览器 UA（勿用 BBS 手机 UA，易触发 10035 极验风控）。
@@ -67,6 +80,12 @@ public abstract class GameRecordClient
     public abstract string UAContent { get; }
 
     public abstract string AppVersion { get; }
+
+    /// <summary>国服/国际服 BBS Gen1 DS 盐。</summary>
+    protected abstract string ApiSalt { get; }
+
+    /// <summary>国服/国际服战绩 Gen2 DS 盐（salt2，按 URL query 签名）。</summary>
+    protected abstract string ApiSalt2 { get; }
 
     /// <summary>
     /// H5 活动页默认 Origin（对齐米游社 / HoYoLAB WebView：act.mihoyo.com / act.hoyolab.com）。
@@ -96,6 +115,114 @@ public abstract class GameRecordClient
 
 
 
+    #region Dynamic Secret
+
+
+    private static string GetRandomString(int timestamp)
+    {
+        var sb = new StringBuilder(6);
+        var random = new Random(timestamp);
+        for (int i = 0; i < 6; i++)
+        {
+            int v8 = random.Next(0, 32768) % 26;
+            int v9 = 87;
+            if (v8 < 10)
+            {
+                v9 = 48;
+            }
+            _ = sb.Append((char)(v8 + v9));
+        }
+        return sb.ToString();
+    }
+
+
+    /// <summary>
+    /// 生成 Gen1 DS 签名（salt&amp;t&amp;r，无 body/query），使用默认 <see cref="ApiSalt"/>。
+    /// </summary>
+    protected string CreateSecret()
+    {
+        return CreateSecret(ApiSalt);
+    }
+
+
+    /// <summary>
+    /// 生成 Gen1 DS 签名（salt&amp;t&amp;r），使用指定 salt。
+    /// </summary>
+    protected string CreateSecret(string salt)
+    {
+        var t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        string r = GetRandomString(t);
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={salt}&t={t}&r={r}"));
+        var check = Convert.ToHexString(bytes).ToLower();
+        return $"{t},{r},{check}";
+    }
+
+
+    /// <summary>
+    /// 生成 Gen2 DS 签名（salt&amp;t&amp;r&amp;b&amp;q），query 按键排序。对齐上游 Starward。
+    /// </summary>
+    protected string CreateSecret2(string url)
+    {
+        string q = "";
+        string[] urls = url.Split('?');
+        if (urls.Length == 2)
+        {
+            string[] queryParams = urls[1].Split('&').OrderBy(x => x).ToArray();
+            q = string.Join("&", queryParams);
+        }
+        return CreateSecret2Parts(q, "");
+    }
+
+
+    /// <summary>
+    /// 生成带 POST body 的 Gen2 DS 签名。
+    /// </summary>
+    protected string CreateSecret2<T>(string url, T postBody)
+    {
+        string b = JsonSerializer.Serialize(postBody, typeof(T), GameRecordJsonContext.Default);
+        string q = "";
+        string[] urls = url.Split('?');
+        if (urls.Length == 2)
+        {
+            string[] queryParams = urls[1].Split('&').OrderBy(x => x).ToArray();
+            q = string.Join("&", queryParams);
+        }
+        return CreateSecret2Parts(q, b);
+    }
+
+
+    /// <summary>
+    /// 给米游社 H5 JS 桥 <c>getDS</c> 用的 Gen1 DS。空串会被 v7 战绩页当成旧客户端，映射为 retcode -10001（「请更新至 V2.10 以上」）。
+    /// </summary>
+    public string CreateJsBridgeSecret() => CreateSecret();
+
+
+    /// <summary>
+    /// 给米游社 H5 JS 桥 <c>getDS2</c> 用的 Gen2 DS。
+    /// </summary>
+    /// <param name="query">已按官方规则排好序的 <c>k=v&amp;k=v</c>；无 query 传空串。</param>
+    /// <param name="body">POST JSON 原文；GET 传空串。</param>
+    public string CreateJsBridgeSecret2(string query, string body) => CreateSecret2Parts(query, body);
+
+
+    /// <summary>
+    /// 用已拆好的 query / body 生成 Gen2 DS。
+    /// </summary>
+    private string CreateSecret2Parts(string query, string body)
+    {
+        int t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        string r = Random.Shared.Next(100000, 200000).ToString();
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={ApiSalt2}&t={t}&r={r}&b={body}&q={query}"));
+        var check = Convert.ToHexString(bytes).ToLower();
+        return $"{t},{r},{check}";
+    }
+
+
+    #endregion
+
+
+
+
     #region Common Method
 
 
@@ -111,12 +238,78 @@ public abstract class GameRecordClient
     }
 
 
+    /// <summary>
+    /// 对齐米游社战绩 H5 的 <c>game_record/app</c> 请求头：Cookie + Gen2 DS + Referer + 设备指纹 + page/tool。
+    /// 缺 <c>x-rpc-page</c> / <c>platform</c> 等时服务端易返回 10035。
+    /// </summary>
+    protected void AddGameRecordAppHeaders(HttpRequestMessage request, string? cookie, string url, string referer = "https://webstatic.mihoyo.com/")
+    {
+        request.Headers.Add(Cookie, cookie);
+        request.Headers.Add(DS, CreateSecret2(url));
+        request.Headers.Add(Referer, referer);
+        request.Headers.Add(x_rpc_app_version, AppVersion);
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add(x_rpc_device_id, DeviceId);
+        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        request.Headers.TryAddWithoutValidation(x_rpc_platform, "5");
+        request.Headers.TryAddWithoutValidation(x_rpc_sys_version, RpcSysVersion);
+        // 官方 H5 对空格做百分号编码（如 Vivo%20V2329A）
+        request.Headers.TryAddWithoutValidation(x_rpc_device_name, Uri.EscapeDataString(RpcDeviceName));
+        ResolveGameRecordH5Identity(url, out string toolVersion, out string page);
+        request.Headers.TryAddWithoutValidation(x_rpc_tool_verison, toolVersion);
+        request.Headers.TryAddWithoutValidation(x_rpc_page, page);
+        TryAddOriginFromReferer(request, referer);
+        request.Headers.TryAddWithoutValidation(X_Request_With, XRequestedWithValue);
+    }
+
+
+    /// <summary>
+    /// 按战绩接口路径选择官方 H5 的 <c>x-rpc-tool_verison</c> / <c>x-rpc-page</c>（字段名官方拼写就是 verison）。
+    /// </summary>
+    private static void ResolveGameRecordH5Identity(string url, out string toolVersion, out string page)
+    {
+        // 星铁：抓包米游社 2.112.0 打开 rpg/index.html 时为 v4.4.0
+        if (url.Contains("/hkrpg/", StringComparison.OrdinalIgnoreCase))
+        {
+            toolVersion = "v4.4.0";
+            page = "v4.4.0_#/rpg";
+            return;
+        }
+        // 原神统一战绩页 v7.0.0-gr-cn
+        if (url.Contains("/genshin/", StringComparison.OrdinalIgnoreCase))
+        {
+            toolVersion = "v7.0.0-gr-cn";
+            page = "v7.0.0-gr-cn_#";
+            return;
+        }
+        if (url.Contains("zzz", StringComparison.OrdinalIgnoreCase))
+        {
+            toolVersion = "v3.0.10";
+            page = "v3.0.10_#";
+            return;
+        }
+        toolVersion = "v7.0.0-gr-cn";
+        page = "v7.0.0-gr-cn_#";
+    }
+
+
+    /// <summary>
+    /// 从 Referer 推导 Origin，对齐官方 H5（星铁战绩 Origin 为 webstatic，而非 act）。
+    /// </summary>
+    private static void TryAddOriginFromReferer(HttpRequestMessage request, string referer)
+    {
+        if (Uri.TryCreate(referer, UriKind.Absolute, out Uri? uri))
+        {
+            request.Headers.TryAddWithoutValidation(Origin, uri.GetLeftPart(UriPartial.Authority));
+        }
+    }
+
+
     protected virtual async Task<T> CommonSendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default) where T : class
     {
         request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
         request.Headers.Add(Accept, Application_Json);
         request.Headers.Add(UserAgent, UAContent);
-        EnsureActWebViewHeaders(request);
         var response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 #if DEBUG

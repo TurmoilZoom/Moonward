@@ -199,6 +199,8 @@ public class MihoyoPassportClient
             $"stuid={aid}",
             $"login_uid={aid}",
             $"mid={mid}",
+            $"ltmid_v2={mid}",
+            $"account_mid_v2={mid}",
             $"stoken={stoken}",
             $"ltoken={ltoken}",
             $"ltoken_v2={ltoken}",

@@ -319,6 +319,12 @@ internal class GameRecordCookieRefreshService
             cookies["login_uid"] = uid;
         }
 
+        if (cookies.TryGetValue("mid", out string? mid) && !string.IsNullOrWhiteSpace(mid))
+        {
+            cookies["ltmid_v2"] = mid;
+            cookies["account_mid_v2"] = mid;
+        }
+
         return string.Join("; ", cookies.Select(static x => $"{x.Key}={x.Value}"));
     }
 

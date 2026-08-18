@@ -180,8 +180,9 @@ public sealed partial class BBSWebBridge : UserControl
                     (true, GameBiz.hkrpg) => "https://act.hoyolab.com/app/community-game-records-sea/m.html?gid=6",
                     (true, GameBiz.nap) => "https://act.hoyolab.com/app/zzz-game-record/m.html?gid=8",
                     (false, GameBiz.bh3) => "https://act.mihoyo.com/app/mihoyo-bh3-game-record/index.html?game_id=1",
-                    (false, GameBiz.hk4e) => "https://webstatic.mihoyo.com/app/community-game-records/?game_id=2",
-                    (false, GameBiz.hkrpg) => "https://webstatic.mihoyo.com/app/community-game-records/?game_id=6",
+                    // 旧 ?game_id= 入口已换成 v7 壳；原神走 index.html，星铁走官方现用的 rpg/index.html
+                    (false, GameBiz.hk4e) => "https://webstatic.mihoyo.com/app/community-game-records/index.html?mhy_presentation_style=fullscreen&bbs_auth_required=true&game_id=2",
+                    (false, GameBiz.hkrpg) => "https://webstatic.mihoyo.com/app/community-game-records/rpg/index.html?mhy_presentation_style=fullscreen&game_id=6",
                     (false, GameBiz.nap) => "https://act.mihoyo.com/app/mihoyo-zzz-game-record/m.html?game_id=8",
                     _ => null,
                 };
@@ -315,8 +316,8 @@ public sealed partial class BBSWebBridge : UserControl
             //"getActionTicket" => await GetActionTicketAsync(param),
             "getCookieInfo" => GetCookieInfo(param),
             "getCookieToken" => GetCookieToken(param),
-            "getDS" => GetDynamicSecretUnavailable(param),
-            "getDS2" => GetDynamicSecretUnavailable(param),
+            "getDS" => GetDynamicSecret(param),
+            "getDS2" => GetDynamicSecret2(param),
             "getHTTPRequestHeaders" => GetHttpRequestHeader(param),
             "getStatusBarHeight" => GetStatusBarHeight(param),
             "getUserInfo" => GetUserInfo(param),
@@ -576,6 +577,7 @@ public sealed partial class BBSWebBridge : UserControl
 
     private JsResult? GetHttpRequestHeader(JsParam param)
     {
+        // v7 战绩页会读 device_model / channel；缺字段会在 includes() 处抛错
         return new()
         {
             Data = new()
@@ -584,6 +586,10 @@ public sealed partial class BBSWebBridge : UserControl
                 ["x-rpc-app_version"] = _gameRecordClient.AppVersion,
                 ["x-rpc-device_fp"] = _gameRecordClient.DeviceFp,
                 ["x-rpc-device_id"] = _gameRecordClient.DeviceId,
+                ["x-rpc-sys_version"] = GameRecordClient.RpcSysVersion,
+                ["x-rpc-device_name"] = GameRecordClient.RpcDeviceName,
+                ["x-rpc-device_model"] = GameRecordClient.RpcDeviceName,
+                ["x-rpc-channel"] = CurrentGameBiz.IsGlobalServer() ? "hoyolab" : "miyousheluodi",
             },
         };
     }
@@ -598,17 +604,74 @@ public sealed partial class BBSWebBridge : UserControl
 
 
     /// <summary>
-    /// 合规起见不再在客户端实现 DS 签名算法；桥接仍响应 getDS/getDS2，返回空串以免 H5 崩溃。
+    /// H5 <c>getDS</c>（Gen1）。空 DS 会被 v7 战绩页当成旧客户端，展示「请更新至 V2.10 以上」。
     /// </summary>
-    private static JsResult? GetDynamicSecretUnavailable(JsParam param)
+    private JsResult? GetDynamicSecret(JsParam param)
     {
         return new JsResult
         {
             Data = new()
             {
-                ["DS"] = string.Empty,
+                ["DS"] = _gameRecordClient.CreateJsBridgeSecret(),
             }
         };
+    }
+
+
+    /// <summary>
+    /// H5 <c>getDS2</c>（Gen2）。payload.query 为对象或已序列化 query，payload.body 为 POST JSON。
+    /// </summary>
+    private JsResult? GetDynamicSecret2(JsParam param)
+    {
+        string query = BuildSortedQuery(param.Payload?["query"]);
+        string body = ReadJsonNodeString(param.Payload?["body"]);
+        return new JsResult
+        {
+            Data = new()
+            {
+                ["DS"] = _gameRecordClient.CreateJsBridgeSecret2(query, body),
+            }
+        };
+    }
+
+
+    /// <summary>
+    /// 把 H5 传入的 query 收成官方 DS 所用的排序 <c>k=v&amp;k=v</c>。
+    /// </summary>
+    private static string BuildSortedQuery(JsonNode? queryNode)
+    {
+        if (queryNode is JsonObject obj)
+        {
+            var pairs = new List<string>();
+            foreach (var kv in obj)
+            {
+                pairs.Add($"{kv.Key}={ReadJsonNodeString(kv.Value)}");
+            }
+            pairs.Sort(StringComparer.Ordinal);
+            return string.Join("&", pairs);
+        }
+        return ReadJsonNodeString(queryNode);
+    }
+
+
+    /// <summary>
+    /// 读取 JSON 字符串值；<see cref="JsonNode.ToString"/> 会给字符串多包一层引号，不能直接用。
+    /// </summary>
+    private static string ReadJsonNodeString(JsonNode? node)
+    {
+        if (node is null)
+        {
+            return "";
+        }
+        if (node is JsonValue value && value.TryGetValue(out string? text))
+        {
+            return text ?? "";
+        }
+        if (node is JsonObject or JsonArray)
+        {
+            return node.ToJsonString();
+        }
+        return node.ToString();
     }
 
 
