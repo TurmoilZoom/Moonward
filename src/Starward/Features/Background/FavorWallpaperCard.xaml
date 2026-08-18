@@ -37,7 +37,7 @@
                             AreTransportControlsEnabled="False"
                             AutoPlay="False"
                             IsHitTestVisible="False"
-                            Stretch="Uniform"
+                            Stretch="UniformToFill"
                             Visibility="Collapsed" />
 
         <Border Height="36"
