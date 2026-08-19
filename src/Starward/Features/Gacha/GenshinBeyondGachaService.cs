@@ -283,20 +283,9 @@ internal class GenshinBeyondGachaService
             }
         }
 
-        stats.List_4.Insert(0, new GenshinBeyondGachaItemEx
-        {
-            OpGachaType = 1000,
-            ItemName = Lang.GachaStatsCard_Pity,
-            Pity = stats.Pity_4,
-            Time = list.Last().Time,
-        });
-        stats.List_3.Insert(0, new GenshinBeyondGachaItemEx
-        {
-            OpGachaType = 1000,
-            ItemName = Lang.GachaStatsCard_Pity,
-            Pity = stats.Pity_3,
-            Time = list.Last().Time,
-        });
+        // 常驻颂愿最高展示稀有度为 4★，硬保底 70
+        stats.Pity_Current = stats.Pity_4;
+        stats.Pity_Max = 70;
 
         return stats;
     }
@@ -368,20 +357,9 @@ internal class GenshinBeyondGachaService
             }
         }
 
-        stats.List_5.Insert(0, new GenshinBeyondGachaItemEx
-        {
-            OpGachaType = 2000,
-            ItemName = Lang.GachaStatsCard_Pity,
-            Pity = stats.Pity_5,
-            Time = list.Last().Time,
-        });
-        stats.List_4.Insert(0, new GenshinBeyondGachaItemEx
-        {
-            OpGachaType = 2000,
-            ItemName = Lang.GachaStatsCard_Pity,
-            Pity = stats.Pity_4,
-            Time = list.Last().Time,
-        });
+        // 活动颂愿最高展示稀有度为 5★，硬保底 70
+        stats.Pity_Current = stats.Pity_5;
+        stats.Pity_Max = 70;
 
         return stats;
     }
@@ -502,6 +480,21 @@ public class GenshinBeyondGachaTypeStats
     public int Pity_4 { get; set; }
 
     public int Pity_3 { get; set; }
+
+    /// <summary>
+    /// 当前最高展示稀有度垫数（常驻颂愿为 4★，活动颂愿为 5★）。
+    /// </summary>
+    public int Pity_Current { get; set; }
+
+    /// <summary>
+    /// 当前最高展示稀有度硬保底抽数。常驻 4★ 与活动 5★ 均为 70。
+    /// </summary>
+    public int Pity_Max { get; set; } = 70;
+
+    /// <summary>
+    /// 当前最高稀有度垫数及硬保底上限的本地化展示文本。
+    /// </summary>
+    public string PityProgressText => string.Format(Lang.GachaStatsCard_CurrentPity, Pity_Current, Pity_Max);
 
     public DateTime StartTime { get; set; }
 
