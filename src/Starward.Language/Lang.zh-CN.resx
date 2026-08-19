@@ -772,6 +772,15 @@
   <data name="SettingPage_ReportIssue" xml:space="preserve">
     <value>反馈问题</value>
   </data>
+  <data name="IssueReport_Opened" xml:space="preserve">
+    <value>已打开问题反馈</value>
+  </data>
+  <data name="IssueReport_OpenLogHint" xml:space="preserve">
+    <value>环境信息已填入表单。请从刚打开的日志文件夹上传当天的日志。</value>
+  </data>
+  <data name="IssueReport_OpenFailed" xml:space="preserve">
+    <value>无法打开问题反馈页</value>
+  </data>
   <data name="SettingPage_ReleaseHistroy" xml:space="preserve">
     <value>更新记录</value>
   </data>

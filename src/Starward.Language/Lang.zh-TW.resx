@@ -713,6 +713,15 @@
   <data name="SettingPage_ReportIssue" xml:space="preserve">
     <value>回饋問題</value>
   </data>
+  <data name="IssueReport_Opened" xml:space="preserve">
+    <value>已開啟問題回饋</value>
+  </data>
+  <data name="IssueReport_OpenLogHint" xml:space="preserve">
+    <value>環境資訊已填入表單。請從剛開啟的日誌資料夾上傳當天的日誌。</value>
+  </data>
+  <data name="IssueReport_OpenFailed" xml:space="preserve">
+    <value>無法開啟問題回饋頁</value>
+  </data>
   <data name="SettingPage_ReleaseHistroy" xml:space="preserve">
     <value>更新紀錄</value>
   </data>

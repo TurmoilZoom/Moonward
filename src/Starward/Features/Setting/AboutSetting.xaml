@@ -87,28 +87,28 @@
                            FontSize="20"
                            Text="{x:Bind lang:Lang.AboutSettingPage_Links}" />
                 <TextBlock Margin="0,12,0,0" HorizontalAlignment="Left">
-                    <Hyperlink NavigateUri="https://github.com/TurmoilZoom/Starward" UnderlineStyle="None">
+                    <Hyperlink NavigateUri="https://github.com/TurmoilZoom/Moonward" UnderlineStyle="None">
                         <Run FontWeight="Bold"
                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                              Text="{x:Bind lang:Lang.SettingPage_ProjectHomepage}" />
                     </Hyperlink>
                 </TextBlock>
                 <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
-                    <Hyperlink NavigateUri="https://github.com/TurmoilZoom/Starward/issues" UnderlineStyle="None">
+                    <Hyperlink Click="Hyperlink_ReportIssue_Click" UnderlineStyle="None">
                         <Run FontWeight="Bold"
                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                              Text="{x:Bind lang:Lang.SettingPage_ReportIssue}" />
                     </Hyperlink>
                 </TextBlock>
                 <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
-                    <Hyperlink NavigateUri="https://github.com/TurmoilZoom/Starward/releases" UnderlineStyle="None">
+                    <Hyperlink NavigateUri="https://github.com/TurmoilZoom/Moonward/releases" UnderlineStyle="None">
                         <Run FontWeight="Bold"
                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                              Text="{x:Bind lang:Lang.SettingPage_ReleaseHistroy}" />
                     </Hyperlink>
                 </TextBlock>
                 <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
-                    <Hyperlink NavigateUri="https://github.com/TurmoilZoom/Starward/blob/main/docs/Privacy.md" UnderlineStyle="None">
+                    <Hyperlink NavigateUri="https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/docs/Privacy.md" UnderlineStyle="None">
                         <Run FontWeight="Bold"
                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                              Text="{x:Bind lang:Lang.SettingPage_PrivacyPolicy}" />

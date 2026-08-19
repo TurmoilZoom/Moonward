@@ -713,6 +713,15 @@
   <data name="SettingPage_ReportIssue" xml:space="preserve">
     <value>問題を報告</value>
   </data>
+  <data name="IssueReport_Opened" xml:space="preserve">
+    <value>フィードバックフォームを開きました</value>
+  </data>
+  <data name="IssueReport_OpenLogHint" xml:space="preserve">
+    <value>環境情報は入力済みです。開いたフォルダーから本日のログをアップロードしてください。</value>
+  </data>
+  <data name="IssueReport_OpenFailed" xml:space="preserve">
+    <value>フィードバックフォームを開けませんでした</value>
+  </data>
   <data name="SettingPage_ReleaseHistroy" xml:space="preserve">
     <value>リリース履歴</value>
   </data>

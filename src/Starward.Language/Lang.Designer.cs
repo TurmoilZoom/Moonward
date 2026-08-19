@@ -5973,6 +5973,33 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Could not open the feedback form 的本地化字符串。
+        /// </summary>
+        public static string IssueReport_OpenFailed {
+            get {
+                return ResourceManager.GetString("IssueReport_OpenFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Feedback form opened 的本地化字符串。
+        /// </summary>
+        public static string IssueReport_Opened {
+            get {
+                return ResourceManager.GetString("IssueReport_Opened", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Environment info is filled in. Upload today's log from the folder that just opened. 的本地化字符串。
+        /// </summary>
+        public static string IssueReport_OpenLogHint {
+            get {
+                return ResourceManager.GetString("IssueReport_OpenLogHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 It is recommended to install the VP9 Video Extensions to reduce CPU usage. 的本地化字符串。
         /// </summary>
         public static string ItIsRecommendedToInstallTheVP9VideoExtensionsToReduceCPUUsage {

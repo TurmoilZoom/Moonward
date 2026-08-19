@@ -15,6 +15,7 @@ using Starward.Features.RedeemCode;
 using Starward.Features.TimeNode;
 using Starward.Features.Background;
 using Starward.Features.Database;
+using Starward.Features.Feedback;
 using Starward.Features.Gacha;
 using Starward.Features.Gacha.UIGF;
 using Starward.Features.Gacha.ZZZGachaToolbox;
@@ -117,6 +118,8 @@ public static partial class AppConfig
             sc.AddSingleton<GameInstallService>();
 
             sc.AddSingleton<GameAuthLoginService>();
+
+            sc.AddSingleton<IssueReportService>();
 
             sc.AddSingleton<ScreenCaptureService>();
 

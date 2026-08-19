@@ -7,11 +7,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        感谢反馈。提交前请先 [搜索已有 Issue](https://github.com/TurmoilZoom/Moonward/issues)。
+        建议在 Moonward 中打开 **设置 → 关于 → 反馈问题** 提交。软件会自动填写诊断信息，并打开日志文件夹便于上传。
 
-        日志可在 **设置 → 文件管理 → 打开日志文件夹** 找到，文件名形如 `Moonward_yyMMdd.log`（统一数据目录下的 `log\`；尚未完成首次设置时在 `%LocalAppData%\Moonward\log\`）。
-
-        **请勿粘贴** cookie、stoken、authkey、login_ticket，或带完整查询参数的抽卡 / 登录链接。
+        提交前请先 [搜索已有 Issue](https://github.com/TurmoilZoom/Moonward/issues)。
 
   - type: checkboxes
     id: checklist
@@ -20,8 +18,6 @@ body:
       description: 重复 Issue 可能不经回复直接关闭。
       options:
         - label: 我已搜索现有 Issue，确认这不是重复问题。 / I have searched existing issues.
-          required: true
-        - label: 日志与截图中不含 cookie、stoken、authkey 等凭证。 / Secrets have been removed from logs and screenshots.
           required: true
 
   - type: textarea
@@ -33,24 +29,6 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: step
-    attributes:
-      label: 复现步骤 / Reproduction Steps
-      description: 从打开 Moonward 到出现问题的步骤。
-      placeholder: |
-        1.
-        2.
-        3.
-    validations:
-      required: true
-
-  - type: textarea
-    id: behavior
-    attributes:
-      label: 预期行为 / Expected Behavior
-      description: 你期望发生什么。
-
   - type: upload
     id: screenshot
     attributes:
@@ -59,102 +37,29 @@ body:
     validations:
       required: false
 
-  - type: dropdown
-    id: game
-    attributes:
-      label: 涉及游戏 / Game
-      options:
-        - 启动器本身 (Moonward)
-        - 原神 (Genshin Impact)
-        - 崩坏：星穹铁道 (Honkai: Star Rail)
-        - 绝区零 (Zenless Zone Zero)
-        - 崩坏3 (Honkai Impact 3rd)
-        - 多个游戏 (Multiple)
-        - 其他 (Other)
-    validations:
-      required: true
-
-  - type: dropdown
-    id: server
-    attributes:
-      label: 区服 / Server
-      description: 启动器本身的问题请选「不适用」。
-      options:
-        - 国服 (CN)
-        - 国际服 (OS)
-        - 两者 (Both)
-        - 不适用 (N/A)
-    validations:
-      required: true
-
-  - type: dropdown
-    id: arch
-    attributes:
-      label: 安装架构 / Architecture
-      options:
-        - x64
-        - ARM64
-        - 不确定 (Not sure)
-    validations:
-      required: true
-
-  - type: dropdown
-    id: channel
-    attributes:
-      label: 更新渠道 / Channel
-      options:
-        - 正式版 (Stable)
-        - 预览版 (Preview)
-        - 自行编译 (Built from source)
-    validations:
-      required: true
-
-  - type: input
-    id: app_ver
-    attributes:
-      label: Moonward 版本 / Version
-      description: 设置 → 关于 中的当前版本。
-      placeholder: "例如: 0.12.3"
-    validations:
-      required: true
-
-  - type: input
-    id: win_ver
-    attributes:
-      label: Windows 版本 / Windows Version
-      description: 运行 `winver` 或查看 设置 → 系统 → 关于。
-      placeholder: "例如: 10.0.26100 / 24H2"
-    validations:
-      required: true
-
   - type: textarea
     id: environment
     attributes:
       label: 诊断信息 / Environment
-      description: 可选。按下面格式补充即可。应用内「报告问题」若已带出这些信息，保留即可。
+      description: 从应用内「反馈问题」打开时会自动填入。网页提交请按格式手填。
       value: |
         Moonward:
         Windows:
         Architecture:
         Channel:
-        Game / GameBiz:
+        Game:
+        Server:
+        Language:
+        Portable:
+        Removable storage:
     validations:
-      required: false
+      required: true
 
   - type: upload
     id: log_file
     attributes:
       label: 日志文件 / Log file
-      description: 请上传当天的 `Moonward_yyMMdd.log`（.log / .txt）。无法上传时用下一栏粘贴末尾若干行。
-    validations:
-      required: false
-
-  - type: textarea
-    id: log
-    attributes:
-      label: 日志摘录 / Log excerpt
-      description: 可选。粘贴与问题相关的日志片段。请先删掉 cookie、stoken、authkey 等。
-      render: shell
+      description: 请上传当天的日志文件（.log / .txt）。可在设置 → 文件管理 → 打开日志文件夹中找到。
     validations:
       required: false
 

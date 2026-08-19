@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Starward.Features.Feedback;
 using Starward.Features.Update;
 using Starward.Frameworks;
 using System;
@@ -131,6 +133,24 @@ public sealed partial class AboutSetting : PageBase
         {
             UpdateErrorText = ex.Message;
             _logger.LogError(ex, "Check update");
+        }
+    }
+
+
+
+
+    /// <summary>
+    /// 打开预填诊断信息的 GitHub Bug 表单，并打开日志文件夹。
+    /// </summary>
+    private async void Hyperlink_ReportIssue_Click(Hyperlink sender, HyperlinkClickEventArgs args)
+    {
+        try
+        {
+            await AppConfig.GetService<IssueReportService>().ReportBugAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Report issue");
         }
     }
 

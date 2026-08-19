@@ -713,6 +713,15 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="SettingPage_ReportIssue" xml:space="preserve">
     <value>Segnala problema</value>
   </data>
+  <data name="IssueReport_Opened" xml:space="preserve">
+    <value>Feedback form opened</value>
+  </data>
+  <data name="IssueReport_OpenLogHint" xml:space="preserve">
+    <value>Environment info is filled in. Upload today's log from the folder that just opened.</value>
+  </data>
+  <data name="IssueReport_OpenFailed" xml:space="preserve">
+    <value>Could not open the feedback form</value>
+  </data>
   <data name="SettingPage_ReleaseHistroy" xml:space="preserve">
     <value>Cronologia Rilasci</value>
   </data>

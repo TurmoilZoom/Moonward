@@ -713,6 +713,15 @@
   <data name="SettingPage_ReportIssue" xml:space="preserve">
     <value>버그 제보</value>
   </data>
+  <data name="IssueReport_Opened" xml:space="preserve">
+    <value>피드백 양식을 열었습니다</value>
+  </data>
+  <data name="IssueReport_OpenLogHint" xml:space="preserve">
+    <value>환경 정보가 입력되었습니다. 방금 연 폴더에서 오늘 로그를 업로드해 주세요.</value>
+  </data>
+  <data name="IssueReport_OpenFailed" xml:space="preserve">
+    <value>피드백 양식을 열 수 없습니다</value>
+  </data>
   <data name="SettingPage_ReleaseHistroy" xml:space="preserve">
     <value>업데이트 기록</value>
   </data>

@@ -22,14 +22,10 @@ Moonward 是 Windows 平台的米哈游游戏启动器（WinUI 3 / .NET 10），
 
 ### 报告 Bug
 
-使用 [Bug Report](https://github.com/TurmoilZoom/Moonward/issues/new?template=bug_report.yml) 模板，并尽量提供：
+优先在软件内 **设置 → 关于 → 反馈问题** 提交（会自动填写诊断信息并打开日志文件夹）。也可使用 [Bug Report](https://github.com/TurmoilZoom/Moonward/issues/new?template=bug_report.yml) 模板，并尽量提供：
 
-- 清晰的复现步骤与预期行为
-- 涉及的游戏与区服（国服 / 国际服）
-- Moonward 版本、Windows 版本、安装架构（x64 / ARM64）、正式版或预览版
-- 相关日志：设置 → 文件管理 → 打开日志文件夹，文件名形如 `Moonward_yyMMdd.log`
-
-请勿在 Issue 中粘贴 cookie、stoken、authkey、login_ticket，或带完整查询参数的抽卡 / 登录链接。
+- 清晰的问题描述
+- 诊断信息与当天日志
 
 提交前请先搜索已有 Issue，避免重复。
 
