@@ -1269,7 +1269,7 @@
     <value>寄付</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>URLプロトコル (試験的)</value>
+    <value>URLプロトコル</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>他のソフトウェアは、URLプロトコルを通じてMoonwardの機能の一部を利用することができます。</value>
@@ -1394,9 +1394,6 @@
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>虚構叙事</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Moonwardの翻訳にご協力ください</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>キャッシュ</value>
@@ -3543,6 +3540,9 @@
     <value>削除に失敗しました</value>
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>サインイン時に起動</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
     <value>サインイン時に起動</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">

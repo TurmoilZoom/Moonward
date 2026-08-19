@@ -1269,7 +1269,7 @@
     <value>บริจาค/สนับสนุน</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>URL โพรโทคอล (ทดลอง)</value>
+    <value>URL โพรโทคอล</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>ซอฟต์แวร์อื่นสามารถใช้บางฟีเจอร์ของ Moonward ผ่าน URL โพรโทคอล</value>
@@ -1394,9 +1394,6 @@
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>นิยายบริสุทธิ์</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>ช่วยแปล Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>แคช</value>
@@ -3538,6 +3535,9 @@ You are welcome to submit exported data to:</value>
     <value>Failed to delete</value>
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Start at login</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
     <value>Start at login</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">

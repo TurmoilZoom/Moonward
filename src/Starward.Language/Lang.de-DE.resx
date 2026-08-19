@@ -1268,7 +1268,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Spenden</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>URL Protocol (Experimentell)</value>
+    <value>URL-Protokoll</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>Andere Software kann einige der Funktionen von Moonward über das URL-Protokoll verwenden.</value>
@@ -1393,9 +1393,6 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>Reine Fiktion</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Hilf uns, Moonward zu übersetzen</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>Cache</value>
@@ -3542,6 +3539,9 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
     <value>Failed to delete</value>
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Beim Anmelden starten</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
     <value>Beim Anmelden starten</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">

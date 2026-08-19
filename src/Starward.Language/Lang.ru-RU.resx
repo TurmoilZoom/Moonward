@@ -1270,7 +1270,7 @@
     <value>Пожертвовать</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>Протокол URL (Экспериментально)</value>
+    <value>Протокол URL</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>Другие программы могут использовать некоторые функции Moonward через протокол URL.</value>
@@ -1395,9 +1395,6 @@
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>Чистый вымысел</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Помогите нам перевести Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>Кэш</value>
@@ -3564,6 +3561,9 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Failed to delete</value>
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Запускать при входе</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
     <value>Запускать при входе</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">

@@ -26,13 +26,6 @@
                       CornerRadius="8,18,18,8"
                       SelectionChanged="ComboBox_Language_SelectionChanged" />
 
-            <!--  帮助翻译  -->
-            <TextBlock Margin="0,12,0,0" HorizontalAlignment="Left">
-                <Hyperlink NavigateUri="https://github.com/Scighost/Starward/blob/main/docs/Localization.md" UnderlineStyle="None">
-                    <Run Text="{x:Bind lang:Lang.AppearanceSettingPage_HelpUsTranslateStarward}" />
-                </Hyperlink>
-            </TextBlock>
-
 
             <!--  游戏启动后  -->
             <TextBlock Margin="0,20,0,0"
@@ -84,8 +77,8 @@
             <ToggleSwitch Margin="0,8,0,0"
                           IsEnabled="{x:Bind StartAtLoginAvailable}"
                           IsOn="{x:Bind StartAtLogin, Mode=TwoWay}"
-                          OffContent="{x:Bind lang:Lang.SettingPage_StartAtLogin}"
-                          OnContent="{x:Bind lang:Lang.SettingPage_StartAtLogin}" />
+                          OffContent="{x:Bind lang:Lang.SettingPage_StartAtLoginSwitch}"
+                          OnContent="{x:Bind lang:Lang.SettingPage_StartAtLoginSwitch}" />
             <TextBlock Margin="0,8,0,0"
                        FontSize="14"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"

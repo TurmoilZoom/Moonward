@@ -1270,7 +1270,7 @@
     <value>기부</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>URL 프로토콜 (실험기능)</value>
+    <value>URL 프로토콜</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>타 프로그램에서 URL 프로토콜을 통해 Moonward 의 일부기능을 사용할 수 있습니다.</value>
@@ -1395,9 +1395,6 @@
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>허구 이야기</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>도움! Moonward 번역</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>캐시</value>
@@ -3544,6 +3541,9 @@
     <value>삭제 실패</value>
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>로그인 시 자동 시작</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
     <value>로그인 시 자동 시작</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">

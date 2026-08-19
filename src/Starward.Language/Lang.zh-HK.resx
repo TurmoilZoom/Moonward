@@ -1269,7 +1269,7 @@
     <value>捐贈</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>URL 協議 (試驗緊)</value>
+    <value>URL 協議</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>其他軟件可以透過 URL 協議使用 Moonward 嘅部分功能</value>
@@ -1394,9 +1394,6 @@
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>虛構敘事</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>幫助我地翻譯 Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>快取</value>
@@ -3544,6 +3541,9 @@
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
     <value>開機時自動啟動</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
+    <value>開機自啟</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">
     <value>登入 Windows 後自動在系統匣啟動 Moonward。亦可在 Windows「設定 → 應用程式 → 啟動」中關閉。</value>

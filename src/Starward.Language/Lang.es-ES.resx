@@ -1270,7 +1270,7 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Donar</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>Protocolo URL (Experimental)</value>
+    <value>Protocolo URL</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>Otro software puede usar algunas funciones de Moonward a través del protocolo URL.</value>
@@ -1395,9 +1395,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>Ficción pura</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Ayúdanos a traducir Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>Caché</value>
@@ -3544,6 +3541,9 @@ You are welcome to submit exported data to:</value>
     <value>Failed to delete</value>
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Iniciar al iniciar sesión</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
     <value>Iniciar al iniciar sesión</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">

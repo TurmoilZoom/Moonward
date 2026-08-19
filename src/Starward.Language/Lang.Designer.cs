@@ -241,15 +241,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Help us translate Starward 的本地化字符串。
-        /// </summary>
-        public static string AppearanceSettingPage_HelpUsTranslateStarward {
-            get {
-                return ResourceManager.GetString("AppearanceSettingPage_HelpUsTranslateStarward", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Theme Color 的本地化字符串。
         /// </summary>
         public static string AppearanceSettingPage_ThemeColor {
@@ -7783,6 +7774,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Start at login 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_StartAtLoginSwitch {
+            get {
+                return ResourceManager.GetString("SettingPage_StartAtLoginSwitch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Windows Startup apps 的本地化字符串。
         /// </summary>
         public static string SettingPage_StartAtLoginWindowsSettings {
@@ -7909,7 +7909,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 URL Protocol (Experimental) 的本地化字符串。
+        ///   查找类似 URL Protocol 的本地化字符串。
         /// </summary>
         public static string SettingPage_URLProtocolExperimental {
             get {

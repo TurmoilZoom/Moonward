@@ -1270,7 +1270,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Ủng hộ</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>Giao thức URL (thử nghiệm)</value>
+    <value>Giao thức URL</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>Những phần mềm khác có thể sử dụng một số tính năng của Moonward thông qua giao thức URL.</value>
@@ -1395,9 +1395,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>Kể chuyện hư cấu</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Giúp chúng tôi dịch Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>Bộ nhớ đệm</value>
@@ -3544,6 +3541,9 @@ You are welcome to submit exported data to:</value>
     <value>Failed to delete</value>
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Start at login</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
     <value>Start at login</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">

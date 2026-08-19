@@ -1328,7 +1328,7 @@ Do you accept the risk and continue to use it?</value>
     <value>Donate</value>
   </data>
   <data name="SettingPage_URLProtocolExperimental" xml:space="preserve">
-    <value>URL Protocol (Experimental)</value>
+    <value>URL Protocol</value>
   </data>
   <data name="SettingPage_URLProtocolDesc" xml:space="preserve">
     <value>Other software can use some of Moonward's features through the URL protocol.</value>
@@ -1453,9 +1453,6 @@ Do you accept the risk and continue to use it?</value>
   </data>
   <data name="HoyolabToolboxPage_PureFiction" xml:space="preserve">
     <value>Pure Fiction</value>
-  </data>
-  <data name="AppearanceSettingPage_HelpUsTranslateStarward" xml:space="preserve">
-    <value>Help us translate Moonward</value>
   </data>
   <data name="FileSettingPage_Cache" xml:space="preserve">
     <value>Cache</value>
@@ -3603,6 +3600,9 @@ Repository:</value>
     <value>Failed to delete</value>
   </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
+    <value>Start at login</value>
+  </data>
+  <data name="SettingPage_StartAtLoginSwitch" xml:space="preserve">
     <value>Start at login</value>
   </data>
   <data name="SettingPage_StartAtLoginDesc" xml:space="preserve">
