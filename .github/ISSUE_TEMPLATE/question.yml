@@ -1,50 +1,44 @@
 name: Question
-description: I have a question
+description: 使用或配置上的疑问 / A question about using Moonward
 title: "[Question] "
-labels: ["triage"]
+labels: ["question"]
 body:
+
+  - type: markdown
+    attributes:
+      value: |
+        使用讨论、经验分享可发到 [Discussions](https://github.com/TurmoilZoom/Moonward/discussions)。
+
+        若已确定是程序错误，请改用 Bug Report 模板。
 
   - type: checkboxes
     id: checklist
     attributes:
-      label: Checklist
-      description: Your question may be closed without any reply if duplicate.
+      label: 检查项 / Checklist
+      description: 重复提问可能不经回复直接关闭。
       options:
-        - label: My question was not mentioned by others, and it is not a duplicate question.
+        - label: 我已搜索现有 Issue 与 Discussions，确认这不是重复问题。 / I have searched existing issues and discussions.
           required: true
 
   - type: textarea
-    id: bug
+    id: question
     attributes:
-      label: Description
-      description: Describe your question.
+      label: 问题 / Question
+      description: 说明你想做什么、卡在哪一步、已经试过什么。
     validations:
       required: true
 
   - type: input
-    id: starward_ver
+    id: app_ver
     attributes:
-      label: Starward Version
-      placeholder:
+      label: Moonward 版本 / Version
+      description: 可选。设置 → 关于 中的当前版本，有助于判断是否已修复。
+      placeholder: "例如: 0.12.3"
     validations:
-      required: true
-
-  - type: input
-    id: win_ver
-    attributes:
-      label: Windows Version
-      placeholder: "Example: 22621.1928"
-    validations:
-      required: true
-
-  - type: textarea
-    id: log
-    attributes:
-      label: Log
-      description: Please upload log file.
+      required: false
 
   - type: textarea
     id: context
     attributes:
-      label: Additional Context
-      description: Enter any other applicable info here.
+      label: 其他信息 / Additional Context
+      description: 可选。涉及的游戏、区服、截图等。

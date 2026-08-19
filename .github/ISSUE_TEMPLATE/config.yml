@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/TurmoilZoom/Moonward/discussions
+    about: 使用讨论、经验分享，或不确定是否为缺陷时先到这里。
+  - name: 贡献指南 / Contributing
+    url: https://github.com/TurmoilZoom/Moonward/blob/rebase/develop/CONTRIBUTING.md
+    about: 如何报告问题、提交 PR 与本地构建。

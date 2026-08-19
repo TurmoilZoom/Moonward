@@ -6,7 +6,7 @@ Moonward 是 Windows 平台的米哈游游戏启动器（WinUI 3 / .NET 10），
 
 ## 仓库说明
 
-本仓库（[TurmoilZoom/Starward](https://github.com/TurmoilZoom/Starward)）基于上游 [Scighost/Starward](https://github.com/Scighost/Starward) 维护，并包含额外的功能与修复。发布渠道见本仓库 [Releases](https://github.com/TurmoilZoom/Starward/releases)。
+本仓库（[TurmoilZoom/Moonward](https://github.com/TurmoilZoom/Moonward)）基于上游 [Scighost/Starward](https://github.com/Scighost/Starward) 维护，并包含额外的功能与修复。发布渠道见本仓库 [Releases](https://github.com/TurmoilZoom/Moonward/releases)。
 
 | 分支 | 用途 |
 |------|------|
@@ -18,19 +18,28 @@ Moonward 是 Windows 平台的米哈游游戏启动器（WinUI 3 / .NET 10），
 
 ## 贡献方式
 
+反馈请从 [Issue 模板选择页](https://github.com/TurmoilZoom/Moonward/issues/new/choose) 进入，不要开空白 Issue。闲聊与经验分享可走 [Discussions](https://github.com/TurmoilZoom/Moonward/discussions)。
+
 ### 报告 Bug
 
-使用 [Bug Report](https://github.com/TurmoilZoom/Starward/issues/new?template=bug_report.yml) 模板提交 Issue，并尽量提供：
+使用 [Bug Report](https://github.com/TurmoilZoom/Moonward/issues/new?template=bug_report.yml) 模板，并尽量提供：
 
 - 清晰的复现步骤与预期行为
-- Moonward 版本号与 Windows 版本号
-- 相关日志（位于 `%LocalAppData%/Moonward/log/` 或用户数据目录下的 `data/log/`）
+- 涉及的游戏与区服（国服 / 国际服）
+- Moonward 版本、Windows 版本、安装架构（x64 / ARM64）、正式版或预览版
+- 相关日志：设置 → 文件管理 → 打开日志文件夹，文件名形如 `Moonward_yyMMdd.log`
+
+请勿在 Issue 中粘贴 cookie、stoken、authkey、login_ticket，或带完整查询参数的抽卡 / 登录链接。
 
 提交前请先搜索已有 Issue，避免重复。
 
 ### 功能建议
 
-使用 [Feature Request](https://github.com/TurmoilZoom/Starward/issues/new?template=feature_request.yml) 模板。对于较大改动，建议先在 Issue 中讨论方案，再开始编码。
+使用 [Feature Request](https://github.com/TurmoilZoom/Moonward/issues/new?template=feature_request.yml) 模板，先写要解决的问题，再写建议做法。对于较大改动，建议先在 Issue 中讨论方案，再开始编码。
+
+### 提问
+
+使用 [Question](https://github.com/TurmoilZoom/Moonward/issues/new?template=question.yml) 模板。不确定是否为缺陷时，也可以先发 [Discussions](https://github.com/TurmoilZoom/Moonward/discussions)。
 
 ### 翻译与文档
 
