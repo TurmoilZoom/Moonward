@@ -3625,4 +3625,13 @@
   <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
     <value>Windows 启动应用</value>
   </data>
+  <data name="UrlProtocol_GameExeNotFound" xml:space="preserve">
+    <value>未找到游戏可执行文件。游戏可能尚未安装，或已被卸载。</value>
+  </data>
+  <data name="UrlProtocol_InvalidGameBiz" xml:space="preserve">
+    <value>无法识别链接中指定的游戏。</value>
+  </data>
+  <data name="UrlProtocol_UnhandledError" xml:space="preserve">
+    <value>处理此链接时失败。</value>
+  </data>
 </root>

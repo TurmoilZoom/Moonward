@@ -3566,4 +3566,13 @@
   <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
     <value>Windows 啟動應用程式</value>
   </data>
+  <data name="UrlProtocol_GameExeNotFound" xml:space="preserve">
+    <value>找不到遊戲執行檔。遊戲可能尚未安裝，或已被解除安裝。</value>
+  </data>
+  <data name="UrlProtocol_InvalidGameBiz" xml:space="preserve">
+    <value>無法識別連結中指定的遊戲。</value>
+  </data>
+  <data name="UrlProtocol_UnhandledError" xml:space="preserve">
+    <value>處理此連結時失敗。</value>
+  </data>
 </root>

@@ -3626,4 +3626,13 @@ Repository:</value>
   <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
     <value>Windows Startup apps</value>
   </data>
+  <data name="UrlProtocol_GameExeNotFound" xml:space="preserve">
+    <value>The game executable was not found. It may not be installed or has been uninstalled.</value>
+  </data>
+  <data name="UrlProtocol_InvalidGameBiz" xml:space="preserve">
+    <value>Cannot identify the game specified in the link.</value>
+  </data>
+  <data name="UrlProtocol_UnhandledError" xml:space="preserve">
+    <value>Failed to handle this link.</value>
+  </data>
 </root>

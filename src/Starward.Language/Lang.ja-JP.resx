@@ -3566,4 +3566,13 @@
   <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
     <value>Windows のスタートアップアプリ</value>
   </data>
+  <data name="UrlProtocol_GameExeNotFound" xml:space="preserve">
+    <value>ゲームの実行ファイルが見つかりません。未インストールか、アンインストールされた可能性があります。</value>
+  </data>
+  <data name="UrlProtocol_InvalidGameBiz" xml:space="preserve">
+    <value>リンクで指定されたゲームを識別できません。</value>
+  </data>
+  <data name="UrlProtocol_UnhandledError" xml:space="preserve">
+    <value>このリンクの処理に失敗しました。</value>
+  </data>
 </root>

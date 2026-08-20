@@ -3567,4 +3567,13 @@
   <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
     <value>Windows 시작 앱</value>
   </data>
+  <data name="UrlProtocol_GameExeNotFound" xml:space="preserve">
+    <value>게임 실행 파일을 찾을 수 없습니다. 설치되지 않았거나 제거되었을 수 있습니다.</value>
+  </data>
+  <data name="UrlProtocol_InvalidGameBiz" xml:space="preserve">
+    <value>링크에 지정된 게임을 식별할 수 없습니다.</value>
+  </data>
+  <data name="UrlProtocol_UnhandledError" xml:space="preserve">
+    <value>이 링크를 처리하지 못했습니다.</value>
+  </data>
 </root>

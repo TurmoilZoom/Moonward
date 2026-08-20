@@ -3567,4 +3567,13 @@ You are welcome to submit exported data to:</value>
   <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
     <value>Aplicaciones de inicio de Windows</value>
   </data>
+  <data name="UrlProtocol_GameExeNotFound" xml:space="preserve">
+    <value>No se encontró el ejecutable del juego. Es posible que no esté instalado o que se haya desinstalado.</value>
+  </data>
+  <data name="UrlProtocol_InvalidGameBiz" xml:space="preserve">
+    <value>No se puede identificar el juego especificado en el enlace.</value>
+  </data>
+  <data name="UrlProtocol_UnhandledError" xml:space="preserve">
+    <value>No se pudo procesar este enlace.</value>
+  </data>
 </root>

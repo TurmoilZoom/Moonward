@@ -3587,4 +3587,13 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
     <value>Автозагрузка Windows</value>
   </data>
+  <data name="UrlProtocol_GameExeNotFound" xml:space="preserve">
+    <value>Исполняемый файл игры не найден. Возможно, игра не установлена или была удалена.</value>
+  </data>
+  <data name="UrlProtocol_InvalidGameBiz" xml:space="preserve">
+    <value>Не удалось распознать игру, указанную в ссылке.</value>
+  </data>
+  <data name="UrlProtocol_UnhandledError" xml:space="preserve">
+    <value>Не удалось обработать эту ссылку.</value>
+  </data>
 </root>

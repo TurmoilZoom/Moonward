@@ -3565,4 +3565,13 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="SettingPage_StartAtLoginWindowsSettings" xml:space="preserve">
     <value>Windows-Autostart-Apps</value>
   </data>
+  <data name="UrlProtocol_GameExeNotFound" xml:space="preserve">
+    <value>Die Spieldatei wurde nicht gefunden. Das Spiel ist möglicherweise nicht installiert oder wurde deinstalliert.</value>
+  </data>
+  <data name="UrlProtocol_InvalidGameBiz" xml:space="preserve">
+    <value>Das im Link angegebene Spiel konnte nicht erkannt werden.</value>
+  </data>
+  <data name="UrlProtocol_UnhandledError" xml:space="preserve">
+    <value>Dieser Link konnte nicht verarbeitet werden.</value>
+  </data>
 </root>

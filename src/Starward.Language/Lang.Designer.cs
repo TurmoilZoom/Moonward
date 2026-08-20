@@ -7882,6 +7882,33 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 The game executable was not found. It may not be installed or has been uninstalled. 的本地化字符串。
+        /// </summary>
+        public static string UrlProtocol_GameExeNotFound {
+            get {
+                return ResourceManager.GetString("UrlProtocol_GameExeNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cannot identify the game specified in the link. 的本地化字符串。
+        /// </summary>
+        public static string UrlProtocol_InvalidGameBiz {
+            get {
+                return ResourceManager.GetString("UrlProtocol_InvalidGameBiz", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to handle this link. 的本地化字符串。
+        /// </summary>
+        public static string UrlProtocol_UnhandledError {
+            get {
+                return ResourceManager.GetString("UrlProtocol_UnhandledError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 The current location of the data folder is: 的本地化字符串。
         /// </summary>
         public static string SettingPage_TheCurrentLocationOfTheDataFolderIs {
