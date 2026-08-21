@@ -68,6 +68,23 @@ public class ShiyuDefenseInfoV2 : ShiyuDefenseInfoBase, IJsonOnDeserialized
     [JsonIgnore]
     public bool HasData { get; set; }
 
+    /// <summary>
+    /// 是否有第五防线阵容详情。米游社当期数据有延迟时，可能只有 Brief（总分/排名/评价）。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasFifthLayerChallenges => FifthLayerDetail?.LayerChallenges is { Count: > 0 };
+
+    /// <summary>
+    /// 是否有第四防线阵容详情。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasFourthLayerDetail => FourthLayerDetail?.LayerChallenges is { Count: > 0 };
+
+    /// <summary>
+    /// 是否已下发任一防线的阵容详情。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasLayerDetails => HasFifthLayerChallenges || HasFourthLayerDetail;
 
 
     public void OnDeserialized()
@@ -76,5 +93,13 @@ public class ShiyuDefenseInfoV2 : ShiyuDefenseInfoBase, IJsonOnDeserialized
         HasData = ScheduleId > 0;
         MaxRating = Brief?.Rating ?? "";
         V2Score = Brief?.Score ?? 0;
+        if (FifthLayerDetail is not null)
+        {
+            FifthLayerDetail.LayerChallenges ??= [];
+        }
+        if (FourthLayerDetail is not null)
+        {
+            FourthLayerDetail.LayerChallenges ??= [];
+        }
     }
 }

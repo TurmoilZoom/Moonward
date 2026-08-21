@@ -1606,6 +1606,8 @@ internal class GameRecordService
                 var info = wrapper.InfoV2;
                 if (info.PassFifthFloor)
                 {
+                    // 米游社当期详情常延迟，可能只有总分/排名/评价；不要用空防线覆盖已缓存的阵容
+                    PreserveCachedShiyuDefenseV2LayerDetails(role, info);
                     var obj = new
                     {
                         role.Uid,
@@ -1627,6 +1629,30 @@ internal class GameRecordService
             }
         }
         return wrapper;
+    }
+
+
+    /// <summary>
+    /// 当期响应缺少防线详情时，保留同期已缓存的阵容，只更新 Brief 等概要字段。
+    /// </summary>
+    private void PreserveCachedShiyuDefenseV2LayerDetails(GameRecordRole role, ShiyuDefenseInfoV2 info)
+    {
+        if (info.HasLayerDetails)
+        {
+            return;
+        }
+        if (GetShiyuDefenseInfo(role, info.ScheduleId) is not ShiyuDefenseInfoV2 existing)
+        {
+            return;
+        }
+        if (existing.HasFifthLayerChallenges)
+        {
+            info.FifthLayerDetail = existing.FifthLayerDetail;
+        }
+        if (existing.HasFourthLayerDetail)
+        {
+            info.FourthLayerDetail = existing.FourthLayerDetail;
+        }
     }
 
 

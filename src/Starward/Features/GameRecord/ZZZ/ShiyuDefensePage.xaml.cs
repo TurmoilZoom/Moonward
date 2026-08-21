@@ -205,11 +205,33 @@ public sealed partial class ShiyuDefensePage : PageBase
         {
             return string.Empty;
         }
-        var time = info.Brief.ChallengeTime;
+        var time = info.Brief?.ChallengeTime ?? default;
         if (time == DateTime.MinValue)
         {
-            time = info.FourthLayerDetail.ChallengeTime;
+            time = info.FourthLayerDetail?.ChallengeTime ?? default;
+        }
+        if (time == DateTime.MinValue)
+        {
+            return string.Empty;
         }
         return time.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+
+    /// <summary>
+    /// 第五防线挑战列表。中间节点为 null 时返回空列表，避免 x:Bind 跳过更新导致 ItemsRepeater 残留上期数据。
+    /// </summary>
+    public static IList<ShiyuDefenseV2FifthLayerChallengeInfo> GetFifthLayerChallenges(ShiyuDefenseInfoV2? info)
+    {
+        return info?.FifthLayerDetail?.LayerChallenges ?? [];
+    }
+
+
+    /// <summary>
+    /// 第四防线挑战列表。中间节点为 null 时返回空列表，避免 x:Bind 跳过更新导致 ItemsControl 残留上期数据。
+    /// </summary>
+    public static IList<ShiyuDefenseV2FourthLayerChallengeInfo> GetFourthLayerChallenges(ShiyuDefenseInfoV2? info)
+    {
+        return info?.FourthLayerDetail?.LayerChallenges ?? [];
     }
 }

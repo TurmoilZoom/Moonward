@@ -933,10 +933,12 @@
                     </Grid>
 
 
-                    <!--  卡片  -->
-                    <ItemsRepeater Grid.Row="1"
-                                   HorizontalAlignment="Stretch"
-                                   ItemsSource="{x:Bind CurrentShiyuDefenseV2.FifthLayerDetail.LayerChallenges}">
+                    <!--  卡片：x:Load 卸掉无详情时的视觉树，避免 ItemsRepeater 残留上期阵容  -->
+                    <Grid x:Name="FifthLayerChallengesHost"
+                          Grid.Row="1"
+                          x:Load="{x:Bind CurrentShiyuDefenseV2.HasFifthLayerChallenges, FallbackValue=False}">
+                    <ItemsRepeater HorizontalAlignment="Stretch"
+                                   ItemsSource="{x:Bind local:ShiyuDefensePage.GetFifthLayerChallenges(CurrentShiyuDefenseV2)}">
                         <ItemsRepeater.Layout>
                             <StackLayout Spacing="12" />
                         </ItemsRepeater.Layout>
@@ -1152,12 +1154,14 @@
                             </DataTemplate>
                         </ItemsRepeater.ItemTemplate>
                     </ItemsRepeater>
+                    </Grid>
 
                 </Grid>
 
 
-                <!--  第四防线  -->
-                <Grid Width="680"
+                <!--  第四防线：无详情时从视觉树卸掉，避免切月后仍显示上期 buff/阵容  -->
+                <Grid x:Name="FourthLayerDetailHost"
+                      Width="680"
                       Margin="0,8,0,0"
                       Padding="16,12,16,12"
                       HorizontalAlignment="Center"
@@ -1165,7 +1169,8 @@
                       CornerRadius="8"
                       RowSpacing="4"
                       Shadow="{ThemeResource ThemeShadow}"
-                      Translation="0,0,16">
+                      Translation="0,0,16"
+                      x:Load="{x:Bind CurrentShiyuDefenseV2.HasFourthLayerDetail, FallbackValue=False}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -1224,7 +1229,7 @@
                     <AppBarSeparator Grid.Row="2" Padding="0" />
 
                     <!--  阵容  -->
-                    <ItemsControl Grid.Row="2" ItemsSource="{x:Bind CurrentShiyuDefenseV2.FourthLayerDetail.LayerChallenges}">
+                    <ItemsControl Grid.Row="2" ItemsSource="{x:Bind local:ShiyuDefensePage.GetFourthLayerChallenges(CurrentShiyuDefenseV2)}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" Spacing="24" />
