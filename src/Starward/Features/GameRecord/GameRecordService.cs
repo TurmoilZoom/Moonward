@@ -23,10 +23,14 @@ using Starward.Core.GameRecord.ZZZ.GachaRecord;
 using Starward.Core.GameRecord.SignIn;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
+using Starward.Core.GameRecord.Passport;
 using Starward.Features.Database;
+using Starward.Features.ViewHost;
+using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +44,11 @@ internal class GameRecordService
     /// 国服请求失败后刷新设备指纹的最小间隔，避免连续业务错误频繁请求 public-data-api。
     /// </summary>
     private static readonly TimeSpan DeviceFpFailureUpdateCooldown = TimeSpan.FromHours(6);
+
+    /// <summary>
+    /// 当前 getFp ext_fields 载荷版本。旧版本含 windows 硬件字段，升级后必须强制重刷指纹。
+    /// </summary>
+    private const int DeviceFpPayloadVersion = 2;
 
     private readonly ILogger<GameRecordService> _logger;
 
@@ -133,8 +142,19 @@ internal class GameRecordService
         {
             return await action(client);
         }
-        catch (miHoYoApiException ex) when (client is HyperionClient)
+        catch (miHoYoApiException ex)
         {
+            var aigisRetry = await TryRetryAfterAigisAsync(client, ex, action, cancellationToken);
+            if (aigisRetry.Handled)
+            {
+                return aigisRetry.Result;
+            }
+
+            if (client is not HyperionClient)
+            {
+                throw;
+            }
+
             bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
 
             if (ex.IsLoginExpired)
@@ -183,8 +203,19 @@ internal class GameRecordService
         {
             return await action(client, cookie);
         }
-        catch (miHoYoApiException ex) when (!isHoyolab)
+        catch (miHoYoApiException ex)
         {
+            var aigisRetry = await TryRetryAfterAigisAsync(client, ex, c => action(c, cookie), cancellationToken);
+            if (aigisRetry.Handled)
+            {
+                return aigisRetry.Result;
+            }
+
+            if (isHoyolab)
+            {
+                throw;
+            }
+
             bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
 
             string currentCookie = cookie;
@@ -216,6 +247,114 @@ internal class GameRecordService
         }
     }
 
+
+
+    /// <summary>
+    /// 若业务错误带有 <c>x-rpc-aigis</c>，弹出极验并带挑战头重试一次。
+    /// </summary>
+    private async Task<(bool Handled, T Result)> TryRetryAfterAigisAsync<T>(GameRecordClient client, miHoYoApiException ex, Func<GameRecordClient, Task<T>> action, CancellationToken cancellationToken)
+    {
+        if (ex.Aigis is null || string.IsNullOrWhiteSpace(ex.Aigis.Data))
+        {
+            return (false, default!);
+        }
+
+        string? aigisHeader = await ResolveGameRecordAigisAsync(ex.Aigis, cancellationToken);
+        if (string.IsNullOrWhiteSpace(aigisHeader))
+        {
+            return (false, default!);
+        }
+
+        ApplyGameRecordRiskHeaders(client, aigisHeader);
+        try
+        {
+            T result = await action(client);
+            return (true, result);
+        }
+        finally
+        {
+            client.RiskAigisHeader = null;
+            client.RiskChallenge = null;
+        }
+    }
+
+
+    /// <summary>
+    /// 在主窗口弹出极验。无法取得 UI 时返回 null，由上层继续走「验证账号」WebView。
+    /// </summary>
+    private async Task<string?> ResolveGameRecordAigisAsync(CaptchaAigis aigis, CancellationToken cancellationToken)
+    {
+        MainWindow? window = MainWindow.Current;
+        if (window?.Content?.XamlRoot is not { } xamlRoot)
+        {
+            _logger.LogWarning("Cannot show game-record geetest: MainWindow XamlRoot is unavailable.");
+            return null;
+        }
+
+        if (window.DispatcherQueue.HasThreadAccess)
+        {
+            return await GeetestVerifyPopup.ShowAsync(xamlRoot, aigis, cancellationToken);
+        }
+
+        var tcs = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        if (!window.DispatcherQueue.TryEnqueue(async () =>
+        {
+            try
+            {
+                tcs.TrySetResult(await GeetestVerifyPopup.ShowAsync(xamlRoot, aigis, cancellationToken));
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        }))
+        {
+            return null;
+        }
+
+        return await tcs.Task.WaitAsync(cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 把极验结果写到 Client，供下一次 CommonSendAsync 带上 aigis / challenge。
+    /// </summary>
+    private static void ApplyGameRecordRiskHeaders(GameRecordClient client, string aigisHeader)
+    {
+        client.RiskAigisHeader = aigisHeader;
+        client.RiskChallenge = TryReadGeetestChallenge(aigisHeader);
+    }
+
+
+    /// <summary>
+    /// 从 <c>session_id;base64(validateJson)</c> 取出 geetest_challenge，供 <c>x-rpc-challenge</c> 使用。
+    /// </summary>
+    private static string? TryReadGeetestChallenge(string aigisHeader)
+    {
+        try
+        {
+            int separator = aigisHeader.IndexOf(';');
+            if (separator < 0 || separator >= aigisHeader.Length - 1)
+            {
+                return null;
+            }
+            string json = Encoding.UTF8.GetString(Convert.FromBase64String(aigisHeader[(separator + 1)..]));
+            using JsonDocument doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("geetest_challenge", out JsonElement challenge))
+            {
+                return challenge.GetString();
+            }
+            if (doc.RootElement.TryGetProperty("challenge", out JsonElement challengeAlt))
+            {
+                return challengeAlt.GetString();
+            }
+        }
+        catch
+        {
+            // 校验 JSON 非预期时只带 aigis 头重试
+        }
+        return null;
+    }
 
 
     /// <summary>
@@ -312,16 +451,42 @@ internal class GameRecordService
         string? id = AppConfig.HyperionDeviceId;
         string? fp = AppConfig.HyperionDeviceFp;
         DateTimeOffset lastUpdateTime = AppConfig.HyperionDeviceFpLastUpdateTime;
-        if (!string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(fp))
+        if (!string.IsNullOrWhiteSpace(id))
         {
             _hyperionClient.DeviceId = id;
+        }
+        if (!string.IsNullOrWhiteSpace(fp))
+        {
             _hyperionClient.DeviceFp = fp;
         }
+        if (!string.IsNullOrWhiteSpace(AppConfig.HyperionDeviceFpSeedId))
+        {
+            _hyperionClient.DeviceFpSeedId = AppConfig.HyperionDeviceFpSeedId;
+        }
+        if (!string.IsNullOrWhiteSpace(AppConfig.HyperionDeviceFpSeedTime))
+        {
+            _hyperionClient.DeviceFpSeedTime = AppConfig.HyperionDeviceFpSeedTime;
+        }
+        if (!string.IsNullOrWhiteSpace(AppConfig.HyperionDeviceAndroidId))
+        {
+            _hyperionClient.DeviceAndroidId = AppConfig.HyperionDeviceAndroidId;
+        }
+
+        // 旧指纹 ext_fields 带 windows 硬件信息，绝区零战绩会直接 10041，必须换一套 Android 载荷。
+        if (AppConfig.HyperionDeviceFpPayloadVersion < DeviceFpPayloadVersion)
+        {
+            forceUpdate = true;
+        }
+
         if (forceUpdate || DateTimeOffset.Now - lastUpdateTime > TimeSpan.FromDays(3))
         {
             await _hyperionClient.GetDeviceFpAsync(cancellationToken);
             AppConfig.HyperionDeviceId = _hyperionClient.DeviceId;
             AppConfig.HyperionDeviceFp = _hyperionClient.DeviceFp;
+            AppConfig.HyperionDeviceFpSeedId = _hyperionClient.DeviceFpSeedId;
+            AppConfig.HyperionDeviceFpSeedTime = _hyperionClient.DeviceFpSeedTime;
+            AppConfig.HyperionDeviceAndroidId = _hyperionClient.DeviceAndroidId;
+            AppConfig.HyperionDeviceFpPayloadVersion = DeviceFpPayloadVersion;
             AppConfig.HyperionDeviceFpLastUpdateTime = DateTimeOffset.Now;
         }
     }

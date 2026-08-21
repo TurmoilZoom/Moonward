@@ -172,7 +172,14 @@ public class HyperionClient : GameRecordClient
             _ => throw new ArgumentOutOfRangeException($"Unsupport GameBiz: {role.GameBiz}"),
         };
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddGameRecordAppHeaders(request, role.Cookie, url);
+        if (role.GameBiz is GameBiz.nap_cn)
+        {
+            AddZZZGameRecordH5Headers(request, role, url);
+        }
+        else
+        {
+            AddGameRecordAppHeaders(request, role.Cookie, url);
+        }
         var data = await CommonSendAsync<GameRecordIndex>(request, cancellationToken);
         return data.HeadIcon;
     }
@@ -188,24 +195,29 @@ public class HyperionClient : GameRecordClient
     public override async Task<string> GetDeviceFpAsync(CancellationToken cancellationToken = default)
     {
         const string url = "https://public-data-api.mihoyo.com/device-fp/api/getFp";
-        string productName = GenerateProductName();
+        EnsureDeviceFpIdentity();
+        long nowMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        string currentFp = string.IsNullOrWhiteSpace(DeviceFp) || DeviceFp is "0000000000000" ? "0000000000000" : DeviceFp;
+        // 与 UA（Pixel 5 / Android 13 / TQ3A.230901.001）对齐；禁止 hardware=windows_*、debugStatus=1，否则 getFp 会被标成模拟器，战绩接口直接 10041。
+        string extFields = $$"""
+            {"proxyStatus":0,"isRoot":0,"romCapacity":"128","deviceName":"Pixel 5","productName":"redfin","romRemain":"64","hostname":"redfin","screenSize":"1080x2340","isTablet":0,"aaid":"","model":"Pixel 5","brand":"google","hardware":"redfin","deviceType":"redfin","devId":"REL","serialNumber":"unknown","sdCapacity":128000,"buildTime":"1692921600000","buildUser":"android-build","simState":1,"ramRemain":"5800","appUpdateTimeDiff":{{nowMs - 172800000}},"deviceInfo":"google/redfin/redfin:13/TQ3A.230901.001/10161073:user/release-keys","vaid":"","buildType":"user","sdkVersion":"33","ui_mode":"UI_MODE_TYPE_NORMAL","isMockLocation":0,"cpuType":"arm64-v8a","isAirMode":0,"ringMode":2,"chargeStatus":3,"manufacturer":"Google","emulatorStatus":0,"appMemory":"512","osVersion":"13","vendor":"unknown","accelerometer":"0.12x9.81x0.35","sdRemain":110000,"buildTags":"release-keys","packageName":"com.mihoyo.hyperion","networkType":"WiFi","oaid":"","debugStatus":0,"ramCapacity":"8192","magnetometer":"-12.4x3.1x41.7","display":"TQ3A.230901.001","appInstallTimeDiff":{{nowMs - 2592000000}},"packageVersion":"{{AppVersion}}","gyroscope":"0.001x-0.002x0.0","batteryStatus":82,"hasKeyboard":0,"board":"redfin"}
+            """.ReplaceLineEndings("");
         string postContent = $$"""
             {
-                "device_id": "{{GenerateSeedId()}}",
-                "seed_id": "{{Guid.NewGuid():D}}",
-                "seed_time": "{{DateTimeOffset.Now.ToUnixTimeMilliseconds()}}",
+                "device_id": "{{DeviceAndroidId}}",
+                "seed_id": "{{DeviceFpSeedId}}",
+                "seed_time": "{{DeviceFpSeedTime}}",
                 "platform": "2",
-                "device_fp": "{{DeviceFp}}",
+                "device_fp": "{{currentFp}}",
                 "app_name": "bbs_cn",
-                "ext_fields": "{\"proxyStatus\":0,\"isRoot\":0,\"romCapacity\":\"512\",\"deviceName\":\"Pixel5\",\"productName\":\"{{productName}}\",\"romRemain\":\"512\",\"hostname\":\"db1ba5f7c000000\",\"screenSize\":\"1080x2400\",\"isTablet\":0,\"aaid\":\"\",\"model\":\"Pixel5\",\"brand\":\"google\",\"hardware\":\"windows_x86_64\",\"deviceType\":\"redfin\",\"devId\":\"REL\",\"serialNumber\":\"unknown\",\"sdCapacity\":125943,\"buildTime\":\"1704316741000\",\"buildUser\":\"cloudtest\",\"simState\":0,\"ramRemain\":\"124603\",\"appUpdateTimeDiff\":1716369357492,\"deviceInfo\":\"google\\\/{{productName}}\\\/redfin:13\\\/TQ3A.230901.001\\\/2311.40000.5.0:user\\\/release-keys\",\"vaid\":\"\",\"buildType\":\"user\",\"sdkVersion\":\"33\",\"ui_mode\":\"UI_MODE_TYPE_NORMAL\",\"isMockLocation\":0,\"cpuType\":\"arm64-v8a\",\"isAirMode\":0,\"ringMode\":2,\"chargeStatus\":3,\"manufacturer\":\"Google\",\"emulatorStatus\":0,\"appMemory\":\"512\",\"osVersion\":\"13\",\"vendor\":\"unknown\",\"accelerometer\":\"\",\"sdRemain\":123276,\"buildTags\":\"release-keys\",\"packageName\":\"com.mihoyo.hyperion\",\"networkType\":\"WiFi\",\"oaid\":\"\",\"debugStatus\":1,\"ramCapacity\":\"125943\",\"magnetometer\":\"\",\"display\":\"TQ3A.230901.001\",\"appInstallTimeDiff\":1706444666737,\"packageVersion\":\"2.20.2\",\"gyroscope\":\"\",\"batteryStatus\":85,\"hasKeyboard\":10,\"board\":\"windows\"}",
+                "ext_fields": {{JsonSerializer.Serialize(extFields)}},
                 "bbs_device_id": "{{DeviceId}}"
             }
             """;
         var request = new HttpRequestMessage(HttpMethod.Post, url)
         {
-            Content = new StringContent(postContent),
+            Content = new StringContent(postContent, Encoding.UTF8, Application_Json),
         };
-        request.Headers.TryAddWithoutValidation("Content-Type", "application/json");
         var data = await CommonSendAsync<DeviceFpResult>(request, cancellationToken);
         if (data.Code != 200)
         {
@@ -216,6 +228,24 @@ public class HyperionClient : GameRecordClient
     }
 
 
+    /// <summary>
+    /// 补齐 getFp 所需的稳定设备标识；已有值不覆盖，避免每次刷新都换 ANDROID_ID / seed。
+    /// </summary>
+    private void EnsureDeviceFpIdentity()
+    {
+        if (string.IsNullOrWhiteSpace(DeviceAndroidId))
+        {
+            DeviceAndroidId = GenerateSeedId();
+        }
+        if (string.IsNullOrWhiteSpace(DeviceFpSeedId))
+        {
+            DeviceFpSeedId = Guid.NewGuid().ToString("D");
+        }
+        if (string.IsNullOrWhiteSpace(DeviceFpSeedTime))
+        {
+            DeviceFpSeedTime = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
+        }
+    }
 
 
     private static string GenerateSeedId()
@@ -223,15 +253,6 @@ public class HyperionClient : GameRecordClient
         var bytes = new byte[8];
         Random.Shared.NextBytes(bytes);
         return Convert.ToHexString(bytes).ToLower();
-    }
-
-
-
-    private static string GenerateProductName()
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        char[] name = Random.Shared.GetItems<char>(chars, 6);
-        return new string(name);
     }
 
 
@@ -774,12 +795,7 @@ public class HyperionClient : GameRecordClient
             url += $"&end_id={validEndId}";
         }
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ZZZGachaRecordData>(request, cancellationToken);
     }
 
@@ -875,7 +891,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/hadal_info_v2?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddGameRecordAppHeaders(request, role.Cookie, url);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ShiyuDefenseWrapper>(request, cancellationToken);
     }
 
@@ -891,7 +907,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/hadal_mem_detail_v2?schedule_type={schedule}&region={role.Region}&uid={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddGameRecordAppHeaders(request, role.Cookie, url);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<DeadlyAssaultInfo>(request, cancellationToken);
     }
 
@@ -907,11 +923,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi.mihoyo.com/event/nap_ledger/month_info?uid={role.Uid}&region={role.Region}&month={month}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<InterKnotReportSummary>(request, cancellationToken);
     }
 
@@ -929,11 +941,7 @@ public class HyperionClient : GameRecordClient
     {
         var url = $"https://api-takumi.mihoyo.com/event/nap_ledger/month_detail?uid={role.Uid}&region={role.Region}&month={month}&type={type}&current_page={page}&page_size={page_size}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<InterKnotReportDetail>(request, cancellationToken);
     }
 
@@ -1064,7 +1072,7 @@ public class HyperionClient : GameRecordClient
     {
         string url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddGameRecordAppHeaders(request, role.Cookie, url, "https://act.mihoyo.com/");
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ZZZDailyNote>(request, cancellationToken);
     }
 
@@ -1080,12 +1088,7 @@ public class HyperionClient : GameRecordClient
     {
         string url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/void_front_battle_abstract_info?region={role.Region}&uid={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ThresholdSimulationAbstractInfo>(request, cancellationToken);
     }
 
@@ -1102,12 +1105,7 @@ public class HyperionClient : GameRecordClient
     {
         string url = $"https://api-takumi-record.mihoyo.com/event/game_record_zzz/api/zzz/void_front_battle_detail?region={role.Region}&uid={role.Uid}&void_front_id={void_front_id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.mihoyo.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ThresholdSimulationDetailInfo>(request, cancellationToken);
     }
 

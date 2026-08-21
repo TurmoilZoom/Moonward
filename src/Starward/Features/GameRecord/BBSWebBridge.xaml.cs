@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.Web.WebView2.Core;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Helpers;
@@ -139,6 +140,13 @@ public sealed partial class BBSWebBridge : UserControl
             coreWebView2.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
             coreWebView2.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
 
+            // 米游社客户端会在 WebView 层注入绝区零战绩头；WebView2 没有这层，缺 geetest_ext 等会 10041
+            coreWebView2.AddWebResourceRequestedFilter("https://api-takumi-record.mihoyo.com/*", CoreWebView2WebResourceContext.All);
+            coreWebView2.AddWebResourceRequestedFilter("https://api-takumi.mihoyo.com/*", CoreWebView2WebResourceContext.All);
+            coreWebView2.AddWebResourceRequestedFilter("https://sg-public-api.hoyolab.com/*", CoreWebView2WebResourceContext.All);
+            coreWebView2.WebResourceRequested -= CoreWebView2_WebResourceRequested;
+            coreWebView2.WebResourceRequested += CoreWebView2_WebResourceRequested;
+
             initialized = true;
         }
         catch (Exception ex)
@@ -160,17 +168,22 @@ public sealed partial class BBSWebBridge : UserControl
             if (coreWebView2.Source is "about:blank" || force)
             {
                 var manager = coreWebView2.CookieManager;
-                var cookies = await manager.GetCookiesAsync(CurrentGameBiz.IsGlobalServer() ? "https://act.hoyolab.com" : "https://webstatic.mihoyo.com");
-                foreach (var cookie in cookies)
+                foreach (string cookieUrl in GetCookieClearUrls())
                 {
-                    manager.DeleteCookie(cookie);
+                    var cookies = await manager.GetCookiesAsync(cookieUrl);
+                    foreach (var cookie in cookies)
+                    {
+                        manager.DeleteCookie(cookie);
+                    }
                 }
 
                 await Task.Delay(60);
                 ParseCookie();
+                InjectDeviceFpCookies();
+                string cookieDomain = CurrentGameBiz.IsGlobalServer() ? ".hoyolab.com" : ".mihoyo.com";
                 foreach (var cookie in cookieDic)
                 {
-                    manager.AddOrUpdateCookie(manager.CreateCookie(cookie.Key, cookie.Value, CurrentGameBiz.IsGlobalServer() ? ".hoyolab.com" : ".mihoyo.com", "/"));
+                    manager.AddOrUpdateCookie(manager.CreateCookie(cookie.Key, cookie.Value, cookieDomain, "/"));
                 }
 
                 string? url = (CurrentGameBiz.IsGlobalServer(), CurrentGameBiz.Game) switch
@@ -201,26 +214,71 @@ public sealed partial class BBSWebBridge : UserControl
 
 
 
+    /// <summary>
+    /// 解析角色 Cookie 写入 WebView。必须只按第一个 <c>=</c> 分割：
+    /// <c>cookie_token_v2</c> / <c>ltoken_v2</c> 的值本身含 <c>=</c>（如末尾 padding），
+    /// <c>Split('=')</c> 后长度不为 2 会被整段丢掉，战绩页会变成未登录或风控。
+    /// </summary>
     private void ParseCookie()
     {
         cookieDic.Clear();
-        var cookies = GameRecordRole?.Cookie?.Split(';');
-        if (cookies is null)
+        string? cookie = GameRecordRole?.Cookie;
+        if (string.IsNullOrWhiteSpace(cookie))
         {
             return;
         }
-        foreach (var item in cookies)
+        foreach (var kv in GameRecordCookieRefreshService.ParseCookie(cookie))
         {
-            var kv = item.Split('=');
-            if (kv.Length == 2)
+            if (!string.IsNullOrWhiteSpace(kv.Value))
             {
-                var key = kv[0].Trim();
-                var value = kv[1].Trim();
-                if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
-                {
-                    cookieDic[key] = value;
-                }
+                cookieDic[kv.Key] = kv.Value;
             }
+        }
+    }
+
+
+    /// <summary>
+    /// 清除 WebView 里旧 Cookie 时覆盖的站点。绝区零战绩在 act.mihoyo.com，不能只清 webstatic。
+    /// </summary>
+    private IEnumerable<string> GetCookieClearUrls()
+    {
+        if (CurrentGameBiz.IsGlobalServer())
+        {
+            yield return "https://act.hoyolab.com";
+            yield break;
+        }
+        yield return "https://webstatic.mihoyo.com";
+        if (CurrentGameBiz.Game is GameBiz.nap)
+        {
+            yield return "https://act.mihoyo.com";
+        }
+    }
+
+
+    /// <summary>
+    /// 把 getFp 指纹写入 WebView Cookie，对齐官方战绩 H5 的 DEVICEFP / _MHYUUID。
+    /// </summary>
+    private void InjectDeviceFpCookies()
+    {
+        if (_gameRecordClient is null)
+        {
+            return;
+        }
+        if (!string.IsNullOrWhiteSpace(_gameRecordClient.DeviceFp) && _gameRecordClient.DeviceFp is not "0000000000000")
+        {
+            cookieDic["DEVICEFP"] = _gameRecordClient.DeviceFp;
+        }
+        if (!string.IsNullOrWhiteSpace(_gameRecordClient.DeviceFpSeedId))
+        {
+            cookieDic["DEVICEFP_SEED_ID"] = _gameRecordClient.DeviceFpSeedId;
+        }
+        if (!string.IsNullOrWhiteSpace(_gameRecordClient.DeviceFpSeedTime))
+        {
+            cookieDic["DEVICEFP_SEED_TIME"] = _gameRecordClient.DeviceFpSeedTime;
+        }
+        if (!string.IsNullOrWhiteSpace(_gameRecordClient.DeviceId))
+        {
+            cookieDic["_MHYUUID"] = _gameRecordClient.DeviceId;
         }
     }
 
@@ -278,6 +336,35 @@ public sealed partial class BBSWebBridge : UserControl
             DocumentTitle = sender.DocumentTitle;
         }
         catch { }
+    }
+
+
+    /// <summary>
+    /// 向绝区零战绩 / 绳网月报 XHR 补齐官方 WebView 注入头（geetest_ext、page、platform 等）。
+    /// </summary>
+    private void CoreWebView2_WebResourceRequested(CoreWebView2 sender, CoreWebView2WebResourceRequestedEventArgs args)
+    {
+        try
+        {
+            if (CurrentGameBiz.Game is not GameBiz.nap || GameRecordRole is null || _gameRecordClient is null)
+            {
+                return;
+            }
+            string uri = args.Request.Uri;
+            if (uri.IndexOf("game_record_zzz", StringComparison.OrdinalIgnoreCase) < 0
+                && uri.IndexOf("nap_ledger", StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                return;
+            }
+            foreach (var header in _gameRecordClient.GetZZZGameRecordH5InjectHeaders(GameRecordRole, uri))
+            {
+                args.Request.Headers.SetHeader(header.Key, header.Value);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Inject ZZZ game record WebView headers.");
+        }
     }
 
 

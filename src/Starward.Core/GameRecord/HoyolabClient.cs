@@ -55,10 +55,13 @@ public class HoyolabClient : GameRecordClient
 
 
 
+    protected override string RpcLanguage => Language;
+
+
     protected override Task<T> CommonSendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
-        request.Headers.Add(x_rpc_language, Language);
-        request.Headers.Add("x-rpc-lang", Language);
+        request.Headers.TryAddWithoutValidation(x_rpc_language, Language);
+        request.Headers.TryAddWithoutValidation(x_rpc_lang, Language);
         return base.CommonSendAsync<T>(request, cancellationToken);
     }
 
@@ -196,7 +199,14 @@ public class HoyolabClient : GameRecordClient
             _ => throw new ArgumentOutOfRangeException($"Unsupport GameBiz: {role.GameBiz}"),
         };
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddGameRecordAppHeaders(request, role.Cookie, url, "https://act.hoyolab.com/");
+        if (role.GameBiz is GameBiz.nap_global)
+        {
+            AddZZZGameRecordH5Headers(request, role, url);
+        }
+        else
+        {
+            AddGameRecordAppHeaders(request, role.Cookie, url, "https://act.hoyolab.com/");
+        }
         var data = await CommonSendAsync<GameRecordIndex>(request, cancellationToken);
         return data.HeadIcon;
     }
@@ -728,12 +738,7 @@ public class HoyolabClient : GameRecordClient
             url += $"&end_id={validEndId}";
         }
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.hoyolab.com/");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(x_rpc_device_id, DeviceId);
-        request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ZZZGachaRecordData>(request, cancellationToken);
     }
 
@@ -763,11 +768,7 @@ public class HoyolabClient : GameRecordClient
     {
         var url = $"https://sg-public-api.hoyolab.com/event/game_record_zzz/api/zzz/hadal_info_v2?schedule_type={schedule}&server={role.Region}&role_id={role.Uid}&need_all=true";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.hoyolab.com");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(X_Request_With, com_mihoyo_hoyolab);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ShiyuDefenseWrapper>(request, cancellationToken);
     }
 
@@ -783,11 +784,7 @@ public class HoyolabClient : GameRecordClient
     {
         var url = $"https://sg-public-api.hoyolab.com/event/game_record_zzz/api/zzz/hadal_mem_detail_v2?schedule_type={schedule}&region={role.Region}&uid={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.hoyolab.com");
-        request.Headers.Add(x_rpc_app_version, AppVersion);
-        request.Headers.Add(x_rpc_client_type, "5");
-        request.Headers.Add(X_Request_With, com_mihoyo_hoyolab);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<DeadlyAssaultInfo>(request, cancellationToken);
     }
 
@@ -803,9 +800,7 @@ public class HoyolabClient : GameRecordClient
     {
         var url = $"https://sg-public-api.hoyolab.com/event/nap_ledger/month_info?uid={role.Uid}&region={role.Region}&month={month}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.hoyolab.com/");
-        request.Headers.Add(X_Request_With, com_mihoyo_hoyolab);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<InterKnotReportSummary>(request, cancellationToken);
     }
 
@@ -823,9 +818,7 @@ public class HoyolabClient : GameRecordClient
     {
         var url = $"https://sg-public-api.hoyolab.com/event/nap_ledger/month_detail?uid={role.Uid}&region={role.Region}&month={month}&type={type}&current_page={page}&page_size={page_size}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add(Cookie, role.Cookie);
-        request.Headers.Add(Referer, "https://act.hoyolab.com/");
-        request.Headers.Add(X_Request_With, com_mihoyo_hoyolab);
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<InterKnotReportDetail>(request, cancellationToken);
     }
 
@@ -981,7 +974,7 @@ public class HoyolabClient : GameRecordClient
     {
         string url = $"https://sg-public-api.hoyolab.com/event/game_record_zzz/api/zzz/note?server={role.Region}&role_id={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddGameRecordAppHeaders(request, role.Cookie, url, "https://act.hoyolab.com/");
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ZZZDailyNote>(request, cancellationToken);
     }
 
@@ -996,7 +989,7 @@ public class HoyolabClient : GameRecordClient
     {
         string url = $"https://sg-public-api.hoyolab.com/event/game_record_zzz/api/zzz/void_front_battle_abstract_info?region={role.Region}&uid={role.Uid}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddGameRecordAppHeaders(request, role.Cookie, url, "https://act.hoyolab.com/");
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ThresholdSimulationAbstractInfo>(request, cancellationToken);
     }
 
@@ -1013,7 +1006,7 @@ public class HoyolabClient : GameRecordClient
     {
         string url = $"https://sg-public-api.hoyolab.com/event/game_record_zzz/api/zzz/void_front_battle_detail?region={role.Region}&uid={role.Uid}&void_front_id={void_front_id}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddGameRecordAppHeaders(request, role.Cookie, url, "https://act.hoyolab.com/");
+        AddZZZGameRecordH5Headers(request, role, url);
         return await CommonSendAsync<ThresholdSimulationDetailInfo>(request, cancellationToken);
     }
 

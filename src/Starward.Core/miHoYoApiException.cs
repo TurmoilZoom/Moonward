@@ -1,3 +1,5 @@
+using Starward.Core.GameRecord.Passport;
+
 namespace Starward.Core;
 
 public class miHoYoApiException : Exception
@@ -16,6 +18,12 @@ public class miHoYoApiException : Exception
 
 
     /// <summary>
+    /// 响应头 <c>x-rpc-aigis</c> 解析结果。10035 / 10041 等风控码出现时，调用方应完成极验后重试。
+    /// </summary>
+    public CaptchaAigis? Aigis { get; }
+
+
+    /// <summary>
     /// 获取当前返回码是否表示米游社登录态失效或缺少 Cookie。
     /// </summary>
     /// <remarks>
@@ -29,10 +37,12 @@ public class miHoYoApiException : Exception
     /// </summary>
     /// <param name="returnCode">接口 retcode。</param>
     /// <param name="message">接口返回的原始文案；可为 null。</param>
-    public miHoYoApiException(int returnCode, string? message) : base($"{message} ({returnCode})")
+    /// <param name="aigis">响应头中的极验载荷；没有则为 null。</param>
+    public miHoYoApiException(int returnCode, string? message, CaptchaAigis? aigis = null) : base($"{message} ({returnCode})")
     {
         ReturnCode = returnCode;
         ResponseMessage = message;
+        Aigis = aigis;
     }
 
 }

@@ -204,6 +204,36 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>getFp 的 seed_id，与指纹一起复用。</summary>
+    public static string? HyperionDeviceFpSeedId
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+    /// <summary>getFp 的 seed_time。</summary>
+    public static string? HyperionDeviceFpSeedTime
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+    /// <summary>getFp 体中的 16 位 hex device_id（模拟 ANDROID_ID）。</summary>
+    public static string? HyperionDeviceAndroidId
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 设备指纹 ext_fields 载荷版本。低于当前实现版本时强制重新 getFp（旧载荷含 windows 硬件信息，易 10041）。
+    /// </summary>
+    public static int HyperionDeviceFpPayloadVersion
+    {
+        get => GetValue<int>();
+        set => SetValue(value);
+    }
+
     /// <summary>
     /// 当前选择的游戏区服
     /// </summary>

@@ -21,6 +21,7 @@ using Starward.Core.GameRecord.Genshin.StygianOnslaught;
 using Starward.Core.GameRecord.ZZZ.ThresholdSimulation;
 using Starward.Core.GameRecord.StarRail.ChallengePeak;
 using Starward.Core.GameRecord.ZZZ.GachaRecord;
+using Starward.Core.GameRecord.Passport;
 
 
 
@@ -57,10 +58,27 @@ public abstract class GameRecordClient
     protected const string x_rpc_device_name = "x-rpc-device_name";
     protected const string x_rpc_client_type = "x-rpc-client_type";
     protected const string x_rpc_language = "X-Rpc-Language";
+    protected const string x_rpc_lang = "x-rpc-lang";
     protected const string x_rpc_platform = "x-rpc-platform";
     protected const string x_rpc_sys_version = "x-rpc-sys_version";
     protected const string x_rpc_page = "x-rpc-page";
     protected const string x_rpc_tool_verison = "x-rpc-tool_verison";
+    protected const string x_rpc_lrsag = "x-rpc-lrsag";
+    protected const string x_rpc_geetest_ext = "x-rpc-geetest_ext";
+    protected const string x_rpc_aigis = "x-rpc-aigis";
+    protected const string x_rpc_challenge = "x-rpc-challenge";
+
+    /// <summary>绝区零战绩 H5（<c>mihoyo-zzz-game-record</c>）版本，对齐米游社 2.112.0 的 <c>x-op-env</c>。</summary>
+    protected const string ZzzGameRecordH5Version = "v3.0.10";
+
+    /// <summary>绝区零战绩首页的 <c>x-rpc-page</c>。</summary>
+    public const string ZzzGameRecordH5Page = "v3.0.10_#/zzz";
+
+    /// <summary>绝区零绳网月报页的 <c>x-rpc-page</c>。</summary>
+    public const string ZzzNotebookH5Page = "v3.0.10_#/zzz/notebook";
+
+    /// <summary>绝区零在米游社的 gameId（战绩 H5 / <c>x-rpc-geetest_ext</c>）。</summary>
+    protected const int ZzzGameId = 8;
 
     /// <summary>与 <see cref="UAContent"/> 中 Pixel 5 / Android 13 对齐，供战绩 H5 头使用。</summary>
     public const string RpcDeviceName = "Pixel 5";
@@ -97,9 +115,29 @@ public abstract class GameRecordClient
     /// </summary>
     protected abstract string XRequestedWithValue { get; }
 
+    /// <summary>
+    /// 战绩 H5 的 <c>x-rpc-lang</c> / <c>x-rpc-language</c>。国服固定 zh-cn；国际服用当前界面语言。
+    /// </summary>
+    protected virtual string RpcLanguage => "zh-cn";
+
     public string DeviceId { get; set; } = Guid.NewGuid().ToString("D");
 
     public string DeviceFp { get; set; } = "0000000000000";
+
+    /// <summary>getFp 的 seed_id，需与 <see cref="DeviceFp"/> 一起稳定复用，并写入 DEVICEFP_SEED_ID Cookie。</summary>
+    public string DeviceFpSeedId { get; set; } = "";
+
+    /// <summary>getFp 的 seed_time（毫秒时间戳字符串）。</summary>
+    public string DeviceFpSeedTime { get; set; } = "";
+
+    /// <summary>getFp 体里的 16 位 hex device_id（模拟 ANDROID_ID），跨刷新保持不变。</summary>
+    public string DeviceAndroidId { get; set; } = "";
+
+    /// <summary>极验通过后重试战绩请求时带上的 <c>x-rpc-aigis</c>。</summary>
+    public string? RiskAigisHeader { get; set; }
+
+    /// <summary>极验通过后重试战绩请求时带上的 <c>x-rpc-challenge</c>。</summary>
+    public string? RiskChallenge { get; set; }
 
 
     protected readonly HttpClient _httpClient;
@@ -244,7 +282,7 @@ public abstract class GameRecordClient
     /// </summary>
     protected void AddGameRecordAppHeaders(HttpRequestMessage request, string? cookie, string url, string referer = "https://webstatic.mihoyo.com/")
     {
-        request.Headers.Add(Cookie, cookie);
+        request.Headers.Add(Cookie, MergeDeviceFpCookies(cookie));
         request.Headers.Add(DS, CreateSecret2(url));
         request.Headers.Add(Referer, referer);
         request.Headers.Add(x_rpc_app_version, AppVersion);
@@ -284,8 +322,8 @@ public abstract class GameRecordClient
         }
         if (url.Contains("zzz", StringComparison.OrdinalIgnoreCase))
         {
-            toolVersion = "v3.0.10";
-            page = "v3.0.10_#";
+            toolVersion = ZzzGameRecordH5Version;
+            page = ZzzGameRecordH5Page;
             return;
         }
         toolVersion = "v7.0.0-gr-cn";
@@ -305,11 +343,126 @@ public abstract class GameRecordClient
     }
 
 
+    /// <summary>
+    /// 对齐米游社绝区零战绩 H5（<c>act.mihoyo.com/app/mihoyo-zzz-game-record</c>）WebView 注入的请求头。
+    /// 官方请求不带 DS / <c>x-rpc-client_type</c> / <c>x-rpc-tool_verison</c>；带 <c>x-rpc-geetest_ext</c> 与 <c>x-rpc-platform: 2</c>。
+    /// 继续按原神/星铁战绩头发送时，服务端易返回 10041（账号存在风险）。
+    /// </summary>
+    /// <param name="request">待发送的 HTTP 请求。</param>
+    /// <param name="role">当前游戏角色（Cookie、区服用于 geetest_ext）。</param>
+    /// <param name="requestUrl">用于选择 <c>x-rpc-page</c> 的 URL；空则用 <paramref name="request"/> 的 URI。</param>
+    protected void AddZZZGameRecordH5Headers(HttpRequestMessage request, GameRecordRole role, string? requestUrl = null)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(role);
+        request.Headers.TryAddWithoutValidation(Cookie, MergeDeviceFpCookies(role.Cookie));
+        string? url = requestUrl ?? request.RequestUri?.OriginalString;
+        foreach (var header in GetZZZGameRecordH5InjectHeaders(role, url))
+        {
+            request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+    }
+
+
+    /// <summary>
+    /// 绝区零战绩 H5 由米游社客户端注入的请求头（不含 Cookie，Cookie 由调用方或 WebView 携带）。
+    /// </summary>
+    /// <param name="role">当前游戏角色。</param>
+    /// <param name="requestUrl">请求 URL，用于区分首页与绳网月报的 <c>x-rpc-page</c>。</param>
+    /// <returns>按官方抓包顺序的请求头。</returns>
+    public IReadOnlyList<KeyValuePair<string, string>> GetZZZGameRecordH5InjectHeaders(GameRecordRole role, string? requestUrl = null)
+    {
+        ArgumentNullException.ThrowIfNull(role);
+        string page = ResolveZZZGameRecordH5Page(requestUrl);
+        string referer = ActOrigin.TrimEnd('/') + "/";
+        string origin = Uri.TryCreate(referer, UriKind.Absolute, out Uri? uri)
+            ? uri.GetLeftPart(UriPartial.Authority)
+            : ActOrigin;
+        string viewUid = GetBbsUidFromCookie(role.Cookie);
+        string server = role.Region ?? "";
+        string geetestExt = $$"""{"viewUid":"{{JsonEscapeHeaderValue(viewUid)}}","server":"{{JsonEscapeHeaderValue(server)}}","gameId":{{ZzzGameId}},"page":"{{JsonEscapeHeaderValue(page)}}","isHost":1,"viewSource":3,"actionSource":127}""";
+        return
+        [
+            new(Referer, referer),
+            new(Origin, origin),
+            new(x_rpc_app_version, AppVersion),
+            new(x_rpc_device_id, DeviceId),
+            new(x_rpc_device_fp, DeviceFp),
+            new(x_rpc_device_name, Uri.EscapeDataString(RpcDeviceName)),
+            new(x_rpc_sys_version, RpcSysVersion),
+            new(x_rpc_platform, "2"),
+            new(x_rpc_page, page),
+            new(x_rpc_lang, RpcLanguage),
+            new(x_rpc_language, RpcLanguage),
+            new(x_rpc_lrsag, ""),
+            new(X_Request_With, XRequestedWithValue),
+            new(x_rpc_geetest_ext, geetestExt),
+        ];
+    }
+
+
+    /// <summary>
+    /// 绳网月报走 notebook 页；其余绝区零战绩接口走首页。
+    /// </summary>
+    private static string ResolveZZZGameRecordH5Page(string? url)
+    {
+        if (!string.IsNullOrWhiteSpace(url) && url.Contains("nap_ledger", StringComparison.OrdinalIgnoreCase))
+        {
+            return ZzzNotebookH5Page;
+        }
+        return ZzzGameRecordH5Page;
+    }
+
+
+    /// <summary>
+    /// 从 Cookie 取米游社通行证 UID，供 <c>x-rpc-geetest_ext.viewUid</c> 使用；缺失时与官方 notebook 请求一致填 <c>0</c>。
+    /// </summary>
+    private static string GetBbsUidFromCookie(string? cookie)
+    {
+        if (string.IsNullOrWhiteSpace(cookie))
+        {
+            return "0";
+        }
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (string part in cookie.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            int eq = part.IndexOf('=');
+            if (eq <= 0)
+            {
+                continue;
+            }
+            map[part[..eq].Trim()] = part[(eq + 1)..].Trim();
+        }
+        foreach (string key in new[] { "account_id_v2", "account_id", "ltuid_v2", "ltuid", "stuid" })
+        {
+            if (map.TryGetValue(key, out string? value) && !string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+        return "0";
+    }
+
+
+    /// <summary>
+    /// 转义写入 JSON 请求头的字符串，避免 Cookie 异常值破坏 geetest_ext。
+    /// </summary>
+    private static string JsonEscapeHeaderValue(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return "";
+        }
+        return value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal);
+    }
+
+
     protected virtual async Task<T> CommonSendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default) where T : class
     {
         request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
         request.Headers.Add(Accept, Application_Json);
         request.Headers.Add(UserAgent, UAContent);
+        TryApplyRiskControlHeaders(request);
         var response = await _httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 #if DEBUG
@@ -320,13 +473,92 @@ public abstract class GameRecordClient
 #endif
         if (responseData is null)
         {
-            throw new miHoYoApiException(-1, "Can not parse the response body.");
+            throw new miHoYoApiException(-1, "Can not parse the response body.", TryParseAigis(response));
         }
         if (responseData.Retcode != 0)
         {
-            throw new miHoYoApiException(responseData.Retcode, responseData.Message);
+            throw new miHoYoApiException(responseData.Retcode, responseData.Message, TryParseAigis(response));
         }
         return responseData.Data;
+    }
+
+
+    /// <summary>
+    /// 极验通过后把 aigis / challenge 带到下一次战绩请求。
+    /// </summary>
+    private void TryApplyRiskControlHeaders(HttpRequestMessage request)
+    {
+        if (!string.IsNullOrWhiteSpace(RiskAigisHeader))
+        {
+            request.Headers.TryAddWithoutValidation(x_rpc_aigis, RiskAigisHeader);
+        }
+        if (!string.IsNullOrWhiteSpace(RiskChallenge))
+        {
+            request.Headers.TryAddWithoutValidation(x_rpc_challenge, RiskChallenge);
+        }
+    }
+
+
+    /// <summary>
+    /// 解析风控响应头 <c>x-rpc-aigis</c>。没有或无法解析时返回 null。
+    /// </summary>
+    private static CaptchaAigis? TryParseAigis(HttpResponseMessage response)
+    {
+        if (!response.Headers.TryGetValues(x_rpc_aigis, out var values))
+        {
+            return null;
+        }
+        string? raw = values.FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+        try
+        {
+            return JsonSerializer.Deserialize(raw, typeof(CaptchaAigis), GameRecordJsonContext.Default) as CaptchaAigis;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+
+    /// <summary>
+    /// 把 getFp 得到的指纹写入 Cookie，对齐官方战绩 H5 携带的 DEVICEFP / _MHYUUID。
+    /// </summary>
+    protected string MergeDeviceFpCookies(string? cookie)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (!string.IsNullOrWhiteSpace(cookie))
+        {
+            foreach (string part in cookie.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                int eq = part.IndexOf('=');
+                if (eq <= 0)
+                {
+                    continue;
+                }
+                map[part[..eq].Trim()] = part[(eq + 1)..].Trim();
+            }
+        }
+        if (!string.IsNullOrWhiteSpace(DeviceFp) && DeviceFp is not "0000000000000")
+        {
+            map["DEVICEFP"] = DeviceFp;
+        }
+        if (!string.IsNullOrWhiteSpace(DeviceFpSeedId))
+        {
+            map["DEVICEFP_SEED_ID"] = DeviceFpSeedId;
+        }
+        if (!string.IsNullOrWhiteSpace(DeviceFpSeedTime))
+        {
+            map["DEVICEFP_SEED_TIME"] = DeviceFpSeedTime;
+        }
+        if (!string.IsNullOrWhiteSpace(DeviceId))
+        {
+            map["_MHYUUID"] = DeviceId;
+        }
+        return string.Join("; ", map.Select(static kv => $"{kv.Key}={kv.Value}"));
     }
 
 
