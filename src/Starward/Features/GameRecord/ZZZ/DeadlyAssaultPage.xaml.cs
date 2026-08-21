@@ -162,5 +162,23 @@ public sealed partial class DeadlyAssaultPage : PageBase
     }
 
 
+    /// <summary>
+    /// 绝境节点。列表为 null 时返回空列表，避免切期后残留上期阵容。
+    /// </summary>
+    public static IList<DeadlyAssaultNode> GetHardList(DeadlyAssaultInfo? info)
+    {
+        return info?.HardList ?? [];
+    }
+
+
+    /// <summary>
+    /// 常规节点。列表为 null 时返回空列表，避免切期后残留上期阵容。
+    /// </summary>
+    public static IList<DeadlyAssaultNode> GetAllNodes(DeadlyAssaultInfo? info)
+    {
+        return info?.AllNodes ?? [];
+    }
+
+
 
 }

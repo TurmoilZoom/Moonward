@@ -205,6 +205,33 @@ public sealed partial class ImaginariumTheaterPage : PageBase
     }
 
 
+    /// <summary>
+    /// 明星挑战星章列表。Stat 为 null 时返回空列表，避免切期后残留上期星章。
+    /// </summary>
+    public static IList<int> GetMedalRoundList(ImaginariumTheaterInfo? info)
+    {
+        return info?.Stat?.GetMedalRoundList ?? [];
+    }
+
+
+    /// <summary>
+    /// 最快完成演出队伍。中间节点为 null 时返回空列表，避免切期后残留上期头像。
+    /// </summary>
+    public static IList<ImaginariumTheaterFightStatisicAvatar> GetShortestAvatarList(ImaginariumTheaterInfo? info)
+    {
+        return info?.Detail?.FightStatisic?.ShortestAvatarList ?? [];
+    }
+
+
+    /// <summary>
+    /// 各幕阵容。Detail 为 null 时返回空列表，避免 ItemsRepeater 残留上期数据。
+    /// </summary>
+    public static IList<ImaginariumTheaterRoundsData> GetRoundsData(ImaginariumTheaterInfo? info)
+    {
+        return info?.Detail?.RoundsData ?? [];
+    }
+
+
 
     public static BitmapImage? HeraldryImage(int heraldry)
     {

@@ -386,14 +386,15 @@
                     </TextBlock>
                 </Grid>
 
-                <!--  绝境：标题/排名 + 节点 合并为同一背景卡片（对齐式舆防卫战第五防线）  -->
-                <Grid Padding="16,12,16,12"
+                <!--  绝境：无此模式时从视觉树卸掉，避免切期后仍显示上期绝境节点  -->
+                <Grid x:Name="HardModeHost"
+                      Padding="16,12,16,12"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
                       RowSpacing="8"
                       Shadow="{ThemeResource ThemeShadow}"
                       Translation="0,0,16"
-                      Visibility="{x:Bind sh:BindConverter.BoolToVisibility(CurrentDeadlyAssault.HasHard)}">
+                      x:Load="{x:Bind CurrentDeadlyAssault.HasHard, FallbackValue=False}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -418,7 +419,7 @@
                     </Grid>
                     <ItemsControl Grid.Row="1"
                                   ItemTemplate="{StaticResource DeadlyAssaultNodeTemplate}"
-                                  ItemsSource="{x:Bind CurrentDeadlyAssault.HardList}">
+                                  ItemsSource="{x:Bind local:DeadlyAssaultPage.GetHardList(CurrentDeadlyAssault)}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Spacing="12" />
@@ -486,15 +487,18 @@
                             <Run Text="{x:Bind local:DeadlyAssaultPage.TotalScoreText(CurrentDeadlyAssault.TotalScore, CurrentDeadlyAssault.TotalMaxScore)}" />
                         </TextBlock>
                     </Grid>
-                    <ItemsControl Grid.Row="1"
-                                  ItemTemplate="{StaticResource DeadlyAssaultNodeTemplate}"
-                                  ItemsSource="{x:Bind CurrentDeadlyAssault.AllNodes}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Spacing="12" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
+                    <Grid x:Name="NormalNodesHost"
+                          Grid.Row="1"
+                          x:Load="{x:Bind CurrentDeadlyAssault.HasNormalNodes, FallbackValue=False}">
+                        <ItemsControl ItemTemplate="{StaticResource DeadlyAssaultNodeTemplate}"
+                                      ItemsSource="{x:Bind local:DeadlyAssaultPage.GetAllNodes(CurrentDeadlyAssault)}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="12" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </Grid>
                 </Grid>
 
 

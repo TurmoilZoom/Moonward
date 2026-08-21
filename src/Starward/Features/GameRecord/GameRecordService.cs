@@ -967,6 +967,8 @@ internal class GameRecordService
         using var t = dapper.BeginTransaction();
         foreach (var info in infos)
         {
+            // 米游社当期详情常延迟，可能只有 Stat；不要用空 Detail 覆盖已缓存的幕次阵容
+            PreserveCachedImaginariumTheaterDetails(role, info);
             var obj = new
             {
                 info.Uid,
@@ -1018,6 +1020,26 @@ internal class GameRecordService
         return JsonSerializer.Deserialize<ImaginariumTheaterInfo>(value);
     }
 
+
+    /// <summary>
+    /// 当期响应缺少演出详情时，保留同期已缓存的 Detail，只更新 Stat 等概要字段。
+    /// </summary>
+    private void PreserveCachedImaginariumTheaterDetails(GameRecordRole role, ImaginariumTheaterInfo info)
+    {
+        if (info.HasDetailContent)
+        {
+            return;
+        }
+        if (GetImaginariumTheaterInfo(role, info.ScheduleId) is not ImaginariumTheaterInfo existing)
+        {
+            return;
+        }
+        if (existing.HasDetailContent)
+        {
+            info.Detail = existing.Detail;
+            info.HasDetailData = true;
+        }
+    }
 
 
 
@@ -1876,6 +1898,8 @@ internal class GameRecordService
         {
             return info;
         }
+        // 米游社当期节点详情常延迟，可能只有总分/排名；不要用空节点覆盖已缓存的阵容
+        PreserveCachedDeadlyAssaultNodeDetails(role, info);
         var obj = new
         {
             role.Uid,
@@ -1924,6 +1948,31 @@ internal class GameRecordService
             return null;
         }
         return JsonSerializer.Deserialize<DeadlyAssaultInfo>(value);
+    }
+
+
+    /// <summary>
+    /// 当期响应缺少节点详情时，保留同期已缓存的常规/绝境阵容，只更新总分等概要字段。
+    /// </summary>
+    private void PreserveCachedDeadlyAssaultNodeDetails(GameRecordRole role, DeadlyAssaultInfo info)
+    {
+        if (info.HasNodeDetails)
+        {
+            return;
+        }
+        if (GetDeadlyAssaultInfo(role, info.ZoneId) is not DeadlyAssaultInfo existing)
+        {
+            return;
+        }
+        if (existing.HasNormalNodes)
+        {
+            info.AllNodes = existing.AllNodes;
+        }
+        if (existing.HasHardNodes)
+        {
+            info.HardList = existing.HardList;
+            info.HasHard = true;
+        }
     }
 
 

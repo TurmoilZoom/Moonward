@@ -232,7 +232,7 @@
 
                     <ItemsControl Grid.Row="1"
                                   Grid.Column="1"
-                                  ItemsSource="{x:Bind CurrentTheater.Stat.GetMedalRoundList}">
+                                  ItemsSource="{x:Bind local:ImaginariumTheaterPage.GetMedalRoundList(CurrentTheater)}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" />
@@ -282,14 +282,15 @@
                 </Grid>
 
 
-                <!--  战斗统计  -->
-                <Grid Margin="0,8,0,0"
+                <!--  战斗统计：无详情时从视觉树卸掉，避免切期后仍显示上期统计  -->
+                <Grid x:Name="FightStatisticHost"
+                      Margin="0,8,0,0"
                       Padding="24,0,24,0"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
                       Shadow="{ThemeResource ThemeShadow}"
                       Translation="0,0,16"
-                      Visibility="{x:Bind local:ImaginariumTheaterPage.FightStatisicVisibility(CurrentTheater.Detail.FightStatisic.TotalUseTime)}">
+                      x:Load="{x:Bind CurrentTheater.HasFightStatistic, FallbackValue=False}">
                     <Grid.RowDefinitions>
                         <RowDefinition MinHeight="32" />
                         <RowDefinition MinHeight="32" />
@@ -366,7 +367,7 @@
                     </StackPanel>
                     <ItemsControl Grid.Row="4"
                                   Grid.Column="1"
-                                  ItemsSource="{x:Bind CurrentTheater.Detail.FightStatisic.ShortestAvatarList}">
+                                  ItemsSource="{x:Bind local:ImaginariumTheaterPage.GetShortestAvatarList(CurrentTheater)}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" />
@@ -385,15 +386,16 @@
                 </Grid>
 
 
-                <!--  参演名单  -->
-                <Grid Margin="0,8,0,0"
+                <!--  参演名单：无详情时从视觉树卸掉，避免 ItemsRepeater 残留上期阵容  -->
+                <Grid x:Name="RoundsDataHost"
+                      Margin="0,8,0,0"
                       Padding="24,12,24,12"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
                       Shadow="{ThemeResource ThemeShadow}"
                       Translation="0,0,16"
-                      Visibility="{x:Bind CurrentTheater.Detail.RoundsData, Converter={StaticResource CollectionToVisibilityConverter}}">
-                    <ItemsRepeater ItemsSource="{x:Bind CurrentTheater.Detail.RoundsData}">
+                      x:Load="{x:Bind CurrentTheater.HasRoundsData, FallbackValue=False}">
+                    <ItemsRepeater ItemsSource="{x:Bind local:ImaginariumTheaterPage.GetRoundsData(CurrentTheater)}">
                         <ItemsRepeater.Layout>
                             <StackLayout Spacing="16" />
                         </ItemsRepeater.Layout>

@@ -6,7 +6,7 @@ namespace Starward.Core.GameRecord.ZZZ.DeadlyAssault;
 /// <summary>
 /// 危局强袭战
 /// </summary>
-public class DeadlyAssaultInfo
+public class DeadlyAssaultInfo : IJsonOnDeserialized
 {
 
     [JsonIgnore]
@@ -97,9 +97,33 @@ public class DeadlyAssaultInfo
     [JsonPropertyName("hard_rank_percent")]
     public int HardRankPercent { get; set; }
 
+    /// <summary>
+    /// 是否有绝境节点详情。米游社当期可能只有总分/排名，节点列表仍为空。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasHardNodes => HardList is { Count: > 0 };
+
+    /// <summary>
+    /// 是否有常规节点详情。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasNormalNodes => AllNodes is { Count: > 0 };
+
+    /// <summary>
+    /// 是否已下发任一节点阵容。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasNodeDetails => HasHardNodes || HasNormalNodes;
+
 
     [JsonExtensionData]
     public Dictionary<string, object>? ExtensionData { get; set; }
 
+
+    public void OnDeserialized()
+    {
+        AllNodes ??= [];
+        HardList ??= [];
+    }
 
 }

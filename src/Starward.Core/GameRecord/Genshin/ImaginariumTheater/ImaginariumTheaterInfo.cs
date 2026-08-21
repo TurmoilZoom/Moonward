@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Starward.Core.GameRecord.Genshin.ImaginariumTheater;
 
-public class ImaginariumTheaterInfo
+public class ImaginariumTheaterInfo : IJsonOnDeserialized
 {
 
     [JsonPropertyName("uid")]
@@ -67,8 +67,44 @@ public class ImaginariumTheaterInfo
     [JsonPropertyName("has_detail_data")]
     public bool HasDetailData { get; set; }
 
+    /// <summary>
+    /// 是否有战斗统计。米游社当期可能只有 Stat（难度/星章），Detail 仍为空。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasFightStatistic => Detail?.FightStatisic is { TotalUseTime: > 0 };
+
+    /// <summary>
+    /// 是否有各幕阵容详情。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasRoundsData => Detail?.RoundsData is { Count: > 0 };
+
+    /// <summary>
+    /// 是否已下发演出详情（战斗统计或幕次阵容）。
+    /// </summary>
+    [JsonIgnore]
+    public bool HasDetailContent => HasFightStatistic || HasRoundsData;
+
 
     [JsonExtensionData]
     public Dictionary<string, object>? ExtensionData { get; set; }
+
+
+    public void OnDeserialized()
+    {
+        if (Detail is not null)
+        {
+            Detail.RoundsData ??= [];
+            Detail.BackupAvatars ??= [];
+            if (Detail.FightStatisic is not null)
+            {
+                Detail.FightStatisic.ShortestAvatarList ??= [];
+            }
+        }
+        if (Stat is not null)
+        {
+            Stat.GetMedalRoundList ??= [];
+        }
+    }
 
 }
