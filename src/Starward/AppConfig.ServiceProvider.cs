@@ -112,7 +112,7 @@ public static partial class AppConfig
 
             // ReleaseClient 只用于从 GitHub 拉取发行说明（更新本身由 Velopack 负责），用默认 HttpClient 即可。
             sc.AddHttpClient<ReleaseClient>();
-            sc.AddTransient<UpdateService>();
+            sc.AddSingleton<UpdateService>();
 
             sc.AddSingleton<RpcService>();
             sc.AddSingleton<GameInstallService>();

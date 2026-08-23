@@ -3088,6 +3088,12 @@
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>更新通知をプッシュ</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>サイレント更新</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>バックグラウンドでダウンロードし、アプリ終了後に自動でインストールします。次回起動時に更新内容を表示します。</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>再生 / 一時停止</value>
   </data>

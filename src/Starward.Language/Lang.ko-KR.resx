@@ -3089,6 +3089,12 @@
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>업데이트 알림 푸시</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>자동 업데이트</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>백그라운드에서 받은 뒤, 앱을 종료하면 자동으로 설치합니다. 다음 실행 시 업데이트 내용을 보여 줍니다.</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>재생 / 일시정지</value>
   </data>

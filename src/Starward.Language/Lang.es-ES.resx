@@ -3089,6 +3089,12 @@ You are welcome to submit exported data to:</value>
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>Notificaciones de actualización</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>Actualización silenciosa</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>Descarga las actualizaciones en segundo plano e instálalas al salir de la aplicación. Las notas de la versión se mostrarán la próxima vez que inicies.</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Reproducir / Pausa</value>
   </data>

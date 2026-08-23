@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using NuGet.Versioning;
+using Starward.Features.RPC;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,11 +50,18 @@ internal class UpdateService
 
     private bool _isUpdating;
 
+    private bool _applyOnExitScheduled;
+
     private CancellationTokenSource? _cancellationTokenSource;
 
 
 
     public static bool UpdateFinished { get; private set; }
+
+    /// <summary>
+    /// 当前是否正在下载更新包（含静默下载）。
+    /// </summary>
+    public bool IsUpdating => _isUpdating;
 
     public UpdateState State { get; private set; }
 
@@ -210,6 +218,10 @@ internal class UpdateService
             await Task.Delay(500, _cancellationTokenSource.Token);
             State = UpdateState.Finish;
             UpdateFinished = true;
+            // 已下载待安装的版本不应再被「忽略此版本」挡住后续检查
+            AppConfig.IgnoreVersion = null;
+            // 退出时需要替换 current\，RPC 不能在主进程退出后继续占用文件
+            AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);
             _logger.LogInformation("Update downloaded from {source}: {version}", source, updateInfo.TargetFullRelease?.Version);
         }
         catch (OperationCanceledException)
@@ -243,6 +255,43 @@ internal class UpdateService
 
 
     /// <summary>
+    /// 后台下载已检查到的更新（不弹窗）。下载完成后由 <see cref="ApplySilentlyOnExit"/> 在退出时静默安装，
+    /// 并置位 <see cref="AppConfig.PendingSilentUpdateContent"/>，下次启动弹出更新内容。
+    /// 若进程未走到退出钩子，下次启动时 Velopack 默认也会自动应用已下载的包。
+    /// </summary>
+    /// <param name="release">检查更新阶段得到的版本信息。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    public async Task TryStartSilentUpdateAsync(UpdateInfo release, CancellationToken cancellationToken = default)
+    {
+        if (!AppConfig.EnableUpdateNotification || !AppConfig.EnableSilentUpdate || UpdateFinished || _isUpdating)
+        {
+            return;
+        }
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+        if (!IsUpdaterAvailable)
+        {
+            return;
+        }
+        try
+        {
+            _logger.LogInformation("Start silent update: {version}", release.TargetFullRelease?.Version);
+            await StartUpdateAsync(release);
+            if (UpdateFinished)
+            {
+                AppConfig.PendingSilentUpdateContent = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Silent update");
+        }
+    }
+
+
+    /// <summary>
     /// 应用已下载的更新并重启应用（由 Velopack 的 Update.exe 完成文件替换后重启）。
     /// 调用前应确保后台子进程（如 RPC）会随主进程退出。
     /// </summary>
@@ -253,9 +302,41 @@ internal class UpdateService
         {
             return;
         }
+        // 从更新窗口重启视为手动更新，不在下次启动弹出更新内容
+        AppConfig.PendingSilentUpdateContent = false;
         // _downloadedUpdate 为 null 时（如重开更新窗口）传 null，Velopack 会应用已下载/暂存的最新包。
         _logger.LogInformation("Apply update and restart: {version}", _downloadedUpdate?.TargetFullRelease?.Version);
         manager.ApplyUpdatesAndRestart(_downloadedUpdate?.TargetFullRelease);
+    }
+
+
+    /// <summary>
+    /// 若已下载更新，通知 Update.exe 在本进程退出后静默安装（不重启、不显示进度窗口）。
+    /// Update.exe 最多等待 60 秒；应在真正退出前调用。
+    /// </summary>
+    public void ApplySilentlyOnExit()
+    {
+        if (_applyOnExitScheduled || !UpdateFinished || !AppConfig.EnableSilentUpdate)
+        {
+            return;
+        }
+        try
+        {
+            var manager = GetManager(_lastDownloadSource);
+            if (!manager.IsInstalled)
+            {
+                return;
+            }
+            AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);
+            _logger.LogInformation("Apply silent update on exit: {version}", _downloadedUpdate?.TargetFullRelease?.Version);
+            _applyOnExitScheduled = true;
+            manager.WaitExitThenApplyUpdates(_downloadedUpdate?.TargetFullRelease, silent: true, restart: false);
+        }
+        catch (Exception ex)
+        {
+            _applyOnExitScheduled = false;
+            _logger.LogWarning(ex, "Apply silent update on exit");
+        }
     }
 
 

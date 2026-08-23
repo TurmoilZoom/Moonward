@@ -44,11 +44,22 @@ public sealed partial class UpdateWindow : WindowEx
 
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _timer;
 
+    /// <summary>
+    /// 本窗口是否发起了下载；关闭时仅在此情况下取消，避免打断后台静默更新。
+    /// </summary>
+    private bool _startedDownloadInThisWindow;
+
+    /// <summary>
+    /// 静默更新内容窗口的起始版本（构造时快照）。避免启动检查随后把 <see cref="AppConfig.LastAppVersion"/> 写成当前版本后，发行说明区间为空。
+    /// </summary>
+    private readonly string? _recentContentFromVersion;
+
 
 
     public UpdateWindow()
     {
         this.InitializeComponent();
+        _recentContentFromVersion = AppConfig.LastAppVersion;
         InitializeWindow();
         _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromMilliseconds(100);
@@ -74,17 +85,34 @@ public sealed partial class UpdateWindow : WindowEx
     private void CenterInScreen()
     {
         RectInt32 workArea = DisplayArea.GetFromWindowId(MainWindowId, DisplayAreaFallback.Nearest).WorkArea;
-        Button_RemindLatter.Visibility = Visibility.Collapsed;
-        int w = (int)(1000 * UIScale);
-        int h = (int)(w / 4.0 * 3.0);
-        if (w > workArea.Width || h > workArea.Height)
+        int w;
+        int h;
+        if (NewVersion is null)
         {
-            h = (int)(workArea.Height * 0.9);
+            Grid_Update.Visibility = Visibility.Collapsed;
+            Title = $"Moonward · {Lang.UpdateContentWindow_RecentlyUpdatedContent}";
+            h = (int)(workArea.Height * 0.95);
             w = (int)(h / 4.0 * 3.0);
             if (w > workArea.Width)
             {
-                w = (int)(workArea.Width * 0.9);
+                w = (int)(workArea.Width * 0.95);
                 h = (int)(w * 4.0 / 3.0);
+            }
+        }
+        else
+        {
+            Button_RemindLatter.Visibility = Visibility.Collapsed;
+            w = (int)(1000 * UIScale);
+            h = (int)(w / 4.0 * 3.0);
+            if (w > workArea.Width || h > workArea.Height)
+            {
+                h = (int)(workArea.Height * 0.9);
+                w = (int)(h / 4.0 * 3.0);
+                if (w > workArea.Width)
+                {
+                    w = (int)(workArea.Width * 0.9);
+                    h = (int)(w * 4.0 / 3.0);
+                }
             }
         }
         int x = workArea.X + (workArea.Width - w) / 2;
@@ -114,6 +142,12 @@ public sealed partial class UpdateWindow : WindowEx
         {
             Finish(skipRestart: true);
         }
+        else if (_updateService.IsUpdating)
+        {
+            // 静默下载已在进行：同步显示进度，不另起一份下载
+            IsUpdateNowEnabled = false;
+            _timer.Start();
+        }
         _ = LoadUpdateContentAsync();
     }
 
@@ -123,7 +157,14 @@ public sealed partial class UpdateWindow : WindowEx
     {
         _timer.Stop();
         _timer.Tick -= _timer_Tick;
-        _updateService.StopUpdate();
+        if (_startedDownloadInThisWindow)
+        {
+            _updateService.StopUpdate();
+        }
+        if (NewVersion is null)
+        {
+            MarkRecentUpdateContentShown();
+        }
         WeakReferenceMessenger.Default.UnregisterAll(this);
         this.Closed -= UpdateWindow_Closed;
     }
@@ -265,6 +306,7 @@ public sealed partial class UpdateWindow : WindowEx
             if (NewVersion != null)
             {
                 // 统一走 Velopack：下载更新包（含增量），由 _timer 轮询进度/状态。
+                _startedDownloadInThisWindow = !_updateService.IsUpdating;
                 _timer.Start();
                 await _updateService.StartUpdateAsync(NewVersion, SelectedUpdateSource);
             }
@@ -430,8 +472,25 @@ public sealed partial class UpdateWindow : WindowEx
     [RelayCommand]
     private void IgnoreThisVersion()
     {
-        AppConfig.IgnoreVersion = NewVersionText;
+        if (NewVersion is null)
+        {
+            MarkRecentUpdateContentShown();
+        }
+        else
+        {
+            AppConfig.IgnoreVersion = NewVersionText;
+        }
         this.Close();
+    }
+
+
+    /// <summary>
+    /// 将当前版本记为已读，避免静默更新内容窗口重复弹出。
+    /// </summary>
+    private static void MarkRecentUpdateContentShown()
+    {
+        AppConfig.LastAppVersion = AppConfig.AppVersion;
+        AppConfig.PendingSilentUpdateContent = false;
     }
 
 
@@ -484,6 +543,10 @@ public sealed partial class UpdateWindow : WindowEx
             string markdown = await GetReleaseContentMarkdownAsync();
             string html = await RenderMarkdownAsync(markdown);
             webview.NavigateToString(html);
+            if (NewVersion is null)
+            {
+                MarkRecentUpdateContentShown();
+            }
         }
         catch (COMException ex)
         {
@@ -522,8 +585,16 @@ public sealed partial class UpdateWindow : WindowEx
     {
         bool showPrerelease = false;
         NuGetVersion? startVersion, endVersion;
-        _ = NuGetVersion.TryParse(AppConfig.AppVersion, out startVersion);
-        _ = NuGetVersion.TryParse(NewVersionText, out endVersion);
+        if (NewVersion is null)
+        {
+            _ = NuGetVersion.TryParse(_recentContentFromVersion, out startVersion);
+            _ = NuGetVersion.TryParse(AppConfig.AppVersion, out endVersion);
+        }
+        else
+        {
+            _ = NuGetVersion.TryParse(AppConfig.AppVersion, out startVersion);
+            _ = NuGetVersion.TryParse(NewVersionText, out endVersion);
+        }
         startVersion ??= new NuGetVersion(0, 0, 0);
         endVersion ??= new NuGetVersion(int.MaxValue, int.MaxValue, int.MaxValue);
         if (endVersion.IsPrerelease)

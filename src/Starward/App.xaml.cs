@@ -5,6 +5,7 @@ using Starward.Features.GamepadControl;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Features.Setting;
 using Starward.Features.Startup;
+using Starward.Features.Update;
 using Starward.Features.UrlProtocol;
 using Starward.Features.ViewHost;
 using System;
@@ -241,11 +242,35 @@ public partial class App : Application
 
 
     /// <summary>
-    /// 退出应用程序：恢复手柄引导键设置，关闭主窗口与托盘窗口，并终止应用进程。
+    /// 退出应用程序：恢复手柄引导键设置，安排已下载更新的静默安装，关闭主窗口与托盘窗口，并终止应用进程。
     /// </summary>
     public new void Exit()
     {
+        Exit(applyPendingUpdate: true);
+    }
+
+
+    /// <summary>
+    /// 退出应用程序：恢复手柄引导键设置，可选地安排已下载更新的静默安装，关闭主窗口与托盘窗口，并终止应用进程。
+    /// </summary>
+    /// <param name="applyPendingUpdate">
+    /// 为 <see langword="true"/> 时，若已下载更新则让 Velopack 在进程退出后静默安装（不重启）。
+    /// 调用方即将自行拉起新进程时应传 <see langword="false"/>，避免与新实例争用 <c>current\</c>。
+    /// </param>
+    public void Exit(bool applyPendingUpdate)
+    {
         GamepadController.RestoreGamepadGuideButtonForGameBar();
+        if (applyPendingUpdate)
+        {
+            try
+            {
+                AppConfig.GetService<UpdateService>().ApplySilentlyOnExit();
+            }
+            catch
+            {
+                // 退出路径不因更新失败而中断
+            }
+        }
         m_MainWindow?.Close();
         m_SystemTrayWindow?.Close();
         Application.Current.Exit();

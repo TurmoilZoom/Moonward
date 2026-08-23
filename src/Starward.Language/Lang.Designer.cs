@@ -79,6 +79,24 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Silent update 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_SilentUpdate {
+            get {
+                return ResourceManager.GetString("AboutSetting_SilentUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Download updates in the background and install them after you quit the app. Release notes will be shown the next time you start. 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_SilentUpdateDesc {
+            get {
+                return ResourceManager.GetString("AboutSetting_SilentUpdateDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Click button to repair files. 的本地化字符串。
         /// </summary>
         public static string AboutSettingPage_ClickButtonToRepairFiles {

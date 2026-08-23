@@ -3147,6 +3147,12 @@
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>推送更新</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>静默更新</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>后台下载更新，退出软件后自动安装。下次启动时会显示更新内容。</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>播放 / 暂停</value>
   </data>

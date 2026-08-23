@@ -3087,6 +3087,12 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>Update-Benachrichtigungen senden</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>Stilles Update</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>Updates im Hintergrund herunterladen und nach dem Beenden der App installieren. Die Versionshinweise werden beim nächsten Start angezeigt.</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Wiedergabe / Pause</value>
   </data>

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
+using NuGet.Versioning;
 using Starward.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
@@ -355,7 +356,8 @@ public sealed partial class MainView : UserControl
 
 
     /// <summary>
-    /// 在用户开启更新通知时检查新版本，并按节流规则弹出 <see cref="UpdateWindow"/>。
+    /// 若刚完成静默更新则弹出更新内容；否则在开启「推送更新」时检查新版本。
+    /// 静默更新（需同时开启推送）优先：后台下载，退出后安装；否则按节流规则弹出 <see cref="UpdateWindow"/>。
     /// Debug / <c>DONOT_CHECK_UPDATE</c> 构建直接跳过。
     /// </summary>
     /// <returns>表示异步检查的任务。</returns>
@@ -374,6 +376,16 @@ public sealed partial class MainView : UserControl
 #pragma warning restore CS0162 // 检测到无法访问的代码
         try
         {
+            if (TryShowSilentUpdateContent())
+            {
+                // 与原先一致：展示更新内容后推迟约 5 分钟再检查新版本
+                _lastCheckUpdateTime = DateTimeOffset.Now - TimeSpan.FromMinutes(55);
+                return;
+            }
+            if (!AppConfig.PendingSilentUpdateContent)
+            {
+                AppConfig.LastAppVersion = AppConfig.AppVersion;
+            }
             if (!AppConfig.EnableUpdateNotification)
             {
                 return;
@@ -381,10 +393,20 @@ public sealed partial class MainView : UserControl
             DateTimeOffset now = DateTimeOffset.Now;
             if (now - _lastCheckUpdateTime > TimeSpan.FromHours(1))
             {
-                var release = await AppConfig.GetService<UpdateService>().CheckUpdateAsync(false);
+                var service = AppConfig.GetService<UpdateService>();
+                var release = await service.CheckUpdateAsync(false);
                 _lastCheckUpdateTime = now;
+                if (release is null)
+                {
+                    return;
+                }
+                if (AppConfig.EnableSilentUpdate && service.IsUpdaterAvailable)
+                {
+                    _ = service.TryStartSilentUpdateAsync(release);
+                    return;
+                }
                 // 有新版本时：距上次弹窗超过 6 小时且不在同一天，才再弹窗
-                if (release != null && now - _lastShowUpdateTime > TimeSpan.FromHours(6) && now.Date != _lastShowUpdateTime.Date)
+                if (now - _lastShowUpdateTime > TimeSpan.FromHours(6) && now.Date != _lastShowUpdateTime.Date)
                 {
                     new UpdateWindow { NewVersion = release }.Activate();
                     _lastShowUpdateTime = now;
@@ -399,6 +421,33 @@ public sealed partial class MainView : UserControl
         {
             _updateLock.Release();
         }
+    }
+
+
+    /// <summary>
+    /// 静默更新安装完成后弹出仅含发行说明的 <see cref="UpdateWindow"/>（无下载/安装按钮）。
+    /// </summary>
+    /// <returns>已弹出则为 <see langword="true"/>。</returns>
+    private static bool TryShowSilentUpdateContent()
+    {
+        if (!AppConfig.PendingSilentUpdateContent)
+        {
+            return false;
+        }
+        if (!NuGetVersion.TryParse(AppConfig.AppVersion, out NuGetVersion? appVersion))
+        {
+            return false;
+        }
+        _ = NuGetVersion.TryParse(AppConfig.LastAppVersion, out NuGetVersion? lastVersion);
+        if (lastVersion is not null && appVersion == lastVersion)
+        {
+            return false;
+        }
+        var window = new UpdateWindow();
+        // 先构造以快照 LastAppVersion，再清标记，避免并发检查把起始版本改成当前版本
+        AppConfig.PendingSilentUpdateContent = false;
+        window.Activate();
+        return true;
     }
 
 

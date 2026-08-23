@@ -95,7 +95,8 @@ public sealed partial class FileManageSetting : PageBase
                 info.ArgumentList.Add(target);
                 AppInstance.GetCurrent().UnregisterKey();
                 Process.Start(info);
-                App.Current.Exit();
+                // 即将自行拉起新进程，不能在退出时应用更新，否则会与新实例争用 current\
+                App.Current.Exit(applyPendingUpdate: false);
             }
         }
         catch (Exception ex)
@@ -152,7 +153,8 @@ public sealed partial class FileManageSetting : PageBase
                 AppConfig.DeleteAllSettings();
                 AppInstance.GetCurrent().UnregisterKey();
                 Process.Start(AppConfig.MoonwardExecutePath);
-                App.Current.Exit();
+                // 即将自行拉起新进程，不能在退出时应用更新，否则会与新实例争用 current\
+                App.Current.Exit(applyPendingUpdate: false);
             }
         }
         catch (Exception ex)

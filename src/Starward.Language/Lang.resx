@@ -3147,6 +3147,12 @@ Repository:</value>
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>Push update notifications</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>Silent update</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>Download updates in the background and install them after you quit the app. Release notes will be shown the next time you start.</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Play / Pause</value>
   </data>

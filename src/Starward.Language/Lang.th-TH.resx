@@ -3083,6 +3083,12 @@ You are welcome to submit exported data to:</value>
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>แจ้งเตือนอัปเดต</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>อัปเดตแบบเงียบ</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>ดาวน์โหลดอัปเดตในพื้นหลังและติดตั้งเมื่อออกจากแอป จะแสดงเนื้อหาอัปเดตเมื่อเปิดครั้งถัดไป</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>เล่น / หยุดชั่วคราว</value>
   </data>

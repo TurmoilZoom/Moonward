@@ -7,6 +7,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.Setting"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:h="using:Starward.Helpers"
              xmlns:s="using:Starward"
              xmlns:sf="using:Starward.Frameworks"
              x:DefaultBindMode="OneWay"
@@ -31,7 +32,7 @@
                                Text="{x:Bind s:AppConfig.AppVersion}" />
                 </StackPanel>
 
-                <!--  预览版 / 推送更新：垂直排列  -->
+                <!--  预览版 / 推送更新 / 静默更新：静默是推送的子选项  -->
                 <StackPanel Margin="0,16,0,0">
                     <ToggleSwitch IsOn="{x:Bind EnablePreviewRelease, Mode=TwoWay}"
                                   OffContent="{x:Bind lang:Lang.SettingPage_JoinPreviewReleaseChannel}"
@@ -40,6 +41,17 @@
                                   IsOn="{x:Bind EnableUpdateNotification, Mode=TwoWay}"
                                   OffContent="{x:Bind lang:Lang.AboutSetting_PushUpdate}"
                                   OnContent="{x:Bind lang:Lang.AboutSetting_PushUpdate}" />
+                    <StackPanel Visibility="{x:Bind h:BindConverter.BoolToVisibility(EnableUpdateNotification)}">
+                        <ToggleSwitch Margin="0,-4,0,0"
+                                      IsOn="{x:Bind EnableSilentUpdate, Mode=TwoWay}"
+                                      OffContent="{x:Bind lang:Lang.AboutSetting_SilentUpdate}"
+                                      OnContent="{x:Bind lang:Lang.AboutSetting_SilentUpdate}" />
+                        <TextBlock Margin="0,4,0,0"
+                                   FontSize="14"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.AboutSetting_SilentUpdateDesc}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
                 </StackPanel>
 
                 <Grid Margin="0,12,0,0" ColumnSpacing="16">

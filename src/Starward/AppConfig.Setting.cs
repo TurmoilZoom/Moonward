@@ -37,6 +37,34 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 是否静默更新：后台下载新版本，退出应用后由 Velopack 静默安装。
+    /// 仅在 <see cref="EnableUpdateNotification"/> 开启时生效；手动「检查更新」不受此开关影响。
+    /// </summary>
+    public static bool EnableSilentUpdate
+    {
+        get => GetValue<bool>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 上次已展示过更新说明（或已对齐）的应用版本。静默更新后与 <see cref="AppVersion"/> 比较，用于弹出更新内容。
+    /// </summary>
+    public static string? LastAppVersion
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 静默更新已下载、待下次启动展示发行说明。手动更新路径不会置位。
+    /// </summary>
+    public static bool PendingSilentUpdateContent
+    {
+        get => GetValue<bool>();
+        set => SetValue(value);
+    }
+
     public static string? IgnoreVersion
     {
         get => GetValue<string>();

@@ -3109,6 +3109,12 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>Push-уведомления об обновлениях</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>Тихое обновление</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>Загрузка обновлений в фоне и установка после выхода из приложения. Описание изменений будет показано при следующем запуске.</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Запуск / Пауза</value>
   </data>

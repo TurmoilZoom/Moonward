@@ -3089,6 +3089,12 @@ You are welcome to submit exported data to:</value>
   <data name="AboutSetting_PushUpdate" xml:space="preserve">
     <value>Thông báo cập nhật</value>
   </data>
+  <data name="AboutSetting_SilentUpdate" xml:space="preserve">
+    <value>Cập nhật im lặng</value>
+  </data>
+  <data name="AboutSetting_SilentUpdateDesc" xml:space="preserve">
+    <value>Tải cập nhật ở nền và tự cài sau khi thoát ứng dụng. Ghi chú phiên bản sẽ hiện khi khởi động lần sau.</value>
+  </data>
   <data name="GameLauncherPage_PlayPause" xml:space="preserve">
     <value>Phát / Tạm dừng</value>
   </data>

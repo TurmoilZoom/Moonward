@@ -21,6 +21,11 @@ public sealed partial class AboutSetting : PageBase
     public AboutSetting()
     {
         this.InitializeComponent();
+        // 静默更新是推送更新的子选项；推送关闭时不应残留开启状态
+        if (!EnableUpdateNotification && EnableSilentUpdate)
+        {
+            EnableSilentUpdate = false;
+        }
     }
 
 
@@ -84,9 +89,28 @@ public sealed partial class AboutSetting : PageBase
             if (SetProperty(ref field, value))
             {
                 AppConfig.EnableUpdateNotification = value;
+                if (!value && EnableSilentUpdate)
+                {
+                    EnableSilentUpdate = false;
+                }
             }
         }
     } = AppConfig.EnableUpdateNotification;
+
+
+    /// <summary>
+    /// 是否后台下载更新并在退出后静默安装。
+    /// </summary>
+    public bool EnableSilentUpdate
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.EnableSilentUpdate = value;
+            }
+        }
+    } = AppConfig.EnableSilentUpdate;
 
 
     /// <summary>
