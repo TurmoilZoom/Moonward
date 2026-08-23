@@ -3238,8 +3238,11 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
     <value>Automatischer Check-in</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1. Der automatische Check-in ist für jedes Spiel unabhängig
-2. Nach Aktivierung des automatischen Check-ins wird beim Start des Spiels über eine Verknüpfung für ein bestimmtes Anmeldekonto nur dieses Konto eingecheckt</value>
+    <value>1. Der automatische Check-in ist für jedes Spiel unabhängig und startet 10 Sekunden nach dem Start von Moonward nacheinander
+2. Nach Aktivierung des automatischen Check-ins wird beim Start des Spiels über eine Verknüpfung für ein bestimmtes Anmeldekonto ebenfalls nur dieses Konto eingecheckt</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>App-Autostart</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Check-in erfolgreich, Belohnung erhalten</value>

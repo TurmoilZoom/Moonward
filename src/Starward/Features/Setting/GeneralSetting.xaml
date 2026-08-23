@@ -11,8 +11,8 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
-    <ScrollViewer>
-        <StackPanel Padding="0,0,24,0">
+    <ScrollViewer x:Name="ScrollViewer_General">
+        <StackPanel x:Name="StackPanel_General" Padding="0,0,24,0">
 
 
             <!--  语言  -->
@@ -65,33 +65,50 @@
             </StackPanel>
 
 
-            <!--  开机启动  -->
-            <TextBlock Margin="0,20,0,0"
-                       FontSize="20"
-                       Text="{x:Bind lang:Lang.SettingPage_StartAtLogin}" />
-            <TextBlock Margin="0,8,0,0"
-                       FontSize="14"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.SettingPage_StartAtLoginDesc}"
-                       TextWrapping="Wrap" />
-            <ToggleSwitch Margin="0,8,0,0"
-                          IsEnabled="{x:Bind StartAtLoginAvailable}"
-                          IsOn="{x:Bind StartAtLogin, Mode=TwoWay}"
-                          OffContent="{x:Bind lang:Lang.SettingPage_StartAtLoginSwitch}"
-                          OnContent="{x:Bind lang:Lang.SettingPage_StartAtLoginSwitch}" />
-            <TextBlock Margin="0,8,0,0"
-                       FontSize="14"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.SettingPage_StartAtLoginRemovableHint}"
-                       TextWrapping="Wrap"
-                       Visibility="{x:Bind StartAtLoginUnavailableVisibility}" />
-            <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
-                <Hyperlink Click="Hyperlink_StartupApps_Click"
-                           NavigateUri="ms-settings:startupapps"
-                           UnderlineStyle="None">
-                    <Run Text="{x:Bind lang:Lang.SettingPage_StartAtLoginWindowsSettings}" />
-                </Hyperlink>
-            </TextBlock>
+            <!--  开机启动：标题 / 说明 / 开关为一组。
+                 从签到提示深链跳入时压暗其它项、左侧色条标出这一块（软聚光，不是闪框也不是 TeachingTip）。  -->
+            <Grid x:Name="Grid_StartAtLogin" Margin="0,20,0,0">
+                <Border x:Name="Border_StartAtLoginAccent"
+                        Width="3"
+                        Margin="-12,-4,0,-4"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Stretch"
+                        CornerRadius="2"
+                        IsHitTestVisible="False">
+                    <Border.Background>
+                        <SolidColorBrush Color="{ThemeResource SystemAccentColor}" />
+                    </Border.Background>
+                </Border>
+                <StackPanel>
+                    <TextBlock x:Name="TextBlock_StartAtLogin"
+                               FontSize="20"
+                               Text="{x:Bind lang:Lang.SettingPage_StartAtLogin}" />
+                    <TextBlock Margin="0,8,0,0"
+                               FontSize="14"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.SettingPage_StartAtLoginDesc}"
+                               TextWrapping="Wrap" />
+                    <ToggleSwitch x:Name="ToggleSwitch_StartAtLogin"
+                                  Margin="0,8,0,0"
+                                  IsEnabled="{x:Bind StartAtLoginAvailable}"
+                                  IsOn="{x:Bind StartAtLogin, Mode=TwoWay}"
+                                  OffContent="{x:Bind lang:Lang.SettingPage_StartAtLoginSwitch}"
+                                  OnContent="{x:Bind lang:Lang.SettingPage_StartAtLoginSwitch}" />
+                    <TextBlock Margin="0,8,0,0"
+                               FontSize="14"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.SettingPage_StartAtLoginRemovableHint}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind StartAtLoginUnavailableVisibility}" />
+                    <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                        <Hyperlink Click="Hyperlink_StartupApps_Click"
+                                   NavigateUri="ms-settings:startupapps"
+                                   UnderlineStyle="None">
+                            <Run Text="{x:Bind lang:Lang.SettingPage_StartAtLoginWindowsSettings}" />
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
 
 
             <MenuFlyoutSeparator Margin="0,20,0,0" />

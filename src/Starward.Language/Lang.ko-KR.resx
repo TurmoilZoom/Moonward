@@ -3240,8 +3240,11 @@
     <value>자동 출석</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1.각 게임의 자동 출석은 서로 독립적입니다
-2.자동 출석을 켠 후, 특정 로그인 계정용 바로가기로 게임을 실행하면 해당 계정만 별도로 출석됩니다</value>
+    <value>1.각 게임의 자동 출석은 서로 독립적이며, Moonward 시작 10초 후부터 순차적으로 실행됩니다
+2.자동 출석을 켠 후, 특정 로그인 계정용 바로가기로 게임을 실행하면 해당 계정에 대해서도 별도로 출석됩니다</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>앱 자동 시작</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>출석 성공, 보상을 수령했습니다</value>

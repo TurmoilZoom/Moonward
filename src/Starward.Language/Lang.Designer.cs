@@ -9936,11 +9936,20 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Auto check-in is independent for each game. Starward only runs batch auto check-in 10 seconds after startup, processing roles in order with a random 3–8 second delay between requests to mimic real usage. If verification is triggered and check-in fails, it will not retry until the next startup. 的本地化字符串。
+        ///   查找类似 1. Auto check-in is independent for each game and starts sequentially 10 seconds after Moonward launches 2. After enabling auto check-in, launching the game via a shortcut for a specific login account will also check in for that account separately 的本地化字符串。
         /// </summary>
         public static string SignInButton_AutoSignInHint {
             get {
                 return ResourceManager.GetString("SignInButton_AutoSignInHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 App start at login 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_StartAtLogin {
+            get {
+                return ResourceManager.GetString("SignInButton_StartAtLogin", resourceCulture);
             }
         }
 

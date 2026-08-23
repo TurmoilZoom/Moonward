@@ -3239,8 +3239,11 @@
     <value>自動チェックイン</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1.各ゲームの自動チェックインは互いに独立しています
-2.自動チェックインを有効にした後、特定のログインアカウント用ショートカットからゲームを起動すると、そのアカウントのみがチェックインされます</value>
+    <value>1.各ゲームの自動チェックインは互いに独立しており、Moonward起動から10秒後に順次実行を開始します
+2.自動チェックインを有効にした後、特定のログインアカウント用ショートカットからゲームを起動すると、そのアカウントに対しても個別にチェックインされます</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>アプリのスタートアップ</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>チェックイン成功、報酬を受け取りました</value>

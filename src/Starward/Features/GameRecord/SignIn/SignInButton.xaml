@@ -41,7 +41,9 @@
 
         <Button.Flyout>
             <!--  签到详情卡片，左侧对齐展开  -->
-            <Flyout Opened="Flyout_SignIn_Opened"
+            <Flyout x:Name="Flyout_SignIn"
+                    Opened="Flyout_SignIn_Opened"
+                    Closing="Flyout_SignIn_Closing"
                     Placement="LeftEdgeAlignedTop"
                     FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
                     sc:FlyoutGap.Horizontal="12">
@@ -219,10 +221,12 @@
                                 Orientation="Horizontal"
                                 Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <FontIcon VerticalAlignment="Center"
+                            <FontIcon x:Name="FontIcon_AutoSignInHint"
+                                      VerticalAlignment="Center"
                                       FontSize="12"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                       Glyph="&#xE9CE;"
+                                      sc:InstantTooltip.ActionText="{x:Bind lang:Lang.SignInButton_StartAtLogin}"
                                       sc:InstantTooltip.Placement="Top"
                                       sc:InstantTooltip.Text="{x:Bind lang:Lang.SignInButton_AutoSignInHint}" />
                             <TextBlock VerticalAlignment="Center"

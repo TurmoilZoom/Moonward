@@ -4,12 +4,15 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.SignIn;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Setting;
+using Starward.Features.ViewHost;
 using Starward.Helpers;
 using Starward.Language;
 using System;
@@ -45,6 +48,9 @@ public sealed partial class SignInButton : UserControl
     /// <summary>最近一次拉取的累计签到天数，语言切换时用于重算 <see cref="TotalSignDaysHint"/>。</summary>
     private int _totalSignDay;
 
+    /// <summary>问号提示（含右下角超链接）打开时，阻止签到 Flyout 被外层点击关掉。</summary>
+    private bool _keepFlyoutOpenForTooltip;
+
 
     /// <summary>初始化控件，默认隐藏，待解析到有效角色后再显示。</summary>
     public SignInButton()
@@ -52,6 +58,8 @@ public sealed partial class SignInButton : UserControl
         this.InitializeComponent();
         this.Visibility = Visibility.Collapsed;
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
+        InstantTooltip.SetActionCallback(FontIcon_AutoSignInHint, OpenStartAtLoginSetting);
+        InstantTooltip.SetOpenChangedCallback(FontIcon_AutoSignInHint, OnAutoSignInHintTooltipOpenChanged);
     }
 
 
@@ -258,6 +266,39 @@ public sealed partial class SignInButton : UserControl
         {
             RefreshSignInStatusCommand.Execute(null);
         }
+    }
+
+
+    /// <summary>
+    /// 问号提示打开时，点击提示气泡会被当成 Flyout 外部点击；取消关闭以便点到右下角超链接。
+    /// </summary>
+    private void Flyout_SignIn_Closing(object sender, FlyoutBaseClosingEventArgs e)
+    {
+        if (_keepFlyoutOpenForTooltip)
+        {
+            e.Cancel = true;
+        }
+    }
+
+
+    /// <summary>
+    /// 同步问号提示（含超链接）的打开状态，供 Flyout 决定是否拦截关闭。
+    /// </summary>
+    /// <param name="isOpen">提示是否打开。</param>
+    private void OnAutoSignInHintTooltipOpenChanged(bool isOpen)
+    {
+        _keepFlyoutOpenForTooltip = isOpen;
+    }
+
+
+    /// <summary>
+    /// 关闭签到卡片并跳转到设置「常规」页的开机启动一节。
+    /// </summary>
+    private void OpenStartAtLoginSetting()
+    {
+        _keepFlyoutOpenForTooltip = false;
+        Flyout_SignIn.Hide();
+        WeakReferenceMessenger.Default.Send(new MainViewNavigateMessage(typeof(SettingPage), SettingPage.StartAtLoginSection));
     }
 
 

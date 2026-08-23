@@ -3240,8 +3240,11 @@ You are welcome to submit exported data to:</value>
     <value>Registro automático</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1. El registro automático es independiente para cada juego
-2. Tras activar el registro automático, al iniciar el juego con un acceso directo de una cuenta de inicio de sesión específica se registrará solo esa cuenta</value>
+    <value>1. El registro automático es independiente para cada juego y comienza a ejecutarse en secuencia 10 segundos después de iniciar Moonward
+2. Tras activar el registro automático, al iniciar el juego con un acceso directo de una cuenta de inicio de sesión específica también se registrará solo esa cuenta</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>Inicio automático de la app</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Registro exitoso, recompensa reclamada</value>

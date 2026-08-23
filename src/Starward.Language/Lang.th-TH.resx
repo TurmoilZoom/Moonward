@@ -3234,8 +3234,11 @@ You are welcome to submit exported data to:</value>
     <value>เช็คอินอัตโนมัติ</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1.เช็คอินอัตโนมัติของแต่ละเกมเป็นอิสระต่อกัน
-2.เมื่อเปิดเช็คอินอัตโนมัติแล้ว การเปิดเกมผ่านทางลัดของบัญชีเข้าสู่ระบบที่ระบุจะเช็คอินเฉพาะบัญชีนั้น</value>
+    <value>1.เช็คอินอัตโนมัติของแต่ละเกมเป็นอิสระต่อกัน และเริ่มดำเนินการตามลำดับ 10 วินาทีหลังจากเปิด Moonward
+2.เมื่อเปิดเช็คอินอัตโนมัติแล้ว การเปิดเกมผ่านทางลัดของบัญชีเข้าสู่ระบบที่ระบุก็จะเช็คอินเฉพาะบัญชีนั้น</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>เปิดซอฟต์แวร์เมื่อเริ่มระบบ</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>เช็คอินสำเร็จ รับรางวัลแล้ว</value>

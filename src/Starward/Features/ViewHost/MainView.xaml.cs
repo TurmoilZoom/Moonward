@@ -330,7 +330,7 @@ public sealed partial class MainView : UserControl
     /// <param name="message">目标页面类型。</param>
     private void OnMainViewNavigateMessageReceived(object _, MainViewNavigateMessage message)
     {
-        NavigateTo(message.Page);
+        NavigateTo(message.Page, message.Parameter);
     }
 
 

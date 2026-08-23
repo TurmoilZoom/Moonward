@@ -3239,8 +3239,11 @@
     <value>自動簽到</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1.每個遊戲嘅自動簽到相互獨立
-2.開啟自動簽到後，透過指定登入帳號嘅捷徑啟動遊戲時會單獨為該帳號進行簽到</value>
+    <value>1.每個遊戲嘅自動簽到相互獨立，喺Moonward啟動十秒後開始依次執行
+2.開啟自動簽到後，透過指定登入帳號嘅捷徑啟動遊戲時也會單獨為該帳號進行簽到</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>軟件開機自啟</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>簽到成功，獎勵已領取</value>

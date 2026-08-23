@@ -3240,8 +3240,11 @@ You are welcome to submit exported data to:</value>
     <value>Tự động điểm danh</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1. Tự động điểm danh của mỗi game độc lập với nhau
-2. Sau khi bật tự động điểm danh, khởi chạy game bằng lối tắt của tài khoản đăng nhập chỉ định sẽ điểm danh riêng cho tài khoản đó</value>
+    <value>1. Tự động điểm danh của mỗi game độc lập với nhau, bắt đầu thực hiện lần lượt 10 giây sau khi Moonward khởi động
+2. Sau khi bật tự động điểm danh, khởi chạy game bằng lối tắt của tài khoản đăng nhập chỉ định cũng sẽ điểm danh riêng cho tài khoản đó</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>Tự khởi động phần mềm</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Điểm danh thành công, đã nhận thưởng</value>

@@ -3298,8 +3298,11 @@ Repository:</value>
     <value>Auto check-in</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1. Auto check-in is independent for each game
-2. After enabling auto check-in, launching the game via a shortcut for a specific login account will check in for that account separately</value>
+    <value>1. Auto check-in is independent for each game and starts sequentially 10 seconds after Moonward launches
+2. After enabling auto check-in, launching the game via a shortcut for a specific login account will also check in for that account separately</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>App start at login</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>Reward claimed successfully</value>

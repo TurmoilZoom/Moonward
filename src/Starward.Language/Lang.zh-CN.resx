@@ -3298,8 +3298,11 @@
     <value>自动签到</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1.每个游戏的自动签到相互独立
-2.开启自动签到后，通过指定登录账号的快捷方式启动游戏时会单独给该账号进行签到</value>
+    <value>1.每个游戏的自动签到相互独立，在Moonward启动十秒后开始依次执行
+2.开启自动签到后，通过指定登录账号的快捷方式启动游戏时也会单独给该账号进行签到</value>
+  </data>
+  <data name="SignInButton_StartAtLogin" xml:space="preserve">
+    <value>软件开机自启</value>
   </data>
   <data name="SignInButton_SignInSucceeded" xml:space="preserve">
     <value>签到成功，奖励已领取</value>
