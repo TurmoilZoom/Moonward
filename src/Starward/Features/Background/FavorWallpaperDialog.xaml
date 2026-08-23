@@ -6,6 +6,7 @@
                xmlns:lang="using:Starward.Language"
                xmlns:local="using:Starward.Features.Background"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
                x:DefaultBindMode="OneWay"
                Background="{ThemeResource CustomAcrylicBrush}"
                BorderThickness="0"
@@ -31,10 +32,29 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="0,0,0,12"
-                   FontSize="20"
-                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                   Text="{x:Bind lang:Lang.FavorWallpaper_Title}" />
+        <StackPanel Margin="0,0,0,12"
+                    Orientation="Horizontal"
+                    Spacing="8">
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="20"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind DialogTitle, Mode=OneWay}" />
+            <Button Width="32"
+                    Height="32"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    BorderThickness="0"
+                    Command="{x:Bind SwitchModeCommand}"
+                    CornerRadius="8"
+                    sc:InstantTooltip.Placement="Bottom"
+                    sc:InstantTooltip.Text="{x:Bind SwitchTooltip, Mode=OneWay}"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                <FontIcon FontSize="14"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE8AB;"
+                          IsTextScaleFactorEnabled="False" />
+            </Button>
+        </StackPanel>
 
         <local:FavorWallpaperPanel x:Name="FavorPanel"
                                    Grid.Row="1"

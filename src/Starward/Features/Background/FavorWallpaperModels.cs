@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.UI.Xaml.Media;
 using Starward.Language;
 using System;
+using System.IO;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -28,12 +30,22 @@ public sealed class FavorWallpaperRecord
     public string VideoUrl { get; set; } = "";
 
 
+    /// <summary>满影画静态图地址；好感壁纸为空。</summary>
+    [JsonPropertyName("imageUrl")]
+    public string ImageUrl { get; set; } = "";
+
+
     [JsonPropertyName("coverUrl")]
     public string CoverUrl { get; set; } = "";
 
 
     [JsonPropertyName("iconUrl")]
     public string? IconUrl { get; set; }
+
+
+    /// <summary>是否为满影画静态壁纸（否则为好感动态视频）。</summary>
+    [JsonPropertyName("isStatic")]
+    public bool IsStatic { get; set; }
 
 }
 
@@ -64,7 +76,30 @@ public partial class FavorWallpaperView : ObservableObject
 
     public string VideoUrl => Record.VideoUrl;
 
-    public string CoverUrl => string.IsNullOrWhiteSpace(Record.CoverUrl) ? (Record.IconUrl ?? "") : Record.CoverUrl;
+    public bool IsStatic => Record.IsStatic;
+
+    /// <summary>
+    /// 卡片封面：满影画已下载时用本地图，否则用密友同行 / 图标。
+    /// </summary>
+    public string CoverUrl
+    {
+        get
+        {
+            if (IsStatic && IsDownloaded)
+            {
+                string path = BackgroundService.GetBgFilePath(FavorWallpaperService.GetCacheFileName(Record));
+                if (File.Exists(path))
+                {
+                    return new Uri(path).AbsoluteUri;
+                }
+            }
+            return string.IsNullOrWhiteSpace(Record.CoverUrl) ? (Record.IconUrl ?? "") : Record.CoverUrl;
+        }
+    }
+
+
+    /// <summary>满影画已下载时铺满裁切；密友同行 / 好感图标保持等比完整显示。</summary>
+    public Stretch CoverStretch => IsStatic && IsDownloaded ? Stretch.UniformToFill : Stretch.Uniform;
 
 
     /// <summary>是否已下载到本地 bg 目录。</summary>
@@ -109,6 +144,8 @@ public partial class FavorWallpaperView : ObservableObject
         OnPropertyChanged(nameof(ShowLocalActions));
         OnPropertyChanged(nameof(ShowActionButton));
         OnPropertyChanged(nameof(ActionTooltip));
+        OnPropertyChanged(nameof(CoverUrl));
+        OnPropertyChanged(nameof(CoverStretch));
     }
 
 

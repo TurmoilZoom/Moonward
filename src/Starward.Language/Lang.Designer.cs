@@ -10375,5 +10375,14 @@ namespace Starward.Language {
                 return ResourceManager.GetString("FavorWallpaper_DeleteFailed", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Mindscape Wallpapers 的本地化字符串。
+        /// </summary>
+        public static string FavorWallpaper_MindscapeTitle {
+            get {
+                return ResourceManager.GetString("FavorWallpaper_MindscapeTitle", resourceCulture);
+            }
+        }
     }
 }

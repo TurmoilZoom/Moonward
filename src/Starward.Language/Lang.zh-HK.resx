@@ -3557,6 +3557,9 @@
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>刪除失敗</value>
   </data>
+  <data name="FavorWallpaper_MindscapeTitle" xml:space="preserve">
+    <value>滿影畫壁紙</value>
+  </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
     <value>開機時自動啟動</value>
   </data>

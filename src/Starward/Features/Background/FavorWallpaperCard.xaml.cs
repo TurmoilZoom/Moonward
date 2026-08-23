@@ -15,8 +15,8 @@ using Windows.Media.Playback;
 namespace Starward.Features.Background;
 
 /// <summary>
-/// 好感壁纸卡片：封面框按密友同行 245×153、下载 / 删除 / 点击设为背景。
-/// 已下载视频可悬停静音循环预览。
+/// 好感 / 满影画卡片：封面框按密友同行 245×153、下载 / 删除 / 点击设为背景。
+/// 已下载的动态壁纸可悬停静音循环预览；满影画下载后封面即换成静态图。
 /// </summary>
 public sealed partial class FavorWallpaperCard : UserControl
 {
@@ -274,21 +274,21 @@ public sealed partial class FavorWallpaperCard : UserControl
 
 
     /// <summary>
-    /// 已下载、未在下载、本地文件仍在时才允许预览。
+    /// 已下载的动态壁纸才悬停预览；满影画是静态图，封面即预览。
     /// </summary>
     private bool CanPreview()
     {
-        return View is { IsDownloaded: true, IsDownloading: false } && TryGetLocalVideoPath() is not null;
+        return View is { IsDownloaded: true, IsDownloading: false, IsStatic: false } && TryGetLocalVideoPath() is not null;
     }
 
 
     private string? TryGetLocalVideoPath()
     {
-        if (View is null)
+        if (View is null || View.IsStatic)
         {
             return null;
         }
-        string path = BackgroundService.GetBgFilePath(FavorWallpaperService.GetVideoFileName(View.Record));
+        string path = BackgroundService.GetBgFilePath(FavorWallpaperService.GetCacheFileName(View.Record));
         return File.Exists(path) ? path : null;
     }
 

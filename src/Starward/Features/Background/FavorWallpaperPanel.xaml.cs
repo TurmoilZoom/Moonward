@@ -8,6 +8,7 @@ using Starward.Core.HoYoPlay;
 using Starward.Helpers;
 using Starward.Language;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 namespace Starward.Features.Background;
 
 /// <summary>
-/// 好感壁纸画廊；点击封面会写入当前游戏的自定义背景。
+/// 好感 / 满影画画廊；点击封面会写入当前游戏的自定义背景。
 /// </summary>
 [INotifyPropertyChanged]
 public sealed partial class FavorWallpaperPanel : UserControl
@@ -40,7 +41,20 @@ public sealed partial class FavorWallpaperPanel : UserControl
     public GameBiz CurrentGameBiz { get; set; }
 
 
+    /// <summary>为 true 时展示满影画静态壁纸，否则为好感动态壁纸。</summary>
+    public bool IsMindscapeMode { get; set; }
+
+
     public ObservableCollection<FavorWallpaperView> Items { get; } = [];
+
+
+    private List<FavorWallpaperView> _favorViews = [];
+
+    private List<FavorWallpaperView> _mindscapeViews = [];
+
+    private bool _favorLoaded;
+
+    private bool _mindscapeLoaded;
 
 
     [ObservableProperty]
@@ -56,16 +70,18 @@ public sealed partial class FavorWallpaperPanel : UserControl
 
 
     /// <summary>
-    /// 加载列表（已有数据时只刷新使用/下载状态）。
+    /// 加载当前模式列表（已有数据时只切换并刷新使用/下载状态）。
     /// </summary>
     public async Task EnsureLoadedAsync(bool forceRefresh = false)
     {
-        if (IsLoading)
+        bool loaded = IsMindscapeMode ? _mindscapeLoaded : _favorLoaded;
+        if (!forceRefresh && loaded)
         {
-            return;
-        }
-        if (!forceRefresh && Items.Count > 0)
-        {
+            _loadCts?.Cancel();
+            IsLoading = false;
+            StatusText = null;
+            ErrorText = null;
+            BindCurrentModeItems();
             RefreshInUseState();
             return;
         }
@@ -75,16 +91,23 @@ public sealed partial class FavorWallpaperPanel : UserControl
 
     private async Task LoadAsync(bool forceRefresh)
     {
+        bool mindscape = IsMindscapeMode;
         _loadCts?.Cancel();
-        _loadCts = new CancellationTokenSource();
-        CancellationToken token = _loadCts.Token;
+        var cts = new CancellationTokenSource();
+        _loadCts = cts;
+        CancellationToken token = cts.Token;
         IsLoading = true;
         ErrorText = null;
         StatusText = Lang.FavorWallpaper_Loading;
+        Items.Clear();
         try
         {
             var progress = new Progress<FavorWallpaperLoadProgress>(p =>
             {
+                if (token.IsCancellationRequested || IsMindscapeMode != mindscape)
+                {
+                    return;
+                }
                 if (p.FromCache)
                 {
                     StatusText = null;
@@ -92,15 +115,17 @@ public sealed partial class FavorWallpaperPanel : UserControl
                 }
                 StatusText = string.Format(Lang.FavorWallpaper_LoadingProgress, p.Done, p.Total);
             });
-            var records = await _service.GetWallpapersAsync(forceRefresh, progress, token);
+            IReadOnlyList<FavorWallpaperRecord> records = mindscape
+                ? await _service.GetMindscapeWallpapersAsync(forceRefresh, progress, token)
+                : await _service.GetWallpapersAsync(forceRefresh, progress, token);
             token.ThrowIfCancellationRequested();
-            Items.Clear();
             string? currentBg = AppConfig.GetCustomBg(CurrentGameBiz);
             bool enabled = AppConfig.GetEnableCustomBg(CurrentGameBiz);
+            var views = new List<FavorWallpaperView>(records.Count);
             foreach (FavorWallpaperRecord record in records)
             {
-                string fileName = FavorWallpaperService.GetVideoFileName(record);
-                Items.Add(new FavorWallpaperView
+                string fileName = FavorWallpaperService.GetCacheFileName(record);
+                views.Add(new FavorWallpaperView
                 {
                     Record = record,
                     IsDownloaded = FavorWallpaperService.IsCached(record),
@@ -110,18 +135,38 @@ public sealed partial class FavorWallpaperPanel : UserControl
                     UseAction = UseAsBackgroundAsync,
                 });
             }
-            StatusText = null;
+            if (mindscape)
+            {
+                _mindscapeViews = views;
+                _mindscapeLoaded = true;
+            }
+            else
+            {
+                _favorViews = views;
+                _favorLoaded = true;
+            }
+            if (IsMindscapeMode == mindscape)
+            {
+                BindCurrentModeItems();
+                StatusText = null;
+            }
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Load favor wallpapers failed");
-            ErrorText = Lang.FavorWallpaper_LoadFailed;
-            StatusText = null;
+            _logger.LogError(ex, "Load wallpapers failed (mindscape={Mindscape})", mindscape);
+            if (IsMindscapeMode == mindscape)
+            {
+                ErrorText = Lang.FavorWallpaper_LoadFailed;
+                StatusText = null;
+            }
         }
         finally
         {
-            IsLoading = false;
+            if (ReferenceEquals(_loadCts, cts))
+            {
+                IsLoading = false;
+            }
         }
     }
 
@@ -167,7 +212,7 @@ public sealed partial class FavorWallpaperPanel : UserControl
         }
         try
         {
-            string fileName = FavorWallpaperService.GetVideoFileName(view.Record);
+            string fileName = FavorWallpaperService.GetCacheFileName(view.Record);
             string? currentBg = AppConfig.GetCustomBg(CurrentGameBiz);
             bool inUse = view.IsInUse || string.Equals(currentBg, fileName, StringComparison.OrdinalIgnoreCase);
             if (inUse)
@@ -221,13 +266,24 @@ public sealed partial class FavorWallpaperPanel : UserControl
     }
 
 
+    private void BindCurrentModeItems()
+    {
+        List<FavorWallpaperView> source = IsMindscapeMode ? _mindscapeViews : _favorViews;
+        Items.Clear();
+        foreach (FavorWallpaperView view in source)
+        {
+            Items.Add(view);
+        }
+    }
+
+
     private void RefreshInUseState()
     {
         string? currentBg = AppConfig.GetCustomBg(CurrentGameBiz);
         bool enabled = AppConfig.GetEnableCustomBg(CurrentGameBiz);
         foreach (FavorWallpaperView item in Items)
         {
-            string fileName = FavorWallpaperService.GetVideoFileName(item.Record);
+            string fileName = FavorWallpaperService.GetCacheFileName(item.Record);
             item.IsInUse = enabled && string.Equals(currentBg, fileName, StringComparison.OrdinalIgnoreCase);
             item.IsDownloaded = FavorWallpaperService.IsCached(item.Record);
         }

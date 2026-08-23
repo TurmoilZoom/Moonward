@@ -3578,6 +3578,9 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>Failed to delete</value>
   </data>
+  <data name="FavorWallpaper_MindscapeTitle" xml:space="preserve">
+    <value>Mindscape Wallpapers</value>
+  </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
     <value>Запускать при входе</value>
   </data>

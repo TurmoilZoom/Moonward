@@ -16,12 +16,14 @@ using System.Threading.Tasks;
 namespace Starward.Features.Background;
 
 /// <summary>
-/// 绝区零百科「好感壁纸」：拉取列表 / 词条视频、按数量持久化、下载与设为背景。
+/// 绝区零百科「好感壁纸」与「满影画壁纸」：拉取列表 / 词条媒体、按数量持久化、下载与设为背景。
 /// </summary>
 internal partial class FavorWallpaperService
 {
 
     public const string CacheKey = "FavorWallpaper:nap";
+
+    public const string MindscapeCacheKey = "MindscapeWallpaper:nap";
 
     /// <summary>绝区零档案频道（含子频道「好感壁纸」）。</summary>
     public const int ArchiveChannelId = 13;
@@ -30,6 +32,12 @@ internal partial class FavorWallpaperService
 
     /// <summary>游戏图鉴「地图」频道，含各角色「密友同行」条目。</summary>
     public const int MapChannelId = 97;
+
+    /// <summary>百科「代理人」频道（<c>/zzz/wiki/channel/map/2/43</c>）。</summary>
+    public const int AgentChannelId = 43;
+
+    /// <summary>预告角色角标，满影画列表中排除。</summary>
+    public const string PreviewCornerMark = "Pre";
 
     public const string WikiAppSn = "zzz_wiki";
 
@@ -68,7 +76,7 @@ internal partial class FavorWallpaperService
         IProgress<FavorWallpaperLoadProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        List<FavorWallpaperRecord> local = LoadCache();
+        List<FavorWallpaperRecord> local = LoadCache(CacheKey);
 
         BlackboardContentListData list;
         try
@@ -100,7 +108,7 @@ internal partial class FavorWallpaperService
             // 视频地址不回源；封面只认密友同行，否则用壁纸图标。
             if (RematchCovers(local, miyouItems))
             {
-                SaveCache(local);
+                SaveCache(CacheKey, local);
             }
             progress?.Report(new FavorWallpaperLoadProgress(local.Count, local.Count, FromCache: true));
             return local;
@@ -177,17 +185,157 @@ internal partial class FavorWallpaperService
             .ToDictionary(x => x.ContentId, x => x.index);
         result = result.OrderBy(x => order.GetValueOrDefault(x.ContentId, int.MaxValue)).ToList();
 
-        SaveCache(result);
+        SaveCache(CacheKey, result);
         return result;
     }
 
 
     /// <summary>
-    /// 由视频 URL 得到缓存文件名（与官方背景相同，落在 CacheFolder/bg）。
+    /// 获取满影画静态壁纸列表。来源为百科代理人频道，排除预告角色；
+    /// 无「影画展示3」的角色（如铃、哲）不进入画廊。封面优先密友同行，否则用好感壁纸图标。
     /// </summary>
-    public static string GetVideoFileName(FavorWallpaperRecord item)
+    /// <param name="forceRefresh">为 true 时忽略数量判断，补齐缺失词条并重配封面。</param>
+    /// <param name="progress">词条拉取进度。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    public async Task<IReadOnlyList<FavorWallpaperRecord>> GetMindscapeWallpapersAsync(
+        bool forceRefresh = false,
+        IProgress<FavorWallpaperLoadProgress>? progress = null,
+        CancellationToken cancellationToken = default)
     {
-        if (Uri.TryCreate(item.VideoUrl, UriKind.Absolute, out Uri? uri))
+        List<FavorWallpaperRecord> local = LoadCache(MindscapeCacheKey);
+
+        BlackboardContentListData list;
+        try
+        {
+            list = await _client.GetHomeContentListAsync(WikiAppSn, AgentChannelId, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (local.Count > 0)
+        {
+            _logger.LogWarning(ex, "Load mindscape wallpaper list failed, using cached {Count} items", local.Count);
+            List<FavorWallpaperRecord> cachedVisible = VisibleMindscape(local);
+            progress?.Report(new FavorWallpaperLoadProgress(cachedVisible.Count, cachedVisible.Count, FromCache: true));
+            return cachedVisible;
+        }
+
+        IReadOnlyList<BlackboardContentItem> miyouItems = [];
+        try
+        {
+            BlackboardContentListData map = await _client.GetHomeContentListAsync(WikiAppSn, MapChannelId, cancellationToken).ConfigureAwait(false);
+            miyouItems = EnumerateMiyouItems(map);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Load 密友同行 list failed, covers will fall back to 好感壁纸 icons");
+        }
+
+        IReadOnlyList<BlackboardContentItem> favorItems = [];
+        try
+        {
+            BlackboardContentListData archive = await _client.GetHomeContentListAsync(WikiAppSn, ArchiveChannelId, cancellationToken).ConfigureAwait(false);
+            favorItems = archive.FindChannel(FavorWallpaperChannelId)?.List ?? [];
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Load 好感壁纸 list failed, covers without 密友同行 will use agent icons");
+        }
+
+        List<BlackboardContentItem> remoteItems = (list.FindChannel(AgentChannelId)?.List ?? [])
+            .Where(static x => !IsPreviewAgent(x))
+            .ToList();
+
+        if (!forceRefresh && local.Count > 0 && local.Count == remoteItems.Count)
+        {
+            if (RematchCovers(local, miyouItems, favorItems))
+            {
+                SaveCache(MindscapeCacheKey, local);
+            }
+            List<FavorWallpaperRecord> visible = VisibleMindscape(local);
+            progress?.Report(new FavorWallpaperLoadProgress(visible.Count, visible.Count, FromCache: true));
+            return visible;
+        }
+
+        Dictionary<int, FavorWallpaperRecord> localById = local.ToDictionary(x => x.ContentId);
+        var result = new List<FavorWallpaperRecord>(remoteItems.Count);
+        var toFetch = new List<BlackboardContentItem>();
+
+        foreach (BlackboardContentItem item in remoteItems)
+        {
+            string name = AgentCharacterName(item);
+            if (localById.TryGetValue(item.ContentId, out FavorWallpaperRecord? cached) && !string.IsNullOrWhiteSpace(cached.ImageUrl))
+            {
+                cached.Title = item.Title;
+                cached.CharacterName = name;
+                cached.IconUrl = FindFavorWallpaperIcon(name, favorItems) ?? item.Icon;
+                cached.CoverUrl = FindMiyouCover(name, miyouItems) ?? cached.IconUrl ?? cached.CoverUrl;
+                cached.IsStatic = true;
+                result.Add(cached);
+            }
+            else
+            {
+                toFetch.Add(item);
+            }
+        }
+
+        int done = result.Count;
+        int total = remoteItems.Count;
+        progress?.Report(new FavorWallpaperLoadProgress(done, total, FromCache: false));
+
+        if (toFetch.Count > 0)
+        {
+            var fetched = new ConcurrentBag<FavorWallpaperRecord>();
+            await Parallel.ForEachAsync(
+                toFetch,
+                new ParallelOptions { MaxDegreeOfParallelism = 4, CancellationToken = cancellationToken },
+                async (item, token) =>
+                {
+                    try
+                    {
+                        WikiEntryPageData page = await _client.GetEntryPageAsync(WikiApp, WikiAppSn, item.ContentId, cancellationToken: token).ConfigureAwait(false);
+                        string name = AgentCharacterName(item);
+                        string? image = WikiEntryMindscape.ExtractFullCinemaImage(page.Page);
+                        string? favorIcon = FindFavorWallpaperIcon(name, favorItems);
+                        fetched.Add(new FavorWallpaperRecord
+                        {
+                            ContentId = item.ContentId,
+                            Title = item.Title,
+                            CharacterName = name,
+                            ImageUrl = image ?? "",
+                            IconUrl = favorIcon ?? item.Icon,
+                            CoverUrl = FindMiyouCover(name, miyouItems) ?? favorIcon ?? item.Icon ?? "",
+                            IsStatic = true,
+                        });
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        _logger.LogWarning(ex, "Fetch mindscape wallpaper entry {Id} failed", item.ContentId);
+                    }
+                    finally
+                    {
+                        int current = Interlocked.Increment(ref done);
+                        progress?.Report(new FavorWallpaperLoadProgress(current, total, FromCache: false));
+                    }
+                }).ConfigureAwait(false);
+
+            result.AddRange(fetched);
+        }
+
+        Dictionary<int, int> order = remoteItems
+            .Select((item, index) => (item.ContentId, index))
+            .ToDictionary(x => x.ContentId, x => x.index);
+        result = result.OrderBy(x => order.GetValueOrDefault(x.ContentId, int.MaxValue)).ToList();
+
+        SaveCache(MindscapeCacheKey, result);
+        return VisibleMindscape(result);
+    }
+
+
+    /// <summary>
+    /// 由媒体 URL 得到缓存文件名（与官方背景相同，落在 CacheFolder/bg）。
+    /// </summary>
+    public static string GetCacheFileName(FavorWallpaperRecord item)
+    {
+        string url = GetMediaUrl(item);
+        if (Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
         {
             string name = Path.GetFileName(uri.LocalPath);
             if (!string.IsNullOrWhiteSpace(name))
@@ -195,16 +343,22 @@ internal partial class FavorWallpaperService
                 return name;
             }
         }
-        return $"zzz_favor_{item.ContentId}.mp4";
+        return item.IsStatic ? $"zzz_mindscape_{item.ContentId}.png" : $"zzz_favor_{item.ContentId}.mp4";
     }
 
 
     /// <summary>
-    /// 本地 bg 目录中是否已有该视频。
+    /// 由视频 URL 得到缓存文件名（与官方背景相同，落在 CacheFolder/bg）。
+    /// </summary>
+    public static string GetVideoFileName(FavorWallpaperRecord item) => GetCacheFileName(item);
+
+
+    /// <summary>
+    /// 本地 bg 目录中是否已有该媒体文件。
     /// </summary>
     public static bool IsCached(FavorWallpaperRecord item)
     {
-        string path = BackgroundService.GetBgFilePath(GetVideoFileName(item));
+        string path = BackgroundService.GetBgFilePath(GetCacheFileName(item));
         return File.Exists(path);
     }
 
@@ -214,7 +368,7 @@ internal partial class FavorWallpaperService
     /// </summary>
     public async Task DeleteLocalCacheAsync(FavorWallpaperRecord item, CancellationToken cancellationToken = default)
     {
-        string path = BackgroundService.GetBgFilePath(GetVideoFileName(item));
+        string path = BackgroundService.GetBgFilePath(GetCacheFileName(item));
         if (!File.Exists(path))
         {
             return;
@@ -241,14 +395,14 @@ internal partial class FavorWallpaperService
     /// </summary>
     public async Task<string> DownloadToBgFolderAsync(FavorWallpaperRecord item, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
     {
-        string name = GetVideoFileName(item);
+        string name = GetCacheFileName(item);
         string path = BackgroundService.GetBgFilePath(name);
         if (File.Exists(path))
         {
             progress?.Report(100);
             return name;
         }
-        await DownloadToPathAsync(item.VideoUrl, path, progress, cancellationToken).ConfigureAwait(false);
+        await DownloadToPathAsync(GetMediaUrl(item), path, progress, cancellationToken).ConfigureAwait(false);
         return name;
     }
 
@@ -258,7 +412,7 @@ internal partial class FavorWallpaperService
     /// </summary>
     public async Task DownloadToFileAsync(FavorWallpaperRecord item, string destPath, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
     {
-        string cached = BackgroundService.GetBgFilePath(GetVideoFileName(item));
+        string cached = BackgroundService.GetBgFilePath(GetCacheFileName(item));
         if (File.Exists(cached))
         {
             Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
@@ -266,12 +420,12 @@ internal partial class FavorWallpaperService
             progress?.Report(100);
             return;
         }
-        await DownloadToPathAsync(item.VideoUrl, destPath, progress, cancellationToken).ConfigureAwait(false);
+        await DownloadToPathAsync(GetMediaUrl(item), destPath, progress, cancellationToken).ConfigureAwait(false);
     }
 
 
     /// <summary>
-    /// 下载并设为当前游戏的自定义背景视频。
+    /// 下载并设为当前游戏的自定义背景（动态视频或满影画静态图）。
     /// </summary>
     public async Task SetAsCustomBackgroundAsync(GameBiz gameBiz, FavorWallpaperRecord item, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
     {
@@ -325,9 +479,9 @@ internal partial class FavorWallpaperService
     }
 
 
-    private List<FavorWallpaperRecord> LoadCache()
+    private List<FavorWallpaperRecord> LoadCache(string cacheKey)
     {
-        if (!DatabaseService.TryGetValue(CacheKey, out string? json, out _) || string.IsNullOrWhiteSpace(json))
+        if (!DatabaseService.TryGetValue(cacheKey, out string? json, out _) || string.IsNullOrWhiteSpace(json))
         {
             return [];
         }
@@ -337,16 +491,54 @@ internal partial class FavorWallpaperService
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Deserialize favor wallpaper cache failed");
+            _logger.LogDebug(ex, "Deserialize wallpaper cache {Key} failed", cacheKey);
             return [];
         }
     }
 
 
-    private void SaveCache(List<FavorWallpaperRecord> items)
+    private void SaveCache(string cacheKey, List<FavorWallpaperRecord> items)
     {
         string json = JsonSerializer.Serialize(items, AppConfig.JsonSerializerOptions);
-        DatabaseService.SetValue(CacheKey, json);
+        DatabaseService.SetValue(cacheKey, json);
+    }
+
+
+    /// <summary>
+    /// 好感视频或满影画图片的下载地址。
+    /// </summary>
+    public static string GetMediaUrl(FavorWallpaperRecord item) => item.IsStatic ? item.ImageUrl : item.VideoUrl;
+
+
+    /// <summary>
+    /// 预告角色（尚未实装）不进入满影画列表。
+    /// </summary>
+    private static bool IsPreviewAgent(BlackboardContentItem item)
+    {
+        return string.Equals(item.CornerMark, PreviewCornerMark, StringComparison.OrdinalIgnoreCase);
+    }
+
+
+    /// <summary>
+    /// 代理人简称优先，便于和密友同行封面匹配。
+    /// </summary>
+    private static string AgentCharacterName(BlackboardContentItem item)
+    {
+        return string.IsNullOrWhiteSpace(item.AliasName) ? item.Title.Trim() : item.AliasName.Trim();
+    }
+
+
+    /// <summary>
+    /// 满影画画廊只展示已解析到「影画展示3」的角色。
+    /// </summary>
+    private static List<FavorWallpaperRecord> VisibleMindscape(List<FavorWallpaperRecord> items)
+    {
+        List<FavorWallpaperRecord> visible = items.Where(x => !string.IsNullOrWhiteSpace(x.ImageUrl)).ToList();
+        foreach (FavorWallpaperRecord item in visible)
+        {
+            item.IsStatic = true;
+        }
+        return visible;
     }
 
 
@@ -361,15 +553,25 @@ internal partial class FavorWallpaperService
 
 
     /// <summary>
-    /// 有密友同行图则用它，否则回退好感壁纸图标。
+    /// 有密友同行图则用它，否则回退好感壁纸图标（满影画可传入好感频道条目以对齐封面）。
     /// </summary>
     private static bool RematchCovers(
         List<FavorWallpaperRecord> items,
-        IReadOnlyList<BlackboardContentItem> miyouItems)
+        IReadOnlyList<BlackboardContentItem> miyouItems,
+        IReadOnlyList<BlackboardContentItem>? favorItems = null)
     {
         bool changed = false;
         foreach (FavorWallpaperRecord item in items)
         {
+            if (favorItems is not null)
+            {
+                string? favorIcon = FindFavorWallpaperIcon(item.CharacterName, favorItems);
+                if (!string.IsNullOrWhiteSpace(favorIcon) && !string.Equals(item.IconUrl, favorIcon, StringComparison.Ordinal))
+                {
+                    item.IconUrl = favorIcon;
+                    changed = true;
+                }
+            }
             string? cover = FindMiyouCover(item.CharacterName, miyouItems) ?? item.IconUrl;
             if (!string.IsNullOrWhiteSpace(cover) && !string.Equals(item.CoverUrl, cover, StringComparison.Ordinal))
             {
@@ -411,6 +613,41 @@ internal partial class FavorWallpaperService
                 continue;
             }
             string? extracted = ExtractMiyouCharacterName(item.Title);
+            if (string.IsNullOrWhiteSpace(extracted))
+            {
+                continue;
+            }
+            int score = ScoreCharacterName(norm, NormalizeName(extracted));
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestIcon = item.Icon;
+            }
+        }
+        return bestIcon;
+    }
+
+
+    /// <summary>
+    /// 按角色名在好感壁纸频道里找图标，使无密友同行的满影画封面与好感壁纸一致。
+    /// </summary>
+    internal static string? FindFavorWallpaperIcon(string characterName, IReadOnlyList<BlackboardContentItem> favorItems)
+    {
+        string norm = NormalizeName(characterName);
+        if (norm.Length == 0 || favorItems.Count == 0)
+        {
+            return null;
+        }
+
+        string? bestIcon = null;
+        int bestScore = 0;
+        foreach (BlackboardContentItem item in favorItems)
+        {
+            if (string.IsNullOrWhiteSpace(item.Icon))
+            {
+                continue;
+            }
+            string extracted = ExtractCharacterName(item.Title);
             if (string.IsNullOrWhiteSpace(extracted))
             {
                 continue;

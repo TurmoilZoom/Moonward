@@ -563,6 +563,24 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 好感壁纸对话框上次是否停在满影画模式。
+    /// </summary>
+    public static bool GetFavorWallpaperMindscapeMode(GameBiz biz)
+    {
+        return GetValue<bool>(default, $"favor_wallpaper_mindscape_{biz}");
+    }
+
+
+    /// <summary>
+    /// 记住好感壁纸对话框的满影画 / 好感切换。
+    /// </summary>
+    public static void SetFavorWallpaperMindscapeMode(GameBiz biz, bool value)
+    {
+        SetValue(value, $"favor_wallpaper_mindscape_{biz}");
+    }
+
+
+    /// <summary>
     /// 每日自动签到（软件启动后静默批量签到），按游戏区分，默认关闭。
     /// </summary>
     /// <param name="biz">游戏业务线，如 hk4e_cn。</param>

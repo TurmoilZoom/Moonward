@@ -3558,6 +3558,9 @@
   <data name="FavorWallpaper_DeleteFailed" xml:space="preserve">
     <value>삭제 실패</value>
   </data>
+  <data name="FavorWallpaper_MindscapeTitle" xml:space="preserve">
+    <value>마인드스케이프 벽지</value>
+  </data>
   <data name="SettingPage_StartAtLogin" xml:space="preserve">
     <value>로그인 시 자동 시작</value>
   </data>

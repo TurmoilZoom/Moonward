@@ -92,4 +92,18 @@ public class BlackboardContentItem
     [JsonPropertyName("summary")]
     public string? Summary { get; set; }
 
+
+    /// <summary>
+    /// 角标（如 <c>Pre</c> 预告、<c>Encore</c> 复刻）。无角标时为 <c>None</c>。
+    /// </summary>
+    [JsonPropertyName("corner_mark")]
+    public string? CornerMark { get; set; }
+
+
+    /// <summary>
+    /// 角色简称（如「浅羽 悠真」对应「悠真」），用于封面匹配。
+    /// </summary>
+    [JsonPropertyName("alias_name")]
+    public string? AliasName { get; set; }
+
 }

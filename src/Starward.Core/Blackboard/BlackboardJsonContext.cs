@@ -6,6 +6,7 @@ namespace Starward.Core.Blackboard;
 [JsonSerializable(typeof(miHoYoApiWrapper<BlackboardPositionData>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<BlackboardContentListData>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<WikiEntryPageData>))]
+[JsonSerializable(typeof(WikiMapDescData))]
 [JsonSerializable(typeof(BlackboardGachaPoolExt))]
 internal partial class BlackboardJsonContext : JsonSerializerContext
 {

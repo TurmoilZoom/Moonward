@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -104,6 +105,85 @@ public static partial class WikiEntryVideo
                 if (match.Success)
                 {
                     return match.Value;
+                }
+            }
+        }
+        return null;
+    }
+
+}
+
+
+/// <summary>
+/// 词条 <c>map_desc</c> 组件的 <c>data</c> JSON。
+/// </summary>
+public class WikiMapDescData
+{
+
+    [JsonPropertyName("list")]
+    public List<WikiMapDescItem> List { get; set; } = [];
+
+}
+
+
+/// <summary>
+/// <c>map_desc</c> 列表项（影画展示等）。
+/// </summary>
+public class WikiMapDescItem
+{
+
+    [JsonPropertyName("tab_name")]
+    public string TabName { get; set; } = "";
+
+
+    [JsonPropertyName("image")]
+    public string Image { get; set; } = "";
+
+}
+
+
+/// <summary>
+/// 从代理人词条中提取满影画壁纸地址。
+/// </summary>
+public static class WikiEntryMindscape
+{
+
+    /// <summary>满影画对应的影画展示页签名。</summary>
+    public const string FullCinemaTabName = "影画展示3";
+
+
+    /// <summary>
+    /// 在 <c>map_desc</c> 组件中查找「影画展示3」的图片地址。
+    /// </summary>
+    /// <param name="page">词条正文。</param>
+    /// <returns>满影画 URL；未找到则为 null。</returns>
+    public static string? ExtractFullCinemaImage(WikiEntryPage? page)
+    {
+        if (page?.Modules is null)
+        {
+            return null;
+        }
+        foreach (WikiEntryModule module in page.Modules)
+        {
+            foreach (WikiEntryComponent component in module.Components ?? [])
+            {
+                if (component.ComponentId is not "map_desc" || string.IsNullOrWhiteSpace(component.Data))
+                {
+                    continue;
+                }
+                WikiMapDescData? data;
+                try
+                {
+                    data = JsonSerializer.Deserialize(component.Data, BlackboardJsonContext.Default.WikiMapDescData);
+                }
+                catch (JsonException)
+                {
+                    continue;
+                }
+                string? image = data?.List?.Find(x => x.TabName == FullCinemaTabName)?.Image;
+                if (!string.IsNullOrWhiteSpace(image))
+                {
+                    return image;
                 }
             }
         }

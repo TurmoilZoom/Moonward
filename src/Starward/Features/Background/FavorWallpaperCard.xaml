@@ -29,7 +29,7 @@
                         VerticalAlignment="Stretch"
                         DecodeWidth="490"
                         Source="{x:Bind View.CoverUrl, Mode=OneWay}"
-                        Stretch="Uniform" />
+                        Stretch="{x:Bind View.CoverStretch, Mode=OneWay}" />
 
         <MediaPlayerElement x:Name="Player_Preview"
                             HorizontalAlignment="Stretch"
