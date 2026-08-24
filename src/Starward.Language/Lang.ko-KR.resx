@@ -1320,6 +1320,12 @@
   <data name="FileSettingPage_DataFolder" xml:space="preserve">
     <value>데이터 저장 경로</value>
   </data>
+  <data name="FileSettingPage_LogFolder" xml:space="preserve">
+    <value>로그 폴더</value>
+  </data>
+  <data name="FileSettingPage_FilePath" xml:space="preserve">
+    <value>파일 경로</value>
+  </data>
   <data name="FileSettingPage_OpenLogFile" xml:space="preserve">
     <value>로그 파일 보기</value>
   </data>
@@ -1327,7 +1333,7 @@
     <value>표시</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>데이터</value>
+    <value>데이터 관리</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>완료</value>

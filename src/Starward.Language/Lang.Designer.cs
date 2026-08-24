@@ -2500,7 +2500,25 @@ namespace Starward.Language {
                 return ResourceManager.GetString("FileSettingPage_DataFolder", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Log Folder 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_LogFolder {
+            get {
+                return ResourceManager.GetString("FileSettingPage_LogFolder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 File Paths 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_FilePath {
+            get {
+                return ResourceManager.GetString("FileSettingPage_FilePath", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Your personal data is stored in the folder below. It is very important, please do not delete it casually. 的本地化字符串。
         /// </summary>

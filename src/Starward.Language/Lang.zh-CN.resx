@@ -1378,6 +1378,12 @@
   <data name="FileSettingPage_DataFolder" xml:space="preserve">
     <value>数据文件夹</value>
   </data>
+  <data name="FileSettingPage_LogFolder" xml:space="preserve">
+    <value>日志文件夹</value>
+  </data>
+  <data name="FileSettingPage_FilePath" xml:space="preserve">
+    <value>文件路径</value>
+  </data>
   <data name="FileSettingPage_OpenLogFile" xml:space="preserve">
     <value>打开日志文件</value>
   </data>
@@ -1385,7 +1391,7 @@
     <value>外观</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>数据</value>
+    <value>数据管理</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>完成</value>

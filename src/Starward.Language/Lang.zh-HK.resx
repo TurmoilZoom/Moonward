@@ -1319,6 +1319,12 @@
   <data name="FileSettingPage_DataFolder" xml:space="preserve">
     <value>資料目錄</value>
   </data>
+  <data name="FileSettingPage_LogFolder" xml:space="preserve">
+    <value>日志資料夾</value>
+  </data>
+  <data name="FileSettingPage_FilePath" xml:space="preserve">
+    <value>檔案路徑</value>
+  </data>
   <data name="FileSettingPage_OpenLogFile" xml:space="preserve">
     <value>打開記錄檔</value>
   </data>
@@ -1326,7 +1332,7 @@
     <value>外觀</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>資料</value>
+    <value>資料管理</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>完成</value>

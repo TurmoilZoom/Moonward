@@ -1319,6 +1319,12 @@
   <data name="FileSettingPage_DataFolder" xml:space="preserve">
     <value>データフォルダー</value>
   </data>
+  <data name="FileSettingPage_LogFolder" xml:space="preserve">
+    <value>ログフォルダー</value>
+  </data>
+  <data name="FileSettingPage_FilePath" xml:space="preserve">
+    <value>ファイルパス</value>
+  </data>
   <data name="FileSettingPage_OpenLogFile" xml:space="preserve">
     <value>ログファイルを開く</value>
   </data>
@@ -1326,7 +1332,7 @@
     <value>外観</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>データ</value>
+    <value>データ管理</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>完了</value>

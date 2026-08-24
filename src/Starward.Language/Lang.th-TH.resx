@@ -1319,6 +1319,12 @@
   <data name="FileSettingPage_DataFolder" xml:space="preserve">
     <value>โฟลเดอร์ข้อมูล</value>
   </data>
+  <data name="FileSettingPage_LogFolder" xml:space="preserve">
+    <value>โฟลเดอร์บันทึก</value>
+  </data>
+  <data name="FileSettingPage_FilePath" xml:space="preserve">
+    <value>เส้นทางไฟล์</value>
+  </data>
   <data name="FileSettingPage_OpenLogFile" xml:space="preserve">
     <value>เปิดไฟล์บันทึก</value>
   </data>
@@ -1326,7 +1332,7 @@
     <value>ลักษณะที่ปรากฏ</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>ข้อมูล</value>
+    <value>การจัดการข้อมูล</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>เสร็จสิ้น</value>

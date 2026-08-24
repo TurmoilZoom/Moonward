@@ -7,91 +7,152 @@
              xmlns:local="using:Starward.Features.Setting"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:s="using:Starward"
+             xmlns:sc="using:Starward.Controls"
              xmlns:sf="using:Starward.Frameworks"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
     <ScrollViewer>
         <StackPanel>
-            <!--  卸载（仅标准安装版可见）  -->
-            <StackPanel Visibility="{x:Bind CanCleanOnUninstall}">
-                <TextBlock Margin="0,0,0,0"
-               FontSize="20"
-               Text="{x:Bind lang:Lang.FileSettingPage_Uninstall}" />
-                <TextBlock Margin="0,8,0,0"
-               FontSize="14"
-               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-               Text="{x:Bind lang:Lang.FileSettingPage_DeleteDataOnUninstallDesc}"
-               TextWrapping="Wrap" />
-                <ToggleSwitch Margin="0,8,0,0"
-                  IsOn="{x:Bind DeleteDataOnUninstall, Mode=TwoWay}"
-                  OffContent="{x:Bind lang:Lang.FileSettingPage_DeleteDataOnUninstall}"
-                  OnContent="{x:Bind lang:Lang.FileSettingPage_DeleteDataOnUninstall}" />
+            <!--  文件路径（模块标题）  -->
+            <TextBlock FontSize="20"
+                       Text="{x:Bind lang:Lang.FileSettingPage_FilePath}" />
+            <!--  数据文件夹 / 日志文件夹：对齐的路径行（前导图标 · 名称 / 完整路径 · 右侧图标操作按钮），两行共用同一套三列网格以保持对齐  -->
+            <StackPanel Margin="0,12,0,0"
+                        Spacing="12">
+                <!--  数据文件夹  -->
+                <Border Padding="16,10"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0"
+                                  Width="24"
+                                  VerticalAlignment="Center"
+                                  FontSize="20"
+                                  Glyph="&#xE8F1;" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind lang:Lang.FileSettingPage_DataFolder}" />
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextSelectionEnabled="True"
+                                       MaxLines="2"
+                                       Text="{x:Bind s:AppConfig.UserDataFolder}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Spacing="8">
+                            <!--  重新选择数据文件夹  -->
+                            <Button Width="36"
+                                    Height="36"
+                                    Padding="0"
+                                    Command="{x:Bind ChangeUserDataFolderCommand}"
+                                    CornerRadius="8"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.SettingPage_ReselectDataFolder}"
+                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                                <FontIcon FontSize="16"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE8DE;" />
+                            </Button>
+                            <!--  打开数据文件夹  -->
+                            <Button Width="36"
+                                    Height="36"
+                                    Padding="0"
+                                    Command="{x:Bind OpenUserDataFolderCommand}"
+                                    CornerRadius="8"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.ScreenshotPage_OpenFolder}"
+                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                                <FontIcon FontSize="16"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE838;" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <!--  日志文件夹（与数据文件夹同处一个模块，日志目录即数据文件夹下的 log 子目录）  -->
+                <Border Padding="16,10"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0"
+                                  Width="24"
+                                  VerticalAlignment="Center"
+                                  FontSize="20"
+                                  Glyph="&#xE9D9;" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind lang:Lang.FileSettingPage_LogFolder}" />
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextSelectionEnabled="True"
+                                       MaxLines="2"
+                                       Text="{x:Bind LogFolder}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Spacing="8">
+                            <!--  打开日志文件夹  -->
+                            <Button Width="36"
+                                    Height="36"
+                                    Padding="0"
+                                    Command="{x:Bind OpenLogFolderCommand}"
+                                    CornerRadius="8"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.SettingPage_OpenLogFolder}"
+                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                                <FontIcon FontSize="16"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE838;" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </StackPanel>
 
 
+            <!--  删除个人设置（单独一行）  -->
+            <Button Margin="0,20,0,0"
+                    Height="40"
+                    Padding="16,0,16,0"
+                    BorderThickness="0"
+                    Command="{x:Bind DeleteAllSettingCommand}"
+                    CornerRadius="8,20,20,8"
+                    Style="{ThemeResource AccentButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE74D;" />
+                    <TextBlock Text="{x:Bind lang:Lang.SettingPage_DeleteAllSettings}" />
+                </StackPanel>
+            </Button>
 
-            <!--  用户数据文件夹  -->
-            <TextBlock FontSize="20"  Margin="0,20,0,0"
-                       Text="{x:Bind lang:Lang.FileSettingPage_DataFolder}" />
-            <TextBlock Margin="0,12,0,0"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.FileSettingPage_DataFolderIsImportant}"
-                       TextWrapping="Wrap" />
-            <Grid Margin="0,12,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <!--  重新选择  -->
-                <Button Grid.Column="0"
-                        Height="40"
-                        Padding="16,0,16,0"
-                        BorderThickness="0"
-                        Command="{x:Bind ChangeUserDataFolderCommand}"
-                        CornerRadius="8,20,20,8"
-                        Style="{ThemeResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE8DE;" />
-                        <TextBlock Text="{x:Bind lang:Lang.SettingPage_ReselectDataFolder}" />
-                    </StackPanel>
-                </Button>
-                <!--  当前用户数据文件夹  -->
-                <Button Grid.Column="1"
-                        Height="40"
-                        Margin="16,0,0,0"
-                        Padding="20,0,20,1"
-                        BorderThickness="0"
-                        Command="{x:Bind OpenUserDataFolderCommand}"
-                        CornerRadius="20">
-                    <Grid ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock VerticalAlignment="Center"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
-                                   MaxLines="2"
-                                   Text="{x:Bind s:AppConfig.UserDataFolder}"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="Wrap" />
-                        <FontIcon Grid.Column="1"
-                                  Margin="0,2,2,0"
-                                  FontSize="14"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                  Glyph="&#xE8A7;" />
-                    </Grid>
-                </Button>
-            </Grid>
-
-
-            <!--  备份数据库  -->
-            <StackPanel Margin="0,8,0,0"
+            <!--  备份数据库（单独一行）  -->
+            <StackPanel Margin="0,12,0,0"
                         Orientation="Horizontal"
                         Spacing="16">
                 <Button Height="40"
-                        Margin="0,0,0,0"
                         Padding="16,0,16,0"
                         BorderThickness="0"
                         Command="{x:Bind BackupDatabaseCommand}"
@@ -102,24 +163,14 @@
                         <TextBlock Text="{x:Bind lang:Lang.SettingPage_BackupDatabase}" />
                     </StackPanel>
                 </Button>
-                <!--  删除个人设置  -->
-                <Button Height="40"
-                        Padding="16,0,16,0"
-                        BorderThickness="0"
-                        Command="{x:Bind DeleteAllSettingCommand}"
-                        CornerRadius="8,20,20,8"
-                        Style="{ThemeResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE74D;" />
-                        <TextBlock Text="{x:Bind lang:Lang.SettingPage_DeleteAllSettings}" />
-                    </StackPanel>
-                </Button>
                 <ProgressRing Width="28"
                               Height="28"
+                              VerticalAlignment="Center"
                               IsIndeterminate="{x:Bind BackupDatabaseCommand.IsRunning}"
                               Visibility="{x:Bind BackupDatabaseCommand.IsRunning}" />
                 <Button Height="40"
                         Padding="20,0,20,1"
+                        VerticalAlignment="Center"
                         BorderThickness="0"
                         Command="{x:Bind OpenLastBackupDatabaseCommand}"
                         CornerRadius="20"
@@ -138,25 +189,6 @@
 
 
             
-
-
-            <!--  日志  -->
-            <TextBlock Margin="0,20,0,0"
-                       FontSize="20"
-                       Text="{x:Bind lang:Lang.FileSettingPage_Log}" />
-            <!--  打开日志文件夹  -->
-            <Button Height="40"
-                    Margin="0,8,0,0"
-                    Padding="16,0,16,0"
-                    BorderThickness="0"
-                    Command="{x:Bind OpenLogFolderCommand}"
-                    CornerRadius="8,20,20,8"
-                    Style="{ThemeResource AccentButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE838;" />
-                    <TextBlock Text="{x:Bind lang:Lang.SettingPage_OpenLogFolder}" />
-                </StackPanel>
-            </Button>
 
 
             <!--  缓存  -->

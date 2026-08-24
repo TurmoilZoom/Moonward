@@ -1320,6 +1320,12 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="FileSettingPage_DataFolder" xml:space="preserve">
     <value>Carpeta de datos</value>
   </data>
+  <data name="FileSettingPage_LogFolder" xml:space="preserve">
+    <value>Carpeta de registro</value>
+  </data>
+  <data name="FileSettingPage_FilePath" xml:space="preserve">
+    <value>Rutas de archivo</value>
+  </data>
   <data name="FileSettingPage_OpenLogFile" xml:space="preserve">
     <value>Abrir archivo de registro</value>
   </data>
@@ -1327,7 +1333,7 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Apariencia</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>Datos</value>
+    <value>Gestión de datos</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>Completado</value>

@@ -50,16 +50,16 @@
                         <FontIcon Glyph="&#xE81E;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <!--  数据管理  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_FileManagement}" Tag="FileManageSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8F1;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <!--  游戏下载  -->
                 <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_Download}" Tag="DownloadSetting">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xEBD3;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <!--  数据  -->
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_FileManagement}" Tag="FileManageSetting">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8F1;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <!--  截图  -->

@@ -1320,6 +1320,12 @@ Accetti il rischio e desideri continuare?</value>
   <data name="FileSettingPage_DataFolder" xml:space="preserve">
     <value>Cartella dati</value>
   </data>
+  <data name="FileSettingPage_LogFolder" xml:space="preserve">
+    <value>Cartella dei Log</value>
+  </data>
+  <data name="FileSettingPage_FilePath" xml:space="preserve">
+    <value>Percorsi file</value>
+  </data>
   <data name="FileSettingPage_OpenLogFile" xml:space="preserve">
     <value>Apri file di registro</value>
   </data>
@@ -1327,7 +1333,7 @@ Accetti il rischio e desideri continuare?</value>
     <value>Aspetto</value>
   </data>
   <data name="SettingPage_FileManagement" xml:space="preserve">
-    <value>Dati</value>
+    <value>Gestione dati</value>
   </data>
   <data name="SettingPage_Completed" xml:space="preserve">
     <value>Completato</value>
