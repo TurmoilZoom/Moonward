@@ -1399,6 +1399,12 @@
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>相关链接</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>致谢</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>本项目在功能与设计上参考了以下开源项目：</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>高级</value>
   </data>

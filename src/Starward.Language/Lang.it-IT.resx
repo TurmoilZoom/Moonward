@@ -1341,6 +1341,12 @@ Accetti il rischio e desideri continuare?</value>
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>Indirizzi</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>Ringraziamenti</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>Questo progetto si ispira ai seguenti progetti open source per funzionalità e design:</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>Avanzate</value>
   </data>

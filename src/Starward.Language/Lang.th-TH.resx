@@ -1340,6 +1340,12 @@
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>ลิงค์</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>กิตติกรรมประกาศ</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>โปรเจกต์นี้อ้างอิงฟีเจอร์และการออกแบบจากโปรเจกต์โอเพนซอร์สต่อไปนี้:</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>ตั้งค่าขั้นสูง</value>
   </data>

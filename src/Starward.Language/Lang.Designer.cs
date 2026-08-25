@@ -122,6 +122,24 @@ namespace Starward.Language {
                 return ResourceManager.GetString("AboutSettingPage_Links", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Acknowledgements 的本地化字符串。
+        /// </summary>
+        public static string AboutSettingPage_Acknowledgements {
+            get {
+                return ResourceManager.GetString("AboutSettingPage_Acknowledgements", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 This project references the following open-source projects for features and design: 的本地化字符串。
+        /// </summary>
+        public static string AboutSettingPage_AcknowledgementsDesc {
+            get {
+                return ResourceManager.GetString("AboutSettingPage_AcknowledgementsDesc", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Repair Files 的本地化字符串。

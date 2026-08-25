@@ -1,78 +1,56 @@
-# Moonward
+<h1 align="center">Moonward</h1>
 
-> **Moonward** происходит от слогана Star Rail: May This Journey Lead Us **Moonward**, который очень подходит для использования в качестве названия приложения.
-> 
-Moonward — это сторонний лаунчер с открытым исходным кодом, разработанный для устранения недостатков HoYoPlay (лаунчера miHoYo). Он поддерживает все компьютерные игры на HoYoverse и призван полностью заменить официальный лаунчер. В дополнение к основным функциям лаунчера, я также включу некоторые дополнительные функции, основанные на индивидуальных потребностях, такие как:
+<p align="center">
+  Сторонний лаунчер с открытым исходным кодом на базе <a href="https://github.com/Scighost/Starward">Starward</a> для PC-игр miHoYo<br/>
+  <a href="https://github.com/TurmoilZoom/Moonward/releases/latest">Скачать</a>
+</p>
 
-Помимо загрузки и установки игры, включены следующие возможности:
-
--  Запись игрового времени
--  Смена игровго аккаунта
--  Просмотр скриншотов игры
--  Сохранение записей гачи
--  Набор инструментов HoYoLAB 
-
-Планируются дополнительные функции...
-
-## Установка
-
-Во-первых, ваше устройство должно соответствовать следующим требованиям:
-
-- Windows 10 1809 (17763) и выше
-- Установлено [Visual C++ Runtime](https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist) 
-- Установлено [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2) 
-- Для улучшения работы, пожалуйста, включите ** Эффекты прозрачности ** и ** Эффекты анимаций ** в системных настройках
-
-Загрузите пакет для вашей архитектуры процессора с сайта [GitHub Release](https://github.com/Scighost/Starward/releases). Извлеките его, затем запустите `Moonward.exe` и следуйте инструкциям.
+<p align="center">
+  <a href="../README.md">简体中文</a>
+  · <a href="README.ja-JP.md">日本語</a>
+  · Русский
+  · <a href="README.th-TH.md">ไทย</a>
+  · <a href="README.vi-VN.md">Tiếng Việt</a>
+</p>
 
 
-## Локализация
+---
 
-[![de-DE translation](https://img.shields.io/badge/dynamic/json?color=blue&label=de-DE&style=flat&logo=crowdin&query=%24.progress.0.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/de)
-[![en-US translation](https://img.shields.io/badge/any_text-100%25-blue?logo=crowdin&label=en-US)](https://crowdin.com/project/starward)
-[![it-IT translation](https://img.shields.io/badge/dynamic/json?color=blue&label=it-IT&style=flat&logo=crowdin&query=%24.progress.2.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/it)
-[![ja-JP translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ja-JP&style=flat&logo=crowdin&query=%24.progress.3.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ja)
-[![ko-KR translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ko-KR&style=flat&logo=crowdin&query=%24.progress.4.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ko)
-[![ru-RU translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ru-RU&style=flat&logo=crowdin&query=%24.progress.5.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ru)
-[![th-TH translation](https://img.shields.io/badge/dynamic/json?color=blue&label=th-TH&style=flat&logo=crowdin&query=%24.progress.6.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/th)
-[![vi-VN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=vi-VN&style=flat&logo=crowdin&query=%24.progress.7.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/vi)
-[![zh-CN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat&logo=crowdin&query=%24.progress.8.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-CN)
-[![zh-TW translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-TW&style=flat&logo=crowdin&query=%24.progress.9.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-TW)
+На основе upstream Starward часто используемые действия собраны в ярлык на рабочем столе и один URL; усилены чекин, гача, фоны и другое. Основные возможности:
 
-Moonward использует [Crowdin](https://crowdin.com/project/starward) для работы по локализации предоставьте машинный перевод английского текста в качестве оригинала. Вы можете помочь нам перевести и отредактировать текст на местном языке, и мы с нетерпением ждем участия большего числа людей. Если вы хотите добавить новый язык перевода, пожалуйста, создайте проблему.
+#### Гача
 
-## Разработка
+- **Записи гачи** — статистику баннеров можно перетаскивать (у края автоматически прокручивается по горизонтали), список поддерживает прокрутку перетаскиванием, статистика закреплена сверху; серии UP / промахов и вероятность выпадения видны сразу; «откручено» в Астральном Пределе отображается прогресс-баром
+- **Фильтры и шаринг** — в выпадающем списке заголовка выбирайте, какие баннеры показывать: выделить все / инвертировать / сбросить; в один клик создаётся матовая шаринг-картинка с открученным количеством и прогрессом гарантии
+- **Синхронизация гачи** — Genshin Impact / Zenless Zone Zero и другие могут обновлять записи через miHoYo BBS; при выпадении нового персонала, которого ещё нет в базе, иконка и имя дополняются автоматически; названия предметов следуют языку приложения
+- **Обмен данными** — импорт / экспорт записей гачи в формате UIGF; историю можно импортировать из upstream Starward только для чтения
 
-Чтобы скомпилировать проект локально, вам необходимо установить Visual Studio 2022 и выбрать следующие Рабочие нагрузки:
+#### Аккаунт и набор инструментов
 
--  .NET Desktop Development
--  C++ Desktop Development
--  Universal Windows Platform Development
+- **Ежедневный чекин** — чекин miHoYo BBS / HoYoLAB, отдельный переключатель для каждой игры, авточекин и доначисление; при запуске игры ярлыком / URL / командной строкой этому аккаунту также выполняется отдельный чекин
+- **Улучшенный вход** — китайский сервер: вход по коду с телефона; международный — через веб; при истечении сессии вход по возможности продлевается автоматически, без повторного логина
+- **Месячные отчёты и записки** — единый макет месячных отчётов в наборе инструментов (Календарь Освоения / Ежемесячный отчет Интернот / Заметки Путешественника); в отчёте Интернот исправлены дневные данные между часовыми поясами, по умолчанию показывается текущий месяц; при срабатывании антифрода в реальных записках есть вход для проверки
 
-## Пожертвование
+#### Запуск
 
-Разработка - дело нелегкое. Если вы считаете Moonward полезным, вы можете пожертвовать мне на https://donate.scighost.com.
+- **Несколько профилей запуска** — для одной игры можно сохранить сколько угодно наборов параметров и пользовательских программ запуска; переключение и правки не требуют повторного ввода, профили можно именовать и создавать ярлыки на рабочем столе
+- **URL-протокол** — `moonward://` запускает / останавливает / перезапускает указанную игру, профиль и аккаунт, либо отдельно запускает чекин; можно встраивать в скрипты и веб-страницы (см. [docs/UrlProtocol](UrlProtocol.md))
+- **Быстрый запуск** — в гамбургер-меню на главной собраны настройки игры, быстрый запуск и «создать ярлык в меню Пуск»
 
-## Спасибо
+#### Внешний вид и фон
 
-<picture>
-    <source srcset="https://github.com/Scighost/Starward/assets/61003590/9d369ec3-ab7c-408f-88c2-11bfe4453208" type="image/avif" />
-    <img src="https://github.com/Scighost/Starward/assets/61003590/44552992-e2c5-451f-9c2a-73176e8e4e93" width="240px" />
-</picture>
+- **Обои доверия** — в Zenless Zone Zero динамические обои доверия и статичные обои Mindscape из энциклопедии можно скачать и задать как пользовательский фон; галерея сразу использует локальный кэш, обновления проверяются в фоне без помех
+- **Пользовательский фон** — отдельный диалог фона, изображения / видео (можно перетащить на главную для замены); восстановление из трея без мерцания; после обновления списка фонов сохраняется выбранный постер
 
-Прежде всего, я хотел бы выразить свою искреннюю благодарность всем участникам и переводчикам этого проекта. Moonward может стать лучше только благодаря вам.
+#### Прочее
 
-Затем я хочу выразить свою особую благодарность [neon-nyan](https://github.com/neon-nyan). Вдохновение и дизайн для этого проекта взяты непосредственно из его проекта [Collapse](https://github.com/neon-nyan/Collapse). Я почерпнул много знаний из кода Collapse, и благодаря такой ценному источника информации мой процесс разработки прошел намного более гладко.
+- **Интеграция с системой** — автозапуск в трей при входе в Windows; на странице «О программе» одним действием заполняются диагностические данные, открывается GitHub Feedback и папка логов
+- **Тихое обновление** — новая версия скачивается в фоне, устанавливается после выхода из программы, при следующем запуске показывается содержимое обновления (Velopack + GitHub Releases)
 
-Далее, огромная благодарность основному разработчику [Snap Hutao](https://github.com/DGP-Studio/Snap.Hutao), [@Lightczx](https://github.com/Lightczx). Его помощь была бесценной в ходе разработки Moonward."
+Пакеты установки — в [Releases](https://github.com/TurmoilZoom/Moonward/releases).
 
-Затем, спасибо [CloudFlare](https://www.cloudflare.com/) за предоставление бесплатного CDN.
+Upstream-проект: [Scighost/Starward](https://github.com/Scighost/Starward)  
+Благодарности: [CREDITS.md](../CREDITS.md) (открытые проекты, на которые опираются функции и дизайн)  
+Лицензия: [MIT](../LICENSE)
 
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
-
-А также [сторонние библиотеки](./docs/ThirdParty.md), используемые в этом проекте.
-
-
-## Скриншот Лаунчера
-
-<img width="1200" src="https://github.com/user-attachments/assets/f3efc7bb-e862-46df-8593-4f91d8ba60b5" />
+Политика конфиденциальности: [docs/Privacy.md](Privacy.md)

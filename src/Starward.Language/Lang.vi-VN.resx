@@ -1341,6 +1341,12 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>Liên kết</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>Lời cảm ơn</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>Dự án này tham khảo các dự án mã nguồn mở sau đây về tính năng và thiết kế:</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>Nâng cao</value>
   </data>

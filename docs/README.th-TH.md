@@ -1,74 +1,56 @@
-# อะไรคือ Moonward?
+<h1 align="center">Moonward</h1>
 
-**Moonward**  มาจากสโลแกนของ Star Rail: ขอให้การเดินทางครั้งนี้ พาเรามุ่งไปสู่ดวงดาว (May This Journey Lead Us **Moonward**) ซึ่งเหมาะมากที่จะใช้เป็นชื่อแอพ 
-Moonward เป็น launcer ที่รองรับเกมบนเดสก์ท็อปทั้งหมดของ miHoYo/HoYoverse โดยมีเป้าหมายที่จะแทนที่ launcher หลักอย่างเป็นทางการ พร้อมกับเพิ่มฟีเจอร์ใหม่ๆเข้าไปด้วย
+<p align="center">
+  ตัวเปิดเกมโอเพนซอร์สของบุคคลที่สามบนฐาน <a href="https://github.com/Scighost/Starward">Starward</a> สำหรับเกม PC ของ miHoYo<br/>
+  <a href="https://github.com/TurmoilZoom/Moonward/releases/latest">ดาวน์โหลด</a>
+</p>
 
-นอกจากที่จะให้ผู้ใช้ดาวน์โหลดแล้วติดตั้งเกม ก็ยังมีฟีเจอร์เพิ่มเติม ดังนี้:
-
-- นับเวลาที่เล่น
-- สลับเปลี่ยนบัญชี
-- ดูภาพหน้าจอ
-- ดูประวัติการสุ่มกาชา
-- HoYoLAB Toolbox
-
-และมีอีกที่วางแผนไว้...
-
-> Moonward จะไม่มีฟีเจอร์ที่ต้องให้ผู้พัฒนาคอยอัพเดตข้อมูลและทรัพยากรของเกม เช่นรูปของไอเทม ฯลฯ
-
-## การดาวน์โหลด
-
-อย่างแรก อุปกรณ์ของคุณต้องตรงตามเงื่อนไขเหล่านี้:
-
-- Windows 10 1809 (17763) ขึ้นไป
-- ติดตั้ง [Visual C++ Runtime](https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist) 
-- ติดตั้ง [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2) installed
-
-ดาวน์โหลดแพ็คเกจสำหรับสถาปัตยกรรม CPU ที่ใช้อยู่จาก [GitHub Release](https://github.com/Scighost/Starward/releases) แตกไฟล์ แล้วรัน 'Moonward.exe' แล้วทำตามที่มันบอกจนเซ็ทอัพเสร็จ
-
-Moonward อาจ crash ได้บนบางอุปกรณ์ หากพบเจอปัญหานี้ให้สร้าง 'config.ini' ไฟล์ในโฟลเดอร์ 'Moonward' แล้ววางข้อความต่อไปนี้ลงไป 
-ไปที่ [docs/Configuration.md](./Configuration.md) หากต้องการข้อมูลเพิ่มเติมเกี่ยวกับ 'config.ini'
-
-``` ini
-UserDataFolder=.
-```
-
-## การแปลภาษา
-
-[![de-DE translation](https://img.shields.io/badge/dynamic/json?color=blue&label=de-DE&style=flat&logo=crowdin&query=%24.progress.0.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/de)
-[![en-US translation](https://img.shields.io/badge/any_text-100%25-blue?logo=crowdin&label=en-US)](https://crowdin.com/project/starward)
-[![it-IT translation](https://img.shields.io/badge/dynamic/json?color=blue&label=it-IT&style=flat&logo=crowdin&query=%24.progress.2.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/it)
-[![ja-JP translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ja-JP&style=flat&logo=crowdin&query=%24.progress.3.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ja)
-[![ko-KR translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ko-KR&style=flat&logo=crowdin&query=%24.progress.4.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ko)
-[![ru-RU translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ru-RU&style=flat&logo=crowdin&query=%24.progress.5.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ru)
-[![th-TH translation](https://img.shields.io/badge/dynamic/json?color=blue&label=th-TH&style=flat&logo=crowdin&query=%24.progress.6.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/th)
-[![vi-VN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=vi-VN&style=flat&logo=crowdin&query=%24.progress.7.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/vi)
-[![zh-CN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat&logo=crowdin&query=%24.progress.8.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-CN)
-[![zh-TW translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-TW&style=flat&logo=crowdin&query=%24.progress.9.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-TW)
-
-Moonward ใช้ [Crowdin](https://crowdin.com/project/starward) ในการแปลภาษาโดยให้ข้อความภาษาอังกฤษที่ถูกแปลด้วยเครื่องจักรเป็นภาษาต้นแบบ คุณสามารถช่วยแปลหรือตรวจสอบข้อความภาษาของคุณได้
-เรายินดีต้อนรับคนที่สนใจช่วย หากคุณต้องการเพิ่มภาษาอื่นๆ สามารถสร้าง issue เพื่อบอกพวกเราได้
-
-## การพัฒนา
-
-ในการคอมไพล์โปรเจกต์นี้ คุณต้องติดตั้ง Visual studio 2022 แล้วเลือก workload ต่อไปนี้ :
-
--  .NET Desktop Development
--  C++ Desktop Development
--  Universal Windows Platform Development
-
-## คำขอบคุณ
-
-ก่อนอื่น ขอขอบคุณคุณ [neon-nyan](https://github.com/neon-nyan) อย่างมาก โดยเฉพาะโปรเจกต์ [Collapse](https://github.com/neon-nyan/Collapse) ที่เป็นแรงบันดาลใจให้โปรเจกต์นี้
-Moonward ไม่เพียงแต่จะใช้ทรัพยากรบางส่วนที่เขาสร้างแล้ว ยังนำเอาแนวการออกแบบ UI มาใช้อีกด้วย 
-ผมได้เรียนรู้เยอะมากจากโค้ดของ Collapse และได้ทำให้การพัฒนา Starwart เป็นไปได้อย่างราบรื่น
-
-นอกจากนี้ผมต้องขอบคุณ [CloudFlare](https://www.cloudflare.com/) ที่ให้บริการ CDN ฟรี
-
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
-
-และ[ไลบรารีของบุคคลที่สาม](./docs/ThirdParty.md) ที่ใช้ในโครงการนี้ 
+<p align="center">
+  <a href="../README.md">简体中文</a>
+  · <a href="README.ja-JP.md">日本語</a>
+  · <a href="README.ru-RU.md">Русский</a>
+  · ไทย
+  · <a href="README.vi-VN.md">Tiếng Việt</a>
+</p>
 
 
-## Screenshot
+---
 
-<img width="1200" src="https://github.com/user-attachments/assets/d289e4e0-38b6-40f1-9554-fa8e916da6c1">
+ต่อยอดจาก Starward ต้นน้ำ โดยรวบการใช้งานที่พบบ่อยไว้ในทางลัดบนเดสก์ท็อปและ URL เส้นเดียว และเสริมเช็คอิน กาชา พื้นหลัง ฯลฯ ฟีเจอร์หลัก:
+
+#### กาชา
+
+- **บันทึกกาชา** — สถิติแบนเนอร์ลากเรียงลำดับได้ (เลื่อนแนวนอนอัตโนมัติเมื่อใกล้ขอบ) รายการรองรับการลากเลื่อน สถิติติดด้านบน; ดู UP ติดกัน / พลาดติดกัน และอัตราชนะได้ในพริบตา; 「จำนวนการสุ่ม」ของมิเลียสตรา วันเดอร์แลนด์ ใช้แถบความคืบหน้า
+- **ตัวกรองและแชร์** — ดรอปดาวน์บนแถบชื่อเรื่องเลือกแบนเนอร์ที่จะแสดง เลือกทั้งหมด / สลับเลือก / รีเซ็ตได้; สร้างรูปแชร์สไตล์ฝ้าด้วยคลิกเดียว รวมจำนวนการสุ่มและความคืบหน้าการันตี
+- **ซิงก์กาชา** — Genshin Impact / Zenless Zone Zero ฯลฯ อัปเดตบันทึกผ่านช่องทางที่เกี่ยวข้องกับ miHoYo BBS ได้; เมื่อสุ่มได้ตัวละครใหม่ที่ยังไม่อยู่ในคลัง ไอคอนและชื่อจะเติมให้อัตโนมัติ; ชื่อไอเทมตามภาษาของแอป
+- **แลกเปลี่ยนข้อมูล** — นำเข้า / ส่งออกบันทึกกาชาแบบ UIGF; นำเข้าประวัติจาก Starward ต้นน้ำแบบอ่านอย่างเดียวได้
+
+#### บัญชีและกล่องเครื่องมือ
+
+- **เช็คอินรายวัน** — เช็คอิน miHoYo BBS / HoYoLAB สวิตช์แยกตามเกม รองรับเช็คอินอัตโนมัติและเซ็นย้อนหลัง; เมื่อเปิดเกมด้วยทางลัด / URL / คำสั่ง บัญชีนั้นจะถูกเช็คอินแยกอีกครั้งด้วย
+- **ปรับปรุงการเข้าสู่ระบบ** — เซิร์ฟจีนใช้เบอร์มือถือรับรหัสยืนยัน เซิร์ฟนานาชาติใช้เว็บล็อกอิน; เมื่อเซสชันหมดอายุจะต่อให้อัตโนมัติเท่าที่ทำได้ ไม่ต้องล็อกอินซ้ำบ่อย ๆ
+- **รายงานเดือนและบันทึกเรียลไทม์** — เลย์เอาต์รายงานเดือนในกล่องเครื่องมือ (ปฏิทินการบุกเบิก / รายงานประจำเดือน Inter-Knot / บันทึกของนักเดินทาง) เป็นชุดเดียวกัน; รายงาน Inter-Knot แก้ข้อมูลรายวันข้ามโซนเวลา และแสดงเดือนปัจจุบันเป็นค่าเริ่มต้น; เมื่อบันทึกเรียลไทม์โดนระบบป้องกันความเสี่ยง จะมีช่องทางยืนยันตัวตน
+
+#### การเปิดเกม
+
+- **โปรไฟล์เปิดเกมหลายชุด** — เกมเดียวกันบันทึกพารามิเตอร์เปิดเกมและโปรแกรมเปิดเกมแบบกำหนดเองได้ไม่จำกัดจำนวน; สลับโปรไฟล์หรือแก้พารามิเตอร์ไม่ต้องกรอกใหม่ทุกครั้ง ตั้งชื่อแล้วสร้างทางลัดบนเดสก์ท็อปได้
+- **โปรโตคอล URL** — `moonward://` ระบุเกม โปรไฟล์ และบัญชี เพื่อเปิด / หยุด / รีสตาร์ทโดยตรง หรือสั่งเช็คอินอย่างเดียวก็ได้; ฝังในสคริปต์หรือหน้าเว็บได้ (ดู [docs/UrlProtocol](UrlProtocol.md))
+- **เปิดเร็ว** — เมนูแฮมเบอร์เกอร์หน้าแรกรวมการตั้งค่าเกม การเปิดเร็ว และ「สร้างทางลัดเมนูเริ่ม」
+
+#### รูปลักษณ์และพื้นหลัง
+
+- **วอลเปเปอร์ความไว้ใจ** — Zenless Zone Zero ดาวน์โหลด「วอลเปเปอร์ไดนามิกความไว้ใจ」และ「วอลเปเปอร์นิ่ง Mindscape」จากสารานุกรมมาตั้งเป็นพื้นหลังกำหนดเองได้; เปิดแกลเลอรีแล้วใช้แคชในเครื่องทันที ตรวจอัปเดตเงียบ ๆ เบื้องหลัง
+- **พื้นหลังกำหนดเอง** — กล่องโต้ตอบพื้นหลังแยกต่างหาก รองรับรูป / วิดีโอ (ลากลงหน้าแรกเพื่อแทนที่ได้ทันที); กู้จากถาดระบบไม่กระพริบ; หลังอัปเดตรายการพื้นหลังแล้วยังคงค่าโปสเตอร์ที่เลือกไว้
+
+#### อื่น ๆ
+
+- **เชื่อมกับระบบ** — ตั้งให้เปิดพร้อม Windows ไปที่ถาดระบบได้; หน้าเกี่ยวกับกรอกข้อมูลวินิจฉัยล่วงหน้าแล้วไป GitHub Feedback ในคลิกเดียว พร้อมเปิดโฟลเดอร์ล็อก
+- **อัปเดตเงียบ** — ดาวน์โหลดเวอร์ชันใหม่เบื้องหลัง ติดตั้งอัตโนมัติหลังปิดโปรแกรม และแสดงเนื้อหาอัปเดตเมื่อเปิดครั้งถัดไป (Velopack + GitHub Releases)
+
+ไฟล์ติดตั้งอยู่ที่ [Releases](https://github.com/TurmoilZoom/Moonward/releases)
+
+โครงการต้นน้ำ: [Scighost/Starward](https://github.com/Scighost/Starward)  
+ขอบคุณ: [CREDITS.md](../CREDITS.md) (โครงการโอเพนซอร์สที่อ้างอิงด้านฟังก์ชันและดีไซน์)  
+สัญญาอนุญาต: [MIT](../LICENSE)
+
+นโยบายความเป็นส่วนตัว: [docs/Privacy.md](Privacy.md) · [ไทย](Privacy.th-TH.md)

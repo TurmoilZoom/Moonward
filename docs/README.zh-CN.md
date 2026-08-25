@@ -1,83 +1,56 @@
-# Moonward
+<h1 align="center">Moonward</h1>
 
-> **Moonward** 出自星穹铁道开服前的宣传语———愿此行，终抵群星 (May This Journey Lead Us **Moonward**)。
+<p align="center">
+  基于 <a href="https://github.com/Scighost/Starward">Starward</a> 的开源第三方启动器，面向米哈游 PC 游戏<br/>
+  <a href="https://github.com/TurmoilZoom/Moonward/releases/latest">下载</a>
+</p>
 
-Moonward 是一个为了解决 HoYoPlay (米哈游启动器) 的缺点而开发的开源第三方启动器，支持米哈游 PC 端的所有游戏，目标是完全替代官方启动器。除了启动器的基本功能外，我还会根据个人需求增加一些拓展功能，比如：
-
--  记录游戏时间
--  切换游戏账号
--  浏览游戏截图
--  保存抽卡记录
--  切换游戏服务器
-
-更多功能留给您自行探索。
-
-
-## 安装
-
-首先，您的设备需要满足以下要求：
-
-- Windows 10 1809 (17763) 及以上的版本
-- 已安装 [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2)
-- 已安装 [WebP 映像扩展](https://apps.microsoft.com/detail/9pg2dk419drg)
-- 为了更好的使用体验，请在系统设置中开启**透明效果**和**动画效果**
->[WebP 映像扩展](https://apps.microsoft.com/detail/9pg2dk419drg) 一般情况下系统自带，如果程序无法正常显示背景图片请自行检查是否安装。
-
-然后在 [GitHub Release](https://github.com/Scighost/Starward/releases) 下载对应 CPU 架构的压缩包，解压后运行 `Moonward.exe` 并按提示操作。
+<p align="center">
+  <a href="../README.md">简体中文</a>
+  · <a href="README.ja-JP.md">日本語</a>
+  · <a href="README.ru-RU.md">Русский</a>
+  · <a href="README.th-TH.md">ไทย</a>
+  · <a href="README.vi-VN.md">Tiếng Việt</a>
+</p>
 
 
-## 本地化
+---
 
-[![de-DE translation](https://img.shields.io/badge/dynamic/json?color=blue&label=de-DE&style=flat&logo=crowdin&query=%24.progress.0.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/de)
-[![en-US translation](https://img.shields.io/badge/any_text-100%25-blue?logo=crowdin&label=en-US)](https://crowdin.com/project/starward)
-[![it-IT translation](https://img.shields.io/badge/dynamic/json?color=blue&label=it-IT&style=flat&logo=crowdin&query=%24.progress.2.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/it)
-[![ja-JP translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ja-JP&style=flat&logo=crowdin&query=%24.progress.3.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ja)
-[![ko-KR translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ko-KR&style=flat&logo=crowdin&query=%24.progress.4.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ko)
-[![ru-RU translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ru-RU&style=flat&logo=crowdin&query=%24.progress.5.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ru)
-[![th-TH translation](https://img.shields.io/badge/dynamic/json?color=blue&label=th-TH&style=flat&logo=crowdin&query=%24.progress.6.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/th)
-[![vi-VN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=vi-VN&style=flat&logo=crowdin&query=%24.progress.7.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/vi)
-[![zh-CN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat&logo=crowdin&query=%24.progress.8.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-CN)
-[![zh-TW translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-TW&style=flat&logo=crowdin&query=%24.progress.9.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-TW)
+在上游 Starward 的基础上，把常用操作收进桌面快捷方式与一条 URL，并在签到、抽卡、背景等方面做了增强。主要功能：
 
-Moonward 使用 [Crowdin](https://crowdin.com/project/starward) 进行应用内文本的本地化工作，你可以帮助我们翻译和校对本地语言，我们期待有更多的人加入。
+#### 抽卡
 
-[本地化指南](./Localization.zh-CN.md)
+- **抽卡记录** — 卡池统计可拖拽排序（靠近边缘自动横向滚动）、列表支持拖拽滚动、统计吸顶；连 UP / 连歪、不歪概率等一目了然；千星奇域「已垫」改用进度条
+- **筛选与分享** — 标题栏下拉筛选显示哪些卡池，可全选 / 反选 / 重置；一键生成磨砂风格分享图，含垫数与保底进度
+- **抽卡同步** — 原神 / 绝区零等可通过米游社相关方式更新记录；抽到未收录的新角色时自动补全图标与名称；物品名跟随应用语言
+- **数据互通** — 支持 UIGF 抽卡记录导入 / 导出；可从上游 Starward 只读导入历史数据
 
+#### 账号与工具箱
 
-## 开发
+- **每日签到** — 米游社 / HoYoLAB 签到，每个游戏独立开关，支持自动签到与补签；用快捷方式 / URL / 命令行启动游戏时，也会给该账号单独签一次
+- **登录改进** — 国服用手机号收验证码登录，国际服走网页登录；登录过期时尽量自动续上，不必反复重新登录
+- **月报与便笺** — 工具箱月报（开拓月历 / 绳网月报 / 旅行札记）布局统一；绳网月报修正跨时区每日数据、默认显示当月；实时便笺遇风控时提供验证入口
 
-在本地编译应用，你需要安装 Visual Studio 2022 并选择以下负载：
+#### 启动
 
--  .NET 桌面开发
--  使用 C++ 的桌面开发
--  通用 Windows 平台开发
+- **多启动配置** — 同一游戏可保存多套启动参数与自定义启动程序，数量不限；切换配置、改参数不必每次重填，可命名保存并生成桌面快捷方式
+- **URL 协议** — `moonward://` 指定游戏、配置与账号直接启动 / 停止 / 重启，也可单独触发签到；能嵌入脚本或网页（详见 [docs/UrlProtocol](UrlProtocol.zh-CN.md)）
+- **快速启动** — 首页汉堡菜单集成游戏设置、快速启动与「生成开始菜单快捷方式」
 
+#### 外观与背景
 
-## 赞助
+- **好感壁纸** — 绝区零可将百科「好感动态壁纸」与「满影画静态壁纸」下载并设为自定义背景；打开画廊即用本地缓存，后台静默校验更新
+- **自定义背景** — 独立的自定义背景对话框，支持图片 / 视频（可拖入首页直接替换）；从托盘恢复不再闪烁；背景列表更新后保留海报偏好
 
-开发不易，如果你觉得 Moonward 好用，可以在 https://donate.scighost.com 赞助我。
+#### 其他
 
+- **系统集成** — 可设置开机自启到托盘；关于页一键预填诊断信息并跳转 GitHub 反馈，同时打开日志文件夹
+- **静默更新** — 后台下载新版本，退出软件后自动安装，下次启动展示更新内容（Velopack + GitHub Releases）
 
-## 致谢
+安装包见 [Releases](https://github.com/TurmoilZoom/Moonward/releases)。
 
-<picture>
-    <source srcset="https://github.com/Scighost/Starward/assets/61003590/9d369ec3-ab7c-408f-88c2-11bfe4453208" type="image/avif" />
-    <img src="https://github.com/Scighost/Starward/assets/61003590/44552992-e2c5-451f-9c2a-73176e8e4e93" width="240px" />
-</picture>
+上游项目：[Scighost/Starward](https://github.com/Scighost/Starward)  
+致谢：[CREDITS.md](../CREDITS.md)（功能与设计参考的开源项目）  
+许可证：[MIT](../LICENSE)
 
-首先，我要向本项目的所有贡献者和翻译者致以最诚挚的感谢，有了你们，Moonward 才能变得更好。
-
-然后，我要特别感谢 [@neon-nyan](https://github.com/neon-nyan)，本项目的灵感和设计正是来源于他的项目 [Collapse](https://github.com/neon-nyan/Collapse)。我也从 Collapse 的代码中学到了很多知识，有此珠玉在前，我的开发过程顺利了很多。
-
-其次，感谢[胡桃工具箱](https://github.com/DGP-Studio/Snap.Hutao)的主要开发者 [@Lightczx](https://github.com/Lightczx)，Moonward 的开发过程中得到了他的很多帮助。
-
-我还要感谢 [CloudFlare](https://www.cloudflare.com/) 提供的免费 CDN。
-
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
-
-以及本项目中使用的[第三方库](./docs/ThirdParty.md)。
-
-
-## 截图
-
-<img width="1200" src="https://github.com/user-attachments/assets/ddd51a20-9705-4112-a454-75b07b7a6f8f" />
+隐私策略：[docs/Privacy.md](Privacy.md) · [中文](Privacy.zh-CN.md)

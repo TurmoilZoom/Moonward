@@ -1340,6 +1340,12 @@
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>リンク</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>謝辞</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>本プロジェクトは、機能とデザインの面で以下のオープンソースプロジェクトを参考にしています：</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>高度な設定</value>
   </data>

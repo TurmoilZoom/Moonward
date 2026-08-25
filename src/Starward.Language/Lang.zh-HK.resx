@@ -1340,6 +1340,12 @@
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>連結</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>致謝</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>本項目在功能與設計上參考了以下開源項目：</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>進階</value>
   </data>

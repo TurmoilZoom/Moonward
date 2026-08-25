@@ -1341,6 +1341,12 @@
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>링크</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>감사의 말</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>이 프로젝트는 기능과 디자인 면에서 다음 오픈 소스 프로젝트를 참고했습니다:</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>고급 설정</value>
   </data>

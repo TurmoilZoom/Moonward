@@ -1399,6 +1399,12 @@ Do you accept the risk and continue to use it?</value>
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>Links</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>Acknowledgements</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>This project references the following open-source projects for features and design:</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>Advanced</value>
   </data>

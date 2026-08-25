@@ -13,9 +13,12 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
-    <Grid PointerEntered="Lottie_AboutLogo_PointerEntered"
-          PointerExited="Lottie_AboutLogo_PointerExited">
-        <ScrollViewer>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Column="0">
             <StackPanel Padding="0,0,24,0">
 
                 <TextBlock FontSize="24"
@@ -137,18 +140,96 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!--  Logo：LottieGen 生成的 C# 动画源（源 JSON：static/cat_playing_animation.json），固定在页面右下角。叠层不接收命中，以免挡住左侧链接与滚动  -->
-        <AnimatedVisualPlayer x:Name="Lottie_AboutLogo"
-                              Width="376"
-                              Height="160"
-                              Margin="0,0,0,12"
-                              HorizontalAlignment="Right"
-                              VerticalAlignment="Bottom"
-                              AutoPlay="False"
-                              IsHitTestVisible="False"
-                              Stretch="Uniform">
-            <animatedvisuals:Cat_playing_animation />
-        </AnimatedVisualPlayer>
+        <!--  Logo：LottieGen 生成的 C# 动画源（源 JSON：static/cat_playing_animation.json），固定在页面右下角，跨两列以保持在整页右下角。
+              悬浮播放的命中层是外层透明 Border（只覆盖猫本体这一块），播放器本身 IsHitTestVisible=False，
+              这样只有鼠标移到猫身上才触发（而非整页），命中区也限制在右下角空白处、尽量不挡左侧链接与滚动。  -->
+        <Border x:Name="Border_CatHover"
+                Grid.ColumnSpan="2"
+                Margin="0,0,0,12"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Background="Transparent"
+                PointerEntered="Lottie_AboutLogo_PointerEntered"
+                PointerExited="Lottie_AboutLogo_PointerExited">
+            <AnimatedVisualPlayer x:Name="Lottie_AboutLogo"
+                                  Width="376"
+                                  Height="160"
+                                  AutoPlay="False"
+                                  IsHitTestVisible="False"
+                                  Stretch="Uniform">
+                <animatedvisuals:Cat_playing_animation />
+            </AnimatedVisualPlayer>
+        </Border>
+
+        <!--  致谢卡片：功能 / 设计参考的开源项目，固定在页面右侧顶部。项目名为专有名词故用字面量，不进 resx；仅标题与说明本地化。声明在 Lottie 之后以确保重叠时卡片在上层  -->
+        <Border Grid.Column="1"
+                Width="280"
+                Padding="16,12,16,14"
+                VerticalAlignment="Top"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+            <StackPanel>
+                <TextBlock FontSize="16"
+                           FontWeight="SemiBold"
+                           Text="{x:Bind lang:Lang.AboutSettingPage_Acknowledgements}" />
+                <TextBlock Margin="0,6,0,0"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.AboutSettingPage_AcknowledgementsDesc}"
+                           TextWrapping="Wrap" />
+                <TextBlock Margin="0,12,0,0" HorizontalAlignment="Left">
+                    <Hyperlink NavigateUri="https://github.com/Scighost/Starward" UnderlineStyle="None">
+                        <Run FontWeight="Bold"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Text="Starward" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                    <Hyperlink NavigateUri="https://github.com/CollapseLauncher/Collapse" UnderlineStyle="None">
+                        <Run FontWeight="Bold"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Text="Collapse" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                    <Hyperlink NavigateUri="https://github.com/character-map-uwp/Character-Map-UWP" UnderlineStyle="None">
+                        <Run FontWeight="Bold"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Text="Character-Map-UWP" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                    <Hyperlink NavigateUri="https://github.com/DGP-Studio/Snap.Hutao" UnderlineStyle="None">
+                        <Run FontWeight="Bold"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Text="Snap.Hutao" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                    <Hyperlink NavigateUri="https://github.com/BTMuli/TeyvatGuide" UnderlineStyle="None">
+                        <Run FontWeight="Bold"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Text="TeyvatGuide" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                    <Hyperlink NavigateUri="https://github.com/Womsxd/MihoyoBBSTools" UnderlineStyle="None">
+                        <Run FontWeight="Bold"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Text="MihoyoBBSTools" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                    <Hyperlink NavigateUri="https://github.com/UIGF-org/mihoyo-api-collect" UnderlineStyle="None">
+                        <Run FontWeight="Bold"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Text="UIGF · mihoyo-api-collect" />
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </Border>
     </Grid>
 
 </sf:PageBase>

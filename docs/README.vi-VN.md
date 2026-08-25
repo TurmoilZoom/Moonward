@@ -1,76 +1,56 @@
-# Moonward
+<h1 align="center">Moonward</h1>
 
-> **Moonward** xuất phát từ khẩu hiệu của Star Rail: May This Journey Lead Us **Moonward**, rất phù hợp để dùng làm tên ứng dụng.
-> Moonward là một trình khởi chạy mã nguồn mở của bên thứ ba được phát triển để giải quyết những thiếu sót của HoYoPlay (miHoYo Launcher). Nó hỗ trợ tất cả các trò chơi trên PC của HoYoverse và nhằm mục đích thay thế hoàn toàn trình khởi chạy chính thức. Ngoài những chức năng cơ bản của trình khởi chạy chính thức, tôi cũng sẽ tích hợp thêm một số tính năng dựa trên nhu cầu cá nhân, chẳng hạn như:
+<p align="center">
+  Trình khởi chạy mã nguồn mở bên thứ ba dựa trên <a href="https://github.com/Scighost/Starward">Starward</a>, dành cho game PC của miHoYo<br/>
+  <a href="https://github.com/TurmoilZoom/Moonward/releases/latest">Tải xuống</a>
+</p>
 
--  Ghi lại thời gian chơi
--  Chuyển đổi tài khoản trò chơi
--  Xem ảnh chụp màn hình trò chơi
--  Lưu lịch sử gacha
+<p align="center">
+  <a href="../README.md">简体中文</a>
+  · <a href="README.ja-JP.md">日本語</a>
+  · <a href="README.ru-RU.md">Русский</a>
+  · <a href="README.th-TH.md">ไทย</a>
+  · Tiếng Việt
+</p>
 
-Còn nhiều tính năng khác để chờ bạn khám phá...
 
-## Cài đặt
+---
 
-Đầu tiên, thiết bị của bạn cần đáp ứng những điều kiện sau:
+Trên nền Starward thượng nguồn, các thao tác thường dùng được gom vào lối tắt màn hình và một URL, đồng thời tăng cường điểm danh, gacha, hình nền. Tính năng chính:
 
--  Phiên bản Windows 10 1809 (17763) trở về sau.
--  Đã cài đặt [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2).
--  Đã cài đặt [WebP Image Extension](https://apps.microsoft.com/detail/9pg2dk419drg)
--  Để có trải nghiệm tốt hơn, vui lòng bật **Hiệu ứng trong suốt** và **Hiệu ứng động** trong cài đặt hệ thống.
+#### Gacha
 
->[WebP Imaging Extension](https://apps.microsoft.com/detail/9pg2dk419drg) thường được tích hợp sẵn trong hệ thống của bạn. Nếu ứng dụng không hiển thị đúng hình nền, vui lòng đảm bảo rằng tiện ích này đã được cài đặt.
+- **Nhật ký gacha** — thống kê banner có thể kéo để sắp xếp (tự cuộn ngang khi sát mép), danh sách hỗ trợ kéo để cuộn, thống kê neo trên cùng; chuỗi UP / chuỗi trượt và tỷ lệ trúng hiện rõ; 「Đảm bảo」của Kỳ quan Miliastra dùng thanh tiến độ
+- **Lọc và chia sẻ** — menu thả xuống trên thanh tiêu đề chọn banner nào được hiện, chọn tất cả / đảo chọn / đặt lại; tạo ảnh chia sẻ kiểu mờ sương một chạm, gồm số đã tích và tiến độ bảo đảm
+- **Đồng bộ gacha** — Genshin Impact / Zenless Zone Zero… có thể cập nhật nhật ký qua các cách liên quan miHoYo BBS; khi ra nhân vật mới chưa có trong kho, icon và tên được bổ sung tự động; tên vật phẩm theo ngôn ngữ ứng dụng
+- **Trao đổi dữ liệu** — nhập / xuất nhật ký gacha UIGF; có thể nhập lịch sử từ Starward thượng nguồn ở chế độ chỉ đọc
 
-Tiếp theo, tải xuống gói dành cho kiến ​​trúc CPU của bạn từ [GitHub Release](https://github.com/Scighost/Starward/releases). Giải nén nó, sau đó chạy `Moonward.exe` và làm theo hướng dẫn.
+#### Tài khoản và hộp công cụ
 
-## Dịch thuật
+- **Điểm danh hàng ngày** — điểm danh miHoYo BBS / HoYoLAB, công tắc riêng từng game, hỗ trợ điểm danh tự động và điểm danh bù; khi mở game bằng lối tắt / URL / dòng lệnh, tài khoản đó cũng được điểm danh thêm một lần
+- **Cải thiện đăng nhập** — máy chủ Trung Quốc đăng nhập bằng mã xác nhận gửi tới số điện thoại, máy chủ quốc tế dùng đăng nhập web; khi phiên hết hạn sẽ cố gia hạn tự động, không phải đăng nhập lại liên tục
+- **Báo cáo tháng và ghi chú** — bố cục báo cáo tháng trong hộp công cụ (Lịch tháng khai phá / Báo cáo tháng Inter-Knot / Nhật kí nhà lữ hành) thống nhất; báo cáo Inter-Knot sửa dữ liệu theo ngày khi lệch múi giờ, mặc định hiện tháng hiện tại; ghi chú thời gian thực gặp kiểm soát rủi ro thì có lối xác minh
 
-[![de-DE translation](https://img.shields.io/badge/dynamic/json?color=blue&label=de-DE&style=flat&logo=crowdin&query=%24.progress.0.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/de)
-[![en-US translation](https://img.shields.io/badge/any_text-100%25-blue?logo=crowdin&label=en-US)](https://crowdin.com/project/starward)
-[![it-IT translation](https://img.shields.io/badge/dynamic/json?color=blue&label=it-IT&style=flat&logo=crowdin&query=%24.progress.2.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/it)
-[![ja-JP translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ja-JP&style=flat&logo=crowdin&query=%24.progress.3.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ja)
-[![ko-KR translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ko-KR&style=flat&logo=crowdin&query=%24.progress.4.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ko)
-[![ru-RU translation](https://img.shields.io/badge/dynamic/json?color=blue&label=ru-RU&style=flat&logo=crowdin&query=%24.progress.5.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/ru)
-[![th-TH translation](https://img.shields.io/badge/dynamic/json?color=blue&label=th-TH&style=flat&logo=crowdin&query=%24.progress.6.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/th)
-[![vi-VN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=vi-VN&style=flat&logo=crowdin&query=%24.progress.7.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/vi)
-[![zh-CN translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-CN&style=flat&logo=crowdin&query=%24.progress.8.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-CN)
-[![zh-TW translation](https://img.shields.io/badge/dynamic/json?color=blue&label=zh-TW&style=flat&logo=crowdin&query=%24.progress.9.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-15878835-595799.json)](https://crowdin.com/project/starward/zh-TW)
+#### Khởi chạy
 
-Moonward sử dụng [Crowdin](https://crowdin.com/project/starward) cho việc dịch văn bản trong ứng dụng. Bạn có thể đóng góp bằng cách giúp chúng tôi dịch và hiệu chỉnh nội dung bằng ngôn ngữ địa phương của bạn. Chúng tôi mong muốn có thêm nhiều người tham gia cùng chúng tôi.
+- **Nhiều cấu hình khởi chạy** — cùng một game có thể lưu không giới hạn bộ tham số khởi chạy và chương trình khởi chạy tùy chỉnh; đổi cấu hình hay sửa tham số không phải điền lại mỗi lần, đặt tên rồi tạo lối tắt màn hình được
+- **Giao thức URL** — `moonward://` chỉ định game, cấu hình và tài khoản để khởi chạy / dừng / khởi động lại, hoặc chỉ kích hoạt điểm danh; nhúng vào script hay trang web được (xem [docs/UrlProtocol](UrlProtocol.md))
+- **Khởi chạy nhanh** — menu hamburger trang chủ gom cài đặt game, khởi chạy nhanh và 「tạo lối tắt menu Start」
 
-[Hướng dẫn dịch thuật ở đây](./docs/Localization.md)
+#### Giao diện và hình nền
 
-## Phát triển
+- **Hình nền Trust** — Zenless Zone Zero có thể tải 「hình nền động Trust」và 「hình nền tĩnh Mindscape」từ bách khoa rồi đặt làm nền tùy chỉnh; mở thư viện là dùng cache máy, kiểm tra cập nhật im lặng ở nền
+- **Hình nền tùy chỉnh** — hộp thoại nền riêng, hỗ trợ ảnh / video (kéo vào trang chủ để thay ngay); khôi phục từ khay hệ thống không nhấp nháy; sau khi danh sách nền cập nhật vẫn giữ lựa chọn poster
 
-Để biên dịch dự án cục bộ, bạn cần cài đặt Visual Studio 2022 và chọn những workloads sau:
+#### Khác
 
--  .NET Desktop Development
--  C++ Desktop Development
--  Universal Windows Platform Development
+- **Tích hợp hệ thống** — có thể mở cùng Windows vào khay hệ thống; trang Giới thiệu điền sẵn thông tin chẩn đoán rồi nhảy tới GitHub Feedback trong một chạm, đồng thời mở thư mục nhật ký
+- **Cập nhật im lặng** — tải phiên bản mới ở nền, tự cài sau khi thoát phần mềm, lần mở sau hiện nội dung cập nhật (Velopack + GitHub Releases)
 
-## Ủng hộ
+Gói cài đặt xem [Releases](https://github.com/TurmoilZoom/Moonward/releases).
 
-Phát triển không phải là dễ dàng. Nếu bạn nghĩ Moonward hữu ích, bạn có thể ủng hộ cho tôi qua https://donate.scighost.com.
+Dự án thượng nguồn: [Scighost/Starward](https://github.com/Scighost/Starward)  
+Ghi nhận: [CREDITS.md](../CREDITS.md) (các dự án mã nguồn mở được tham khảo về tính năng và thiết kế)  
+Giấy phép: [MIT](../LICENSE)
 
-## Cảm ơn
-
-<picture>
-    <source srcset="https://github.com/Scighost/Starward/assets/61003590/9d369ec3-ab7c-408f-88c2-11bfe4453208" type="image/avif" />
-    <img src="https://github.com/Scighost/Starward/assets/61003590/44552992-e2c5-451f-9c2a-73176e8e4e93" width="240px" />
-</picture>
-
-Đầu tiên, tôi xin gửi lời cảm ơn chân thành nhất tới tất cả những người đóng góp và dịch giả của dự án này. Moonward chỉ có thể trở nên tốt hơn nhờ có bạn.
-
-Sau đó, tôi muốn gửi lời cảm ơn đặc biệt tới [@neon-nyan](https://github.com/neon-nyan). Nguồn cảm hứng và thiết kế cho dự án này đến trực tiếp từ dự án [Collapse](https://github.com/neon-nyan/Collapse) của anh ấy. Tôi đã thu được rất nhiều kiến ​​thức từ mã nguồn của Collapse, và với những tài liệu tham khảo quý giá như vậy, quá trình phát triển của tôi đã suôn sẻ hơn rất nhiều.
-
-Tiếp theo, xin gửi lời cảm ơn sâu sắc đến nhà phát triển chính của [Snap Hutao](https://github.com/DGP-Studio/Snap.Hutao), [@Lightczx](https://github.com/Lightczx). Sự trợ giúp của anh ấy là vô giá trong quá trình phát triển Moonward.
-
-Ngoài ra, cảm ơn [CloudFlare](https://www.cloudflare.com/) vì đã cung cấp dịch vụ CDN miễn phí.
-
-<img alt="cloudflare" height="72px" src="https://github.com/user-attachments/assets/c1fba88e-4cd1-45df-b681-bf5634215f41" />
-
-Và các [thư viện bên thứ ba](./docs/ThirdParty.md) được sử dụng trong dự án này.
-
-## Ảnh chụp màn hình
-
-<img width="1200" src="https://github.com/user-attachments/assets/513eea8a-e0bb-450b-818b-5389dc9d40e8">
+Chính sách quyền riêng tư: [docs/Privacy.md](Privacy.md) · [Tiếng Việt](Privacy.vi-VN.md)

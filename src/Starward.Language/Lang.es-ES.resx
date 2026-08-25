@@ -1341,6 +1341,12 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>Enlaces</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>Agradecimientos</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>Este proyecto se inspira en los siguientes proyectos de código abierto para sus funciones y diseño:</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>Avanzado</value>
   </data>

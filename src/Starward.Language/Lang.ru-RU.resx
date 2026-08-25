@@ -1341,6 +1341,12 @@
   <data name="AboutSettingPage_Links" xml:space="preserve">
     <value>Ссылки</value>
   </data>
+  <data name="AboutSettingPage_Acknowledgements" xml:space="preserve">
+    <value>Благодарности</value>
+  </data>
+  <data name="AboutSettingPage_AcknowledgementsDesc" xml:space="preserve">
+    <value>Этот проект использует следующие проекты с открытым исходным кодом в качестве образца для функций и дизайна:</value>
+  </data>
   <data name="SettingPage_Advanced" xml:space="preserve">
     <value>Дополнительно</value>
   </data>
