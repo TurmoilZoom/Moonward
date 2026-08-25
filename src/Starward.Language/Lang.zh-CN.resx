@@ -1999,6 +1999,9 @@
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>拖放图片 / 视频文件</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>图片直接拖入软件首页也可以替换壁纸</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>计算中</value>
     <comment>Calculating storage space usage.</comment>

@@ -3715,6 +3715,15 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GameLauncherSettingDialog_DragAndDropImageOrVideoFiles", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 You can also replace the wallpaper by dragging an image onto the home page. 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_DragImageToHomeTip {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_DragImageToHomeTip", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Game Packages 的本地化字符串。

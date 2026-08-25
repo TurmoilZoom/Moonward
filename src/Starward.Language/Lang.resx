@@ -1999,6 +1999,9 @@ Do you accept the risk and continue to use it?</value>
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>Drag and drop image / video files.</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>You can also replace the wallpaper by dragging an image onto the home page.</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>Calculating</value>
     <comment>Calculating storage space usage.</comment>

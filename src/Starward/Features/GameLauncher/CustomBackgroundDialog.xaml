@@ -6,6 +6,7 @@
                xmlns:lang="using:Starward.Language"
                xmlns:local="using:Starward.Features.GameLauncher"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
                x:DefaultBindMode="OneWay"
                Background="{ThemeResource CustomAcrylicBrush}"
                BorderThickness="0"
@@ -28,11 +29,24 @@
 
         <StackPanel Spacing="12">
 
-            <!--  标题  -->
-            <TextBlock Margin="0,0,0,4"
-                       FontSize="20"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.GameLauncherSettingDialog_CustomBackground}" />
+            <!--  标题 + 帮助图标（悬停提示：图片可直接拖入首页替换壁纸）  -->
+            <StackPanel Margin="0,0,0,4"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                <TextBlock FontSize="20"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.GameLauncherSettingDialog_CustomBackground}" />
+                <!--  透明 Border 兜住命中区域，裸 FontIcon 悬停命中不稳  -->
+                <Border Padding="2"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        sc:InstantTooltip.Placement="Right"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherSettingDialog_DragImageToHomeTip}">
+                    <FontIcon FontSize="16"
+                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                              Glyph="&#xE9CE;" />
+                </Border>
+            </StackPanel>
 
             <!--  自定义背景  -->
             <ToggleSwitch Margin="0,0,0,-8"

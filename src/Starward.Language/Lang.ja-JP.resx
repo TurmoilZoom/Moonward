@@ -1940,6 +1940,9 @@
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>画像または動画をドラッグ&amp;ドロップしてください。</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>画像をホーム画面に直接ドラッグして壁紙を変更することもできます。</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>計算中</value>
     <comment>Calculating storage space usage.</comment>

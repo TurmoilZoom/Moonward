@@ -1941,6 +1941,9 @@ Accetti il rischio e desideri continuare?</value>
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>Trascina e rilascia file immagine/video.</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>Puoi anche sostituire lo sfondo trascinando un'immagine nella pagina iniziale.</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>Calcolo in corso</value>
     <comment>Calculating storage space usage.</comment>

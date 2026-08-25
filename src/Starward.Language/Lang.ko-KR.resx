@@ -1941,6 +1941,9 @@
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>드래그 앤 드롭 이미지 / 비디오 파일．</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>이미지를 홈 화면에 직접 드래그하여 배경화면을 변경할 수도 있습니다.</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>계산중</value>
     <comment>Calculating storage space usage.</comment>

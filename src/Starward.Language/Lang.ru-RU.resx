@@ -1942,6 +1942,9 @@
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>Перетащите изображения / видео файлы.</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>Перетащите изображение на главную страницу, чтобы заменить обои.</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>Расчет</value>
     <comment>Calculating storage space usage.</comment>

@@ -1941,6 +1941,9 @@
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>拖放圖片 / 影片檔案。</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>將圖片直接拖入軟體首頁亦可替換桌布</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>計算中</value>
     <comment>Calculating storage space usage.</comment>

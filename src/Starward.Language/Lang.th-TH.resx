@@ -1940,6 +1940,9 @@
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>ลากและวางไฟล์รูปภาพ / วิดีโอ</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>คุณสามารถเปลี่ยนวอลเปเปอร์ได้ด้วยการลากภาพไปวางที่หน้าหลักโดยตรง</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>กำลังคำนวณ</value>
     <comment>Calculating storage space usage.</comment>

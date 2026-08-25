@@ -1941,6 +1941,9 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>Kéo thả tệp hình ảnh / video vào đây.</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>Bạn cũng có thể thay đổi hình nền bằng cách kéo ảnh trực tiếp vào trang chủ.</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>Đang tính toán</value>
     <comment>Calculating storage space usage.</comment>

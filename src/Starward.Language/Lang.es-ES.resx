@@ -1941,6 +1941,9 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="GameLauncherSettingDialog_DragAndDropImageOrVideoFiles" xml:space="preserve">
     <value>Arrastra y suelta archivos de imagen / video.</value>
   </data>
+  <data name="GameLauncherSettingDialog_DragImageToHomeTip" xml:space="preserve">
+    <value>También puedes reemplazar el fondo de pantalla arrastrando una imagen a la página de inicio.</value>
+  </data>
   <data name="GameSelector_Calculating" xml:space="preserve">
     <value>Calculando</value>
     <comment>Calculating storage space usage.</comment>
