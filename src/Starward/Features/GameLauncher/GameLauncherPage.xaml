@@ -455,24 +455,26 @@
                               Glyph="{x:Bind BannerAndPostButtonIcon, Mode=OneWay}"
                               IsTextScaleFactorEnabled="False" />
                 </Button>
-                <!--  显示 / 隐藏游戏时长：显示=StatusCircleBlock；隐藏=History 时钟。不用闭眼图标，避免与公告按钮冲突  -->
+                <!--  显示 / 隐藏游戏时长：显示=ToggleRight（拨到开）、隐藏=ToggleLeft（拨到关）。两枚图标叠放，切换时靠 Composition「横向滑动 + 交叉淡化」模拟拨钮滑动，故不用 Visibility 直接互斥  -->
                 <Button Padding="4"
                         VerticalAlignment="Center"
                         Command="{x:Bind TogglePlayTimeVisibilityCommand}"
                         sc:InstantTooltip.Placement="Top"
                         sc:InstantTooltip.Text="{x:Bind PlayTimeVisibilityTooltip, Mode=OneWay}"
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                    <Grid>
-                        <FontIcon FontSize="16"
+                    <Grid x:Name="Grid_PlayTimeToggle" Loaded="Grid_PlayTimeToggle_Loaded">
+                        <FontIcon x:Name="Icon_PlayTimeShown"
+                                  FontSize="16"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                  Glyph="&#xEA39;"
-                                  IsTextScaleFactorEnabled="False"
-                                  Visibility="{x:Bind EnablePlayTime, Mode=OneWay}" />
-                        <FontIcon FontSize="16"
+                                  Glyph="&#xF19F;"
+                                  IsHitTestVisible="False"
+                                  IsTextScaleFactorEnabled="False" />
+                        <FontIcon x:Name="Icon_PlayTimeHidden"
+                                  FontSize="16"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                  Glyph="&#xE823;"
-                                  IsTextScaleFactorEnabled="False"
-                                  Visibility="{x:Bind EnablePlayTime, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                                  Glyph="&#xF19E;"
+                                  IsHitTestVisible="False"
+                                  IsTextScaleFactorEnabled="False" />
                     </Grid>
                 </Button>
                 <!--  图库  -->
@@ -496,7 +498,7 @@
                         Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                              Glyph="&#xE794;"
+                              Glyph="&#xF4AA;"
                               IsTextScaleFactorEnabled="False" />
                 </Button>
                 <!--  好感壁纸（所选视频仍作为自定义背景）  -->

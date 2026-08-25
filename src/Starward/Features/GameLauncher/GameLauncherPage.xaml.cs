@@ -3,10 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -28,6 +30,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Timers;
@@ -1310,6 +1313,74 @@ public sealed partial class GameLauncherPage : PageBase
     private void TogglePlayTimeVisibility()
     {
         EnablePlayTime = !EnablePlayTime;
+        UpdatePlayTimeToggleVisual(animate: true);
+    }
+
+
+    private void Grid_PlayTimeToggle_Loaded(object sender, RoutedEventArgs e)
+    {
+        // 加载时直接落到当前状态，不播过渡动画（避免开机/切页时无谓的拨动）。
+        UpdatePlayTimeToggleVisual(animate: false);
+    }
+
+
+    /// <summary>
+    /// 更新工具栏「显示 / 隐藏游戏时长」的两枚拨动图标：显示态亮 ToggleRight（拨到开）、隐藏态亮 ToggleLeft（拨到关）。
+    /// 用户点击时以「横向滑动 + 交叉淡化」过渡——新图标从行进反侧滑入、旧图标顺行进方向滑出——合起来读成拨钮从一端滑到另一端。
+    /// </summary>
+    /// <param name="animate">true 播放过渡动画（用户切换）；false 直接落到目标状态（加载）。</param>
+    private void UpdatePlayTimeToggleVisual(bool animate)
+    {
+        if (Icon_PlayTimeShown is null || Icon_PlayTimeHidden is null)
+        {
+            return;
+        }
+        bool shown = EnablePlayTime;
+        FontIcon incoming = shown ? Icon_PlayTimeShown : Icon_PlayTimeHidden;
+        FontIcon outgoing = shown ? Icon_PlayTimeHidden : Icon_PlayTimeShown;
+
+        // 用 Composition 的 Translation（叠加在布局位置上，不会像直接改 Visual.Offset 那样破坏 Grid 居中）。
+        ElementCompositionPreview.SetIsTranslationEnabled(incoming, true);
+        ElementCompositionPreview.SetIsTranslationEnabled(outgoing, true);
+        Visual vin = ElementCompositionPreview.GetElementVisual(incoming);
+        Visual vout = ElementCompositionPreview.GetElementVisual(outgoing);
+
+        if (!animate || !EntranceAnimation.AnimationsEnabled())
+        {
+            vin.Opacity = 1;
+            vout.Opacity = 0;
+            vin.Properties.InsertVector3("Translation", Vector3.Zero);
+            vout.Properties.InsertVector3("Translation", Vector3.Zero);
+            return;
+        }
+
+        // 拨钮行进方向：开→右(+1)、关→左(-1)。
+        float dir = shown ? 1f : -1f;
+        const float slide = 4f;
+        TimeSpan duration = TimeSpan.FromMilliseconds(250);
+        Compositor compositor = vin.Compositor;
+        CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1f));
+
+        // 新图标：从行进反侧滑入 + 淡入。
+        vin.Properties.InsertVector3("Translation", new Vector3(-dir * slide, 0, 0));
+        Vector3KeyFrameAnimation inMove = compositor.CreateVector3KeyFrameAnimation();
+        inMove.InsertKeyFrame(1f, Vector3.Zero, ease);
+        inMove.Duration = duration;
+        vin.StartAnimation("Translation", inMove);
+        ScalarKeyFrameAnimation inFade = compositor.CreateScalarKeyFrameAnimation();
+        inFade.InsertKeyFrame(1f, 1f, ease);
+        inFade.Duration = duration;
+        vin.StartAnimation(nameof(Visual.Opacity), inFade);
+
+        // 旧图标：顺行进方向滑出 + 淡出。
+        Vector3KeyFrameAnimation outMove = compositor.CreateVector3KeyFrameAnimation();
+        outMove.InsertKeyFrame(1f, new Vector3(dir * slide, 0, 0), ease);
+        outMove.Duration = duration;
+        vout.StartAnimation("Translation", outMove);
+        ScalarKeyFrameAnimation outFade = compositor.CreateScalarKeyFrameAnimation();
+        outFade.InsertKeyFrame(1f, 0f, ease);
+        outFade.Duration = duration;
+        vout.StartAnimation(nameof(Visual.Opacity), outFade);
     }
 
 
