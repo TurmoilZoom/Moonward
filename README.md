@@ -7,7 +7,13 @@
 
 <p align="center">
   简体中文
+  · <a href="docs/README.zh-TW.md">繁體中文</a>
+  · <a href="docs/README.en-US.md">English</a>
+  · <a href="docs/README.de-DE.md">Deutsch</a>
+  · <a href="docs/README.es-ES.md">Español</a>
+  · <a href="docs/README.it-IT.md">Italiano</a>
   · <a href="docs/README.ja-JP.md">日本語</a>
+  · <a href="docs/README.ko-KR.md">한국어</a>
   · <a href="docs/README.ru-RU.md">Русский</a>
   · <a href="docs/README.th-TH.md">ไทย</a>
   · <a href="docs/README.vi-VN.md">Tiếng Việt</a>

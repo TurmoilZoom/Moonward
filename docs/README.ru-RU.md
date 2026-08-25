@@ -7,7 +7,13 @@
 
 <p align="center">
   <a href="../README.md">简体中文</a>
+  · <a href="README.zh-TW.md">繁體中文</a>
+  · <a href="README.en-US.md">English</a>
+  · <a href="README.de-DE.md">Deutsch</a>
+  · <a href="README.es-ES.md">Español</a>
+  · <a href="README.it-IT.md">Italiano</a>
   · <a href="README.ja-JP.md">日本語</a>
+  · <a href="README.ko-KR.md">한국어</a>
   · Русский
   · <a href="README.th-TH.md">ไทย</a>
   · <a href="README.vi-VN.md">Tiếng Việt</a>
