@@ -39,6 +39,16 @@ export const featureCards = [
     },
   },
   {
+    id: 'uac',
+    icon: '⇧',
+    accent: 'cyan',
+    name: { zh: '关闭 UAC 提示', en: 'Skip UAC prompt' },
+    detail: {
+      zh: '创建游戏快捷方式时可勾选。授权一次后，之后双击启动不再弹出系统 UAC。不需要时，可在设置里清理对应任务。',
+      en: 'Optional when creating a game shortcut. Approve once; later double-clicks skip the Windows UAC prompt. Unused tasks can be cleaned up in Settings.',
+    },
+  },
+  {
     id: 'url',
     icon: '↗',
     accent: 'blue',
@@ -54,8 +64,8 @@ export const featureCards = [
     accent: 'green',
     name: { zh: '自动签到', en: 'Auto check-in' },
     detail: {
-      zh: '米游社 / HoYoLAB 每日签到。通过快捷方式、URL 或命令行启动时，可顺带为绑定账号签到。',
-      en: 'miHoYo / HoYoLAB daily check-in. Launching via shortcut, URL, or CLI can check in for that account.',
+      zh: '每个游戏独立开关。软件启动约十秒后依次签到；用绑定账号的快捷方式 / URL / 命令行开游戏时，也会单独签一次。',
+      en: 'Per-game toggle. About 10 seconds after Moonward starts, enabled games check in in turn. Launching via shortcut, URL, or CLI also checks in that bound account.',
     },
   },
   {
@@ -74,28 +84,89 @@ export const featureCards = [
     accent: 'rose',
     name: { zh: '登录改进', en: 'Sign-in' },
     detail: {
-      zh: '国服短信验证码；国际服网页登录。Cookie 失效时可用 stoken 静默换票（最多重试一次）。',
-      en: 'CN SMS login; OS web login. Expired CN cookies can refresh once via stoken.',
+      zh: '国服用手机号收验证码登录，国际服走网页登录。登录过期时会尽量自动续上，不必反复重新登录。',
+      en: 'CN accounts sign in with a phone SMS code; overseas accounts use the web. Expired sessions try to renew themselves, so you need not sign in again.',
     },
   },
   {
-    id: 'zzz',
-    icon: '◇',
-    accent: 'cyan',
-    name: { zh: '绝区零元数据', en: 'ZZZ metadata' },
+    id: 'update',
+    icon: '↻',
+    accent: 'indigo',
+    name: { zh: '静默更新', en: 'Silent update' },
     detail: {
-      zh: '物品图标与多语言名称从 metadata 分支拉取；也可用战绩 Cookie 从养成指南更新。',
-      en: 'Icons and names from the metadata branch; refreshable via record cookie.',
+      zh: '后台下载新版本，退出软件后自动安装。下次启动时会展示更新内容。',
+      en: 'Downloads in the background and installs after you quit. Release notes appear the next time you start.',
     },
   },
   {
-    id: 'ui',
-    icon: '▣',
+    id: 'redeem',
+    icon: '#',
     accent: 'slate',
-    name: { zh: '界面体验', en: 'UI polish' },
+    name: { zh: '前瞻直播兑换码', en: 'Livestream codes' },
     detail: {
-      zh: '快速启动菜单、自定义背景、工具栏图钉；WinUI 亚克力与 Composition 动效。',
-      en: 'Quick-launch, custom background, pinable toolbar; acrylic and Composition motion.',
+      zh: '国服版本前瞻直播期间，启动页展示官方兑换码与奖励，可单个或全部复制。未开播会提示，不必去直播间翻评论。',
+      en: 'During CN version livestreams, official codes and rewards appear on the home page — copy one or all. A notice shows if the stream has not started, so you need not hunt comments.',
+    },
+  },
+]
+
+/**
+ * In-app screenshots in public/screens/ (1184×668 WebP).
+ * Hash: #screens or #screens/<id>
+ */
+export const screens = [
+  {
+    id: 'config',
+    src: 'screens/config.webp',
+    width: 1184,
+    height: 668,
+    icon: '⚙',
+    accent: 'teal',
+    name: { zh: '启动配置', en: 'Launch profile' },
+    tag: { zh: '参数 · URL · 账号', en: 'Args · URL · account' },
+    caption: {
+      zh: '配置文件、命令行参数、URL 指令和绑定账号在同一个对话框里。可保存多套，复制 URL 给脚本用。',
+      en: 'Profile, launch args, the moonward:// URL, and bound account in one dialog. Save several; copy the URL for scripts.',
+    },
+    alt: {
+      zh: 'Moonward 启动参数配置对话框：配置文件、命令行参数、URL 指令预览与绑定账号。',
+      en: 'Moonward launch-profile dialog: saved profile, command-line args, URL preview, and bound account.',
+    },
+  },
+  {
+    id: 'gacha',
+    src: 'screens/gacha.webp',
+    width: 1184,
+    height: 668,
+    icon: '◈',
+    accent: 'violet',
+    name: { zh: '抽卡记录', en: 'Gacha history' },
+    tag: { zh: '卡池 · 连 UP · 概率', en: 'Pools · streaks · rates' },
+    caption: {
+      zh: '卡池卡片可拖拽排序。连 UP / 连歪、不歪概率和出货次数排在一张卡上。',
+      en: 'Drag pool cards to reorder. Streaks, rates, and pull counts sit on one card.',
+    },
+    alt: {
+      zh: 'Moonward 抽卡记录页面：多张卡池统计卡片，含连 UP、概率与角色列表，其中一张正在拖拽。',
+      en: 'Moonward gacha history: pool stat cards with streaks, rates, and character lists; one card is being dragged.',
+    },
+  },
+  {
+    id: 'checkin',
+    src: 'screens/checkin.webp',
+    width: 1184,
+    height: 668,
+    icon: '✓',
+    accent: 'green',
+    name: { zh: '自动签到', en: 'Daily check-in' },
+    tag: { zh: '月历 · 自动签到', en: 'Calendar · auto claim' },
+    caption: {
+      zh: '月历式奖励。打开自动签到后，启动软件或用绑定账号开游戏都会签。',
+      en: 'Monthly reward calendar. With auto check-in on, it runs when Moonward starts or you launch a bound account.',
+    },
+    alt: {
+      zh: 'Moonward 签到面板：本月奖励月历、今日已签到状态与自动签到开关。',
+      en: 'Moonward check-in panel: monthly reward calendar, today claimed, and the auto check-in switch.',
     },
   },
 ]
@@ -136,8 +207,8 @@ export const launchFlow = {
           id: 'shortcut',
           title: { zh: '桌面快捷方式', en: 'Desktop shortcut' },
           desc: {
-            zh: '生成指向该配置的桌面图标，双击即启动。',
-            en: 'Create a desktop icon for the profile; double-click to launch.',
+            zh: '生成指向该配置的桌面图标，双击即启动。可勾选「关闭 UAC 提示」：创建时授权一次，之后不再弹窗。',
+            en: 'Create a desktop icon for the profile. Optionally skip UAC: approve once when creating, then launch without a prompt.',
           },
         },
         {
@@ -164,8 +235,8 @@ export const launchFlow = {
       tag: { zh: '自动签到', en: 'Check-in' },
       title: { zh: '可选：账号签到', en: 'Optional: account check-in' },
       desc: {
-        zh: '若开启自动签到，启动游戏前会对绑定账号执行米游社 / HoYoLAB 签到（命令行启动同样适用）。',
-        en: 'If enabled, checks in the bound account on miHoYo / HoYoLAB before launch (CLI too).',
+        zh: '若已开启，用快捷方式 / URL / 命令行启动时会给绑定账号签一次。软件自身启动后还会按游戏批量签到（见下方流程）。',
+        en: 'If enabled, launching via shortcut, URL, or CLI checks in that bound account. Moonward also runs a per-game batch after it starts (see the flow below).',
       },
     },
     {
@@ -179,6 +250,67 @@ export const launchFlow = {
     },
   ],
   urlExample: 'moonward://launch?game=…&profile=…&account=…',
+}
+
+/**
+ * Auto check-in: per-game toggle → startup batch and/or launch-time one-off → claim.
+ */
+export const checkInFlow = {
+  title: {
+    zh: '自动签到流程',
+    en: 'Auto check-in flow',
+  },
+  lead: {
+    zh: '每个游戏单独开关。日常有两条路：打开 Moonward 后自动挨个签；用绑定账号的快捷方式 / URL / 命令行开游戏时再签一次。',
+    en: 'Each game has its own toggle. Two everyday paths: a batch after Moonward starts, and a one-off when you launch a bound account.',
+  },
+  steps: [
+    {
+      id: 'enable',
+      tag: { zh: '开关', en: 'Toggle' },
+      title: { zh: '按游戏开启', en: 'Enable per game' },
+      desc: {
+        zh: '签到面板上每个游戏独立开关，互不影响。打开后下次启动软件生效。可同时打开开机自启，不必每天点开启动器。',
+        en: 'Each game has its own switch. It takes effect the next time Moonward starts. Optional start-at-login so you need not open the app by hand.',
+      },
+    },
+    {
+      id: 'paths',
+      tag: { zh: '触发', en: 'Triggers' },
+      title: { zh: '两条签到路径', en: 'Two check-in paths' },
+      desc: {
+        zh: '批量签到与开游戏顺带签到互不替代，覆盖「挂着启动器」和「只点快捷方式」两种用法。',
+        en: 'The batch and the launch-time one-off complement each other — leaving Moonward open, or only using a shortcut.',
+      },
+      branches: [
+        {
+          id: 'batch',
+          title: { zh: '启动后批量', en: 'Batch after start' },
+          desc: {
+            zh: 'Moonward 启动约十秒后，对已开启的游戏按角色依次请求，间隔数秒，避开启动高峰。',
+            en: 'About 10 seconds after Moonward starts, enabled games check in one role at a time, a few seconds apart.',
+          },
+        },
+        {
+          id: 'launch',
+          title: { zh: '开游戏顺带签', en: 'On game launch' },
+          desc: {
+            zh: '用绑定账号的快捷方式、URL 或命令行启动时，只给该账号静默签一次，不打断界面。',
+            en: 'A shortcut, URL, or CLI launch with a bound account silently checks in that account only.',
+          },
+        },
+      ],
+    },
+    {
+      id: 'claim',
+      tag: { zh: '领取', en: 'Claim' },
+      title: { zh: '查询并签到', en: 'Look up, then claim' },
+      desc: {
+        zh: '先查今日是否已签；未签则领取奖励，已签则跳过。失败约十分钟内不再重试，避免反复请求。',
+        en: "Looks up today's status first. Claims if needed, skips if already done. Failures cool down for about 10 minutes.",
+      },
+    },
+  ],
 }
 
 export const requirements = [

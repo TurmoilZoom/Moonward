@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import {
+  checkInFlow,
   featureCards,
   games,
   intro,
@@ -8,17 +9,28 @@ import {
   links,
   requirements,
 } from './data/content'
+import Screens from './components/Screens.vue'
 import { asset } from './utils/asset'
+import { renderReleaseMarkdown } from './utils/markdown'
+import {
+  applyTheme,
+  readThemePref,
+  resolveTheme,
+  storeThemePref,
+  watchSystemTheme,
+} from './utils/theme'
 import {
   CHANNELS,
+  applyChannel,
   detectPreferredArch,
-  fetchLatestRelease,
+  fetchReleaseCatalogs,
   findPackage,
   formatBytes,
+  formatPublishedAt,
   loadStoredChannel,
+  pickLatestCatalog,
   refinePreferredArch,
   storeChannel,
-  switchReleaseChannel,
 } from './utils/releases'
 
 const locale = ref(localStorage.getItem('moonward-locale') || 'zh')
@@ -33,10 +45,58 @@ function toggleLocale() {
   locale.value = locale.value === 'zh' ? 'en' : 'zh'
 }
 
-/* —— Latest release downloads —— */
+const themePref = ref(readThemePref())
+const resolvedTheme = ref(
+  document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : resolveTheme(themePref.value),
+)
+const themeArmed = ref(false)
+const themeBusy = ref(false)
+/** @type {import('vue').Ref<'' | 'to-light' | 'to-dark'>} */
+const skyPlay = ref('')
+let stopSystemWatch = null
+let themeGen = 0
+
+function commitTheme(next) {
+  themePref.value = next
+  resolvedTheme.value = next
+  storeThemePref(next)
+  applyTheme(next)
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
+}
+
+async function toggleTheme() {
+  if (themeBusy.value) return
+  const next = resolvedTheme.value === 'dark' ? 'light' : 'dark'
+  if (reducedMotion.value) {
+    commitTheme(next)
+    return
+  }
+
+  const gen = ++themeGen
+  themeBusy.value = true
+  skyPlay.value = next === 'light' ? 'to-light' : 'to-dark'
+  try {
+    // 幕布盖住大半后再换变量，避免颜色硬切
+    await wait(360)
+    if (gen !== themeGen) return
+    commitTheme(next)
+    await wait(600)
+  } finally {
+    if (gen === themeGen) {
+      skyPlay.value = ''
+      themeBusy.value = false
+    }
+  }
+}
+
+/* —— Release downloads & notes —— */
 const releaseLoading = ref(true)
 const releaseError = ref(false)
-const release = ref(null)
+const catalogs = ref([])
+const selectedTag = ref('')
 const preferredArch = ref(detectPreferredArch())
 /** @type {import('vue').Ref<'github' | 'cnb'>} */
 const downloadChannel = ref(loadStoredChannel())
@@ -52,13 +112,36 @@ const activeChannelMeta = computed(
 
 const releasesPageHref = computed(() => activeChannelMeta.value.releasesPage)
 
+const selectedCatalog = computed(
+  () => catalogs.value.find((c) => c.tag === selectedTag.value) || catalogs.value[0] || null,
+)
+
+const release = computed(() =>
+  selectedCatalog.value ? applyChannel(selectedCatalog.value, downloadChannel.value) : null,
+)
+
+const latestRelease = computed(() => {
+  const catalog = pickLatestCatalog(catalogs.value)
+  return catalog ? applyChannel(catalog, downloadChannel.value) : null
+})
+
+const latestTag = computed(() => latestRelease.value?.tag || '')
+
+const notesHtml = computed(() => renderReleaseMarkdown(selectedCatalog.value?.body || ''))
+
+const publishedLabel = computed(() =>
+  formatPublishedAt(selectedCatalog.value?.publishedAt, locale.value),
+)
+
+const selectedReleaseHref = computed(() => release.value?.htmlUrl || releasesPageHref.value)
+
 const archColumns = [
   { id: 'x64', label: { zh: 'Windows x64', en: 'Windows x64' } },
   { id: 'arm64', label: { zh: 'Windows ARM64', en: 'Windows ARM64' } },
 ]
 
 const recommendedSetup = computed(() => {
-  const pkgs = release.value?.packages
+  const pkgs = latestRelease.value?.packages
   if (!pkgs?.length) return null
   return (
     findPackage(pkgs, preferredArch.value, 'setup') ||
@@ -75,6 +158,18 @@ const heroDownloadHref = computed(
 
 function packageFor(arch, kind) {
   return findPackage(release.value?.packages || [], arch, kind)
+}
+
+function optionLabel(catalog) {
+  const tag = catalog.tag || catalog.name
+  const bits = [tag]
+  if (catalog.tag === latestTag.value) {
+    bits.push(locale.value === 'zh' ? '最新' : 'latest')
+  }
+  if (catalog.prerelease) {
+    bits.push(locale.value === 'zh' ? '预览' : 'pre')
+  }
+  return bits.join(' · ')
 }
 
 function kindLabel(kind) {
@@ -101,7 +196,7 @@ function sizeLabel(pkg) {
  * @param {{ silent?: boolean }} [opts] silent：已有卡片时不置 loading，避免整区闪烁
  */
 async function loadRelease(signal, opts = {}) {
-  const silent = Boolean(opts.silent && release.value?.packages?.length)
+  const silent = Boolean(opts.silent && catalogs.value.length)
   if (!silent) {
     releaseLoading.value = true
   }
@@ -109,9 +204,13 @@ async function loadRelease(signal, opts = {}) {
   try {
     preferredArch.value = await refinePreferredArch(preferredArch.value)
     if (signal?.aborted) return
-    release.value = await fetchLatestRelease(downloadChannel.value, signal)
+    const list = await fetchReleaseCatalogs(signal)
     if (signal?.aborted) return
-    if (!release.value?.packages?.length) {
+    catalogs.value = list
+    if (!list.some((c) => c.tag === selectedTag.value)) {
+      selectedTag.value = pickLatestCatalog(list)?.tag || list[0]?.tag || ''
+    }
+    if (!list.length) {
       releaseError.value = true
     }
   } catch (e) {
@@ -119,7 +218,7 @@ async function loadRelease(signal, opts = {}) {
     if (signal?.aborted || (e && /** @type {Error} */ (e).name === 'AbortError')) return
     releaseError.value = true
     if (!silent) {
-      release.value = null
+      catalogs.value = []
     }
   } finally {
     if (!silent) {
@@ -135,13 +234,12 @@ async function loadRelease(signal, opts = {}) {
  */
 function setDownloadChannel(channel) {
   if (channel !== 'github' && channel !== 'cnb') return
-  if (downloadChannel.value === channel && release.value && !releaseError.value) return
+  if (downloadChannel.value === channel && catalogs.value.length && !releaseError.value) return
   downloadChannel.value = channel
   storeChannel(channel)
 
   // 清单与渠道无关：本地换链即可，卡片不卸载
-  if (release.value?.packages?.length && !releaseError.value) {
-    release.value = switchReleaseChannel(release.value, channel)
+  if (catalogs.value.length && !releaseError.value) {
     return
   }
 
@@ -197,17 +295,76 @@ function layerStyle(depth) {
 }
 
 const activeStep = ref('config')
+const activeCheckInStep = ref('enable')
+const showBackTop = ref(false)
+const flowFoldRef = ref(null)
+const checkinFoldRef = ref(null)
 let releaseAbort = null
+let scrollTicking = false
+
+function syncFoldFromHash() {
+  let hash = (window.location.hash || '').replace(/^#/, '')
+  try {
+    hash = decodeURIComponent(hash)
+  } catch {
+    /* keep raw */
+  }
+  const el = hash === 'flow' ? flowFoldRef.value : hash === 'checkin' ? checkinFoldRef.value : null
+  if (!el) return
+  el.open = true
+  requestAnimationFrame(() => {
+    el.scrollIntoView({
+      behavior: reducedMotion.value ? 'auto' : 'smooth',
+      block: 'start',
+    })
+  })
+}
+
+function onWindowScroll() {
+  if (scrollTicking) return
+  scrollTicking = true
+  requestAnimationFrame(() => {
+    showBackTop.value = window.scrollY > 360
+    scrollTicking = false
+  })
+}
+
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: reducedMotion.value ? 'auto' : 'smooth',
+  })
+}
 
 onMounted(() => {
   reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en'
+  themePref.value = readThemePref()
+  resolvedTheme.value = resolveTheme(themePref.value)
+  applyTheme(resolvedTheme.value)
+  requestAnimationFrame(() => {
+    themeArmed.value = true
+  })
+  stopSystemWatch = watchSystemTheme(() => {
+    if (readThemePref() !== 'system') return
+    const next = resolveTheme('system')
+    if (next === resolvedTheme.value) return
+    commitTheme(next)
+  })
   releaseAbort = new AbortController()
   loadRelease(releaseAbort.signal)
+  window.addEventListener('scroll', onWindowScroll, { passive: true })
+  window.addEventListener('hashchange', syncFoldFromHash)
+  onWindowScroll()
+  syncFoldFromHash()
 })
 
 onUnmounted(() => {
+  themeGen += 1
   if (raf) cancelAnimationFrame(raf)
+  window.removeEventListener('scroll', onWindowScroll)
+  window.removeEventListener('hashchange', syncFoldFromHash)
+  stopSystemWatch?.()
   releaseAbort?.abort()
 })
 </script>
@@ -222,9 +379,51 @@ onUnmounted(() => {
         </a>
         <nav class="nav">
           <a href="#features">{{ locale === 'zh' ? '功能' : 'Features' }}</a>
-          <a href="#flow">{{ locale === 'zh' ? '启动流程' : 'Launch flow' }}</a>
+          <a href="#screens">{{ locale === 'zh' ? '界面' : 'Screens' }}</a>
+          <a href="#advanced">{{ locale === 'zh' ? '进阶' : 'Advanced' }}</a>
           <a href="#install">{{ locale === 'zh' ? '安装' : 'Install' }}</a>
           <a :href="links.github" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <button
+            type="button"
+            class="theme-btn"
+            :class="{
+              'is-dark': resolvedTheme === 'dark',
+              armed: themeArmed,
+            }"
+            :aria-busy="themeBusy ? 'true' : undefined"
+            :aria-label="
+              locale === 'zh'
+                ? resolvedTheme === 'dark'
+                  ? '切换为浅色'
+                  : '切换为深色'
+                : resolvedTheme === 'dark'
+                  ? 'Switch to light theme'
+                  : 'Switch to dark theme'
+            "
+            @click="toggleTheme"
+          >
+            <span class="theme-sky" aria-hidden="true">
+              <svg class="celestial sun" viewBox="0 0 24 24" focusable="false">
+                <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.75" />
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  d="M12 3v1.5M12 19.5V21M4.93 4.93l1.06 1.06M18.01 18.01l1.06 1.06M3 12h1.5M19.5 12H21M4.93 19.07l1.06-1.06M18.01 5.99l1.06-1.06"
+                />
+              </svg>
+              <svg class="celestial moon" viewBox="0 0 24 24" focusable="false">
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linejoin="round"
+                  d="M17.5 14.2A7.2 7.2 0 0 1 9.8 6.5 7 7 0 1 0 17.5 14.2z"
+                />
+              </svg>
+            </span>
+          </button>
           <button type="button" class="lang" @click="toggleLocale">
             {{ locale === 'zh' ? 'EN' : '中文' }}
           </button>
@@ -288,7 +487,6 @@ onUnmounted(() => {
     <main class="wrap main">
       <!-- Feature cards -->
       <section id="features" class="block" aria-labelledby="features-heading">
-        <p class="section-kicker">{{ locale === 'zh' ? '新增与增强' : "What's new" }}</p>
         <h2 id="features-heading">{{ locale === 'zh' ? '功能一览' : 'Features' }}</h2>
         <p class="section-lead">
           {{
@@ -313,13 +511,45 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <!-- Launch flow -->
-      <section id="flow" class="block flow-block" aria-labelledby="flow-heading">
-        <p class="section-kicker">{{ locale === 'zh' ? '核心能力' : 'Core' }}</p>
-        <h2 id="flow-heading">{{ t(launchFlow.title) }}</h2>
-        <p class="section-lead">{{ t(launchFlow.lead) }}</p>
+      <Screens :locale="locale" />
 
-        <div class="flow-board">
+      <!-- Advanced: launch + check-in folds -->
+      <section id="advanced" class="block advanced-block" aria-labelledby="advanced-heading">
+        <h2 id="advanced-heading">{{ locale === 'zh' ? '进阶' : 'Advanced' }}</h2>
+        <p class="section-lead">
+          {{
+            locale === 'zh'
+              ? '配置如何落到快捷方式或 URL、如何跳过 UAC，以及签到在何时触发。'
+              : 'How a profile becomes a shortcut or URL, how skip-UAC works, and when check-in runs.'
+          }}
+        </p>
+
+        <details id="flow" ref="flowFoldRef" class="flow-fold">
+          <summary>
+            <span class="fold-chevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 6.5 14.5 12 9 17.5"
+                />
+              </svg>
+            </span>
+            <span class="fold-copy">
+              <span class="fold-title">{{ t(launchFlow.title) }}</span>
+              <span class="fold-hint">{{
+                locale === 'zh'
+                  ? '配置 · 快捷方式 / URL · 免 UAC'
+                  : 'Profile · shortcut / URL · skip UAC'
+              }}</span>
+            </span>
+          </summary>
+          <div class="fold-body">
+            <p class="section-lead">{{ t(launchFlow.lead) }}</p>
+            <div class="flow-board">
           <!-- Step rail -->
           <ol class="flow-rail" role="list">
             <li
@@ -361,7 +591,7 @@ onUnmounted(() => {
                 @mouseenter="activeStep = 'entries'"
               >
                 <span class="pipe-label">{{ locale === 'zh' ? '桌面快捷方式' : 'Shortcut' }}</span>
-                <span class="pipe-sub">.lnk → Moonward</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '.lnk · 可选免 UAC' : '.lnk · optional skip-UAC' }}</span>
               </div>
               <div class="pipe-or">{{ locale === 'zh' ? '或' : 'or' }}</div>
               <div
@@ -454,7 +684,9 @@ onUnmounted(() => {
           <div class="path-item">
             <span class="path-key">{{ locale === 'zh' ? '快捷方式' : 'Shortcut' }}</span>
             <span class="path-val">{{
-              locale === 'zh' ? '桌面图标绑定某套配置，双击直达' : 'Desktop icon bound to one profile'
+              locale === 'zh'
+                ? '桌面图标绑定配置；可勾选关闭 UAC'
+                : 'Desktop icon; optional skip-UAC'
             }}</span>
           </div>
           <div class="path-item">
@@ -465,24 +697,165 @@ onUnmounted(() => {
             <span class="path-key">{{ locale === 'zh' ? '自动签到' : 'Check-in' }}</span>
             <span class="path-val">{{
               locale === 'zh'
-                ? '快捷方式 / URL / 命令行启动时顺带签到'
-                : 'On shortcut, URL, or CLI launch'
+                ? '开游戏顺带签；软件启动后还会批量签'
+                : 'On launch, plus a batch after Moonward starts'
             }}</span>
           </div>
         </div>
+          </div>
+        </details>
+
+        <details id="checkin" ref="checkinFoldRef" class="flow-fold checkin-tone">
+          <summary>
+            <span class="fold-chevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 6.5 14.5 12 9 17.5"
+                />
+              </svg>
+            </span>
+            <span class="fold-copy">
+              <span class="fold-title">{{ t(checkInFlow.title) }}</span>
+              <span class="fold-hint">{{
+                locale === 'zh'
+                  ? '按游戏开关 · 启动后批量 · 开游戏顺带签'
+                  : 'Per-game toggle · batch after start · on launch'
+              }}</span>
+            </span>
+          </summary>
+          <div class="fold-body">
+            <p class="section-lead">{{ t(checkInFlow.lead) }}</p>
+            <div class="flow-board">
+          <ol class="flow-rail" role="list">
+            <li
+              v-for="(step, i) in checkInFlow.steps"
+              :key="step.id"
+              class="flow-rail-item"
+              :class="{ active: activeCheckInStep === step.id }"
+            >
+              <button type="button" class="flow-rail-btn" @click="activeCheckInStep = step.id">
+                <span class="flow-num">{{ i + 1 }}</span>
+                <span class="flow-rail-label">{{ t(step.tag) }}</span>
+              </button>
+              <span v-if="i < checkInFlow.steps.length - 1" class="flow-rail-line" aria-hidden="true" />
+            </li>
+          </ol>
+
+          <div class="flow-visual" aria-hidden="true">
+            <div class="pipe-row">
+              <div
+                class="pipe-node enable"
+                :class="{ on: activeCheckInStep === 'enable' }"
+                @mouseenter="activeCheckInStep = 'enable'"
+              >
+                <span class="pipe-label">{{ locale === 'zh' ? '按游戏开启' : 'Enable per game' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '独立开关 · 下次启动生效' : 'per-game · next start' }}</span>
+              </div>
+            </div>
+
+            <div class="pipe-join">
+              <span class="pipe-v" />
+              <span class="pipe-hint">{{ locale === 'zh' ? '两条路径' : 'Two paths' }}</span>
+            </div>
+
+            <div class="pipe-row split">
+              <div
+                class="pipe-node batch"
+                :class="{ on: activeCheckInStep === 'paths' }"
+                @mouseenter="activeCheckInStep = 'paths'"
+              >
+                <span class="pipe-label">{{ locale === 'zh' ? '启动后批量' : 'Batch after start' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '约 10 秒 · 依次签到' : '~10s · one by one' }}</span>
+              </div>
+              <div class="pipe-or">{{ locale === 'zh' ? '或' : 'or' }}</div>
+              <div
+                class="pipe-node launch-acc"
+                :class="{ on: activeCheckInStep === 'paths' }"
+                @mouseenter="activeCheckInStep = 'paths'"
+              >
+                <span class="pipe-label">{{ locale === 'zh' ? '开游戏顺带签' : 'On game launch' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '快捷方式 / URL / CLI' : 'shortcut / URL / CLI' }}</span>
+              </div>
+            </div>
+
+            <div class="pipe-join">
+              <span class="pipe-v merge" />
+            </div>
+
+            <div class="pipe-row">
+              <div
+                class="pipe-node claim"
+                :class="{ on: activeCheckInStep === 'claim' }"
+                @mouseenter="activeCheckInStep = 'claim'"
+              >
+                <span class="pipe-label">{{ locale === 'zh' ? '查询并签到' : 'Look up, then claim' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '已签则跳过 · 失败冷却' : 'skip if done · cooldown' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-detail">
+            <template v-for="step in checkInFlow.steps" :key="step.id">
+              <div v-show="activeCheckInStep === step.id" class="detail-panel">
+                <p class="detail-tag mono">{{ t(step.tag) }}</p>
+                <h3>{{ t(step.title) }}</h3>
+                <p class="detail-desc">{{ t(step.desc) }}</p>
+                <div v-if="step.branches" class="branches">
+                  <div v-for="b in step.branches" :key="b.id" class="branch">
+                    <strong>{{ t(b.title) }}</strong>
+                    <p>{{ t(b.desc) }}</p>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div class="path-summary">
+          <div class="path-item">
+            <span class="path-key">{{ locale === 'zh' ? '按游戏开关' : 'Per-game toggle' }}</span>
+            <span class="path-val">{{
+              locale === 'zh' ? '各游戏互不影响，下次启动生效' : 'Independent; takes effect next start'
+            }}</span>
+          </div>
+          <div class="path-item">
+            <span class="path-key">{{ locale === 'zh' ? '启动后批量' : 'Batch after start' }}</span>
+            <span class="path-val">{{
+              locale === 'zh' ? '约十秒后依次签已开启的游戏' : 'Enabled games, one by one after ~10s'
+            }}</span>
+          </div>
+          <div class="path-item">
+            <span class="path-key">{{ locale === 'zh' ? '开游戏顺带签' : 'On launch' }}</span>
+            <span class="path-val">{{
+              locale === 'zh' ? '快捷方式 / URL / 命令行只签该账号' : 'Shortcut, URL, or CLI: that account only'
+            }}</span>
+          </div>
+          <div class="path-item">
+            <span class="path-key">{{ locale === 'zh' ? '失败冷却' : 'Cooldown' }}</span>
+            <span class="path-val">{{
+              locale === 'zh' ? '出错约十分钟内不再重试' : 'About 10 minutes after a failure'
+            }}</span>
+          </div>
+        </div>
+          </div>
+        </details>
       </section>
 
       <!-- Install -->
       <section id="install" class="block install-block" aria-labelledby="install-heading">
         <div class="install-head">
           <div>
-            <p class="section-kicker">{{ locale === 'zh' ? '开始使用' : 'Get started' }}</p>
             <h2 id="install-heading">{{ locale === 'zh' ? '下载与安装' : 'Download & install' }}</h2>
             <p class="section-lead install-lead">
               {{
                 locale === 'zh'
-                  ? '直接下载最新版安装包或便携版。多数电脑选 x64；Surface / 骁龙等 Windows on ARM 选 ARM64。可切换 GitHub / CNB 下载线路。'
-                  : 'Download the latest Setup or Portable build. Most PCs use x64; Windows on ARM uses ARM64. Switch GitHub / CNB download channels as needed.'
+                  ? '直接下载安装包或便携版。可切换版本查看该版发布说明；下载线路可选 GitHub / CNB。多数电脑选 x64，Windows on ARM 选 ARM64。'
+                  : 'Download Setup or Portable. Switch versions to read that release\'s notes; pick GitHub or CNB for the download channel. Most PCs use x64; Windows on ARM uses ARM64.'
               }}
             </p>
           </div>
@@ -521,7 +894,26 @@ onUnmounted(() => {
         </div>
 
         <div v-else class="dl-section">
-          <span v-if="release" class="ver mono">{{ release.tag || release.name }}</span>
+          <div class="ver-row">
+            <label class="ver-picker">
+              <span class="ver-picker-label">{{ locale === 'zh' ? '版本' : 'Version' }}</span>
+              <select
+                v-model="selectedTag"
+                class="ver-select mono"
+                :aria-label="locale === 'zh' ? '选择版本' : 'Choose a version'"
+              >
+                <option v-for="c in catalogs" :key="c.tag" :value="c.tag">
+                  {{ optionLabel(c) }}
+                </option>
+              </select>
+            </label>
+            <span v-if="release?.prerelease" class="badge">
+              {{ locale === 'zh' ? '预览版' : 'Pre-release' }}
+            </span>
+            <time v-if="publishedLabel" class="ver-date" :datetime="selectedCatalog?.publishedAt || undefined">
+              {{ publishedLabel }}
+            </time>
+          </div>
           <div class="dl-grid">
             <article
               v-for="col in archColumns"
@@ -562,6 +954,16 @@ onUnmounted(() => {
               </ul>
             </article>
           </div>
+
+          <article class="notes" :aria-label="locale === 'zh' ? '发布说明' : 'Release notes'">
+            <header class="notes-head">
+              <p class="notes-tag mono">{{ release?.tag }}</p>
+            </header>
+            <div v-if="notesHtml" class="notes-body" v-html="notesHtml" />
+            <p v-else class="notes-empty">
+              {{ locale === 'zh' ? '此版本没有发布说明。' : 'No release notes for this version.' }}
+            </p>
+          </article>
         </div>
 
         <div class="install-foot">
@@ -572,11 +974,11 @@ onUnmounted(() => {
             </template>
           </dl>
           <div class="install-cta">
-            <a class="text-link" :href="releasesPageHref" target="_blank" rel="noopener noreferrer">
+            <a class="text-link" :href="selectedReleaseHref" target="_blank" rel="noopener noreferrer">
               {{
                 locale === 'zh'
-                  ? `全部历史版本（${activeChannelMeta.label.zh}）`
-                  : `All releases (${activeChannelMeta.label.en})`
+                  ? `在 ${activeChannelMeta.label.zh} 打开此版本`
+                  : `Open this release on ${activeChannelMeta.label.en}`
               }}
             </a>
             <a class="text-link" :href="links.issues" target="_blank" rel="noopener noreferrer">
@@ -606,6 +1008,32 @@ onUnmounted(() => {
         </p>
       </div>
     </footer>
+
+    <div class="sky-play" :class="skyPlay" aria-hidden="true">
+      <div class="sky-veil" />
+      <div class="sky-glow" />
+      <div class="sky-disc" />
+    </div>
+
+    <button
+      type="button"
+      class="back-top"
+      :class="{ show: showBackTop }"
+      :aria-label="locale === 'zh' ? '回到顶部' : 'Back to top'"
+      :tabindex="showBackTop ? 0 : -1"
+      @click="scrollToTop"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6.5 14.5 12 9l5.5 5.5"
+        />
+      </svg>
+    </button>
   </div>
 </template>
 
@@ -672,7 +1100,8 @@ onUnmounted(() => {
   text-decoration: underline;
 }
 
-.lang {
+.lang,
+.theme-btn {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   padding: 0.22rem 0.5rem;
@@ -681,9 +1110,60 @@ onUnmounted(() => {
   color: var(--muted);
 }
 
-.lang:hover {
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+}
+
+.theme-sky {
+  position: relative;
+  width: 0.95rem;
+  height: 0.95rem;
+  overflow: hidden;
+}
+
+.celestial {
+  position: absolute;
+  inset: 0;
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+
+.celestial.sun {
+  transform: translateY(0);
+}
+
+.celestial.moon {
+  transform: translateY(130%);
+}
+
+.theme-btn.is-dark .celestial.sun {
+  transform: translateY(130%);
+}
+
+.theme-btn.is-dark .celestial.moon {
+  transform: translateY(0);
+}
+
+.theme-btn.armed .celestial {
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lang:hover,
+.theme-btn:hover {
   color: var(--ink);
   border-color: var(--ink-2);
+}
+
+.theme-btn:focus-visible,
+.lang:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* —— Hero + parallax —— */
@@ -692,7 +1172,7 @@ onUnmounted(() => {
   overflow: hidden;
   border-bottom: 1px solid var(--line);
   background:
-    linear-gradient(165deg, #e8e1d4 0%, var(--bg) 45%, #e4ebe6 100%);
+    linear-gradient(165deg, var(--hero-grad-start) 0%, var(--bg) 45%, var(--hero-grad-end) 100%);
   min-height: 22rem;
   display: flex;
   align-items: center;
@@ -715,9 +1195,9 @@ onUnmounted(() => {
 .layer-bg {
   inset: -8%;
   background:
-    radial-gradient(circle at 22% 40%, rgba(30, 77, 63, 0.14), transparent 42%),
-    radial-gradient(circle at 78% 30%, rgba(154, 107, 31, 0.12), transparent 38%),
-    radial-gradient(circle at 55% 85%, rgba(42, 79, 122, 0.08), transparent 40%);
+    radial-gradient(circle at 22% 40%, var(--hero-wash-teal), transparent 42%),
+    radial-gradient(circle at 78% 30%, var(--hero-wash-amber), transparent 38%),
+    radial-gradient(circle at 55% 85%, var(--hero-wash-blue), transparent 40%);
 }
 
 .layer-orb {
@@ -730,8 +1210,8 @@ onUnmounted(() => {
   height: 18rem;
   top: -4rem;
   right: 8%;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 252, 247, 0.9), rgba(220, 234, 228, 0.45) 55%, transparent 70%);
-  box-shadow: inset 0 0 40px rgba(30, 77, 63, 0.08);
+  background: radial-gradient(circle at 35% 35%, var(--orb-a-from), var(--orb-a-mid) 55%, transparent 70%);
+  box-shadow: inset 0 0 40px var(--orb-a-inset);
 }
 
 .orb-b {
@@ -739,7 +1219,7 @@ onUnmounted(() => {
   height: 9rem;
   bottom: 10%;
   left: 12%;
-  background: radial-gradient(circle at 40% 40%, rgba(255, 240, 210, 0.75), rgba(154, 107, 31, 0.15) 60%, transparent 72%);
+  background: radial-gradient(circle at 40% 40%, var(--orb-b-from), var(--orb-b-mid) 60%, transparent 72%);
 }
 
 .orb-c {
@@ -747,7 +1227,7 @@ onUnmounted(() => {
   height: 5.5rem;
   top: 28%;
   left: 38%;
-  background: radial-gradient(circle, rgba(42, 106, 106, 0.22), transparent 68%);
+  background: radial-gradient(circle, var(--orb-c), transparent 68%);
 }
 
 .layer-ring {
@@ -755,17 +1235,17 @@ onUnmounted(() => {
   height: 22rem;
   right: -2rem;
   bottom: -6rem;
-  border: 1px solid rgba(30, 77, 63, 0.12);
+  border: 1px solid var(--ring);
   border-radius: 50%;
-  box-shadow: 0 0 0 28px rgba(30, 77, 63, 0.04);
+  box-shadow: 0 0 0 28px var(--ring-glow);
 }
 
 .layer-grid {
   inset: 0;
   opacity: 0.35;
   background-image:
-    linear-gradient(rgba(28, 25, 21, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(28, 25, 21, 0.04) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 70% 70% at 70% 40%, black, transparent);
 }
@@ -840,7 +1320,7 @@ onUnmounted(() => {
   padding: 0.5rem 1.05rem;
   border-radius: 6px;
   background: var(--accent);
-  color: #f7faf8;
+  color: var(--on-accent);
   text-decoration: none;
   font-family: var(--font-sans);
   font-size: 0.9rem;
@@ -849,7 +1329,7 @@ onUnmounted(() => {
 }
 
 .btn:hover {
-  color: #fff;
+  color: var(--on-accent);
   background: var(--accent-hover);
 }
 
@@ -888,12 +1368,13 @@ onUnmounted(() => {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
+  scroll-margin-top: 4.25rem;
 }
 
 /* —— Feature cards —— */
 .cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
 }
 
@@ -918,6 +1399,7 @@ onUnmounted(() => {
 .card[data-accent='violet'] { --card-accent: var(--violet); }
 .card[data-accent='rose'] { --card-accent: var(--rose); }
 .card[data-accent='cyan'] { --card-accent: var(--cyan); }
+.card[data-accent='indigo'] { --card-accent: var(--indigo); }
 .card[data-accent='slate'] { --card-accent: var(--slate); }
 
 .card-top {
@@ -953,10 +1435,94 @@ onUnmounted(() => {
   color: var(--ink-2);
 }
 
-/* —— Flow —— */
-.flow-block {
-  background:
-    linear-gradient(180deg, var(--bg-card) 0%, #f7f3ec 100%);
+/* —— Advanced folds —— */
+.flow-fold {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, var(--bg-raised) 0%, var(--flow-end) 100%);
+  scroll-margin-top: 4.25rem;
+}
+
+.flow-fold + .flow-fold {
+  margin-top: 0.65rem;
+}
+
+.flow-fold.checkin-tone {
+  background: linear-gradient(180deg, var(--bg-raised) 0%, var(--checkin-end) 100%);
+}
+
+.flow-fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 0.95rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.flow-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.flow-fold > summary:hover .fold-title {
+  color: var(--accent);
+}
+
+.flow-fold > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.fold-chevron {
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: transform 0.2s ease;
+}
+
+.fold-chevron svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+
+.flow-fold[open] > summary .fold-chevron {
+  transform: rotate(90deg);
+}
+
+.fold-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.fold-title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.fold-hint {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.fold-body {
+  padding: 0.95rem 0.95rem 1.05rem;
+  border-top: 1px solid var(--line);
+}
+
+.fold-body > .section-lead {
+  margin-bottom: 0.95rem;
 }
 
 .flow-board {
@@ -1016,7 +1582,7 @@ onUnmounted(() => {
 
 .flow-rail-item.active .flow-num {
   background: var(--accent);
-  color: #f7faf8;
+  color: var(--on-accent);
 }
 
 .flow-rail-line {
@@ -1057,23 +1623,35 @@ onUnmounted(() => {
 .pipe-node.on {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
-  background: #fff;
+  background: var(--surface-hover);
 }
 
 .pipe-node.shortcut.on,
 .pipe-node.url.on {
   border-color: var(--amber);
-  box-shadow: 0 0 0 3px rgba(154, 107, 31, 0.15);
+  box-shadow: 0 0 0 3px var(--glow-amber);
 }
 
-.pipe-node.checkin.on {
+.pipe-node.checkin.on,
+.pipe-node.claim.on,
+.pipe-node.batch.on {
   border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(58, 107, 58, 0.15);
+  box-shadow: 0 0 0 3px var(--glow-green);
+}
+
+.pipe-node.enable.on {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.pipe-node.launch-acc.on {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px var(--glow-amber);
 }
 
 .pipe-node.game.on {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(42, 79, 122, 0.15);
+  box-shadow: 0 0 0 3px var(--glow-blue);
 }
 
 .pipe-label {
@@ -1288,31 +1866,162 @@ onUnmounted(() => {
 }
 
 .channel-btn.active {
-  color: #f7faf8;
+  color: var(--on-accent);
   background: var(--accent);
   box-shadow: var(--shadow-sm);
 }
 
-/*
- * 版本胶囊：两张下载卡片右上侧。
- * absolute 不占左侧流式高度；与卡片顶边间距 = 左侧文案到底部卡片的间距（--install-stack-gap）。
- */
 .dl-section {
   position: relative;
 }
 
-.dl-section > .ver {
-  position: absolute;
-  right: 0;
-  top: 0;
-  transform: translateY(calc(-100% - var(--install-stack-gap)));
-  font-size: 0.95rem;
+.ver-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  margin-bottom: var(--install-stack-gap);
+}
+
+.ver-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ver-picker-label {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ver-select {
+  appearance: none;
+  color-scheme: inherit;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--accent);
-  padding: 0.2rem 0.55rem;
+  padding: 0.32rem 1.9rem 0.32rem 0.75rem;
   border-radius: 999px;
-  background: var(--accent-soft);
   border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  background-color: var(--accent-soft);
+  background-image: var(--select-caret);
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 0.75rem;
+  cursor: pointer;
+  max-width: min(100%, 22rem);
+}
+
+.ver-select:hover,
+.ver-select:focus-visible {
+  border-color: var(--accent);
+}
+
+.ver-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ver-date {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.notes {
+  margin: 0 0 1.15rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+}
+
+.notes-head {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.7rem;
+}
+
+.notes-tag {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.notes-empty {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.notes-body {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+.notes-body :deep(:first-child) {
+  margin-top: 0;
+}
+
+.notes-body :deep(h1),
+.notes-body :deep(h2),
+.notes-body :deep(h3),
+.notes-body :deep(h4) {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0.95rem 0 0.35rem;
+  letter-spacing: 0;
+}
+
+.notes-body :deep(ul),
+.notes-body :deep(ol) {
+  margin: 0 0 0.55rem;
+  padding-left: 1.2rem;
+  list-style: disc;
+}
+
+.notes-body :deep(ol) {
+  list-style: decimal;
+}
+
+.notes-body :deep(li) {
+  margin: 0.22rem 0;
+}
+
+.notes-body :deep(li + li) {
+  margin-top: 0.35rem;
+}
+
+.notes-body :deep(p) {
+  margin: 0 0 0.5rem;
+}
+
+.notes-body :deep(a) {
+  color: var(--accent);
+}
+
+.notes-body :deep(hr) {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0.85rem 0;
+}
+
+.notes-body :deep(code) {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  padding: 0.05em 0.35em;
+  border-radius: 4px;
+  background: var(--code-bg);
+}
+
+.notes-body :deep(strong) {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .dl-status {
@@ -1408,7 +2117,7 @@ onUnmounted(() => {
 
 .dl-link:hover {
   border-color: var(--accent);
-  background: #fff;
+  background: var(--surface-hover);
   color: var(--ink);
   transform: translateY(-1px);
 }
@@ -1537,6 +2246,243 @@ onUnmounted(() => {
   text-decoration: underline;
 }
 
+/* —— Theme: sun rise / moon fall —— */
+.sky-play {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.sky-play.to-light,
+.sky-play.to-dark {
+  visibility: visible;
+  animation: sky-play-hold 0.92s ease both;
+}
+
+.sky-veil,
+.sky-glow,
+.sky-disc {
+  position: absolute;
+}
+
+.sky-veil {
+  inset: 0;
+}
+
+.sky-play.to-light .sky-veil {
+  background: var(--theme-light-bg);
+  animation: sky-veil-rise 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.sky-play.to-dark .sky-veil {
+  background: var(--theme-dark-bg);
+  animation: sky-veil-fall 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.sky-glow {
+  left: 0;
+  right: 0;
+  height: 42%;
+  opacity: 0;
+}
+
+.sky-play.to-light .sky-glow {
+  bottom: 0;
+  background: radial-gradient(ellipse 80% 100% at 50% 100%, rgba(226, 184, 90, 0.38), transparent 72%);
+  animation: sky-glow-in 0.92s ease forwards;
+}
+
+.sky-play.to-dark .sky-glow {
+  top: 0;
+  background: radial-gradient(ellipse 80% 100% at 50% 0%, rgba(214, 206, 194, 0.16), transparent 72%);
+  animation: sky-glow-in 0.92s ease forwards;
+}
+
+.sky-disc {
+  width: 4.4rem;
+  height: 4.4rem;
+  margin-left: -2.2rem;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.sky-play.to-light .sky-disc {
+  background:
+    radial-gradient(circle at 34% 32%, #fff8e6 0%, #f0d48a 42%, #d4a24a 78%);
+  box-shadow: 0 0 2.4rem 0.55rem rgba(212, 164, 92, 0.32);
+  animation: sky-sun-rise 0.92s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.sky-play.to-dark .sky-disc {
+  background:
+    radial-gradient(circle at 38% 34%, #f7f2ea 0%, #d8d0c4 55%, #b8aea0 100%);
+  box-shadow:
+    inset -0.7rem 0 0 0 rgba(22, 20, 16, 0.28),
+    0 0 1.8rem 0.35rem rgba(243, 238, 230, 0.12);
+  animation: sky-moon-fall 0.92s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes sky-play-hold {
+  0%,
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes sky-veil-rise {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes sky-veil-fall {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes sky-glow-in {
+  0% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes sky-sun-rise {
+  0% {
+    top: 108%;
+    left: 40%;
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  16% {
+    opacity: 1;
+  }
+  62% {
+    top: 28%;
+    left: 50%;
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    top: 16%;
+    left: 56%;
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes sky-moon-fall {
+  0% {
+    top: -20%;
+    left: 58%;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  16% {
+    opacity: 1;
+  }
+  62% {
+    top: 36%;
+    left: 50%;
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    top: 58%;
+    left: 42%;
+    opacity: 0;
+    transform: scale(0.78);
+  }
+}
+
+/* —— Back to top —— */
+.back-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 30;
+  width: 2.6rem;
+  height: 2.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  color: var(--accent);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(0.35rem);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    visibility 0.2s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.back-top.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+}
+
+.back-top:hover {
+  color: var(--accent-hover);
+  border-color: var(--accent);
+  background: var(--bg-card);
+}
+
+.back-top:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.back-top svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-play {
+    display: none;
+  }
+
+  .theme-btn .celestial {
+    transition: none;
+  }
+
+  .back-top {
+    transform: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+}
+
 /* —— Responsive —— */
 @media (max-width: 1100px) {
   .cards {
@@ -1607,6 +2553,11 @@ onUnmounted(() => {
 
   .main {
     padding-top: 1.15rem;
+  }
+
+  .back-top {
+    right: 0.85rem;
+    bottom: 0.85rem;
   }
 }
 </style>

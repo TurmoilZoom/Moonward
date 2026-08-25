@@ -9,6 +9,24 @@
       content="Moonward：基于 Starward 的开源米哈游 PC 启动器。多启动配置、桌面快捷方式、URL 协议与自动签到。"
     />
     <meta name="theme-color" content="#f0ebe3" />
+    <script>
+      (function () {
+        var stored = null
+        try {
+          stored = localStorage.getItem('moonward-theme')
+        } catch (e) {}
+        var dark =
+          stored === 'dark' ||
+          (stored !== 'light' &&
+            window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches)
+        var theme = dark ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', theme)
+        document.documentElement.style.colorScheme = theme
+        var meta = document.querySelector('meta[name="theme-color"]')
+        if (meta) meta.setAttribute('content', dark ? '#161410' : '#f0ebe3')
+      })()
+    </script>
     <meta property="og:title" content="Moonward" />
     <meta
       property="og:description"

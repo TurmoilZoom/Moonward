@@ -1,9 +1,10 @@
 /**
- * 最新版安装包：支持 GitHub / CNB 双渠道。
+ * 安装包与发行说明：支持 GitHub / CNB 双渠道。
  *
- * - 清单优先走 GitHub API（浏览器 CORS 友好）
+ * - 清单优先走 GitHub API（浏览器 CORS 友好），一次拉最近若干个版本（含 body）
  * - CNB 列表 API 在浏览器中通常无 CORS，失败时用同 tag/文件名改写为 CNB 直链
  * - 下载源切换只改 URL，不重复请求（已有缓存时）
+ * - 页内切换版本时同步安装包与发布说明
  */
 
 /** @typedef {'github' | 'cnb'} DownloadChannel */
@@ -40,8 +41,9 @@ export const CHANNELS = {
 export const DEFAULT_CHANNEL = /** @type {DownloadChannel} */ ('cnb')
 
 const CHANNEL_STORAGE_KEY = 'moonward-download-channel'
-const CACHE_KEY = 'moonward-release-catalog-v2'
+const CACHE_KEY = 'moonward-release-catalogs-v3'
 const CACHE_TTL_MS = 10 * 60 * 1000
+const RELEASE_LIST_PAGE_SIZE = 30
 
 /**
  * @typedef {object} ReleasePackage
@@ -58,6 +60,8 @@ const CACHE_TTL_MS = 10 * 60 * 1000
  * @property {string} name
  * @property {string} htmlUrl
  * @property {string | null} publishedAt
+ * @property {string} body
+ * @property {boolean} prerelease
  * @property {ReleasePackage[]} packages
  * @property {DownloadChannel} channel
  * @property {'github' | 'cnb' | 'github+cnb-urls'} catalogSource
@@ -177,11 +181,13 @@ function packagesFromAssets(assets, urlFor) {
 }
 
 /**
- * 不含渠道 URL 的原始目录（仅 name/size/arch/kind）。
+ * 不含渠道 URL 的原始目录（name/size/arch/kind + 发行说明）。
  * @typedef {object} ReleaseCatalog
  * @property {string} tag
  * @property {string} name
  * @property {string | null} publishedAt
+ * @property {string} body
+ * @property {boolean} prerelease
  * @property {{ name: string, size: number, arch: Arch, kind: PackageKind }[]} items
  * @property {'github' | 'cnb'} catalogSource
  */
@@ -197,6 +203,8 @@ export function catalogFromGitHubPayload(json) {
     tag,
     name: json?.name || tag,
     publishedAt: json?.published_at || null,
+    body: typeof json?.body === 'string' ? json.body : '',
+    prerelease: Boolean(json?.prerelease),
     items,
     catalogSource: 'github',
   }
@@ -209,10 +217,16 @@ export function catalogFromGitHubPayload(json) {
 export function catalogFromCnbPayload(json) {
   const tag = json?.tag_name || json?.name || ''
   const items = packagesFromAssets(json?.assets, () => '').map(({ url: _u, ...rest }) => rest)
+  const body =
+    (typeof json?.body === 'string' && json.body) ||
+    (typeof json?.description === 'string' && json.description) ||
+    ''
   return {
     tag,
     name: json?.name || tag,
     publishedAt: json?.published_at || json?.created_at || null,
+    body,
+    prerelease: Boolean(json?.prerelease),
     items,
     catalogSource: 'cnb',
   }
@@ -224,7 +238,6 @@ export function catalogFromCnbPayload(json) {
  * @returns {LatestRelease}
  */
 export function applyChannel(catalog, channel) {
-  const ch = CHANNELS[channel] || CHANNELS.cnb
   const packages = (catalog.items || []).map((item) => ({
     ...item,
     url:
@@ -232,11 +245,17 @@ export function applyChannel(catalog, channel) {
         ? githubDownloadUrl(catalog.tag, item.name)
         : cnbDownloadUrl(catalog.tag, item.name),
   }))
+  const tag = catalog.tag
   return {
-    tag: catalog.tag,
+    tag,
     name: catalog.name,
-    htmlUrl: ch.releasesPage,
+    htmlUrl:
+      channel === 'github'
+        ? `https://github.com/${GITHUB_REPO}/releases/tag/${encodeURIComponent(tag)}`
+        : `https://cnb.cool/${CNB_ASSET_REPO}/-/releases/tag/${encodeURIComponent(tag)}`,
     publishedAt: catalog.publishedAt,
+    body: catalog.body || '',
+    prerelease: Boolean(catalog.prerelease),
     packages,
     channel,
     catalogSource:
@@ -251,14 +270,15 @@ function readCatalogCache() {
     const raw = sessionStorage.getItem(CACHE_KEY)
     if (!raw) return null
     const { at, data } = JSON.parse(raw)
-    if (!at || !data?.items?.length || Date.now() - at > CACHE_TTL_MS) return null
-    return /** @type {ReleaseCatalog} */ (data)
+    if (!at || !Array.isArray(data) || !data.length || Date.now() - at > CACHE_TTL_MS) return null
+    if (!data[0]?.tag) return null
+    return /** @type {ReleaseCatalog[]} */ (data)
   } catch {
     return null
   }
 }
 
-/** @param {ReleaseCatalog} data */
+/** @param {ReleaseCatalog[]} data */
 function writeCatalogCache(data) {
   try {
     sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data }))
@@ -269,28 +289,32 @@ function writeCatalogCache(data) {
 
 /**
  * @param {AbortSignal} [signal]
- * @returns {Promise<ReleaseCatalog>}
+ * @returns {Promise<ReleaseCatalog[]>}
  */
-async function fetchGitHubCatalog(signal) {
-  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
-    headers: { Accept: 'application/vnd.github+json' },
-    signal,
-  })
+async function fetchGitHubCatalogs(signal) {
+  const res = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=${RELEASE_LIST_PAGE_SIZE}`,
+    {
+      headers: { Accept: 'application/vnd.github+json' },
+      signal,
+    },
+  )
   if (!res.ok) throw new Error(`GitHub API ${res.status}`)
   const json = await res.json()
-  const catalog = catalogFromGitHubPayload(json)
-  if (!catalog.items.length) throw new Error('GitHub release has no install packages')
-  return catalog
+  const arr = Array.isArray(json) ? json : []
+  const catalogs = arr.filter((x) => !x?.draft).map(catalogFromGitHubPayload)
+  if (!catalogs.length) throw new Error('GitHub has no published releases')
+  return catalogs
 }
 
 /**
  * @param {AbortSignal} [signal]
- * @returns {Promise<ReleaseCatalog>}
+ * @returns {Promise<ReleaseCatalog[]>}
  */
-async function fetchCnbCatalog(signal) {
+async function fetchCnbCatalogs(signal) {
   // 列表 API 与应用 CnbSource 一致；公开页可读，但浏览器可能遇 CORS
   const res = await fetch(
-    `https://cnb.cool/${CNB_LIST_REPO}/-/releases?page=1&page_size=20`,
+    `https://cnb.cool/${CNB_LIST_REPO}/-/releases?page=1&page_size=${RELEASE_LIST_PAGE_SIZE}`,
     {
       headers: { Accept: 'application/vnd.cnb.api+json' },
       signal,
@@ -299,41 +323,48 @@ async function fetchCnbCatalog(signal) {
   if (!res.ok) throw new Error(`CNB API ${res.status}`)
   const list = await res.json()
   const arr = Array.isArray(list) ? list : []
-  const latest = arr.find((x) => !x?.prerelease && !x?.draft) || arr[0]
-  if (!latest) throw new Error('CNB has no releases')
-  const catalog = catalogFromCnbPayload(latest)
-  if (!catalog.items.length) throw new Error('CNB release has no install packages')
-  return catalog
+  const catalogs = arr.filter((x) => !x?.draft).map(catalogFromCnbPayload)
+  if (!catalogs.length) throw new Error('CNB has no releases')
+  return catalogs
 }
 
 /**
- * 拉取安装包目录（与渠道无关）；渠道在 applyChannel 中绑定 URL。
+ * 拉取最近若干个版本的目录（与渠道无关）；渠道在 applyChannel 中绑定 URL。
  * @param {AbortSignal} [signal]
- * @returns {Promise<ReleaseCatalog>}
+ * @returns {Promise<ReleaseCatalog[]>}
  */
-export async function fetchReleaseCatalog(signal) {
+export async function fetchReleaseCatalogs(signal) {
   const cached = readCatalogCache()
   if (cached) return cached
 
   /** @type {Error | null} */
   let lastErr = null
   try {
-    const catalog = await fetchGitHubCatalog(signal)
-    writeCatalogCache(catalog)
-    return catalog
+    const catalogs = await fetchGitHubCatalogs(signal)
+    writeCatalogCache(catalogs)
+    return catalogs
   } catch (e) {
     lastErr = e instanceof Error ? e : new Error(String(e))
   }
 
   try {
-    const catalog = await fetchCnbCatalog(signal)
-    writeCatalogCache(catalog)
-    return catalog
+    const catalogs = await fetchCnbCatalogs(signal)
+    writeCatalogCache(catalogs)
+    return catalogs
   } catch (e) {
     lastErr = e instanceof Error ? e : new Error(String(e))
   }
 
-  throw lastErr || new Error('Failed to load release catalog')
+  throw lastErr || new Error('Failed to load release catalogs')
+}
+
+/**
+ * @param {ReleaseCatalog[]} catalogs
+ * @returns {ReleaseCatalog | null}
+ */
+export function pickLatestCatalog(catalogs) {
+  if (!catalogs?.length) return null
+  return catalogs.find((c) => !c.prerelease) || catalogs[0] || null
 }
 
 /**
@@ -342,7 +373,9 @@ export async function fetchReleaseCatalog(signal) {
  * @returns {Promise<LatestRelease>}
  */
 export async function fetchLatestRelease(channel, signal) {
-  const catalog = await fetchReleaseCatalog(signal)
+  const catalogs = await fetchReleaseCatalogs(signal)
+  const catalog = pickLatestCatalog(catalogs)
+  if (!catalog) throw new Error('No releases')
   return applyChannel(catalog, channel)
 }
 
@@ -360,6 +393,8 @@ export function switchReleaseChannel(release, channel) {
       tag: release.tag,
       name: release.name,
       publishedAt: release.publishedAt,
+      body: release.body || '',
+      prerelease: Boolean(release.prerelease),
       items: (release.packages || []).map(({ arch, kind, name, size }) => ({
         arch,
         kind,
@@ -370,6 +405,20 @@ export function switchReleaseChannel(release, channel) {
     },
     channel,
   )
+}
+
+/**
+ * @param {string | null | undefined} iso
+ * @param {'zh' | 'en'} locale
+ */
+export function formatPublishedAt(iso, locale = 'zh') {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  if (locale === 'zh') {
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+  }
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 /**
