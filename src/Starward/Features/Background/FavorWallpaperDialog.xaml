@@ -54,6 +54,13 @@
                           Glyph="&#xE8AB;"
                           IsTextScaleFactorEnabled="False" />
             </Button>
+
+            <!-- 后台校验/回源时的提示（数量对不上、正在补词条）；命中缓存与首次转圈时不显示。 -->
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind FavorPanel.StatusText, Mode=OneWay}"
+                       Visibility="{x:Bind FavorPanel.StatusText, Mode=OneWay, Converter={StaticResource ObjectToVisibilityConverter}}" />
         </StackPanel>
 
         <local:FavorWallpaperPanel x:Name="FavorPanel"

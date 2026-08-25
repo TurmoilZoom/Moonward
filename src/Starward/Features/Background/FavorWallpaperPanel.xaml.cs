@@ -96,10 +96,37 @@ public sealed partial class FavorWallpaperPanel : UserControl
         var cts = new CancellationTokenSource();
         _loadCts = cts;
         CancellationToken token = cts.Token;
-        IsLoading = true;
         ErrorText = null;
-        StatusText = Lang.FavorWallpaper_Loading;
-        Items.Clear();
+        StatusText = null;
+
+        // 1) 先贴本地缓存立即可见；只有从未缓存过（首次）时才转圈。
+        List<FavorWallpaperView> cachedViews = forceRefresh
+            ? []
+            : BuildViews(_service.GetCachedWallpapers(mindscape));
+        bool showedCache = cachedViews.Count > 0;
+        if (showedCache)
+        {
+            if (mindscape)
+            {
+                _mindscapeViews = cachedViews;
+            }
+            else
+            {
+                _favorViews = cachedViews;
+            }
+            IsLoading = false;
+            if (IsMindscapeMode == mindscape)
+            {
+                BindCurrentModeItems();
+            }
+        }
+        else
+        {
+            IsLoading = true;
+            Items.Clear();
+        }
+
+        // 2) 后台校验：数量一致则静默（仅就地补封面），对不上才整页强刷。
         try
         {
             var progress = new Progress<FavorWallpaperLoadProgress>(p =>
@@ -108,48 +135,49 @@ public sealed partial class FavorWallpaperPanel : UserControl
                 {
                     return;
                 }
-                if (p.FromCache)
-                {
-                    StatusText = null;
-                    return;
-                }
-                StatusText = string.Format(Lang.FavorWallpaper_LoadingProgress, p.Done, p.Total);
+                // 命中缓存（数量一致）或首屏仍在转圈时不显示标题提示；仅回源补词条时在标题右侧提示。
+                StatusText = p.FromCache || !showedCache
+                    ? null
+                    : string.Format(Lang.FavorWallpaper_LoadingProgress, p.Done, p.Total);
             });
             IReadOnlyList<FavorWallpaperRecord> records = mindscape
                 ? await _service.GetMindscapeWallpapersAsync(forceRefresh, progress, token)
                 : await _service.GetWallpapersAsync(forceRefresh, progress, token);
             token.ThrowIfCancellationRequested();
-            string? currentBg = AppConfig.GetCustomBg(CurrentGameBiz);
-            bool enabled = AppConfig.GetEnableCustomBg(CurrentGameBiz);
-            var views = new List<FavorWallpaperView>(records.Count);
-            foreach (FavorWallpaperRecord record in records)
+
+            List<FavorWallpaperView> shown = mindscape ? _mindscapeViews : _favorViews;
+            if (showedCache && !forceRefresh && SameEntries(shown, records))
             {
-                string fileName = FavorWallpaperService.GetCacheFileName(record);
-                views.Add(new FavorWallpaperView
-                {
-                    Record = record,
-                    IsDownloaded = FavorWallpaperService.IsCached(record),
-                    IsInUse = enabled && string.Equals(currentBg, fileName, StringComparison.OrdinalIgnoreCase),
-                    DownloadAction = DownloadAsync,
-                    DeleteAction = DeleteAsync,
-                    UseAction = UseAsBackgroundAsync,
-                });
+                // 条目未变：密友同行封面若被重新匹配则就地替换，不整页重绑。
+                PatchCovers(shown, records);
+                RefreshInUseState();
             }
+            else
+            {
+                List<FavorWallpaperView> views = BuildViews(records);
+                if (mindscape)
+                {
+                    _mindscapeViews = views;
+                }
+                else
+                {
+                    _favorViews = views;
+                }
+                if (IsMindscapeMode == mindscape)
+                {
+                    BindCurrentModeItems();
+                }
+            }
+
             if (mindscape)
             {
-                _mindscapeViews = views;
                 _mindscapeLoaded = true;
             }
             else
             {
-                _favorViews = views;
                 _favorLoaded = true;
             }
-            if (IsMindscapeMode == mindscape)
-            {
-                BindCurrentModeItems();
-                StatusText = null;
-            }
+            StatusText = null;
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
@@ -157,7 +185,11 @@ public sealed partial class FavorWallpaperPanel : UserControl
             _logger.LogError(ex, "Load wallpapers failed (mindscape={Mindscape})", mindscape);
             if (IsMindscapeMode == mindscape)
             {
-                ErrorText = Lang.FavorWallpaper_LoadFailed;
+                // 已有缓存呈现时后台失败保持静默，不打断浏览；仅首次无内容可展示才报错。
+                if (!showedCache)
+                {
+                    ErrorText = Lang.FavorWallpaper_LoadFailed;
+                }
                 StatusText = null;
             }
         }
@@ -166,6 +198,86 @@ public sealed partial class FavorWallpaperPanel : UserControl
             if (ReferenceEquals(_loadCts, cts))
             {
                 IsLoading = false;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 由记录构造卡片视图，注入下载 / 删除 / 使用回调与当前的已下载 / 使用中状态。
+    /// </summary>
+    private List<FavorWallpaperView> BuildViews(IReadOnlyList<FavorWallpaperRecord> records)
+    {
+        string? currentBg = AppConfig.GetCustomBg(CurrentGameBiz);
+        bool enabled = AppConfig.GetEnableCustomBg(CurrentGameBiz);
+        var views = new List<FavorWallpaperView>(records.Count);
+        foreach (FavorWallpaperRecord record in records)
+        {
+            string fileName = FavorWallpaperService.GetCacheFileName(record);
+            views.Add(new FavorWallpaperView
+            {
+                Record = record,
+                IsDownloaded = FavorWallpaperService.IsCached(record),
+                IsInUse = enabled && string.Equals(currentBg, fileName, StringComparison.OrdinalIgnoreCase),
+                DownloadAction = DownloadAsync,
+                DeleteAction = DeleteAsync,
+                UseAction = UseAsBackgroundAsync,
+            });
+        }
+        return views;
+    }
+
+
+    /// <summary>
+    /// 按 ContentId 序列判断展示中的列表与最新结果是否为同一批条目（数量与顺序均一致）。
+    /// </summary>
+    private static bool SameEntries(List<FavorWallpaperView> views, IReadOnlyList<FavorWallpaperRecord> records)
+    {
+        if (views.Count != records.Count)
+        {
+            return false;
+        }
+        for (int i = 0; i < views.Count; i++)
+        {
+            if (views[i].ContentId != records[i].ContentId)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    /// <summary>
+    /// 条目未变时，仅把被重新匹配过的封面 / 图标就地写回并通知刷新，避免整页重绑与闪动。
+    /// </summary>
+    private static void PatchCovers(List<FavorWallpaperView> views, IReadOnlyList<FavorWallpaperRecord> records)
+    {
+        var byId = new Dictionary<int, FavorWallpaperRecord>(records.Count);
+        foreach (FavorWallpaperRecord record in records)
+        {
+            byId[record.ContentId] = record;
+        }
+        foreach (FavorWallpaperView view in views)
+        {
+            if (!byId.TryGetValue(view.ContentId, out FavorWallpaperRecord? record))
+            {
+                continue;
+            }
+            bool changed = false;
+            if (!string.Equals(view.Record.CoverUrl, record.CoverUrl, StringComparison.Ordinal))
+            {
+                view.Record.CoverUrl = record.CoverUrl;
+                changed = true;
+            }
+            if (!string.Equals(view.Record.IconUrl, record.IconUrl, StringComparison.Ordinal))
+            {
+                view.Record.IconUrl = record.IconUrl;
+                changed = true;
+            }
+            if (changed)
+            {
+                view.NotifyCoverChanged();
             }
         }
     }

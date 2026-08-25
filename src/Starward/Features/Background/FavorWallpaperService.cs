@@ -330,6 +330,18 @@ internal partial class FavorWallpaperService
 
 
     /// <summary>
+    /// 同步读取本地已缓存的壁纸列表（不访问网络），供打开面板时立即呈现；数量比对与回源在后台异步进行。
+    /// </summary>
+    /// <param name="mindscape">true 取满影画静态壁纸，false 取好感动态壁纸。</param>
+    /// <returns>本地缓存的记录；从未缓存过时为空列表。</returns>
+    public IReadOnlyList<FavorWallpaperRecord> GetCachedWallpapers(bool mindscape)
+    {
+        List<FavorWallpaperRecord> local = LoadCache(mindscape ? MindscapeCacheKey : CacheKey);
+        return mindscape ? VisibleMindscape(local) : local;
+    }
+
+
+    /// <summary>
     /// 由媒体 URL 得到缓存文件名（与官方背景相同，落在 CacheFolder/bg）。
     /// </summary>
     public static string GetCacheFileName(FavorWallpaperRecord item)

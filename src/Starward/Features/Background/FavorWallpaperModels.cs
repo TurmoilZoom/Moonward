@@ -157,6 +157,16 @@ public partial class FavorWallpaperView : ObservableObject
     }
 
 
+    /// <summary>
+    /// 封面地址被就地更新（如密友同行重新匹配到新图）后刷新绑定，免整页重绑。
+    /// </summary>
+    public void NotifyCoverChanged()
+    {
+        OnPropertyChanged(nameof(CoverUrl));
+        OnPropertyChanged(nameof(CoverStretch));
+    }
+
+
     /// <summary>由画廊面板注入：下载到本地缓存。</summary>
     public Func<FavorWallpaperView, Task>? DownloadAction { get; set; }
 

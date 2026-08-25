@@ -15,12 +15,6 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="0,0,0,8"
-                   FontSize="12"
-                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                   Text="{x:Bind StatusText, Mode=OneWay}"
-                   Visibility="{x:Bind StatusText, Mode=OneWay, Converter={StaticResource ObjectToVisibilityConverter}}" />
-
         <GridView x:Name="GridView_Items"
                   Grid.Row="1"
                   Padding="0"
