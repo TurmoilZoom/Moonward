@@ -22,6 +22,7 @@ using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Media.Core;
 using Windows.Media.Playback;
+using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI;
 using WinRT;
@@ -262,7 +263,7 @@ public sealed partial class AppBackground : UserControl
                     }
                     else if (BackgroundService.FileIsSupportedVideo(filePath))
                     {
-                        StartMediaPlayer(filePath);
+                        await StartMediaPlayerAsync(filePath, cancellationToken);
                     }
                     else
                     {
@@ -397,8 +398,20 @@ public sealed partial class AppBackground : UserControl
 
     #region Video
 
+    /// <summary>不超过此大小的背景视频会读入内存循环播放，避免每次循环重新读盘。</summary>
+    private const long InMemoryVideoBackgroundMaxBytes = 32L * 1024 * 1024;
+
     /// <summary>当前正在播放视频背景的 MediaPlayer 实例（帧服务器模式）。</summary>
     private MediaPlayer? _mediaPlayer;
+
+    /// <summary>当前视频源；内存播放时需与流一起保持存活。</summary>
+    private MediaSource? _mediaSource;
+
+    /// <summary>内存播放时持有的视频数据；MediaPlayer 释放前不可关掉。</summary>
+    private InMemoryRandomAccessStream? _mediaStream;
+
+    /// <summary>用于取消尚未完成的内存读入 / 启动，避免切换背景后旧任务再创建播放器。</summary>
+    private CancellationTokenSource? _startMediaPlayerCts;
 
     /// <summary>用于接收视频帧的 Win2D 渲染目标。</summary>
     private CanvasRenderTarget? _videoSurface;
@@ -430,10 +443,12 @@ public sealed partial class AppBackground : UserControl
 
     /// <summary>
     /// 为指定的视频文件启动 MediaPlayer（使用帧服务器模式）。
+    /// 文件不超过 <see cref="InMemoryVideoBackgroundMaxBytes"/> 时读入内存循环播放；更大或失败则从文件流式播放。
     /// .webm 文件会根据检测结果注册 VP9/Vorbis 本地解码器。
     /// </summary>
     /// <param name="file">视频文件完整路径（支持 mp4/mkv/webm）。</param>
-    private void StartMediaPlayer(string file)
+    /// <param name="cancellationToken">取消令牌。</param>
+    private async Task StartMediaPlayerAsync(string file, CancellationToken cancellationToken = default)
     {
         if (Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
         {
@@ -462,20 +477,141 @@ public sealed partial class AppBackground : UserControl
         }
         // 无论是否 webm，只要是视频背景都注册 Vorbis（部分 mkv/webm 可能包含 Vorbis 音频）
         VP9Helper.RegisterVorbisDecoder();
-        _mediaPlayer = new MediaPlayer
+
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var previousCts = _startMediaPlayerCts;
+        _startMediaPlayerCts = cts;
+        previousCts?.Cancel();
+
+        MediaSource? source = null;
+        InMemoryRandomAccessStream? memoryStream = null;
+        try
         {
-            IsLoopingEnabled = true,
-            Volume = GetEffectiveVideoVolume() / 100.0,
-            IsMuted = false,
-            // 关键：启用帧服务器模式，后续通过 VideoFrameAvailable + CopyFrameToVideoSurface 手动获取帧
-            IsVideoFrameServerEnabled = true,
-            Source = MediaSource.CreateFromUri(new Uri(file))
-        };
-        _mediaPlayer.CommandManager.IsEnabled = false;
-        _mediaPlayer.SystemMediaTransportControls.IsEnabled = false;
-        _mediaPlayer.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
-        _mediaPlayer.MediaFailed += MediaPlayer_MediaFailed;
-        _mediaPlayer.Play();
+            (source, memoryStream) = await CreateVideoMediaSourceAsync(file, cts.Token);
+            cts.Token.ThrowIfCancellationRequested();
+            if (!ReferenceEquals(_startMediaPlayerCts, cts))
+            {
+                source.Dispose();
+                memoryStream?.Dispose();
+                return;
+            }
+
+            DisposeMediaPlayback();
+            _mediaSource = source;
+            _mediaStream = memoryStream;
+            source = null;
+            memoryStream = null;
+
+            _mediaPlayer = new MediaPlayer
+            {
+                IsLoopingEnabled = true,
+                Volume = GetEffectiveVideoVolume() / 100.0,
+                IsMuted = false,
+                // 关键：启用帧服务器模式，后续通过 VideoFrameAvailable + CopyFrameToVideoSurface 手动获取帧
+                IsVideoFrameServerEnabled = true,
+                Source = _mediaSource
+            };
+            _mediaPlayer.CommandManager.IsEnabled = false;
+            _mediaPlayer.SystemMediaTransportControls.IsEnabled = false;
+            _mediaPlayer.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
+            _mediaPlayer.MediaFailed += MediaPlayer_MediaFailed;
+            _mediaPlayer.Play();
+        }
+        catch (OperationCanceledException)
+        {
+            source?.Dispose();
+            memoryStream?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            source?.Dispose();
+            memoryStream?.Dispose();
+            _logger.LogError(ex, "Start media player");
+        }
+        finally
+        {
+            if (ReferenceEquals(_startMediaPlayerCts, cts))
+            {
+                _startMediaPlayerCts = null;
+            }
+            cts.Dispose();
+        }
+    }
+
+
+    /// <summary>
+    /// 创建视频背景的 MediaSource。
+    /// 小文件拷入 <see cref="InMemoryRandomAccessStream"/> 供循环播放；否则或失败时回退到文件 URI。
+    /// </summary>
+    /// <param name="file">视频文件完整路径。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>媒体源，以及内存播放时需要一直拿着的流（文件 URI 时为 null）。</returns>
+    private async Task<(MediaSource Source, InMemoryRandomAccessStream? Stream)> CreateVideoMediaSourceAsync(string file, CancellationToken cancellationToken)
+    {
+        string? contentType = GetVideoContentType(file);
+        long length = 0;
+        try
+        {
+            length = new FileInfo(file).Length;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get video background file size failed, fallback to file");
+        }
+
+        if (contentType is not null && length > 0 && length <= InMemoryVideoBackgroundMaxBytes)
+        {
+            InMemoryRandomAccessStream? memory = null;
+            try
+            {
+                memory = new InMemoryRandomAccessStream();
+                using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, 64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan))
+                {
+                    await RandomAccessStream.CopyAsync(fs.AsRandomAccessStream(), memory).AsTask(cancellationToken);
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                memory.Seek(0);
+                MediaSource source = MediaSource.CreateFromStream(memory, contentType);
+                InMemoryRandomAccessStream stream = memory;
+                memory = null;
+                return (source, stream);
+            }
+            catch (OperationCanceledException)
+            {
+                memory?.Dispose();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                memory?.Dispose();
+                _logger.LogWarning(ex, "Load video background into memory failed, fallback to file");
+            }
+        }
+
+        return (MediaSource.CreateFromUri(new Uri(file)), null);
+    }
+
+
+    /// <summary>
+    /// 按扩展名返回 Media Foundation 识别的视频 MIME。无法识别时返回 null。
+    /// </summary>
+    /// <param name="file">视频文件路径或文件名。</param>
+    private static string? GetVideoContentType(string file)
+    {
+        string ext = Path.GetExtension(file);
+        if (ext.Equals(".mp4", StringComparison.OrdinalIgnoreCase))
+        {
+            return "video/mp4";
+        }
+        if (ext.Equals(".webm", StringComparison.OrdinalIgnoreCase))
+        {
+            return "video/webm";
+        }
+        if (ext.Equals(".mkv", StringComparison.OrdinalIgnoreCase))
+        {
+            return "video/x-matroska";
+        }
+        return null;
     }
 
 
@@ -491,7 +627,7 @@ public sealed partial class AppBackground : UserControl
         cancellationToken.ThrowIfCancellationRequested();
         if (BackgroundService.FileIsSupportedVideo(filePath))
         {
-            StartMediaPlayer(filePath);
+            await StartMediaPlayerAsync(filePath, cancellationToken);
             // overlay 和强调色可以异步加载，不阻塞主流程
             _ = PrepareVideoOverlayImageAsync(gameBackground.Theme.Url, cancellationToken);
             _ = ChangeAccentColorToImageFileAsync(gameBackground.Background.Url, cancellationToken);
@@ -657,13 +793,13 @@ public sealed partial class AppBackground : UserControl
 
 
     /// <summary>
-    /// 释放所有视频相关资源（MediaPlayer、Win2D 表面、叠加图、已注册的解码器 MFT）。
+    /// 释放所有视频相关资源（MediaPlayer、内存视频流、Win2D 表面、叠加图、已注册的解码器 MFT）。
     /// 必须在切换背景、窗口隐藏过久、控件卸载时调用。
     /// </summary>
     private void DisposeVideoResource()
     {
-        _mediaPlayer?.Dispose();
-        _mediaPlayer = null;
+        _startMediaPlayerCts?.Cancel();
+        DisposeMediaPlayback();
         _videoSurface?.Dispose();
         _videoSurface = null;
         _videoImageSource = null;
@@ -672,6 +808,20 @@ public sealed partial class AppBackground : UserControl
         // 主动注销我们注册的本地解码器
         VP9Helper.UnregisterVP9Decoder(true);
         VP9Helper.UnregisterVorbisDecoder();
+    }
+
+
+    /// <summary>
+    /// 释放播放器及其媒体源、内存流，不碰 Win2D 表面与解码器。
+    /// </summary>
+    private void DisposeMediaPlayback()
+    {
+        _mediaPlayer?.Dispose();
+        _mediaPlayer = null;
+        _mediaSource?.Dispose();
+        _mediaSource = null;
+        _mediaStream?.Dispose();
+        _mediaStream = null;
     }
 
     /// <summary>
@@ -816,10 +966,10 @@ public sealed partial class AppBackground : UserControl
             }
             else if (message.Activate)
             {
-                if (_mediaPlayer is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
+                if (_mediaPlayer is null && _startMediaPlayerCts is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
                 {
                     // 兜底：若播放器曾在其他路径被释放，则重新开始解码渲染背景视频
-                    StartMediaPlayer(_lastBackgroundFile!);
+                    _ = StartMediaPlayerAsync(_lastBackgroundFile!);
                     if (CurrentGameBackground?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && CurrentGameBackground.Theme?.Url is string url && !string.IsNullOrEmpty(url))
                     {
                         _ = PrepareVideoOverlayImageAsync(url);
