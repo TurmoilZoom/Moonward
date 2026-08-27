@@ -134,6 +134,24 @@ export const screens = [
     },
   },
   {
+    id: 'bettergi',
+    src: 'screens/betterGI.webp',
+    width: 1184,
+    height: 668,
+    icon: '⌘',
+    accent: 'amber',
+    name: { zh: 'BetterGI 参数', en: 'BetterGI args' },
+    tag: { zh: '常用命令行 · 一键勾选', en: 'Preset args · one tick' },
+    caption: {
+      zh: '「常用命令行参数」内置 BetterGI 分组：勾选「启动 / 一条龙 / 调度器配置组」即自动拼成命令行；把 BetterGI.exe 设为自定义启动程序即可联动。',
+      en: 'The common-args list has a BetterGI group: tick start, one-dragon, or scheduler groups to auto-build the command line; set BetterGI.exe as the custom launcher to hook it up.',
+    },
+    alt: {
+      zh: 'Moonward「常用命令行参数」对话框中的 BetterGI 分组：启动、一条龙、调度器配置组等勾选项，下方为组合结果。',
+      en: 'Moonward common command-line args dialog showing a BetterGI group: start, one-dragon, and scheduler-group checkboxes with a combined-result field below.',
+    },
+  },
+  {
     id: 'gacha',
     src: 'screens/gacha.webp',
     width: 1184,

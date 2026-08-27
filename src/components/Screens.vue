@@ -236,8 +236,8 @@ onUnmounted(() => {
     <p class="section-lead">
       {{
         locale === 'zh'
-          ? '三张实际窗口：启动配置、抽卡记录、每日签到。点选切换，点图放大。'
-          : 'Three real windows: launch profile, gacha history, daily check-in. Pick a tab; click the shot to enlarge.'
+          ? '四张实际窗口：启动配置、BetterGI 参数、抽卡记录、每日签到。点选切换，点图放大。'
+          : 'Four real windows: launch profile, BetterGI args, gacha history, daily check-in. Pick a tab; click the shot to enlarge.'
       }}
     </p>
 
@@ -529,6 +529,7 @@ onUnmounted(() => {
 }
 
 .screen-tab[data-accent='teal'] { --card-accent: var(--teal); }
+.screen-tab[data-accent='amber'] { --card-accent: var(--amber); }
 .screen-tab[data-accent='violet'] { --card-accent: var(--violet); }
 .screen-tab[data-accent='green'] { --card-accent: var(--green); }
 
