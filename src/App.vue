@@ -294,6 +294,19 @@ function layerStyle(depth) {
   }
 }
 
+/**
+ * 月亮层：在按深度平移之外，把归一化的鼠标位置（约 -0.5…0.5）暴露为
+ * CSS 变量，供月面明暗界线跟随光标偏移——「光从鼠标方向来」。
+ */
+const moonLayerStyle = computed(() => {
+  const depth = 0.32
+  return {
+    transform: `translate3d(${px.value * depth * 28}px, ${py.value * depth * 18}px, 0)`,
+    '--moon-px': px.value,
+    '--moon-py': py.value,
+  }
+})
+
 const activeStep = ref('config')
 const activeCheckInStep = ref('enable')
 const showBackTop = ref(false)
@@ -440,12 +453,21 @@ onUnmounted(() => {
       aria-labelledby="hero-title"
     >
       <div class="hero-layers" aria-hidden="true">
-        <div class="layer layer-bg" :style="layerStyle(0.15)" />
-        <div class="layer layer-orb orb-a" :style="layerStyle(0.55)" />
-        <div class="layer layer-orb orb-b" :style="layerStyle(0.85)" />
-        <div class="layer layer-orb orb-c" :style="layerStyle(1.15)" />
-        <div class="layer layer-ring" :style="layerStyle(0.4)" />
-        <div class="layer layer-grid" :style="layerStyle(0.25)" />
+        <div class="layer layer-sky" :style="layerStyle(0.08)" />
+        <div class="layer layer-stars stars-far" :style="layerStyle(0.18)" />
+        <div class="layer layer-shoot"><span class="shoot" /></div>
+        <div class="layer layer-halo" :style="layerStyle(0.28)" />
+        <div class="layer layer-moon" :style="moonLayerStyle">
+          <span class="moon-disc" />
+          <span class="moon-shade" />
+        </div>
+        <div class="layer layer-stars stars-near" :style="layerStyle(0.4)">
+          <span class="twinkle t1" />
+          <span class="twinkle t2" />
+          <span class="twinkle t3" />
+        </div>
+        <div class="layer layer-cloud cloud-a" :style="layerStyle(0.7)" />
+        <div class="layer layer-cloud cloud-b" :style="layerStyle(1.05)" />
       </div>
 
       <div class="wrap hero-content" :style="layerStyle(0.08)">
@@ -1192,62 +1214,165 @@ onUnmounted(() => {
   transition: none;
 }
 
-.layer-bg {
+/* 夜空底：月侧柔光 + 对角轻辉，铺满并随最浅深度微移 */
+.layer-sky {
   inset: -8%;
   background:
-    radial-gradient(circle at 22% 40%, var(--hero-wash-teal), transparent 42%),
-    radial-gradient(circle at 78% 30%, var(--hero-wash-amber), transparent 38%),
-    radial-gradient(circle at 55% 85%, var(--hero-wash-blue), transparent 40%);
+    radial-gradient(circle at 78% 18%, var(--sky-wash), transparent 52%),
+    radial-gradient(circle at 18% 92%, var(--sky-wash), transparent 60%);
 }
 
-.layer-orb {
-  border-radius: 50%;
-  filter: blur(0.5px);
+/* 星空：叠层 radial-gradient 画点，GPU 友好；远近两套疏密不同 */
+.layer-stars {
+  inset: -8%;
+  background-repeat: no-repeat;
 }
 
-.orb-a {
-  width: 18rem;
-  height: 18rem;
-  top: -4rem;
-  right: 8%;
-  background: radial-gradient(circle at 35% 35%, var(--orb-a-from), var(--orb-a-mid) 55%, transparent 70%);
-  box-shadow: inset 0 0 40px var(--orb-a-inset);
-}
-
-.orb-b {
-  width: 9rem;
-  height: 9rem;
-  bottom: 10%;
-  left: 12%;
-  background: radial-gradient(circle at 40% 40%, var(--orb-b-from), var(--orb-b-mid) 60%, transparent 72%);
-}
-
-.orb-c {
-  width: 5.5rem;
-  height: 5.5rem;
-  top: 28%;
-  left: 38%;
-  background: radial-gradient(circle, var(--orb-c), transparent 68%);
-}
-
-.layer-ring {
-  width: 22rem;
-  height: 22rem;
-  right: -2rem;
-  bottom: -6rem;
-  border: 1px solid var(--ring);
-  border-radius: 50%;
-  box-shadow: 0 0 0 28px var(--ring-glow);
-}
-
-.layer-grid {
-  inset: 0;
-  opacity: 0.35;
+.stars-far {
+  opacity: 0.75;
   background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 70% 70% at 70% 40%, black, transparent);
+    radial-gradient(1px 1px at 12% 18%, var(--star-color), transparent 60%),
+    radial-gradient(1px 1px at 24% 62%, var(--star-color), transparent 60%),
+    radial-gradient(1.4px 1.4px at 41% 30%, var(--star-color), transparent 60%),
+    radial-gradient(1px 1px at 57% 12%, var(--star-color), transparent 60%),
+    radial-gradient(1px 1px at 66% 48%, var(--star-color), transparent 60%),
+    radial-gradient(1px 1px at 83% 66%, var(--star-color), transparent 60%),
+    radial-gradient(1.4px 1.4px at 90% 26%, var(--star-color), transparent 60%),
+    radial-gradient(1px 1px at 34% 82%, var(--star-color), transparent 60%),
+    radial-gradient(1px 1px at 6% 44%, var(--star-color), transparent 60%),
+    radial-gradient(1px 1px at 50% 74%, var(--star-color), transparent 60%);
+}
+
+.stars-near {
+  opacity: 0.9;
+  background-image:
+    radial-gradient(1.5px 1.5px at 16% 40%, var(--star-color), transparent 60%),
+    radial-gradient(1.6px 1.6px at 46% 22%, var(--star-color), transparent 60%),
+    radial-gradient(2px 2px at 73% 36%, var(--star-color), transparent 60%),
+    radial-gradient(1.6px 1.6px at 61% 78%, var(--star-color), transparent 60%),
+    radial-gradient(1.5px 1.5px at 30% 66%, var(--star-color), transparent 60%);
+}
+
+/* 少数会呼吸闪烁的亮星，各自错峰 */
+.twinkle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--star-color);
+  box-shadow: 0 0 6px 1px var(--star-color);
+  animation: twinkle 3.4s ease-in-out infinite;
+}
+
+.twinkle.t1 { top: 20%; left: 32%; animation-delay: 0s; }
+.twinkle.t2 { top: 52%; left: 70%; animation-delay: 1.2s; }
+.twinkle.t3 { top: 74%; left: 52%; animation-delay: 2.3s; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.75); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* 偶发流星：约 9s 一次斜向划过，浅色主题下 star-color 很淡近乎不可见 */
+.layer-shoot {
+  inset: 0;
+  overflow: hidden;
+}
+
+.shoot {
+  position: absolute;
+  top: 14%;
+  left: 68%;
+  width: 8rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--star-color));
+  opacity: 0;
+  transform: rotate(18deg) scaleX(0.2);
+  transform-origin: right center;
+  animation: shoot 9s ease-in infinite;
+}
+
+@keyframes shoot {
+  0%, 90% { opacity: 0; transform: translate(0, 0) rotate(18deg) scaleX(0.2); }
+  91% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(-15rem, 5rem) rotate(18deg) scaleX(1); }
+}
+
+/* 月晕：环绕月亮的两道柔和同心光圈 */
+.layer-halo {
+  width: 26rem;
+  height: 26rem;
+  top: -8rem;
+  right: 0.5%;
+  border-radius: 50%;
+  opacity: 0.85;
+  background: radial-gradient(
+    circle,
+    transparent 39%,
+    var(--halo-ring) 45%,
+    transparent 53%,
+    transparent 61%,
+    var(--halo-ring) 67%,
+    transparent 75%
+  );
+}
+
+/* 月亮：月面（环形山 + 柔边）+ 光晕；明暗界线在 moon-shade 上随鼠标偏移 */
+.layer-moon {
+  width: 15rem;
+  height: 15rem;
+  top: -2.5rem;
+  right: 7%;
+}
+
+.moon-disc,
+.moon-shade {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.moon-disc {
+  background:
+    radial-gradient(circle at 62% 32%, var(--moon-shade) 0 7%, transparent 8%),
+    radial-gradient(circle at 38% 60%, var(--moon-shade) 0 5%, transparent 6%),
+    radial-gradient(circle at 70% 67%, var(--moon-shade) 0 4%, transparent 5%),
+    radial-gradient(circle at 50% 45%, var(--moon-shade) 0 3%, transparent 4%),
+    var(--moon-face);
+  box-shadow:
+    0 0 4rem 0.7rem var(--moon-glow),
+    inset -0.45rem -0.35rem 1.3rem var(--moon-shade);
+}
+
+/* 透明处即受光面：中心随 --moon-px/py 朝光标方向移动，背光侧堆积阴影 */
+.moon-shade {
+  background: radial-gradient(
+    circle at calc(50% + var(--moon-px, 0) * 60%) calc(50% + var(--moon-py, 0) * 60%),
+    transparent 34%,
+    var(--moon-shade) 96%
+  );
+}
+
+/* 前景云雾：飘动幅度最大（parallax 深度最深），模糊柔和 */
+.layer-cloud {
+  border-radius: 50%;
+  filter: blur(9px);
+  opacity: 0.55;
+  background: radial-gradient(ellipse 60% 100% at 50% 50%, var(--cloud-tint), transparent 72%);
+}
+
+.cloud-a {
+  width: 20rem;
+  height: 6rem;
+  top: 36%;
+  left: -3rem;
+}
+
+.cloud-b {
+  width: 14rem;
+  height: 4.5rem;
+  bottom: 12%;
+  right: 6%;
 }
 
 .hero-content {
@@ -2471,6 +2596,19 @@ onUnmounted(() => {
 @media (prefers-reduced-motion: reduce) {
   .sky-play {
     display: none;
+  }
+
+  .twinkle,
+  .shoot {
+    animation: none;
+  }
+
+  .twinkle {
+    opacity: 0.7;
+  }
+
+  .shoot {
+    opacity: 0;
   }
 
   .theme-btn .celestial {

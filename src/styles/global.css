@@ -37,18 +37,14 @@
   /* Hero / flow washes (light) */
   --hero-grad-start: #e8e1d4;
   --hero-grad-end: #e4ebe6;
-  --hero-wash-teal: rgba(30, 77, 63, 0.14);
-  --hero-wash-amber: rgba(154, 107, 31, 0.12);
-  --hero-wash-blue: rgba(42, 79, 122, 0.08);
-  --orb-a-from: rgba(255, 252, 247, 0.9);
-  --orb-a-mid: rgba(220, 234, 228, 0.45);
-  --orb-a-inset: rgba(30, 77, 63, 0.08);
-  --orb-b-from: rgba(255, 240, 210, 0.75);
-  --orb-b-mid: rgba(154, 107, 31, 0.15);
-  --orb-c: rgba(42, 106, 106, 0.22);
-  --ring: rgba(30, 77, 63, 0.12);
-  --ring-glow: rgba(30, 77, 63, 0.04);
-  --grid-line: rgba(28, 25, 21, 0.04);
+  /* Hero moon scene — light（柔和天空里的淡月，白天星弱） */
+  --sky-wash: rgba(120, 140, 172, 0.1);
+  --moon-face: radial-gradient(circle at 38% 34%, #fffdf8 0%, #efe9dc 60%, #ddd4c4 100%);
+  --moon-glow: rgba(214, 204, 184, 0.38);
+  --moon-shade: rgba(120, 108, 86, 0.16);
+  --halo-ring: rgba(176, 170, 154, 0.22);
+  --star-color: rgba(86, 98, 122, 0.38);
+  --cloud-tint: rgba(255, 255, 255, 0.6);
   --page-wash-teal: rgba(30, 77, 63, 0.07);
   --page-wash-amber: rgba(154, 107, 31, 0.06);
   --flow-end: #f7f3ec;
@@ -107,18 +103,14 @@
 
   --hero-grad-start: #1c1914;
   --hero-grad-end: #171c19;
-  --hero-wash-teal: rgba(143, 191, 173, 0.16);
-  --hero-wash-amber: rgba(212, 164, 92, 0.1);
-  --hero-wash-blue: rgba(126, 159, 196, 0.1);
-  --orb-a-from: rgba(143, 191, 173, 0.28);
-  --orb-a-mid: rgba(36, 51, 46, 0.5);
-  --orb-a-inset: rgba(143, 191, 173, 0.12);
-  --orb-b-from: rgba(212, 164, 92, 0.22);
-  --orb-b-mid: rgba(154, 107, 31, 0.14);
-  --orb-c: rgba(110, 184, 180, 0.18);
-  --ring: rgba(143, 191, 173, 0.18);
-  --ring-glow: rgba(143, 191, 173, 0.06);
-  --grid-line: rgba(243, 238, 230, 0.05);
+  /* Hero moon scene — dark（夜空亮月 + 清晰星空） */
+  --sky-wash: rgba(150, 176, 214, 0.15);
+  --moon-face: radial-gradient(circle at 38% 34%, #f9f5ec 0%, #ded5c4 58%, #c3b8a4 100%);
+  --moon-glow: rgba(220, 230, 244, 0.3);
+  --moon-shade: rgba(18, 20, 27, 0.32);
+  --halo-ring: rgba(190, 206, 228, 0.17);
+  --star-color: rgba(243, 238, 230, 0.85);
+  --cloud-tint: rgba(38, 43, 54, 0.55);
   --page-wash-teal: rgba(143, 191, 173, 0.08);
   --page-wash-amber: rgba(212, 164, 92, 0.05);
   --flow-end: #1c1914;
