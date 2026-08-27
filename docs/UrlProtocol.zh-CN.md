@@ -36,7 +36,7 @@ moonward://startgame/{game_biz}?install_path={install_path}&profile={profile}&ui
 |---|---|---|
 | install_path | `string`（可选） | 游戏可执行文件所在文件夹的完整路径。 |
 | profile | `string`（可选） | 启动方式 / 配置内部名。`none` 表示「无」：不使用启动参数配置启动（仍受 DX12 等全局开关影响）。`configN`（N ≥ 1，无数量上限）与「配置文件 N」一一对应（`config1` 数据存于 legacy 键）。省略时跟随软件当前生效的启动方式（「跟随软件设置」）；默认生效方式为 `none`。 |
-| uid | `long`（可选） | 米游社工具箱中的游戏角色 UID。指定且对应角色 Cookie 含有效 `stoken` 时，启动前换取 auth ticket 并附加 `login_auth_ticket`，使游戏自动以该账号登录（仅国服）。优先级高于配置文件内保存的登录账号。 |
+| uid | `long`（可选） | 米游社工具箱中的游戏角色 UID。指定且对应角色 Cookie 含有效 `stoken` 时，启动前换取 auth ticket 并附加 `login_auth_ticket`，使游戏自动以该账号登录（仅国服）。优先级高于配置文件内保存的登录账号。使用自定义启动程序时不注入 token（游戏由工具自行登录），该 UID 仅用于签到。 |
 
 
 ### 记录游戏时长

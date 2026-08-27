@@ -18,6 +18,7 @@ using Starward.Core.HoYoPlay;
 using Starward.Features.Background;
 using Starward.Features.CloudGame;
 using Starward.Features.GameInstall;
+using Starward.Features.GameRecord.SignIn;
 using Starward.Features.HoYoPlay;
 using Starward.Features.Overlay;
 using Starward.Features.Setting;
@@ -607,6 +608,12 @@ public sealed partial class GameLauncherPage : PageBase
                 GameState = GameState.GameIsRunning;
                 GameProcess = process;
                 WeakReferenceMessenger.Default.Send(new GameStartedMessage());
+                GameBiz biz = CurrentGameBiz;
+                long uid = GameLauncherService.ResolveLoginUid(biz, profile, useNone, null);
+                if (uid > 0)
+                {
+                    _ = Task.Run(() => AppConfig.GetService<AutoSignInService>().TrySignInForLaunchAccountAsync(biz, uid));
+                }
             }
         }
         catch (FileNotFoundException)

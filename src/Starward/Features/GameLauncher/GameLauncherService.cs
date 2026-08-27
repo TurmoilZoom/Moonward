@@ -319,12 +319,12 @@ internal partial class GameLauncherService
 
 
     /// <summary>
-    /// 启动游戏
+    /// 启动游戏。使用自定义启动程序时不注入 <c>login_auth_ticket</c>（游戏由工具自行登录；配置的登录账号仅供启动后签到）。
     /// </summary>
     /// <returns></returns>
     /// <param name="profile">额外配置文件（config2…）；null 且 <paramref name="useNoneLaunchMethod"/> 为 false 时使用 config1 的 legacy 键。</param>
     /// <param name="useNoneLaunchMethod">「无」：不使用启动参数配置（无命令行参数、无自定义启动程序），仍应用 DX12 等全局开关。</param>
-    /// <param name="loginUid">URL 或调用方显式指定的游戏角色 UID；优先于配置文件中的 <see cref="GameLaunchProfile.LoginUid"/>。</param>
+    /// <param name="loginUid">URL 或调用方显式指定的游戏角色 UID；优先于配置文件中的 <see cref="GameLaunchProfile.LoginUid"/>。自定义程序启动时不用于换票。</param>
     public async Task<Process?> StartGameAsync(GameId gameId, string? installPath = null, GameLaunchProfile? profile = null, bool useNoneLaunchMethod = false, long? loginUid = null)
     {
         const int ERROR_CANCELLED = 0x000004C7;
@@ -395,30 +395,34 @@ internal partial class GameLauncherService
                 }
             }
             arg = startArgument?.Trim();
-            long resolvedLoginUid = ResolveLoginUid(gameId.GameBiz, profile, useNoneLaunchMethod, loginUid);
-            if (resolvedLoginUid > 0)
+            // 自定义程序启动的是工具而非游戏，token 对工具无用且可能干扰其 argparse
+            if (!thirdPartyTool)
             {
-                GameRecordRole? role = _gameRecordService.GetGameRoles(gameId.GameBiz)
-                    .FirstOrDefault(r => r.Uid == resolvedLoginUid);
-                if (role is null)
+                long resolvedLoginUid = ResolveLoginUid(gameId.GameBiz, profile, useNoneLaunchMethod, loginUid);
+                if (resolvedLoginUid > 0)
                 {
-                    _logger.LogWarning("Login account role not found (biz={Biz}, uid={Uid})", gameId.GameBiz, resolvedLoginUid);
+                    GameRecordRole? role = _gameRecordService.GetGameRoles(gameId.GameBiz)
+                        .FirstOrDefault(r => r.Uid == resolvedLoginUid);
+                    if (role is null)
+                    {
+                        _logger.LogWarning("Login account role not found (biz={Biz}, uid={Uid})", gameId.GameBiz, resolvedLoginUid);
+                    }
+                    else
+                    {
+                        string? ticket = await _gameAuthLoginService.CreateAuthTicketByGameRoleAsync(gameId, role);
+                        if (!string.IsNullOrWhiteSpace(ticket))
+                        {
+                            arg += $" login_auth_ticket={ticket}";
+                        }
+                    }
                 }
-                else
+                else if (AppConfig.EnableLoginAuthTicket is true)
                 {
-                    string? ticket = await _gameAuthLoginService.CreateAuthTicketByGameRoleAsync(gameId, role);
+                    string? ticket = await _gameAuthLoginService.CreateAuthTicketByGameBiz(gameId);
                     if (!string.IsNullOrWhiteSpace(ticket))
                     {
                         arg += $" login_auth_ticket={ticket}";
                     }
-                }
-            }
-            else if (AppConfig.EnableLoginAuthTicket is true)
-            {
-                string? ticket = await _gameAuthLoginService.CreateAuthTicketByGameBiz(gameId);
-                if (!string.IsNullOrWhiteSpace(ticket))
-                {
-                    arg += $" login_auth_ticket={ticket}";
                 }
             }
             if (AppConfig.GetUsePopupWindow(gameId.GameBiz))

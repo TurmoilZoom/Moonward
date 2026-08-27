@@ -33,7 +33,7 @@ moonward://startgame/{game_biz}?install_path={install_path}&profile={profile}&ui
 |---|---|---|
 |install_path| `string` (Option) | Folder full path of game executable. |
 |profile| `string` (Option) | Launch method / profile id. `none` = launch without launch-argument profiles (DX12 and other global toggles still apply). `configN` (N ≥ 1, no upper limit) maps 1:1 to display name “Profile N” (`config1` uses legacy storage). When omitted, the app's currently active launch method is used ("follow app setting"); the default active method is `none`. |
-|uid| `long` (Option) | Game character UID from HoYoLAB / miyoushe toolbox roles. When set (and the matching role Cookie has a valid `stoken`), Moonward requests an auth ticket and appends `login_auth_ticket` so the game logs in as that account (CN servers only). Takes priority over the profile's saved login account. |
+|uid| `long` (Option) | Game character UID from HoYoLAB / miyoushe toolbox roles. When set (and the matching role Cookie has a valid `stoken`), Moonward requests an auth ticket and appends `login_auth_ticket` so the game logs in as that account (CN servers only). Takes priority over the profile's saved login account. When a custom launcher is used, the token is not injected (the tool starts the game itself); the UID is only used for daily sign-in. |
 
 
 ### Record playtime
