@@ -782,6 +782,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         bool isDx12ManagedByApp = CurrentGameBiz.Game is GameBiz.nap || ShowDx12Argument;
         CommandLineArgumentPicker.LoadFromArgument(
             EditingArgument,
+            CurrentGameBiz,
             isDx12ManagedByApp: isDx12ManagedByApp,
             isDx12Enabled: ShowDx12Argument);
 

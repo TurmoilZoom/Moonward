@@ -3571,6 +3571,129 @@
   <data name="CmdArg_BetterGI_SeeDocs" xml:space="preserve">
     <value>BetterGI 命令行说明</value>
   </data>
+  <data name="CmdArg_Category_OneDragon" xml:space="preserve">
+    <value>绝区零一条龙</value>
+  </data>
+  <data name="CmdArg_Category_March7th" xml:space="preserve">
+    <value>三月七小助手</value>
+  </data>
+  <data name="CmdArg_OneDragon_Run" xml:space="preserve">
+    <value>运行一条龙</value>
+  </data>
+  <data name="CmdArg_OneDragon_Run_Desc" xml:space="preserve">
+    <value>按预设流程运行一条龙。请把 OneDragon-Launcher.exe 设为自定义启动程序后使用。</value>
+  </data>
+  <data name="CmdArg_OneDragon_CloseGame" xml:space="preserve">
+    <value>结束后关游戏</value>
+  </data>
+  <data name="CmdArg_OneDragon_CloseGame_Desc" xml:space="preserve">
+    <value>一条龙结束后关闭游戏。</value>
+  </data>
+  <data name="CmdArg_OneDragon_Shutdown" xml:space="preserve">
+    <value>结束后关机</value>
+  </data>
+  <data name="CmdArg_OneDragon_Shutdown_Desc" xml:space="preserve">
+    <value>一条龙结束后关机。秒数可选（默认 60）。</value>
+  </data>
+  <data name="CmdArg_OneDragon_Shutdown_Placeholder" xml:space="preserve">
+    <value>秒数（可选，默认 60）</value>
+  </data>
+  <data name="CmdArg_OneDragon_Instance" xml:space="preserve">
+    <value>指定账号实例</value>
+  </data>
+  <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
+    <value>指定一条龙自己的账号实例（逗号分隔，如 1,2）。游戏登录哪个号由一条龙的实例配置（-i）决定；Moonward 的「登录账号」此时只用于签到，不影响一条龙登录。</value>
+  </data>
+  <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
+    <value>1,2</value>
+  </data>
+  <data name="CmdArg_OneDragon_SeeDocs" xml:space="preserve">
+    <value>绝区零一条龙启动参数说明</value>
+  </data>
+  <data name="CmdArg_March7th_SeeDocs" xml:space="preserve">
+    <value>三月七小助手说明</value>
+  </data>
+  <data name="CmdArg_March7th_Main" xml:space="preserve">
+    <value>完整运行</value>
+  </data>
+  <data name="CmdArg_March7th_Routine" xml:space="preserve">
+    <value>日常</value>
+  </data>
+  <data name="CmdArg_March7th_Daily" xml:space="preserve">
+    <value>每日实训</value>
+  </data>
+  <data name="CmdArg_March7th_Power" xml:space="preserve">
+    <value>清体力</value>
+  </data>
+  <data name="CmdArg_March7th_Fight" xml:space="preserve">
+    <value>锄大地</value>
+  </data>
+  <data name="CmdArg_March7th_Universe" xml:space="preserve">
+    <value>模拟宇宙</value>
+  </data>
+  <data name="CmdArg_March7th_ForgottenHall" xml:space="preserve">
+    <value>混沌回忆</value>
+  </data>
+  <data name="CmdArg_March7th_PureFiction" xml:space="preserve">
+    <value>虚构叙事</value>
+  </data>
+  <data name="CmdArg_March7th_Apocalyptic" xml:space="preserve">
+    <value>末日幻影</value>
+  </data>
+  <data name="CmdArg_March7th_Redemption" xml:space="preserve">
+    <value>兑换码</value>
+  </data>
+  <data name="CmdArg_March7th_CurrencyWars" xml:space="preserve">
+    <value>货币战争</value>
+  </data>
+  <data name="CmdArg_March7th_CurrencyWarsLoop" xml:space="preserve">
+    <value>货币战争循环</value>
+  </data>
+  <data name="CmdArg_March7th_CurrencyWarsTemp" xml:space="preserve">
+    <value>货币战争中途接管</value>
+  </data>
+  <data name="CmdArg_March7th_Divergent" xml:space="preserve">
+    <value>差分宇宙</value>
+  </data>
+  <data name="CmdArg_March7th_DivergentLoop" xml:space="preserve">
+    <value>差分宇宙循环</value>
+  </data>
+  <data name="CmdArg_March7th_DivergentTemp" xml:space="preserve">
+    <value>差分宇宙中途接管</value>
+  </data>
+  <data name="CmdArg_March7th_Game" xml:space="preserve">
+    <value>启动游戏</value>
+  </data>
+  <data name="CmdArg_March7th_GameUpdate" xml:space="preserve">
+    <value>更新游戏</value>
+  </data>
+  <data name="CmdArg_March7th_GamePreDownload" xml:space="preserve">
+    <value>预下载游戏</value>
+  </data>
+  <data name="CmdArg_March7th_AppUpdate" xml:space="preserve">
+    <value>更新三月七小助手</value>
+  </data>
+  <data name="CmdArg_March7th_UniverseGui" xml:space="preserve">
+    <value>模拟宇宙原生界面</value>
+  </data>
+  <data name="CmdArg_March7th_FightGui" xml:space="preserve">
+    <value>锄大地原生界面</value>
+  </data>
+  <data name="CmdArg_March7th_UniverseUpdate" xml:space="preserve">
+    <value>模拟宇宙更新</value>
+  </data>
+  <data name="CmdArg_March7th_FightUpdate" xml:space="preserve">
+    <value>锄大地更新</value>
+  </data>
+  <data name="CmdArg_March7th_MobileUiUpdate" xml:space="preserve">
+    <value>触屏模式更新</value>
+  </data>
+  <data name="CmdArg_March7th_Notify" xml:space="preserve">
+    <value>测试消息推送</value>
+  </data>
+  <data name="CmdArg_March7th_ScreenTest" xml:space="preserve">
+    <value>界面可切换性测试</value>
+  </data>
   <data name="TimeNodeButton_Title" xml:space="preserve">
     <value>时间节点</value>
   </data>

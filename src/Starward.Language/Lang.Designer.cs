@@ -1022,6 +1022,375 @@ namespace Starward.Language {
                 return ResourceManager.GetString("CmdArg_BetterGI_SeeDocs", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Zenless OneDragon 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Category_OneDragon {
+            get {
+                return ResourceManager.GetString("CmdArg_Category_OneDragon", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 March 7th Assistant 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Category_March7th {
+            get {
+                return ResourceManager.GetString("CmdArg_Category_March7th", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Run OneDragon 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_Run {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_Run", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Run the preset OneDragon workflow 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_Run_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_Run_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Close game 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_CloseGame {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_CloseGame", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Close the game when OneDragon finishes 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_CloseGame_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_CloseGame_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Shut down PC 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_Shutdown {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_Shutdown", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Shut down the PC when OneDragon finishes 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_Shutdown_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_Shutdown_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Seconds (optional, default 60) 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_Shutdown_Placeholder {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_Shutdown_Placeholder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Account instances 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_Instance {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_Instance", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Select OneDragon account instances 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_Instance_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_Instance_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 1,2 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_Instance_Placeholder {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_Instance_Placeholder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Zenless OneDragon command-line documentation 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_OneDragon_SeeDocs {
+            get {
+                return ResourceManager.GetString("CmdArg_OneDragon_SeeDocs", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 March 7th Assistant documentation 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_SeeDocs {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_SeeDocs", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Full run 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Main {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Main", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Daily routine 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Routine {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Routine", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Daily Training 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Daily {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Daily", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Spend Trailblaze Power 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Power {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Power", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Farm 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Fight {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Fight", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Simulated Universe 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Universe {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Universe", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Memory of Chaos 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_ForgottenHall {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_ForgottenHall", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Pure Fiction 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_PureFiction {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_PureFiction", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Apocalyptic Shadow 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Apocalyptic {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Apocalyptic", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Redemption code 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Redemption {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Redemption", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Currency Wars 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_CurrencyWars {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_CurrencyWars", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Currency Wars (loop) 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_CurrencyWarsLoop {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_CurrencyWarsLoop", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Currency Wars (take over) 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_CurrencyWarsTemp {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_CurrencyWarsTemp", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Divergent Universe 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Divergent {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Divergent", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Divergent Universe (loop) 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_DivergentLoop {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_DivergentLoop", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Divergent Universe (take over) 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_DivergentTemp {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_DivergentTemp", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Launch game 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Game {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Game", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Update game 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_GameUpdate {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_GameUpdate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Pre-download game 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_GamePreDownload {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_GamePreDownload", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Update March 7th Assistant 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_AppUpdate {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_AppUpdate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Simulated Universe (native UI) 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_UniverseGui {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_UniverseGui", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Farm (native UI) 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_FightGui {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_FightGui", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Simulated Universe update 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_UniverseUpdate {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_UniverseUpdate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Farm update 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_FightUpdate {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_FightUpdate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Touch mode update 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_MobileUiUpdate {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_MobileUiUpdate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Test notification 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_Notify {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_Notify", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 UI switchability test 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_March7th_ScreenTest {
+            get {
+                return ResourceManager.GetString("CmdArg_March7th_ScreenTest", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Challenge Attempts 的本地化字符串。

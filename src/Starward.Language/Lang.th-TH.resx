@@ -3507,6 +3507,129 @@ You are welcome to submit exported data to:</value>
   <data name="CmdArg_BetterGI_SeeDocs" xml:space="preserve">
     <value>BetterGI command-line documentation</value>
   </data>
+  <data name="CmdArg_Category_OneDragon" xml:space="preserve">
+    <value>Zenless OneDragon</value>
+  </data>
+  <data name="CmdArg_Category_March7th" xml:space="preserve">
+    <value>March 7th Assistant</value>
+  </data>
+  <data name="CmdArg_OneDragon_Run" xml:space="preserve">
+    <value>Run OneDragon</value>
+  </data>
+  <data name="CmdArg_OneDragon_Run_Desc" xml:space="preserve">
+    <value>Run the preset OneDragon workflow. Use after setting OneDragon-Launcher.exe as the custom launcher.</value>
+  </data>
+  <data name="CmdArg_OneDragon_CloseGame" xml:space="preserve">
+    <value>Close game</value>
+  </data>
+  <data name="CmdArg_OneDragon_CloseGame_Desc" xml:space="preserve">
+    <value>Close the game when OneDragon finishes.</value>
+  </data>
+  <data name="CmdArg_OneDragon_Shutdown" xml:space="preserve">
+    <value>Shut down PC</value>
+  </data>
+  <data name="CmdArg_OneDragon_Shutdown_Desc" xml:space="preserve">
+    <value>Shut down the PC when OneDragon finishes. Seconds are optional (default 60).</value>
+  </data>
+  <data name="CmdArg_OneDragon_Shutdown_Placeholder" xml:space="preserve">
+    <value>Seconds (optional, default 60)</value>
+  </data>
+  <data name="CmdArg_OneDragon_Instance" xml:space="preserve">
+    <value>Account instances</value>
+  </data>
+  <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
+    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward's "Login account" is only used for daily sign-in in this case and does not affect OneDragon login.</value>
+  </data>
+  <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
+    <value>1,2</value>
+  </data>
+  <data name="CmdArg_OneDragon_SeeDocs" xml:space="preserve">
+    <value>Zenless OneDragon command-line documentation</value>
+  </data>
+  <data name="CmdArg_March7th_SeeDocs" xml:space="preserve">
+    <value>March 7th Assistant documentation</value>
+  </data>
+  <data name="CmdArg_March7th_Main" xml:space="preserve">
+    <value>Full run</value>
+  </data>
+  <data name="CmdArg_March7th_Routine" xml:space="preserve">
+    <value>Daily routine</value>
+  </data>
+  <data name="CmdArg_March7th_Daily" xml:space="preserve">
+    <value>Daily Training</value>
+  </data>
+  <data name="CmdArg_March7th_Power" xml:space="preserve">
+    <value>Spend Trailblaze Power</value>
+  </data>
+  <data name="CmdArg_March7th_Fight" xml:space="preserve">
+    <value>Farm</value>
+  </data>
+  <data name="CmdArg_March7th_Universe" xml:space="preserve">
+    <value>Simulated Universe</value>
+  </data>
+  <data name="CmdArg_March7th_ForgottenHall" xml:space="preserve">
+    <value>Memory of Chaos</value>
+  </data>
+  <data name="CmdArg_March7th_PureFiction" xml:space="preserve">
+    <value>Pure Fiction</value>
+  </data>
+  <data name="CmdArg_March7th_Apocalyptic" xml:space="preserve">
+    <value>Apocalyptic Shadow</value>
+  </data>
+  <data name="CmdArg_March7th_Redemption" xml:space="preserve">
+    <value>Redemption code</value>
+  </data>
+  <data name="CmdArg_March7th_CurrencyWars" xml:space="preserve">
+    <value>Currency Wars</value>
+  </data>
+  <data name="CmdArg_March7th_CurrencyWarsLoop" xml:space="preserve">
+    <value>Currency Wars (loop)</value>
+  </data>
+  <data name="CmdArg_March7th_CurrencyWarsTemp" xml:space="preserve">
+    <value>Currency Wars (take over)</value>
+  </data>
+  <data name="CmdArg_March7th_Divergent" xml:space="preserve">
+    <value>Divergent Universe</value>
+  </data>
+  <data name="CmdArg_March7th_DivergentLoop" xml:space="preserve">
+    <value>Divergent Universe (loop)</value>
+  </data>
+  <data name="CmdArg_March7th_DivergentTemp" xml:space="preserve">
+    <value>Divergent Universe (take over)</value>
+  </data>
+  <data name="CmdArg_March7th_Game" xml:space="preserve">
+    <value>Launch game</value>
+  </data>
+  <data name="CmdArg_March7th_GameUpdate" xml:space="preserve">
+    <value>Update game</value>
+  </data>
+  <data name="CmdArg_March7th_GamePreDownload" xml:space="preserve">
+    <value>Pre-download game</value>
+  </data>
+  <data name="CmdArg_March7th_AppUpdate" xml:space="preserve">
+    <value>Update March 7th Assistant</value>
+  </data>
+  <data name="CmdArg_March7th_UniverseGui" xml:space="preserve">
+    <value>Simulated Universe (native UI)</value>
+  </data>
+  <data name="CmdArg_March7th_FightGui" xml:space="preserve">
+    <value>Farm (native UI)</value>
+  </data>
+  <data name="CmdArg_March7th_UniverseUpdate" xml:space="preserve">
+    <value>Simulated Universe update</value>
+  </data>
+  <data name="CmdArg_March7th_FightUpdate" xml:space="preserve">
+    <value>Farm update</value>
+  </data>
+  <data name="CmdArg_March7th_MobileUiUpdate" xml:space="preserve">
+    <value>Touch mode update</value>
+  </data>
+  <data name="CmdArg_March7th_Notify" xml:space="preserve">
+    <value>Test notification</value>
+  </data>
+  <data name="CmdArg_March7th_ScreenTest" xml:space="preserve">
+    <value>UI switchability test</value>
+  </data>
   <data name="TimeNodeButton_Title" xml:space="preserve">
     <value>Time Nodes</value>
   </data>

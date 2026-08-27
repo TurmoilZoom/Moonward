@@ -71,7 +71,8 @@
                                                                FontSize="12"
                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                Text="{x:Bind Description}"
-                                                               TextWrapping="WrapWholeWords" />
+                                                               TextWrapping="WrapWholeWords"
+                                                               Visibility="{x:Bind sh:BindConverter.BoolToVisibility(HasDescription)}" />
                                                 </StackPanel>
                                             </CheckBox>
 
@@ -146,8 +147,23 @@
             </HyperlinkButton>
             <HyperlinkButton Padding="0"
                              FontSize="11"
-                             NavigateUri="https://www.bettergi.com/feats/command/introduce.html">
+                             NavigateUri="https://www.bettergi.com/feats/command/introduce.html"
+                             Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowBetterGIDocs)}">
                 <TextBlock Text="{x:Bind lang:Lang.CmdArg_BetterGI_SeeDocs}"
+                           TextWrapping="Wrap" />
+            </HyperlinkButton>
+            <HyperlinkButton Padding="0"
+                             FontSize="11"
+                             NavigateUri="https://one-dragon.com/zzz/zh/quickstart.html"
+                             Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowOneDragonDocs)}">
+                <TextBlock Text="{x:Bind lang:Lang.CmdArg_OneDragon_SeeDocs}"
+                           TextWrapping="Wrap" />
+            </HyperlinkButton>
+            <HyperlinkButton Padding="0"
+                             FontSize="11"
+                             NavigateUri="https://github.com/moesnow/March7thAssistant"
+                             Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowMarch7thDocs)}">
+                <TextBlock Text="{x:Bind lang:Lang.CmdArg_March7th_SeeDocs}"
                            TextWrapping="Wrap" />
             </HyperlinkButton>
         </StackPanel>

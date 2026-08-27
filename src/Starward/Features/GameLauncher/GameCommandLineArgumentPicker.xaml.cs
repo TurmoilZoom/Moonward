@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Starward.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,13 +11,13 @@ using System.Linq;
 namespace Starward.Features.GameLauncher;
 
 /// <summary>
-/// 命令行参数勾选面板：展示常用 Unity/社区预设与 BetterGI 命令，勾选或改取值后回写组合结果。
+/// 命令行参数勾选面板：展示常用 Unity 预设与当前游戏对应的社区工具命令，勾选或改取值后回写组合结果。
 /// </summary>
 [INotifyPropertyChanged]
 public sealed partial class GameCommandLineArgumentPicker : UserControl
 {
 
-    private readonly List<GameCommandLineArgumentOption> _options;
+    private List<GameCommandLineArgumentOption> _options;
 
     private string _customArgument = "";
 
@@ -34,18 +35,24 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
 
     public GameCommandLineArgumentPicker()
     {
-        _options = GameCommandLineArgumentHelper.CreateOptions();
-        Groups = GameCommandLineArgumentHelper.CreateGroups(_options);
-        foreach (GameCommandLineArgumentOption option in _options)
-        {
-            option.PropertyChanged += Option_PropertyChanged;
-        }
+        _options = [];
+        Groups = [];
         this.InitializeComponent();
     }
 
 
     /// <summary>分类后的预设列表。</summary>
     public ObservableCollection<GameCommandLineArgumentGroup> Groups { get; }
+
+
+    /// <summary>当前游戏为原神时显示 BetterGI 文档链接。</summary>
+    public bool ShowBetterGIDocs { get; private set => SetProperty(ref field, value); }
+
+    /// <summary>当前游戏为绝区零时显示一条龙文档链接。</summary>
+    public bool ShowOneDragonDocs { get; private set => SetProperty(ref field, value); }
+
+    /// <summary>当前游戏为星穹铁道时显示三月七小助手文档链接。</summary>
+    public bool ShowMarch7thDocs { get; private set => SetProperty(ref field, value); }
 
 
     /// <summary>
@@ -70,14 +77,16 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
 
     /// <summary>
     /// 用已有命令行字符串初始化勾选状态与自定义残余段。
+    /// 按 <paramref name="gameBiz"/> 重建工具参数分组（仅当前游戏对应的社区工具）。
     /// </summary>
     /// <param name="argument">当前配置文件中的命令行参数。</param>
+    /// <param name="gameBiz">当前游戏区服；工具预设按 <see cref="GameBiz.Game"/> 过滤。</param>
     /// <param name="isDx12ManagedByApp">
     /// 为 true 时表示 <c>-use-d3d12</c> 由应用全局 DX12 开关附加（如绝区零），
     /// 列表项置灰、勾选状态与全局开关同步，且不写入配置文件参数。
     /// </param>
     /// <param name="isDx12Enabled">全局 DX12 是否已开启（仅在 <paramref name="isDx12ManagedByApp"/> 时生效）。</param>
-    public void LoadFromArgument(string? argument, bool isDx12ManagedByApp = false, bool isDx12Enabled = false)
+    public void LoadFromArgument(string? argument, GameBiz gameBiz, bool isDx12ManagedByApp = false, bool isDx12Enabled = false)
     {
         _isDx12ManagedByApp = isDx12ManagedByApp;
         _isDx12Enabled = isDx12Enabled;
@@ -85,6 +94,7 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
         _suppressCombinedNotify = true;
         try
         {
+            ResetOptions(gameBiz);
             _customArgument = GameCommandLineArgumentHelper.ApplyFromArgumentString(_options, argument);
             ApplyDx12ManagedState();
             // 面板内预览与外部输入框保持一致（含未识别参数的原始写法），避免打开时重排写回
@@ -101,6 +111,33 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
             _suppressOptionSync = false;
             _suppressCombinedNotify = false;
         }
+    }
+
+
+    /// <summary>
+    /// 按当前游戏重建可勾选项与分组，并更新底部工具文档链接可见性。
+    /// </summary>
+    private void ResetOptions(GameBiz gameBiz)
+    {
+        foreach (GameCommandLineArgumentOption option in _options)
+        {
+            option.PropertyChanged -= Option_PropertyChanged;
+        }
+        _options = GameCommandLineArgumentHelper.CreateOptions(gameBiz);
+        foreach (GameCommandLineArgumentOption option in _options)
+        {
+            option.PropertyChanged += Option_PropertyChanged;
+        }
+
+        Groups.Clear();
+        foreach (GameCommandLineArgumentGroup group in GameCommandLineArgumentHelper.CreateGroups(_options))
+        {
+            Groups.Add(group);
+        }
+
+        ShowBetterGIDocs = gameBiz.Game is GameBiz.hk4e;
+        ShowOneDragonDocs = gameBiz.Game is GameBiz.nap;
+        ShowMarch7thDocs = gameBiz.Game is GameBiz.hkrpg;
     }
 
 

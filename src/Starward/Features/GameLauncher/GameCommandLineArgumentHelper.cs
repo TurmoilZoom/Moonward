@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Starward.Core;
 using Starward.Language;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,8 @@ public enum GameCommandLineArgumentCategory
     Graphics,
     Other,
     BetterGI,
+    OneDragon,
+    March7th,
 }
 
 
@@ -37,7 +40,8 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         string? defaultValue = null,
         string? alternateKey = null,
         bool valueOptional = false,
-        bool consumeRemainingValues = false)
+        bool consumeRemainingValues = false,
+        bool compactEditor = false)
     {
         Id = id;
         Key = key;
@@ -48,6 +52,7 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         DefaultValue = defaultValue;
         ValueOptional = valueOptional;
         ConsumeRemainingValues = consumeRemainingValues;
+        CompactEditor = compactEditor;
         Value = defaultValue ?? "";
     }
 
@@ -79,16 +84,19 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
     /// </summary>
     public bool ConsumeRemainingValues { get; }
 
+    /// <summary>窄输入框（分辨率宽高、显示器序号、一条龙实例/关机秒数）。</summary>
+    public bool CompactEditor { get; }
+
     /// <summary>
     /// 是否在 UI 中显示取值编辑框。窗口化/全屏等取值由选项本身固定，不展示。
     /// </summary>
     public bool ShowValueEditor => ShowCompactValueEditor || ShowWideValueEditor;
 
-    /// <summary>窄输入框（分辨率宽高、显示器序号）。</summary>
-    public bool ShowCompactValueEditor => HasValue && Id is "screen_width" or "screen_height" or "monitor";
+    /// <summary>窄输入框（分辨率宽高、显示器序号、一条龙 <c>-i</c>/<c>-s</c>）。</summary>
+    public bool ShowCompactValueEditor => HasValue && CompactEditor;
 
     /// <summary>宽输入框（BetterGI 配置名 / 配置组名）。</summary>
-    public bool ShowWideValueEditor => HasValue && (ValueOptional || ConsumeRemainingValues);
+    public bool ShowWideValueEditor => HasValue && !CompactEditor && (ValueOptional || ConsumeRemainingValues);
 
 
     /// <summary>展示标题（本地化）。</summary>
@@ -113,6 +121,37 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         "bettergi_onedragon" => Lang.CmdArg_BetterGI_OneDragon,
         "bettergi_groups" => Lang.CmdArg_BetterGI_Groups,
         "bettergi_taskprogress" => Lang.CmdArg_BetterGI_TaskProgress,
+        "onedragon_run" => Lang.CmdArg_OneDragon_Run,
+        "onedragon_close_game" => Lang.CmdArg_OneDragon_CloseGame,
+        "onedragon_shutdown" => Lang.CmdArg_OneDragon_Shutdown,
+        "onedragon_instance" => Lang.CmdArg_OneDragon_Instance,
+        "m7a_main" => Lang.CmdArg_March7th_Main,
+        "m7a_routine" => Lang.CmdArg_March7th_Routine,
+        "m7a_daily" => Lang.CmdArg_March7th_Daily,
+        "m7a_power" => Lang.CmdArg_March7th_Power,
+        "m7a_fight" => Lang.CmdArg_March7th_Fight,
+        "m7a_universe" => Lang.CmdArg_March7th_Universe,
+        "m7a_forgottenhall" => Lang.CmdArg_March7th_ForgottenHall,
+        "m7a_purefiction" => Lang.CmdArg_March7th_PureFiction,
+        "m7a_apocalyptic" => Lang.CmdArg_March7th_Apocalyptic,
+        "m7a_redemption" => Lang.CmdArg_March7th_Redemption,
+        "m7a_currencywars" => Lang.CmdArg_March7th_CurrencyWars,
+        "m7a_currencywarsloop" => Lang.CmdArg_March7th_CurrencyWarsLoop,
+        "m7a_currencywarstemp" => Lang.CmdArg_March7th_CurrencyWarsTemp,
+        "m7a_divergent" => Lang.CmdArg_March7th_Divergent,
+        "m7a_divergentloop" => Lang.CmdArg_March7th_DivergentLoop,
+        "m7a_divergenttemp" => Lang.CmdArg_March7th_DivergentTemp,
+        "m7a_game" => Lang.CmdArg_March7th_Game,
+        "m7a_game_update" => Lang.CmdArg_March7th_GameUpdate,
+        "m7a_game_pre_download" => Lang.CmdArg_March7th_GamePreDownload,
+        "m7a_app_update" => Lang.CmdArg_March7th_AppUpdate,
+        "m7a_universe_gui" => Lang.CmdArg_March7th_UniverseGui,
+        "m7a_fight_gui" => Lang.CmdArg_March7th_FightGui,
+        "m7a_universe_update" => Lang.CmdArg_March7th_UniverseUpdate,
+        "m7a_fight_update" => Lang.CmdArg_March7th_FightUpdate,
+        "m7a_mobileui_update" => Lang.CmdArg_March7th_MobileUiUpdate,
+        "m7a_notify" => Lang.CmdArg_March7th_Notify,
+        "m7a_screen_test" => Lang.CmdArg_March7th_ScreenTest,
         _ => Id,
     };
 
@@ -139,8 +178,16 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         "bettergi_onedragon" => Lang.CmdArg_BetterGI_OneDragon_Desc,
         "bettergi_groups" => Lang.CmdArg_BetterGI_Groups_Desc,
         "bettergi_taskprogress" => Lang.CmdArg_BetterGI_TaskProgress_Desc,
+        "onedragon_run" => Lang.CmdArg_OneDragon_Run_Desc,
+        "onedragon_close_game" => Lang.CmdArg_OneDragon_CloseGame_Desc,
+        "onedragon_shutdown" => Lang.CmdArg_OneDragon_Shutdown_Desc,
+        "onedragon_instance" => Lang.CmdArg_OneDragon_Instance_Desc,
         _ => "",
     };
+
+
+    /// <summary>是否有说明文字（三月七任务名无描述，避免空行占位）。</summary>
+    public bool HasDescription => !string.IsNullOrEmpty(Description);
 
 
     /// <summary>取值输入框占位（宽高用默认值；BetterGI 用说明性占位）。</summary>
@@ -149,6 +196,7 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         "bettergi_onedragon" => Lang.CmdArg_BetterGI_OneDragon_Placeholder,
         "bettergi_groups" => Lang.CmdArg_BetterGI_Groups_Placeholder,
         "bettergi_taskprogress" => Lang.CmdArg_BetterGI_TaskProgress_Placeholder,
+        "onedragon_instance" => Lang.CmdArg_OneDragon_Instance_Placeholder,
         _ => DefaultValue,
     };
 
@@ -160,6 +208,8 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         GameCommandLineArgumentCategory.Resolution => Lang.CmdArg_Category_Resolution,
         GameCommandLineArgumentCategory.Graphics => Lang.CmdArg_Category_Graphics,
         GameCommandLineArgumentCategory.BetterGI => Lang.CmdArg_Category_BetterGI,
+        GameCommandLineArgumentCategory.OneDragon => Lang.CmdArg_Category_OneDragon,
+        GameCommandLineArgumentCategory.March7th => Lang.CmdArg_Category_March7th,
         _ => Lang.CmdArg_Category_Other,
     };
 
@@ -245,7 +295,7 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
             : (DefaultValue ?? Value?.Trim() ?? "");
         if (string.IsNullOrEmpty(v))
         {
-            // 一条龙可不带配置名；调度器未填组名时仍写出开关本身
+            // 可选取值未填时仍写出开关本身（BetterGI startOneDragon、一条龙 -s）
             return ValueOptional || ConsumeRemainingValues ? Key : null;
         }
         return $"{Key} {v}";
@@ -273,51 +323,117 @@ public sealed class GameCommandLineArgumentGroup
 
 
 /// <summary>
-/// Unity / 米哈游 PC 客户端常用启动参数，以及 BetterGI 自定义启动命令：预设目录、解析与组合。
-/// 参考 Unity Standalone Player 命令行参数文档、社区启动器常见开关，以及 BetterGI 官方命令行（start / startOneDragon / --startGroups / --TaskProgress）。
+/// Unity / 米哈游 PC 客户端常用启动参数，以及按游戏过滤的社区工具命令：预设目录、解析与组合。
+/// 参考 Unity Standalone Player 命令行参数文档、社区启动器常见开关；
+/// BetterGI（原神 hk4e：start / startOneDragon / --startGroups / --TaskProgress）、
+/// 绝区零一条龙（nap：-o / -c / -s / -i）、三月七小助手（星铁 hkrpg：位置参数 TASK）。
+/// 工具分组按 <see cref="GameBiz.Game"/> 过滤，只生成当前游戏对应的那一组。
 /// 显示与分辨率类预设统一在「启动参数配置」中管理（游戏设置页不再重复提供）。
 /// </summary>
 public static class GameCommandLineArgumentHelper
 {
 
     /// <summary>
-    /// 创建一套新的可编辑预设（每次打开选择面板时新建，避免跨配置串状态）。
+    /// 三月七小助手位置参数 TASK（源码 <c>AVAILABLE_TASKS</c>）。显示名走 Lang.CmdArg_March7th_*。
     /// </summary>
-    public static List<GameCommandLineArgumentOption> CreateOptions()
+    private static readonly (string Id, string Key)[] March7thTasks =
+    [
+        ("m7a_main", "main"),
+        ("m7a_routine", "routine"),
+        ("m7a_daily", "daily"),
+        ("m7a_power", "power"),
+        ("m7a_fight", "fight"),
+        ("m7a_universe", "universe"),
+        ("m7a_forgottenhall", "forgottenhall"),
+        ("m7a_purefiction", "purefiction"),
+        ("m7a_apocalyptic", "apocalyptic"),
+        ("m7a_redemption", "redemption"),
+        ("m7a_currencywars", "currencywars"),
+        ("m7a_currencywarsloop", "currencywarsloop"),
+        ("m7a_currencywarstemp", "currencywarstemp"),
+        ("m7a_divergent", "divergent"),
+        ("m7a_divergentloop", "divergentloop"),
+        ("m7a_divergenttemp", "divergenttemp"),
+        ("m7a_game", "game"),
+        ("m7a_game_update", "game_update"),
+        ("m7a_game_pre_download", "game_pre_download"),
+        ("m7a_app_update", "app_update"),
+        ("m7a_universe_gui", "universe_gui"),
+        ("m7a_fight_gui", "fight_gui"),
+        ("m7a_universe_update", "universe_update"),
+        ("m7a_fight_update", "fight_update"),
+        ("m7a_mobileui_update", "mobileui_update"),
+        ("m7a_notify", "notify"),
+        ("m7a_screen_test", "screen_test"),
+    ];
+
+
+    /// <summary>
+    /// 创建一套新的可编辑预设（每次打开选择面板时按当前游戏新建，避免跨配置串状态）。
+    /// 社区工具参数只生成与 <paramref name="gameBiz"/> 对应的那一组；Unity 通用项始终包含。
+    /// </summary>
+    public static List<GameCommandLineArgumentOption> CreateOptions(GameBiz gameBiz)
     {
-        return
-        [
+        var list = new List<GameCommandLineArgumentOption>();
+
+        if (gameBiz.Game is GameBiz.hk4e)
+        {
             // BetterGI 命令行（官方文档：start / startOneDragon / --startGroups / --TaskProgress，四者互斥）
             // 用于自定义启动程序指向 BetterGI.exe 时；组合时会写在最前，以免 BGI 把 Unity 参数当成动作。
-            new("bettergi_start", "start", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi"),
-            new("bettergi_onedragon", "startOneDragon", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, alternateKey: "--startOneDragon", valueOptional: true),
-            new("bettergi_groups", "--startGroups", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, consumeRemainingValues: true),
-            new("bettergi_taskprogress", "--TaskProgress", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, consumeRemainingValues: true),
+            list.Add(new("bettergi_start", "start", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi"));
+            list.Add(new("bettergi_onedragon", "startOneDragon", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, alternateKey: "--startOneDragon", valueOptional: true));
+            list.Add(new("bettergi_groups", "--startGroups", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, consumeRemainingValues: true));
+            list.Add(new("bettergi_taskprogress", "--TaskProgress", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, consumeRemainingValues: true));
+        }
+        else if (gameBiz.Game is GameBiz.nap)
+        {
+            // 绝区零一条龙（OneDragon-Launcher.exe，四项可组合，非互斥）
+            list.Add(new("onedragon_run", "-o", GameCommandLineArgumentCategory.OneDragon, alternateKey: "--onedragon"));
+            list.Add(new("onedragon_close_game", "-c", GameCommandLineArgumentCategory.OneDragon, alternateKey: "--close-game"));
+            list.Add(new("onedragon_shutdown", "-s", GameCommandLineArgumentCategory.OneDragon, hasValue: true, alternateKey: "--shutdown", valueOptional: true, compactEditor: true));
+            list.Add(new("onedragon_instance", "-i", GameCommandLineArgumentCategory.OneDragon, hasValue: true, alternateKey: "--instance", compactEditor: true));
+        }
+        else if (gameBiz.Game is GameBiz.hkrpg)
+        {
+            // 三月七小助手（March7th Assistant.exe，位置参数 TASK 单选互斥）
+            foreach ((string id, string key) in March7thTasks)
+            {
+                list.Add(new(id, key, GameCommandLineArgumentCategory.March7th, exclusiveGroup: "march7th"));
+            }
+        }
 
-            // 显示模式（互斥）
-            new("windowed", "-screen-fullscreen", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "0"),
-            new("fullscreen", "-screen-fullscreen", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "1"),
-            new("popupwindow", "-popupwindow", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display"),
-            new("window_mode_exclusive", "-window-mode", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "exclusive"),
-            new("window_mode_borderless", "-window-mode", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "borderless"),
+        // 显示模式（互斥）
+        list.Add(new("windowed", "-screen-fullscreen", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "0"));
+        list.Add(new("fullscreen", "-screen-fullscreen", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "1"));
+        list.Add(new("popupwindow", "-popupwindow", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display"));
+        list.Add(new("window_mode_exclusive", "-window-mode", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "exclusive"));
+        list.Add(new("window_mode_borderless", "-window-mode", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "borderless"));
 
-            // 分辨率 / 显示器
-            new("screen_width", "-screen-width", GameCommandLineArgumentCategory.Resolution, hasValue: true, defaultValue: "1920"),
-            new("screen_height", "-screen-height", GameCommandLineArgumentCategory.Resolution, hasValue: true, defaultValue: "1080"),
-            new("monitor", "-monitor", GameCommandLineArgumentCategory.Resolution, hasValue: true, defaultValue: "1"),
+        // 分辨率 / 显示器
+        list.Add(new("screen_width", "-screen-width", GameCommandLineArgumentCategory.Resolution, hasValue: true, defaultValue: "1920", compactEditor: true));
+        list.Add(new("screen_height", "-screen-height", GameCommandLineArgumentCategory.Resolution, hasValue: true, defaultValue: "1080", compactEditor: true));
+        list.Add(new("monitor", "-monitor", GameCommandLineArgumentCategory.Resolution, hasValue: true, defaultValue: "1", compactEditor: true));
 
-            // 图形 API（互斥；force_d3d12 在绝区零等由全局 DX12 管理时会置灰且不写入配置）
-            new("force_d3d11", "-force-d3d11", GameCommandLineArgumentCategory.Graphics, exclusiveGroup: "graphics"),
-            new("force_d3d12", "-use-d3d12", GameCommandLineArgumentCategory.Graphics, exclusiveGroup: "graphics", alternateKey: "-force-d3d12"),
-            new("force_vulkan", "-force-vulkan", GameCommandLineArgumentCategory.Graphics, exclusiveGroup: "graphics"),
-            new("force_low_power", "-force-low-power-device", GameCommandLineArgumentCategory.Graphics),
+        // 图形 API（互斥；force_d3d12 在绝区零等由全局 DX12 管理时会置灰且不写入配置）
+        list.Add(new("force_d3d11", "-force-d3d11", GameCommandLineArgumentCategory.Graphics, exclusiveGroup: "graphics"));
+        list.Add(new("force_d3d12", "-use-d3d12", GameCommandLineArgumentCategory.Graphics, exclusiveGroup: "graphics", alternateKey: "-force-d3d12"));
+        list.Add(new("force_vulkan", "-force-vulkan", GameCommandLineArgumentCategory.Graphics, exclusiveGroup: "graphics"));
+        list.Add(new("force_low_power", "-force-low-power-device", GameCommandLineArgumentCategory.Graphics));
 
-            // 其他
-            new("force_gfx_direct", "-force-gfx-direct", GameCommandLineArgumentCategory.Other),
-            new("nolog", "-nolog", GameCommandLineArgumentCategory.Other),
-            new("single_instance", "-single-instance", GameCommandLineArgumentCategory.Other),
-        ];
+        // 其他
+        list.Add(new("force_gfx_direct", "-force-gfx-direct", GameCommandLineArgumentCategory.Other));
+        list.Add(new("nolog", "-nolog", GameCommandLineArgumentCategory.Other));
+        list.Add(new("single_instance", "-single-instance", GameCommandLineArgumentCategory.Other));
+
+        return list;
     }
+
+
+    /// <summary>社区工具参数（BetterGI / 一条龙 / 三月七），组合时排在 Unity 参数前面。</summary>
+    public static bool IsToolCategory(GameCommandLineArgumentCategory category) => category is
+        GameCommandLineArgumentCategory.BetterGI
+        or GameCommandLineArgumentCategory.OneDragon
+        or GameCommandLineArgumentCategory.March7th;
 
 
     /// <summary>
@@ -415,7 +531,7 @@ public static class GameCommandLineArgumentHelper
                 }
             }
 
-            // BetterGI 可选单值（startOneDragon [配置名]）：下一 token 不是预设键且不像开关时才吞掉
+            // 可选单值（BetterGI startOneDragon [配置名]、一条龙 -s [秒]）：下一 token 不是预设键且不像开关时才吞掉
             if (i + 1 < tokens.Count)
             {
                 string next = tokens[i + 1];
@@ -435,7 +551,7 @@ public static class GameCommandLineArgumentHelper
                 }
             }
 
-            // 无取值开关，或可选取值未带参数（仅 startOneDragon）
+            // 无取值开关，或可选取值未带参数（startOneDragon / -s）
             match = options.FirstOrDefault(o =>
                 o.MatchesKey(token) && (!o.HasValue || o.ValueOptional));
             if (match is not null)
@@ -459,9 +575,9 @@ public static class GameCommandLineArgumentHelper
     public static string BuildArgumentString(IEnumerable<GameCommandLineArgumentOption> options, string? customArgument)
     {
         var parts = new List<string>();
-        // BetterGI 动作必须在最前，否则 BGI 会把 Unity 参数当成第一个命令而忽略 start / startOneDragon
+        // 工具动作必须在最前，否则会把 Unity 参数当成第一个命令（BetterGI start / 一条龙 -o / 三月七 TASK）
         foreach (GameCommandLineArgumentOption o in options
-                     .OrderBy(x => x.Category == GameCommandLineArgumentCategory.BetterGI ? 0 : 1))
+                     .OrderBy(x => IsToolCategory(x.Category) ? 0 : 1))
         {
             string? fragment = o.ToArgumentFragment();
             if (!string.IsNullOrWhiteSpace(fragment))
@@ -525,7 +641,7 @@ public static class GameCommandLineArgumentHelper
 
     private static bool IsGenericValueOption(GameCommandLineArgumentOption o)
     {
-        return o.Id is "screen_width" or "screen_height" or "monitor";
+        return o.HasValue && o.CompactEditor && !o.ValueOptional;
     }
 
 
