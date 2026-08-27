@@ -591,6 +591,10 @@ public sealed partial class StartGameButton : UserControl
     public GameId CurrentGameId { get; set => SetProperty(ref field, value); }
 
 
+    /// <summary>游戏运行中时按钮上显示的已运行时长文本（hh:mm:ss），由页面每秒刷新。</summary>
+    public string? RunningGameTime { get; set { field = value; OnPropertyChanged(nameof(StartGameButtonText)); } }
+
+
     /// <summary>游戏运行中时悬停 Popup 显示的信息文本（如进程/时长等）。</summary>
     public string? RunningGameInfo { get; set => SetProperty(ref field, value); }
 
@@ -626,7 +630,7 @@ public sealed partial class StartGameButton : UserControl
     public string StartGameButtonText => GameState switch
     {
         GameState.StartGame => Lang.LauncherPage_StartGame,
-        GameState.GameIsRunning => Lang.LauncherPage_GameIsRunning,
+        GameState.GameIsRunning => RunningGameTime ?? "",
         GameState.InstallGame => Lang.LauncherPage_InstallGame,
         GameState.UpdateGame => Lang.LauncherPage_UpdateGame,
         GameState.UpdatePlugin => "Update Plugins",

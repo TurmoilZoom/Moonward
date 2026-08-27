@@ -621,7 +621,8 @@
                                    CurrentGameId="{x:Bind CurrentGameId}"
                                    GameCommand="{x:Bind ClickStartGameButtonCommand}"
                                    GameState="{x:Bind GameState}"
-                                   RunningGameInfo="{x:Bind RunningGameInfo}" />
+                                   RunningGameInfo="{x:Bind RunningGameInfo}"
+                                   RunningGameTime="{x:Bind RunningGameTime}" />
 
 
             <!--  文字阴影  -->
