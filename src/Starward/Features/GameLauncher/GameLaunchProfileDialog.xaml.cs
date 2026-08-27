@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
@@ -53,6 +54,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         this.InitializeComponent();
         this.Loaded += GameLaunchProfileDialog_Loaded;
         this.Unloaded += GameLaunchProfileDialog_Unloaded;
+        InstantTooltip.SetActionCallback(Button_CmdLaunchHint, OpenCmdLaunchIssue);
     }
 
 
@@ -336,7 +338,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 该游戏勾选 DX12 时为 true，用于在命令行参数末尾显示只读、不可编辑的 DX12 参数。
+    /// 该游戏勾选 DX12 时为 true。用于在命令行参数旁显示可按配置文件关闭的 DX12 参数徽章。
     /// </summary>
     public bool ShowDx12Argument
     {
@@ -351,8 +353,25 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     }
 
 
-    /// <summary>DX12 只读参数 chip 可见性。</summary>
-    public Visibility Dx12ArgumentVisibility => ShowDx12Argument ? Visibility.Visible : Visibility.Collapsed;
+    /// <summary>
+    /// 工作副本：本配置文件是否跳过自动附加 <c>-use-d3d12</c>。
+    /// </summary>
+    public bool EditingSkipAutoDx12
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                UpdateIsDirty();
+                OnPropertyChanged(nameof(Dx12ArgumentVisibility));
+            }
+        }
+    }
+
+
+    /// <summary>DX12 参数徽章可见性：全局已开启且本配置尚未关闭时显示。</summary>
+    public Visibility Dx12ArgumentVisibility => (ShowDx12Argument && !EditingSkipAutoDx12) ? Visibility.Visible : Visibility.Collapsed;
 
 
     /// <summary>
@@ -378,7 +397,8 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         IsDirty = EditingName != p.Name
             || (EditingArgument ?? "") != (p.Argument ?? "")
             || (EditingThirdPartyToolPath ?? "") != (p.ThirdPartyToolPath ?? "")
-            || EditingLoginUid != savedUid;
+            || EditingLoginUid != savedUid
+            || EditingSkipAutoDx12 != p.SkipAutoDx12;
     }
 
 
@@ -397,6 +417,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
             ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
             LoginUid = AppConfig.GetDefaultLaunchLoginUid(CurrentGameBiz),
+            SkipAutoDx12 = AppConfig.GetDefaultLaunchProfileSkipAutoDx12(CurrentGameBiz),
         };
         Profiles.Add(config1);
         foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz))
@@ -480,6 +501,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         EditingArgument = profile.Argument;
         EditingThirdPartyToolPath = profile.ThirdPartyToolPath;
         EditingLoginUid = NormalizeLoginUid(profile.LoginUid);
+        EditingSkipAutoDx12 = profile.SkipAutoDx12;
         IsRenamingProfile = false;
         IsDirty = false;
         AppConfig.SetSelectedLaunchProfileId(CurrentGameBiz, profile.Id);
@@ -558,9 +580,11 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             AppConfig.SetEnableThirdPartyTool(CurrentGameBiz, enableTool);
             AppConfig.SetDefaultLaunchProfileName(CurrentGameBiz, name);
             AppConfig.SetDefaultLaunchLoginUid(CurrentGameBiz, loginUid > 0 ? loginUid : null);
+            AppConfig.SetDefaultLaunchProfileSkipAutoDx12(CurrentGameBiz, EditingSkipAutoDx12);
             p.Argument = EditingArgument;
             p.EnableThirdPartyTool = enableTool;
             p.ThirdPartyToolPath = savedPath;
+            p.SkipAutoDx12 = EditingSkipAutoDx12;
             EditingThirdPartyToolPath = savedPath;
         }
         else
@@ -568,6 +592,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             p.Argument = EditingArgument;
             p.ThirdPartyToolPath = EditingThirdPartyToolPath;
             p.EnableThirdPartyTool = !string.IsNullOrWhiteSpace(EditingThirdPartyToolPath);
+            p.SkipAutoDx12 = EditingSkipAutoDx12;
         }
         p.LoginUid = loginUid > 0 ? loginUid : null;
         p.Name = name;
@@ -707,9 +732,19 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     }
 
 
-    private void Button_ThirdPartyToolInfo_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// 打开 CMD 启动说明对应的上游 Issue。
+    /// </summary>
+    private async void OpenCmdLaunchIssue()
     {
-        TeachingTip_ThirdPartyTool.IsOpen = true;
+        try
+        {
+            await Launcher.LaunchUriAsync(new Uri("https://github.com/Scighost/Starward/issues/1634"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Open CMD launch issue");
+        }
     }
 
 
@@ -767,6 +802,15 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
+    /// 关闭本配置文件的自动 DX12 参数。全局 DX12 开关不变，保存后启动时不再附加 <c>-use-d3d12</c>。
+    /// </summary>
+    private void DismissDx12Argument_Click(object sender, RoutedEventArgs e)
+    {
+        EditingSkipAutoDx12 = true;
+    }
+
+
+    /// <summary>
     /// 打开/关闭常用参数勾选面板（独立 Popup：整窗铺满 + 卡片布局居中，与 ContentDialog 同参照）。
     /// </summary>
     private void Button_CommandLineArgumentPicker_Click(object sender, RoutedEventArgs e)
@@ -778,13 +822,14 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             return;
         }
 
-        // nap：DX12 始终走全局开关；其它游戏仅在已开启全局 DX12 时按只读同步，避免与启动附加重复
-        bool isDx12ManagedByApp = CurrentGameBiz.Game is GameBiz.nap || ShowDx12Argument;
+        // 本配置已关闭自动 DX12 时不再只读托管，允许在常用参数里改图形 API。
+        // 否则 nap 始终走全局开关；其它游戏仅在已开启全局 DX12 时按只读同步，避免与启动附加重复。
+        bool isDx12ManagedByApp = !EditingSkipAutoDx12 && (CurrentGameBiz.Game is GameBiz.nap || ShowDx12Argument);
         CommandLineArgumentPicker.LoadFromArgument(
             EditingArgument,
             CurrentGameBiz,
             isDx12ManagedByApp: isDx12ManagedByApp,
-            isDx12Enabled: ShowDx12Argument);
+            isDx12Enabled: ShowDx12Argument && !EditingSkipAutoDx12);
 
         popup.XamlRoot = XamlRoot;
         AlignCommandLineArgumentPickerPopup(popup);

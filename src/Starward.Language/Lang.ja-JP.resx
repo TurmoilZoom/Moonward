@@ -3764,4 +3764,7 @@
   <data name="UrlProtocol_UnhandledError" xml:space="preserve">
     <value>このリンクの処理に失敗しました。</value>
   </data>
+  <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
+    <value>この構成では起動時に -use-d3d12 を付けません（グローバルな DX12 設定は変わりません）</value>
+  </data>
 </root>

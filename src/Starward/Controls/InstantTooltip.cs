@@ -10,8 +10,9 @@ namespace Starward.Controls;
 /// <para>
 /// 与系统 <c>ToolTipService</c> 不同：无显示延迟、样式为亚克力圆角气泡、
 /// 同一 <see cref="XamlRoot"/> 内共享一个 <see cref="InstantTooltipHost"/>（单个 Popup）。
-/// 可选 <see cref="ActionTextProperty"/> + <see cref="SetActionCallback"/> 在气泡右下角提供可点击操作
-/// （指针移入气泡本身不会关闭，便于点击）。
+/// 可选 <see cref="ActionTextProperty"/> + <see cref="SetActionCallback"/> 提供可点击操作
+/// （默认在气泡右下角；<see cref="ActionInlineProperty"/> 为 true 时紧跟正文右侧，不换行）。
+/// 指针移入气泡本身不会关闭，便于点击。
 /// </para>
 /// <para>
 /// XAML 用法：
@@ -74,7 +75,8 @@ public static class InstantTooltip
             new PropertyMetadata(InstantTooltipPlacement.Right));
 
     /// <summary>
-    /// 可选：气泡右下角操作按钮文案。非空时 Host 显示可点击链接（需配合 <see cref="SetActionCallback"/>）。
+    /// 可选：操作按钮文案。非空时 Host 显示可点击链接（需配合 <see cref="SetActionCallback"/>）。
+    /// 默认在气泡右下角；与 <see cref="ActionInlineProperty"/> 同时使用时紧跟正文。
     /// </summary>
     public static readonly DependencyProperty ActionTextProperty =
         DependencyProperty.RegisterAttached(
@@ -82,6 +84,17 @@ public static class InstantTooltip
             typeof(string),
             typeof(InstantTooltip),
             new PropertyMetadata(null));
+
+
+    /// <summary>
+    /// 为 true 时操作链接紧跟正文右侧，不另起一行。默认 false（右下角独立按钮）。
+    /// </summary>
+    public static readonly DependencyProperty ActionInlineProperty =
+        DependencyProperty.RegisterAttached(
+            "ActionInline",
+            typeof(bool),
+            typeof(InstantTooltip),
+            new PropertyMetadata(false));
 
 
     /// <summary>
@@ -129,7 +142,7 @@ public static class InstantTooltip
 
 
     /// <summary>
-    /// 取得气泡右下角操作按钮文案。
+    /// 取得操作按钮文案。
     /// </summary>
     public static string? GetActionText(DependencyObject element)
     {
@@ -138,11 +151,29 @@ public static class InstantTooltip
 
 
     /// <summary>
-    /// 设置气泡右下角操作按钮文案；空则不显示操作按钮。
+    /// 设置操作按钮文案；空则不显示操作按钮。
     /// </summary>
     public static void SetActionText(DependencyObject element, string? value)
     {
         element.SetValue(ActionTextProperty, value);
+    }
+
+
+    /// <summary>
+    /// 取得操作链接是否紧跟正文。
+    /// </summary>
+    public static bool GetActionInline(DependencyObject element)
+    {
+        return (bool)element.GetValue(ActionInlineProperty);
+    }
+
+
+    /// <summary>
+    /// 设置操作链接是否紧跟正文（不另起一行）。
+    /// </summary>
+    public static void SetActionInline(DependencyObject element, bool value)
+    {
+        element.SetValue(ActionInlineProperty, value);
     }
 
 

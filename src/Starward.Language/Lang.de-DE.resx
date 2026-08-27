@@ -3763,4 +3763,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="UrlProtocol_UnhandledError" xml:space="preserve">
     <value>Dieser Link konnte nicht verarbeitet werden.</value>
   </data>
+  <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
+    <value>-use-d3d12 für dieses Profil nicht anhängen. Die globale DX12-Option bleibt unverändert.</value>
+  </data>
 </root>

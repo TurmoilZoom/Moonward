@@ -774,6 +774,24 @@ public static partial class AppConfig
         SetValue<long?>(uid == 0 ? null : uid, $"launch_profile_login_uid_{biz}");
     }
 
+
+    /// <summary>
+    /// 获取 config1 是否跳过启动时自动附加的 <c>-use-d3d12</c>。
+    /// </summary>
+    public static bool GetDefaultLaunchProfileSkipAutoDx12(GameBiz biz)
+    {
+        return GetValue<bool>(false, $"launch_profile_skip_auto_dx12_{biz}");
+    }
+
+
+    /// <summary>
+    /// 设置 config1 是否跳过启动时自动附加的 <c>-use-d3d12</c>。
+    /// </summary>
+    public static void SetDefaultLaunchProfileSkipAutoDx12(GameBiz biz, bool value)
+    {
+        SetValue(value, $"launch_profile_skip_auto_dx12_{biz}");
+    }
+
     /// <summary>
     /// 获取当前在启动参数编辑界面选中的配置文件内部名（configN）。
     /// </summary>

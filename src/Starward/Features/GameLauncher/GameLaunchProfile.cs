@@ -166,6 +166,14 @@ public sealed class GameLaunchProfile : ObservableObject
 
 
     /// <summary>
+    /// 为 true 时，即使全局已启用 DX12，本配置文件启动时也不自动附加 <c>-use-d3d12</c>。
+    /// 全局开关不变；config1 存于 legacy 键，其余配置写入 JSON。
+    /// </summary>
+    [JsonPropertyName("skip_auto_dx12")]
+    public bool SkipAutoDx12 { get; set; }
+
+
+    /// <summary>
     /// 是否启用自定义启动程序。
     /// </summary>
     [JsonPropertyName("enable_third_party_tool")]

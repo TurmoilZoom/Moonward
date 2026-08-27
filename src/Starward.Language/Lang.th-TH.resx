@@ -3759,4 +3759,7 @@ You are welcome to submit exported data to:</value>
   <data name="UrlProtocol_UnhandledError" xml:space="preserve">
     <value>ประมวลผลลิงก์นี้ไม่สำเร็จ</value>
   </data>
+  <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
+    <value>ไม่แนบ -use-d3d12 เมื่อเปิดเกมด้วยโปรไฟล์นี้ การตั้งค่า DX12 ส่วนกลางไม่เปลี่ยน</value>
+  </data>
 </root>

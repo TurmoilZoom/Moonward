@@ -3,6 +3,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -17,7 +18,7 @@ namespace Starward.Controls;
 /// 每个 <see cref="XamlRoot"/> 共享一个 <see cref="Popup"/>，承载即时 Tooltip 的显示、定位与 Composition 动画。
 /// <para>
 /// 由 <see cref="InstantTooltip"/> 按窗口创建与释放；多锚点注册指针事件后，悬停时复用同一气泡改文案与偏移。
-/// 无 XAML 模板：UI 在构造函数中代码搭建（Border + TextBlock，可选右下角操作链接）。
+/// 无 XAML 模板：UI 在构造函数中代码搭建（Border + TextBlock，可选操作链接：右下角或紧跟正文）。
 /// 指针可移入气泡本身（便于点击操作）；仅当锚点与气泡都离开时才隐藏。
 /// </para>
 /// </summary>
@@ -59,10 +60,19 @@ internal sealed class InstantTooltipHost
     /// </summary>
     private readonly StackPanel _body;
 
-    /// <summary>提示正文。</summary>
+    /// <summary>提示正文；行内操作时 Inlines 为「正文 + Hyperlink」。</summary>
     private readonly TextBlock _text;
 
-    /// <summary>可选操作链接（右下角）；无 ActionText 时折叠。</summary>
+    /// <summary>正文 Run，纯文案与行内操作共用。</summary>
+    private readonly Run _labelRun = new();
+
+    /// <summary>行内操作链接的可见文案。</summary>
+    private readonly Run _inlineActionRun = new();
+
+    /// <summary>紧跟正文的操作链接；<see cref="InstantTooltip.ActionInlineProperty"/> 为 true 时使用。</summary>
+    private readonly Hyperlink _inlineActionLink;
+
+    /// <summary>可选操作链接（右下角）；无 ActionText 或行内模式时折叠。</summary>
     private readonly HyperlinkButton _actionButton;
 
     /// <summary>驱动 scale / opacity 关键帧动画的 Composition 合成器。</summary>
@@ -149,6 +159,14 @@ internal sealed class InstantTooltipHost
             FontSize = 12,
             Foreground = GetThemeBrush("TextFillColorPrimaryBrush"),
         };
+
+        _inlineActionLink = new Hyperlink
+        {
+            UnderlineStyle = UnderlineStyle.None,
+            Foreground = GetThemeBrush("AccentTextFillColorPrimaryBrush"),
+        };
+        _inlineActionLink.Inlines.Add(_inlineActionRun);
+        _inlineActionLink.Click += InlineActionLink_Click;
 
         _actionButton = new HyperlinkButton
         {
@@ -357,6 +375,7 @@ internal sealed class InstantTooltipHost
         _currentHasAction = false;
         _dismissedUntilLeaveAnchor = null;
         _actionButton.Click -= ActionButton_Click;
+        _inlineActionLink.Click -= InlineActionLink_Click;
         _content.PointerEntered -= Content_PointerEntered;
         _content.PointerExited -= Content_PointerExited;
         _interactiveHideTimer.Tick -= InteractiveHideTimer_Tick;
@@ -488,9 +507,26 @@ internal sealed class InstantTooltipHost
     /// </summary>
     private void ActionButton_Click(object sender, RoutedEventArgs e)
     {
+        InvokeCurrentAction();
+    }
+
+
+    /// <summary>
+    /// 行内操作链接：与右下角按钮同一套回调。
+    /// </summary>
+    private void InlineActionLink_Click(Hyperlink sender, HyperlinkClickEventArgs args)
+    {
+        InvokeCurrentAction();
+    }
+
+
+    /// <summary>
+    /// 执行当前锚点的操作回调。先关气泡，避免回调里再弹层时叠在提示上。
+    /// </summary>
+    private void InvokeCurrentAction()
+    {
         FrameworkElement? anchor = _currentAnchor;
         Action? callback = anchor is null ? null : InstantTooltip.GetActionCallback(anchor);
-        // 先关气泡，再回调（回调内可能弹 ContentDialog）
         _pointerInsideAnyElement = false;
         _pointerInsidePopup = false;
         ForceClosePopup();
@@ -581,22 +617,39 @@ internal sealed class InstantTooltipHost
 
         _currentAnchor = element;
         _currentPlacement = InstantTooltip.GetPlacement(element);
-        _text.Text = label;
 
         string? actionText = InstantTooltip.GetActionText(element);
         bool hasAction = !string.IsNullOrEmpty(actionText) && InstantTooltip.GetActionCallback(element) is not null;
+        bool actionInline = hasAction && InstantTooltip.GetActionInline(element);
         _currentHasAction = hasAction;
         // 仅可交互气泡需要命中；纯文案必须穿透，否则退场后透明层会挡住下方工具栏。
         _content.IsHitTestVisible = hasAction;
-        if (hasAction)
+
+        _text.Inlines.Clear();
+        if (actionInline)
         {
-            _actionButton.Content = actionText;
-            _actionButton.Visibility = Visibility.Visible;
+            // 不换行空格：链接紧跟正文，避免单独掉到下一行
+            _labelRun.Text = label.TrimEnd() + "\u00A0";
+            _inlineActionRun.Text = actionText;
+            _text.Inlines.Add(_labelRun);
+            _text.Inlines.Add(_inlineActionLink);
+            _actionButton.Content = null;
+            _actionButton.Visibility = Visibility.Collapsed;
         }
         else
         {
-            _actionButton.Content = null;
-            _actionButton.Visibility = Visibility.Collapsed;
+            _labelRun.Text = label;
+            _text.Inlines.Add(_labelRun);
+            if (hasAction)
+            {
+                _actionButton.Content = actionText;
+                _actionButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                _actionButton.Content = null;
+                _actionButton.Visibility = Visibility.Collapsed;
+            }
         }
 
         UpdatePosition(element);

@@ -4455,6 +4455,15 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Don't append -use-d3d12 for this profile. The global DX12 option is unchanged. 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_DismissDx12ArgumentTooltip {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_DismissDx12ArgumentTooltip", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Launch Game using CMD 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_LaunchGameUsingCMD {

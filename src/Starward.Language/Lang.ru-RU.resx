@@ -3785,4 +3785,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="UrlProtocol_UnhandledError" xml:space="preserve">
     <value>Не удалось обработать эту ссылку.</value>
   </data>
+  <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
+    <value>Не добавлять -use-d3d12 при запуске этого профиля. Глобальный параметр DX12 не изменяется.</value>
+  </data>
 </root>

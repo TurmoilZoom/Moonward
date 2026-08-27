@@ -3765,4 +3765,7 @@
   <data name="UrlProtocol_UnhandledError" xml:space="preserve">
     <value>處理此連結時失敗。</value>
   </data>
+  <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
+    <value>此設定檔啟動時不附加 -use-d3d12（不影響全域 DX12 開關）</value>
+  </data>
 </root>

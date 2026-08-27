@@ -3765,4 +3765,7 @@ You are welcome to submit exported data to:</value>
   <data name="UrlProtocol_UnhandledError" xml:space="preserve">
     <value>No se pudo procesar este enlace.</value>
   </data>
+  <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
+    <value>No se añadirá -use-d3d12 al iniciar este perfil. La opción global de DX12 no cambia.</value>
+  </data>
 </root>

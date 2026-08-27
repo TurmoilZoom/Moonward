@@ -3824,4 +3824,7 @@ Repository:</value>
   <data name="UrlProtocol_UnhandledError" xml:space="preserve">
     <value>Failed to handle this link.</value>
   </data>
+  <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
+    <value>Don't append -use-d3d12 for this profile. The global DX12 option is unchanged.</value>
+  </data>
 </root>

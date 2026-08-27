@@ -429,7 +429,7 @@ internal partial class GameLauncherService
             {
                 arg += " -popupwindow";
             }
-            if (AppConfig.GetEnableDX12(gameId.GameBiz))
+            if (ShouldAppendAutoDx12(gameId.GameBiz, profile, useNoneLaunchMethod))
             {
                 arg += " -use-d3d12";
             }
@@ -503,6 +503,22 @@ internal partial class GameLauncherService
     }
 
 
+    /// <summary>
+    /// 是否在本次启动附加全局 DX12 参数 <c>-use-d3d12</c>。
+    /// 全局未开启则否；「无」始终跟随全局；具体配置文件可通过 <see cref="GameLaunchProfile.SkipAutoDx12"/> 单独跳过。
+    /// </summary>
+    private static bool ShouldAppendAutoDx12(GameBiz biz, GameLaunchProfile? profile, bool useNoneLaunchMethod)
+    {
+        if (!AppConfig.GetEnableDX12(biz))
+        {
+            return false;
+        }
+        if (useNoneLaunchMethod)
+        {
+            return true;
+        }
+        return !(profile?.SkipAutoDx12 ?? AppConfig.GetDefaultLaunchProfileSkipAutoDx12(biz));
+    }
 
 
     /// <summary>

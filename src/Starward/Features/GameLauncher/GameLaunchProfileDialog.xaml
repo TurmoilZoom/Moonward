@@ -211,20 +211,51 @@
                              HorizontalTextAlignment="Left"
                              IsSpellCheckEnabled="False"
                              Text="{x:Bind EditingArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <!--  DX12 自动追加参数：只读徽章，勾选 DX12 时显示；「勾选常用参数」紧随其后  -->
-                    <Border Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Padding="8,4,8,4"
-                            Background="{ThemeResource ControlFillColorDefaultBrush}"
-                            CornerRadius="6"
-                            IsHitTestVisible="False"
-                            Visibility="{x:Bind Dx12ArgumentVisibility, Mode=OneWay}">
-                        <TextBlock VerticalAlignment="Center"
-                                   FontFamily="Consolas"
-                                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                   IsTextSelectionEnabled="False"
-                                   Text="-use-d3d12" />
-                    </Border>
+                    <!--  DX12 自动追加参数：全局开启时显示；右上角关闭仅作用于当前配置文件  -->
+                    <Grid Grid.Column="1"
+                          VerticalAlignment="Center"
+                          Visibility="{x:Bind Dx12ArgumentVisibility, Mode=OneWay}">
+                        <Border Padding="8,4,18,4"
+                                Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                CornerRadius="6">
+                            <TextBlock VerticalAlignment="Center"
+                                       FontFamily="Consolas"
+                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                       IsHitTestVisible="False"
+                                       IsTextSelectionEnabled="False"
+                                       Text="-use-d3d12" />
+                        </Border>
+                        <Grid Width="18"
+                              Height="18"
+                              Margin="0,-4,-4,0"
+                              HorizontalAlignment="Right"
+                              VerticalAlignment="Top"
+                              Canvas.ZIndex="1">
+                            <Ellipse Fill="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+                                     Stroke="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                     StrokeThickness="1"
+                                     IsHitTestVisible="False" />
+                            <Button Width="18"
+                                    Height="18"
+                                    MinWidth="18"
+                                    MinHeight="18"
+                                    Padding="0"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Click="DismissDx12Argument_Click"
+                                    CornerRadius="9"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLaunchProfileDialog_DismissDx12ArgumentTooltip}"
+                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                                <FontIcon FontSize="9"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE711;"
+                                          IsTextScaleFactorEnabled="False" />
+                            </Button>
+                        </Grid>
+                    </Grid>
                     <!--  打开常用参数勾选面板（放在 -use-d3d12 徽章后面）；用 Popup 居中 + light dismiss，见 Click  -->
                     <Button x:Name="Button_CommandLineArgumentPicker"
                             Grid.Column="2"
@@ -272,13 +303,13 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Button x:Name="Button_ThirdPartyToolInfo"
-                                Width="20"
+                        <Button Width="20"
                                 Height="20"
                                 Padding="0"
                                 VerticalAlignment="Center"
-                                Click="Button_ThirdPartyToolInfo_Click"
                                 CornerRadius="10"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ThirdPartyToolTip}"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                             <FontIcon FontSize="16"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -313,22 +344,17 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Button Padding="4"
+                        <Button x:Name="Button_CmdLaunchHint"
+                                Padding="4"
                                 VerticalAlignment="Center"
+                                sc:InstantTooltip.ActionInline="True"
+                                sc:InstantTooltip.ActionText="#1634"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherSettingDialog_AvoidShowingAlertsAboutDetectingIllegalToolInTheGame}"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                             <FontIcon FontSize="16"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                       Glyph="&#xE9CE;" />
-                            <Button.Flyout>
-                                <Flyout>
-                                    <TextBlock MaxWidth="380" TextWrapping="Wrap">
-                                        <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_AvoidShowingAlertsAboutDetectingIllegalToolInTheGame}" />
-                                        <Hyperlink NavigateUri="https://github.com/Scighost/Starward/issues/1634" UnderlineStyle="None">
-                                            <Run Text="#1634" />
-                                        </Hyperlink>
-                                    </TextBlock>
-                                </Flyout>
-                            </Button.Flyout>
                         </Button>
                         <TextBlock Grid.Column="1"
                                    MaxWidth="160"
@@ -344,11 +370,6 @@
                                       OffContent="{x:Null}"
                                       OnContent="{x:Null}" />
                     </Grid>
-                    <TeachingTip x:Name="TeachingTip_ThirdPartyTool"
-                                 IsLightDismissEnabled="True"
-                                 PreferredPlacement="Top"
-                                 Subtitle="{x:Bind lang:Lang.GameLauncherSettingDialog_ThirdPartyToolTip}"
-                                 Target="{x:Bind Button_ThirdPartyToolInfo}" />
                 </Grid>
 
                 <!--  自定义启动程序路径（设置后显示）  -->

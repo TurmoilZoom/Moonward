@@ -3765,4 +3765,7 @@ You are welcome to submit exported data to:</value>
   <data name="UrlProtocol_UnhandledError" xml:space="preserve">
     <value>Không xử lý được liên kết này.</value>
   </data>
+  <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
+    <value>Không thêm -use-d3d12 khi khởi chạy hồ sơ này. Tùy chọn DX12 toàn cục không thay đổi.</value>
+  </data>
 </root>
