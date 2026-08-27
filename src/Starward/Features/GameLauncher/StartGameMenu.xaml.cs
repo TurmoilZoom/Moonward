@@ -1,9 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameSelector;
@@ -13,6 +16,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Storage;
@@ -299,25 +303,37 @@ public sealed partial class StartGameMenu : UserControl
     }
 
 
-    #region 「创建游戏快捷方式」折叠区高度缓动
+    #region 「创建游戏快捷方式」折叠区揭示动画（Composition InsetClip，非逐帧布局）
 
 
     private bool _shortcutExpanded;
 
-    private Storyboard? _shortcutHeightStoryboard;
+    /// <summary>折叠容器的合成器裁剪：BottomInset 从下往上揭示/卷起，是纯合成器动画，不触发布局。</summary>
+    private InsetClip? _shortcutClip;
+
+    private Storyboard? _chevronStoryboard;
 
 
     /// <summary>
-    /// 折叠内容裁剪矩形随容器高度变化更新，使展开过程中超出部分被裁掉。
+    /// 惰性获取折叠容器的 <see cref="InsetClip"/> 并挂到其 Composition 视觉上。
+    /// 该裁剪同时承担两个职责：①收起态（Height=0）把溢出内容裁掉（替代原 XAML RectangleGeometry）；
+    /// ②展开/收起时动画 <see cref="InsetClip.BottomInset"/> 做「卷帘」揭示，全程在合成器线程，
+    /// 不像动画 Height 那样逐帧触发整个菜单的 Measure/Arrange 与 Popup 重定位。
     /// </summary>
-    private void ShortcutExpandHost_SizeChanged(object sender, Microsoft.UI.Xaml.SizeChangedEventArgs e)
+    private InsetClip GetShortcutClip()
     {
-        ShortcutExpandClip.Rect = new Rect(0, 0, e.NewSize.Width, e.NewSize.Height);
+        if (_shortcutClip is null)
+        {
+            Visual host = ElementCompositionPreview.GetElementVisual(ShortcutExpandHost);
+            _shortcutClip = host.Compositor.CreateInsetClip();
+            host.Clip = _shortcutClip;
+        }
+        return _shortcutClip;
     }
 
 
     /// <summary>
-    /// 点击折叠标题：在展开/收起之间切换（带高度缓动动画）。
+    /// 点击折叠标题：在展开/收起之间切换（合成器揭示动画）。
     /// </summary>
     private void Button_ShortcutHeader_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
@@ -330,10 +346,17 @@ public sealed partial class StartGameMenu : UserControl
     /// </summary>
     private void CollapseShortcutSection()
     {
-        _shortcutHeightStoryboard?.Stop();
-        _shortcutHeightStoryboard = null;
         _shortcutExpanded = false;
-        ShortcutExpandHost.Height = 0;
+        _chevronStoryboard?.Stop();
+        _chevronStoryboard = null;
+
+        InsetClip clip = GetShortcutClip();
+        Visual content = ElementCompositionPreview.GetElementVisual(ShortcutExpandContent);
+        clip.StopAnimation(nameof(InsetClip.BottomInset));
+        content.StopAnimation(nameof(Visual.Opacity));
+        clip.BottomInset = 0;
+        content.Opacity = 1;
+        ShortcutExpandHost.Height = 0;   // Height=0 时容器视觉高度为 0，裁剪自然隐藏全部内容
         ShortcutChevronRotate.Angle = 0;
         // 免 UAC 为敏感选项，每次打开菜单重置为未勾选，避免误操作
         if (CheckBox_SkipUac is not null)
@@ -344,73 +367,139 @@ public sealed partial class StartGameMenu : UserControl
 
 
     /// <summary>
-    /// 展开或收起折叠内容，并用缓动曲线驱动容器高度变化，使整个菜单的尺寸过渡平滑。
+    /// 展开或收起折叠内容。用一次布局把容器设到目标高度，再以合成器 <see cref="InsetClip.BottomInset"/>
+    /// （配合内容淡入淡出）做揭示/卷起动画——避免逐帧动画 Height 造成的整菜单重排与 Popup 重定位卡顿。
     /// </summary>
+    /// <param name="expand">是否展开。</param>
+    /// <param name="animate">是否播放动画；关闭或系统减少动态效果时直接切到终态。</param>
     private void SetShortcutExpanded(bool expand, bool animate)
     {
         _shortcutExpanded = expand;
-        AnimateChevron(expand);
 
-        // 收起目标高度为 0；展开时先量出内容自然高度作为目标。
-        double to = 0;
+        // 系统「显示动画」关闭时不做揭示动画，直接切终态（无障碍 / 减少动态效果）。
+        bool motion = animate && EntranceAnimation.AnimationsEnabled();
+        AnimateChevron(expand, motion);
+
+        InsetClip clip = GetShortcutClip();
+        Visual content = ElementCompositionPreview.GetElementVisual(ShortcutExpandContent);
+        Compositor compositor = clip.Compositor;
+
+        // 结束上一段揭示动画，避免其完成回调与本次错乱（终态仍由回调内的状态判断把关）。
+        clip.StopAnimation(nameof(InsetClip.BottomInset));
+        content.StopAnimation(nameof(Visual.Opacity));
+
         if (expand)
         {
+            // 量一次内容自然高度，一次性把容器设为该高度（整个过程仅此一次布局 + Popup 重定位）。
             double width = ShortcutExpandContent.ActualWidth;
             if (width <= 0)
             {
-                width = 296;
+                width = ShortcutExpandHost.ActualWidth > 0 ? ShortcutExpandHost.ActualWidth : 224;
             }
             ShortcutExpandContent.Measure(new Size(width, double.PositiveInfinity));
-            to = ShortcutExpandContent.DesiredSize.Height;
-        }
+            double target = ShortcutExpandContent.DesiredSize.Height;
+            ShortcutExpandHost.Height = target;
 
-        // 先取当前高度作为动画起点，再停掉旧动画，避免 Stop 把高度还原成基值导致跳变。
-        double from = ShortcutExpandHost.ActualHeight;
-        _shortcutHeightStoryboard?.Stop();
-        _shortcutHeightStoryboard = null;
-
-        if (!animate)
-        {
-            ShortcutExpandHost.Height = expand ? double.NaN : 0;
-            return;
-        }
-
-        var animation = new DoubleAnimation
-        {
-            From = from,
-            To = to,
-            Duration = TimeSpan.FromMilliseconds(300),
-            EnableDependentAnimation = true,
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut },
-        };
-        Storyboard.SetTarget(animation, ShortcutExpandHost);
-        Storyboard.SetTargetProperty(animation, "Height");
-
-        var storyboard = new Storyboard();
-        storyboard.Children.Add(animation);
-        bool expanding = expand;
-        storyboard.Completed += (s, e) =>
-        {
-            if (expanding && _shortcutExpanded)
+            if (!motion)
             {
-                // 展开完成后改为自适应高度，以便适应后续动态内容（如上传新图标）。
-                ShortcutExpandHost.Height = double.NaN;
+                clip.BottomInset = 0;
+                content.Opacity = 1;
+                ShortcutExpandHost.Height = double.NaN;   // 自适应后续内容
+                return;
             }
-            else if (!expanding && !_shortcutExpanded)
+
+            // 揭示前先把内容裁掉并透明，防止首帧闪现整块。
+            clip.BottomInset = (float)target;
+            content.Opacity = 0;
+
+            CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1f));
+            var duration = TimeSpan.FromMilliseconds(260);
+
+            ScalarKeyFrameAnimation reveal = compositor.CreateScalarKeyFrameAnimation();
+            reveal.InsertKeyFrame(1f, 0f, ease);
+            reveal.Duration = duration;
+
+            ScalarKeyFrameAnimation fade = compositor.CreateScalarKeyFrameAnimation();
+            fade.InsertKeyFrame(1f, 1f, ease);
+            fade.Duration = duration;
+
+            CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+            clip.StartAnimation(nameof(InsetClip.BottomInset), reveal);
+            content.StartAnimation(nameof(Visual.Opacity), fade);
+            batch.Completed += (_, _) =>
             {
+                // 完成回调不保证在 UI 线程；改 Height 须回到 DispatcherQueue。
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (_shortcutExpanded)   // 仍处展开态才收尾为自适应高度
+                    {
+                        ShortcutExpandHost.Height = double.NaN;
+                    }
+                });
+            };
+            batch.End();
+        }
+        else
+        {
+            // 收起：把高度钉成当前像素值（从 Auto→具体值，视觉不变，仅一次布局），随后卷起 + 淡出，结束再归零。
+            double height = ShortcutExpandHost.ActualHeight;
+            ShortcutExpandHost.Height = height;
+
+            if (!motion)
+            {
+                clip.BottomInset = 0;
+                content.Opacity = 1;
                 ShortcutExpandHost.Height = 0;
+                return;
             }
-        };
-        _shortcutHeightStoryboard = storyboard;
-        storyboard.Begin();
+
+            CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0.7f, 0f), new Vector2(1f, 0.5f));
+            var duration = TimeSpan.FromMilliseconds(180);
+
+            ScalarKeyFrameAnimation roll = compositor.CreateScalarKeyFrameAnimation();
+            roll.InsertKeyFrame(1f, (float)height, ease);
+            roll.Duration = duration;
+
+            ScalarKeyFrameAnimation fade = compositor.CreateScalarKeyFrameAnimation();
+            fade.InsertKeyFrame(1f, 0f, ease);
+            fade.Duration = duration;
+
+            CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+            clip.StartAnimation(nameof(InsetClip.BottomInset), roll);
+            content.StartAnimation(nameof(Visual.Opacity), fade);
+            batch.Completed += (_, _) =>
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (!_shortcutExpanded)   // 仍处收起态才归零并复位裁剪/透明度，供下次展开
+                    {
+                        ShortcutExpandHost.Height = 0;
+                        clip.BottomInset = 0;
+                        content.Opacity = 1;
+                    }
+                });
+            };
+            batch.End();
+        }
     }
 
 
     /// <summary>
-    /// 折叠标题右侧的小箭头随展开状态旋转。
+    /// 折叠标题右侧的小箭头随展开状态旋转（RenderTransform 旋转为独立动画，开销可忽略）。
     /// </summary>
-    private void AnimateChevron(bool expanded)
+    /// <param name="expanded">是否处于展开态。</param>
+    /// <param name="animate">是否播放旋转动画；否则直接置终值。</param>
+    private void AnimateChevron(bool expanded, bool animate)
     {
+        _chevronStoryboard?.Stop();
+        _chevronStoryboard = null;
+
+        if (!animate)
+        {
+            ShortcutChevronRotate.Angle = expanded ? 180 : 0;
+            return;
+        }
+
         var animation = new DoubleAnimation
         {
             To = expanded ? 180 : 0,
@@ -421,6 +510,7 @@ public sealed partial class StartGameMenu : UserControl
         Storyboard.SetTargetProperty(animation, "Angle");
         var storyboard = new Storyboard();
         storyboard.Children.Add(animation);
+        _chevronStoryboard = storyboard;
         storyboard.Begin();
     }
 

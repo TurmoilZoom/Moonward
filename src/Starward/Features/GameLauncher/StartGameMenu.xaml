@@ -152,14 +152,10 @@
             </Grid>
         </Button>
 
-        <!--  折叠内容：以 Height 缓动动画展开/收起，溢出部分按裁剪矩形裁掉  -->
+        <!--  折叠内容：由 Composition InsetClip 自下而上揭示（合成器动画，展开/收起不逐帧触发布局），见后端 SetShortcutExpanded  -->
         <Grid x:Name="ShortcutExpandHost"
               Height="0"
-              VerticalAlignment="Top"
-              SizeChanged="ShortcutExpandHost_SizeChanged">
-            <Grid.Clip>
-                <RectangleGeometry x:Name="ShortcutExpandClip" />
-            </Grid.Clip>
+              VerticalAlignment="Top">
             <StackPanel x:Name="ShortcutExpandContent"
                         Padding="12,8,12,2"
                         VerticalAlignment="Top"
