@@ -10,7 +10,7 @@ using System.Linq;
 namespace Starward.Features.GameLauncher;
 
 /// <summary>
-/// 命令行参数勾选面板：展示常用 Unity/社区预设，勾选或改取值后回写组合结果。
+/// 命令行参数勾选面板：展示常用 Unity/社区预设与 BetterGI 命令，勾选或改取值后回写组合结果。
 /// </summary>
 [INotifyPropertyChanged]
 public sealed partial class GameCommandLineArgumentPicker : UserControl

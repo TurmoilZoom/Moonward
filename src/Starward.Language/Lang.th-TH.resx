@@ -3468,6 +3468,45 @@ You are welcome to submit exported data to:</value>
   <data name="CmdArg_SingleInstance_Desc" xml:space="preserve">
     <value>Allow only one game instance (-single-instance).</value>
   </data>
+  <data name="CmdArg_Category_BetterGI" xml:space="preserve">
+    <value>BetterGI</value>
+  </data>
+  <data name="CmdArg_BetterGI_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="CmdArg_BetterGI_Start_Desc" xml:space="preserve">
+    <value>Same as clicking Start in BetterGI: enables recognition, and launches Genshin if “Launch Genshin together” is on. Use after setting BetterGI.exe as the custom launcher. Only one BetterGI action can be selected.</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon" xml:space="preserve">
+    <value>One-Dragon</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon_Desc" xml:space="preserve">
+    <value>Run the One-Dragon workflow. Optionally enter a profile name (BetterGI 0.45.3+); leave empty to use the one currently selected in BetterGI.</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon_Placeholder" xml:space="preserve">
+    <value>Profile name (optional)</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups" xml:space="preserve">
+    <value>Scheduler groups</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups_Desc" xml:space="preserve">
+    <value>Run scheduler config groups in order. Enter names separated by spaces; they must match BetterGI exactly.</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups_Placeholder" xml:space="preserve">
+    <value>Group1 Group2</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress" xml:space="preserve">
+    <value>Task progress</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress_Desc" xml:space="preserve">
+    <value>Run scheduler groups from task progress. Enter names separated by spaces; they must match BetterGI exactly.</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress_Placeholder" xml:space="preserve">
+    <value>Group1 Group2</value>
+  </data>
+  <data name="CmdArg_BetterGI_SeeDocs" xml:space="preserve">
+    <value>BetterGI command-line documentation</value>
+  </data>
   <data name="TimeNodeButton_Title" xml:space="preserve">
     <value>Time Nodes</value>
   </data>

@@ -3473,6 +3473,45 @@
   <data name="CmdArg_SingleInstance_Desc" xml:space="preserve">
     <value>僅允許執行一個遊戲實例（-single-instance）。</value>
   </data>
+  <data name="CmdArg_Category_BetterGI" xml:space="preserve">
+    <value>BetterGI</value>
+  </data>
+  <data name="CmdArg_BetterGI_Start" xml:space="preserve">
+    <value>啟動</value>
+  </data>
+  <data name="CmdArg_BetterGI_Start_Desc" xml:space="preserve">
+    <value>等同於在 BetterGI 啟動頁點「啟動」：開啟識別；若開啟「同時啟動原神」會一併開遊戲。請把 BetterGI.exe 設為自訂啟動程式後使用。BetterGI 動作同時只能勾選一項。</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon" xml:space="preserve">
+    <value>一條龍</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon_Desc" xml:space="preserve">
+    <value>執行一條龍。可填寫設定名稱（BetterGI 0.45.3+）；留空則使用頁面上目前選中的設定。</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon_Placeholder" xml:space="preserve">
+    <value>設定名稱（可選）</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups" xml:space="preserve">
+    <value>調度器設定組</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups_Desc" xml:space="preserve">
+    <value>依序執行調度器中的設定組。填寫組名，多個以空格分隔，須與 BetterGI 中的名稱完全一致。</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups_Placeholder" xml:space="preserve">
+    <value>組名1 組名2</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress" xml:space="preserve">
+    <value>任務進度</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress_Desc" xml:space="preserve">
+    <value>依任務進度執行指定設定組。填寫組名，多個以空格分隔，須與 BetterGI 中的名稱完全一致。</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress_Placeholder" xml:space="preserve">
+    <value>組名1 組名2</value>
+  </data>
+  <data name="CmdArg_BetterGI_SeeDocs" xml:space="preserve">
+    <value>BetterGI 命令列說明</value>
+  </data>
   <data name="TimeNodeButton_Title" xml:space="preserve">
     <value>时间节点</value>
   </data>

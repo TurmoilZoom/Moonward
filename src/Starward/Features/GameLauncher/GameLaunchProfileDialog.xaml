@@ -173,10 +173,13 @@
                 <TextBox x:Name="TextBox_ProfileName"
                          Grid.Row="1"
                          Grid.Column="1"
+                         MinHeight="36"
                          Margin="0,12,0,0"
+                         Padding="10,8,6,8"
                          HorizontalAlignment="Stretch"
                          HorizontalTextAlignment="Left"
                          IsSpellCheckEnabled="False"
+                         VerticalContentAlignment="Center"
                          Text="{x:Bind EditingName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Visibility="{x:Bind RenameAreaVisibility, Mode=OneWay}" />
 
@@ -201,7 +204,10 @@
                     </Grid.ColumnDefinitions>
                     <!--  保持单行（默认 NoWrap），以显示 WinUI 自带清除按钮  -->
                     <TextBox MinWidth="160"
+                             MinHeight="36"
+                             Padding="10,8,6,8"
                              VerticalAlignment="Center"
+                             VerticalContentAlignment="Center"
                              HorizontalTextAlignment="Left"
                              IsSpellCheckEnabled="False"
                              Text="{x:Bind EditingArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />

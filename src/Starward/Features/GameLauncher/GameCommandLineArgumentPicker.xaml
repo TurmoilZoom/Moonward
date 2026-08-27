@@ -40,7 +40,13 @@
                             <ItemsControl ItemsSource="{x:Bind Options}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="local:GameCommandLineArgumentOption">
-                                        <Grid Margin="0,0,0,8" ColumnSpacing="8">
+                                        <Grid Margin="0,0,0,8"
+                                              ColumnSpacing="8"
+                                              RowSpacing="6">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
@@ -69,16 +75,37 @@
                                                 </StackPanel>
                                             </CheckBox>
 
-                                            <!--  需要取值时显示输入框（宽高、显示器序号、模式值）  -->
+                                            <!--  窄输入：分辨率宽高、显示器序号  -->
                                             <TextBox Grid.Column="1"
                                                      Width="88"
                                                      Margin="0,0,4,0"
-                                                     VerticalAlignment="Top"
+                                                     Padding="10,8,6,8"
+                                                     VerticalAlignment="Bottom"
+                                                     VerticalContentAlignment="Center"
+                                                     IsEnabled="{x:Bind IsEnabled, Mode=OneWay}"
                                                      IsSpellCheckEnabled="False"
-                                                     PlaceholderText="{x:Bind DefaultValue}"
+                                                     PlaceholderText="{x:Bind ValuePlaceholder}"
                                                      Text="{x:Bind Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                      TextChanged="OptionValue_TextChanged"
-                                                     Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowValueEditor)}" />
+                                                     Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowCompactValueEditor)}" />
+
+                                            <!--  宽输入：BetterGI 配置名 / 调度器组名  -->
+                                            <TextBox Grid.Row="1"
+                                                     Grid.Column="0"
+                                                     Grid.ColumnSpan="2"
+                                                     MinHeight="36"
+                                                     Margin="32,0,4,0"
+                                                     Padding="10,8,6,8"
+                                                     HorizontalAlignment="Stretch"
+                                                     FontFamily="Consolas"
+                                                     FontSize="12"
+                                                     IsEnabled="{x:Bind IsEnabled, Mode=OneWay}"
+                                                     IsSpellCheckEnabled="False"
+                                                     VerticalContentAlignment="Center"
+                                                     PlaceholderText="{x:Bind ValuePlaceholder}"
+                                                     Text="{x:Bind Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     TextChanged="OptionValue_TextChanged"
+                                                     Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowWideValueEditor)}" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -95,10 +122,12 @@
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        Text="{x:Bind lang:Lang.CmdArg_CombinedResult}" />
             <TextBox MinHeight="36"
+                     Padding="10,8,6,8"
                      AcceptsReturn="False"
                      FontFamily="Consolas"
                      FontSize="12"
                      IsSpellCheckEnabled="False"
+                     VerticalContentAlignment="Center"
                      PlaceholderText="{x:Bind lang:Lang.CmdArg_CombinedResultPlaceholder}"
                      Text="{x:Bind CombinedArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      TextChanged="CombinedArgument_TextChanged" />
@@ -113,6 +142,12 @@
                              FontSize="11"
                              NavigateUri="https://docs.unity3d.com/Manual/PlayerCommandLineArguments.html">
                 <TextBlock Text="{x:Bind lang:Lang.GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument}"
+                           TextWrapping="Wrap" />
+            </HyperlinkButton>
+            <HyperlinkButton Padding="0"
+                             FontSize="11"
+                             NavigateUri="https://www.bettergi.com/feats/command/introduce.html">
+                <TextBlock Text="{x:Bind lang:Lang.CmdArg_BetterGI_SeeDocs}"
                            TextWrapping="Wrap" />
             </HyperlinkButton>
         </StackPanel>

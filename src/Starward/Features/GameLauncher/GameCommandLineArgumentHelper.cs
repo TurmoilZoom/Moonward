@@ -17,6 +17,7 @@ public enum GameCommandLineArgumentCategory
     Resolution,
     Graphics,
     Other,
+    BetterGI,
 }
 
 
@@ -34,7 +35,9 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         string? exclusiveGroup = null,
         bool hasValue = false,
         string? defaultValue = null,
-        string? alternateKey = null)
+        string? alternateKey = null,
+        bool valueOptional = false,
+        bool consumeRemainingValues = false)
     {
         Id = id;
         Key = key;
@@ -43,6 +46,8 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         ExclusiveGroup = exclusiveGroup;
         HasValue = hasValue;
         DefaultValue = defaultValue;
+        ValueOptional = valueOptional;
+        ConsumeRemainingValues = consumeRemainingValues;
         Value = defaultValue ?? "";
     }
 
@@ -61,15 +66,29 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
     /// <summary>互斥组名；同组内勾选一项时取消其他项。</summary>
     public string? ExclusiveGroup { get; }
 
-    /// <summary>是否需要附加取值（如分辨率宽高）。</summary>
+    /// <summary>是否需要附加取值（如分辨率宽高、BetterGI 配置名）。</summary>
     public bool HasValue { get; }
 
     public string? DefaultValue { get; }
 
+    /// <summary>取值可省略（如 <c>startOneDragon</c> 不带配置名）。空值时仍写入开关本身。</summary>
+    public bool ValueOptional { get; }
+
+    /// <summary>
+    /// 解析时吞掉后续所有非预设键的 token，作为空格分隔的取值（调度器配置组名）。
+    /// </summary>
+    public bool ConsumeRemainingValues { get; }
+
     /// <summary>
     /// 是否在 UI 中显示取值编辑框。窗口化/全屏等取值由选项本身固定，不展示。
     /// </summary>
-    public bool ShowValueEditor => HasValue && Id is "screen_width" or "screen_height" or "monitor";
+    public bool ShowValueEditor => ShowCompactValueEditor || ShowWideValueEditor;
+
+    /// <summary>窄输入框（分辨率宽高、显示器序号）。</summary>
+    public bool ShowCompactValueEditor => HasValue && Id is "screen_width" or "screen_height" or "monitor";
+
+    /// <summary>宽输入框（BetterGI 配置名 / 配置组名）。</summary>
+    public bool ShowWideValueEditor => HasValue && (ValueOptional || ConsumeRemainingValues);
 
 
     /// <summary>展示标题（本地化）。</summary>
@@ -90,6 +109,10 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         "force_gfx_direct" => Lang.CmdArg_ForceGfxDirect,
         "nolog" => Lang.CmdArg_NoLog,
         "single_instance" => Lang.CmdArg_SingleInstance,
+        "bettergi_start" => Lang.CmdArg_BetterGI_Start,
+        "bettergi_onedragon" => Lang.CmdArg_BetterGI_OneDragon,
+        "bettergi_groups" => Lang.CmdArg_BetterGI_Groups,
+        "bettergi_taskprogress" => Lang.CmdArg_BetterGI_TaskProgress,
         _ => Id,
     };
 
@@ -112,7 +135,21 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         "force_gfx_direct" => Lang.CmdArg_ForceGfxDirect_Desc,
         "nolog" => Lang.CmdArg_NoLog_Desc,
         "single_instance" => Lang.CmdArg_SingleInstance_Desc,
+        "bettergi_start" => Lang.CmdArg_BetterGI_Start_Desc,
+        "bettergi_onedragon" => Lang.CmdArg_BetterGI_OneDragon_Desc,
+        "bettergi_groups" => Lang.CmdArg_BetterGI_Groups_Desc,
+        "bettergi_taskprogress" => Lang.CmdArg_BetterGI_TaskProgress_Desc,
         _ => "",
+    };
+
+
+    /// <summary>取值输入框占位（宽高用默认值；BetterGI 用说明性占位）。</summary>
+    public string? ValuePlaceholder => Id switch
+    {
+        "bettergi_onedragon" => Lang.CmdArg_BetterGI_OneDragon_Placeholder,
+        "bettergi_groups" => Lang.CmdArg_BetterGI_Groups_Placeholder,
+        "bettergi_taskprogress" => Lang.CmdArg_BetterGI_TaskProgress_Placeholder,
+        _ => DefaultValue,
     };
 
 
@@ -122,6 +159,7 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
         GameCommandLineArgumentCategory.Display => Lang.CmdArg_Category_Display,
         GameCommandLineArgumentCategory.Resolution => Lang.CmdArg_Category_Resolution,
         GameCommandLineArgumentCategory.Graphics => Lang.CmdArg_Category_Graphics,
+        GameCommandLineArgumentCategory.BetterGI => Lang.CmdArg_Category_BetterGI,
         _ => Lang.CmdArg_Category_Other,
     };
 
@@ -135,8 +173,16 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
             {
                 return Key;
             }
-            string v = string.IsNullOrWhiteSpace(Value) ? (DefaultValue ?? "…") : Value.Trim();
-            return $"{Key} {v}";
+            if (string.IsNullOrWhiteSpace(Value))
+            {
+                if (ValueOptional || ConsumeRemainingValues)
+                {
+                    return Key;
+                }
+                string fallback = DefaultValue ?? "…";
+                return $"{Key} {fallback}";
+            }
+            return $"{Key} {Value.Trim()}";
         }
     }
 
@@ -199,7 +245,8 @@ public sealed class GameCommandLineArgumentOption : ObservableObject
             : (DefaultValue ?? Value?.Trim() ?? "");
         if (string.IsNullOrEmpty(v))
         {
-            return null;
+            // 一条龙可不带配置名；调度器未填组名时仍写出开关本身
+            return ValueOptional || ConsumeRemainingValues ? Key : null;
         }
         return $"{Key} {v}";
     }
@@ -226,8 +273,8 @@ public sealed class GameCommandLineArgumentGroup
 
 
 /// <summary>
-/// Unity / 米哈游 PC 客户端常用启动参数：预设目录、解析与组合。
-/// 参考 Unity Standalone Player 命令行参数文档，以及社区启动器中常见的分辨率/无边框/图形 API 开关。
+/// Unity / 米哈游 PC 客户端常用启动参数，以及 BetterGI 自定义启动命令：预设目录、解析与组合。
+/// 参考 Unity Standalone Player 命令行参数文档、社区启动器常见开关，以及 BetterGI 官方命令行（start / startOneDragon / --startGroups / --TaskProgress）。
 /// 显示与分辨率类预设统一在「启动参数配置」中管理（游戏设置页不再重复提供）。
 /// </summary>
 public static class GameCommandLineArgumentHelper
@@ -240,6 +287,13 @@ public static class GameCommandLineArgumentHelper
     {
         return
         [
+            // BetterGI 命令行（官方文档：start / startOneDragon / --startGroups / --TaskProgress，四者互斥）
+            // 用于自定义启动程序指向 BetterGI.exe 时；组合时会写在最前，以免 BGI 把 Unity 参数当成动作。
+            new("bettergi_start", "start", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi"),
+            new("bettergi_onedragon", "startOneDragon", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, alternateKey: "--startOneDragon", valueOptional: true),
+            new("bettergi_groups", "--startGroups", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, consumeRemainingValues: true),
+            new("bettergi_taskprogress", "--TaskProgress", GameCommandLineArgumentCategory.BetterGI, exclusiveGroup: "bettergi", hasValue: true, consumeRemainingValues: true),
+
             // 显示模式（互斥）
             new("windowed", "-screen-fullscreen", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "0"),
             new("fullscreen", "-screen-fullscreen", GameCommandLineArgumentCategory.Display, exclusiveGroup: "display", hasValue: true, defaultValue: "1"),
@@ -292,9 +346,9 @@ public static class GameCommandLineArgumentHelper
         foreach (GameCommandLineArgumentOption o in options)
         {
             o.IsSelected = false;
-            if (o.HasValue && !string.IsNullOrEmpty(o.DefaultValue))
+            if (o.HasValue)
             {
-                o.Value = o.DefaultValue;
+                o.Value = o.DefaultValue ?? "";
             }
         }
 
@@ -316,6 +370,24 @@ public static class GameCommandLineArgumentHelper
 
             string token = tokens[i];
             GameCommandLineArgumentOption? match = null;
+
+            // BetterGI 调度器：键后面直到下一个已知预设键之前的 token 都是组名
+            match = options.FirstOrDefault(o => o.ConsumeRemainingValues && o.MatchesKey(token));
+            if (match is not null)
+            {
+                match.IsSelected = true;
+                var values = new List<string>();
+                int j = i + 1;
+                while (j < tokens.Count && !IsKnownOptionKey(options, tokens[j]))
+                {
+                    values.Add(tokens[j]);
+                    consumed[j] = true;
+                    j++;
+                }
+                match.Value = string.Join(' ', values);
+                consumed[i] = true;
+                continue;
+            }
 
             // 优先匹配「键 + 取值」类，且取值符合该选项默认语义（fullscreen 0/1、window-mode exclusive/borderless）
             if (i + 1 < tokens.Count)
@@ -343,8 +415,29 @@ public static class GameCommandLineArgumentHelper
                 }
             }
 
-            // 无取值开关
-            match = options.FirstOrDefault(o => !o.HasValue && o.MatchesKey(token));
+            // BetterGI 可选单值（startOneDragon [配置名]）：下一 token 不是预设键且不像开关时才吞掉
+            if (i + 1 < tokens.Count)
+            {
+                string next = tokens[i + 1];
+                match = options.FirstOrDefault(o =>
+                    o.ValueOptional
+                    && o.HasValue
+                    && o.MatchesKey(token)
+                    && !IsKnownOptionKey(options, next)
+                    && !next.StartsWith('-'));
+                if (match is not null)
+                {
+                    match.IsSelected = true;
+                    match.Value = next;
+                    consumed[i] = true;
+                    consumed[i + 1] = true;
+                    continue;
+                }
+            }
+
+            // 无取值开关，或可选取值未带参数（仅 startOneDragon）
+            match = options.FirstOrDefault(o =>
+                o.MatchesKey(token) && (!o.HasValue || o.ValueOptional));
             if (match is not null)
             {
                 match.IsSelected = true;
@@ -366,7 +459,9 @@ public static class GameCommandLineArgumentHelper
     public static string BuildArgumentString(IEnumerable<GameCommandLineArgumentOption> options, string? customArgument)
     {
         var parts = new List<string>();
-        foreach (GameCommandLineArgumentOption o in options)
+        // BetterGI 动作必须在最前，否则 BGI 会把 Unity 参数当成第一个命令而忽略 start / startOneDragon
+        foreach (GameCommandLineArgumentOption o in options
+                     .OrderBy(x => x.Category == GameCommandLineArgumentCategory.BetterGI ? 0 : 1))
         {
             string? fragment = o.ToArgumentFragment();
             if (!string.IsNullOrWhiteSpace(fragment))
@@ -431,6 +526,12 @@ public static class GameCommandLineArgumentHelper
     private static bool IsGenericValueOption(GameCommandLineArgumentOption o)
     {
         return o.Id is "screen_width" or "screen_height" or "monitor";
+    }
+
+
+    private static bool IsKnownOptionKey(IReadOnlyList<GameCommandLineArgumentOption> options, string token)
+    {
+        return options.Any(o => o.MatchesKey(token));
     }
 
 

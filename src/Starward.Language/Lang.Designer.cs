@@ -905,6 +905,123 @@ namespace Starward.Language {
                 return ResourceManager.GetString("CmdArg_SingleInstance_Desc", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 BetterGI 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_Category_BetterGI {
+            get {
+                return ResourceManager.GetString("CmdArg_Category_BetterGI", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Start 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_Start {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_Start", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Same as clicking Start in BetterGI 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_Start_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_Start_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 One-Dragon 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_OneDragon {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_OneDragon", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Run the One-Dragon workflow 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_OneDragon_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_OneDragon_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Profile name (optional) 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_OneDragon_Placeholder {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_OneDragon_Placeholder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Scheduler groups 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_Groups {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_Groups", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Run scheduler config groups in order 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_Groups_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_Groups_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Group1 Group2 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_Groups_Placeholder {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_Groups_Placeholder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Task progress 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_TaskProgress {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_TaskProgress", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Run scheduler groups from task progress 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_TaskProgress_Desc {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_TaskProgress_Desc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Group1 Group2 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_TaskProgress_Placeholder {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_TaskProgress_Placeholder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 BetterGI command-line documentation 的本地化字符串。
+        /// </summary>
+        public static string CmdArg_BetterGI_SeeDocs {
+            get {
+                return ResourceManager.GetString("CmdArg_BetterGI_SeeDocs", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Challenge Attempts 的本地化字符串。

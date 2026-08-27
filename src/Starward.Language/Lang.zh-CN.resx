@@ -3532,6 +3532,45 @@
   <data name="CmdArg_SingleInstance_Desc" xml:space="preserve">
     <value>仅允许运行一个游戏实例（-single-instance）。</value>
   </data>
+  <data name="CmdArg_Category_BetterGI" xml:space="preserve">
+    <value>BetterGI</value>
+  </data>
+  <data name="CmdArg_BetterGI_Start" xml:space="preserve">
+    <value>启动</value>
+  </data>
+  <data name="CmdArg_BetterGI_Start_Desc" xml:space="preserve">
+    <value>等同于在 BetterGI 启动页点「启动」：开启识别；若开启「同时启动原神」会一并开游戏。请把 BetterGI.exe 设为自定义启动程序后使用。BetterGI 动作同时只能勾选一项。</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon" xml:space="preserve">
+    <value>一条龙</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon_Desc" xml:space="preserve">
+    <value>执行一条龙。可填写配置名称（BetterGI 0.45.3+）；留空则使用页面上当前选中的配置。</value>
+  </data>
+  <data name="CmdArg_BetterGI_OneDragon_Placeholder" xml:space="preserve">
+    <value>配置名称（可选）</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups" xml:space="preserve">
+    <value>调度器配置组</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups_Desc" xml:space="preserve">
+    <value>按顺序执行调度器中的配置组。填写组名，多个用空格分隔，须与 BetterGI 中的名称完全一致。</value>
+  </data>
+  <data name="CmdArg_BetterGI_Groups_Placeholder" xml:space="preserve">
+    <value>组名1 组名2</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress" xml:space="preserve">
+    <value>任务进度</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress_Desc" xml:space="preserve">
+    <value>按任务进度执行指定配置组。填写组名，多个用空格分隔，须与 BetterGI 中的名称完全一致。</value>
+  </data>
+  <data name="CmdArg_BetterGI_TaskProgress_Placeholder" xml:space="preserve">
+    <value>组名1 组名2</value>
+  </data>
+  <data name="CmdArg_BetterGI_SeeDocs" xml:space="preserve">
+    <value>BetterGI 命令行说明</value>
+  </data>
   <data name="TimeNodeButton_Title" xml:space="preserve">
     <value>时间节点</value>
   </data>
