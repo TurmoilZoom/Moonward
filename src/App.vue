@@ -307,6 +307,15 @@ const moonLayerStyle = computed(() => {
   }
 })
 
+/** 顶栏页内导航：滚动时高亮当前区块（id 对应页面各 section） */
+const sectionNav = [
+  { id: 'features', zh: '功能', en: 'Features' },
+  { id: 'screens', zh: '界面', en: 'Screens' },
+  { id: 'advanced', zh: '进阶', en: 'Advanced' },
+  { id: 'install', zh: '安装', en: 'Install' },
+]
+const activeSection = ref('')
+
 const activeStep = ref('config')
 const activeCheckInStep = ref('enable')
 const showBackTop = ref(false)
@@ -333,11 +342,25 @@ function syncFoldFromHash() {
   })
 }
 
+/** 当前区块 = 顶边已越过粘性表头下沿的最后一个 section；顶部 hero 阶段不高亮 */
+function updateActiveSection() {
+  const anchorLine = 72
+  let current = ''
+  for (const item of sectionNav) {
+    const el = document.getElementById(item.id)
+    if (el && el.getBoundingClientRect().top <= anchorLine) {
+      current = item.id
+    }
+  }
+  activeSection.value = current
+}
+
 function onWindowScroll() {
   if (scrollTicking) return
   scrollTicking = true
   requestAnimationFrame(() => {
     showBackTop.value = window.scrollY > 360
+    updateActiveSection()
     scrollTicking = false
   })
 }
@@ -391,10 +414,14 @@ onUnmounted(() => {
           <span>Moonward</span>
         </a>
         <nav class="nav">
-          <a href="#features">{{ locale === 'zh' ? '功能' : 'Features' }}</a>
-          <a href="#screens">{{ locale === 'zh' ? '界面' : 'Screens' }}</a>
-          <a href="#advanced">{{ locale === 'zh' ? '进阶' : 'Advanced' }}</a>
-          <a href="#install">{{ locale === 'zh' ? '安装' : 'Install' }}</a>
+          <a
+            v-for="item in sectionNav"
+            :key="item.id"
+            class="nav-link nav-section"
+            :class="{ 'is-current': activeSection === item.id }"
+            :href="`#${item.id}`"
+            :aria-current="activeSection === item.id ? 'true' : undefined"
+          >{{ locale === 'zh' ? item.zh : item.en }}</a>
           <a :href="links.github" target="_blank" rel="noopener noreferrer">GitHub</a>
           <button
             type="button"
@@ -1120,6 +1147,31 @@ onUnmounted(() => {
 .nav a:hover {
   color: var(--ink);
   text-decoration: underline;
+}
+
+/* 页内导航：滚动到对应区块时高亮，底部一条强调色指示条 */
+.nav-link {
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.nav-link.is-current {
+  color: var(--ink);
+}
+
+.nav-link.is-current:hover {
+  text-decoration: none;
+}
+
+.nav-link.is-current::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.35rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
 }
 
 .lang,
@@ -2696,6 +2748,13 @@ onUnmounted(() => {
   .back-top {
     right: 0.85rem;
     bottom: 0.85rem;
+  }
+}
+
+/* 窄屏顶栏：页内锚点会挤成两行，收起只留品牌 + GitHub + 主题 + 语言 */
+@media (max-width: 480px) {
+  .nav-section {
+    display: none;
   }
 }
 </style>
