@@ -222,6 +222,13 @@
                     </Hyperlink>
                 </TextBlock>
                 <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
+                    <Hyperlink NavigateUri="https://github.com/yoimiya-kokomi/Miao-Yunzai" UnderlineStyle="None">
+                        <Run FontWeight="Bold"
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Text="Miao-Yunzai" />
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Left">
                     <Hyperlink NavigateUri="https://github.com/UIGF-org/mihoyo-api-collect" UnderlineStyle="None">
                         <Run FontWeight="Bold"
                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"

@@ -16,6 +16,7 @@ Moonward 基于 [Scighost/Starward](https://github.com/Scighost/Starward) 开发
 - **[Snap.Hutao](https://github.com/DGP-Studio/Snap.Hutao)** — 每日签到卡片（签到 / 补签 / 自动签到）与抽卡 authkey 的实现思路。
 - **[TeyvatGuide](https://github.com/BTMuli/TeyvatGuide)** — 登录与换票（stoken → ltoken / cookie_token）、极验登录、Cookie 失效刷新、抽卡 authkey 等接口形态与请求头细节。
 - **[MihoyoBBSTools](https://github.com/Womsxd/MihoyoBBSTools)** — 各游戏签到的 act_id、活动主机与「模拟真人节奏」的参考。
+- **[Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai)** — 国服前瞻直播兑换码：从官方账号动态解析直播页 `act_id`、首页导航备用路径、调用 miyolive `index` / `refreshCode`，以及 `remain > 0` 表示尚未可领。
 - **[UIGF · mihoyo-api-collect](https://github.com/UIGF-org/mihoyo-api-collect)** — 米哈游相关 API 的社区文档，以及 UIGF 抽卡数据交换格式标准。
 
 ---
