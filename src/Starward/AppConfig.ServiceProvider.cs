@@ -72,7 +72,8 @@ public static partial class AppConfig
             sc.AddSingleton<FavorWallpaperService>();
             sc.AddSingleton<GameLauncherService>();
             sc.AddSingleton<GamePackageService>();
-            sc.AddSingleton<PlayTimeService>();
+            sc.AddSingleton<PlayTimeRecordService>();
+            sc.AddSingleton<PlayTimeStatsService>();
             sc.AddSingleton<GameNoticeService>();
 
             sc.AddSingleton<GenshinGachaClient>();

@@ -150,14 +150,14 @@ internal class UrlProtocolService
                     if (GameBiz.TryParse(uri.AbsolutePath.Trim('/'), out GameBiz biz) && GameId.FromGameBiz(biz) is GameId gameId)
                     {
                         var kvs = HttpUtility.ParseQueryString(uri.Query);
-                        // 指定 pid 时跟踪已有进程；否则由 PlayTimeService 自行发现并记录
+                        // 指定 pid 时跟踪已有进程；否则由 PlayTimeRecordService 自行发现并记录
                         if (int.TryParse(kvs["pid"], out int pid))
                         {
-                            await AppConfig.GetService<PlayTimeService>().StartProcessToLogAsync(gameId, pid);
+                            await AppConfig.GetService<PlayTimeRecordService>().StartProcessToLogAsync(gameId, pid);
                         }
                         else
                         {
-                            await AppConfig.GetService<PlayTimeService>().StartProcessToLogAsync(gameId);
+                            await AppConfig.GetService<PlayTimeRecordService>().StartProcessToLogAsync(gameId);
                         }
                     }
                     else

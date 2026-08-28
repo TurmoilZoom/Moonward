@@ -3764,4 +3764,34 @@ You are welcome to submit exported data to:</value>
   <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
     <value>ไม่แนบ -use-d3d12 เมื่อเปิดเกมด้วยโปรไฟล์นี้ การตั้งค่า DX12 ส่วนกลางไม่เปลี่ยน</value>
   </data>
+  <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
+    <value>สถิติเวลาเล่น</value>
+  </data>
+  <data name="PlayTimeStatsDialog_Total" xml:space="preserve">
+    <value>รวม</value>
+  </data>
+  <data name="PlayTimeStatsDialog_TotalPlaytime" xml:space="preserve">
+    <value>เวลาเล่นทั้งหมด</value>
+  </data>
+  <data name="PlayTimeStatsDialog_LongestDailyPlaytime" xml:space="preserve">
+    <value>เวลาเล่นต่อวันยาวที่สุด</value>
+  </data>
+  <data name="PlayTimeStatsDialog_Last15Days" xml:space="preserve">
+    <value>15 วันที่ผ่านมา</value>
+  </data>
+  <data name="PlayTimeStatsDialog_Last12Weeks" xml:space="preserve">
+    <value>12 สัปดาห์ที่ผ่านมา</value>
+  </data>
+  <data name="PlayTimeStatsDialog_Last12Months" xml:space="preserve">
+    <value>12 เดือนที่ผ่านมา</value>
+  </data>
+  <data name="PlayTimeStatsDialog_LongestStreak" xml:space="preserve">
+    <value>วันที่เล่นต่อเนื่องยาวที่สุด</value>
+  </data>
+  <data name="PlayTimeStatsDialog_LongestSession" xml:space="preserve">
+    <value>เซสชันการเล่นยาวที่สุด</value>
+  </data>
+  <data name="PlayTimeStatsDialog_0Days" xml:space="preserve">
+    <value>{0} วัน</value>
+  </data>
 </root>

@@ -590,7 +590,7 @@ public sealed partial class GameLauncherPage : PageBase
                 }
                 else
                 {
-                    DispatcherQueue.TryEnqueue(() => RunningGameTime = TimeSpanToString(DateTime.Now - GameProcess.StartTime));
+                    DispatcherQueue?.TryEnqueue(() => RunningGameTime = TimeSpanToString(DateTime.Now - GameProcess.StartTime));
                 }
             }
         }

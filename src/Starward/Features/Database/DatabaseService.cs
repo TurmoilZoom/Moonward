@@ -325,6 +325,7 @@ internal static class DatabaseService
         Sql_v19,
         Sql_v20,
         Sql_v21,
+        Sql_v22,
     ];
 
 
@@ -1119,6 +1120,31 @@ internal static class DatabaseService
         DROP TABLE IF EXISTS GameAccount;
 
         PRAGMA USER_VERSION = 21;
+        COMMIT TRANSACTION;
+        """;
+
+    /// <summary>
+    /// 游戏时长统计：合并 bilibili 服到国服，并新建按进程记录的 PlayTimeStats 表。
+    /// 对应上游 Starward 的 v21（本仓 v21 已被账号表清理占用，故顺延到 v22）。
+    /// </summary>
+    private const string Sql_v22 = """
+        BEGIN TRANSACTION;
+
+        UPDATE PlayTimeItem SET GameBiz = REPLACE(GameBiz, '_bilibili', '_cn') WHERE GameBiz LIKE '%_bilibili';
+
+        CREATE TABLE IF NOT EXISTS PlayTimeStats
+        (
+            Id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            GameBiz      TEXT    NOT NULL,
+            Pid          INTEGER NOT NULL,
+            StartTime    INTEGER NOT NULL,
+            EndTime      INTEGER NOT NULL,
+            Interruption INTEGER NOT NULL DEFAULT 0,
+            Type         INTEGER NOT NULL DEFAULT 0
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS IX_PlayTimeStats_GameBiz_StartTime_Pid ON PlayTimeStats (GameBiz, StartTime, Pid);
+
+        PRAGMA USER_VERSION = 22;
         COMMIT TRANSACTION;
         """;
 

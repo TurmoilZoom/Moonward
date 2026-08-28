@@ -21,7 +21,7 @@ internal sealed class PlayTimeStartupHandler : IStartupHandler
         GameBiz biz = (GameBiz)context.Configuration.GetValue<string>("biz");
         if (pid > 0)
         {
-            await AppConfig.GetService<PlayTimeService>().LogPlayTimeAsync(biz, pid);
+            await AppConfig.GetService<PlayTimeRecordService>().LogPlayTimeAsync(biz, pid);
         }
         return StartupOutcome.Exit;
     }
