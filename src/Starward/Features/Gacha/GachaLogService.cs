@@ -610,7 +610,7 @@ internal abstract class GachaLogService
     /// <param name="lang">期望的语言代码（如 zh-cn、en-us）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <param name="onlyIfNewItems">
-    /// 为 true 时先比对：仅当出现本地信息表未收录的新角色/物品，或当前语言名称缓存尚不存在时才写入；
+    /// 为 true 时先比对：仅当出现本地信息表未收录的新角色/物品，或当前语言名称缓存未覆盖本次拉取的物品 Id 时才写入；
     /// 否则跳过写入（用于导航到游戏时「有新内容才更新」的轻量刷新）。为 false（默认）时无条件写入。
     /// </param>
     /// <returns>实际使用的语言代码（服务器返回的 Language）。</returns>
@@ -646,29 +646,56 @@ internal abstract class GachaLogService
 
 
 
-    /// <summary>本地是否已缓存指定语言（规整后）的名称映射。</summary>
-    /// <param name="lang">语言代码。</param>
-    /// <returns>已有缓存返回 true。</returns>
-    protected bool HasNameCache(string lang)
+    /// <summary>
+    /// 当前语言的名称缓存是否覆盖本地已有物品 Id。
+    /// 比对范围为物品信息表与抽卡记录中非 0 ItemId 的并集。
+    /// 本地尚无任何物品 Id 时视为不齐（首次启动需要拉语言包）。
+    /// 不能只用「该语言是否已有任意一行」判断，否则新角色加入后旧缓存会一直缺名。
+    /// </summary>
+    /// <param name="lang">语言代码（内部会规整）。</param>
+    /// <returns>本地已知物品 Id 均已有该语言名称时返回 true。</returns>
+    public bool HasCompleteNameCache(string lang)
     {
         lang = LanguageUtil.FilterLanguage(lang);
         using var dapper = DatabaseService.CreateConnection();
-        return dapper.QueryFirstOrDefault<int>(
-            "SELECT COUNT(*) FROM GachaItemName WHERE Game = @Game AND Lang = @Lang;",
-            new { Game = GameKey, Lang = lang }) > 0;
+        var expected = dapper.Query<long>($"""
+            SELECT {GachaInfoIdColumn} FROM {GachaInfoTableName} WHERE {GachaInfoIdColumn} != 0
+            UNION
+            SELECT ItemId FROM {GachaTableName} WHERE ItemId != 0
+            """).ToList();
+        if (expected.Count == 0)
+        {
+            return false;
+        }
+        var cached = dapper.Query<long>(
+            "SELECT ItemId FROM GachaItemName WHERE Game = @Game AND Lang = @Lang;",
+            new { Game = GameKey, Lang = lang }).ToHashSet();
+        return expected.TrueForAll(cached.Contains);
+    }
+
+
+
+    /// <summary>指定语言下已缓存的物品 Id 集合。</summary>
+    private HashSet<long> QueryCachedItemIds(string lang)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.Query<long>(
+            "SELECT ItemId FROM GachaItemName WHERE Game = @Game AND Lang = @Lang;",
+            new { Game = GameKey, Lang = lang }).ToHashSet();
     }
 
 
 
     /// <summary>
-    /// 确保本地已缓存指定语言的名称映射；缺失则联网下载（<see cref="UpdateGachaInfoAsync"/> 同时刷新 GachaInfo 图标与名称缓存）。
+    /// 确保本地已缓存指定语言的名称映射，且覆盖本地已知物品 Id；
+    /// 不齐则联网下载（<see cref="UpdateGachaInfoAsync"/> 同时刷新 GachaInfo 图标与名称缓存）。
     /// </summary>
     /// <param name="lang">语言代码。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     public async Task EnsureNameCacheAsync(string lang, CancellationToken cancellationToken = default)
     {
         lang = LanguageUtil.FilterLanguage(lang);
-        if (!HasNameCache(lang))
+        if (!HasCompleteNameCache(lang))
         {
             await UpdateGachaInfoAsync(CurrentGameBiz, lang, cancellationToken);
         }
@@ -696,22 +723,42 @@ internal abstract class GachaLogService
 
 
     /// <summary>
+    /// 传入的物品 Id 是否有缺失当前语言名称缓存的项（0 会被忽略）。
+    /// </summary>
+    /// <param name="lang">语言代码（内部会规整）。</param>
+    /// <param name="incomingIds">联网获取到的全部角色/物品 Id。</param>
+    /// <returns>存在未缓存名称的 Id 返回 true。</returns>
+    protected bool HasMissingNameCacheItems(string lang, IEnumerable<long> incomingIds)
+    {
+        lang = LanguageUtil.FilterLanguage(lang);
+        var ids = incomingIds.Where(x => x != 0).Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return false;
+        }
+        var cached = QueryCachedItemIds(lang);
+        return ids.Exists(id => !cached.Contains(id));
+    }
+
+
+
+    /// <summary>
     /// 比对：导航刷新时是否需要写入信息表/名称缓存。满足任一即需写入：
-    /// 当前语言的名称缓存尚不存在（首次使用/换语言后未下载），或出现本地未收录的新角色/物品。
+    /// 当前语言名称缓存未覆盖本次拉取的全部物品 Id（含新角色，或旧缓存缺名），或信息表出现尚未收录的新 Id。
     /// </summary>
     /// <param name="lang">服务器实际返回的语言代码。</param>
     /// <param name="incomingIds">联网获取到的全部角色/物品 Id。</param>
     /// <returns>需要写入返回 true。</returns>
     protected bool ShouldWriteGachaInfo(string lang, IEnumerable<long> incomingIds)
     {
-        return !HasNameCache(lang) || HasNewInfoItems(incomingIds);
+        return HasMissingNameCacheItems(lang, incomingIds) || HasNewInfoItems(incomingIds);
     }
 
 
 
     /// <summary>
     /// 导航到该游戏（切换游戏 / 打开抽卡页）时调用：联网获取全部角色/物品信息并与本地信息表比对，
-    /// 仅当出现新角色/新物品（或当前语言名称缓存缺失）时，才更新物品信息表（GachaInfo）与多语言名称缓存（GachaItemName）。
+    /// 仅当出现新角色/新物品（或当前语言名称缓存未覆盖本次拉取的物品 Id）时，才更新物品信息表（GachaInfo）与多语言名称缓存（GachaItemName）。
     /// </summary>
     /// <param name="lang">目标语言（跟随软件 UI 语言；内部会规整）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -776,7 +823,7 @@ internal abstract class GachaLogService
     /// 回写抽卡记录名称
     /// 
     /// 把当前游戏所有抽卡记录的名称按 ItemId 回写为指定语言（取自多语言缓存 GachaItemName）。
-    /// 缺失该语言缓存时先联网下载；并按名称跨语言回填旧记录缺失的 ItemId（ZZZ 记录恒带 ItemId，回填为空操作）。
+    /// 当前语言名称未覆盖全部已知物品 Id 时先联网下载；并按名称跨语言回填旧记录缺失的 ItemId（ZZZ 记录恒带 ItemId，回填为空操作）。
     /// 按 UID 分批回写以平滑上报进度。
     /// 
     /// </summary>

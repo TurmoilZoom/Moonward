@@ -14,10 +14,10 @@ namespace Starward.Features.Gacha;
 /// <summary>
 /// 抽卡物品名称（多语言）协调服务。
 /// <para>抽卡记录中物品名称跟随软件 UI 语言：本服务负责为三个游戏（原神/星铁/绝区零）按当前语言
-/// <b>确保</b>「物品id → 名称」映射缓存（缺失才联网下载，已缓存则跳过），并在需要时<b>异步回写</b>
+/// <b>确保</b>「物品id → 名称」映射缓存（按物品 Id 是否齐全判断，缺了才联网下载并回写记录），并在需要时<b>异步回写</b>
 /// 数据库中已有记录的名称。回写进度通过 <see cref="GachaItemNameProgressMessage"/> 广播，
 /// <see cref="GachaLogPage"/> 打开时可据此显示处理进度。</para>
-/// <para>触发时机：软件启动（首次启动全量下载各游戏图标与名称、更新后自动迁移存量记录）、切换软件语言、导入数据后。
+/// <para>触发时机：软件启动（首次启动全量下载各游戏图标与名称、更新后自动迁移存量记录、缓存不齐时补拉新角色）、切换软件语言、导入数据后。
 /// 千星奇域物品信息（仅图标，不分语言）也在首次启动时一并全量下载。</para>
 /// 单例，注册于 AppConfig.ServiceProvider。
 /// </summary>
@@ -62,7 +62,7 @@ internal class GachaItemNameService
 
 
     /// <summary>
-    /// 软件启动时调用：为三个游戏按当前语言确保名称缓存（缺失才下载，首次启动即全量下载图标与名称），
+    /// 软件启动时调用：为三个游戏按当前语言确保名称缓存（按物品 Id 是否齐全判断，不齐则下载并回写），
     /// 并确保千星奇域物品信息（图标，不分语言）。
     /// 若 <see cref="AppConfig.LastGachaNameLanguage"/> 与当前语言不一致（含首次启动/更新后为 null 的情况），
     /// 则一次性把所有存量记录名称迁移为当前语言。后台执行，异常仅记日志。
@@ -70,7 +70,8 @@ internal class GachaItemNameService
     public async Task EnsureCurrentLanguageOnStartupAsync()
     {
         string lang = CurrentLanguage;
-        // migrate=false时，为软件首次登录，直接安装默认语言去下载语言包
+        // migrate=true：语言与上次不一致（含首次启动 LastGachaNameLanguage 为 null），全量回写。
+        // migrate=false：语言未变；若缓存未覆盖全部物品 Id，RunAllAsync 仍会重拉并回写。
         bool migrate = !string.Equals(AppConfig.LastGachaNameLanguage, lang, StringComparison.OrdinalIgnoreCase);
         bool success = await RunAllAsync(lang, rewrite: migrate);
         // 仅在全部成功后记录语言；若联网失败或进程中途退出，下次启动会因语言不一致而重试（回写幂等）。
@@ -144,8 +145,8 @@ internal class GachaItemNameService
 
     /// <summary>
     /// 导航到某个游戏（在 MainView 切换游戏，或打开该游戏的抽卡记录页）时调用：
-    /// 后台联网获取该游戏全部角色/物品信息，与本地信息表比对，仅当出现新角色/新物品
-    /// （或当前语言名称缓存缺失）时，才更新物品信息表（GachaInfo）与多语言名称缓存（GachaItemName）。
+    /// 后台联网获取该游戏全部角色/物品信息，与本地信息表比对。
+    /// 当前语言名称缓存未覆盖已知物品 Id 时重拉语言包并回写记录；否则仅当出现新角色/新物品时更新信息表与名称缓存。
     /// <para>静默、容错：任何失败仅记日志。同一游戏的刷新并发去重——已有刷新在途时本次直接跳过，
     /// 避免「切换游戏」与「打开抽卡页」两个触发点对同一游戏同时联网。</para>
     /// </summary>
@@ -171,7 +172,16 @@ internal class GachaItemNameService
             await _semaphore.WaitAsync();
             try
             {
-                await service.RefreshGachaInfoIfNewItemsAsync(lang);
+                if (!service.HasCompleteNameCache(lang))
+                {
+                    // 缺物品 Id 的名称：重拉语言包并回写记录，使抽卡页进度条完成后刷新显示。
+                    var progress = new RelayProgress<GachaNameProgress>(p => WeakReferenceMessenger.Default.Send(new GachaItemNameProgressMessage(game, p)));
+                    await service.ApplyGachaItemNamesAsync(lang, progress);
+                }
+                else
+                {
+                    await service.RefreshGachaInfoIfNewItemsAsync(lang);
+                }
             }
             finally
             {
@@ -180,6 +190,7 @@ internal class GachaItemNameService
         }
         catch (Exception ex)
         {
+            WeakReferenceMessenger.Default.Send(new GachaItemNameProgressMessage(game, new GachaNameProgress(0, 0, true)));
             _logger.LogError(ex, "Refresh gacha info for {game} on navigation", game);
         }
         finally
@@ -191,7 +202,8 @@ internal class GachaItemNameService
 
 
     /// <summary>
-    /// 对三个游戏依次执行：确保缓存（rewrite=false）或确保缓存+回写名称（rewrite=true）。逐游戏容错。
+    /// 对三个游戏依次执行：确保缓存并在需要时回写名称。逐游戏容错。
+    /// <paramref name="rewrite"/> 为 true（切语言）时无条件回写；为 false（启动且语言未变）时仅当缓存未覆盖全部物品 Id 才重拉并回写。
     /// </summary>
     /// <returns>是否全部游戏均成功（任一失败返回 false，调用方据此决定是否记录语言以便下次重试）。</returns>
     private async Task<bool> RunAllAsync(string lang, bool rewrite)
@@ -203,24 +215,20 @@ internal class GachaItemNameService
             // 逐游戏执行，单个游戏失败不影响其他游戏。
             foreach ((GameBiz biz, GachaLogService service) in _services)
             {
+                bool apply = rewrite || !service.HasCompleteNameCache(lang);
                 try
                 {
-                    // rewrite=true 时确保缓存并回写名称；rewrite=false 时仅确保缓存
-                    if (rewrite)
+                    if (apply)
                     {
                         var progress = new RelayProgress<GachaNameProgress>(p => WeakReferenceMessenger.Default.Send(new GachaItemNameProgressMessage(biz, p)));
                         await service.ApplyGachaItemNamesAsync(lang, progress);
-                    }
-                    else
-                    {
-                        await service.EnsureNameCacheAsync(lang);
                     }
                 }
                 catch (Exception ex)
                 {
                     allSucceeded = false;
                     // 失败（如网络不通）时发送终止进度，关闭页面进度条，避免一直停在进行中。
-                    if (rewrite)
+                    if (apply)
                     {
                         WeakReferenceMessenger.Default.Send(new GachaItemNameProgressMessage(biz, new GachaNameProgress(0, 0, true)));
                     }

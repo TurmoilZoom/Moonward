@@ -180,7 +180,7 @@ public sealed partial class GachaLogPage : PageBase
     /// <para>1. 延迟一帧（Task.Delay(16)）后注册两个 WeakReferenceMessenger 处理器：<see cref="UpdateGachaLogMessage"/>（外部触发抽卡记录更新时激活窗口并拉取）和 <see cref="GachaLogImportedMessage"/>（本地导入完成后刷新 UID 列表与统计）；</para>
     /// <para>2. 订阅 <see cref="Grid_GachaStats"/> 的 PointerWheelChanged 事件，用于拖拽时横向滚轮优先滚动；</para>
     /// <para>3. 调用 <see cref="Initialize"/> 完成卡池筛选列表（GachaBanners）、UID 列表加载、恢复上次选中 UID、以及空数据时的表情占位显示；</para>
-    /// <para>4. 异步调用 <see cref="EnsureWikiDataAsync"/> 确保当前语言的卡池/物品维基数据已缓存（缺失才联网，不阻塞 UI）。</para>
+    /// <para>4. 异步调用 <see cref="EnsureWikiDataAsync"/> 确保当前语言的卡池/物品维基数据已缓存（不齐才联网并回写，不阻塞 UI）。</para>
     /// <para>注意：方法为 async void，符合基类事件驱动约定，不应被直接 await。</para>
     /// </summary>
     protected override async void OnLoaded()
@@ -289,16 +289,16 @@ public sealed partial class GachaLogPage : PageBase
     /// <summary>
     /// 打开抽卡记录页时刷新当前游戏的抽卡维基数据（角色/物品信息 + 多语言名称）。
     /// <para>在 <see cref="OnLoaded"/> 末尾被 await 调用（async void，不阻塞页面其他初始化）。</para>
-    /// <para>委托 <see cref="GachaItemNameService.RefreshGachaInfoForGameAsync"/>：后台联网获取该游戏<b>全部</b>角色/物品信息，
-    /// 与本地信息表比对，<b>仅当出现新角色/新物品（或当前语言名称缓存缺失）时</b>才写入物品信息表与多语言名称缓存。
-    /// 因此首次使用会全量下载，日常打开页面虽会联网比对、但通常无需写库。</para>
+    /// <para>委托 <see cref="GachaItemNameService.RefreshGachaInfoForGameAsync"/>：后台联网获取该游戏<b>全部</b>角色/物品信息。
+    /// 当前语言名称缓存未覆盖已知物品 Id 时重拉并回写记录；否则仅当出现新角色/新物品时才写入信息表与名称缓存。
+    /// 因此首次使用会全量下载，日常打开页面虽会联网比对、但缓存齐全时通常无需写库。</para>
     /// <para>与「切换游戏」触发点共用同一协调方法，按游戏并发去重；任何异常仅记录日志，不影响页面加载。</para>
     /// </summary>
     private async Task EnsureWikiDataAsync()
     {
         try
         {
-            // 打开抽卡页：联网获取全部角色/物品信息并比对，出现新内容（或当前语言名称缓存缺失）时更新信息表与多语言名称缓存。
+            // 打开抽卡页：联网获取全部角色/物品信息并比对；名称缓存不齐则重拉并回写，出现新物品时更新信息表。
             await AppConfig.GetService<GachaItemNameService>().RefreshGachaInfoForGameAsync(CurrentGameBiz);
         }
         catch (Exception ex)

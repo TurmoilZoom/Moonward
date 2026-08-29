@@ -548,7 +548,7 @@ internal class ZZZGachaService : GachaLogService
     {
         //全量获取语言包、图标
         var data = await _client.GetZZZGachaInfoAsync(gameBiz, lang, cancellationToken);
-        // 导航刷新：仅当当前语言名称缓存缺失或出现新代理人/音擎/邦布时才写入，避免每次导航都重写信息表与名称缓存。
+        // 导航刷新：仅当当前语言名称未覆盖本次拉取的物品 Id，或出现新代理人/音擎/邦布时才写入，避免每次导航都重写信息表与名称缓存。
         if (onlyIfNewItems && !ShouldWriteGachaInfo(data.Language, data.List.Select(x => (long)x.Id)))
         {
             return data.Language;
