@@ -966,7 +966,12 @@ public sealed partial class AppBackground : UserControl
             }
             else if (message.Activate)
             {
-                if (_mediaPlayer is null && _startMediaPlayerCts is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
+                // 关键：正在切换背景（UpdateBackgroundAsync 运行中）时不得在此兜底重启视频。
+                // 从视频切换到图片时，DisposeVideoResource 已把 _mediaPlayer 置空，而 _lastBackgroundFile
+                // 要等 await ChangeBackgroundImageAsync 完成后才更新为新图片；此空窗期内 _lastBackgroundFile 仍指向
+                // 旧视频。若此时收到窗口激活消息（如从「图库」窗口把图片拖到首页，落点激活主窗口），
+                // 兜底分支会用这个过期路径把刚释放的视频重新拉起，其帧回调再覆盖掉刚设好的图片，表现为「更换失败」。
+                if (!IsUpdateBackgroundRunning && _mediaPlayer is null && _startMediaPlayerCts is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
                 {
                     // 兜底：若播放器曾在其他路径被释放，则重新开始解码渲染背景视频
                     _ = StartMediaPlayerAsync(_lastBackgroundFile!);
