@@ -118,11 +118,13 @@
                             Orientation="Horizontal"
                             Spacing="8">
                     <!--  角色  -->
-                    <ItemsRepeater ItemsSource="{x:Bind Avatars}">
-                        <ItemsRepeater.Layout>
-                            <StackLayout Orientation="Horizontal" Spacing="8" />
-                        </ItemsRepeater.Layout>
-                        <ItemsRepeater.ItemTemplate>
+                    <ItemsControl ItemsSource="{x:Bind Avatars}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="scgz:ZZZAvatar">
                                 <Grid Width="76" Height="94">
                                     <Border Width="76"
@@ -180,8 +182,8 @@
                                     </Border>
                                 </Grid>
                             </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                     <!--  邦布  -->
                     <Grid Width="58"
                           Height="78"
@@ -331,6 +333,12 @@
                   SelectionChanged="ListView_DeadlyAssault_SelectionChanged"
                   SelectionMode="Single"
                   Visibility="{x:Bind DeadlyAssaultList, Converter={StaticResource ObjectToVisibilityConverter}}">
+            <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ItemContainerStyle>
                 <Style BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
                     <Setter Property="Margin" Value="0,4,0,4" />

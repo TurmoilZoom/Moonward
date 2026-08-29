@@ -90,6 +90,12 @@
                   SelectionChanged="ListView_SimulatedUniverse_SelectionChanged"
                   SelectionMode="Single"
                   Visibility="{x:Bind RecordBasicList, Converter={StaticResource ObjectToVisibilityConverter}}">
+            <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ItemContainerStyle>
                 <Style BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
                     <Setter Property="Margin" Value="0,4,0,4" />
@@ -193,13 +199,16 @@
                 </Grid>
 
 
-                <ItemsRepeater Margin="0,16,0,0"
-                               ItemsSource="{x:Bind CurrentRecord.Records}"
-                               Visibility="{x:Bind CurrentRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Spacing="12" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
+                <ItemsControl Margin="0,16,0,0"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{x:Bind CurrentRecord.Records}"
+                              Visibility="{x:Bind CurrentRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="su:SimulatedUniverseRecordItem">
                             <Border Background="{ThemeResource CustomOverlayAcrylicBrush}"
                                     CornerRadius="8"
@@ -259,11 +268,13 @@
 
                                             <!--  通关角色  -->
                                             <TextBlock Text="{x:Bind lang:Lang.SimulatedUniversePage_CharactersUsed}" />
-                                            <ItemsRepeater ItemsSource="{x:Bind FinalLineup}">
-                                                <ItemsRepeater.Layout>
-                                                    <StackLayout Orientation="Horizontal" Spacing="20" />
-                                                </ItemsRepeater.Layout>
-                                                <ItemsRepeater.ItemTemplate>
+                                            <ItemsControl ItemsSource="{x:Bind FinalLineup}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="20" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
                                                     <DataTemplate x:DataType="su:SimulatedUniverseAvatar">
                                                         <Grid Width="72" Height="84">
                                                             <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
@@ -283,8 +294,8 @@
                                                             </Border>
                                                         </Grid>
                                                     </DataTemplate>
-                                                </ItemsRepeater.ItemTemplate>
-                                            </ItemsRepeater>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
 
                                             <!--  buff  -->
                                             <ItemsControl ItemsSource="{x:Bind BuffTypeList}">
@@ -371,15 +382,16 @@
                                                                        Margin="32,0,0,0"
                                                                        VerticalAlignment="Center"
                                                                        Text="{x:Bind BuffType.Name}" />
-                                                            <ItemsRepeater Grid.Row="1"
-                                                                           Margin="32,0,0,0"
-                                                                           ItemsSource="{x:Bind Items}">
-                                                                <ItemsRepeater.Layout>
-                                                                    <cc:WrapLayout HorizontalSpacing="8"
-                                                                                   Orientation="Horizontal"
-                                                                                   VerticalSpacing="4" />
-                                                                </ItemsRepeater.Layout>
-                                                                <ItemsRepeater.ItemTemplate>
+                                                            <ItemsControl Grid.Row="1"
+                                                                          Margin="32,0,0,0"
+                                                                          ItemsSource="{x:Bind Items}">
+                                                                <ItemsControl.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <cc:WrapPanel HorizontalSpacing="8"
+                                                                                      VerticalSpacing="4" />
+                                                                    </ItemsPanelTemplate>
+                                                                </ItemsControl.ItemsPanel>
+                                                                <ItemsControl.ItemTemplate>
                                                                     <DataTemplate x:DataType="su:SimulatedUniverseBuffItem" x:DefaultBindMode="OneWay">
                                                                         <Grid Padding="8,4,8,4"
                                                                               Background="{x:Bind Rank, Converter={StaticResource SimulatedUniverseBuffBgConverter}}"
@@ -399,8 +411,8 @@
                                                                                       Visibility="{x:Bind IsEvoluted}" />
                                                                         </Grid>
                                                                     </DataTemplate>
-                                                                </ItemsRepeater.ItemTemplate>
-                                                            </ItemsRepeater>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
                                                         </Grid>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
@@ -409,11 +421,13 @@
                                             <TextBlock Margin="0,12,0,0"
                                                        HorizontalAlignment="Left"
                                                        Text="{x:Bind lang:Lang.SimulatedUniversePage_CuriosObtained}" />
-                                            <ItemsRepeater Margin="0,8,0,0" ItemsSource="{x:Bind Miracles}">
-                                                <ItemsRepeater.Layout>
-                                                    <UniformGridLayout MinColumnSpacing="8" MinRowSpacing="8" />
-                                                </ItemsRepeater.Layout>
-                                                <ItemsRepeater.ItemTemplate>
+                                            <ItemsControl Margin="0,8,0,0" ItemsSource="{x:Bind Miracles}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <cc:WrapPanel HorizontalSpacing="8" VerticalSpacing="8" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
                                                     <DataTemplate x:DataType="su:SimulatedUniverseMiracleItem">
                                                         <sc:CachedImage Width="32"
                                                                         Height="32"
@@ -423,15 +437,15 @@
                                                                         sc:InstantTooltip.Placement="Top"
                                                                         sc:InstantTooltip.Text="{x:Bind Name}" />
                                                     </DataTemplate>
-                                                </ItemsRepeater.ItemTemplate>
-                                            </ItemsRepeater>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
                                         </StackPanel>
                                     </Expander.Content>
                                 </Expander>
                             </Border>
                         </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
 
 

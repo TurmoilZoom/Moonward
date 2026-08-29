@@ -94,6 +94,12 @@
                   SelectionChanged="ListView_ForgottenHall_SelectionChanged"
                   SelectionMode="Single"
                   Visibility="{x:Bind PureFictionList, Converter={StaticResource ObjectToVisibilityConverter}}">
+            <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ItemContainerStyle>
                 <Style BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
                     <Setter Property="Margin" Value="0,4,0,4" />

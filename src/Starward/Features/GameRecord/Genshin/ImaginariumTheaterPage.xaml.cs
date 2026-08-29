@@ -244,7 +244,7 @@ public sealed partial class ImaginariumTheaterPage : PageBase
 
 
     /// <summary>
-    /// 各幕阵容。Detail 为 null 时返回空列表，避免 ItemsRepeater 残留上期数据。
+    /// 各幕阵容。Detail 为 null 时返回空列表，避免切期后残留上期数据。
     /// </summary>
     public static IList<ImaginariumTheaterRoundsData> GetRoundsData(ImaginariumTheaterInfo? info)
     {

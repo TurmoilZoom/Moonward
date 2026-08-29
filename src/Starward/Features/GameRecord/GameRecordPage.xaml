@@ -219,6 +219,12 @@
                                               ItemsSource="{x:Bind GameRoleList}"
                                               SelectionChanged="ListView_GameRoles_SelectionChanged"
                                               SelectionMode="Single">
+                                        <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+                                        <ListView.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ListView.ItemsPanel>
                                         <ListView.ItemTemplate>
                                             <DataTemplate x:DataType="scg:GameRecordRole">
                                                 <Grid Padding="0,6,0,6">

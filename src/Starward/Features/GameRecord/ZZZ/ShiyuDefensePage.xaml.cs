@@ -247,7 +247,7 @@ public sealed partial class ShiyuDefensePage : PageBase
 
 
     /// <summary>
-    /// 第五防线挑战列表。中间节点为 null 时返回空列表，避免 x:Bind 跳过更新导致 ItemsRepeater 残留上期数据。
+    /// 第五防线挑战列表。中间节点为 null 时返回空列表，避免 x:Bind 跳过更新导致切期后残留上期数据。
     /// </summary>
     public static IList<ShiyuDefenseV2FifthLayerChallengeInfo> GetFifthLayerChallenges(ShiyuDefenseInfoV2? info)
     {

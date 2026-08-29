@@ -87,6 +87,12 @@
                   ItemsSource="{x:Bind AbyssList}"
                   SelectionChanged="ListView_AbyssList_SelectionChanged"
                   SelectionMode="Single">
+            <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ItemContainerStyle>
                 <Style BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
                     <Setter Property="Margin" Value="0,4,0,4" />
@@ -381,12 +387,16 @@
                                Text="{x:Bind CurrentAbyss.FirstEnergySkillRank.Value, FallbackValue={x:Null}}" />
                 </Grid>
 
-                <!--  战斗记录  -->
-                <ItemsRepeater Margin="0,8,0,0" ItemsSource="{x:Bind CurrentAbyss.Floors}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Spacing="16" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
+                <!--  战斗记录：层数有限，用 ItemsControl 避免虚拟化在跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+                <ItemsControl Margin="0,8,0,0"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{x:Bind CurrentAbyss.Floors}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="16" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="abyss:SpiralAbyssFloor">
                             <Grid Padding="24,12,24,12"
                                   Background="{ThemeResource CustomOverlayAcrylicBrush}"
@@ -414,8 +424,8 @@
                                     </TextBlock>
                                 </StackPanel>
                                 <!--  每间  -->
-                                <ItemsRepeater Grid.Row="1" ItemsSource="{x:Bind Levels}">
-                                    <ItemsRepeater.ItemTemplate>
+                                <ItemsControl Grid.Row="1" ItemsSource="{x:Bind Levels}">
+                                    <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="abyss:SpiralAbyssLevel">
                                             <UserControl Name="UserControl_AbyssLevel" SizeChanged="UserControl_AbyssLevel_SizeChanged">
                                                 <Grid>
@@ -447,18 +457,20 @@
                                                                        Text="{x:Bind FirstBattleTime.LocalDateTime.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}" />
                                                         </StackPanel>
                                                         <!--  星星  -->
-                                                        <ItemsRepeater HorizontalAlignment="Right" ItemsSource="{x:Bind linq:Enumerable.Range(0, Star)}">
-                                                            <ItemsRepeater.Layout>
-                                                                <StackLayout Orientation="Horizontal" />
-                                                            </ItemsRepeater.Layout>
-                                                            <ItemsRepeater.ItemTemplate>
+                                                        <ItemsControl HorizontalAlignment="Right" ItemsSource="{x:Bind linq:Enumerable.Range(0, Star)}">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <StackPanel Orientation="Horizontal" />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
                                                                 <DataTemplate>
                                                                     <Image Width="20"
                                                                            Height="20"
                                                                            Source="{StaticResource AbyssIcon}" />
                                                                 </DataTemplate>
-                                                            </ItemsRepeater.ItemTemplate>
-                                                        </ItemsRepeater>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
                                                     </Grid>
                                                     <!--  中部  -->
                                                     <StackPanel Name="StackPanel_LevelTimeAndStar"
@@ -474,18 +486,20 @@
                                                                    FontSize="12"
                                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                    Text="{x:Bind FirstBattleTime.LocalDateTime.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}" />
-                                                        <ItemsRepeater HorizontalAlignment="Center" ItemsSource="{x:Bind linq:Enumerable.Range(0, Star)}">
-                                                            <ItemsRepeater.Layout>
-                                                                <StackLayout Orientation="Horizontal" />
-                                                            </ItemsRepeater.Layout>
-                                                            <ItemsRepeater.ItemTemplate>
+                                                        <ItemsControl HorizontalAlignment="Center" ItemsSource="{x:Bind linq:Enumerable.Range(0, Star)}">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <StackPanel Orientation="Horizontal" />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
                                                                 <DataTemplate>
                                                                     <Image Width="20"
                                                                            Height="20"
                                                                            Source="{StaticResource AbyssIcon}" />
                                                                 </DataTemplate>
-                                                            </ItemsRepeater.ItemTemplate>
-                                                        </ItemsRepeater>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
                                                     </StackPanel>
                                                     <!--  上半阵容  -->
                                                     <ItemsControl Grid.Row="2"
@@ -564,12 +578,12 @@
                                                 </Grid>
                                             </UserControl>
                                         </DataTemplate>
-                                    </ItemsRepeater.ItemTemplate>
-                                </ItemsRepeater>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </Grid>
                         </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
             </StackPanel>
             </ScrollViewer>

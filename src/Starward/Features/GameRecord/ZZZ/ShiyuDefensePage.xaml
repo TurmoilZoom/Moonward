@@ -86,6 +86,12 @@
                   SelectionChanged="ListView_ShiyuDefense_SelectionChanged"
                   SelectionMode="Single"
                   Visibility="{x:Bind ShiyuDefenseList, Converter={StaticResource ObjectToVisibilityConverter}}">
+            <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ItemContainerStyle>
                 <Style BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
                     <Setter Property="Margin" Value="0,4,0,4" />
@@ -275,14 +281,16 @@
 
                 </Grid>
 
-                <!--  卡片  -->
-                <ItemsRepeater Margin="0,12,0,0"
-                               HorizontalAlignment="Stretch"
-                               ItemsSource="{x:Bind CurrentShiyuDefense.AllFloorDetail}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Spacing="12" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
+                <!--  卡片：层数有限，用 ItemsControl 避免虚拟化在跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+                <ItemsControl Margin="0,12,0,0"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{x:Bind CurrentShiyuDefense.AllFloorDetail}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="scgzs:ShiyuDefenseFloorDetail">
                             <Grid Padding="20,8,20,8"
                                   HorizontalAlignment="Stretch"
@@ -328,11 +336,13 @@
                                         <Button.Flyout>
                                             <Flyout>
                                                 <Grid MaxWidth="320">
-                                                    <ItemsRepeater ItemsSource="{x:Bind Buffs}">
-                                                        <ItemsRepeater.Layout>
-                                                            <StackLayout Spacing="8" />
-                                                        </ItemsRepeater.Layout>
-                                                        <ItemsRepeater.ItemTemplate>
+                                                    <ItemsControl ItemsSource="{x:Bind Buffs}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Spacing="8" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
                                                             <DataTemplate x:DataType="scgzs:ShiyuDefenseBuff">
                                                                 <StackPanel Spacing="4">
                                                                     <TextBlock Text="{x:Bind Title}" />
@@ -342,8 +352,8 @@
                                                                                           TextWrapping="Wrap" />
                                                                 </StackPanel>
                                                             </DataTemplate>
-                                                        </ItemsRepeater.ItemTemplate>
-                                                    </ItemsRepeater>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
                                                 </Grid>
                                             </Flyout>
                                         </Button.Flyout>
@@ -398,11 +408,13 @@
                                         <Button.Flyout>
                                             <Flyout>
                                                 <Grid MaxWidth="320">
-                                                    <ItemsRepeater ItemsSource="{x:Bind Node1.MonsterInfo.List}">
-                                                        <ItemsRepeater.Layout>
-                                                            <StackLayout Spacing="8" />
-                                                        </ItemsRepeater.Layout>
-                                                        <ItemsRepeater.ItemTemplate>
+                                                    <ItemsControl ItemsSource="{x:Bind Node1.MonsterInfo.List}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Spacing="8" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
                                                             <DataTemplate x:DataType="scgzs:ShiyuDefenseMonster">
                                                                 <Grid ColumnSpacing="16">
                                                                     <Grid.ColumnDefinitions>
@@ -478,8 +490,8 @@
                                                                     </StackPanel>
                                                                 </Grid>
                                                             </DataTemplate>
-                                                        </ItemsRepeater.ItemTemplate>
-                                                    </ItemsRepeater>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
                                                 </Grid>
                                             </Flyout>
                                         </Button.Flyout>
@@ -655,11 +667,13 @@
                                         <Button.Flyout>
                                             <Flyout>
                                                 <Grid MaxWidth="320">
-                                                    <ItemsRepeater ItemsSource="{x:Bind Node2.MonsterInfo.List}">
-                                                        <ItemsRepeater.Layout>
-                                                            <StackLayout Spacing="8" />
-                                                        </ItemsRepeater.Layout>
-                                                        <ItemsRepeater.ItemTemplate>
+                                                    <ItemsControl ItemsSource="{x:Bind Node2.MonsterInfo.List}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Spacing="8" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
                                                             <DataTemplate x:DataType="scgzs:ShiyuDefenseMonster">
                                                                 <Grid ColumnSpacing="16">
                                                                     <Grid.ColumnDefinitions>
@@ -735,8 +749,8 @@
                                                                     </StackPanel>
                                                                 </Grid>
                                                             </DataTemplate>
-                                                        </ItemsRepeater.ItemTemplate>
-                                                    </ItemsRepeater>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
                                                 </Grid>
                                             </Flyout>
                                         </Button.Flyout>
@@ -881,8 +895,8 @@
 
                             </Grid>
                         </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
             </StackPanel>
             </ScrollViewer>
@@ -984,16 +998,18 @@
                     </Grid>
 
 
-                    <!--  卡片：x:Load 卸掉无详情时的视觉树，避免 ItemsRepeater 残留上期阵容  -->
+                    <!--  卡片：x:Load 卸掉无详情时的视觉树，避免切期后残留上期阵容  -->
                     <Grid x:Name="FifthLayerChallengesHost"
                           Grid.Row="1"
                           x:Load="{x:Bind CurrentShiyuDefenseV2.HasFifthLayerChallenges, FallbackValue=False}">
-                    <ItemsRepeater HorizontalAlignment="Stretch"
-                                   ItemsSource="{x:Bind local:ShiyuDefensePage.GetFifthLayerChallenges(CurrentShiyuDefenseV2)}">
-                        <ItemsRepeater.Layout>
-                            <StackLayout Spacing="12" />
-                        </ItemsRepeater.Layout>
-                        <ItemsRepeater.ItemTemplate>
+                    <ItemsControl HorizontalAlignment="Stretch"
+                                  ItemsSource="{x:Bind local:ShiyuDefensePage.GetFifthLayerChallenges(CurrentShiyuDefenseV2)}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="12" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="scgzs:ShiyuDefenseV2FifthLayerChallengeInfo">
                                 <Grid Height="208"
                                       BorderBrush="{ThemeResource AppBarSeparatorForegroundThemeBrush}"
@@ -1082,11 +1098,13 @@
                                                 Orientation="Horizontal"
                                                 Spacing="16">
                                         <!--  角色  -->
-                                        <ItemsRepeater ItemsSource="{x:Bind AvatarList}">
-                                            <ItemsRepeater.Layout>
-                                                <StackLayout Orientation="Horizontal" Spacing="16" />
-                                            </ItemsRepeater.Layout>
-                                            <ItemsRepeater.ItemTemplate>
+                                        <ItemsControl ItemsSource="{x:Bind AvatarList}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="16" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="scgz:ZZZAvatar">
                                                     <Grid Width="76" Height="94">
                                                         <Border Width="76"
@@ -1144,8 +1162,8 @@
                                                         </Border>
                                                     </Grid>
                                                 </DataTemplate>
-                                            </ItemsRepeater.ItemTemplate>
-                                        </ItemsRepeater>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                         <!--  邦布  -->
                                         <Grid Width="58"
                                               Height="78"
@@ -1203,8 +1221,8 @@
 
                                 </Grid>
                             </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                     </Grid>
 
                 </Grid>

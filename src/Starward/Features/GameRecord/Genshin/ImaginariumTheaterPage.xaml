@@ -94,6 +94,12 @@
                   ItemsSource="{x:Bind TheaterList}"
                   SelectionChanged="ListView_TheaterList_SelectionChanged"
                   SelectionMode="Single">
+            <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
             <ListView.ItemContainerStyle>
                 <Style BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
                     <Setter Property="Margin" Value="0,4,0,4" />
@@ -417,7 +423,7 @@
                 </Grid>
 
 
-                <!--  参演名单：无详情时从视觉树卸掉，避免 ItemsRepeater 残留上期阵容  -->
+                <!--  参演名单：无详情时从视觉树卸掉，避免切期后残留上期阵容  -->
                 <Grid x:Name="RoundsDataHost"
                       Margin="0,8,0,0"
                       Padding="24,12,24,12"
@@ -426,11 +432,14 @@
                       Shadow="{ThemeResource ThemeShadow}"
                       Translation="0,0,16"
                       x:Load="{x:Bind CurrentTheater.HasRoundsData, FallbackValue=False}">
-                    <ItemsRepeater ItemsSource="{x:Bind local:ImaginariumTheaterPage.GetRoundsData(CurrentTheater)}">
-                        <ItemsRepeater.Layout>
-                            <StackLayout Spacing="16" />
-                        </ItemsRepeater.Layout>
-                        <ItemsRepeater.ItemTemplate>
+                    <ItemsControl HorizontalAlignment="Stretch"
+                                  ItemsSource="{x:Bind local:ImaginariumTheaterPage.GetRoundsData(CurrentTheater)}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="16" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="scggi:ImaginariumTheaterRoundsData">
                                 <Grid ColumnSpacing="24" RowSpacing="4">
                                     <Grid.RowDefinitions>
@@ -692,8 +701,8 @@
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </Grid>
 
             </StackPanel>
