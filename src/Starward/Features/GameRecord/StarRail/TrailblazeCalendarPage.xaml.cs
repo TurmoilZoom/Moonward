@@ -10,6 +10,7 @@ using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
+using Starward.Features.GameRecord.Share;
 using Starward.Features.GameRecord.WeeklyDailyData;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -93,7 +94,13 @@ public sealed partial class TrailblazeCalendarPage : PageBase
     /// 当前选中的月份数据（用于右侧展示）。
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
     private TrailblazeCalendarMonthData? selectMonthData;
+
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
+    private bool isSharingRecordImage;
 
 
     /// <summary>
@@ -609,5 +616,51 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         };
     }
 
+
+    /// <summary>将当前月开拓月历绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (SelectMonthData is null)
+        {
+            return;
+        }
+
+        MonthlyReportShareSnapshot data = new()
+        {
+            FileStem = "trailblaze_calendar",
+            Title = $"{Lang.TravelersDiaryPage_HistoricalData}  {SelectMonthData.Month}",
+            Currencies =
+            [
+                new MonthlyReportShareCurrency
+                {
+                    Icon = "ms-appx:///Assets/Image/900001.png",
+                    Name = Lang.TrailblazeCalendarPage_StellarJade,
+                    Value = SelectMonthData.CurrentHcoin.ToString(CultureInfo.CurrentCulture),
+                },
+                new MonthlyReportShareCurrency
+                {
+                    Icon = "ms-appx:///Assets/Image/101.png",
+                    Name = Lang.TrailblazeCalendarPage_PassAndSpecialPass,
+                    Value = SelectMonthData.CurrentRailsPass.ToString(CultureInfo.CurrentCulture),
+                },
+            ],
+            SourcesTitle = Lang.TrailblazeCalendarPage_StellarJadeSources,
+            Sources = MonthlyReportShareSnapshot.CaptureSources(SelectSeries),
+            DailyTitle = $"{Lang.HoyolabToolboxPage_DailyData}  {WeekRangeText}",
+            Days = MonthlyReportShareSnapshot.CaptureDays(WeekDateList),
+            Rows = MonthlyReportShareSnapshot.CaptureRows(WeeklyResourceRows),
+        };
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => MonthlyReportShareRenderer.RenderAndSaveAsync(data, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && SelectMonthData is not null;
 
 }

@@ -50,7 +50,8 @@ internal static class GachaShareImageRenderer
     private const float IconCornerRadius = 6f;
     private const float ItemPityBarCornerRadius = 4f;
     private const float FooterHeight = 16f;
-    private const float FooterGap = 12f;
+    private const float FooterGap = 4f;
+    private const float FooterBottom = 10f;
 
     // 卡片级当前垫数进度块（对齐 GachaStatsCard / ZZZGachaStatsCard Grid.Row=5：Margin 0,2,0,4，RowSpacing 3）
     private const float PityProgressMarginTop = 2f;
@@ -150,7 +151,7 @@ internal static class GachaShareImageRenderer
             var iconBitmaps = iconLoads.ToDictionary(x => x.Key, x => x.Value.Result, StringComparer.Ordinal);
             float contentHeight = cardHeights.Max();
             float canvasWidth = OuterMargin * 2 + stats.Count * CardWidth + Math.Max(0, stats.Count - 1) * CardSpacing;
-            float canvasHeight = OuterMargin + contentHeight + FooterGap + FooterHeight + OuterMargin;
+            float canvasHeight = OuterMargin + contentHeight + FooterGap + FooterHeight + FooterBottom;
 
             using var renderTarget = new CanvasRenderTarget(device, canvasWidth, canvasHeight, Dpi);
             using (CanvasDrawingSession ds = renderTarget.CreateDrawingSession())
@@ -179,7 +180,7 @@ internal static class GachaShareImageRenderer
                     cardLeft += CardWidth + CardSpacing;
                 }
 
-                DrawFooter(ds, uid, cardTop + contentHeight + FooterGap, smallFormat);
+                DrawFooter(ds, uid, cardTop + contentHeight + FooterGap, canvasWidth, smallFormat);
             }
 
             string folder = Path.Combine(AppConfig.CacheFolder, "cache", "share");
@@ -743,11 +744,13 @@ internal static class GachaShareImageRenderer
 
 
     /// <summary>
-    /// 图脚：左下 UID，给分享图一个轻锚点，不抢卡片内容。
+    /// 图脚：右下 UID，给分享图一个轻锚点，不抢卡片内容。
     /// </summary>
-    private static void DrawFooter(CanvasDrawingSession ds, long uid, float y, CanvasTextFormat format)
+    private static void DrawFooter(CanvasDrawingSession ds, long uid, float y, float canvasWidth, CanvasTextFormat format)
     {
-        DrawText(ds, $"UID {uid}", OuterMargin, y, format, TertiaryText);
+        string text = $"UID {uid}";
+        float width = MeasureTextWidth(ds, text, format);
+        DrawText(ds, text, canvasWidth - OuterMargin - width, y, format, TertiaryText);
     }
 
 

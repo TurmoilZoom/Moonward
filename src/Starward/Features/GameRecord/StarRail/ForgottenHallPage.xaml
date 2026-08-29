@@ -13,6 +13,7 @@
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.Gacha"
              xmlns:sfgr="using:Starward.Features.GameRecord"
+             xmlns:helpers="using:Starward.Helpers"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
@@ -138,27 +139,53 @@
 
 
 
-        <ScrollViewer Grid.RowSpan="2"
-                      Grid.Column="1"
-                      Margin="0,24,0,0"
-                      Visibility="{x:Bind CurrentForgottenHall, Converter={StaticResource ObjectToVisibilityConverter}}">
+        <Grid Grid.RowSpan="2"
+              Grid.Column="1"
+              Margin="0,24,0,0"
+              Visibility="{x:Bind CurrentForgottenHall, Converter={StaticResource ObjectToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid MinHeight="34" Margin="24,0,24,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <!--  统计周期  -->
+                <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                    <Run Text="{x:Bind lang:Lang.ForgottenHallPage_Period}" />
+                    <Run Text="" />
+                    <Run Text="{x:Bind CurrentForgottenHall.BeginTime.ToString('yyyy/MM/dd', x:Null)}" />
+                    <Run Text=" - " />
+                    <Run Text="{x:Bind CurrentForgottenHall.EndTime.ToString('yyyy/MM/dd', x:Null)}" />
+                </TextBlock>
+                <TextBlock Grid.Column="1"
+                           Margin="12,0,12,0"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind CurrentForgottenHall.Name}" />
+                <Button Grid.Column="2"
+                        MinWidth="0"
+                        MinHeight="0"
+                        Padding="8,4,8,4"
+                        VerticalAlignment="Center"
+                        Command="{x:Bind ShareRecordImageCommand}"
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
+                    <Grid Width="16" Height="16">
+                        <FontIcon FontSize="14"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Glyph="&#xE72D;" />
+                    </Grid>
+                </Button>
+            </Grid>
+            <ScrollViewer Grid.Row="1">
             <StackPanel Margin="24,0,24,24" Spacing="8">
 
-                <Grid>
-                    <!--  统计周期  -->
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                        <Run Text="{x:Bind lang:Lang.ForgottenHallPage_Period}" />
-                        <Run Text="" />
-                        <Run Text="{x:Bind CurrentForgottenHall.BeginTime.ToString('yyyy/MM/dd', x:Null)}" />
-                        <Run Text=" - " />
-                        <Run Text="{x:Bind CurrentForgottenHall.EndTime.ToString('yyyy/MM/dd', x:Null)}" />
-                    </TextBlock>
-                    <TextBlock HorizontalAlignment="Right" Text="{x:Bind CurrentForgottenHall.Name}" />
-                </Grid>
-
                 <!--  出战统计  -->
-                <Grid Margin="0,-4,0,0"
-                      Padding="8"
+                <Grid Padding="8"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
                       Shadow="{ThemeResource ThemeShadow}"
@@ -536,9 +563,8 @@
 
 
             </StackPanel>
-        </ScrollViewer>
-
-
+            </ScrollViewer>
+        </Grid>
 
     </Grid>
 </sf:PageBase>

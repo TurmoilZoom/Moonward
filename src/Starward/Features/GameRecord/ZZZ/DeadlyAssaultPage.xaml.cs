@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
+using Starward.Features.GameRecord.Share;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -66,7 +67,26 @@ public sealed partial class DeadlyAssaultPage : PageBase
     public List<DeadlyAssaultInfo> DeadlyAssaultList { get; set => SetProperty(ref field, value); }
 
 
-    public DeadlyAssaultInfo? CurrentDeadlyAssault { get; set => SetProperty(ref field, value); }
+    public DeadlyAssaultInfo? CurrentDeadlyAssault
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+
+    public bool IsSharingRecordImage
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
 
 
 
@@ -180,5 +200,26 @@ public sealed partial class DeadlyAssaultPage : PageBase
     }
 
 
+    /// <summary>将当前期危局强袭战通关记录绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (CurrentDeadlyAssault is null)
+        {
+            return;
+        }
+
+        DeadlyAssaultInfo info = CurrentDeadlyAssault;
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => DeadlyAssaultShareRenderer.RenderAndSaveAsync(info, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && CurrentDeadlyAssault is not null && gameRole is not null;
 
 }

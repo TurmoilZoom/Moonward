@@ -121,42 +121,68 @@
 
 
 
-        <ScrollViewer Grid.RowSpan="2"
-                      Grid.Column="1"
-                      Margin="0,24,0,0">
-            <StackPanel Margin="24,0,24,24" Spacing="8">
-
-                <!--  Statistics Data  -->
-                <Grid Margin="0,8,0,0"
-                      Visibility="{x:Bind SelectMonthData, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock FontSize="16"
-                               VerticalAlignment="Center"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                        <Run Text="{x:Bind lang:Lang.TravelersDiaryPage_HistoricalData}" />
-                        <Run Text="" />
-                        <Run Text="{x:Bind SelectMonthData.Year}" /><Run Text="-" /><Run Text="{x:Bind SelectMonthData.Month.ToString('D2', x:Null)}" />
-                    </TextBlock>
-                    <Button Grid.Column="1"
+        <Grid Grid.RowSpan="2"
+              Grid.Column="1"
+              Margin="0,24,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid MinHeight="34"
+                  Margin="24,0,24,12"
+                  Visibility="{x:Bind SelectMonthData, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock FontSize="16"
+                           VerticalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                    <Run Text="{x:Bind lang:Lang.TravelersDiaryPage_HistoricalData}" />
+                    <Run Text="" />
+                    <Run Text="{x:Bind SelectMonthData.Year}" /><Run Text="-" /><Run Text="{x:Bind SelectMonthData.Month.ToString('D2', x:Null)}" />
+                </TextBlock>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="4"
+                            VerticalAlignment="Center">
+                    <Button MinWidth="0"
+                            MinHeight="0"
+                            Padding="8,4,8,4"
+                            VerticalAlignment="Center"
+                            Command="{x:Bind ShareRecordImageCommand}"
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
+                        <Grid Width="16" Height="16">
+                            <FontIcon FontSize="14"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Glyph="&#xE72D;" />
+                        </Grid>
+                    </Button>
+                    <Button MinWidth="0"
+                            MinHeight="0"
                             Padding="8,4,8,4"
                             VerticalAlignment="Center"
                             Command="{x:Bind GetFullDataDetailsCommand}"
                             CommandParameter="{x:Bind SelectMonthData.Month}"
                             IsEnabled="{x:Bind GetFullDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}"
                             Visibility="{x:Bind IsRefreshButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Grid>
+                        <Grid Width="16" Height="16">
                             <ProgressRing Width="16"
                                           Height="16"
                                           IsActive="{x:Bind GetFullDataDetailsCommand.IsRunning}" />
                             <FontIcon FontSize="14"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
                                       Glyph="&#xE72C;"
                                       Visibility="{x:Bind GetFullDataDetailsCommand.IsRunning, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
                         </Grid>
                     </Button>
-                </Grid>
+                </StackPanel>
+            </Grid>
+            <ScrollViewer Grid.Row="1">
+            <StackPanel Margin="24,0,24,24" Spacing="8">
                 <Grid Padding="24,8,24,8"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
@@ -396,7 +422,8 @@
 
 
             </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
+        </Grid>
 
 
 

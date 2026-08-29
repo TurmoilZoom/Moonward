@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.Genshin.ImaginariumTheater;
+using Starward.Features.GameRecord.Share;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -71,7 +72,26 @@ public sealed partial class ImaginariumTheaterPage : PageBase
     public List<ImaginariumTheaterInfo> TheaterList { get; set => SetProperty(ref field, value); }
 
 
-    public ImaginariumTheaterInfo? CurrentTheater { get; set => SetProperty(ref field, value); }
+    public ImaginariumTheaterInfo? CurrentTheater
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+
+    public bool IsSharingRecordImage
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
 
 
 
@@ -285,6 +305,28 @@ public sealed partial class ImaginariumTheaterPage : PageBase
         };
     }
 
+
+    /// <summary>将当前期幻想真境剧诗通关记录绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (CurrentTheater is null)
+        {
+            return;
+        }
+
+        ImaginariumTheaterInfo info = CurrentTheater;
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => ImaginariumTheaterShareRenderer.RenderAndSaveAsync(info, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && CurrentTheater is not null;
 
 }
 

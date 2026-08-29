@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
+using Starward.Features.GameRecord.Share;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -67,10 +68,37 @@ public sealed partial class ShiyuDefensePage : PageBase
     public List<ShiyuDefenseInfo> ShiyuDefenseList { get; set => SetProperty(ref field, value); }
 
 
-    public ShiyuDefenseInfo? CurrentShiyuDefense { get; set => SetProperty(ref field, value); }
+    public ShiyuDefenseInfo? CurrentShiyuDefense
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
 
 
-    public ShiyuDefenseInfoV2? CurrentShiyuDefenseV2 { get; set => SetProperty(ref field, value); }
+    public ShiyuDefenseInfoV2? CurrentShiyuDefenseV2
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+
+    public bool IsSharingRecordImage
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
 
 
 
@@ -234,4 +262,36 @@ public sealed partial class ShiyuDefensePage : PageBase
     {
         return info?.FourthLayerDetail?.LayerChallenges ?? [];
     }
+
+
+    /// <summary>将当前期式舆防卫战通关记录绘制为分享图（v1 / v2 与页面一致）。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (CurrentShiyuDefense is ShiyuDefenseInfo v1)
+        {
+            await GameRecordShareHelper.ShareAsync(
+                this,
+                gameRole,
+                _logger,
+                busy => IsSharingRecordImage = busy,
+                (bg, accent) => ShiyuDefenseShareRenderer.RenderAndSaveAsync(v1, gameRole.Uid, bg, accent));
+            return;
+        }
+
+        if (CurrentShiyuDefenseV2 is ShiyuDefenseInfoV2 v2)
+        {
+            await GameRecordShareHelper.ShareAsync(
+                this,
+                gameRole,
+                _logger,
+                busy => IsSharingRecordImage = busy,
+                (bg, accent) => ShiyuDefenseShareRenderer.RenderAndSaveAsync(v2, gameRole.Uid, bg, accent));
+        }
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && (CurrentShiyuDefense is not null || CurrentShiyuDefenseV2 is not null);
+
 }

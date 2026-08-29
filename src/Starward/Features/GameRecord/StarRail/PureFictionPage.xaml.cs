@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.StarRail.PureFiction;
+using Starward.Features.GameRecord.Share;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -69,7 +70,13 @@ public sealed partial class PureFictionPage : PageBase
 
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
     private PureFictionInfo? currentPureFiction;
+
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
+    private bool isSharingRecordImage;
 
 
 
@@ -157,5 +164,27 @@ public sealed partial class PureFictionPage : PageBase
 
     public static bool FloorHasExtraStar(int starNum) => starNum > 3;
 
+
+    /// <summary>将当前期虚构叙事通关记录绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (CurrentPureFiction is null)
+        {
+            return;
+        }
+
+        PureFictionInfo info = CurrentPureFiction;
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => PureFictionShareRenderer.RenderAndSaveAsync(info, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && CurrentPureFiction is not null;
 
 }

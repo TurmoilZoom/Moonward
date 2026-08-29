@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.StarRail.ApocalypticShadow;
+using Starward.Features.GameRecord.Share;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -69,7 +70,13 @@ public sealed partial class ApocalypticShadowPage : PageBase
 
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
     private ApocalypticShadowInfo? currentApocalypticShadow;
+
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
+    private bool isSharingRecordImage;
 
 
 
@@ -182,6 +189,26 @@ public sealed partial class ApocalypticShadowPage : PageBase
     }
 
 
+    /// <summary>将当前期末日幻影通关记录绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (CurrentApocalypticShadow is null)
+        {
+            return;
+        }
 
+        ApocalypticShadowInfo info = CurrentApocalypticShadow;
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => ApocalypticShadowShareRenderer.RenderAndSaveAsync(info, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && CurrentApocalypticShadow is not null;
 
 }

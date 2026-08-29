@@ -10,6 +10,7 @@ using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.Genshin.TravelersDiary;
+using Starward.Features.GameRecord.Share;
 using Starward.Features.GameRecord.WeeklyDailyData;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -82,7 +83,13 @@ public sealed partial class TravelersDiaryPage : PageBase
     /// 当前选中的月份数据（用于右侧展示）。
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
     private TravelersDiaryMonthData? selectMonthData;
+
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
+    private bool isSharingRecordImage;
 
 
     /// <summary>
@@ -596,5 +603,51 @@ public sealed partial class TravelersDiaryPage : PageBase
         };
     }
 
+
+    /// <summary>将当前月旅行者札记绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (SelectMonthData is null)
+        {
+            return;
+        }
+
+        MonthlyReportShareSnapshot data = new()
+        {
+            FileStem = "travelers_diary",
+            Title = $"{Lang.TravelersDiaryPage_HistoricalData}  {SelectMonthData.Year}-{SelectMonthData.Month.ToString("D2", CultureInfo.CurrentCulture)}",
+            Currencies =
+            [
+                new MonthlyReportShareCurrency
+                {
+                    Icon = "ms-appx:///Assets/Image/UI_ItemIcon_201.png",
+                    Name = Lang.TravelersDiaryPage_Primogems,
+                    Value = SelectMonthData.CurrentPrimogems.ToString(CultureInfo.CurrentCulture),
+                },
+                new MonthlyReportShareCurrency
+                {
+                    Icon = "ms-appx:///Assets/Image/UI_ItemIcon_202.png",
+                    Name = Lang.TravelersDiaryPage_Mora,
+                    Value = SelectMonthData.CurrentMora.ToString(CultureInfo.CurrentCulture),
+                },
+            ],
+            SourcesTitle = Lang.TravelersDiaryPage_PrimogemsObtained,
+            Sources = MonthlyReportShareSnapshot.CaptureSources(SelectSeries),
+            DailyTitle = $"{Lang.HoyolabToolboxPage_DailyData}  {WeekRangeText}",
+            Days = MonthlyReportShareSnapshot.CaptureDays(WeekDateList),
+            Rows = MonthlyReportShareSnapshot.CaptureRows(WeeklyResourceRows),
+        };
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => MonthlyReportShareRenderer.RenderAndSaveAsync(data, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && SelectMonthData is not null;
 
 }

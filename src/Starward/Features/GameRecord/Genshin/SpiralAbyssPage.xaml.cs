@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.Genshin.SpiralAbyss;
+using Starward.Features.GameRecord.Share;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -74,7 +75,13 @@ public sealed partial class SpiralAbyssPage : PageBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RevealRankInternalStar))]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
     private SpiralAbyssInfo? currentAbyss;
+
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
+    private bool isSharingRecordImage;
 
 
     public List<int> RevealRankInternalStar => Enumerable.Range(0, Math.Clamp((CurrentAbyss?.RevealRank?.Count ?? 1) - 1, 0, int.MaxValue)).ToList();
@@ -182,5 +189,27 @@ public sealed partial class SpiralAbyssPage : PageBase
         return Lang.SpiralAbyssPage_ChamberX.Replace("{X}", x.ToString());
     }
 
+
+    /// <summary>将当前期深境螺旋通关记录绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (CurrentAbyss is null)
+        {
+            return;
+        }
+
+        SpiralAbyssInfo info = CurrentAbyss;
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => SpiralAbyssShareRenderer.RenderAndSaveAsync(info, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && CurrentAbyss is not null;
 
 }

@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.StarRail.ChallengePeak;
+using Starward.Features.GameRecord.Share;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -66,9 +67,36 @@ public sealed partial class ChallengePeakPage : PageBase
     private List<ChallengePeakData> ChallengePeakDataList { get; set => SetProperty(ref field, value); }
 
 
-    private ChallengePeakData? CurrentChallengePeakData { get; set => SetProperty(ref field, value); }
+    private ChallengePeakData? CurrentChallengePeakData
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
 
-    private ChallengePeakRecord? CurrentChallengePeakRecord { get; set => SetProperty(ref field, value); }
+    private ChallengePeakRecord? CurrentChallengePeakRecord
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+
+    private bool IsSharingRecordImage
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
 
 
 
@@ -154,5 +182,27 @@ public sealed partial class ChallengePeakPage : PageBase
     }
 
 
+    /// <summary>将当前期逐光捡金通关记录绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (CurrentChallengePeakData is null || CurrentChallengePeakRecord is null)
+        {
+            return;
+        }
+
+        ChallengePeakData data = CurrentChallengePeakData;
+        ChallengePeakRecord record = CurrentChallengePeakRecord;
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => ChallengePeakShareRenderer.RenderAndSaveAsync(data, record, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && CurrentChallengePeakData is not null && CurrentChallengePeakRecord is not null;
 
 }

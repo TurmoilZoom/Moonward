@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.Genshin.StygianOnslaught;
+using Starward.Features.GameRecord.Share;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -70,10 +71,37 @@ public sealed partial class StygianOnslaughtPage : PageBase
     public List<StygianOnslaughtInfo> SOList { get; set => SetProperty(ref field, value); }
 
 
-    public StygianOnslaughtInfo? CurrentInfo { get => field; set => SetProperty(ref field, value); }
+    public StygianOnslaughtInfo? CurrentInfo
+    {
+        get => field;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
 
 
-    public StygianOnslaughtBattle? CurrentSelectedBattle { get => field; set => SetProperty(ref field, value); }
+    public StygianOnslaughtBattle? CurrentSelectedBattle
+    {
+        get => field;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+
+    public bool IsSharingRecordImage
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            ShareRecordImageCommand.NotifyCanExecuteChanged();
+        }
+    }
 
 
     private void InitializeAbyssData()
@@ -208,5 +236,28 @@ public sealed partial class StygianOnslaughtPage : PageBase
         };
     }
 
+
+    /// <summary>将当前页所选单人/协战通关记录绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (CurrentInfo is null || CurrentSelectedBattle is not { HasData: true })
+        {
+            return;
+        }
+
+        StygianOnslaughtInfo info = CurrentInfo;
+        StygianOnslaughtBattle battle = CurrentSelectedBattle;
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => StygianOnslaughtShareRenderer.RenderAndSaveAsync(info, battle, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && CurrentInfo is not null && CurrentSelectedBattle is { HasData: true };
 
 }

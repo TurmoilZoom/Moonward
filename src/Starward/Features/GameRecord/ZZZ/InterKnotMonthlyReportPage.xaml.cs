@@ -11,6 +11,7 @@ using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
+using Starward.Features.GameRecord.Share;
 using Starward.Features.GameRecord.WeeklyDailyData;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -100,7 +101,13 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     /// 当前选中的月份数据（用于右侧展示）。
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
     private InterKnotReportSummary? selectMonthData;
+
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShareRecordImageCommand))]
+    private bool isSharingRecordImage;
 
 
     /// <summary>
@@ -770,6 +777,46 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     {
         return monthData?.List?.FirstOrDefault(a => a.DataType == InterKnotReportDataType.PolychromesData)?.Count ?? 0;
     }
+
+
+    /// <summary>将当前月绳网月报绘制为分享图。</summary>
+    [RelayCommand(CanExecute = nameof(CanShareRecordImage))]
+    private async Task ShareRecordImageAsync()
+    {
+        if (SelectMonthData is null)
+        {
+            return;
+        }
+
+        MonthlyReportShareSnapshot data = new()
+        {
+            FileStem = "interknot_report",
+            Title = $"{Lang.TravelersDiaryPage_HistoricalData}  {SelectMonthData.DataMonth}",
+            Currencies = (SelectMonthData.MonthData?.List ?? [])
+                .Select(a => new MonthlyReportShareCurrency
+                {
+                    Icon = DataTypeToImage(a.DataType)?.UriSource?.OriginalString ?? "",
+                    Name = DataTypeToName(a.DataType),
+                    Value = a.Count.ToString(CultureInfo.CurrentCulture),
+                })
+                .ToList(),
+            SourcesTitle = Lang.InterKnotMonthlyReportPage_PolychromeRevenueStreams,
+            Sources = MonthlyReportShareSnapshot.CaptureSources(SelectSeries),
+            DailyTitle = $"{Lang.HoyolabToolboxPage_DailyData}  {WeekRangeText}",
+            Days = MonthlyReportShareSnapshot.CaptureDays(WeekDateList),
+            Rows = MonthlyReportShareSnapshot.CaptureRows(WeeklyResourceRows),
+        };
+        await GameRecordShareHelper.ShareAsync(
+            this,
+            gameRole,
+            _logger,
+            busy => IsSharingRecordImage = busy,
+            (bg, accent) => MonthlyReportShareRenderer.RenderAndSaveAsync(data, gameRole.Uid, bg, accent));
+    }
+
+
+    private bool CanShareRecordImage()
+        => !IsSharingRecordImage && gameRole is not null && SelectMonthData is not null;
 
 
 
