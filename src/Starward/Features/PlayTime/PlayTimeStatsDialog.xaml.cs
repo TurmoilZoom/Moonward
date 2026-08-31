@@ -5,13 +5,19 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
+using Starward.Features.Background;
 using Starward.Features.Database;
+using Starward.Features.GameRecord.Share;
 using Starward.Features.GameSelector;
+using Starward.Features.Screenshot;
+using Starward.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
+using Windows.UI;
 
 
 namespace Starward.Features.PlayTime;
@@ -229,6 +235,10 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     /// 统计卡片数据项
     /// </summary>
     public List<StatCardItem> StatCards { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>分享图渲染中时禁用分享按钮，避免重复触发。</summary>
+    public bool IsNotSharingImage { get; set => SetProperty(ref field, value); } = true;
 
 
 
@@ -780,6 +790,87 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
             sum += _playTimePerDay.GetValueOrDefault(d);
         }
         return sum;
+    }
+
+
+    /// <summary>
+    /// 用 Win2D 离屏渲染当前统计（卡片 + 柱状图 + 热力图）并用内置看图窗口打开。
+    /// </summary>
+    [RelayCommand]
+    private async Task ShareImageAsync()
+    {
+        if (!IsNotSharingImage)
+        {
+            return;
+        }
+        try
+        {
+            IsNotSharingImage = false;
+            PlayTimeShareSnapshot data = BuildShareSnapshot();
+            string? backgroundFile = await PrepareShareBackgroundAsync();
+            // 强调色只能在 UI 线程读，Win2D 绘制放后台
+            Color accentColor = GameRecordShareHelper.GetAccentColor();
+            string file = await Task.Run(async () => await PlayTimeShareRenderer.RenderAndSaveAsync(data, backgroundFile, accentColor));
+            await new ImageViewWindow2().ShowWindowAsync(this.XamlRoot.ContentIslandEnvironment.AppWindowId, file, false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Share play time stats image: GameBiz {biz}", SelectedGameBiz);
+            InAppToast.MainWindow?.Error(ex);
+        }
+        finally
+        {
+            IsNotSharingImage = true;
+        }
+    }
+
+
+    private PlayTimeShareSnapshot BuildShareSnapshot()
+    {
+        return new PlayTimeShareSnapshot
+        {
+            FileStem = "playtime_stats",
+            Title = Lang.PlayTimeStatsDialog_PlaytimeStatistics,
+            GameName = SelectedGameIcon?.GameName ?? SelectedGameBiz.ToGameName(),
+            ServerName = SelectedGameIcon?.ServerName ?? SelectedGameBiz.ToGameServerName(),
+            Cards = StatCards?.Select(x => new PlayTimeShareCard
+            {
+                Title = x.Title,
+                Value = x.Value,
+                SubText = x.SubText,
+            }).ToList() ?? [],
+            BarTitle = GetBarRangeTitle(),
+            BarTotalText = $"{Lang.PlayTimeStatsDialog_Total} {BarTotalText}",
+            Bars = PlayTimeBarChart.Items?.Select(x => new PlayTimeShareBar
+            {
+                Label = x.Label,
+                Minutes = x.Value,
+            }).ToList() ?? [],
+            HeatmapDays = PlayTimeHeatmap.Days?.Select(x => new PlayTimeShareHeatmapDay
+            {
+                Date = x.Date,
+                Minutes = x.Value,
+            }).ToList() ?? [],
+        };
+    }
+
+
+    /// <summary>
+    /// 分享图背景：当前游戏用启动器正在显示的壁纸（视频背景抓当前帧），
+    /// 切到其他游戏时只能用它的缓存壁纸，视频没有可抓的帧就退回渐变底。
+    /// </summary>
+    private async Task<string?> PrepareShareBackgroundAsync()
+    {
+        if (SelectedGameBiz == PlayTimeStatsService.NormalizeBiz(CurrentGameBiz))
+        {
+            return await GameRecordShareHelper.PrepareBackgroundFileAsync(CurrentGameBiz);
+        }
+        if (GameId.FromGameBiz(SelectedGameBiz) is GameId gameId)
+        {
+            string? file = BackgroundService.GetCachedBackgroundFile(gameId);
+            return file is not null && BackgroundService.FileIsSupportedVideo(file) ? null : file;
+        }
+        return null;
     }
 
 

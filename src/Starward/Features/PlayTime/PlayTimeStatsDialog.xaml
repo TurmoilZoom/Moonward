@@ -130,6 +130,23 @@
                     Orientation="Horizontal"
                     Spacing="8">
 
+            <!--  Share Button  -->
+            <Button Width="32"
+                    Height="32"
+                    Padding="0"
+                    BorderThickness="0"
+                    Command="{x:Bind ShareImageCommand}"
+                    CornerRadius="8"
+                    IsEnabled="{x:Bind IsNotSharingImage}"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                    sc:InstantTooltip.Placement="Bottom"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
+                <FontIcon FontSize="16"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE72D;"
+                          IsTextScaleFactorEnabled="False" />
+            </Button>
+
             <!--  Close Button  -->
             <Button Width="32"
                     Height="32"

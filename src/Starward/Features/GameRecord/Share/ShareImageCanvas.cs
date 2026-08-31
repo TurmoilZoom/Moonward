@@ -90,6 +90,7 @@ internal static class ShareImageCanvas
     /// 离屏合成背景 + 内容 + 脚标并保存 PNG。
     /// </summary>
     /// <param name="contentHeight">页边距以内、脚标以上的内容高度。</param>
+    /// <param name="footerText">右下角脚标文本；为空时按战绩页惯例显示 <c>UID {uid}</c>。</param>
     public static async Task<string> ComposeAndSaveAsync(
         float canvasWidth,
         float contentHeight,
@@ -98,7 +99,8 @@ internal static class ShareImageCanvas
         string? backgroundFile,
         ShareImageContext ctx,
         Action<CanvasDrawingSession, CanvasBitmap> drawContent,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? footerText = null)
     {
         float canvasHeight = OuterMargin + Math.Max(contentHeight, 1f) + FooterGap + FooterHeight + FooterBottom;
         float dpi = FitRenderDpi(ctx.Device, canvasWidth, canvasHeight);
@@ -118,12 +120,14 @@ internal static class ShareImageCanvas
 
             DrawGradedBackground(ds, bgLayer, canvasWidth, canvasHeight, ctx.Accent);
             drawContent(ds, bgLayer);
-            DrawFooter(ds, uid, OuterMargin + contentHeight + FooterGap, canvasWidth, ctx.Small);
+            DrawFooter(ds, footerText ?? $"UID {uid}", OuterMargin + contentHeight + FooterGap, canvasWidth, ctx.Small);
         }
 
         string folder = Path.Combine(AppConfig.CacheFolder, "cache", "share");
         Directory.CreateDirectory(folder);
-        string filePath = Path.Combine(folder, $"{fileStem}_{uid}_{DateTime.Now:yyyyMMddHHmmss}.png");
+        // 没有 UID 的分享图（如游戏时长统计）不在文件名里塞 0
+        string uidPart = uid > 0 ? $"_{uid}" : "";
+        string filePath = Path.Combine(folder, $"{fileStem}{uidPart}_{DateTime.Now:yyyyMMddHHmmss}.png");
         await using var fs = File.Create(filePath);
         await ImageSaver.SaveAsPngAsync(renderTarget, fs, ColorPrimaries.BT709);
         return filePath;
@@ -713,9 +717,9 @@ internal static class ShareImageCanvas
     }
 
 
-    private static void DrawFooter(CanvasDrawingSession ds, long uid, float y, float canvasWidth, CanvasTextFormat format)
+    private static void DrawFooter(CanvasDrawingSession ds, string text, float y, float canvasWidth, CanvasTextFormat format)
     {
-        DrawTextRight(ds, $"UID {uid}", canvasWidth - OuterMargin, y, format, TertiaryText);
+        DrawTextRight(ds, text, canvasWidth - OuterMargin, y, format, TertiaryText);
     }
 
 
