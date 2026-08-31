@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog x:Class="Starward.Features.GameLauncher.ElevatedStartGameTaskManagerDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:lang="using:Starward.Language"
+               xmlns:local="using:Starward.Features.GameLauncher"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
+               x:DefaultBindMode="OneWay"
+               Background="{ThemeResource CustomAcrylicBrush}"
+               BorderThickness="0"
+               Style="{ThemeResource DefaultContentDialogStyle}"
+               mc:Ignorable="d">
+
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">800</x:Double>
+    </ContentDialog.Resources>
+
+    <Grid Width="640" MinHeight="360" MaxHeight="620" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Spacing="8">
+            <TextBlock FontSize="20" Text="{x:Bind lang:Lang.StartGameTaskManager_Title}" />
+            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.StartGameTaskManager_Description}"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <InfoBar x:Name="InfoBar_Feedback"
+                 Grid.Row="1"
+                 IsClosable="True"
+                 IsOpen="False" />
+
+        <Border Grid.Row="2"
+                Padding="12"
+                Background="{ThemeResource ControlFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Visibility="{x:Bind IsConfirming, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel Spacing="8">
+                <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                           Text="{x:Bind ConfirmationText}"
+                           TextWrapping="Wrap" />
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                    <Button Click="Button_CancelDelete_Click" Content="{x:Bind lang:Lang.Common_Cancel}" />
+                    <Button Click="Button_ConfirmDelete_Click"
+                            Content="{x:Bind lang:Lang.Common_Delete}"
+                            Style="{ThemeResource AccentButtonStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="3" MinHeight="160">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          IsEnabled="{x:Bind CanEdit}"
+                          Visibility="{x:Bind HasTasks, Converter={StaticResource BoolToVisibilityConverter}}">
+                <ItemsControl ItemsSource="{x:Bind TaskGroups}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="local:ElevatedStartGameTaskGroup">
+                            <StackPanel Spacing="4">
+                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="{x:Bind Title}" />
+                                <ItemsControl ItemsSource="{x:Bind Tasks}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="local:ElevatedStartGameTaskItem">
+                                            <Grid Padding="8" ColumnSpacing="8" CornerRadius="6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox VerticalAlignment="Top"
+                                                          IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                                                <StackPanel Grid.Column="1" Spacing="2">
+                                                    <TextBlock Text="{x:Bind ProfileText}" />
+                                                    <TextBlock FontSize="12"
+                                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                               Text="{x:Bind LoginUidText}"
+                                                               Visibility="{x:Bind LoginUidText, Converter={StaticResource ObjectToVisibilityConverter}}" />
+                                                    <TextBlock FontSize="12"
+                                                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                               IsTextSelectionEnabled="True"
+                                                               Text="{x:Bind TaskPath}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                                <Button Grid.Column="2"
+                                                        Width="32"
+                                                        Height="32"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        Click="Button_DeleteTask_Click"
+                                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                                        sc:InstantTooltip.Placement="Top"
+                                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Delete}">
+                                                    <FontIcon FontSize="16"
+                                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                              Glyph="&#xE74D;" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.StartGameTaskManager_NoTasks}"
+                       Visibility="{x:Bind HasTasks, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+
+            <ProgressRing Width="28"
+                          Height="28"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          IsActive="True"
+                          Visibility="{x:Bind IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" />
+        </Grid>
+
+        <Grid Grid.Row="4" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Command="{x:Bind SelectAllCommand}"
+                        Content="{x:Bind lang:Lang.Common_SelectAll}"
+                        IsEnabled="{x:Bind CanEdit}" />
+                <Button Command="{x:Bind ClearSelectionCommand}"
+                        Content="{x:Bind lang:Lang.Common_Clear}"
+                        IsEnabled="{x:Bind CanEdit}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <Button Click="Button_DeleteSelected_Click"
+                        Content="{x:Bind DeleteSelectedText}"
+                        IsEnabled="{x:Bind CanDeleteSelected}" />
+                <Button Click="Button_DeleteAll_Click"
+                        Content="{x:Bind lang:Lang.StartGameTaskManager_DeleteAll}"
+                        IsEnabled="{x:Bind CanEdit}"
+                        Style="{ThemeResource AccentButtonStyle}" />
+                <Button Click="Button_Close_Click" Content="{x:Bind lang:Lang.Common_Cancel}" IsEnabled="{x:Bind CanClose}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</ContentDialog>

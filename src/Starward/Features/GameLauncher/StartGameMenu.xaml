@@ -204,8 +204,8 @@
                                                      Padding="0"
                                                      HorizontalAlignment="Right"
                                                      helpers:PointerCursor.CursorShape="Hand"
-                                                     Click="Button_CleanupElevatedTasks_Click"
-                                                     Content="{x:Bind lang:Lang.StartGameMenu_CleanElevatedTasks}"
+                                                     Click="Button_ManageElevatedTasks_Click"
+                                                     Content="{x:Bind lang:Lang.SettingPage_ManageElevatedStartGameTasks}"
                                                      FontSize="12" />
                                 </Grid>
                             </Flyout>

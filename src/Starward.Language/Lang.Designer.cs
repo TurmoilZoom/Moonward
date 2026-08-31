@@ -11086,5 +11086,83 @@ namespace Starward.Language {
                 return ResourceManager.GetString("FavorWallpaper_MindscapeTitle", resourceCulture);
             }
         }
+
+        public static string SettingPage_ManageElevatedStartGameTasks {
+            get {
+                return ResourceManager.GetString("SettingPage_ManageElevatedStartGameTasks", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_Title {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_Title", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_Description {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_Description", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_NoTasks {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_NoTasks", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_UnknownGame {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_UnknownGame", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_Profile {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_Profile", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_LoginUid {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_LoginUid", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_DeleteSelected {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_DeleteSelected", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_DeleteAll {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_DeleteAll", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_ConfirmMessage {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_ConfirmMessage", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_Deleted {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_Deleted", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_Partial {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_Partial", resourceCulture);
+            }
+        }
+
+        public static string StartGameTaskManager_Cancelled {
+            get {
+                return ResourceManager.GetString("StartGameTaskManager_Cancelled", resourceCulture);
+            }
+        }
     }
 }

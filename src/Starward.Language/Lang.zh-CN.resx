@@ -1943,7 +1943,7 @@
     <value>免 UAC 启动任务</value>
   </data>
   <data name="SettingPage_ElevatedStartGameTasksDesc" xml:space="preserve">
-    <value>在「游戏快捷方式」中勾选「关闭启动 UAC 提示」时，会在计划任务库 \Moonward 下注册最高权限任务。不再需要或卸载相关快捷方式后，可在此清理这些任务。</value>
+    <value>在「游戏快捷方式」中勾选「关闭启动 UAC 提示」时，会在计划任务库 \Moonward 下注册最高权限任务。可按游戏查看，并在不再需要或卸载相关快捷方式后删除指定任务。</value>
   </data>
   <data name="SettingPage_CleanElevatedStartGameTasks" xml:space="preserve">
     <value>清理免 UAC 计划任务</value>
@@ -3878,5 +3878,44 @@
   </data>
   <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
     <value>全年</value>
+  </data>
+  <data name="SettingPage_ManageElevatedStartGameTasks" xml:space="preserve">
+    <value>管理免 UAC 计划任务</value>
+  </data>
+  <data name="StartGameTaskManager_Title" xml:space="preserve">
+    <value>免 UAC 启动任务</value>
+  </data>
+  <data name="StartGameTaskManager_Description" xml:space="preserve">
+    <value>任务会按游戏和区服分组。删除任务后，关联的桌面快捷方式会失效，需重新创建。</value>
+  </data>
+  <data name="StartGameTaskManager_NoTasks" xml:space="preserve">
+    <value>未找到免 UAC 启动游戏的计划任务。</value>
+  </data>
+  <data name="StartGameTaskManager_UnknownGame" xml:space="preserve">
+    <value>未识别的任务</value>
+  </data>
+  <data name="StartGameTaskManager_Profile" xml:space="preserve">
+    <value>启动配置：{0}</value>
+  </data>
+  <data name="StartGameTaskManager_LoginUid" xml:space="preserve">
+    <value>登录 UID：{0}</value>
+  </data>
+  <data name="StartGameTaskManager_DeleteSelected" xml:space="preserve">
+    <value>删除所选项（{0}）</value>
+  </data>
+  <data name="StartGameTaskManager_DeleteAll" xml:space="preserve">
+    <value>删除全部</value>
+  </data>
+  <data name="StartGameTaskManager_ConfirmMessage" xml:space="preserve">
+    <value>删除所选的 {0} 个免 UAC 计划任务？关联的桌面快捷方式将失效，需重新创建。可能需要管理员授权一次。</value>
+  </data>
+  <data name="StartGameTaskManager_Deleted" xml:space="preserve">
+    <value>已删除 {0} 个计划任务。</value>
+  </data>
+  <data name="StartGameTaskManager_Partial" xml:space="preserve">
+    <value>已删除 {0} 个任务，所选任务中仍有 {1} 个残留。</value>
+  </data>
+  <data name="StartGameTaskManager_Cancelled" xml:space="preserve">
+    <value>已取消管理员授权，未删除计划任务。</value>
   </data>
 </root>
