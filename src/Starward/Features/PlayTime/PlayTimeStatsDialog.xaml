@@ -56,73 +56,75 @@
                     </Flyout>
                 </Button.Flyout>
             </Button>
-
-            <!--  游戏切换：列出有时长记录的游戏  -->
-            <DropDownButton x:Name="DropDownButton_Game"
-                            Height="28"
-                            MinHeight="0"
-                            Padding="8,0,4,0"
-                            VerticalAlignment="Center"
-                            BorderThickness="0"
-                            CornerRadius="6"
-                            sc:InstantTooltip.Placement="Bottom"
-                            sc:InstantTooltip.Text="{x:Bind lang:Lang.PlayTimeStatsDialog_SwitchGame}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Border Width="20"
-                            Height="20"
-                            VerticalAlignment="Center"
-                            CornerRadius="4">
-                        <Image Source="{x:Bind SelectedGameIcon.GameIcon, FallbackValue={x:Null}}" Stretch="UniformToFill" />
-                    </Border>
-                    <TextBlock VerticalAlignment="Center"
-                               FontSize="13"
-                               IsTextScaleFactorEnabled="False"
-                               Text="{x:Bind SelectedGameIcon.GameName, FallbackValue=''}" />
-                    <TextBlock VerticalAlignment="Center"
-                               FontSize="12"
-                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                               IsTextScaleFactorEnabled="False"
-                               Text="{x:Bind SelectedGameIcon.ServerName, FallbackValue=''}" />
-                </StackPanel>
-                <DropDownButton.Flyout>
-                    <Flyout x:Name="Flyout_Game" Placement="Bottom">
-                        <ListView x:Name="ListView_Game"
-                                  Margin="-8,-4,-8,-4"
-                                  ItemsSource="{x:Bind GameBizIcons}"
-                                  SelectionChanged="ListView_Game_SelectionChanged"
-                                  SelectionMode="Single">
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="gs:GameBizIcon">
-                                    <Grid Height="40" ColumnSpacing="10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Border Width="24"
-                                                Height="24"
-                                                VerticalAlignment="Center"
-                                                CornerRadius="4">
-                                            <Image Source="{x:Bind GameIcon}" Stretch="UniformToFill" />
-                                        </Border>
-                                        <TextBlock Grid.Column="1"
-                                                   VerticalAlignment="Center"
-                                                   IsTextScaleFactorEnabled="False"
-                                                   Text="{x:Bind GameName}" />
-                                        <TextBlock Grid.Column="2"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="12"
-                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                                   IsTextScaleFactorEnabled="False"
-                                                   Text="{x:Bind ServerName}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </Flyout>
-                </DropDownButton.Flyout>
-            </DropDownButton>
         </StackPanel>
+
+        <!--  游戏切换：列出有时长记录的游戏  -->
+        <DropDownButton x:Name="DropDownButton_Game"
+                        Height="28"
+                        MinHeight="0"
+                        Margin="0,12,0,0"
+                        Padding="8,0,4,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        BorderThickness="0"
+                        CornerRadius="6"
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.PlayTimeStatsDialog_SwitchGame}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Border Width="20"
+                        Height="20"
+                        VerticalAlignment="Center"
+                        CornerRadius="4">
+                    <Image Source="{x:Bind SelectedGameIcon.GameIcon, FallbackValue={x:Null}}" Stretch="UniformToFill" />
+                </Border>
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="13"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind SelectedGameIcon.GameName, FallbackValue=''}" />
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind SelectedGameIcon.ServerName, FallbackValue=''}" />
+            </StackPanel>
+            <DropDownButton.Flyout>
+                <Flyout x:Name="Flyout_Game" Placement="Bottom">
+                    <ListView x:Name="ListView_Game"
+                              Margin="-8,-4,-8,-4"
+                              ItemsSource="{x:Bind GameBizIcons}"
+                              SelectionChanged="ListView_Game_SelectionChanged"
+                              SelectionMode="Single">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="gs:GameBizIcon">
+                                <Grid Height="40" ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="24"
+                                            Height="24"
+                                            VerticalAlignment="Center"
+                                            CornerRadius="4">
+                                        <Image Source="{x:Bind GameIcon}" Stretch="UniformToFill" />
+                                    </Border>
+                                    <TextBlock Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               IsTextScaleFactorEnabled="False"
+                                               Text="{x:Bind GameName}" />
+                                    <TextBlock Grid.Column="2"
+                                               VerticalAlignment="Center"
+                                               FontSize="12"
+                                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                               IsTextScaleFactorEnabled="False"
+                                               Text="{x:Bind ServerName}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Flyout>
+            </DropDownButton.Flyout>
+        </DropDownButton>
 
         <StackPanel Margin="0,12,16,0"
                     HorizontalAlignment="Right"
