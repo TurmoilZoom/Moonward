@@ -218,7 +218,8 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
 
             TotalTimeText = TimeSpanToString(TimeSpan.FromMilliseconds(totalMs));
             StartUpCountText = totalMs > 0 ? string.Format(Lang.PlayTimeStatsDialog_Started0Times, sessions.Count) : "";
-            DatabaseService.SetValue($"playtime_total_{biz}", TimeSpan.FromMilliseconds(totalMs));
+            // 键必须与 PlayTimeButton 读取的一致（B 服归一化到官服），否则按钮显示 0h 0m。
+            DatabaseService.SetValue(PlayTimeStatsService.TotalPlayTimeKey(biz), TimeSpan.FromMilliseconds(totalMs));
 
             AverageDayTimeText = timePerDay.Count > 0 ? TimeSpanToString(TimeSpan.FromMilliseconds(totalMs / timePerDay.Count)) : "-";
             PlayDaysText = timePerDay.Count > 0 ? string.Format(Lang.PlayTimeStatsDialog_PlayedFor0Days, timePerDay.Count) : "";

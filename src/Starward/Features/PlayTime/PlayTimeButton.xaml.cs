@@ -22,6 +22,9 @@ public sealed partial class PlayTimeButton : UserControl
     private readonly ILogger<PlayTimeButton> _logger = AppConfig.GetLogger<PlayTimeButton>();
 
 
+    private readonly PlayTimeStatsService _playTimeStatsService = AppConfig.GetService<PlayTimeStatsService>();
+
+
 
     public PlayTimeButton()
     {
@@ -45,12 +48,47 @@ public sealed partial class PlayTimeButton : UserControl
     {
         try
         {
-            GameBiz gameBiz = CurrentGameBiz.IsBilibili() ? $"{CurrentGameBiz.Game}_cn" : CurrentGameBiz;
-            PlayTimeTotal = DatabaseService.GetValue<TimeSpan>($"playtime_total_{gameBiz}", out _);
+            PlayTimeTotal = DatabaseService.GetValue<TimeSpan>(PlayTimeStatsService.TotalPlayTimeKey(CurrentGameBiz), out _);
+            if (PlayTimeTotal == TimeSpan.Zero)
+            {
+                // 缓存里没有归一化后的键（B 服合并到官服前的旧数据、或从未打开过统计对话框），
+                // 直接现算一次并写回缓存，否则按钮会一直显示 0h 0m。
+                _ = RecalculatePlayTimeTotalAsync();
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Initialize play time");
+        }
+    }
+
+
+
+    /// <summary>
+    /// 在后台线程重算总时长并写回缓存；属性赋值回到 UI 线程，避免绑定更新跨线程。
+    /// </summary>
+    private async Task RecalculatePlayTimeTotalAsync()
+    {
+        try
+        {
+            GameBiz biz = CurrentGameBiz;
+            TimeSpan total = await Task.Run(() =>
+            {
+                TimeSpan value = _playTimeStatsService.GetPlayTimeTotal(biz);
+                if (value > TimeSpan.Zero)
+                {
+                    DatabaseService.SetValue(PlayTimeStatsService.TotalPlayTimeKey(biz), value);
+                }
+                return value;
+            });
+            if (biz == CurrentGameBiz)
+            {
+                PlayTimeTotal = total;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Recalculate play time total");
         }
     }
 

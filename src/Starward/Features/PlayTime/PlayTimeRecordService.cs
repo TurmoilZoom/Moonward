@@ -68,7 +68,7 @@ internal class PlayTimeRecordService
                     }
                 }
             }
-            DatabaseService.SetValue($"playtime_total_{biz}", _playTimeStatsService.GetPlayTimeTotal(biz));
+            DatabaseService.SetValue(PlayTimeStatsService.TotalPlayTimeKey(biz), _playTimeStatsService.GetPlayTimeTotal(biz));
             _logger.LogInformation("End log playtime ({biz}, {pid})", biz, pid);
         }
         catch (Exception ex)
