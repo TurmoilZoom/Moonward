@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
+using Starward.Controls;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -62,7 +63,6 @@ public sealed class CalendarHeatmap : Grid
     private readonly Canvas _monthLayer = new() { Height = 18 };
     private readonly Canvas _dividerLayer = new() { IsHitTestVisible = false };
     private readonly Grid _weekdayColumn = new();
-    private readonly HoverCard _hoverCard = new();
 
 
     /// <summary>
@@ -121,13 +121,6 @@ public sealed class CalendarHeatmap : Grid
         SetRow(_dividerLayer, 0);
         SetColumn(_dividerLayer, 1);
         Children.Add(_dividerLayer);
-
-        // 悬浮卡需覆盖整个根网格，其坐标系原点 = 根网格原点，hover 位置才能正确跟随方块
-        SetRow(_hoverCard, 0);
-        SetColumn(_hoverCard, 0);
-        SetRowSpan(_hoverCard, 2);
-        SetColumnSpan(_hoverCard, 2);
-        Children.Add(_hoverCard);
 
         LayoutUpdated += OnLayoutUpdated;
         SizeChanged += OnSizeChanged;
@@ -195,8 +188,6 @@ public sealed class CalendarHeatmap : Grid
 
     private void Rebuild()
     {
-        // 释放上一轮方格的悬浮绑定（每个方格一条，_hoverCard 是本控件复用的长生命周期实例）
-        _hoverCard.Clear();
         _plate.Children.Clear();
         _monthLayer.Children.Clear();
         _dividerLayer.Children.Clear();
@@ -353,7 +344,8 @@ public sealed class CalendarHeatmap : Grid
         slot.Children.Add(border);
         if (day is { } d2 && !string.IsNullOrEmpty(d2.Tooltip))
         {
-            _hoverCard.Bind(border, () => d2.Tooltip);
+            InstantTooltip.SetPlacement(border, InstantTooltipPlacement.Top);
+            InstantTooltip.SetText(border, d2.Tooltip);
         }
         return slot;
     }

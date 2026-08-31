@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
+using Starward.Controls;
 using System;
 using System.Collections.Generic;
 using Windows.Foundation;
@@ -9,7 +10,7 @@ using Windows.Foundation;
 namespace Starward.Features.PlayTime;
 
 /// <summary>
-/// 通用柱状图：纵轴刻度与网格线随数据自适应（5 等分），圆角柱体，悬停显示提示卡。
+/// 通用柱状图：纵轴刻度与网格线随数据自适应（5 等分），圆角柱体，悬停显示即时 Tooltip。
 /// </summary>
 public sealed class BarChart : Grid
 {
@@ -43,10 +44,6 @@ public sealed class BarChart : Grid
     public double MaxBarWidth { get; set; } = 38;
 
 
-    private readonly HoverCard _hoverCard = new() { AlwaysAbove = true };
-
-
-
     public BarChart()
     {
         HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -59,8 +56,6 @@ public sealed class BarChart : Grid
         Children.Clear();
         RowDefinitions.Clear();
         ColumnDefinitions.Clear();
-        // 释放上一轮柱体的悬浮绑定（_hoverCard 是本控件复用的长生命周期实例）
-        _hoverCard.Clear();
 
         var items = _items;
         if (items is null || items.Count == 0)
@@ -190,7 +185,9 @@ public sealed class BarChart : Grid
                 };
                 hit.SetValue(Grid.ColumnProperty, index);
                 barsHost.Children.Add(hit);
-                _hoverCard.Bind(hit, () => item.Tooltip);
+                // 提示卡显示在整列命中区上方，即贴着绘图区顶部，避免遮挡相邻柱体
+                InstantTooltip.SetPlacement(hit, InstantTooltipPlacement.Top);
+                InstantTooltip.SetText(hit, item.Tooltip);
                 hit.PointerEntered += (_, _) =>
                 {
                     hoverHighlight.SetValue(Grid.ColumnProperty, index);
@@ -217,11 +214,6 @@ public sealed class BarChart : Grid
         labelsHost.SetValue(Grid.ColumnProperty, 1);
         Children.Add(barsHost);
         Children.Add(labelsHost);
-
-        // 悬浮提示层，覆盖整个图表区域
-        SetRowSpan(_hoverCard, 2);
-        SetColumnSpan(_hoverCard, 2);
-        Children.Add(_hoverCard);
     }
 
 

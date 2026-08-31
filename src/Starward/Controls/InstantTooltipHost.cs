@@ -629,17 +629,15 @@ internal sealed class InstantTooltipHost
         if (actionInline)
         {
             // 不换行空格：链接紧跟正文，避免单独掉到下一行
-            _labelRun.Text = label.TrimEnd() + "\u00A0";
+            AppendLabelInlines(label.TrimEnd() + "\u00A0");
             _inlineActionRun.Text = actionText;
-            _text.Inlines.Add(_labelRun);
             _text.Inlines.Add(_inlineActionLink);
             _actionButton.Content = null;
             _actionButton.Visibility = Visibility.Collapsed;
         }
         else
         {
-            _labelRun.Text = label;
-            _text.Inlines.Add(_labelRun);
+            AppendLabelInlines(label);
             if (hasAction)
             {
                 _actionButton.Content = actionText;
@@ -669,6 +667,24 @@ internal sealed class InstantTooltipHost
         else if (wasOpenWithAction && previousAnchor is not null)
         {
             InstantTooltip.GetOpenChangedCallback(previousAnchor)?.Invoke(false);
+        }
+    }
+
+
+    /// <summary>
+    /// 把正文写入 <see cref="_text"/>，其中的换行符转成 <see cref="LineBreak"/>。
+    /// 图表提示这类「日期 + 数值」两行文案，靠 Run 自带的换行符不一定断行。
+    /// </summary>
+    /// <param name="label">提示正文，可含换行符。</param>
+    private void AppendLabelInlines(string label)
+    {
+        string[] lines = label.Replace("\r\n", "\n").Split('\n');
+        _labelRun.Text = lines[0];
+        _text.Inlines.Add(_labelRun);
+        for (int i = 1; i < lines.Length; i++)
+        {
+            _text.Inlines.Add(new LineBreak());
+            _text.Inlines.Add(new Run { Text = lines[i] });
         }
     }
 
