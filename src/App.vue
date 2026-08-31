@@ -568,7 +568,7 @@ onUnmounted(() => {
         <p class="section-lead">
           {{
             locale === 'zh'
-              ? '配置如何落到快捷方式或 URL、如何跳过 UAC，以及签到在何时触发。'
+              ? '一套设置怎么变成桌面图标或一条链接、UAC 提示怎么跳过，以及签到到底什么时候跑。'
               : 'How a profile becomes a shortcut or URL, how skip-UAC works, and when check-in runs.'
           }}
         </p>
@@ -624,13 +624,13 @@ onUnmounted(() => {
                 @mouseenter="activeStep = 'config'"
               >
                 <span class="pipe-label">{{ locale === 'zh' ? '配置文件' : 'Profile' }}</span>
-                <span class="pipe-sub">game · args · account</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '游戏 · 参数 · 账号' : 'game · args · account' }}</span>
               </div>
             </div>
 
             <div class="pipe-join">
               <span class="pipe-v" />
-              <span class="pipe-hint">{{ locale === 'zh' ? '导出入口' : 'Export entry' }}</span>
+              <span class="pipe-hint">{{ locale === 'zh' ? '两种入口' : 'Two entries' }}</span>
             </div>
 
             <div class="pipe-row split">
@@ -640,7 +640,7 @@ onUnmounted(() => {
                 @mouseenter="activeStep = 'entries'"
               >
                 <span class="pipe-label">{{ locale === 'zh' ? '桌面快捷方式' : 'Shortcut' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '.lnk · 可选免 UAC' : '.lnk · optional skip-UAC' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '桌面图标 · 可选免 UAC' : 'desktop icon · optional skip-UAC' }}</span>
               </div>
               <div class="pipe-or">{{ locale === 'zh' ? '或' : 'or' }}</div>
               <div
@@ -674,27 +674,12 @@ onUnmounted(() => {
 
             <div class="pipe-row">
               <div
-                class="pipe-node checkin"
-                :class="{ on: activeStep === 'checkin' }"
-                @mouseenter="activeStep = 'checkin'"
-              >
-                <span class="pipe-label">{{ locale === 'zh' ? '自动签到' : 'Auto check-in' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '可选 · 绑定账号' : 'optional · bound account' }}</span>
-              </div>
-            </div>
-
-            <div class="pipe-join">
-              <span class="pipe-v" />
-            </div>
-
-            <div class="pipe-row">
-              <div
                 class="pipe-node game"
                 :class="{ on: activeStep === 'game' }"
                 @mouseenter="activeStep = 'game'"
               >
                 <span class="pipe-label">{{ locale === 'zh' ? '启动游戏' : 'Launch game' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '客户端进程' : 'game process' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '游戏本体' : 'the game itself' }}</span>
               </div>
             </div>
           </div>
@@ -726,28 +711,32 @@ onUnmounted(() => {
             <span class="path-key">{{ locale === 'zh' ? '配置文件' : 'Profile' }}</span>
             <span class="path-val">{{
               locale === 'zh'
-                ? '游戏 + 启动参数 + 绑定账号，可多套并存'
-                : 'Game + args + account; multiple per title'
+                ? '玩哪个游戏 + 什么启动参数 + 哪个账号，可存多套'
+                : 'Which game, which launch options, which account — save several'
             }}</span>
           </div>
           <div class="path-item">
             <span class="path-key">{{ locale === 'zh' ? '快捷方式' : 'Shortcut' }}</span>
             <span class="path-val">{{
               locale === 'zh'
-                ? '桌面图标绑定配置；可勾选关闭 UAC'
-                : 'Desktop icon; optional skip-UAC'
+                ? '桌面图标绑定一套设置，双击直接开游戏'
+                : 'A desktop icon bound to one setup; double-click to play'
             }}</span>
           </div>
           <div class="path-item">
             <span class="path-key">URL</span>
-            <span class="path-val mono">moonward:// → profile → game</span>
+            <span class="path-val mono">{{
+              locale === 'zh'
+                ? 'moonward://startgame → 配置 → 开游戏'
+                : 'moonward://startgame → profile → game'
+            }}</span>
           </div>
           <div class="path-item">
-            <span class="path-key">{{ locale === 'zh' ? '自动签到' : 'Check-in' }}</span>
+            <span class="path-key">{{ locale === 'zh' ? '免 UAC' : 'Skip UAC' }}</span>
             <span class="path-val">{{
               locale === 'zh'
-                ? '开游戏顺带签；软件启动后还会批量签'
-                : 'On launch, plus a batch after Moonward starts'
+                ? '只在创建时同意一次，之后双击不再弹窗'
+                : 'Approve once at creation; later double-clicks never prompt'
             }}</span>
           </div>
         </div>
@@ -772,8 +761,8 @@ onUnmounted(() => {
               <span class="fold-title">{{ t(checkInFlow.title) }}</span>
               <span class="fold-hint">{{
                 locale === 'zh'
-                  ? '按游戏开关 · 启动后批量 · 开游戏顺带签'
-                  : 'Per-game toggle · batch after start · on launch'
+                  ? '按游戏开关 · 启动十秒后 · 依次签到'
+                  : 'Per-game toggle · ~10s after start · one by one'
               }}</span>
             </span>
           </summary>
@@ -803,32 +792,32 @@ onUnmounted(() => {
                 @mouseenter="activeCheckInStep = 'enable'"
               >
                 <span class="pipe-label">{{ locale === 'zh' ? '按游戏开启' : 'Enable per game' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '独立开关 · 下次启动生效' : 'per-game · next start' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '各自独立 · 下次打开生效' : 'independent · next start' }}</span>
               </div>
             </div>
 
             <div class="pipe-join">
               <span class="pipe-v" />
-              <span class="pipe-hint">{{ locale === 'zh' ? '两条路径' : 'Two paths' }}</span>
+              <span class="pipe-hint">{{ locale === 'zh' ? '两种启动' : 'Two ways to start' }}</span>
             </div>
 
             <div class="pipe-row split">
               <div
                 class="pipe-node batch"
-                :class="{ on: activeCheckInStep === 'paths' }"
-                @mouseenter="activeCheckInStep = 'paths'"
+                :class="{ on: activeCheckInStep === 'start' }"
+                @mouseenter="activeCheckInStep = 'start'"
               >
-                <span class="pipe-label">{{ locale === 'zh' ? '启动后批量' : 'Batch after start' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '约 10 秒 · 依次签到' : '~10s · one by one' }}</span>
+                <span class="pipe-label">{{ locale === 'zh' ? '打开软件' : 'Open Moonward' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '含开机自启' : 'incl. start-at-login' }}</span>
               </div>
               <div class="pipe-or">{{ locale === 'zh' ? '或' : 'or' }}</div>
               <div
-                class="pipe-node launch-acc"
-                :class="{ on: activeCheckInStep === 'paths' }"
-                @mouseenter="activeCheckInStep = 'paths'"
+                class="pipe-node launch-tray"
+                :class="{ on: activeCheckInStep === 'start' }"
+                @mouseenter="activeCheckInStep = 'start'"
               >
-                <span class="pipe-label">{{ locale === 'zh' ? '开游戏顺带签' : 'On game launch' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '快捷方式 / URL / CLI' : 'shortcut / URL / CLI' }}</span>
+                <span class="pipe-label">{{ locale === 'zh' ? '快捷方式开游戏' : 'Launch by shortcut' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '软件留在托盘' : 'app stays in the tray' }}</span>
               </div>
             </div>
 
@@ -843,7 +832,7 @@ onUnmounted(() => {
                 @mouseenter="activeCheckInStep = 'claim'"
               >
                 <span class="pipe-label">{{ locale === 'zh' ? '查询并签到' : 'Look up, then claim' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '已签则跳过 · 失败冷却' : 'skip if done · cooldown' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '约 10 秒后 · 已签则跳过' : '~10s later · skip if done' }}</span>
               </div>
             </div>
           </div>
@@ -869,25 +858,27 @@ onUnmounted(() => {
           <div class="path-item">
             <span class="path-key">{{ locale === 'zh' ? '按游戏开关' : 'Per-game toggle' }}</span>
             <span class="path-val">{{
-              locale === 'zh' ? '各游戏互不影响，下次启动生效' : 'Independent; takes effect next start'
+              locale === 'zh' ? '各游戏互不影响，改完下次打开生效' : 'Independent; takes effect next time you open the app'
             }}</span>
           </div>
           <div class="path-item">
             <span class="path-key">{{ locale === 'zh' ? '启动后批量' : 'Batch after start' }}</span>
             <span class="path-val">{{
-              locale === 'zh' ? '约十秒后依次签已开启的游戏' : 'Enabled games, one by one after ~10s'
+              locale === 'zh'
+                ? '启动约十秒后挨个领，中间隔几秒'
+                : 'Starts ~10s after launch, one game at a time, seconds apart'
             }}</span>
           </div>
           <div class="path-item">
-            <span class="path-key">{{ locale === 'zh' ? '开游戏顺带签' : 'On launch' }}</span>
+            <span class="path-key">{{ locale === 'zh' ? '开机自启' : 'Start at login' }}</span>
             <span class="path-val">{{
-              locale === 'zh' ? '快捷方式 / URL / 命令行只签该账号' : 'Shortcut, URL, or CLI: that account only'
+              locale === 'zh' ? '登录 Windows 后自己缩到托盘，签到照跑' : 'Tucks into the tray after you sign in; check-in still runs'
             }}</span>
           </div>
           <div class="path-item">
             <span class="path-key">{{ locale === 'zh' ? '失败冷却' : 'Cooldown' }}</span>
             <span class="path-val">{{
-              locale === 'zh' ? '出错约十分钟内不再重试' : 'About 10 minutes after a failure'
+              locale === 'zh' ? '出错后约十分钟内不再重试' : 'Waits about 10 minutes after a failure'
             }}</span>
           </div>
         </div>
@@ -1809,7 +1800,6 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px var(--glow-amber);
 }
 
-.pipe-node.checkin.on,
 .pipe-node.claim.on,
 .pipe-node.batch.on {
   border-color: var(--green);
@@ -1821,7 +1811,7 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-.pipe-node.launch-acc.on {
+.pipe-node.launch-tray.on {
   border-color: var(--amber);
   box-shadow: 0 0 0 3px var(--glow-amber);
 }
