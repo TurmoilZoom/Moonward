@@ -3820,10 +3820,8 @@ You are welcome to submit exported data to:</value>
   <data name="StartGameTaskManager_Description" xml:space="preserve"><value>Tasks are grouped by game and server. Deleting a task makes its associated desktop shortcut unavailable until you create it again.</value></data>
   <data name="StartGameTaskManager_NoTasks" xml:space="preserve"><value>No skip-UAC start-game scheduled tasks were found.</value></data>
   <data name="StartGameTaskManager_UnknownGame" xml:space="preserve"><value>Unrecognized tasks</value></data>
-  <data name="StartGameTaskManager_Profile" xml:space="preserve"><value>Launch profile: {0}</value></data>
   <data name="StartGameTaskManager_LoginUid" xml:space="preserve"><value>Login UID: {0}</value></data>
   <data name="StartGameTaskManager_DeleteSelected" xml:space="preserve"><value>Delete selected ({0})</value></data>
-  <data name="StartGameTaskManager_DeleteAll" xml:space="preserve"><value>Delete all</value></data>
   <data name="StartGameTaskManager_ConfirmMessage" xml:space="preserve"><value>Delete {0} selected skip-UAC task(s)? Their associated desktop shortcuts will stop working until recreated. Administrator approval may be required once.</value></data>
   <data name="StartGameTaskManager_Deleted" xml:space="preserve"><value>Deleted {0} scheduled task(s).</value></data>
   <data name="StartGameTaskManager_Partial" xml:space="preserve"><value>Deleted {0} task(s); {1} selected task(s) remain.</value></data>

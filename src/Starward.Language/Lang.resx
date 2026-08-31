@@ -3895,17 +3895,11 @@ Repository:</value>
   <data name="StartGameTaskManager_UnknownGame" xml:space="preserve">
     <value>Unrecognized tasks</value>
   </data>
-  <data name="StartGameTaskManager_Profile" xml:space="preserve">
-    <value>Launch profile: {0}</value>
-  </data>
   <data name="StartGameTaskManager_LoginUid" xml:space="preserve">
     <value>Login UID: {0}</value>
   </data>
   <data name="StartGameTaskManager_DeleteSelected" xml:space="preserve">
     <value>Delete selected ({0})</value>
-  </data>
-  <data name="StartGameTaskManager_DeleteAll" xml:space="preserve">
-    <value>Delete all</value>
   </data>
   <data name="StartGameTaskManager_ConfirmMessage" xml:space="preserve">
     <value>Delete {0} selected skip-UAC task(s)? Their associated desktop shortcuts will stop working until recreated. Administrator approval may be required once.</value>

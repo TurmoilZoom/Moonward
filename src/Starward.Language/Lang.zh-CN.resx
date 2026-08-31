@@ -3894,17 +3894,11 @@
   <data name="StartGameTaskManager_UnknownGame" xml:space="preserve">
     <value>未识别的任务</value>
   </data>
-  <data name="StartGameTaskManager_Profile" xml:space="preserve">
-    <value>启动配置：{0}</value>
-  </data>
   <data name="StartGameTaskManager_LoginUid" xml:space="preserve">
     <value>登录 UID：{0}</value>
   </data>
   <data name="StartGameTaskManager_DeleteSelected" xml:space="preserve">
     <value>删除所选项（{0}）</value>
-  </data>
-  <data name="StartGameTaskManager_DeleteAll" xml:space="preserve">
-    <value>删除全部</value>
   </data>
   <data name="StartGameTaskManager_ConfirmMessage" xml:space="preserve">
     <value>删除所选的 {0} 个免 UAC 计划任务？关联的桌面快捷方式将失效，需重新创建。可能需要管理员授权一次。</value>

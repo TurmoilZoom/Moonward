@@ -1,9 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
+using Starward.Features.GameSelector;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,6 +20,7 @@ public sealed partial class ElevatedStartGameTaskManagerDialog : ContentDialog
 {
     private readonly ILogger<ElevatedStartGameTaskManagerDialog> _logger = AppConfig.GetLogger<ElevatedStartGameTaskManagerDialog>();
 
+    /// <summary>确认气泡当前指向的任务；确认后才真正删除。</summary>
     private IReadOnlyList<string> _pendingTaskPaths = [];
 
     public ElevatedStartGameTaskManagerDialog()
@@ -32,80 +33,87 @@ public sealed partial class ElevatedStartGameTaskManagerDialog : ContentDialog
 
     public bool HasTasks => TaskGroups.Count > 0;
 
-    public bool CanEdit => HasTasks && !IsBusy && !IsConfirming;
+    public bool CanEdit => HasTasks && !IsBusy;
 
     public bool CanClose => !IsBusy;
 
-    public bool CanDeleteSelected => CanEdit && TaskGroups.SelectMany(x => x.Tasks).Any(x => x.IsSelected);
+    /// <summary>列表为空且不在加载中时才显示空态，避免与进度环叠在一起。</summary>
+    public bool ShowEmptyState => !HasTasks && !IsBusy;
 
-    public string DeleteSelectedText => string.Format(
-        Lang.StartGameTaskManager_DeleteSelected,
-        TaskGroups.SelectMany(x => x.Tasks).Count(x => x.IsSelected));
+    public bool CanDeleteSelected => CanEdit && SelectedCount > 0;
+
+    /// <summary>三态全选：无选中为 false，全部选中为 true，部分选中为 null。</summary>
+    public bool? AllSelected
+    {
+        get
+        {
+            int total = AllTasks.Count();
+            if (total == 0)
+            {
+                return false;
+            }
+            int selected = SelectedCount;
+            return selected == 0 ? false : selected == total ? true : null;
+        }
+    }
+
+    public string DeleteSelectedText => string.Format(Lang.StartGameTaskManager_DeleteSelected, SelectedCount);
+
+    public string ConfirmationText => string.Format(Lang.StartGameTaskManager_ConfirmMessage, _pendingTaskPaths.Count);
+
+    private IEnumerable<ElevatedStartGameTaskItem> AllTasks => TaskGroups.SelectMany(x => x.Tasks);
+
+    private int SelectedCount => AllTasks.Count(x => x.IsSelected);
 
     [ObservableProperty]
     private bool _isBusy;
 
-    [ObservableProperty]
-    private bool _isConfirming;
-
-    [ObservableProperty]
-    private string _confirmationText = string.Empty;
-
     partial void OnIsBusyChanged(bool value) => RefreshCommandStates();
-
-    partial void OnIsConfirmingChanged(bool value) => RefreshCommandStates();
 
     private async void ElevatedStartGameTaskManagerDialog_Loaded(object sender, RoutedEventArgs e)
     {
         await RefreshAsync(clearFeedback: true);
     }
 
-    [RelayCommand]
-    private void SelectAll()
+    /// <summary>
+    /// 底部三态全选：未全选时全选，已全选时清除选择。
+    /// </summary>
+    private void CheckBox_SelectAll_Click(object sender, RoutedEventArgs e)
     {
-        foreach (ElevatedStartGameTaskItem item in TaskGroups.SelectMany(x => x.Tasks))
+        bool selectAll = AllSelected is not true;
+        foreach (ElevatedStartGameTaskItem item in AllTasks)
         {
-            item.IsSelected = true;
+            item.IsSelected = selectAll;
         }
-    }
-
-    [RelayCommand]
-    private void ClearSelection()
-    {
-        foreach (ElevatedStartGameTaskItem item in TaskGroups.SelectMany(x => x.Tasks))
-        {
-            item.IsSelected = false;
-        }
+        RefreshCommandStates();
     }
 
     private void Button_DeleteTask_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is FrameworkElement { DataContext: ElevatedStartGameTaskItem item })
+        if (sender is FrameworkElement { DataContext: ElevatedStartGameTaskItem item } element)
         {
-            BeginDelete([item.TaskPath]);
+            BeginDelete([item.TaskPath], element);
         }
     }
 
     private void Button_DeleteSelected_Click(object sender, RoutedEventArgs e)
     {
-        BeginDelete(TaskGroups.SelectMany(x => x.Tasks).Where(x => x.IsSelected).Select(x => x.TaskPath));
-    }
-
-    private void Button_DeleteAll_Click(object sender, RoutedEventArgs e)
-    {
-        BeginDelete(TaskGroups.SelectMany(x => x.Tasks).Select(x => x.TaskPath));
+        if (sender is FrameworkElement element)
+        {
+            BeginDelete(AllTasks.Where(x => x.IsSelected).Select(x => x.TaskPath), element);
+        }
     }
 
     private void Button_CancelDelete_Click(object sender, RoutedEventArgs e)
     {
-        IsConfirming = false;
+        Flyout_ConfirmDelete.Hide();
         _pendingTaskPaths = [];
     }
 
     private async void Button_ConfirmDelete_Click(object sender, RoutedEventArgs e)
     {
+        Flyout_ConfirmDelete.Hide();
         IReadOnlyList<string> taskPaths = _pendingTaskPaths;
-        IsConfirming = false;
         _pendingTaskPaths = [];
         if (taskPaths.Count == 0)
         {
@@ -148,7 +156,12 @@ public sealed partial class ElevatedStartGameTaskManagerDialog : ContentDialog
         Hide();
     }
 
-    private void BeginDelete(IEnumerable<string> taskPaths)
+    /// <summary>
+    /// 记下待删除任务，并把确认气泡弹到触发的按钮上。
+    /// </summary>
+    /// <param name="taskPaths">待删除的计划任务完整路径。</param>
+    /// <param name="anchor">确认气泡的锚点（单项删除按钮或「删除所选」按钮）。</param>
+    private void BeginDelete(IEnumerable<string> taskPaths, FrameworkElement anchor)
     {
         if (!CanEdit)
         {
@@ -164,8 +177,8 @@ public sealed partial class ElevatedStartGameTaskManagerDialog : ContentDialog
             return;
         }
 
-        ConfirmationText = string.Format(Lang.StartGameTaskManager_ConfirmMessage, _pendingTaskPaths.Count);
-        IsConfirming = true;
+        OnPropertyChanged(nameof(ConfirmationText));
+        Flyout_ConfirmDelete.ShowAt(anchor);
     }
 
     private async Task RefreshAsync(bool clearFeedback)
@@ -210,7 +223,7 @@ public sealed partial class ElevatedStartGameTaskManagerDialog : ContentDialog
             {
                 item.SelectionChanged += TaskItem_SelectionChanged;
             }
-            TaskGroups.Add(new ElevatedStartGameTaskGroup(GetGroupTitle(gameBiz), items));
+            TaskGroups.Add(new ElevatedStartGameTaskGroup(gameBiz, items));
         }
 
         OnPropertyChanged(nameof(HasTasks));
@@ -219,25 +232,44 @@ public sealed partial class ElevatedStartGameTaskManagerDialog : ContentDialog
 
     private ElevatedStartGameTaskItem CreateTaskItem(ElevatedStartGameTaskService.StartGameTaskInfo task)
     {
-        string profile = string.Equals(task.ProfileId, "follow", StringComparison.OrdinalIgnoreCase)
-            ? Lang.StartGameMenu_FollowAppSetting
-            : string.IsNullOrWhiteSpace(task.ProfileId) ? task.TaskName : task.ProfileId;
         return new ElevatedStartGameTaskItem(
             task.TaskPath,
-            string.Format(Lang.StartGameTaskManager_Profile, profile),
-            task.LoginUid is > 0 ? string.Format(Lang.StartGameTaskManager_LoginUid, task.LoginUid.Value) : string.Empty);
+            GetProfileDisplayName(task),
+            task.LoginUid is > 0 ? string.Format(Lang.StartGameTaskManager_LoginUid, task.LoginUid.Value) : null);
     }
 
-    private static string GetGroupTitle(GameBiz? gameBiz)
+    /// <summary>
+    /// 任务名中的配置标识换成用户看到的配置名（如「配置文件 1」或自定义名）。
+    /// </summary>
+    /// <param name="task">任务信息。</param>
+    /// <returns>配置显示名；无法识别时回退为任务名。</returns>
+    private static string GetProfileDisplayName(ElevatedStartGameTaskService.StartGameTaskInfo task)
     {
-        if (gameBiz is not GameBiz biz)
+        string profileId = task.ProfileId?.Trim() ?? string.Empty;
+        if (profileId.Length == 0)
         {
-            return Lang.StartGameTaskManager_UnknownGame;
+            return task.TaskName;
         }
-
-        string gameName = biz.ToGameName();
-        string serverName = biz.ToGameServerName();
-        return string.IsNullOrWhiteSpace(serverName) ? gameName : $"{gameName} · {serverName}";
+        if (string.Equals(profileId, "follow", StringComparison.OrdinalIgnoreCase))
+        {
+            return Lang.StartGameMenu_FollowAppSetting;
+        }
+        if (GameLaunchProfile.IsNoneId(profileId))
+        {
+            return Lang.StartGameMenu_LaunchMethodNone;
+        }
+        if (task.GameBiz is GameBiz biz && GameLaunchProfile.TryGetIndex(profileId) is int index)
+        {
+            // 配置名保存在设置里：config1 存 legacy 键，其余在额外配置文件 JSON 中
+            string? customName = index == 1
+                ? AppConfig.GetDefaultLaunchProfileName(biz)
+                : AppConfig.GetExtraLaunchProfiles(biz)
+                    .FirstOrDefault(x => string.Equals(x.Id, profileId, StringComparison.OrdinalIgnoreCase))?.Name;
+            return string.IsNullOrWhiteSpace(customName)
+                ? string.Format(Lang.GameLauncherSettingDialog_ProfileNameFormat, index)
+                : customName.Trim();
+        }
+        return profileId;
     }
 
     private void TaskItem_SelectionChanged(object? sender, EventArgs e)
@@ -248,9 +280,11 @@ public sealed partial class ElevatedStartGameTaskManagerDialog : ContentDialog
     private void RefreshCommandStates()
     {
         OnPropertyChanged(nameof(CanEdit));
+        OnPropertyChanged(nameof(ShowEmptyState));
         OnPropertyChanged(nameof(CanClose));
         OnPropertyChanged(nameof(CanDeleteSelected));
         OnPropertyChanged(nameof(DeleteSelectedText));
+        OnPropertyChanged(nameof(AllSelected));
     }
 
     private void ShowFeedback(InfoBarSeverity severity, string message)
@@ -262,23 +296,42 @@ public sealed partial class ElevatedStartGameTaskManagerDialog : ContentDialog
     }
 }
 
+/// <summary>
+/// 按游戏区服分组的免 UAC 启动任务。
+/// </summary>
 public sealed class ElevatedStartGameTaskGroup
 {
-    public ElevatedStartGameTaskGroup(string title, IReadOnlyList<ElevatedStartGameTaskItem> tasks)
+    public ElevatedStartGameTaskGroup(GameBiz? gameBiz, IReadOnlyList<ElevatedStartGameTaskItem> tasks)
     {
-        Title = title;
+        if (gameBiz is GameBiz biz)
+        {
+            var icon = new GameBizIcon(biz);
+            GameIcon = icon.GameIcon;
+            GameName = icon.GameName;
+            ServerName = icon.ServerName;
+        }
+        else
+        {
+            // 无法识别游戏的历史任务：不显示图标，只给出统一标题
+            GameName = Lang.StartGameTaskManager_UnknownGame;
+            ServerName = string.Empty;
+        }
         Tasks = tasks;
     }
 
-    public string Title { get; }
+    /// <summary>游戏图标；无法识别游戏时为 null，分组标题不显示图标。</summary>
+    public string? GameIcon { get; }
+
+    public string GameName { get; }
+
+    public string ServerName { get; }
 
     public IReadOnlyList<ElevatedStartGameTaskItem> Tasks { get; }
 }
 
-[INotifyPropertyChanged]
-public sealed partial class ElevatedStartGameTaskItem
+public sealed partial class ElevatedStartGameTaskItem : ObservableObject
 {
-    public ElevatedStartGameTaskItem(string taskPath, string profileText, string loginUidText)
+    public ElevatedStartGameTaskItem(string taskPath, string profileText, string? loginUidText)
     {
         TaskPath = taskPath;
         ProfileText = profileText;
@@ -291,7 +344,8 @@ public sealed partial class ElevatedStartGameTaskItem
 
     public string ProfileText { get; }
 
-    public string LoginUidText { get; }
+    /// <summary>登录 UID 文案；任务未绑定 UID 时为 null，该列不显示。</summary>
+    public string? LoginUidText { get; }
 
     [ObservableProperty]
     private bool _isSelected;

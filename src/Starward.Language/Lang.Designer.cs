@@ -11117,12 +11117,6 @@ namespace Starward.Language {
             }
         }
 
-        public static string StartGameTaskManager_Profile {
-            get {
-                return ResourceManager.GetString("StartGameTaskManager_Profile", resourceCulture);
-            }
-        }
-
         public static string StartGameTaskManager_LoginUid {
             get {
                 return ResourceManager.GetString("StartGameTaskManager_LoginUid", resourceCulture);
@@ -11132,12 +11126,6 @@ namespace Starward.Language {
         public static string StartGameTaskManager_DeleteSelected {
             get {
                 return ResourceManager.GetString("StartGameTaskManager_DeleteSelected", resourceCulture);
-            }
-        }
-
-        public static string StartGameTaskManager_DeleteAll {
-            get {
-                return ResourceManager.GetString("StartGameTaskManager_DeleteAll", resourceCulture);
             }
         }
 
