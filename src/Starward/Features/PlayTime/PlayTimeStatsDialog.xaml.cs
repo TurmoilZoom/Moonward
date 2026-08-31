@@ -127,7 +127,10 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
                 }
             }
             SelectedGameIcon = GameBizIcons.FirstOrDefault(x => x.GameBiz == SelectedGameBiz);
-            ListView_Game.SelectedItem = SelectedGameIcon;
+            if (ListView_Game is not null)
+            {
+                ListView_Game.SelectedItem = SelectedGameIcon;
+            }
         }
         catch (Exception ex)
         {
@@ -142,11 +145,11 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
 
     private void ListView_Game_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_suppressGameSelection || ListView_Game.SelectedItem is not GameBizIcon icon)
+        if (_suppressGameSelection || (sender as ListView)?.SelectedItem is not GameBizIcon icon)
         {
             return;
         }
-        Flyout_Game.Hide();
+        Flyout_Game?.Hide();
         if (icon.GameBiz == SelectedGameBiz)
         {
             return;
@@ -593,7 +596,6 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
             ComboBox_BarMonth.ItemsSource = months;
             ComboBox_BarMonth.SelectedIndex = Math.Clamp(AppConfig.PlayTimeStatsBarMonth, 0, 12);
             Segmented_BarRange.SelectedIndex = Math.Clamp(AppConfig.PlayTimeStatsBarRange, 0, BarRangeCustom);
-            UpdateCustomRangeVisibility();
         }
         catch (Exception ex)
         {
@@ -602,6 +604,8 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
         finally
         {
             _suppressBarRangeSave = false;
+            // 控件此时才齐全，这里补上 SelectionChanged 里没能生效的那次可见性同步
+            UpdateCustomRangeVisibility();
         }
     }
 
@@ -646,9 +650,19 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     }
 
 
+    /// <summary>
+    /// 同步自定义模式下年月下拉框的显隐。
+    /// Segmented 首项的 <c>IsSelected="True"</c> 在 <c>InitializeComponent</c> 解析到该控件时就会触发
+    /// SelectionChanged，而两个下拉框声明在它后面、字段尚未赋值，所以这里必须容忍 null——
+    /// 那一次跳过没关系，<see cref="InitializeBarRangeOptions"/> 会在控件齐全后再同步一次。
+    /// </summary>
     private void UpdateCustomRangeVisibility()
     {
-        Visibility visibility = Segmented_BarRange.SelectedIndex == BarRangeCustom ? Visibility.Visible : Visibility.Collapsed;
+        if (ComboBox_BarYear is null || ComboBox_BarMonth is null)
+        {
+            return;
+        }
+        Visibility visibility = Segmented_BarRange?.SelectedIndex == BarRangeCustom ? Visibility.Visible : Visibility.Collapsed;
         ComboBox_BarYear.Visibility = visibility;
         ComboBox_BarMonth.Visibility = visibility;
     }
