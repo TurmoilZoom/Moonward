@@ -922,6 +922,8 @@ internal static class GamepadController
         try
         {
             Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\GameBar", "UseNexusForGameBarEnabled", 0, RegistryValueKind.DWord);
+            // 记下「这个 0 是我们写的」，退出与下次启动据此判断该不该还原，避免覆盖用户自己关掉的引导键
+            AppConfig.GamepadGuideButtonTakenOver = true;
         }
         catch { }
     }
@@ -932,8 +934,42 @@ internal static class GamepadController
         try
         {
             Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\GameBar", "UseNexusForGameBarEnabled", 1, RegistryValueKind.DWord);
+            AppConfig.GamepadGuideButtonTakenOver = false;
         }
         catch { }
+    }
+
+
+    /// <summary>
+    /// 退出应用时还原引导键：仅当接管标记还在时才还原。
+    /// 无条件还原会把用户自己在 GameBar 里关掉的引导键又打开。
+    /// </summary>
+    public static void RestoreGamepadGuideButtonOnExit()
+    {
+        if (AppConfig.GamepadGuideButtonTakenOver)
+        {
+            RestoreGamepadGuideButtonForGameBar();
+        }
+    }
+
+
+    /// <summary>
+    /// 启动时自愈：上次进程被强杀或崩溃会让接管标记与 <c>UseNexusForGameBarEnabled=0</c> 一起残留，
+    /// 用户会发现引导键再也按不出 GameBar。当前配置并非「总是接管」时把它还原
+    /// —— 「游戏运行时接管」模式此刻尚无游戏在跑，同样应处于还原状态，真正需要接管时
+    /// <see cref="Initialize"/> 与 <see cref="DisableGamepadGuideButtonForGameBarBecauseOfGameStart"/> 会再关掉。
+    /// </summary>
+    public static void RestoreGamepadGuideButtonIfNotAlwaysTakenOver()
+    {
+        if (!AppConfig.GamepadGuideButtonTakenOver)
+        {
+            return;
+        }
+        if (AppConfig.EnableGamepadController && AppConfig.GamepadGuideButtonMode is 2)
+        {
+            return;
+        }
+        RestoreGamepadGuideButtonForGameBar();
     }
 
 

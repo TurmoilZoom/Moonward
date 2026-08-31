@@ -18,7 +18,10 @@ internal static class RunningGameService
     private static readonly List<RunningGame> _runningGames = new();
 
 
-    private static readonly System.Timers.Timer _timer = new();
+    /// <summary>
+    /// 轮询游戏进程是否退出。必须显式给周期：无参构造默认 100ms，会在首次启动游戏后留下一个终生高频轮询。
+    /// </summary>
+    private static readonly System.Timers.Timer _timer = new(1000);
 
 
     private static RunningGame? _latestActiveGame;
@@ -91,6 +94,8 @@ internal static class RunningGameService
             }
             if (_runningGames.Count == 0)
             {
+                // 没有游戏在跑就停表，避免空转（下次 AddRuninngGame 会重新 Start）
+                _timer.Stop();
                 _overlayWindow?.DispatcherQueue.TryEnqueue(() =>
                 {
                     if (_overlayWindow?.AppWindow is not null)

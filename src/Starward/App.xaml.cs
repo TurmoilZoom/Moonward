@@ -2,7 +2,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using Starward.Features.GamepadControl;
-using Starward.Features.GameRecord.SignIn;
+using Starward.Features.Overlay;
 using Starward.Features.Setting;
 using Starward.Features.Startup;
 using Starward.Features.Update;
@@ -113,8 +113,10 @@ public partial class App : Application
         // 便携目录挪过之后，把仍启用的开机启动项路径改到当前 exe；用户已删除/禁用则不动
         AutoStartService.RepairIfNeeded();
 
-        // 特殊启动模式（rpc / playtime / startgame / moonward://）：交由启动处理器职责链分发；若已接管则直接返回
-        if (await DispatchStartupAsync(new StartupContext(args)))
+        // 特殊启动模式（rpc / playtime / startgame / moonward://）：交由启动处理器职责链分发；若已接管则直接返回。
+        // 「启动游戏」类模式在没有常驻实例时会返回 Continue，由下方转为常驻托盘实例（见 GameLaunchStartupCoordinator）。
+        var context = new StartupContext(args);
+        if (await DispatchStartupAsync(context))
         {
             return;
         }
@@ -126,16 +128,26 @@ public partial class App : Application
         var main = AppInstance.FindOrRegisterForKey("main");
         if (!main.IsCurrent)
         {
+            // 竞态兜底：两个快捷方式几乎同时启动时，抢注失败的一方把已拉起的游戏改用 IPC 通知给胜出者，
+            // 且不重定向激活（用户只想开游戏，不该被弹出主窗口）
+            if (context.LaunchedGame is { } lost)
+            {
+                ResidentInstanceMessenger.NotifyGameStarted(lost.Biz, lost.Process.Id);
+                Environment.Exit(0);
+            }
             await main.RedirectActivationToAsync(instance.GetActivatedEventArgs());
             Environment.Exit(0);
         }
 
-        // --hide 参数：仅启动系统托盘，不显示主窗口
-        if (args.Contains(StartupVerbs.Hide))
+        // 仅驻留系统托盘、不显示主窗口：--hide（开机静默启动），或本次是快捷方式/命令行启动游戏。
+        // 后者恒定常驻，让全局热键、手柄与 GameBar 引导键接管有一个知道「游戏正在跑」的宿主。
+        if (args.Contains(StartupVerbs.Hide) || context.IsGameLaunchRequest)
         {
             m_SystemTrayWindow = new SystemTrayWindow();
-            // 批量签到挂在主界面 Loaded 上；托盘启动也要跑，否则开机静默驻留不会签到
-            _ = Task.Run(() => AppConfig.GetService<AutoSignInService>().RunStartupBatchAsync());
+            if (context.LaunchedGame is { } launched)
+            {
+                RunningGameService.AddRuninngGame(launched.Biz, launched.Process);
+            }
         }
         else
         {
@@ -259,7 +271,7 @@ public partial class App : Application
     /// </param>
     public void Exit(bool applyPendingUpdate)
     {
-        GamepadController.RestoreGamepadGuideButtonForGameBar();
+        GamepadController.RestoreGamepadGuideButtonOnExit();
         if (applyPendingUpdate)
         {
             try

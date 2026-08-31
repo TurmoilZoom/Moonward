@@ -25,9 +25,6 @@ public sealed partial class HotkeyInput : UserControl
 
 
 
-    public nint WindowHandle { get; set; }
-
-
     public int HotkeyId { get; set; }
 
 
@@ -233,7 +230,6 @@ public sealed partial class HotkeyInput : UserControl
         State = HoykeyInputState.None;
         HotkeyDeleted?.Invoke(this, new HotkeyInputEventArg
         {
-            WindowHandle = WindowHandle,
             HotkeyId = HotkeyId,
             Modifiers = 0,
             Key = 0,
@@ -364,7 +360,6 @@ public sealed partial class HotkeyInput : UserControl
     {
         HotkeyEditing?.Invoke(this, new HotkeyInputEventArg
         {
-            WindowHandle = WindowHandle,
             HotkeyId = HotkeyId,
             Modifiers = Modifiers,
             Key = Key,
@@ -379,7 +374,6 @@ public sealed partial class HotkeyInput : UserControl
         {
             var e = new HotkeyEditFinishedEventArg
             {
-                WindowHandle = WindowHandle,
                 HotkeyId = HotkeyId,
                 Modifiers = _editingModifiers,
                 Key = _editingKey,
@@ -397,7 +391,6 @@ public sealed partial class HotkeyInput : UserControl
         {
             var e = new HotkeyEditFinishedEventArg
             {
-                WindowHandle = WindowHandle,
                 HotkeyId = HotkeyId,
                 Modifiers = Modifiers,
                 Key = Key,
@@ -534,8 +527,6 @@ public enum HoykeyInputState
 
 public class HotkeyInputEventArg : EventArgs
 {
-    public required nint WindowHandle { get; init; }
-
     public required int HotkeyId { get; init; }
 
     public required VirtualKeyModifiers Modifiers { get; init; }

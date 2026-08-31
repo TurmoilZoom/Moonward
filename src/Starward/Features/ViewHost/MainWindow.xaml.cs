@@ -566,22 +566,8 @@ public sealed partial class MainWindow : WindowEx
                 }
             }
         }
-        else if (uMsg == (uint)User32.WindowMessage.WM_HOTKEY)
-        {
-            if (wParam == 44444)
-            {
-                // 全局热键：打开游戏内覆盖层，失败则显示主窗口
-                if (!RunningGameService.OpenOverlayWindow())
-                {
-                    this.Show();
-                }
-            }
-            else if (wParam == 44445)
-            {
-                // 截图
-                ScreenCaptureService.Capture();
-            }
-        }
+        // 全局热键（WM_HOTKEY）不在这里处理：热键注册在系统托盘窗口上，见 SystemTrayWindow.WindowSubclassProc。
+        // 主窗口可能压根没创建（仅托盘驻留 / 快捷方式启动），挂在这里会让热键整体失效。
         return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
     }
 

@@ -73,6 +73,9 @@ internal class ScreenCaptureService
         RunningGame? runningGame = RunningGameService.GetLatestActiveGame();
         if (runningGame is null)
         {
+            // 截图只针对「本软件已登记为运行中」的游戏。这里静默返回过，用户按了快捷键毫无反应也拿不到日志，
+            // 排查困难（见 issue #10：快捷方式启动的游戏没被登记）；至少留一条记录。
+            _logger.LogInformation("Screenshot hotkey pressed but no running game is tracked.");
             return;
         }
         if (User32.IsIconic(runningGame.WindowHandle))

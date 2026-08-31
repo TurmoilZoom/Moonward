@@ -624,6 +624,9 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>Haga clic con el botón derecho del mouse en el icono del juego a la izquierda.</value>
   </data>
+  <data name="SystemTrayWindow_GlobalHotkey" xml:space="preserve">
+    <value>Atajos globales</value>
+  </data>
   <data name="MainPage_Launcer" xml:space="preserve">
     <value>Iniciador</value>
   </data>
@@ -3261,8 +3264,7 @@ You are welcome to submit exported data to:</value>
     <value>Registro automático</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1. El registro automático es independiente para cada juego y comienza a ejecutarse en secuencia 10 segundos después de iniciar Moonward
-2. Tras activar el registro automático, al iniciar el juego con un acceso directo de una cuenta de inicio de sesión específica también se registrará solo esa cuenta</value>
+    <value>El registro automático es independiente para cada juego y comienza a ejecutarse en secuencia 10 segundos después de iniciar Moonward</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>Inicio automático de la app</value>
@@ -3544,7 +3546,7 @@ You are welcome to submit exported data to:</value>
     <value>Account instances</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
-    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward's "Login account" is only used for daily sign-in in this case and does not affect OneDragon login.</value>
+    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward does not inject a login ticket when a custom launcher is used, so its "Login account" setting has no effect here.</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
     <value>1,2</value>

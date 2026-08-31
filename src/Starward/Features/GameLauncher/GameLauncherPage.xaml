@@ -455,7 +455,9 @@
                               Glyph="{x:Bind BannerAndPostButtonIcon, Mode=OneWay}"
                               IsTextScaleFactorEnabled="False" />
                 </Button>
-                <!--  显示 / 隐藏游戏时长：显示=ToggleRight（拨到开）、隐藏=ToggleLeft（拨到关）。两枚图标叠放，切换时靠 Composition「横向滑动 + 交叉淡化」模拟拨钮滑动，故不用 Visibility 直接互斥  -->
+                <!--  显示 / 隐藏游戏时长：显示=ToggleRight（拨到开、强调色）、隐藏=ToggleLeft（拨到关、禁用色），
+                      与系统托盘菜单里的快捷键开关同一套视觉语言。两枚图标叠放，切换时靠 Composition
+                      「横向滑动 + 交叉淡化」模拟拨钮滑动，故不用 Visibility 直接互斥  -->
                 <Button Padding="4"
                         VerticalAlignment="Center"
                         Command="{x:Bind TogglePlayTimeVisibilityCommand}"
@@ -465,13 +467,13 @@
                     <Grid x:Name="Grid_PlayTimeToggle" Loaded="Grid_PlayTimeToggle_Loaded">
                         <FontIcon x:Name="Icon_PlayTimeShown"
                                   FontSize="16"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                   Glyph="&#xF19F;"
                                   IsHitTestVisible="False"
                                   IsTextScaleFactorEnabled="False" />
                         <FontIcon x:Name="Icon_PlayTimeHidden"
                                   FontSize="16"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                   Glyph="&#xF19E;"
                                   IsHitTestVisible="False"
                                   IsTextScaleFactorEnabled="False" />

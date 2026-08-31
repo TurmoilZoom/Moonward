@@ -319,7 +319,7 @@ internal partial class GameLauncherService
 
 
     /// <summary>
-    /// 启动游戏。使用自定义启动程序时不注入 <c>login_auth_ticket</c>（游戏由工具自行登录；配置的登录账号仅供启动后签到）。
+    /// 启动游戏。使用自定义启动程序时不注入 <c>login_auth_ticket</c>（游戏由工具自行登录，配置的登录账号在此不生效）。
     /// </summary>
     /// <returns></returns>
     /// <param name="profile">额外配置文件（config2…）；null 且 <paramref name="useNoneLaunchMethod"/> 为 false 时使用 config1 的 legacy 键。</param>

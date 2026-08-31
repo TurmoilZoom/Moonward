@@ -624,6 +624,9 @@
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>ゲームアイコンをマウスの右クリックでメニューが表示されます。</value>
   </data>
+  <data name="SystemTrayWindow_GlobalHotkey" xml:space="preserve">
+    <value>グローバルホットキー</value>
+  </data>
   <data name="MainPage_Launcer" xml:space="preserve">
     <value>ランチャー</value>
   </data>
@@ -3260,8 +3263,7 @@
     <value>自動チェックイン</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1.各ゲームの自動チェックインは互いに独立しており、Moonward起動から10秒後に順次実行を開始します
-2.自動チェックインを有効にした後、特定のログインアカウント用ショートカットからゲームを起動すると、そのアカウントに対しても個別にチェックインされます</value>
+    <value>各ゲームの自動チェックインは互いに独立しており、Moonward起動から10秒後に順次実行を開始します</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>アプリのスタートアップ</value>
@@ -3543,7 +3545,7 @@
     <value>Account instances</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
-    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward's "Login account" is only used for daily sign-in in this case and does not affect OneDragon login.</value>
+    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward does not inject a login ticket when a custom launcher is used, so its "Login account" setting has no effect here.</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
     <value>1,2</value>

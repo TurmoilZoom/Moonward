@@ -34,6 +34,131 @@
                     <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.MainPage_Launcer}" />
                 </StackPanel>
             </Button>
+            <!--  全局快捷键：分组标题（文字 + 延伸细线）圈出下面两行，明确它们是全局热键开关而非动作项。
+                  托盘是个刚好包住菜单的独立小窗口，Popup 类提示（InstantTooltip）会被窗口边界裁掉，故用可见标题。  -->
+            <Grid Margin="12,10,4,6" ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock FontSize="11"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.SystemTrayWindow_GlobalHotkey}" />
+                <Rectangle Grid.Column="1"
+                           Height="1"
+                           VerticalAlignment="Center"
+                           Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+            </Grid>
+            <Button Height="36"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Command="{x:Bind ToggleShowMainWindowHotkeyCommand}"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!--  状态灯：绿=已开启、红=已关闭。外圈淡色底 + 内圈实心点，两套叠放靠 Visibility 互斥；
+                          颜色一律 ThemeResource，才能跟随托盘按系统深浅色设置的 RequestedTheme。  -->
+                    <Grid Grid.Column="0"
+                          Width="16"
+                          Height="16"
+                          VerticalAlignment="Center">
+                        <Ellipse Width="16"
+                                 Height="16"
+                                 Fill="{ThemeResource SystemFillColorSuccessBrush}"
+                                 Opacity="0.2"
+                                 Visibility="{x:Bind ToVisibility(ShowMainWindowHotkeyEnabled), Mode=OneWay}" />
+                        <Ellipse Width="8"
+                                 Height="8"
+                                 Fill="{ThemeResource SystemFillColorSuccessBrush}"
+                                 Visibility="{x:Bind ToVisibility(ShowMainWindowHotkeyEnabled), Mode=OneWay}" />
+                        <Ellipse Width="16"
+                                 Height="16"
+                                 Fill="{ThemeResource SystemFillColorCriticalBrush}"
+                                 Opacity="0.2"
+                                 Visibility="{x:Bind ToVisibilityReversed(ShowMainWindowHotkeyEnabled), Mode=OneWay}" />
+                        <Ellipse Width="8"
+                                 Height="8"
+                                 Fill="{ThemeResource SystemFillColorCriticalBrush}"
+                                 Visibility="{x:Bind ToVisibilityReversed(ShowMainWindowHotkeyEnabled), Mode=OneWay}" />
+                    </Grid>
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{x:Bind lang:Lang.HotkeySetting_OpenMainWindow}" />
+                    <!--  键帽：展示该热键当前的按键组合；关闭时整体淡化。  -->
+                    <Border Grid.Column="2"
+                            Margin="16,0,0,0"
+                            Padding="6,1"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource ControlFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Opacity="{x:Bind ToOpacity(ShowMainWindowHotkeyEnabled), Mode=OneWay}">
+                        <TextBlock FontSize="11"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind ShowMainWindowHotkeyText, Mode=OneWay}" />
+                    </Border>
+                </Grid>
+            </Button>
+            <Button Height="36"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Command="{x:Bind ToggleScreenshotHotkeyCommand}"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!--  状态灯：绿=已开启、红=已关闭。外圈淡色底 + 内圈实心点，两套叠放靠 Visibility 互斥；
+                          颜色一律 ThemeResource，才能跟随托盘按系统深浅色设置的 RequestedTheme。  -->
+                    <Grid Grid.Column="0"
+                          Width="16"
+                          Height="16"
+                          VerticalAlignment="Center">
+                        <Ellipse Width="16"
+                                 Height="16"
+                                 Fill="{ThemeResource SystemFillColorSuccessBrush}"
+                                 Opacity="0.2"
+                                 Visibility="{x:Bind ToVisibility(ScreenshotHotkeyEnabled), Mode=OneWay}" />
+                        <Ellipse Width="8"
+                                 Height="8"
+                                 Fill="{ThemeResource SystemFillColorSuccessBrush}"
+                                 Visibility="{x:Bind ToVisibility(ScreenshotHotkeyEnabled), Mode=OneWay}" />
+                        <Ellipse Width="16"
+                                 Height="16"
+                                 Fill="{ThemeResource SystemFillColorCriticalBrush}"
+                                 Opacity="0.2"
+                                 Visibility="{x:Bind ToVisibilityReversed(ScreenshotHotkeyEnabled), Mode=OneWay}" />
+                        <Ellipse Width="8"
+                                 Height="8"
+                                 Fill="{ThemeResource SystemFillColorCriticalBrush}"
+                                 Visibility="{x:Bind ToVisibilityReversed(ScreenshotHotkeyEnabled), Mode=OneWay}" />
+                    </Grid>
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{x:Bind lang:Lang.MainPage_GameScreenshot}" />
+                    <!--  键帽：展示该热键当前的按键组合；关闭时整体淡化。  -->
+                    <Border Grid.Column="2"
+                            Margin="16,0,0,0"
+                            Padding="6,1"
+                            VerticalAlignment="Center"
+                            Background="{ThemeResource ControlFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Opacity="{x:Bind ToOpacity(ScreenshotHotkeyEnabled), Mode=OneWay}">
+                        <TextBlock FontSize="11"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind ScreenshotHotkeyText, Mode=OneWay}" />
+                    </Border>
+                </Grid>
+            </Button>
             <Button Height="36"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Left"

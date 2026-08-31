@@ -92,8 +92,7 @@
                                HotkeyDeleted="HotkeyInput_HotkeyDeleted"
                                HotkeyEditFinished="HotkeyInput_HotkeyEditFinished"
                                HotkeyEditing="HotkeyInput_HotkeyEditing"
-                               HotkeyId="44445"
-                               WindowHandle="{x:Bind WindowHandle}" />
+                               HotkeyId="44445" />
 
 
             <!--  其他选项  -->

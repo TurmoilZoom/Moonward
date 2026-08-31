@@ -624,6 +624,9 @@
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>Щелкните правой кнопкой мыши по иконке игры слева.</value>
   </data>
+  <data name="SystemTrayWindow_GlobalHotkey" xml:space="preserve">
+    <value>Глобальные горячие клавиши</value>
+  </data>
   <data name="MainPage_Launcer" xml:space="preserve">
     <value>Лаунчер</value>
   </data>
@@ -3281,8 +3284,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Автоотметка</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1. Автоотметка независима для каждой игры и начнётся последовательно через 10 секунд после запуска Moonward
-2. После включения автоотметки запуск игры через ярлык конкретной учётной записи также выполнит отметку только для этой учётной записи</value>
+    <value>Автоотметка независима для каждой игры и начнётся последовательно через 10 секунд после запуска Moonward</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>Автозапуск приложения</value>
@@ -3564,7 +3566,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Account instances</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
-    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward's "Login account" is only used for daily sign-in in this case and does not affect OneDragon login.</value>
+    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward does not inject a login ticket when a custom launcher is used, so its "Login account" setting has no effect here.</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
     <value>1,2</value>

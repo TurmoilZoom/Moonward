@@ -7108,6 +7108,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Global hotkeys 的本地化字符串。
+        /// </summary>
+        public static string SystemTrayWindow_GlobalHotkey {
+            get {
+                return ResourceManager.GetString("SystemTrayWindow_GlobalHotkey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Launcher 的本地化字符串。
         /// </summary>
         public static string MainPage_Launcer {

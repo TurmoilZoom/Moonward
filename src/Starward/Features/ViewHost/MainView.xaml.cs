@@ -10,11 +10,8 @@ using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Gacha;
 using Starward.Features.GameLauncher;
-using Starward.Features.GamepadControl;
 using Starward.Features.GameRecord;
-using Starward.Features.GameRecord.SignIn;
 using Starward.Features.GameSetting;
-using Starward.Features.RPC;
 using Starward.Features.Screenshot;
 using Starward.Features.SelfQuery;
 using Starward.Features.Setting;
@@ -28,8 +25,9 @@ using System.Threading.Tasks;
 namespace Starward.Features.ViewHost;
 
 /// <summary>
-/// 主窗口内容壳：左侧导航、内容 Frame、游戏选择与启动后的后台任务（更新检查、抽卡名缓存、自动签到等）。
+/// 主窗口内容壳：左侧导航、内容 Frame、游戏选择与更新检查。
 /// 导航可见性由 <see cref="GameFeatureConfig"/> 按当前 <see cref="GameId"/> 决定；页面切换走 <see cref="NavigateTo"/>。
+/// 与主窗口无关的常驻后台职责（热键、手柄、RPC 环境、抽卡名缓存、批量签到）见 <see cref="Startup.ResidentHost"/>。
 /// </summary>
 [INotifyPropertyChanged]
 public sealed partial class MainView : UserControl
@@ -92,26 +90,18 @@ public sealed partial class MainView : UserControl
 
 
     /// <summary>
-    /// 首次加载到视觉树后：热键、更新检查、抽卡名缓存、批量签到、RPC 环境与可选手柄支持。
+    /// 首次加载到视觉树后：检查更新 / 展示更新说明。
+    /// <para>
+    /// 热键、手柄、GameBar 引导键接管、RPC 环境、抽卡名缓存与批量签到等**与主窗口无关**的常驻职责
+    /// 已移至 <see cref="Startup.ResidentHost"/>，由系统托盘窗口拉起 —— 挂在这里会导致仅托盘驻留
+    /// 或快捷方式启动时统统缺席（见 issue #10）。此处只保留需要主界面 UI 的部分。
+    /// </para>
     /// </summary>
     /// <param name="sender">事件源（本控件）。</param>
     /// <param name="e">路由事件参数。</param>
-    private async void MainView_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void MainView_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        HotkeyManager.InitializeHotkey(this.XamlRoot.GetWindowHandle());
         _ = CheckUpdateOrShowRecentUpdateContentAsync();
-        // 启动时为三个游戏按当前语言确保物品名称映射缓存；首次启动/更新后会一次性迁移存量记录名称。
-        _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().EnsureCurrentLanguageOnStartupAsync());
-        // 启动后批量为所有账号的每个游戏静默签到（逐个请求、请求间随机延时，模拟真人节奏）。
-        _ = Task.Run(() => AppConfig.GetService<AutoSignInService>().RunStartupBatchAsync());
-        AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
-        if (AppConfig.EnableGamepadController)
-        {
-            // 延后初始化，避免与首屏布局/输入抢占同一时刻
-            await Task.Delay(1000);
-            var queue = Content.DispatcherQueue;
-            _ = Task.Run(() => GamepadController.Initialize(queue));
-        }
     }
 
 

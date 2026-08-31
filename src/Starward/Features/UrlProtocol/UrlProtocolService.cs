@@ -3,8 +3,8 @@ using Microsoft.Win32;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
-using Starward.Features.GameRecord.SignIn;
 using Starward.Features.PlayTime;
+using Starward.Features.Startup;
 using Starward.Language;
 using System;
 using System.Diagnostics;
@@ -90,11 +90,15 @@ internal class UrlProtocolService
     /// 当前支持 <c>startgame</c>（启动游戏）与 <c>playtime</c>（记录游玩时长）两种主机名。
     /// </summary>
     /// <param name="url">完整的协议 URL 字符串（如 <c>moonward://startgame/hk4e_cn?profile=config1</c>）。</param>
+    /// <param name="context">
+    /// 启动上下文；由启动处理器传入时，<c>startgame</c> 会据此决定是通知已有常驻实例还是把本进程转为常驻托盘实例
+    /// （见 <see cref="GameLaunchStartupCoordinator"/>）。为 <see langword="null"/> 时只启动游戏，不做常驻处理。
+    /// </param>
     /// <returns>
     /// 已成功识别并处理（含执行失败但已弹出错误提示）时返回 <see langword="true"/>；
     /// 未识别、测试模式或前置条件不满足时返回 <see langword="false"/>，由调用方继续正常启动流程。
     /// </returns>
-    public static async Task<bool> HandleUrlProtocolAsync(string url)
+    public static async Task<bool> HandleUrlProtocolAsync(string url, StartupContext? context = null)
     {
         var log = AppConfig.GetLogger<UrlProtocolService>();
         try
@@ -128,14 +132,9 @@ internal class UrlProtocolService
                         AppConfig.ResolveLaunchProfile(biz, profileId, out bool useNone, out GameLaunchProfile? profile);
                         long? loginUid = long.TryParse(kvs["uid"], out long uid) && uid > 0 ? uid : null;
                         Process? process = await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, installPath, profile, useNone, loginUid);
-                        // URL 进程即将 Exit，不经主界面批量签到；启动成功且解析到指定账号时静默签该账号
-                        if (process is not null)
+                        if (context is not null)
                         {
-                            long resolvedLoginUid = GameLauncherService.ResolveLoginUid(biz, profile, useNone, loginUid);
-                            if (resolvedLoginUid > 0)
-                            {
-                                await AppConfig.GetService<AutoSignInService>().TrySignInForLaunchAccountAsync(biz, resolvedLoginUid);
-                            }
+                            GameLaunchStartupCoordinator.AfterGameStarted(context, biz, process);
                         }
                     }
                     else

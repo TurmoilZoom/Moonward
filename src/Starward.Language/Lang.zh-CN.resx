@@ -683,6 +683,9 @@
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>在左侧的游戏图标上点击鼠标右键</value>
   </data>
+  <data name="SystemTrayWindow_GlobalHotkey" xml:space="preserve">
+    <value>全局快捷键</value>
+  </data>
   <data name="MainPage_Launcer" xml:space="preserve">
     <value>启动器</value>
   </data>
@@ -3319,8 +3322,7 @@
     <value>自动签到</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1.每个游戏的自动签到相互独立，在Moonward启动十秒后开始依次执行
-2.开启自动签到后，通过指定登录账号的快捷方式启动游戏时也会单独给该账号进行签到</value>
+    <value>每个游戏的自动签到相互独立，在Moonward启动十秒后开始依次执行</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>软件开机自启</value>
@@ -3602,7 +3604,7 @@
     <value>指定账号实例</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
-    <value>指定一条龙自己的账号实例（逗号分隔，如 1,2）。游戏登录哪个号由一条龙的实例配置（-i）决定；Moonward 的「登录账号」此时只用于签到，不影响一条龙登录。</value>
+    <value>指定一条龙自己的账号实例（逗号分隔，如 1,2）。游戏登录哪个号由一条龙的实例配置（-i）决定；使用自定义启动程序时 Moonward 不注入登录票据，「登录账号」在此不生效。</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
     <value>1,2</value>

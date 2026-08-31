@@ -34,8 +34,7 @@
                                    HotkeyDeleted="HotkeyInput_HotkeyDeleted"
                                    HotkeyEditFinished="HotkeyInput_HotkeyEditFinished"
                                    HotkeyEditing="HotkeyInput_HotkeyEditing"
-                                   HotkeyId="44444"
-                                   WindowHandle="{x:Bind WindowHandle}" />
+                                   HotkeyId="44444" />
             </StackPanel>
 
             <!--  游戏截图  -->
@@ -50,8 +49,7 @@
                                    HotkeyDeleted="HotkeyInput_HotkeyDeleted"
                                    HotkeyEditFinished="HotkeyInput_HotkeyEditFinished"
                                    HotkeyEditing="HotkeyInput_HotkeyEditing"
-                                   HotkeyId="44445"
-                                   WindowHandle="{x:Bind WindowHandle}" />
+                                   HotkeyId="44445" />
             </StackPanel>
 
 

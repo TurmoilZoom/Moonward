@@ -371,6 +371,26 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 「显示主窗口」快捷键是否启用，可在系统托盘菜单里随时切换。
+    /// 关闭后不向系统注册该热键，但按键配置仍保留，重新打开即按原键恢复。
+    /// </summary>
+    public static bool EnableShowMainWindowHotkey
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 「游戏截图」快捷键是否启用，可在系统托盘菜单里随时切换。
+    /// 关闭后不向系统注册该热键，但按键配置仍保留，重新打开即按原键恢复。
+    /// </summary>
+    public static bool EnableScreenshotCaptureHotkey
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 显示主窗口快捷键
     /// </summary>
     public static string? ShowMainWindowHotkey
@@ -420,6 +440,16 @@ public static partial class AppConfig
     public static int GamepadShareButtonMode
     {
         get => GetValue<int>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 当前是否由本软件接管了 GameBar 引导键（注册表 <c>UseNexusForGameBarEnabled=0</c> 是我们写的）。
+    /// 进程被强杀/崩溃时注册表值会残留，靠这个标记在下次启动时自愈还原，同时避免覆盖用户自己关掉的引导键。
+    /// </summary>
+    public static bool GamepadGuideButtonTakenOver
+    {
+        get => GetValue<bool>();
         set => SetValue(value);
     }
 

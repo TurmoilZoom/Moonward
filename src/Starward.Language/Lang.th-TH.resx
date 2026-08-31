@@ -623,6 +623,9 @@
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>กดคลิ๊กขวาที่ไอคอนของเกมด้านซ้าย</value>
   </data>
+  <data name="SystemTrayWindow_GlobalHotkey" xml:space="preserve">
+    <value>ปุ่มลัดส่วนกลาง</value>
+  </data>
   <data name="MainPage_Launcer" xml:space="preserve">
     <value>ตัวเริ่มเกม</value>
   </data>
@@ -3255,8 +3258,7 @@ You are welcome to submit exported data to:</value>
     <value>เช็คอินอัตโนมัติ</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1.เช็คอินอัตโนมัติของแต่ละเกมเป็นอิสระต่อกัน และเริ่มดำเนินการตามลำดับ 10 วินาทีหลังจากเปิด Moonward
-2.เมื่อเปิดเช็คอินอัตโนมัติแล้ว การเปิดเกมผ่านทางลัดของบัญชีเข้าสู่ระบบที่ระบุก็จะเช็คอินเฉพาะบัญชีนั้น</value>
+    <value>เช็คอินอัตโนมัติของแต่ละเกมเป็นอิสระต่อกัน และเริ่มดำเนินการตามลำดับ 10 วินาทีหลังจากเปิด Moonward</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>เปิดซอฟต์แวร์เมื่อเริ่มระบบ</value>
@@ -3538,7 +3540,7 @@ You are welcome to submit exported data to:</value>
     <value>Account instances</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
-    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward's "Login account" is only used for daily sign-in in this case and does not affect OneDragon login.</value>
+    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward does not inject a login ticket when a custom launcher is used, so its "Login account" setting has no effect here.</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
     <value>1,2</value>

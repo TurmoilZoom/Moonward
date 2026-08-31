@@ -683,6 +683,9 @@ closing the program during decompression will cause game file corruption.</value
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>Click the right mouse button on the game icon on the left.</value>
   </data>
+  <data name="SystemTrayWindow_GlobalHotkey" xml:space="preserve">
+    <value>Global hotkeys</value>
+  </data>
   <data name="MainPage_Launcer" xml:space="preserve">
     <value>Launcher</value>
   </data>
@@ -3319,8 +3322,7 @@ Repository:</value>
     <value>Auto check-in</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1. Auto check-in is independent for each game and starts sequentially 10 seconds after Moonward launches
-2. After enabling auto check-in, launching the game via a shortcut for a specific login account will also check in for that account separately</value>
+    <value>Auto check-in is independent for each game and starts sequentially 10 seconds after Moonward launches</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>App start at login</value>
@@ -3602,7 +3604,7 @@ Repository:</value>
     <value>Account instances</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
-    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward's "Login account" is only used for daily sign-in in this case and does not affect OneDragon login.</value>
+    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward does not inject a login ticket when a custom launcher is used, so its "Login account" setting has no effect here.</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
     <value>1,2</value>

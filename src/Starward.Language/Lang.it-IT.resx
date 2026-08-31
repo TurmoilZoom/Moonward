@@ -624,6 +624,9 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="MainPage_ClickTheRightMouseButtonOnTheGameIconOnTheLeft" xml:space="preserve">
     <value>Fare clic sul pulsante destro del mouse sull'icona del gioco a sinistra.</value>
   </data>
+  <data name="SystemTrayWindow_GlobalHotkey" xml:space="preserve">
+    <value>Scorciatoie globali</value>
+  </data>
   <data name="MainPage_Launcer" xml:space="preserve">
     <value>Launcher</value>
   </data>
@@ -3261,8 +3264,7 @@ You are welcome to submit exported data to:</value>
     <value>Check-in automatico</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>1. Il check-in automatico è indipendente per ogni gioco e inizia in sequenza 10 secondi dopo l'avvio di Moonward
-2. Dopo aver attivato il check-in automatico, avviando il gioco da un collegamento per un account di accesso specifico verrà eseguito il check-in anche per quell'account</value>
+    <value>Il check-in automatico è indipendente per ogni gioco e inizia in sequenza 10 secondi dopo l'avvio di Moonward</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>Avvio automatico dell'app</value>
@@ -3544,7 +3546,7 @@ You are welcome to submit exported data to:</value>
     <value>Account instances</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Desc" xml:space="preserve">
-    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward's "Login account" is only used for daily sign-in in this case and does not affect OneDragon login.</value>
+    <value>Select OneDragon's own account instances (comma-separated, e.g. 1,2). Which account logs into the game is decided by those instances. Moonward does not inject a login ticket when a custom launcher is used, so its "Login account" setting has no effect here.</value>
   </data>
   <data name="CmdArg_OneDragon_Instance_Placeholder" xml:space="preserve">
     <value>1,2</value>

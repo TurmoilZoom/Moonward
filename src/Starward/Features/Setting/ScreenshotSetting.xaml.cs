@@ -28,6 +28,9 @@ public sealed partial class ScreenshotSetting : PageBase
     private readonly ILogger<ScreenshotSetting> _logger = AppConfig.GetLogger<ScreenshotSetting>();
 
 
+    /// <summary>
+    /// 本页所在窗口的句柄，仅用于「测试截图」判断当前显示器（全局热键的宿主窗口另见 <see cref="HotkeyManager.OwnerHandle"/>）。
+    /// </summary>
     public nint WindowHandle => XamlRoot.GetWindowHandle();
 
 
@@ -71,7 +74,7 @@ public sealed partial class ScreenshotSetting : PageBase
     {
         try
         {
-            HotkeyManager.UnregisterHotkey(e.WindowHandle, e.HotkeyId);
+            HotkeyManager.UnregisterHotkey(e.HotkeyId);
         }
         catch { }
     }
@@ -82,7 +85,7 @@ public sealed partial class ScreenshotSetting : PageBase
         try
         {
             this.XamlRoot.Content.Focus(FocusState.Programmatic);
-            HotkeyManager.DeleteHotkey(e.WindowHandle, e.HotkeyId);
+            HotkeyManager.DeleteHotkey(e.HotkeyId);
         }
         catch { }
     }
@@ -96,7 +99,7 @@ public sealed partial class ScreenshotSetting : PageBase
             this.XamlRoot.Content.Focus(FocusState.Programmatic);
             if (e.HotkeyAvaliable)
             {
-                Win32Error error = HotkeyManager.RegisterHotkey(e.WindowHandle, e.HotkeyId, (User32.HotKeyModifiers)e.fsModifiers, (User32.VK)e.Key);
+                Win32Error error = HotkeyManager.RegisterHotkey(e.HotkeyId, (User32.HotKeyModifiers)e.fsModifiers, (User32.VK)e.Key);
                 if (error.Succeeded && e.HotkeyChanged)
                 {
                     ((HotkeyInput)sender).State = HoykeyInputState.Success;
