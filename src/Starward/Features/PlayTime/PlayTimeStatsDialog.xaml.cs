@@ -6,8 +6,10 @@ using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Database;
+using Starward.Features.GameSelector;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 
@@ -49,6 +51,8 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
         try
         {
             _playTimeStatsService.ConvertItemToStats();
+            InitializeGameSwitcher();
+            InitializeBarRangeOptions();
             LoadPlayTimeStats();
         }
         catch (Exception ex)
@@ -64,10 +68,90 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
         this.Loaded -= PlayTimeStatsDialog_Loaded;
         this.Unloaded -= PlayTimeStatsDialog_Unloaded;
         StatCards?.Clear();
+        GameBizIcons.Clear();
         PlayTimeBarChart.Items = null;
         PlayTimeHeatmap.Days = null;
         _playTimeLoaded = false;
     }
+
+
+
+
+    #region 游戏切换
+
+
+    private bool _suppressGameSelection;
+
+
+    /// <summary>
+    /// 当前展示的游戏。默认取打开对话框的游戏，可在标题栏切换；B 服已折算成官服。
+    /// </summary>
+    public GameBiz SelectedGameBiz { get; private set => SetProperty(ref field, value); }
+
+
+    /// <summary>标题栏切换按钮上显示的游戏图标与名称。</summary>
+    public GameBizIcon? SelectedGameIcon { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>有游戏时长记录的游戏列表（含当前游戏）。</summary>
+    public ObservableCollection<GameBizIcon> GameBizIcons { get; } = [];
+
+
+    /// <summary>
+    /// 构建游戏切换列表：数据库中有时长记录的游戏，外加当前游戏（可能还没有记录）。
+    /// </summary>
+    private void InitializeGameSwitcher()
+    {
+        _suppressGameSelection = true;
+        try
+        {
+            SelectedGameBiz = PlayTimeStatsService.NormalizeBiz(CurrentGameBiz);
+            List<GameBiz> bizs = _playTimeStatsService.GetRecordedGameBizs();
+            if (!bizs.Contains(SelectedGameBiz))
+            {
+                bizs.Insert(0, SelectedGameBiz);
+            }
+            GameBizIcons.Clear();
+            foreach (GameBiz biz in bizs)
+            {
+                // 未适配的 GameBiz 没有本地图标与名称，不进切换列表
+                if (biz.IsKnown() && GameId.FromGameBiz(biz) is not null)
+                {
+                    GameBizIcons.Add(new GameBizIcon(biz));
+                }
+            }
+            SelectedGameIcon = GameBizIcons.FirstOrDefault(x => x.GameBiz == SelectedGameBiz);
+            ListView_Game.SelectedItem = SelectedGameIcon;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Initialize play time game switcher");
+        }
+        finally
+        {
+            _suppressGameSelection = false;
+        }
+    }
+
+
+    private void ListView_Game_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_suppressGameSelection || ListView_Game.SelectedItem is not GameBizIcon icon)
+        {
+            return;
+        }
+        Flyout_Game.Hide();
+        if (icon.GameBiz == SelectedGameBiz)
+        {
+            return;
+        }
+        SelectedGameBiz = icon.GameBiz;
+        SelectedGameIcon = icon;
+        LoadPlayTimeStats();
+    }
+
+
+    #endregion
 
 
     private bool _playTimeLoaded;
@@ -161,7 +245,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     /// </summary>
     private void LoadPlayTimeStats()
     {
-        var biz = CurrentGameBiz;
+        var biz = SelectedGameBiz;
         try
         {
             var sessions = _playTimeStatsService.GetPlayTimeInRange(biz, default, DateTimeOffset.Now);
@@ -215,6 +299,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
             }
 
             _playTimePerDay = timePerDay;
+            UpdateYearOptions();
 
             TotalTimeText = TimeSpanToString(TimeSpan.FromMilliseconds(totalMs));
             StartUpCountText = totalMs > 0 ? string.Format(Lang.PlayTimeStatsDialog_Started0Times, sessions.Count) : "";
@@ -326,7 +411,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Build bar chart: GameBiz {biz}, range {range}", CurrentGameBiz, Segmented_BarRange.SelectedIndex);
+            _logger.LogError(ex, "Build bar chart: GameBiz {biz}, range {range}", SelectedGameBiz, Segmented_BarRange.SelectedIndex);
         }
 
         try
@@ -335,7 +420,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Build heatmap: GameBiz {biz}", CurrentGameBiz);
+            _logger.LogError(ex, "Build heatmap: GameBiz {biz}", SelectedGameBiz);
         }
 
 
@@ -354,7 +439,11 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     {
         int range = Segmented_BarRange.SelectedIndex;
         var today = DateTime.Today;
-        if (range == 1)
+        if (range == BarRangeCustom)
+        {
+            BuildCustomBarChart();
+        }
+        else if (range == 1)
         {
             // 最近 12 个自然周（周一 ～ 周日为一周）：以今天所在的周为最后一周，往前共 12 组
             int sinceMonday = ((int)today.DayOfWeek + 6) % 7; // 本周已过天数（0 = 周一）
@@ -423,19 +512,230 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     }
 
 
+    /// <summary>柱状图「自定义」模式在 <see cref="Segmented_BarRange"/> 中的下标。</summary>
+    private const int BarRangeCustom = 3;
+
+
+    /// <summary>恢复设置、切换游戏时会改动下拉框，期间不回写设置也不重建图表。</summary>
+    private bool _suppressBarRangeSave;
+
+
+    /// <summary>
+    /// 自定义模式：月份选「全年」时按该年 12 个月聚合，否则展示该月每一天。
+    /// </summary>
+    private void BuildCustomBarChart()
+    {
+        int year = ComboBox_BarYear.SelectedItem is int y ? y : DateTime.Today.Year;
+        int month = ComboBox_BarMonth.SelectedItem is BarMonthOption option ? option.Month : 0;
+        var items = new List<BarChartItem>();
+        long total = 0;
+        if (month is 0)
+        {
+            string[] monthNames = CultureInfo.CurrentUICulture.DateTimeFormat.AbbreviatedMonthNames;
+            for (int m = 1; m <= 12; m++)
+            {
+                var monthStart = new DateOnly(year, m, 1);
+                long sum = SumDayRange(monthStart, monthStart.AddMonths(1).AddDays(-1));
+                total += sum;
+                items.Add(new BarChartItem
+                {
+                    Label = monthNames[m - 1],
+                    Value = Math.Max(0, sum / 60_000.0),
+                    Tooltip = $"{year}-{m:D2}\n{TimeSpanToString(TimeSpan.FromMilliseconds(sum))}",
+                });
+            }
+        }
+        else
+        {
+            int days = DateTime.DaysInMonth(year, month);
+            for (int d = 1; d <= days; d++)
+            {
+                var day = new DateOnly(year, month, d);
+                long ms = _playTimePerDay.GetValueOrDefault(day);
+                total += ms;
+                items.Add(new BarChartItem
+                {
+                    Label = d.ToString(CultureInfo.CurrentCulture),
+                    Value = Math.Max(0, ms / 60_000.0),
+                    Tooltip = $"{day:yyyy-MM-dd}\n{TimeSpanToString(TimeSpan.FromMilliseconds(ms))}",
+                });
+            }
+        }
+        PlayTimeBarChart.Items = items;
+        BarTotalText = TimeSpanToString(TimeSpan.FromMilliseconds(total));
+    }
+
+
+    /// <summary>
+    /// 恢复上次选择的柱状图模式与参数（年份列表要等每日数据算出来后才知道范围，见 <see cref="UpdateYearOptions"/>）。
+    /// </summary>
+    private void InitializeBarRangeOptions()
+    {
+        _suppressBarRangeSave = true;
+        try
+        {
+            var months = new List<BarMonthOption> { new(0, Lang.PlayTimeStatsDialog_WholeYear) };
+            string[] monthNames = CultureInfo.CurrentUICulture.DateTimeFormat.MonthNames;
+            for (int m = 1; m <= 12; m++)
+            {
+                months.Add(new BarMonthOption(m, monthNames[m - 1]));
+            }
+            ComboBox_BarMonth.ItemsSource = months;
+            ComboBox_BarMonth.SelectedIndex = Math.Clamp(AppConfig.PlayTimeStatsBarMonth, 0, 12);
+            Segmented_BarRange.SelectedIndex = Math.Clamp(AppConfig.PlayTimeStatsBarRange, 0, BarRangeCustom);
+            UpdateCustomRangeVisibility();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Initialize bar range options");
+        }
+        finally
+        {
+            _suppressBarRangeSave = false;
+        }
+    }
+
+
+    /// <summary>
+    /// 年份候选：从有记录的最早一年到今年，并保证上次选中的年份仍在列表里。
+    /// </summary>
+    private void UpdateYearOptions()
+    {
+        _suppressBarRangeSave = true;
+        try
+        {
+            int currentYear = DateTime.Today.Year;
+            int selected = ComboBox_BarYear.SelectedItem is int y ? y : AppConfig.PlayTimeStatsBarYear;
+            if (selected <= 0)
+            {
+                selected = currentYear;
+            }
+            int minYear = Math.Min(currentYear, selected);
+            if (_playTimePerDay.Count > 0)
+            {
+                minYear = Math.Min(minYear, _playTimePerDay.Keys.Min().Year);
+            }
+            // 时间戳异常的记录可能落在很久以前，最多回溯 20 年，避免下拉框被撑爆
+            minYear = Math.Clamp(minYear, currentYear - 20, currentYear);
+            var years = new List<int>();
+            for (int year = currentYear; year >= minYear; year--)
+            {
+                years.Add(year);
+            }
+            ComboBox_BarYear.ItemsSource = years;
+            ComboBox_BarYear.SelectedItem = years.Contains(selected) ? selected : currentYear;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Update bar chart year options");
+        }
+        finally
+        {
+            _suppressBarRangeSave = false;
+        }
+    }
+
+
+    private void UpdateCustomRangeVisibility()
+    {
+        Visibility visibility = Segmented_BarRange.SelectedIndex == BarRangeCustom ? Visibility.Visible : Visibility.Collapsed;
+        ComboBox_BarYear.Visibility = visibility;
+        ComboBox_BarMonth.Visibility = visibility;
+    }
+
+
+    private void SaveBarRangeSetting()
+    {
+        AppConfig.PlayTimeStatsBarRange = Segmented_BarRange.SelectedIndex;
+        if (ComboBox_BarYear.SelectedItem is int year)
+        {
+            AppConfig.PlayTimeStatsBarYear = year;
+        }
+        if (ComboBox_BarMonth.SelectedItem is BarMonthOption option)
+        {
+            AppConfig.PlayTimeStatsBarMonth = option.Month;
+        }
+    }
+
+
     private void Segmented_BarRange_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        UpdateCustomRangeVisibility();
         if (!_playTimeLoaded)
         {
             return;
         }
         try
         {
+            SaveBarRangeSetting();
             BuildBarChart();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Rebuild bar chart: GameBiz {biz}", CurrentGameBiz);
+            _logger.LogError(ex, "Rebuild bar chart: GameBiz {biz}", SelectedGameBiz);
+        }
+    }
+
+
+    private void ComboBox_BarYear_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        OnCustomRangeChanged();
+    }
+
+
+    private void ComboBox_BarMonth_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        OnCustomRangeChanged();
+    }
+
+
+    private void OnCustomRangeChanged()
+    {
+        if (_suppressBarRangeSave || !_playTimeLoaded)
+        {
+            return;
+        }
+        try
+        {
+            SaveBarRangeSetting();
+            BuildBarChart();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Rebuild custom bar chart: GameBiz {biz}", SelectedGameBiz);
+        }
+    }
+
+
+    /// <summary>柱状图当前区间的标题文本，用于分享图。</summary>
+    private string GetBarRangeTitle()
+    {
+        if (Segmented_BarRange.SelectedIndex == BarRangeCustom)
+        {
+            int year = ComboBox_BarYear.SelectedItem is int y ? y : DateTime.Today.Year;
+            int month = ComboBox_BarMonth.SelectedItem is BarMonthOption option ? option.Month : 0;
+            return month is 0 ? year.ToString(CultureInfo.CurrentCulture) : $"{year}-{month:D2}";
+        }
+        return Segmented_BarRange.SelectedIndex switch
+        {
+            1 => Lang.PlayTimeStatsDialog_Last12Weeks,
+            2 => Lang.PlayTimeStatsDialog_Last12Months,
+            _ => Lang.PlayTimeStatsDialog_Last15Days,
+        };
+    }
+
+
+    /// <summary>月份下拉项，<see cref="Month"/> 为 0 表示「全年」。</summary>
+    public sealed class BarMonthOption
+    {
+        public int Month { get; }
+
+        public string Text { get; }
+
+        public BarMonthOption(int month, string text)
+        {
+            Month = month;
+            Text = text;
         }
     }
 

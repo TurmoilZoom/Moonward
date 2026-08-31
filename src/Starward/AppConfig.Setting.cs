@@ -507,6 +507,33 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 游戏时长统计柱状图的区间模式：0 最近 15 天、1 最近 12 周、2 最近 12 月、3 自定义年月。
+    /// </summary>
+    public static int PlayTimeStatsBarRange
+    {
+        get => GetValue(0);
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 游戏时长统计柱状图自定义模式选中的年份，0 表示未选择（用当前年）。
+    /// </summary>
+    public static int PlayTimeStatsBarYear
+    {
+        get => GetValue(0);
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 游戏时长统计柱状图自定义模式选中的月份，0 表示全年。
+    /// </summary>
+    public static int PlayTimeStatsBarMonth
+    {
+        get => GetValue(0);
+        set => SetValue(value);
+    }
+
 
     #endregion
 

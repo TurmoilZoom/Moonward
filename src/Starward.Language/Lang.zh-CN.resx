@@ -3870,4 +3870,13 @@
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>统计基于游戏运行时长，而不是实际在线时长，仅供参考。</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>切换游戏</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>全年</value>
+  </data>
 </root>

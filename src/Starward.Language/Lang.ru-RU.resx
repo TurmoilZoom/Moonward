@@ -3832,4 +3832,13 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Статистика основана на времени работы игры, а не на фактическом времени в игре, и приведена только для справки.</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>Произвольно</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>Сменить игру</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>Весь год</value>
+  </data>
 </root>

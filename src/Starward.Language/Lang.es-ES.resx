@@ -3812,4 +3812,13 @@ You are welcome to submit exported data to:</value>
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Las estadísticas se basan en el tiempo de ejecución del juego, no en el tiempo de juego real, y solo sirven como referencia.</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>Personalizado</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>Cambiar juego</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>Año completo</value>
+  </data>
 </root>

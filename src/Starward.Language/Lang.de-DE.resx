@@ -3810,4 +3810,13 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Die Statistiken basieren auf der Laufzeit des Spiels, nicht auf der tatsächlichen Spielzeit, und dienen nur als Orientierung.</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>Benutzerdefiniert</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>Spiel wechseln</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>Ganzes Jahr</value>
+  </data>
 </root>

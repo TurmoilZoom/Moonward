@@ -3871,4 +3871,13 @@ Repository:</value>
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Statistics are based on game runtime, not actual playtime, and are for reference only.</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>Switch Game</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>Whole Year</value>
+  </data>
 </root>

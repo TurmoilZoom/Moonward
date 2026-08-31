@@ -3812,4 +3812,13 @@
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>통계는 실제 플레이 시간이 아닌 게임 실행 시간을 기준으로 하며, 참고용으로만 제공됩니다.</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>사용자 지정</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>게임 전환</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>연간</value>
+  </data>
 </root>

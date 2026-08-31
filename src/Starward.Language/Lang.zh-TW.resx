@@ -3812,4 +3812,13 @@
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>統計基於遊戲運行時長，而非實際遊玩時長，僅供參考。</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>自訂</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>切換遊戲</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>全年</value>
+  </data>
 </root>

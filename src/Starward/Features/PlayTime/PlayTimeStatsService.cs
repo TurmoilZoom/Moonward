@@ -147,6 +147,36 @@ internal sealed class PlayTimeStatsService
 
 
     /// <summary>
+    /// 列出有游戏时长记录的游戏（已归一化 GameBiz），按总时长从多到少排序。
+    /// </summary>
+    public List<GameBiz> GetRecordedGameBizs()
+    {
+        try
+        {
+            using var dapper = DatabaseService.CreateConnection();
+            // PlayTimeItem 里是尚未归档成会话的近期记录，一并纳入，避免刚玩过的游戏不在列表里
+            List<(string GameBiz, long TotalMs)> rows = dapper.Query<(string GameBiz, long TotalMs)>("""
+                SELECT GameBiz, SUM(MAX(EndTime - StartTime, 0)) AS TotalMs FROM PlayTimeStats GROUP BY GameBiz
+                UNION ALL
+                SELECT GameBiz, 0 AS TotalMs FROM PlayTimeItem GROUP BY GameBiz;
+                """).ToList();
+            return rows.GroupBy(x => x.GameBiz, StringComparer.OrdinalIgnoreCase)
+                       .Select(x => (Biz: GameBiz.TryParse(x.Key, out GameBiz biz) ? biz : default, Total: x.Sum(y => y.TotalMs)))
+                       .Where(x => x.Biz.IsKnown())
+                       .OrderByDescending(x => x.Total)
+                       .Select(x => x.Biz)
+                       .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Get recorded game bizs");
+            return [];
+        }
+    }
+
+
+
+    /// <summary>
     /// 获取总游戏时间（全历史范围）
     /// </summary>
     /// <param name="biz"></param>

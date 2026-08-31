@@ -3806,4 +3806,13 @@ You are welcome to submit exported data to:</value>
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>สถิติอ้างอิงจากเวลาที่เกมทำงาน ไม่ใช่เวลาเล่นจริง และใช้เพื่อการอ้างอิงเท่านั้น</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>กำหนดเอง</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>สลับเกม</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>ทั้งปี</value>
+  </data>
 </root>

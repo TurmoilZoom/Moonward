@@ -7198,6 +7198,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Custom 的本地化字符串。
+        /// </summary>
+        public static string PlayTimeStatsDialog_CustomPeriod {
+            get {
+                return ResourceManager.GetString("PlayTimeStatsDialog_CustomPeriod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Last 12 Months 的本地化字符串。
         /// </summary>
         public static string PlayTimeStatsDialog_Last12Months {
@@ -7288,6 +7297,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Switch Game 的本地化字符串。
+        /// </summary>
+        public static string PlayTimeStatsDialog_SwitchGame {
+            get {
+                return ResourceManager.GetString("PlayTimeStatsDialog_SwitchGame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Total 的本地化字符串。
         /// </summary>
         public static string PlayTimeStatsDialog_Total {
@@ -7302,6 +7320,15 @@ namespace Starward.Language {
         public static string PlayTimeStatsDialog_TotalPlaytime {
             get {
                 return ResourceManager.GetString("PlayTimeStatsDialog_TotalPlaytime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Whole Year 的本地化字符串。
+        /// </summary>
+        public static string PlayTimeStatsDialog_WholeYear {
+            get {
+                return ResourceManager.GetString("PlayTimeStatsDialog_WholeYear", resourceCulture);
             }
         }
         

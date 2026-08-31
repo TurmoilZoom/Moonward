@@ -3812,4 +3812,13 @@ You are welcome to submit exported data to:</value>
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Thống kê dựa trên thời gian chạy của trò chơi, không phải thời gian chơi thực tế, và chỉ mang tính chất tham khảo.</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>Tùy chỉnh</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>Chuyển game</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>Cả năm</value>
+  </data>
 </root>

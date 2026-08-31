@@ -3811,4 +3811,13 @@
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>統計はゲームの実行時間に基づいており、実際のプレイ時間とは異なります。あくまで参考としてご覧ください。</value>
   </data>
+  <data name="PlayTimeStatsDialog_CustomPeriod" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="PlayTimeStatsDialog_SwitchGame" xml:space="preserve">
+    <value>ゲームを切り替え</value>
+  </data>
+  <data name="PlayTimeStatsDialog_WholeYear" xml:space="preserve">
+    <value>年間</value>
+  </data>
 </root>

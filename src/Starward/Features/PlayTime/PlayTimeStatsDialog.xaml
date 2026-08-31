@@ -4,9 +4,11 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:gs="using:Starward.Features.GameSelector"
                xmlns:lang="using:Starward.Language"
                xmlns:local="using:Starward.Features.PlayTime"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
                x:DefaultBindMode="OneWay"
                Background="{ThemeResource CustomAcrylicBrush}"
                BorderThickness="0"
@@ -54,6 +56,72 @@
                     </Flyout>
                 </Button.Flyout>
             </Button>
+
+            <!--  游戏切换：列出有时长记录的游戏  -->
+            <DropDownButton x:Name="DropDownButton_Game"
+                            Height="28"
+                            MinHeight="0"
+                            Padding="8,0,4,0"
+                            VerticalAlignment="Center"
+                            BorderThickness="0"
+                            CornerRadius="6"
+                            sc:InstantTooltip.Placement="Bottom"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.PlayTimeStatsDialog_SwitchGame}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border Width="20"
+                            Height="20"
+                            VerticalAlignment="Center"
+                            CornerRadius="4">
+                        <Image Source="{x:Bind SelectedGameIcon.GameIcon, FallbackValue={x:Null}}" Stretch="UniformToFill" />
+                    </Border>
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="13"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind SelectedGameIcon.GameName, FallbackValue=''}" />
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind SelectedGameIcon.ServerName, FallbackValue=''}" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                    <Flyout x:Name="Flyout_Game" Placement="Bottom">
+                        <ListView x:Name="ListView_Game"
+                                  Margin="-8,-4,-8,-4"
+                                  ItemsSource="{x:Bind GameBizIcons}"
+                                  SelectionChanged="ListView_Game_SelectionChanged"
+                                  SelectionMode="Single">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="gs:GameBizIcon">
+                                    <Grid Height="40" ColumnSpacing="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="24"
+                                                Height="24"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="4">
+                                            <Image Source="{x:Bind GameIcon}" Stretch="UniformToFill" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1"
+                                                   VerticalAlignment="Center"
+                                                   IsTextScaleFactorEnabled="False"
+                                                   Text="{x:Bind GameName}" />
+                                        <TextBlock Grid.Column="2"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="12"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   IsTextScaleFactorEnabled="False"
+                                                   Text="{x:Bind ServerName}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
         </StackPanel>
 
         <StackPanel Margin="0,12,16,0"
@@ -151,7 +219,24 @@
                                            Content="{x:Bind lang:Lang.PlayTimeStatsDialog_Last12Months}"
                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                                            IsTextScaleFactorEnabled="False" />
+                        <cwc:SegmentedItem MinWidth="60"
+                                           Content="{x:Bind lang:Lang.PlayTimeStatsDialog_CustomPeriod}"
+                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                           IsTextScaleFactorEnabled="False" />
                     </cwc:Segmented>
+
+                    <!--  自定义模式：指定年份与月份（月份可选「全年」）  -->
+                    <ComboBox x:Name="ComboBox_BarYear"
+                              MinWidth="92"
+                              VerticalAlignment="Center"
+                              SelectionChanged="ComboBox_BarYear_SelectionChanged"
+                              Visibility="Collapsed" />
+                    <ComboBox x:Name="ComboBox_BarMonth"
+                              MinWidth="104"
+                              VerticalAlignment="Center"
+                              DisplayMemberPath="Text"
+                              SelectionChanged="ComboBox_BarMonth_SelectionChanged"
+                              Visibility="Collapsed" />
                 </StackPanel>
                 <StackPanel HorizontalAlignment="Right"
                             VerticalAlignment="Center"
