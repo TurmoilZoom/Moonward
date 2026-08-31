@@ -21,8 +21,8 @@ namespace Starward.Features.Database;
 /// <para>
 /// 库版本策略（两边会各自继续演进）：
 /// 共同祖先是 <see cref="CommonUserVersion"/>（v1–v18 脚本一致）。此后编号分叉——
-/// Starward v19 = ExtraStarNum，v20 = ZZZ HasHard；
-/// Moonward v19 = GachaItemName，v20 = ExtraStarNum，v21 = DROP GameAccount。
+/// Starward v19 = ExtraStarNum，v20 = ZZZ HasHard，v21 = PlayTimeStats；
+/// Moonward v19 = GachaItemName，v20 = ExtraStarNum，v21 = DROP GameAccount，v22 = PlayTimeStats。
 /// 先只读探测源库：无 GachaItemName 且 USER_VERSION &gt; <see cref="KnownMaxStarwardUserVersion"/> 视为未知 Starward，拒绝导入且不落副本。
 /// 导入时在<b>副本</b>上回退 Starward 独有变更；仅当副本版本 &gt; 共同祖先时才把 USER_VERSION 盖回祖先（绝不把 v1–v17 盖成 18），
 /// 再交给 Moonward 的 <c>DatabaseSqls</c> 往下跑。两边都有的列（ExtraStarNum）保留，
@@ -42,7 +42,7 @@ internal static class StarwardDataImportService
     public const int CommonUserVersion = 18;
 
     /// <summary>当前已编写回退脚本的最高上游 USER_VERSION。</summary>
-    public const int KnownMaxStarwardUserVersion = 20;
+    public const int KnownMaxStarwardUserVersion = 21;
 
     private const string DatabaseFileName = "StarwardDatabase.db";
 
@@ -69,10 +69,12 @@ internal static class StarwardDataImportService
 
     /// <summary>
     /// 回退 Starward 在共同祖先之后、且 Moonward 脚本里没有对等编号的变更。
-    /// ExtraStarNum（Starward v19 / Moonward v20）是两边共有列，不在此删除。
+    /// ExtraStarNum（Starward v19 / Moonward v20）与 PlayTimeStats（Starward v21 / Moonward v22）
+    /// 是两边共有的表/列，保留数据不在此回退。
     /// 保留版本须用 <c>import-keep: N</c> 标出，供 CI 对照上游，不要只改 <see cref="KnownMaxStarwardUserVersion"/>。
     /// </summary>
     // import-keep: 19
+    // import-keep: 21
     private static readonly (int Version, string ReverseSql)[] StarwardOnlyRollbacks =
     [
         (20, """

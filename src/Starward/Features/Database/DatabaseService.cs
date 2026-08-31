@@ -88,7 +88,7 @@ internal static class DatabaseService
 
     /// <summary>
     /// 目标版本对应的 schema 是否已经存在。
-    /// 用于从 Starward 导入后跳过编号冲突但语义相同的脚本（目前仅 v20 ExtraStarNum）。
+    /// 用于从 Starward 导入后跳过编号冲突但语义相同的脚本（v20 ExtraStarNum、v22 PlayTimeStats）。
     /// 以后若再与上游撞号，在此按表/列探测追加，不要改已发布的 <c>Sql_vN</c> 文本。
     /// </summary>
     private static bool IsMigrationAlreadySatisfied(SqliteConnection con, int targetVersion)
@@ -96,6 +96,8 @@ internal static class DatabaseService
         return targetVersion switch
         {
             20 => ColumnExists(con, "StarRailForgottenHallInfo", "ExtraStarNum"),
+            // 上游 v21 已建好同名表并做过 bilibili 合并，重复执行无意义
+            22 => TableExists(con, "PlayTimeStats"),
             _ => false,
         };
     }
