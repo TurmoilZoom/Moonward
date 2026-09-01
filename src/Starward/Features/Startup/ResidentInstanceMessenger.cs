@@ -212,7 +212,7 @@ internal static partial class ResidentInstanceMessenger
             Process process = Process.GetProcessById(pid);
             RunningGameService.AddRuninngGame(biz, process);
             Log.Information("Resident IPC: game started by shortcut ({biz}, {pid})", biz, pid);
-            WeakReferenceMessenger.Default.Send(new GameStartedMessage());
+            WeakReferenceMessenger.Default.Send(new GameStartedMessage(biz));
         }
         catch (Exception ex)
         {

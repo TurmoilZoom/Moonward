@@ -123,6 +123,7 @@ public sealed partial class GameLauncherPage : PageBase
         _ = InitializeBackgameImageSwitcherAsync();
         WeakReferenceMessenger.Default.Register<GameInstallPathChangedMessage>(this, OnGameInstallPathChanged);
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, OnMainWindowStateChanged);
+        WeakReferenceMessenger.Default.Register<GameStartedMessage>(this, OnGameStarted);
         WeakReferenceMessenger.Default.Register<RemovableStorageDeviceChangedMessage>(this, OnRemovableStorageDeviceChanged);
         WeakReferenceMessenger.Default.Register<GameInstallTaskStartedMessage>(this, OnGameInstallTaskStarted);
         WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, OnBackgroundChanged);
@@ -485,13 +486,28 @@ public sealed partial class GameLauncherPage : PageBase
 
 
 
-    private void OnMainWindowStateChanged(object _, MainWindowStateChangedMessage message)
+    /// <summary>
+    /// 主窗口激活时刷新页面状态。版本检查保留 10 分钟 / 跨整点的冷却，但「游戏是否在运行」每次激活都补检一次：
+    /// 隐藏到托盘期间游戏可能由快捷方式（另一个短命进程）拉起，本页不会拿到进程，
+    /// 否则要等冷却过去才显示计时。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="message">主窗口状态变化消息。</param>
+    private async void OnMainWindowStateChanged(object _, MainWindowStateChangedMessage message)
     {
         try
         {
-            if (message.Activate && (message.ElapsedOver(TimeSpan.FromMinutes(10)) || message.IsCrossingHour))
+            if (!message.Activate)
+            {
+                return;
+            }
+            if (message.ElapsedOver(TimeSpan.FromMinutes(10)) || message.IsCrossingHour)
             {
                 CheckGameVersion();
+            }
+            else if (GameState is GameState.StartGame && GameProcess is null)
+            {
+                await CheckGameRunningAsync();
             }
         }
         catch { }
@@ -576,6 +592,28 @@ public sealed partial class GameLauncherPage : PageBase
 
 
 
+    /// <summary>
+    /// 响应「游戏已启动」通知。快捷方式启动的游戏由独立进程拉起，本页的 <see cref="GameProcess"/> 不会被填上，
+    /// 需按通知补检一次，否则按钮会停在「开始游戏」而不显示计时。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="message">通知消息，含被启动游戏的区服。</param>
+    private async void OnGameStarted(object _, GameStartedMessage message)
+    {
+        try
+        {
+            // 只关心当前页面对应的游戏；已经在计时中则无需重复检测
+            if (message.GameBiz != CurrentGameBiz || GameProcess is { HasExited: false })
+            {
+                return;
+            }
+            await CheckGameRunningAsync();
+        }
+        catch { }
+    }
+
+
+
     private void CheckGameExited()
     {
         try
@@ -618,7 +656,7 @@ public sealed partial class GameLauncherPage : PageBase
             {
                 GameState = GameState.GameIsRunning;
                 GameProcess = process;
-                WeakReferenceMessenger.Default.Send(new GameStartedMessage());
+                WeakReferenceMessenger.Default.Send(new GameStartedMessage(CurrentGameBiz));
             }
         }
         catch (FileNotFoundException)
