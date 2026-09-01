@@ -522,11 +522,17 @@ public sealed partial class TravelersDiaryPage : PageBase
     /// <summary>
     /// 构建原神周资源表格（原石/摩拉 2 行）。
     /// 按 item.Time 本地日期聚合，不使用区服偏移。
+    /// 跨月周会查询涉及的多个月份的 DB 缓存。
     /// </summary>
     private List<WeeklyResourceRow> BuildWeeklyResourceRows(TravelersDiaryMonthData summary, IReadOnlyList<DateOnly> dates, DateOnly today)
     {
-        // 可能跨月，但按现有月数据加载；为简单起见只查当前选中月明细（与旧逻辑一致）
-        var allItems = _gameRecordService.GetTravelersDiaryDetailItems(summary.Uid, summary.Year, summary.Month);
+        // 含月初 1 号的那一周会跨月，只查选中月会让上月尾部几天恒为 0，
+        // 因此按本周涉及的年月逐月读取 DB 缓存（不触发网络请求）。
+        var allItems = new List<TravelersDiaryAwardItem>();
+        foreach ((int year, int month) in dates.Select(d => (d.Year, d.Month)).Distinct())
+        {
+            allItems.AddRange(_gameRecordService.GetTravelersDiaryDetailItems(summary.Uid, year, month));
+        }
 
         var dateSet = dates.ToHashSet();
         var map = allItems

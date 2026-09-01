@@ -537,10 +537,17 @@ public sealed partial class TrailblazeCalendarPage : PageBase
     /// <summary>
     /// 构建星铁周资源表格（星琼 / 通行证 2 行）。
     /// 按 item.Time 本地日期聚合。
+    /// 跨月周会查询涉及的多个月份的 DB 缓存。
     /// </summary>
     private List<WeeklyResourceRow> BuildWeeklyResourceRows(TrailblazeCalendarMonthData summary, IReadOnlyList<DateOnly> dates, DateOnly today)
     {
-        var allItems = _gameRecordService.GetTrailblazeCalendarDetailItems(summary.Uid, summary.Month);
+        // 含月初 1 号的那一周会跨月，只查选中月会让上月尾部几天恒为 0，
+        // 因此按本周涉及的月份（yyyyMM）逐月读取 DB 缓存（不触发网络请求）。
+        var allItems = new List<TrailblazeCalendarDetailItem>();
+        foreach (string month in dates.Select(d => d.ToString("yyyyMM", CultureInfo.InvariantCulture)).Distinct())
+        {
+            allItems.AddRange(_gameRecordService.GetTrailblazeCalendarDetailItems(summary.Uid, month));
+        }
 
         var dateSet = dates.ToHashSet();
         var map = allItems
