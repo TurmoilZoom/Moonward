@@ -95,6 +95,16 @@ internal sealed class InstantTooltipHost
     private readonly PointerEventHandler _pointerPressedHandler;
 
     /// <summary>
+    /// 点击触发模式的「点击别处收起」处理（挂到 <see cref="_clickDismissRoot"/>）。
+    /// </summary>
+    private readonly PointerEventHandler _rootPointerPressedHandler;
+
+    /// <summary>
+    /// 气泡自身的按下处理（handledEventsToo）：操作链接会把 PointerPressed 标已处理，普通 += 收不到。
+    /// </summary>
+    private readonly PointerEventHandler _contentPointerPressedHandler;
+
+    /// <summary>
     /// 指针是否仍在任一已注册锚点内。
     /// 相邻项切换时 Exited→Entered 之间短暂为 false，配合延后隐藏避免闪烁。
     /// </summary>
@@ -128,12 +138,26 @@ internal sealed class InstantTooltipHost
     /// </summary>
     private FrameworkElement? _dismissedUntilLeaveAnchor;
 
+    /// <summary>当前展示是否由点击触发；为 true 时指针进出不再关闭气泡。</summary>
+    private bool _currentIsClickTriggered;
+
+    /// <summary>点击触发展示期间监听「点击别处」的元素；未展示时为 <see langword="null"/>。</summary>
+    private UIElement? _clickDismissRoot;
+
+    /// <summary>
+    /// 正在处理锚点上的这次按下：同一次事件随后冒泡到根，不能当成「点击别处」把刚开的气泡关掉。
+    /// </summary>
+    private bool _clickToggleInProgress;
+
 
     /// <summary>当前是否无任何挂接元素（为 true 时 <see cref="InstantTooltip"/> 可释放本 Host）。</summary>
     public bool IsEmpty => _elements.Count == 0;
 
     /// <summary>本宿主所属的视觉树根（与字典键一致）。</summary>
     public XamlRoot XamlRoot => _xamlRoot;
+
+    /// <summary>指针当前是否停在气泡上（外层弹层判断外部点击是否落在提示里）。</summary>
+    public bool IsPointerOverPopup => _pointerInsidePopup;
 
     /// <summary>指针是否仍在锚点或气泡内（用于延后隐藏）。</summary>
     private bool IsPointerOverTooltipSurface => _pointerInsideAnyElement || _pointerInsidePopup;
@@ -199,6 +223,8 @@ internal sealed class InstantTooltipHost
         };
         _content.PointerEntered += Content_PointerEntered;
         _content.PointerExited += Content_PointerExited;
+        _contentPointerPressedHandler = Content_PointerPressed;
+        _content.AddHandler(UIElement.PointerPressedEvent, _contentPointerPressedHandler, handledEventsToo: true);
 
         _popup = new Popup
         {
@@ -214,6 +240,7 @@ internal sealed class InstantTooltipHost
         _interactiveHideTimer.Tick += InteractiveHideTimer_Tick;
 
         _pointerPressedHandler = Element_PointerPressed;
+        _rootPointerPressedHandler = Root_PointerPressed;
         _compositor = ElementCompositionPreview.GetElementVisual(_content).Compositor;
     }
 
@@ -365,6 +392,7 @@ internal sealed class InstantTooltipHost
 
         _elements.Clear();
         _visibilityTokens.Clear();
+        DetachClickDismissRoot();
         CancelInteractiveHideTimer();
         NotifyOpenChanged(false);
         _popup.IsOpen = false;
@@ -373,11 +401,13 @@ internal sealed class InstantTooltipHost
         _hideScheduled = false;
         _currentAnchor = null;
         _currentHasAction = false;
+        _currentIsClickTriggered = false;
         _dismissedUntilLeaveAnchor = null;
         _actionButton.Click -= ActionButton_Click;
         _inlineActionLink.Click -= InlineActionLink_Click;
         _content.PointerEntered -= Content_PointerEntered;
         _content.PointerExited -= Content_PointerExited;
+        _content.RemoveHandler(UIElement.PointerPressedEvent, _contentPointerPressedHandler);
         _interactiveHideTimer.Tick -= InteractiveHideTimer_Tick;
     }
 
@@ -417,6 +447,12 @@ internal sealed class InstantTooltipHost
             return;
         }
 
+        // 点击触发的说明性提示不响应悬停，只认按下
+        if (InstantTooltip.GetTrigger(element) is InstantTooltipTrigger.Click)
+        {
+            return;
+        }
+
         // 父级已淡出/折叠时仍可能命中（如下侧工具栏取消固定后 Opacity=0），不要再弹出。
         if (IsEffectivelyHidden(element))
         {
@@ -446,6 +482,11 @@ internal sealed class InstantTooltipHost
     private void Element_PointerExited(object sender, PointerRoutedEventArgs e)
     {
         FrameworkElement? exited = sender as FrameworkElement;
+        if (exited is not null && InstantTooltip.GetTrigger(exited) is InstantTooltipTrigger.Click)
+        {
+            return;
+        }
+
         _pointerInsideAnyElement = false;
         ScheduleHideIfPointerLeftSurface();
 
@@ -465,7 +506,8 @@ internal sealed class InstantTooltipHost
 
 
     /// <summary>
-    /// 在锚点上按下：立即关掉 Tooltip，避免点开 Flyout 或按钮随后折叠后提示仍叠在原处。
+    /// 在锚点上按下：点击触发的锚点在此开合，其余锚点立即关掉 Tooltip，
+    /// 避免点开 Flyout 或按钮随后折叠后提示仍叠在原处。
     /// 经 AddHandler(handledEventsToo) 注册，才能收到 Button 已处理的 PointerPressed。
     /// </summary>
     private void Element_PointerPressed(object sender, PointerRoutedEventArgs e)
@@ -475,10 +517,164 @@ internal sealed class InstantTooltipHost
             return;
         }
 
+        if (InstantTooltip.GetTrigger(element) is InstantTooltipTrigger.Click)
+        {
+            ToggleClickTooltip(element);
+            return;
+        }
+
         _dismissedUntilLeaveAnchor = element;
         _pointerInsideAnyElement = false;
         _pointerInsidePopup = false;
         ForceClosePopup();
+    }
+
+
+    /// <summary>
+    /// 点击触发：同一锚点已展开则收起，否则展开并开始监听「点击别处」。
+    /// </summary>
+    /// <param name="element">被按下的点击触发锚点。</param>
+    private void ToggleClickTooltip(FrameworkElement element)
+    {
+        // 这次按下随后会冒泡到根元素，标记一拍避免被 Root_PointerPressed 当成点击别处
+        _clickToggleInProgress = true;
+        _dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => _clickToggleInProgress = false);
+
+        _dismissedUntilLeaveAnchor = null;
+        _pointerInsideAnyElement = false;
+        _pointerInsidePopup = false;
+
+        if (_popup.IsOpen && _currentIsClickTriggered && ReferenceEquals(_currentAnchor, element))
+        {
+            ForceClosePopup();
+            return;
+        }
+
+        CancelPendingHide();
+        ShowTooltip(element);
+    }
+
+
+    /// <summary>
+    /// 点击触发展示期间，别处按下即收起。
+    /// 气泡与锚点上的按下必须放行：Popup 子树的事件同样会冒泡到窗口根，
+    /// 若在此关掉气泡，抬起时操作链接已消失，点了等于没点。
+    /// </summary>
+    private void Root_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (_clickToggleInProgress)
+        {
+            // 锚点上的这次按下已冒泡到此，标记就地清掉，不必等 Low 优先级那一拍
+            _clickToggleInProgress = false;
+            return;
+        }
+
+        if (!_currentIsClickTriggered)
+        {
+            return;
+        }
+
+        if (e.OriginalSource is DependencyObject source
+            && (IsSelfOrDescendantOf(source, _content)
+                || (_currentAnchor is not null && IsSelfOrDescendantOf(source, _currentAnchor))))
+        {
+            return;
+        }
+
+        _pointerInsideAnyElement = false;
+        _pointerInsidePopup = false;
+        ForceClosePopup();
+    }
+
+
+    /// <summary>
+    /// 判断 <paramref name="node"/> 是否为 <paramref name="ancestor"/> 自身或其视觉子孙。
+    /// </summary>
+    /// <param name="node">起点节点（通常是事件的 OriginalSource）。</param>
+    /// <param name="ancestor">待比较的祖先。</param>
+    /// <returns>是自身或子孙则为 <see langword="true"/>。</returns>
+    private static bool IsSelfOrDescendantOf(DependencyObject node, DependencyObject ancestor)
+    {
+        DependencyObject? current = node;
+        while (current is not null)
+        {
+            if (ReferenceEquals(current, ancestor))
+            {
+                return true;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// 监听锚点所在视觉树顶层的按下事件，用于「点击别处收起」。
+    /// 顶层通常是窗口根（Popup 子树也会一路冒泡上去）；若走到 Popup 就停，则改挂其 Child。
+    /// 点到外层弹层之外会先关掉弹层并卸载锚点，由 <see cref="Unregister"/> 收起气泡。
+    /// </summary>
+    /// <param name="element">当前展示的点击触发锚点。</param>
+    private void AttachClickDismissRoot(FrameworkElement element)
+    {
+        UIElement? root = FindEventRoot(element);
+        if (root is Popup popup && popup.Child is UIElement popupChild)
+        {
+            root = popupChild;
+        }
+
+        if (ReferenceEquals(root, _clickDismissRoot))
+        {
+            return;
+        }
+
+        DetachClickDismissRoot();
+        if (root is null)
+        {
+            return;
+        }
+
+        _clickDismissRoot = root;
+        root.AddHandler(UIElement.PointerPressedEvent, _rootPointerPressedHandler, handledEventsToo: true);
+    }
+
+
+    /// <summary>
+    /// 解除「点击别处收起」监听。
+    /// </summary>
+    private void DetachClickDismissRoot()
+    {
+        if (_clickDismissRoot is null)
+        {
+            return;
+        }
+
+        _clickDismissRoot.RemoveHandler(UIElement.PointerPressedEvent, _rootPointerPressedHandler);
+        _clickDismissRoot = null;
+    }
+
+
+    /// <summary>
+    /// 向上找到锚点所在视觉树的最顶层 <see cref="UIElement"/>（页面根，或承载弹层的 Popup）。
+    /// </summary>
+    /// <param name="element">起点元素。</param>
+    /// <returns>顶层元素；无法取得时为 <see langword="null"/>。</returns>
+    private static UIElement? FindEventRoot(DependencyObject element)
+    {
+        UIElement? root = element as UIElement;
+        DependencyObject? current = element;
+        while (current is not null)
+        {
+            if (current is UIElement ui)
+            {
+                root = ui;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return root;
     }
 
 
@@ -499,6 +695,17 @@ internal sealed class InstantTooltipHost
     {
         _pointerInsidePopup = false;
         ScheduleHideIfPointerLeftSurface();
+    }
+
+
+    /// <summary>
+    /// 在气泡上按下：补记「指针在气泡内」。触摸没有悬停阶段收不到 PointerEntered，
+    /// 外层弹层（签到 Flyout）会把这次按下当成外部点击而关掉，操作链接就点不到了。
+    /// </summary>
+    private void Content_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        _pointerInsidePopup = true;
+        CancelPendingHide();
     }
 
 
@@ -562,6 +769,12 @@ internal sealed class InstantTooltipHost
     /// </summary>
     private void ScheduleHideIfPointerLeftSurface()
     {
+        // 点击触发的提示只由再次点击 / 点击别处 / 锚点消失收起，指针进出不管
+        if (_currentIsClickTriggered)
+        {
+            return;
+        }
+
         if (_currentHasAction)
         {
             // 可交互：重启宽限，避免锚点与气泡间隙中气泡先消失
@@ -621,9 +834,11 @@ internal sealed class InstantTooltipHost
         string? actionText = InstantTooltip.GetActionText(element);
         bool hasAction = !string.IsNullOrEmpty(actionText) && InstantTooltip.GetActionCallback(element) is not null;
         bool actionInline = hasAction && InstantTooltip.GetActionInline(element);
+        bool clickTriggered = InstantTooltip.GetTrigger(element) is InstantTooltipTrigger.Click;
         _currentHasAction = hasAction;
-        // 仅可交互气泡需要命中；纯文案必须穿透，否则退场后透明层会挡住下方工具栏。
-        _content.IsHitTestVisible = hasAction;
+        _currentIsClickTriggered = clickTriggered;
+        // 仅可交互 / 点击触发的气泡需要命中；纯悬停文案必须穿透，否则退场后透明层会挡住下方工具栏。
+        _content.IsHitTestVisible = hasAction || clickTriggered;
 
         _text.Inlines.Clear();
         if (actionInline)
@@ -655,6 +870,15 @@ internal sealed class InstantTooltipHost
         PrepareShowVisual();
         _popup.IsOpen = true;
         PlayShowAnimation();
+
+        if (clickTriggered)
+        {
+            AttachClickDismissRoot(element);
+        }
+        else
+        {
+            DetachClickDismissRoot();
+        }
 
         // 可交互气泡：通知外层（如快速菜单）勿因指针移入气泡而关闭
         if (hasAction)
@@ -715,11 +939,13 @@ internal sealed class InstantTooltipHost
     private void ForceClosePopup()
     {
         CancelPendingHide();
+        DetachClickDismissRoot();
         NotifyOpenChanged(false);
         _content.IsHitTestVisible = false;
         _popup.IsOpen = false;
         _currentAnchor = null;
         _currentHasAction = false;
+        _currentIsClickTriggered = false;
     }
 
 

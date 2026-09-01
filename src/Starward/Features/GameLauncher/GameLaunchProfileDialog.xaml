@@ -8,6 +8,7 @@
                xmlns:local="using:Starward.Features.GameLauncher"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                xmlns:sc="using:Starward.Controls"
+               xmlns:sh="using:Starward.Helpers"
                x:DefaultBindMode="OneWay"
                Background="{ThemeResource CustomAcrylicBrush}"
                BorderThickness="0"
@@ -310,6 +311,8 @@
                                 CornerRadius="10"
                                 sc:InstantTooltip.Placement="Top"
                                 sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ThirdPartyToolTip}"
+                                sc:InstantTooltip.Trigger="Click"
+                                sh:PointerCursor.CursorShape="Hand"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                             <FontIcon FontSize="16"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -351,6 +354,8 @@
                                 sc:InstantTooltip.ActionText="#1634"
                                 sc:InstantTooltip.Placement="Top"
                                 sc:InstantTooltip.Text="{x:Bind lang:Lang.GameLauncherSettingDialog_AvoidShowingAlertsAboutDetectingIllegalToolInTheGame}"
+                                sc:InstantTooltip.Trigger="Click"
+                                sh:PointerCursor.CursorShape="Hand"
                                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
                             <FontIcon FontSize="16"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"

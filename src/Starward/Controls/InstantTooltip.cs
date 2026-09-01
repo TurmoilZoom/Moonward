@@ -20,7 +20,10 @@ namespace Starward.Controls;
 /// sc:InstantTooltip.Text="{x:Bind lang:Lang.SomeKey}"
 /// sc:InstantTooltip.Placement="Left"
 /// sc:InstantTooltip.ActionText="{x:Bind lang:Lang.SomeAction}"
+/// sc:InstantTooltip.Trigger="Click"
 /// </code>
+/// 问号 / 感叹号这类说明性提示用 <see cref="TriggerProperty"/> = <see cref="InstantTooltipTrigger.Click"/>：
+/// 悬停不弹出，点击锚点开合，点击别处收起。
 /// 操作回调需在代码中 <see cref="SetActionCallback"/>；可选 <see cref="SetOpenChangedCallback"/> 同步外层 Popup。
 /// 无独立 XAML 控件文件；视觉树在 <see cref="InstantTooltipHost"/> 内用代码创建。
 /// </para>
@@ -95,6 +98,18 @@ public static class InstantTooltip
             typeof(bool),
             typeof(InstantTooltip),
             new PropertyMetadata(false));
+
+
+    /// <summary>
+    /// 触发方式；默认 <see cref="InstantTooltipTrigger.Hover"/>。
+    /// 设为 <see cref="InstantTooltipTrigger.Click"/> 时悬停不再弹出，须点击锚点开合（问号 / 说明图标用）。
+    /// </summary>
+    public static readonly DependencyProperty TriggerProperty =
+        DependencyProperty.RegisterAttached(
+            "Trigger",
+            typeof(InstantTooltipTrigger),
+            typeof(InstantTooltip),
+            new PropertyMetadata(InstantTooltipTrigger.Hover));
 
 
     /// <summary>
@@ -178,6 +193,28 @@ public static class InstantTooltip
 
 
     /// <summary>
+    /// 取得 <see cref="TriggerProperty"/> 值。
+    /// </summary>
+    /// <param name="element">目标元素。</param>
+    /// <returns>触发方式。</returns>
+    public static InstantTooltipTrigger GetTrigger(DependencyObject element)
+    {
+        return (InstantTooltipTrigger)element.GetValue(TriggerProperty);
+    }
+
+
+    /// <summary>
+    /// 设置 <see cref="TriggerProperty"/> 值。
+    /// </summary>
+    /// <param name="element">目标元素。</param>
+    /// <param name="value">触发方式。</param>
+    public static void SetTrigger(DependencyObject element, InstantTooltipTrigger value)
+    {
+        element.SetValue(TriggerProperty, value);
+    }
+
+
+    /// <summary>
     /// 注册操作按钮点击回调（覆盖旧值；传 <see langword="null"/> 清除）。
     /// </summary>
     public static void SetActionCallback(FrameworkElement element, Action? callback)
@@ -256,6 +293,21 @@ public static class InstantTooltip
     internal static bool IsSuppressed(XamlRoot? xamlRoot)
     {
         return xamlRoot is not null && SuppressedRoots.Contains(xamlRoot);
+    }
+
+
+    /// <summary>
+    /// 指针当前是否停在气泡上。
+    /// 外层弹层（如签到 Flyout）用它判断这次「外部点击」是不是点在提示气泡里，
+    /// 从而决定拦截关闭（让用户点得到气泡里的链接）还是连同提示一起收起。
+    /// </summary>
+    /// <param name="xamlRoot">目标视觉树根；为 <see langword="null"/> 时返回 <see langword="false"/>。</param>
+    /// <returns>指针在气泡内为 <see langword="true"/>。</returns>
+    public static bool IsPointerOverTooltip(XamlRoot? xamlRoot)
+    {
+        return xamlRoot is not null
+            && Hosts.TryGetValue(xamlRoot, out InstantTooltipHost? host)
+            && host.IsPointerOverPopup;
     }
 
 

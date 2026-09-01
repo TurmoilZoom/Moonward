@@ -60,9 +60,11 @@
                                 <Border Grid.Column="1"
                                         Padding="4"
                                         VerticalAlignment="Center"
+                                        Background="Transparent"
                                         helpers:PointerCursor.CursorShape="Hand"
                                         sc:InstantTooltip.Placement="Top"
-                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilterDragHint}">
+                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilterDragHint}"
+                                        sc:InstantTooltip.Trigger="Click">
                                     <FontIcon FontSize="14"
                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                               Glyph="&#xE9CE;" />
@@ -267,8 +269,11 @@
                                                     <Border HorizontalAlignment="Right"
                                                             VerticalAlignment="Center"
                                                             Padding="4"
+                                                            Background="Transparent"
+                                                            helpers:PointerCursor.CursorShape="Hand"
                                                             sc:InstantTooltip.Placement="Top"
-                                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_UIGFImportVersionsTip}">
+                                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_UIGFImportVersionsTip}"
+                                                            sc:InstantTooltip.Trigger="Click">
                                                         <FontIcon FontSize="14"
                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                   Glyph="&#xE9CE;" />

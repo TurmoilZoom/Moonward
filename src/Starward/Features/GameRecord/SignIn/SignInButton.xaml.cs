@@ -58,8 +58,8 @@ public sealed partial class SignInButton : UserControl
         this.InitializeComponent();
         this.Visibility = Visibility.Collapsed;
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
-        InstantTooltip.SetActionCallback(FontIcon_AutoSignInHint, OpenStartAtLoginSetting);
-        InstantTooltip.SetOpenChangedCallback(FontIcon_AutoSignInHint, OnAutoSignInHintTooltipOpenChanged);
+        InstantTooltip.SetActionCallback(Border_AutoSignInHint, OpenStartAtLoginSetting);
+        InstantTooltip.SetOpenChangedCallback(Border_AutoSignInHint, OnAutoSignInHintTooltipOpenChanged);
     }
 
 
@@ -270,14 +270,23 @@ public sealed partial class SignInButton : UserControl
 
 
     /// <summary>
-    /// 问号提示打开时，点击提示气泡会被当成 Flyout 外部点击；取消关闭以便点到右下角超链接。
+    /// 问号提示打开时，点击提示气泡会被当成 Flyout 外部点击：仅这种情况取消关闭，以便点到右下角超链接。
+    /// 提示改为点击触发后不会随指针移开自行消失，点其它位置时必须连同提示一起收起，否则 Flyout 永远关不掉。
     /// </summary>
     private void Flyout_SignIn_Closing(object sender, FlyoutBaseClosingEventArgs e)
     {
-        if (_keepFlyoutOpenForTooltip)
+        if (!_keepFlyoutOpenForTooltip)
+        {
+            return;
+        }
+
+        if (InstantTooltip.IsPointerOverTooltip(XamlRoot))
         {
             e.Cancel = true;
+            return;
         }
+
+        InstantTooltip.Dismiss(XamlRoot);
     }
 
 

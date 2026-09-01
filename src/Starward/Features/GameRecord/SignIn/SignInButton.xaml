@@ -11,6 +11,7 @@
              xmlns:local="using:Starward.Features.GameRecord.SignIn"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sc="using:Starward.Controls"
+             xmlns:sh="using:Starward.Helpers"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
@@ -221,14 +222,20 @@
                                 Orientation="Horizontal"
                                 Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <FontIcon x:Name="FontIcon_AutoSignInHint"
-                                      VerticalAlignment="Center"
-                                      FontSize="12"
-                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                      Glyph="&#xE9CE;"
-                                      sc:InstantTooltip.ActionText="{x:Bind lang:Lang.SignInButton_StartAtLogin}"
-                                      sc:InstantTooltip.Placement="Top"
-                                      sc:InstantTooltip.Text="{x:Bind lang:Lang.SignInButton_AutoSignInHint}" />
+                            <!--  透明 Border 兜住命中区域，裸 FontIcon 点击命中不稳  -->
+                            <Border x:Name="Border_AutoSignInHint"
+                                    Padding="2"
+                                    VerticalAlignment="Center"
+                                    Background="Transparent"
+                                    sc:InstantTooltip.ActionText="{x:Bind lang:Lang.SignInButton_StartAtLogin}"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.SignInButton_AutoSignInHint}"
+                                    sc:InstantTooltip.Trigger="Click"
+                                    sh:PointerCursor.CursorShape="Hand">
+                                <FontIcon FontSize="12"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE9CE;" />
+                            </Border>
                             <TextBlock VerticalAlignment="Center"
                                        FontSize="13"
                                        Text="{x:Bind lang:Lang.SignInButton_AutoSignIn}" />
