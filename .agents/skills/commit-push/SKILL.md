@@ -1,16 +1,16 @@
 ---
 name: commit-push
 description: >
-  撰写提交信息并推送到仓库全部远程（origin、cnb 等）。
+  撰写提交信息并推送到 fork 远程（origin、cnb 等，不含 upstream）。
   可关联某个 Issue，并把 #N 放在提交标题末尾（平台会做成可跳转超链接）。
   提交风格：Conventional Commits 类型英文 + 说明主体中文。
   Use when the user runs /commit-push, or asks to 提交并推送、commit and push、
   推到所有远程、写 commit message 并 push、关联 issue 提交.
 ---
 
-# Commit Push（全远程）
+# Commit Push（fork 远程）
 
-根据当前工作区改动撰写**一条**提交信息，创建提交，并**推送到每一个 git remote**。
+根据当前工作区改动撰写**一条**提交信息，创建提交，并推送到 fork 远程（`origin`、`cnb` 等）。**不要**向 `upstream` 推送（上游原仓库，只用于 fetch / rebase）。
 
 **不**改业务代码逻辑（只做 git add / commit / push）。**禁止** `--force` / `--no-verify`，除非用户明确要求。
 
@@ -22,7 +22,7 @@ description: >
 | 常用类型 | `feat` / `fix` / `docs` / `refactor` / `improve` / `remove` / `chore` 等 |
 | 示例 | `feat: 为首页添加功能图钉`；`fix: 修复自定义背景在分辨率变化后回退的问题` |
 | 关联 Issue | 用户指定了 Issue 时，标题末尾加 `#N`（GitHub 会做成可跳转链接；见「3. 撰写提交信息」） |
-| 远程 | 通常有 `origin`（GitHub）与 `cnb`（CNB 镜像）；**两个都要推当前分支** |
+| 远程 | 通常有 `origin`（GitHub）与 `cnb`（CNB 镜像）；**两个都要推当前分支**。名为 `upstream` 的远程跳过，不推 |
 | 日常分支 | 多在 `rebase/develop`；在 `main` / `master` 上操作前须确认 |
 | 不提交 | `bin/`、`obj/`、日志；勿把无关大范围重构塞进同一提交 |
 
@@ -134,23 +134,24 @@ gh issue view <N> --json url,title,state
 - 工作区仍有未纳入本次提交的改动：提交后在汇报里提醒。
 - 敏感文件（密钥、本地路径配置等）误入暂存：先移出，再提交。
 
-### 5. 提交并推送到全部远程
+### 5. 提交并推送到 fork 远程
 
 ```powershell
 # 先完成 commit（见上）
 
 $branch = git branch --show-current
-$remotes = @(git remote)
-if ($remotes.Count -eq 0) { throw "没有任何 remote，无法推送" }
+# 跳过 upstream：那是上游原仓库，本 fork 只 fetch / rebase，不往回推
+$remotes = @(git remote | Where-Object { $_ -ne 'upstream' })
+if ($remotes.Count -eq 0) { throw "没有任何可推送的 remote（已排除 upstream），无法推送" }
 
-$hasUpstream = $false
+$hasTracking = $false
 git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null | Out-Null
-if ($LASTEXITCODE -eq 0) { $hasUpstream = $true }
+if ($LASTEXITCODE -eq 0) { $hasTracking = $true }
 
 $ok = @(); $fail = @()
 $first = $true
 foreach ($r in $remotes) {
-  if ($first -and -not $hasUpstream) {
+  if ($first -and -not $hasTracking) {
     git push -u $r HEAD
   } else {
     git push $r $branch
@@ -163,16 +164,17 @@ foreach ($r in $remotes) {
 
 规则：
 
-- **每个** `git remote` 都推当前分支；不要只推 `origin` 或无参数的 `git push`（后者只推上游对应远程）。
-- 无上游时：对**第一个**远程 `git push -u <remote> HEAD` 建立跟踪；其余 `git push <remote> <branch>`。
+- 推送 **fork 远程**（`origin`、`cnb` 等）；**不要** `git push upstream …`。
+- 不要只推 `origin` 或无参数的 `git push`（后者只推跟踪对应的那一个远程）。
+- 无跟踪分支时：对**第一个**可推送远程 `git push -u <remote> HEAD` 建立跟踪；其余 `git push <remote> <branch>`。
 - 非快进被拒：**不要** `--force`；记录失败原因，继续其余远程，最后汇总，并提示可能需要先 `git pull --rebase`。
-- 某一远程失败不算「全部成功」。
+- 某一可推送远程失败不算「全部成功」。`upstream` 被跳过不算失败。
 
 ### 6. 汇报
 
 - 提交标题、短/完整 hash  
 - 若关联了 Issue：标题末尾的 `#N`，以及是否在正文写了 `Closes #N`  
-- **逐个远程**推送结果（如 `origin/rebase/develop`、`cnb/rebase/develop`）  
+- **逐个远程**推送结果（如 `origin/rebase/develop`、`cnb/rebase/develop`）；`upstream` 跳过即可，不必报失败  
 - 仍留在工作区的未提交改动（若有）  
 - 任一步失败：如实给出命令与输出，不谎报成功  
 
@@ -188,7 +190,8 @@ foreach ($r in $remotes) {
 
 ## 反例（不要做）
 
-- 只推 `origin` 而漏掉 `cnb` 或其他 remote  
+- 只推 `origin` 而漏掉 `cnb` 或其他 fork 远程
+- 向 `upstream` 推送（上游原仓库，只 fetch / rebase）  
 - 无改动仍 `git commit --allow-empty`  
 - `git push --force` / `git commit --no-verify`（除非用户明确要求）  
 - 英文-only 标题或与仓库风格不符的长英文 subject（本仓说明主体用中文）  
@@ -197,4 +200,4 @@ foreach ($r in $remotes) {
 - 只「关联」却擅自写 `Closes` / `Fixes`  
 - 把不相关改动塞进同一提交  
 - 提交 `bin/`、`obj/`、日志或用户数据  
-- 汇报「已推送到全部远程」但部分 remote 实际失败  
+- 汇报「已推送到全部远程」但部分 **fork** 远程实际失败；或把跳过 `upstream` 写成推送失败  
