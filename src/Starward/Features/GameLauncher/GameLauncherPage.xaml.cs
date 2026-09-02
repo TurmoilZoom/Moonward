@@ -60,7 +60,7 @@ public sealed partial class GameLauncherPage : PageBase
 
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _dispatchTimer;
 
-    /// <summary>右侧功能工具栏离开后自动收起 / 回贴边的延迟。</summary>
+    /// <summary>右侧功能工具栏贴边浮出后自动回贴边的延迟。</summary>
     private static readonly TimeSpan RightToolbarCollapseDelay = TimeSpan.FromSeconds(5);
 
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _rightToolbarCollapseTimer;
@@ -1485,13 +1485,10 @@ public sealed partial class GameLauncherPage : PageBase
     /// <summary>右侧工具栏视觉状态。</summary>
     private enum RightToolbarState
     {
-        /// <summary>自由位置，仅显示首个按钮。</summary>
-        Collapsed,
-
         /// <summary>自由位置，完整展开。</summary>
         Expanded,
 
-        /// <summary>拖拽中：保持当前高度并跟随指针（不收缩）。</summary>
+        /// <summary>拖拽中：保持完整高度并跟随指针。</summary>
         Dragging,
 
         /// <summary>贴边收纳：完整展开尺寸，仅漏出统一宽度的边缘条；不可点功能。</summary>
@@ -1513,7 +1510,7 @@ public sealed partial class GameLauncherPage : PageBase
     }
 
 
-    private RightToolbarState _rightToolbarState = RightToolbarState.Collapsed;
+    private RightToolbarState _rightToolbarState = RightToolbarState.Expanded;
 
     private RightToolbarDockEdge _rightToolbarDockEdge = RightToolbarDockEdge.None;
 
@@ -1566,7 +1563,7 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// 初始化右侧工具栏状态机：默认右上角收起，监听尺寸与 Flyout。
+    /// 初始化右侧工具栏状态机：默认右上角展开，监听尺寸与 Flyout。
     /// </summary>
     private void InitializeRightToolbarCollapse()
     {
@@ -1671,7 +1668,7 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// 子项显隐变化时同步高度（贴边始终展开；自由态保持当前展开/收起意图）。
+    /// 子项显隐变化时同步高度（始终按完整展开尺寸）。
     /// </summary>
     private void StackPanel_RightToolbar_SizeChanged(object sender, SizeChangedEventArgs e)
     {
@@ -1728,9 +1725,6 @@ public sealed partial class GameLauncherPage : PageBase
 
         switch (_rightToolbarState)
         {
-            case RightToolbarState.Collapsed:
-                TransitionRightToolbar(RightToolbarState.Expanded, animate: true);
-                break;
             case RightToolbarState.Docked:
                 // 贴边时悬停只做浮出；浮出完成前不可点功能。
                 TransitionRightToolbar(RightToolbarState.DockRevealed, animate: true);
@@ -1745,7 +1739,7 @@ public sealed partial class GameLauncherPage : PageBase
 
     private void Border_RightToolbar_PointerExited(object sender, PointerRoutedEventArgs e)
     {
-        // 拖拽中指针可能短暂离开视觉区域，不触发收起计时。
+        // 拖拽中指针可能短暂离开视觉区域，不触发回贴边计时。
         if (_rightToolbarDragging || _rightToolbarPressed)
         {
             return;
@@ -1857,7 +1851,7 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// 进入拖拽：从子 Button 夺过 Capture；保持当前高度不收缩；禁用按钮命中，抑制 Tooltip。
+    /// 进入拖拽：从子 Button 夺过 Capture；保持完整高度；禁用按钮命中，抑制 Tooltip。
     /// </summary>
     private void BeginRightToolbarDrag(Pointer pointer)
     {
@@ -1871,11 +1865,7 @@ public sealed partial class GameLauncherPage : PageBase
         SetRightToolbarButtonsHitTestVisible(false);
         _rightToolbarState = RightToolbarState.Dragging;
         _rightToolbarRevealInteractive = false;
-        // 拖动过程中不收缩，保持进入拖拽前的高度（通常为展开）。
-        if (GetRightToolbarCurrentHeight() < MeasureRightToolbarExpandedHeight() - 0.5)
-        {
-            ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate: false);
-        }
+        ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate: false);
         try
         {
             Border_RightToolbar.CapturePointer(pointer);
@@ -2024,10 +2014,6 @@ public sealed partial class GameLauncherPage : PageBase
                 _rightToolbarSuppressClick = false;
                 InstantTooltip.SetSuppressed(XamlRoot, false);
                 ApplyRightToolbarInteractionGate();
-                if (!_rightToolbarPointerOver)
-                {
-                    ScheduleRightToolbarIdleCollapse();
-                }
             });
             return;
         }
@@ -2056,14 +2042,6 @@ public sealed partial class GameLauncherPage : PageBase
 
         switch (state)
         {
-            case RightToolbarState.Collapsed:
-                _rightToolbarRevealInteractive = true;
-                _rightToolbarDockEdge = RightToolbarDockEdge.None;
-                ApplyRightToolbarHeight(MeasureRightToolbarCollapsedHeight(), animate);
-                SetRightToolbarButtonsHitTestVisible(true);
-                InstantTooltip.SetSuppressed(XamlRoot, false);
-                break;
-
             case RightToolbarState.Expanded:
                 _rightToolbarRevealInteractive = true;
                 ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
@@ -2073,7 +2051,6 @@ public sealed partial class GameLauncherPage : PageBase
 
             case RightToolbarState.Dragging:
                 _rightToolbarRevealInteractive = false;
-                // 拖动保持展开高度，不收缩。
                 ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
                 SetRightToolbarButtonsHitTestVisible(false);
                 InstantTooltip.SetSuppressed(XamlRoot, true);
@@ -2119,23 +2096,12 @@ public sealed partial class GameLauncherPage : PageBase
     /// </summary>
     private void SyncRightToolbarHeightForState(bool animate)
     {
-        switch (_rightToolbarState)
-        {
-            case RightToolbarState.Collapsed:
-                ApplyRightToolbarHeight(MeasureRightToolbarCollapsedHeight(), animate);
-                break;
-            case RightToolbarState.Dragging:
-            case RightToolbarState.Expanded:
-            case RightToolbarState.Docked:
-            case RightToolbarState.DockRevealed:
-                ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
-                break;
-        }
+        ApplyRightToolbarHeight(MeasureRightToolbarExpandedHeight(), animate);
     }
 
 
     /// <summary>
-    /// 空闲 5 秒后：贴边浮出 → 回到贴边；自由展开 → 单按钮收起。
+    /// 空闲 5 秒后：贴边浮出 → 回到贴边。
     /// </summary>
     private void ScheduleRightToolbarIdleCollapse()
     {
@@ -2149,7 +2115,7 @@ public sealed partial class GameLauncherPage : PageBase
             return;
         }
 
-        if (_rightToolbarState is RightToolbarState.Collapsed or RightToolbarState.Docked or RightToolbarState.Dragging)
+        if (_rightToolbarState is not RightToolbarState.DockRevealed)
         {
             return;
         }
@@ -2177,10 +2143,6 @@ public sealed partial class GameLauncherPage : PageBase
         if (_rightToolbarState is RightToolbarState.Docked or RightToolbarState.DockRevealed)
         {
             return;
-        }
-        if (_rightToolbarState is RightToolbarState.Collapsed)
-        {
-            TransitionRightToolbar(RightToolbarState.Expanded, animate: false);
         }
         StopRightToolbarCollapseTimer();
         InstantTooltip.SetSuppressed(XamlRoot, true);
@@ -2219,7 +2181,7 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// TeachingTip 关闭后：按需记「已看过」，恢复 InstantTooltip，并允许空闲收起。
+    /// TeachingTip 关闭后：按需记「已看过」，恢复 InstantTooltip，贴边浮出态允许空闲回贴边。
     /// </summary>
     private void TeachingTip_RightToolbarDrag_Closed(TeachingTip sender, TeachingTipClosedEventArgs args)
     {
@@ -2253,11 +2215,6 @@ public sealed partial class GameLauncherPage : PageBase
             TransitionRightToolbar(RightToolbarState.Docked, animate: true);
             SaveRightToolbarLayout();
         }
-        else if (_rightToolbarState is RightToolbarState.Expanded)
-        {
-            TransitionRightToolbar(RightToolbarState.Collapsed, animate: true);
-            SaveRightToolbarLayout();
-        }
     }
 
 
@@ -2265,7 +2222,6 @@ public sealed partial class GameLauncherPage : PageBase
     {
         bool interactive = _rightToolbarState switch
         {
-            RightToolbarState.Collapsed => true,
             RightToolbarState.Expanded => true,
             RightToolbarState.DockRevealed => _rightToolbarRevealInteractive,
             _ => false,
@@ -2303,7 +2259,7 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// 从设置恢复工具栏位置与贴边状态；无记录时使用默认右上角收起。
+    /// 从设置恢复工具栏位置与贴边状态；无记录时使用默认右上角展开。
     /// 布局串：<c>docked|left|y</c> / <c>docked|right|y</c> / <c>free|x|y</c>
     /// </summary>
     private void RestoreRightToolbarLayout()
@@ -2312,7 +2268,7 @@ public sealed partial class GameLauncherPage : PageBase
         if (string.IsNullOrWhiteSpace(raw))
         {
             PlaceRightToolbarDefaultPosition();
-            TransitionRightToolbar(RightToolbarState.Collapsed, animate: false);
+            TransitionRightToolbar(RightToolbarState.Expanded, animate: false);
             return;
         }
 
@@ -2343,7 +2299,7 @@ public sealed partial class GameLauncherPage : PageBase
                 SetRightToolbarPosition(freeX, freeY, animate: false);
                 ClampRightToolbarIntoSoftBounds();
                 SetRightToolbarPosition(_rightToolbarX, _rightToolbarY, animate: false);
-                TransitionRightToolbar(RightToolbarState.Collapsed, animate: false);
+                TransitionRightToolbar(RightToolbarState.Expanded, animate: false);
                 return;
             }
         }
@@ -2353,7 +2309,7 @@ public sealed partial class GameLauncherPage : PageBase
         }
 
         PlaceRightToolbarDefaultPosition();
-        TransitionRightToolbar(RightToolbarState.Collapsed, animate: false);
+        TransitionRightToolbar(RightToolbarState.Expanded, animate: false);
     }
 
 
@@ -2631,7 +2587,7 @@ public sealed partial class GameLauncherPage : PageBase
     private void ClampRightToolbarIntoSoftBounds()
     {
         double width = MeasureRightToolbarWidth();
-        double height = Math.Max(GetRightToolbarCurrentHeight(), MeasureRightToolbarCollapsedHeight());
+        double height = Math.Max(GetRightToolbarCurrentHeight(), MeasureRightToolbarExpandedHeight());
         double rootW = RootGrid.ActualWidth;
         double rootH = RootGrid.ActualHeight;
         const double keep = 24;
@@ -2691,7 +2647,7 @@ public sealed partial class GameLauncherPage : PageBase
             EnableDependentAnimation = true,
             EasingFunction = new CubicEase
             {
-                EasingMode = _rightToolbarState is RightToolbarState.Collapsed or RightToolbarState.Dragging
+                EasingMode = _rightToolbarState is RightToolbarState.Dragging
                     ? EasingMode.EaseIn
                     : EasingMode.EaseOut,
             },
@@ -2725,7 +2681,7 @@ public sealed partial class GameLauncherPage : PageBase
         {
             return Border_RightToolbar.ActualHeight;
         }
-        return MeasureRightToolbarCollapsedHeight();
+        return MeasureRightToolbarExpandedHeight();
     }
 
 
@@ -2769,13 +2725,6 @@ public sealed partial class GameLauncherPage : PageBase
         {
             return Border_RightToolbar.ActualWidth;
         }
-        return padding + RightToolbarButtonSize;
-    }
-
-
-    private double MeasureRightToolbarCollapsedHeight()
-    {
-        double padding = Border_RightToolbar.Padding.Top + Border_RightToolbar.Padding.Bottom;
         return padding + RightToolbarButtonSize;
     }
 
@@ -2874,11 +2823,7 @@ public sealed partial class GameLauncherPage : PageBase
 
         DismissRightToolbarDragTip(markSeen: true);
         StopRightToolbarCollapseTimer();
-        if (_rightToolbarState is RightToolbarState.Collapsed)
-        {
-            TransitionRightToolbar(RightToolbarState.Expanded, animate: true);
-        }
-        else if (_rightToolbarState is RightToolbarState.Docked)
+        if (_rightToolbarState is RightToolbarState.Docked)
         {
             // 贴边等待离开期间不允许借 Flyout 浮出。
             if (_rightToolbarDockAwaitPointerLeave)
