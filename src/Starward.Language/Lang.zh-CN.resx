@@ -3322,7 +3322,7 @@
     <value>自动签到</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>每个游戏的自动签到相互独立，在Moonward启动十秒后开始依次执行</value>
+    <value>每个游戏的自动签到相互独立。启动后会先签一轮，软件常驻期间每天刷新后再签</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>软件开机自启</value>
@@ -3356,9 +3356,6 @@
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>补签将消耗 {0} 补签货币，当前拥有 {1}。是否继续？</value>
-  </data>
-  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
-    <value>软件下次启动生效</value>
   </data>
   <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
     <value>请在米游社工具箱中重新登录该账号({0})</value>

@@ -10656,7 +10656,7 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 1. Auto check-in is independent for each game and starts sequentially 10 seconds after Moonward launches 2. After enabling auto check-in, launching the game via a shortcut for a specific login account will also check in for that account separately 的本地化字符串。
+        ///   查找类似 Auto check-in is independent for each game. Moonward checks in shortly after launch, and again after the daily reset while it stays running 的本地化字符串。
         /// </summary>
         public static string SignInButton_AutoSignInHint {
             get {
@@ -10760,15 +10760,6 @@ namespace Starward.Language {
         public static string SignInButton_ReSignConfirmContent {
             get {
                 return ResourceManager.GetString("SignInButton_ReSignConfirmContent", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   查找类似 Effective on next software startup 的本地化字符串。
-        /// </summary>
-        public static string SignInButton_AutoSignInEffectiveAtNextStartup {
-            get {
-                return ResourceManager.GetString("SignInButton_AutoSignInEffectiveAtNextStartup", resourceCulture);
             }
         }
 

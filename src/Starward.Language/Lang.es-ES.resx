@@ -3264,7 +3264,7 @@ You are welcome to submit exported data to:</value>
     <value>Registro automático</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>El registro automático es independiente para cada juego y comienza a ejecutarse en secuencia 10 segundos después de iniciar Moonward</value>
+    <value>El registro automático es independiente para cada juego. Moonward registra poco después de iniciar y de nuevo tras el reinicio diario mientras sigue en ejecución</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>Inicio automático de la app</value>
@@ -3298,9 +3298,6 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>El re-registro costará {0} moneda(s). Actualmente tiene {1}. ¿Continuar?</value>
-  </data>
-  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
-    <value>Efectivo en el próximo inicio del software</value>
   </data>
   <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
     <value>Vuelve a iniciar sesión con esta cuenta en la caja de herramientas de Miyoushe ({0})</value>

@@ -3263,7 +3263,7 @@
     <value>自動チェックイン</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>各ゲームの自動チェックインは互いに独立しており、Moonward起動から10秒後に順次実行を開始します</value>
+    <value>各ゲームの自動チェックインは互いに独立しています。起動直後に一度行い、常駐中は毎日リセット後にもう一度行います</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>アプリのスタートアップ</value>
@@ -3297,9 +3297,6 @@
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>再チェックインには {0} コインが必要です。現在 {1} 所持しています。続行しますか？</value>
-  </data>
-  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
-    <value>次回のソフトウェア起動時に有効</value>
   </data>
   <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
     <value>米游社ツールボックスでこのアカウントに再ログインしてください({0})</value>

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Starward.Features.GameRecord.SignIn;
 using Starward.Features.Overlay;
 using Starward.Features.Screenshot;
 using Starward.Features.Setting;
@@ -249,6 +250,17 @@ public sealed partial class SystemTrayWindow : WindowEx
             {
                 // 截图
                 ScreenCaptureService.Capture();
+            }
+        }
+        else if (uMsg == (uint)User32.WindowMessage.WM_POWERBROADCAST)
+        {
+            // 广播给所有顶层窗口，无需 RegisterPowerSettingNotification。不吞消息。
+            var power = (User32.PowerBroadcastType)(int)wParam;
+            if (power is User32.PowerBroadcastType.PBT_APMRESUMESUSPEND
+                or User32.PowerBroadcastType.PBT_APMRESUMEAUTOMATIC
+                or User32.PowerBroadcastType.PBT_APMRESUMECRITICAL)
+            {
+                AppConfig.GetService<AutoSignInService>().NotifySystemResumed();
             }
         }
         return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);

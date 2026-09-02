@@ -96,7 +96,7 @@ public static partial class AppConfig
             sc.AddSingleton<GameRecordCookieRefreshService>();
             sc.AddSingleton<GameRecordService>();
             sc.AddSingleton<CaptchaLoginService>();
-            // 每日签到：业务编排 + 启动批量自动签到
+            // 每日签到：业务编排 + 常驻自动签到
             sc.AddSingleton<SignInService>();
             sc.AddSingleton<AutoSignInService>();
 

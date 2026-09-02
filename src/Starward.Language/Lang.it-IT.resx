@@ -3264,7 +3264,7 @@ You are welcome to submit exported data to:</value>
     <value>Check-in automatico</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>Il check-in automatico è indipendente per ogni gioco e inizia in sequenza 10 secondi dopo l'avvio di Moonward</value>
+    <value>Il check-in automatico è indipendente per ogni gioco. Moonward effettua il check-in poco dopo l'avvio e di nuovo dopo il reset giornaliero finché resta in esecuzione</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>Avvio automatico dell'app</value>
@@ -3298,9 +3298,6 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>Il richeck-in costerà {0} moneta/e. Attualmente ne hai {1}. Continuare?</value>
-  </data>
-  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
-    <value>Effettivo al prossimo avvio del software</value>
   </data>
   <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
     <value>Effettua nuovamente l'accesso a questo account nella toolbox di Miyoushe ({0})</value>

@@ -3258,7 +3258,7 @@ You are welcome to submit exported data to:</value>
     <value>เช็คอินอัตโนมัติ</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>เช็คอินอัตโนมัติของแต่ละเกมเป็นอิสระต่อกัน และเริ่มดำเนินการตามลำดับ 10 วินาทีหลังจากเปิด Moonward</value>
+    <value>เช็คอินอัตโนมัติของแต่ละเกมเป็นอิสระต่อกัน Moonward จะเช็คอินไม่นานหลังเปิด และเช็คอินอีกครั้งหลังรีเซ็ตรายวันหากโปรแกรมยังทำงานอยู่</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>เปิดซอฟต์แวร์เมื่อเริ่มระบบ</value>
@@ -3292,9 +3292,6 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>เช็คอินย้อนหลังใช้เหรียญ {0} เหรียญ ขณะนี้มี {1} ต้องการดำเนินการต่อหรือไม่?</value>
-  </data>
-  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
-    <value>มีผลเมื่อเปิดซอฟต์แวร์ครั้งถัดไป</value>
   </data>
   <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
     <value>โปรดเข้าสู่ระบบบัญชีนี้อีกครั้งในกล่องเครื่องมือ Miyoushe ({0})</value>

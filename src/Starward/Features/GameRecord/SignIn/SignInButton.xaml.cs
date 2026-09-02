@@ -161,8 +161,7 @@ public sealed partial class SignInButton : UserControl
                 _autoSignInService.SetEnabled(_signInGameBiz, value);
                 if (value)
                 {
-                    // 自动签到在下次启动的批量任务（AutoSignInService.RunStartupBatchAsync）中生效，立即给用户明确提示（使用主窗口底部 InAppToast / InfoBar）
-                    InAppToast.MainWindow?.Information(Lang.SignInButton_AutoSignInEffectiveAtNextStartup);
+                    _autoSignInService.RequestImmediateCheck();
                 }
             }
         }
@@ -249,7 +248,7 @@ public sealed partial class SignInButton : UserControl
             _statusLoaded = false;
             ErrorMessage = null;
             IsLoading = false;
-            // 自动签到不再在切换游戏时触发，统一由软件启动后的批量任务完成（AutoSignInService.RunStartupBatchAsync）。
+            // 自动签到由常驻循环统一调度，切换游戏只同步开关状态，不在这里触发。
         }
         catch (Exception ex)
         {

@@ -3284,7 +3284,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Автоотметка</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>Автоотметка независима для каждой игры и начнётся последовательно через 10 секунд после запуска Moonward</value>
+    <value>Автоотметка независима для каждой игры. Moonward отмечает вход вскоре после запуска и снова после ежедневного сброса, пока программа работает</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>Автозапуск приложения</value>
@@ -3318,9 +3318,6 @@ ChatGPT может допускать ошибки. Проверьте важн�
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>Дополнительная отметка стоит {0} монет(ы). Сейчас у вас {1}. Продолжить?</value>
-  </data>
-  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
-    <value>Вступит в силу при следующем запуске</value>
   </data>
   <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
     <value>Пожалуйста, повторно войдите в этот аккаунт через Miyoushe toolbox ({0})</value>

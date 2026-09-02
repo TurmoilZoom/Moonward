@@ -3264,7 +3264,7 @@ You are welcome to submit exported data to:</value>
     <value>Tự động điểm danh</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>Tự động điểm danh của mỗi game độc lập với nhau, bắt đầu thực hiện lần lượt 10 giây sau khi Moonward khởi động</value>
+    <value>Tự động điểm danh của mỗi game độc lập với nhau. Moonward điểm danh ngay sau khi khởi động, và điểm danh lại sau khi làm mới hằng ngày nếu phần mềm vẫn chạy</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>Tự khởi động phần mềm</value>
@@ -3298,9 +3298,6 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>Điểm danh bù sẽ tiêu tốn {0} xu. Hiện bạn có {1}. Tiếp tục?</value>
-  </data>
-  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
-    <value>Có hiệu lực ở lần khởi động phần mềm tiếp theo</value>
   </data>
   <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
     <value>Vui lòng đăng nhập lại tài khoản này trong hộp công cụ Miyoushe ({0})</value>

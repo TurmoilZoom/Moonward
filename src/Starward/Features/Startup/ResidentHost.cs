@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Starward.Features.Startup;
 
 /// <summary>
-/// 常驻实例的后台宿主：全局热键、手柄驱动、GameBar 引导键接管、RPC 环境下发、抽卡物品名缓存与启动批量签到。
+/// 常驻实例的后台宿主：全局热键、手柄驱动、GameBar 引导键接管、RPC 环境下发、抽卡物品名缓存与自动签到常驻循环。
 /// <para>
 /// 这些职责过去全挂在 <c>MainView_Loaded</c> 上，导致仅托盘驻留（<c>--hide</c>）或快捷方式启动时统统缺席
 /// —— 用户按 Alt+D 截不了图，手柄与引导键接管也不生效。现由系统托盘窗口（常驻实例中唯一必然存在
@@ -48,8 +48,8 @@ internal static class ResidentHost
             GamepadController.RestoreGamepadGuideButtonIfNotAlwaysTakenOver();
             // 启动时为三个游戏按当前语言确保物品名称映射缓存；首次启动/更新后会一次性迁移存量记录名称。
             _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().EnsureCurrentLanguageOnStartupAsync());
-            // 启动后批量为所有账号的每个游戏静默签到（逐个请求、请求间随机延时，模拟真人节奏）。
-            _ = Task.Run(() => AppConfig.GetService<AutoSignInService>().RunStartupBatchAsync());
+            // 启动后批量签到，并在进程常驻期间跨日再签（绝对到期 + 休眠唤醒补判）。
+            AppConfig.GetService<AutoSignInService>().StartResident();
             AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
             _ = InitializeGamepadAsync(dispatcherQueue);
         }

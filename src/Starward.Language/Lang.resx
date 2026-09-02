@@ -3322,7 +3322,7 @@ Repository:</value>
     <value>Auto check-in</value>
   </data>
   <data name="SignInButton_AutoSignInHint" xml:space="preserve">
-    <value>Auto check-in is independent for each game and starts sequentially 10 seconds after Moonward launches</value>
+    <value>Auto check-in is independent for each game. Moonward checks in shortly after launch, and again after the daily reset while it stays running</value>
   </data>
   <data name="SignInButton_StartAtLogin" xml:space="preserve">
     <value>App start at login</value>
@@ -3356,9 +3356,6 @@ Repository:</value>
   </data>
   <data name="SignInButton_ReSignConfirmContent" xml:space="preserve">
     <value>Resigning will cost {0} coin(s). You currently have {1}. Continue?</value>
-  </data>
-  <data name="SignInButton_AutoSignInEffectiveAtNextStartup" xml:space="preserve">
-    <value>Effective on next software startup</value>
   </data>
   <data name="HoyolabToolboxPage_PleaseReloginInMiyousheToolbox" xml:space="preserve">
     <value>Please re-login this account in Miyoushe toolbox ({0})</value>
