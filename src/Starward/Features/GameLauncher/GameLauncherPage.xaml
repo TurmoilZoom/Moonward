@@ -15,6 +15,7 @@
              xmlns:sfgd="using:Starward.Features.GameRecord.DailyNote"
              xmlns:sfgs="using:Starward.Features.GameRecord.SignIn"
              xmlns:sfp="using:Starward.Features.PlayTime"
+             xmlns:sfm="using:Starward.Features.MapTool"
              xmlns:sfr="using:Starward.Features.RedeemCode"
              xmlns:sft="using:Starward.Features.TimeNode"
              x:DefaultBindMode="OneWay"
@@ -754,6 +755,10 @@
                 <sft:TimeNodeButton Width="40"
                                     Height="40"
                                     CurrentGameId="{x:Bind CurrentGameId}" />
+                <!--  地图工具：点击打开站点列表，跳转浏览器  -->
+                <sfm:MapToolButton Width="40"
+                                   Height="40"
+                                   CurrentGameId="{x:Bind CurrentGameId}" />
                 <!--  兑换码：国服前瞻直播码展示（可复制，不兑换）  -->
                 <sfr:RedeemCodeButton Width="40"
                                       Height="40"

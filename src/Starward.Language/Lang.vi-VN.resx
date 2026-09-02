@@ -3832,4 +3832,8 @@ You are welcome to submit exported data to:</value>
   <data name="StartGameTaskManager_Deleted" xml:space="preserve"><value>Deleted {0} scheduled task(s).</value></data>
   <data name="StartGameTaskManager_Partial" xml:space="preserve"><value>Deleted {0} task(s); {1} selected task(s) remain.</value></data>
   <data name="StartGameTaskManager_Cancelled" xml:space="preserve"><value>Administrator approval was cancelled; tasks were not deleted.</value></data>
+  <data name="MapToolButton_Title" xml:space="preserve"><value>Bản đồ</value></data>
+  <data name="MapTool_Official" xml:space="preserve"><value>Bản đồ chính thức</value></data>
+  <data name="MapTool_AppSample" xml:space="preserve"><value>AppSample</value></data>
+  <data name="MapTool_Kongying" xml:space="preserve"><value>Kongying Tavern</value></data>
 </root>

@@ -11152,5 +11152,41 @@ namespace Starward.Language {
                 return ResourceManager.GetString("StartGameTaskManager_Cancelled", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Map 的本地化字符串。
+        /// </summary>
+        public static string MapToolButton_Title {
+            get {
+                return ResourceManager.GetString("MapToolButton_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Official Map 的本地化字符串。
+        /// </summary>
+        public static string MapTool_Official {
+            get {
+                return ResourceManager.GetString("MapTool_Official", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 AppSample 的本地化字符串。
+        /// </summary>
+        public static string MapTool_AppSample {
+            get {
+                return ResourceManager.GetString("MapTool_AppSample", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Kongying Tavern 的本地化字符串。
+        /// </summary>
+        public static string MapTool_Kongying {
+            get {
+                return ResourceManager.GetString("MapTool_Kongying", resourceCulture);
+            }
+        }
     }
 }

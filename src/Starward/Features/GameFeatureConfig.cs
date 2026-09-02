@@ -69,6 +69,12 @@ internal partial class GameFeatureConfig
 
 
     /// <summary>
+    /// 支持首页地图工具（原神 / 星穹铁道互动地图跳转）
+    /// </summary>
+    public bool SupportMapTool { get; init; }
+
+
+    /// <summary>
     /// 支持百科好感壁纸（绝区零自定义背景）
     /// </summary>
     public bool SupportFavorWallpaper { get; init; }
@@ -168,6 +174,7 @@ internal partial class GameFeatureConfig
         SupportSignIn = true,
         SupportTimeNode = true,
         SupportRedeemCode = true,
+        SupportMapTool = true,
     };
 
 
@@ -189,6 +196,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
+        SupportMapTool = true,
     };
 
 
@@ -210,6 +218,7 @@ internal partial class GameFeatureConfig
         SupportSignIn = true,
         SupportTimeNode = true,
         SupportRedeemCode = true,
+        SupportMapTool = true,
     };
 
 
@@ -230,6 +239,7 @@ internal partial class GameFeatureConfig
         SupportSignIn = true,
         SupportTimeNode = true,
         SupportRedeemCode = true,
+        SupportMapTool = true,
     };
 
 
@@ -249,6 +259,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
+        SupportMapTool = true,
     };
 
 
@@ -269,6 +280,7 @@ internal partial class GameFeatureConfig
         SupportSignIn = true,
         SupportTimeNode = true,
         SupportRedeemCode = true,
+        SupportMapTool = true,
     };
 
 

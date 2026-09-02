@@ -3912,4 +3912,16 @@
   <data name="StartGameTaskManager_Cancelled" xml:space="preserve">
     <value>已取消管理员授权，未删除计划任务。</value>
   </data>
+  <data name="MapToolButton_Title" xml:space="preserve">
+    <value>地图</value>
+  </data>
+  <data name="MapTool_Official" xml:space="preserve">
+    <value>官方地图</value>
+  </data>
+  <data name="MapTool_AppSample" xml:space="preserve">
+    <value>AppSample</value>
+  </data>
+  <data name="MapTool_Kongying" xml:space="preserve">
+    <value>空荧酒馆</value>
+  </data>
 </root>
