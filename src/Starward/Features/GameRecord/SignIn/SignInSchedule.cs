@@ -14,10 +14,10 @@ internal static class SignInSchedule
     public static readonly TimeSpan ServerOffset = TimeSpan.FromHours(8);
 
     /// <summary>Completed 后排到「下一个 0 点」时附加的随机分钟数（含端点）。</summary>
-    public const int MinDailyJitterMinutes = 2;
+    public const int MinDailyJitterMinutes = 3;
 
     /// <summary>见 <see cref="MinDailyJitterMinutes"/>。</summary>
-    public const int MaxDailyJitterMinutes = 20;
+    public const int MaxDailyJitterMinutes = 8;
 
 
     /// <summary>
@@ -32,7 +32,7 @@ internal static class SignInSchedule
 
 
     /// <summary>
-    /// 下一个严格晚于 <paramref name="utcNow"/> 的 UTC+8 0:00，再加上 2–20 分钟抖动。
+    /// 下一个严格晚于 <paramref name="utcNow"/> 的 UTC+8 0:00，再加上 3–8 分钟抖动。
     /// <para>
     /// 23:50 签完应对准今晚的 0 点；00:30 签完应对准明天 0 点，不能再落到当天 0:00+jitter。
     /// </para>
