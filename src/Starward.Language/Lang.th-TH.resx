@@ -2402,6 +2402,18 @@ You are welcome to submit exported data to:</value>
   <data name="DailyNoteButton_Genshin_Expedition" xml:space="preserve">
     <value>การสำรวจ</value>
   </data>
+  <data name="DailyNoteButton_Genshin_StoredEncounterPoints" xml:space="preserve">
+    <value>คะแนนเผชิญหน้าสะสม</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_WeeklyBossRemaining" xml:space="preserve">
+    <value>บอสประจำสัปดาห์ที่เหลือ</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_ParametricTransformer" xml:space="preserve">
+    <value>เครื่องแปรสภาพพารามิเตอร์</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_TransformerReady" xml:space="preserve">
+    <value>พร้อมใช้งาน</value>
+  </data>
   <data name="DailyNoteButton_StarRail_FullTime" xml:space="preserve">
     <value>เต็มเวลา</value>
   </data>

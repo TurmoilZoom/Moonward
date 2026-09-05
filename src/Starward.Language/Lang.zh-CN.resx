@@ -2461,6 +2461,18 @@
   <data name="DailyNoteButton_Genshin_Expedition" xml:space="preserve">
     <value>探索派遣</value>
   </data>
+  <data name="DailyNoteButton_Genshin_StoredEncounterPoints" xml:space="preserve">
+    <value>长效历练点</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_WeeklyBossRemaining" xml:space="preserve">
+    <value>周本剩余次数</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_ParametricTransformer" xml:space="preserve">
+    <value>参量质变仪</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_TransformerReady" xml:space="preserve">
+    <value>可使用</value>
+  </data>
   <data name="DailyNoteButton_StarRail_FullTime" xml:space="preserve">
     <value>回满时间</value>
   </data>

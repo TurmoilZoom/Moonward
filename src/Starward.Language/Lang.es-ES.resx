@@ -2403,6 +2403,18 @@ You are welcome to submit exported data to:</value>
   <data name="DailyNoteButton_Genshin_Expedition" xml:space="preserve">
     <value>Expedición</value>
   </data>
+  <data name="DailyNoteButton_Genshin_StoredEncounterPoints" xml:space="preserve">
+    <value>Puntos de encuentro almacenados</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_WeeklyBossRemaining" xml:space="preserve">
+    <value>Jefes semanales restantes</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_ParametricTransformer" xml:space="preserve">
+    <value>Transformador paramétrico</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_TransformerReady" xml:space="preserve">
+    <value>Disponible</value>
+  </data>
   <data name="DailyNoteButton_StarRail_FullTime" xml:space="preserve">
     <value>Tiempo completo</value>
   </data>

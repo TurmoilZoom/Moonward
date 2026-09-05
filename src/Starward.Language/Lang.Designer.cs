@@ -2006,6 +2006,42 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Stored Encounter Points 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteButton_Genshin_StoredEncounterPoints {
+            get {
+                return ResourceManager.GetString("DailyNoteButton_Genshin_StoredEncounterPoints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Weekly Bosses Remaining 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteButton_Genshin_WeeklyBossRemaining {
+            get {
+                return ResourceManager.GetString("DailyNoteButton_Genshin_WeeklyBossRemaining", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Parametric Transformer 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteButton_Genshin_ParametricTransformer {
+            get {
+                return ResourceManager.GetString("DailyNoteButton_Genshin_ParametricTransformer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Ready 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteButton_Genshin_TransformerReady {
+            get {
+                return ResourceManager.GetString("DailyNoteButton_Genshin_TransformerReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Realm Currency 的本地化字符串。
         /// </summary>
         public static string DailyNoteButton_Genshin_RealmCurrency {

@@ -163,63 +163,92 @@
                     <Grid x:Name="Grid_Genshin"
                           Grid.Row="2"
                           x:Load="{x:Bind IsGenshinEnabled}"
-                          ColumnSpacing="12"
+                          ColumnSpacing="8"
                           Visibility="{x:Bind GenshinDailyNote, Converter={StaticResource ObjectToVisibilityConverter}}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" MinHeight="28" />
+                            <!--  可整行隐藏的行不能写 MinHeight，否则塌陷后仍占位；行高由图标外层 Grid 撑起  -->
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" MinHeight="28" />
-                            <RowDefinition Height="Auto" MinHeight="28" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <!--  体力  -->
-                        <StackPanel Grid.RowSpan="20">
-                            <Image Width="60" Source="ms-appx:///Assets/Image/UI_ItemIcon_210.png" />
-                            <TextBlock HorizontalAlignment="Center"
-                                       FontSize="16"
-                                       FontWeight="SemiBold">
-                                <Run Text="{x:Bind GenshinDailyNote.CurrentResin}" />
-                                <Run Text="/" />
-                                <Run Text="{x:Bind GenshinDailyNote.MaxResin}" />
-                            </TextBlock>
+                        <!--  原粹树脂：跨三列，避免 40px 大图把图标列撑宽后小图标居中产生左侧空隙  -->
+                        <StackPanel Grid.ColumnSpan="3"
+                                    Margin="0,0,0,4"
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                            <Image Width="40"
+                                   Height="40"
+                                   Source="ms-appx:///Assets/Image/UI_ItemIcon_210.png" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock FontSize="16" FontWeight="SemiBold">
+                                    <Run Text="{x:Bind GenshinDailyNote.CurrentResin}" /><Run Text="/" /><Run Text="{x:Bind GenshinDailyNote.MaxResin}" />
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="1"
+                                            Visibility="{x:Bind GenshinDailyNote.IsResinFull, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                                    <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                        <Run Text="{x:Bind lang:Lang.DailyNoteButton_StarRail_FullTime}" />
+                                        <Run Text="{x:Bind GenshinDailyNote.ResinFullTime.LocalDateTime.ToString('HH\:mm', x:Null)}" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="12"
+                                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                               Text="{x:Bind GenshinDailyNote.ResinRecoveryDaysRemaining}"
+                                               Visibility="{x:Bind GenshinDailyNote.ResinRecoveryBeyondTomorrow}" />
+                                </StackPanel>
+                                <TextBlock FontSize="12"
+                                           Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                           Text="{x:Bind lang:Lang.DailyNoteButton_StarRail_FullyRecovered}"
+                                           Visibility="{x:Bind GenshinDailyNote.IsResinFull}" />
+                            </StackPanel>
                         </StackPanel>
 
                         <!--  每日委托奖励  -->
-                        <Image Grid.Column="1"
-                               Width="20"
-                               Height="20"
-                               HorizontalAlignment="Left"
-                               Source="ms-appx:///Assets/Image/UI_NPCTopIcon_QuestEvent_64.png" />
-                        <TextBlock Grid.Column="1"
-                                   Margin="24,0,0,0"
+                        <Grid Grid.Row="1" Width="20" Height="28">
+                            <Image Width="20"
+                                   Height="20"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Source="ms-appx:///Assets/Image/UI_NPCTopIcon_QuestEvent_64.png" />
+                        </Grid>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
                                    VerticalAlignment="Center"
                                    FontSize="12"
                                    Text="{x:Bind lang:Lang.DailyNoteButton_Genshin_DailyCommissionRewards}" />
-                        <FontIcon Grid.Column="2"
+                        <FontIcon Grid.Row="1"
+                                  Grid.Column="2"
                                   HorizontalAlignment="Right"
                                   VerticalAlignment="Center"
                                   FontSize="14"
                                   Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                                   Glyph="&#xE930;"
                                   Visibility="{x:Bind GenshinDailyNote.DailyTask.IsExtraTaskRewardReceived}" />
-                        <TextBlock Grid.Column="2"
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="2"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"
+                                   FontSize="12"
                                    Visibility="{x:Bind GenshinDailyNote.DailyTask.IsExtraTaskRewardReceived, Converter={StaticResource BoolToVisibilityReversedConverter}}">
                             <Run Text="{x:Bind GenshinDailyNote.FinishedTaskNum}" /><Run Text="/" /><Run Text="{x:Bind GenshinDailyNote.TotalTaskNum}" />
                         </TextBlock>
 
 
-                        <!--  每日委托 & 历练点  -->
-                        <Grid Grid.Row="1"
+                        <!--  委托任务 & 历练点  -->
+                        <Grid Grid.Row="2"
                               Grid.Column="1"
                               Grid.ColumnSpan="2"
-                              Margin="24,0,0,0"
+                              Margin="0,0,0,4"
                               ColumnSpacing="12"
                               RowSpacing="4"
                               Visibility="{x:Bind GenshinDailyNote.IsExtraTaskRewardReceived, Converter={StaticResource BoolToVisibilityReversedConverter}}">
@@ -232,7 +261,7 @@
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
 
-                            <!--  每日委托  -->
+                            <!--  委托任务  -->
                             <TextBlock VerticalAlignment="Center"
                                        FontSize="12"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -337,21 +366,47 @@
                         </Grid>
 
 
+                        <!--  长效历练点  -->
+                        <Grid Grid.Row="3"
+                              Width="20"
+                              Height="28"
+                              Visibility="{x:Bind GenshinDailyNote.DailyTask.AttendanceVisible}">
+                            <Image Width="20"
+                                   Height="20"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Source="ms-appx:///static/hk4e_stored_attendance.png" />
+                        </Grid>
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Text="{x:Bind lang:Lang.DailyNoteButton_Genshin_StoredEncounterPoints}"
+                                   Visibility="{x:Bind GenshinDailyNote.DailyTask.AttendanceVisible}" />
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="2"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Visibility="{x:Bind GenshinDailyNote.DailyTask.AttendanceVisible}">
+                            <Run Text="&#xD7;" /><Run Text="{x:Bind GenshinDailyNote.DailyTask.StoredAttendance}" />
+                        </TextBlock>
+
 
                         <!--  洞天宝钱  -->
-                        <Image Grid.Row="2"
-                               Grid.Column="1"
-                               Width="20"
-                               Height="20"
-                               HorizontalAlignment="Left"
-                               Source="ms-appx:///Assets/Image/UI_ItemIcon_204.png" />
-                        <TextBlock Grid.Row="2"
+                        <Grid Grid.Row="4" Width="20" Height="28">
+                            <Image Width="20"
+                                   Height="20"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Source="ms-appx:///Assets/Image/UI_ItemIcon_204.png" />
+                        </Grid>
+                        <TextBlock Grid.Row="4"
                                    Grid.Column="1"
-                                   Margin="24,0,0,0"
                                    VerticalAlignment="Center"
                                    FontSize="12"
                                    Text="{x:Bind lang:Lang.DailyNoteButton_Genshin_RealmCurrency}" />
-                        <TextBlock Grid.Row="2"
+                        <TextBlock Grid.Row="4"
                                    Grid.Column="2"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"
@@ -361,19 +416,19 @@
 
 
                         <!--  探索派遣  -->
-                        <Image Grid.Row="3"
-                               Grid.Column="1"
-                               Width="20"
-                               Height="20"
-                               HorizontalAlignment="Left"
-                               Source="ms-appx:///Assets/Image/UI_TouchIcon_Map.png" />
-                        <TextBlock Grid.Row="3"
+                        <Grid Grid.Row="5" Width="20" Height="28">
+                            <Image Width="20"
+                                   Height="20"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Source="ms-appx:///Assets/Image/UI_TouchIcon_Map.png" />
+                        </Grid>
+                        <TextBlock Grid.Row="5"
                                    Grid.Column="1"
-                                   Margin="24,0,0,0"
                                    VerticalAlignment="Center"
                                    FontSize="12"
                                    Text="{x:Bind lang:Lang.DailyNoteButton_Genshin_Expedition}" />
-                        <TextBlock Grid.Row="3"
+                        <TextBlock Grid.Row="5"
                                    Grid.Column="2"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"
@@ -382,7 +437,60 @@
                         </TextBlock>
 
 
+                        <!--  周本剩余次数（值得铭记的强敌消耗减半剩余次数）  -->
+                        <Grid Grid.Row="6" Width="20" Height="28">
+                            <Image Width="20"
+                                   Height="20"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Source="ms-appx:///static/hk4e_enemies_of_note.png" />
+                        </Grid>
+                        <TextBlock Grid.Row="6"
+                                   Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Text="{x:Bind lang:Lang.DailyNoteButton_Genshin_WeeklyBossRemaining}" />
+                        <TextBlock Grid.Row="6"
+                                   Grid.Column="2"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   FontSize="12">
+                            <Run Text="{x:Bind GenshinDailyNote.RemainResinDiscountNum}" /><Run Text="/" /><Run Text="{x:Bind GenshinDailyNote.ResinDiscountNumLimit}" />
+                        </TextBlock>
 
+
+                        <!--  参量质变仪  -->
+                        <Grid Grid.Row="7"
+                              Width="20"
+                              Height="28"
+                              Visibility="{x:Bind GenshinDailyNote.Transformer.Obtained}">
+                            <Image Width="20"
+                                   Height="20"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Source="ms-appx:///Assets/Image/UI_ItemIcon_220021_64.png" />
+                        </Grid>
+                        <TextBlock Grid.Row="7"
+                                   Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Text="{x:Bind lang:Lang.DailyNoteButton_Genshin_ParametricTransformer}"
+                                   Visibility="{x:Bind GenshinDailyNote.Transformer.Obtained}" />
+                        <TextBlock Grid.Row="7"
+                                   Grid.Column="2"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                   Text="{x:Bind lang:Lang.DailyNoteButton_Genshin_TransformerReady}"
+                                   Visibility="{x:Bind GenshinTransformerReadyVisibility(GenshinDailyNote.Transformer)}" />
+                        <TextBlock Grid.Row="7"
+                                   Grid.Column="2"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Text="{x:Bind GenshinTransformerRecoveryToString(GenshinDailyNote.Transformer)}"
+                                   Visibility="{x:Bind GenshinTransformerCoolingDownVisibility(GenshinDailyNote.Transformer)}" />
 
                     </Grid>
 

@@ -2401,6 +2401,18 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="DailyNoteButton_Genshin_Expedition" xml:space="preserve">
     <value>Expedition</value>
   </data>
+  <data name="DailyNoteButton_Genshin_StoredEncounterPoints" xml:space="preserve">
+    <value>Gespeicherte Begegnungspunkte</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_WeeklyBossRemaining" xml:space="preserve">
+    <value>Verbleibende Wochenbosse</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_ParametricTransformer" xml:space="preserve">
+    <value>Parametrischer Transmutator</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_TransformerReady" xml:space="preserve">
+    <value>Bereit</value>
+  </data>
   <data name="DailyNoteButton_StarRail_FullTime" xml:space="preserve">
     <value>Vollzeit</value>
   </data>

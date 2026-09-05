@@ -258,6 +258,53 @@ public sealed partial class DailyNoteButton : UserControl
     }
 
 
+    /// <summary>
+    /// 参量质变仪已冷却完毕，可再次使用。
+    /// </summary>
+    /// <param name="transformer">参量质变仪，未拥有时为 null。</param>
+    /// <returns>可使用时为 <see cref="Visibility.Visible"/>。</returns>
+    /// <remarks>x:Bind 函数绑定返回 bool 再隐式转 Visibility 会生成无法编译的代码，只能直接返回 Visibility。</remarks>
+    public Visibility GenshinTransformerReadyVisibility(Transformer? transformer)
+    {
+        return transformer?.RecoveryTime?.Reached is true ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+
+    /// <summary>
+    /// 参量质变仪冷却中。
+    /// </summary>
+    /// <param name="transformer">参量质变仪，未拥有时为 null。</param>
+    /// <returns>冷却中时为 <see cref="Visibility.Visible"/>。</returns>
+    public Visibility GenshinTransformerCoolingDownVisibility(Transformer? transformer)
+    {
+        return transformer?.RecoveryTime is { Reached: false } ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+
+    /// <summary>
+    /// 参量质变仪剩余冷却时间的显示文案。
+    /// </summary>
+    /// <param name="transformer">参量质变仪，未拥有时为 null。</param>
+    /// <returns>形如「还剩 6 天」的文案；已冷却完毕或数据缺失时为空字符串。</returns>
+    public string GenshinTransformerRecoveryToString(Transformer? transformer)
+    {
+        // 接口只在天/时/分中填一个非零值，按粒度从大到小取
+        if (transformer?.RecoveryTime is not { Reached: false } time)
+        {
+            return string.Empty;
+        }
+        if (time.Day > 0)
+        {
+            return string.Format(Lang.TimeNode_RemainingDays, time.Day);
+        }
+        if (time.Hour > 0)
+        {
+            return string.Format(Lang.TimeNode_RemainingHours, time.Hour);
+        }
+        return string.Format(Lang.TimeNode_RemainingMinutes, time.Minute);
+    }
+
+
 
 
 

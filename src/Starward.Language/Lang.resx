@@ -2461,6 +2461,18 @@ Repository:</value>
   <data name="DailyNoteButton_Genshin_Expedition" xml:space="preserve">
     <value>Expedition</value>
   </data>
+  <data name="DailyNoteButton_Genshin_StoredEncounterPoints" xml:space="preserve">
+    <value>Stored Encounter Points</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_WeeklyBossRemaining" xml:space="preserve">
+    <value>Weekly Bosses Remaining</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_ParametricTransformer" xml:space="preserve">
+    <value>Parametric Transformer</value>
+  </data>
+  <data name="DailyNoteButton_Genshin_TransformerReady" xml:space="preserve">
+    <value>Ready</value>
+  </data>
   <data name="DailyNoteButton_StarRail_FullTime" xml:space="preserve">
     <value>Full Time</value>
   </data>

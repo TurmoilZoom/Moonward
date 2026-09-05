@@ -132,6 +132,48 @@ public class GenshinDailyNote
     [JsonPropertyName("archon_quest_progress")]
     public ArchonQuestProgress ArchonQuestProgress { get; set; }
 
+
+    /// <summary>
+    /// 砺行修远
+    /// </summary>
+    [JsonPropertyName("week_active_progress")]
+    public WeekActiveProgress WeekActiveProgress { get; set; }
+
+
+    /// <summary>
+    /// 反序列化时刻，接口只给树脂恢复的剩余秒数、没有绝对时间戳，回满时刻只能以此推算
+    /// </summary>
+    [JsonIgnore]
+    public DateTimeOffset CreateTime { get; } = DateTimeOffset.Now;
+
+
+    /// <summary>
+    /// 树脂已满
+    /// </summary>
+    [JsonIgnore]
+    public bool IsResinFull => CurrentResin >= MaxResin;
+
+
+    /// <summary>
+    /// 树脂回满时刻
+    /// </summary>
+    [JsonIgnore]
+    public DateTimeOffset ResinFullTime => CreateTime + ResinRecoveryTime;
+
+
+    /// <summary>
+    /// 隔天树脂回满
+    /// </summary>
+    [JsonIgnore]
+    public bool ResinRecoveryBeyondTomorrow => ResinFullTime.LocalDateTime.Date > CreateTime.LocalDateTime.Date;
+
+
+    /// <summary>
+    /// 树脂回满剩余天数
+    /// </summary>
+    [JsonIgnore]
+    public string ResinRecoveryDaysRemaining => (ResinFullTime.LocalDateTime.Date - CreateTime.LocalDateTime.Date).Days.ToString("+0");
+
 }
 
 
