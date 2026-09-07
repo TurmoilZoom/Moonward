@@ -5,6 +5,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameRecord"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
              xmlns:sf="using:Starward.Frameworks"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -30,7 +31,9 @@
                         Height="32"
                         Padding="0"
                         Click="Button_GoBack_Click"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Back}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="&#xEC52;" />
@@ -40,7 +43,9 @@
                         Height="32"
                         Padding="0"
                         Click="Button_GoForward_Click"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Forward}">
                     <FontIcon FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               Glyph="&#xEBE7;" />
@@ -50,7 +55,9 @@
                         Height="32"
                         Padding="0"
                         Click="Button_RefreshOrCancel_Click"
-                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                        sc:InstantTooltip.Placement="Bottom"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
                     <FontIcon Name="FontIcon_RefreshOrCancel"
                               FontSize="16"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"

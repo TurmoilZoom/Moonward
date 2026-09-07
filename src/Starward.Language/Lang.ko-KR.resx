@@ -519,6 +519,12 @@
   <data name="Common_Refresh" xml:space="preserve">
     <value>새로고침</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>뒤로</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>앞으로</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>이번주</value>
   </data>

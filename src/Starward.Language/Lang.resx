@@ -578,6 +578,12 @@ closing the program during decompression will cause game file corruption.</value
   <data name="Common_Refresh" xml:space="preserve">
     <value>Refresh</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>Forward</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>This Week</value>
   </data>

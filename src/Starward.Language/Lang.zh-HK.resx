@@ -518,6 +518,12 @@
   <data name="Common_Refresh" xml:space="preserve">
     <value>重新整理</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>返回</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>前進</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>呢個禮拜</value>
   </data>

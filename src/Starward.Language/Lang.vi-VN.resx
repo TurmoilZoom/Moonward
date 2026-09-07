@@ -519,6 +519,12 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="Common_Refresh" xml:space="preserve">
     <value>Làm mới</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>Quay lại</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>Chuyển tiếp</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>Tuần này</value>
   </data>

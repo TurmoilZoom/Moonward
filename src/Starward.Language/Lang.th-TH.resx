@@ -518,6 +518,12 @@
   <data name="Common_Refresh" xml:space="preserve">
     <value>รีเฟรซ</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>ย้อนกลับ</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>ไปข้างหน้า</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>สัปดาห์นี้</value>
   </data>

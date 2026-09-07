@@ -519,6 +519,12 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="Common_Refresh" xml:space="preserve">
     <value>Aggiorna</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>Indietro</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>Avanti</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>Questa Settimana</value>
   </data>

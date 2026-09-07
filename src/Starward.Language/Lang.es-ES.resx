@@ -519,6 +519,12 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="Common_Refresh" xml:space="preserve">
     <value>Recargar</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>Atrás</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>Adelante</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>Esta semana</value>
   </data>

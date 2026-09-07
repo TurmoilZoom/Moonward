@@ -519,6 +519,12 @@
   <data name="Common_Refresh" xml:space="preserve">
     <value>更新</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>戻る</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>進む</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>今週</value>
   </data>

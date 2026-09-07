@@ -4,10 +4,12 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.Web.WebView2.Core;
+using Starward.Controls;
 using Starward.Core;
 using Starward.Features;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Frameworks;
+using Starward.Language;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -110,6 +112,7 @@ public sealed partial class LoginPage : PageBase
         try
         {
             FontIcon_RefreshOrCancel.Glyph = CancelIcon;
+            InstantTooltip.SetText(Button_RefreshOrCancel, Lang.Common_Cancel);
         }
         catch { }
     }
@@ -119,6 +122,7 @@ public sealed partial class LoginPage : PageBase
         try
         {
             FontIcon_RefreshOrCancel.Glyph = RefreshIcon;
+            InstantTooltip.SetText(Button_RefreshOrCancel, Lang.Common_Refresh);
             if (args.IsSuccess)
             {
                 await sender.ExecuteScriptAsync("""

@@ -578,6 +578,12 @@
   <data name="Common_Refresh" xml:space="preserve">
     <value>刷新</value>
   </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>后退</value>
+  </data>
+  <data name="Common_Forward" xml:space="preserve">
+    <value>前进</value>
+  </data>
   <data name="LauncherPage_ThisWeek" xml:space="preserve">
     <value>本周</value>
   </data>

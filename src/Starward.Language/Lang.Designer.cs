@@ -1799,6 +1799,24 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Back 的本地化字符串。
+        /// </summary>
+        public static string Common_Back {
+            get {
+                return ResourceManager.GetString("Common_Back", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Forward 的本地化字符串。
+        /// </summary>
+        public static string Common_Forward {
+            get {
+                return ResourceManager.GetString("Common_Forward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Reject 的本地化字符串。
         /// </summary>
         public static string Common_Reject {

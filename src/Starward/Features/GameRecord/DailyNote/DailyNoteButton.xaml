@@ -58,7 +58,9 @@
                             BorderThickness="0"
                             Command="{x:Bind RefreshDailyNoteCommand}"
                             CornerRadius="4"
-                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
                         <FontIcon FontSize="14"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                   Glyph="&#xE72C;" />

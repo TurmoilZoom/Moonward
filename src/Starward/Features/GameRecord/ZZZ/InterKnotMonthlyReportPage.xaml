@@ -171,7 +171,9 @@
                             Command="{x:Bind GetFullDataDetailsCommand}"
                             CommandParameter="{x:Bind SelectMonthData.DataMonth}"
                             IsEnabled="{x:Bind GetFullDataDetailsCommand.IsRunning, Converter={StaticResource BoolReversedConverter}}"
-                            Visibility="{x:Bind IsRefreshButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{x:Bind IsRefreshButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
                         <Grid Width="16" Height="16">
                             <ProgressRing Width="16"
                                           Height="16"
