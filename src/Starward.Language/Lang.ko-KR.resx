@@ -411,6 +411,9 @@
   <data name="UpdateService_CannotUpdateAutomatically" xml:space="preserve">
     <value>자동 업데이트 실패</value>
   </data>
+  <data name="UpdateService_TooManyRequests" xml:space="preserve">
+    <value>업데이트 서버에 대한 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요</value>
+  </data>
   <data name="GameSettingPage_Custom" xml:space="preserve">
     <value>사용자 지정</value>
   </data>
@@ -2199,7 +2202,7 @@
     <value>A PAT is already stored in Windows PasswordVault on this device.</value>
   </data>
   <data name="ZZZGachaInfoWindow_GitHubPatNotConfigured" xml:space="preserve">
-    <value>No PAT stored. Maintainers need a token with contents:write on TurmoilZoom/Starward.</value>
+    <value>No PAT stored. Maintainers need a token with contents:write on TurmoilZoom/Moonward.</value>
   </data>
   <data name="ZZZGachaInfoWindow_GitHubPatDialogDescription" xml:space="preserve">
     <value>Store a GitHub Personal Access Token (encrypted via Windows PasswordVault) to publish selected JSON packs to the metadata branch. The token is never written to the app database or logs.</value>

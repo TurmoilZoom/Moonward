@@ -470,6 +470,9 @@
   <data name="UpdateService_CannotUpdateAutomatically" xml:space="preserve">
     <value>无法自动更新</value>
   </data>
+  <data name="UpdateService_TooManyRequests" xml:space="preserve">
+    <value>更新服务器请求过于频繁，请稍后再试</value>
+  </data>
   <data name="GameSettingPage_Custom" xml:space="preserve">
     <value>自定义</value>
   </data>
@@ -2257,7 +2260,7 @@
     <value>本机 PasswordVault 中已保存 PAT。</value>
   </data>
   <data name="ZZZGachaInfoWindow_GitHubPatNotConfigured" xml:space="preserve">
-    <value>尚未配置 PAT。维护者需具备对 TurmoilZoom/Starward 的 contents:write 权限。</value>
+    <value>尚未配置 PAT。维护者需具备对 TurmoilZoom/Moonward 的 contents:write 权限。</value>
   </data>
   <data name="ZZZGachaInfoWindow_GitHubPatDialogDescription" xml:space="preserve">
     <value>将 GitHub Personal Access Token 加密存入 Windows PasswordVault，用于把选中的 JSON 语言包提交到 metadata 分支。令牌不会写入应用数据库或日志。</value>

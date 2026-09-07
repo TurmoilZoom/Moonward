@@ -10096,6 +10096,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Too many requests to the update server, please try again later 的本地化字符串。
+        /// </summary>
+        public static string UpdateService_TooManyRequests {
+            get {
+                return ResourceManager.GetString("UpdateService_TooManyRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Auto-restart after update 的本地化字符串。
         /// </summary>
         public static string UpdateWindow_AutoRestartAfterUpdate {

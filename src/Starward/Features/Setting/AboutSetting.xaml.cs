@@ -155,7 +155,7 @@ public sealed partial class AboutSetting : PageBase
         }
         catch (Exception ex)
         {
-            UpdateErrorText = ex.Message;
+            UpdateErrorText = UpdateService.GetDisplayErrorMessage(ex);
             _logger.LogError(ex, "Check update");
         }
     }

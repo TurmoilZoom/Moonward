@@ -1,3 +1,4 @@
+using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,6 +58,11 @@ internal class CnbSource : GitBase<CnbRelease>
 {
     private const string CnbApiAccept = "application/vnd.cnb.api+json";
 
+    /// <summary>
+    /// 单次检查更新最多拉取 feed 的 Release 数量，与 Velopack 自带 <c>GithubSource</c> 的 per_page 取值一致。
+    /// </summary>
+    private const int MaxReleaseCount = 10;
+
     /// <inheritdoc />
     protected override (string Name, string Value)? Authorization => null;
 
@@ -83,10 +89,41 @@ internal class CnbSource : GitBase<CnbRelease>
             return [];
         }
 
-        return list
+        CnbRelease[] releases = list
             .OrderByDescending(x => x.PublishedAt ?? x.CreatedAt)
             .Where(x => includePrereleases || !x.Prerelease)
             .ToArray();
+        return TrimToRequiredReleases(releases);
+    }
+
+    /// <summary>
+    /// 收敛真正需要拉取 feed 的 Release 数量。
+    /// <para>
+    /// <see cref="GitBase{T}.GetReleaseFeed"/> 会为**每个** Release 单独下载一次 <c>releases.{channel}.json</c>，
+    /// 而 CNB 匿名接口限流为 20 次/分钟（见响应头 <c>X-Ratelimit-Limit</c>）。全量返回时一次检查更新就要打出
+    /// 「1 + Release 总数」个请求，稳定触发 429，且随发版数量增长只会更糟。
+    /// </para>
+    /// </summary>
+    /// <param name="releases">已按发布时间降序排列、并按需过滤掉预览版的列表。</param>
+    /// <returns>只保留增量链所需的 Release，最多 <see cref="MaxReleaseCount"/> 个。</returns>
+    private static CnbRelease[] TrimToRequiredReleases(CnbRelease[] releases)
+    {
+        if (releases.Length <= 1)
+        {
+            return releases;
+        }
+        if (NuGetVersion.TryParse(AppConfig.AppVersion, out NuGetVersion? current))
+        {
+            // 比当前版本旧的 Release 对「最新完整包 + 增量链」都没有贡献（UpdateManager 未开启降级），跳过即可省下绝大多数请求。
+            CnbRelease[] newer = releases
+                .Where(x => NuGetVersion.TryParse(x.TagName, out NuGetVersion? version) && version > current)
+                .ToArray();
+            // 已是最新版时 newer 为空，但仍需最新一个 Release 的 feed 才能判定「无更新」。
+            releases = newer.Length > 0 ? newer : releases[..1];
+        }
+        // 兜底：版本号解析失败、或落后太多个版本时也不放任请求数膨胀。
+        // 上限取 10 与 UpdateManager.MaximumDeltasBeforeFallback 一致——增量超过 10 个时它本就会回退到完整包。
+        return releases.Length > MaxReleaseCount ? releases[..MaxReleaseCount] : releases;
     }
 
     /// <inheritdoc />

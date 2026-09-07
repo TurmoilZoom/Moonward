@@ -23,7 +23,7 @@ public class ReleaseClient
     /// <summary>
     /// 发行说明来源仓库（owner/repo）。
     /// </summary>
-    public const string Repository = "TurmoilZoom/Starward";
+    public const string Repository = "TurmoilZoom/Moonward";
 
 
     private readonly HttpClient _httpClient;

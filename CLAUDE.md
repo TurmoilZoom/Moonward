@@ -6,7 +6,7 @@
 
 Moonward（产品品牌；工程目录与 C# 命名空间仍为 `Starward.*`）：Windows 米哈游游戏启动器（WinUI 3 / .NET 10），支持原神（hk4e）、星穹铁道（hkrpg）、绝区零（nap）、崩坏3（bh3）。
 
-本仓为 **fork**（上游 Scighost/Starward，发布走 TurmoilZoom/Starward + Velopack，安装包身份为 Moonward）。日常开发在 `rebase/develop`，会周期性变基上游——**许多自定义改动易在变基中丢失**。
+本仓为 **fork**（上游 Scighost/Starward，发布走 TurmoilZoom/Moonward + Velopack，安装包身份为 Moonward）。日常开发在 `rebase/develop`，会周期性变基上游——**许多自定义改动易在变基中丢失**。
 
 ## Git Worktree
 

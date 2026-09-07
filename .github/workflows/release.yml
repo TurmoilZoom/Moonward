@@ -208,7 +208,7 @@ jobs:
         $ErrorActionPreference = "Stop"
         $version = $env:Version
         $pre = $version.Contains("-")
-        $uri = "https://api.cnb.cool/TurmoilZoom/Starward/-/build/start"
+        $uri = "https://api.cnb.cool/TurmoilZoom/Moonward/-/build/start"
         $body = @{
           event = "api_trigger"
           tag = $version

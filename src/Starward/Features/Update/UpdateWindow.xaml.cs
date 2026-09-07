@@ -281,8 +281,11 @@ public sealed partial class UpdateWindow : WindowEx
 
     /// <summary>
     /// 更新渠道下拉框选中索引（0=GitHub，1=CNB）；仅本会话有效，默认 CNB。
+    /// 检查更新因 CNB 限流回落到 GitHub 时默认选中 GitHub —— 此时的 <see cref="NewVersion"/> 本就绑定在 GitHub 源上，
+    /// 再选 CNB 会立刻重新向被限流的 CNB 发一次检查。
     /// </summary>
-    public int SelectedUpdateSourceIndex { get; set => SetProperty(ref field, value); } = 1;
+    public int SelectedUpdateSourceIndex { get; set => SetProperty(ref field, value); }
+        = AppConfig.GetService<UpdateService>().LastCheckSource is UpdateDownloadSource.GitHub ? 0 : 1;
 
 
     /// <summary>

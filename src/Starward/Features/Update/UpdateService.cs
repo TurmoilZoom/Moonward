@@ -2,6 +2,9 @@ using Microsoft.Extensions.Logging;
 using NuGet.Versioning;
 using Starward.Features.RPC;
 using System;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Velopack;
@@ -20,12 +23,12 @@ internal class UpdateService
     /// <summary>
     /// CNB 更新源仓库地址。
     /// </summary>
-    public const string RepoUrl = "https://cnb.cool/TurmoilZoom/Starward";
+    public const string RepoUrl = "https://cnb.cool/TurmoilZoom/Moonward";
 
     /// <summary>
     /// GitHub 更新源仓库地址（Velopack <see cref="GithubSource"/>）。
     /// </summary>
-    public const string GitHubRepoUrl = "https://github.com/TurmoilZoom/Starward";
+    public const string GitHubRepoUrl = "https://github.com/TurmoilZoom/Moonward";
 
 
     private readonly ILogger<UpdateService> _logger;
@@ -54,6 +57,17 @@ internal class UpdateService
 
     private CancellationTokenSource? _cancellationTokenSource;
 
+    /// <summary>正在进行的检查更新任务，用于合并并发调用（首页启动检查与关于页手动检查可能同时发生）。</summary>
+    private Task<UpdateInfo?>? _checkingTask;
+
+    private readonly Lock _checkingLock = new();
+
+    /// <summary>
+    /// GitHub 回落检查的等待上限。Velopack 下载器的默认超时长达 30 分钟，
+    /// 而 GitHub 在部分网络环境下会长时间无响应，不设上限会把「检查更新」一直挂住。
+    /// </summary>
+    private static readonly TimeSpan GitHubFallbackTimeout = TimeSpan.FromSeconds(30);
+
 
 
     public static bool UpdateFinished { get; private set; }
@@ -73,6 +87,12 @@ internal class UpdateService
     public int Progress_Percent { get; private set; }
 
     public string? ErrorMessage { get; private set; }
+
+    /// <summary>
+    /// 最近一次检查更新实际使用的源。CNB 被限流时会自动回落到 GitHub，
+    /// 此时得到的 <see cref="UpdateInfo"/> 只能由 GitHub 源下载（Velopack 的资产与源强绑定）。
+    /// </summary>
+    public UpdateDownloadSource LastCheckSource { get; private set; } = UpdateDownloadSource.Cnb;
 
 
 
@@ -159,9 +179,95 @@ internal class UpdateService
             _logger.LogInformation("Not a Velopack install, skip update check.");
             return null;
         }
-        var info = await manager.CheckForUpdatesAsync();
-        _logger.LogInformation("Current version: {currentVersion}, latest version: {latestVersion}.", manager.CurrentVersion, info?.TargetFullRelease?.Version);
+        // 一次检查会向 CNB 打出多个请求，而其匿名接口限流为 20 次/分钟；
+        // 并发调用共用同一个任务，避免两处入口各查一遍直接把配额打满（见 CnbSource.TrimToRequiredReleases）。
+        Task<UpdateInfo?> task;
+        lock (_checkingLock)
+        {
+            task = _checkingTask ??= CheckForUpdatesCoreAsync(manager);
+        }
+        try
+        {
+            return await task;
+        }
+        finally
+        {
+            lock (_checkingLock)
+            {
+                if (_checkingTask == task)
+                {
+                    _checkingTask = null;
+                }
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 真正向更新源发起一次检查，并记录当前/最新版本。CNB 被限流(429)时自动回落到 GitHub 源。
+    /// </summary>
+    private async Task<UpdateInfo?> CheckForUpdatesCoreAsync(UpdateManager manager)
+    {
+        UpdateInfo? info;
+        try
+        {
+            info = await manager.CheckForUpdatesAsync();
+            LastCheckSource = UpdateDownloadSource.Cnb;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode is HttpStatusCode.TooManyRequests)
+        {
+            // CNB 匿名接口限流 20 次/分钟，被限流时整个检查会失败；GitHub 源的资产托管在 CDN 上，可作为备用。
+            _logger.LogWarning(ex, "CNB update source is rate limited, fall back to GitHub.");
+            info = await CheckFromGitHubOrRethrowAsync(ex);
+        }
+        _logger.LogInformation("Current version: {currentVersion}, latest version: {latestVersion}, source: {source}.",
+                               manager.CurrentVersion, info?.TargetFullRelease?.Version, LastCheckSource);
         return info;
+    }
+
+
+    /// <summary>
+    /// 用 GitHub 源重新检查一次更新；若 GitHub 也失败，则抛回 CNB 的原始异常。
+    /// </summary>
+    /// <param name="cnbException">CNB 源抛出的限流异常。</param>
+    /// <returns>GitHub 源的检查结果。</returns>
+    private async Task<UpdateInfo?> CheckFromGitHubOrRethrowAsync(Exception cnbException)
+    {
+        try
+        {
+            Task<UpdateInfo?> checkTask = GetManager(UpdateDownloadSource.GitHub).CheckForUpdatesAsync();
+            if (await Task.WhenAny(checkTask, Task.Delay(GitHubFallbackTimeout)) != checkTask)
+            {
+                // CheckForUpdatesAsync 不接受取消令牌，超时后只能弃用该任务，这里顺手观察它的异常。
+                _ = checkTask.ContinueWith(static t => _ = t.Exception, TaskContinuationOptions.OnlyOnFaulted);
+                throw new TimeoutException("Checking updates from GitHub timed out.");
+            }
+            UpdateInfo? info = await checkTask;
+            LastCheckSource = UpdateDownloadSource.GitHub;
+            return info;
+        }
+        catch (Exception ex)
+        {
+            // 回落也失败（多为断网）时，展示 CNB 的限流提示比展示 GitHub 的网络错误更贴近真实原因。
+            _logger.LogWarning(ex, "Fall back to GitHub update source");
+            ExceptionDispatchInfo.Capture(cnbException).Throw();
+            throw;
+        }
+    }
+
+
+    /// <summary>
+    /// 把更新过程中的异常转换为可展示的文案：被限流(429)时给出友好提示，其余保留原始信息。
+    /// </summary>
+    /// <param name="ex">检查或下载更新时捕获的异常。</param>
+    /// <returns>可直接显示给用户的错误文本。</returns>
+    public static string GetDisplayErrorMessage(Exception ex)
+    {
+        if (ex is HttpRequestException { StatusCode: HttpStatusCode.TooManyRequests })
+        {
+            return Lang.UpdateService_TooManyRequests;
+        }
+        return ex.Message;
     }
 
 
@@ -195,11 +301,11 @@ internal class UpdateService
                 return;
             }
 
-            // UpdateInfo 与 IUpdateSource 绑定；切换 GitHub 时需重新 CheckForUpdatesAsync。
+            // UpdateInfo 与 IUpdateSource 绑定；下载源与检查时用的源不一致（手动切换，或检查被限流回落到 GitHub）时需重新 CheckForUpdatesAsync。
             _cancellationTokenSource.Token.ThrowIfCancellationRequested();
-            var updateInfo = source is UpdateDownloadSource.GitHub
-                ? await manager.CheckForUpdatesAsync()
-                : release;
+            var updateInfo = source == LastCheckSource
+                ? release
+                : await manager.CheckForUpdatesAsync();
             if (updateInfo is null)
             {
                 ErrorMessage = Lang.UpdateService_CannotUpdateAutomatically;
@@ -233,7 +339,7 @@ internal class UpdateService
         {
             _logger.LogError(ex, "Start update");
             State = UpdateState.Error;
-            ErrorMessage = ex.Message;
+            ErrorMessage = GetDisplayErrorMessage(ex);
         }
         finally
         {
@@ -277,8 +383,9 @@ internal class UpdateService
         }
         try
         {
-            _logger.LogInformation("Start silent update: {version}", release.TargetFullRelease?.Version);
-            await StartUpdateAsync(release);
+            _logger.LogInformation("Start silent update: {version} from {source}", release.TargetFullRelease?.Version, LastCheckSource);
+            // 跟随检查时实际使用的源：检查因限流回落到 GitHub 时，这里再走 CNB 只会重新触发一次限流。
+            await StartUpdateAsync(release, LastCheckSource);
             if (UpdateFinished)
             {
                 AppConfig.PendingSilentUpdateContent = true;

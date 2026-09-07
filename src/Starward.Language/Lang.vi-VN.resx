@@ -411,6 +411,9 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="UpdateService_CannotUpdateAutomatically" xml:space="preserve">
     <value>Không thể cập nhật tự động</value>
   </data>
+  <data name="UpdateService_TooManyRequests" xml:space="preserve">
+    <value>Quá nhiều yêu cầu đến máy chủ cập nhật, vui lòng thử lại sau</value>
+  </data>
   <data name="GameSettingPage_Custom" xml:space="preserve">
     <value>Tuỳ chọn</value>
   </data>
@@ -2199,7 +2202,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>A PAT is already stored in Windows PasswordVault on this device.</value>
   </data>
   <data name="ZZZGachaInfoWindow_GitHubPatNotConfigured" xml:space="preserve">
-    <value>No PAT stored. Maintainers need a token with contents:write on TurmoilZoom/Starward.</value>
+    <value>No PAT stored. Maintainers need a token with contents:write on TurmoilZoom/Moonward.</value>
   </data>
   <data name="ZZZGachaInfoWindow_GitHubPatDialogDescription" xml:space="preserve">
     <value>Store a GitHub Personal Access Token (encrypted via Windows PasswordVault) to publish selected JSON packs to the metadata branch. The token is never written to the app database or logs.</value>
