@@ -265,11 +265,11 @@ public class HoYoPlayService
 
     public async Task<GameSophonChunkBuild?> GetGameSophonChunkBuildAsync(GameBranch gameBranch, GameBranchPackage gameBranchPackage, CancellationToken cancellationToken = default)
     {
-        if (!_memoryCache.TryGetValue($"{nameof(GameSophonChunkBuild)}_{gameBranchPackage.PackageId}", out GameSophonChunkBuild? build))
+        if (!_memoryCache.TryGetValue($"{nameof(GameSophonChunkBuild)}_{gameBranchPackage.PackageId}_{gameBranchPackage.Branch}", out GameSophonChunkBuild? build))
         {
             string lang = CultureInfo.CurrentUICulture.Name;
             build = await _client.GetGameSophonChunkBuildAsync(gameBranch, gameBranchPackage, gameBranchPackage.Tag, cancellationToken);
-            _memoryCache.Set($"{nameof(GameSophonChunkBuild)}_{gameBranchPackage.PackageId}", build, TimeSpan.FromMinutes(1));
+            _memoryCache.Set($"{nameof(GameSophonChunkBuild)}_{gameBranchPackage.PackageId}_{gameBranchPackage.Branch}", build, TimeSpan.FromMinutes(1));
         }
         return build;
     }
@@ -279,11 +279,11 @@ public class HoYoPlayService
 
     public async Task<GameSophonPatchBuild?> GetGameSophonPatchBuildAsync(GameBranch gameBranch, GameBranchPackage gameBranchPackage, CancellationToken cancellationToken = default)
     {
-        if (!_memoryCache.TryGetValue($"{nameof(GameSophonPatchBuild)}_{gameBranchPackage.PackageId}", out GameSophonPatchBuild? build))
+        if (!_memoryCache.TryGetValue($"{nameof(GameSophonPatchBuild)}_{gameBranchPackage.PackageId}_{gameBranchPackage.Branch}", out GameSophonPatchBuild? build))
         {
             string lang = CultureInfo.CurrentUICulture.Name;
             build = await _client.GetGameSophonPatchBuildAsync(gameBranch, gameBranchPackage, cancellationToken);
-            _memoryCache.Set($"{nameof(GameSophonPatchBuild)}_{gameBranchPackage.PackageId}", build, TimeSpan.FromMinutes(1));
+            _memoryCache.Set($"{nameof(GameSophonPatchBuild)}_{gameBranchPackage.PackageId}_{gameBranchPackage.Branch}", build, TimeSpan.FromMinutes(1));
         }
         return build;
     }
