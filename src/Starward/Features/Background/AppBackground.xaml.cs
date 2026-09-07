@@ -435,6 +435,13 @@ public sealed partial class AppBackground : UserControl
     /// <summary>用于限制同时处理视频帧的信号量，避免 Win2D 绘制冲突。</summary>
     private SemaphoreSlim _videoSemaphore = new SemaphoreSlim(1, 1);
 
+    /// <summary>
+    /// 主窗口当前是否隐藏 / 最小化，释放解码资源的唯一依据。
+    /// 不能改用 _mediaPlayer 是否为 null 来判断：播放器由 fire-and-forget 的 <see cref="StartMediaPlayerAsync"/>
+    /// 异步创建，隐藏完全可能发生在它完成之前。
+    /// </summary>
+    private bool _windowHidden;
+
 
     /// <summary>
     /// 计算背景视频实际使用的音量（0-100）。
@@ -526,6 +533,13 @@ public sealed partial class AppBackground : UserControl
             _mediaPlayer.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
             _mediaPlayer.MediaFailed += MediaPlayer_MediaFailed;
             _mediaPlayer.Play();
+            if (_windowHidden)
+            {
+                // 本方法是 fire-and-forget 且要先把视频读进内存，窗口可能在这期间被隐藏：
+                // 那一刻 Hide 分支的释放打在还不存在的播放器上，不在这里补一次，
+                // 就会一直对着看不见的窗口解码，且没有任何时机去收拾它。
+                ReleaseVideoDecodingResource();
+            }
         }
         catch (OperationCanceledException)
         {
@@ -803,8 +817,36 @@ public sealed partial class AppBackground : UserControl
 
 
     /// <summary>
+    /// 窗口一进入托盘 / 最小化就释放视频里最大的两样：MediaPlayer（含整条 MF 解码管线）与内存视频流。
+    /// <para>
+    /// 渲染侧一律保留：<see cref="_videoSurface"/> 与 <see cref="_videoImageSource"/> 定格着最后一帧，
+    /// 窗口恢复时画面直接就在，也不会换掉 <see cref="BackgroundImageSource"/> 的引用触发 ImageEx 的占位图淡变；
+    /// <see cref="_videoOverlayImage"/> 重建要重新读盘解码；VP9 / Vorbis 的 MFT 是进程内注册，注销省不下内存，
+    /// 还会放开对缩略图路径误注销的保护。重新激活时由 <see cref="OnMainWindowStateChanged"/> 的兜底分支重建播放器。
+    /// </para>
+    /// </summary>
+    private void ReleaseVideoDecodingResource()
+    {
+        // 兜一道：StartMediaPlayerAsync 的收尾是异步的，跑到这里时窗口可能已经回到前台了。
+        if (!_windowHidden)
+        {
+            return;
+        }
+        try
+        {
+            _startMediaPlayerCts?.Cancel();
+            DisposeMediaPlayback();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Release video decoding resource");
+        }
+    }
+
+
+    /// <summary>
     /// 释放所有视频相关资源（MediaPlayer、内存视频流、Win2D 表面、叠加图、已注册的解码器 MFT）。
-    /// 必须在切换背景、窗口隐藏过久、控件卸载时调用。
+    /// 用于切换背景、切换游戏与控件卸载；窗口隐藏走的是只放解码资源的 <see cref="ReleaseVideoDecodingResource"/>。
     /// </summary>
     private void DisposeVideoResource()
     {
@@ -826,7 +868,14 @@ public sealed partial class AppBackground : UserControl
     /// </summary>
     private void DisposeMediaPlayback()
     {
-        _mediaPlayer?.Dispose();
+        if (_mediaPlayer is not null)
+        {
+            // 必须先退订再 Dispose：已在飞行中的帧回调若在 Dispose 之后才跑到 UI 线程，
+            // 会对已释放的 sender 取帧，并把定格的最后一帧清成空白。
+            _mediaPlayer.VideoFrameAvailable -= MediaPlayer_VideoFrameAvailable;
+            _mediaPlayer.MediaFailed -= MediaPlayer_MediaFailed;
+            _mediaPlayer.Dispose();
+        }
         _mediaPlayer = null;
         _mediaSource?.Dispose();
         _mediaSource = null;
@@ -991,12 +1040,25 @@ public sealed partial class AppBackground : UserControl
         {
             if (message.Hide || message.SessionLock)
             {
-                // 窗口隐藏、最小化或锁屏时仅暂停视频播放（不释放解码器与渲染资源），
-                // 停止解码以降低占用；恢复显示时直接续播，避免重建资源导致背景闪烁。
-                _mediaPlayer?.Pause();
+                if (message.Hide)
+                {
+                    // 进入托盘 / 最小化即刻释放解码资源。渲染侧保留着最后一帧，恢复时画面直接就在，
+                    // 只是视频要重新起解码（由下面 Activate 的兜底分支负责）。
+                    // 释放放在这里还有个好处：MainWindow.Hide 与 WM_SIZE 最小化都是先同步发本消息、
+                    // 紧接着才排上 MemoryTrimmer 的延迟回收，刚断开的 COM 对象正好赶上那一次回收。
+                    _windowHidden = true;
+                    ReleaseVideoDecodingResource();
+                }
+                else
+                {
+                    // 锁屏只暂停不释放：解锁未必产生 WM_ACTIVATE（锁屏前窗口不在前台时就不会），
+                    // 一旦释放就没有可靠的重建时机，背景会一直定格在最后一帧。
+                    _mediaPlayer?.Pause();
+                }
             }
             else if (message.Activate)
             {
+                _windowHidden = false;
                 // 关键：正在切换背景（UpdateBackgroundAsync 运行中）时不得在此兜底重启视频。
                 // 从视频切换到图片时，DisposeVideoResource 已把 _mediaPlayer 置空，而 _lastBackgroundFile
                 // 要等 await ChangeBackgroundImageAsync 完成后才更新为新图片；此空窗期内 _lastBackgroundFile 仍指向
@@ -1006,7 +1068,9 @@ public sealed partial class AppBackground : UserControl
                 {
                     // 兜底：若播放器曾在其他路径被释放，则重新开始解码渲染背景视频
                     _ = StartMediaPlayerAsync(_lastBackgroundFile!);
-                    if (CurrentGameBackground?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && CurrentGameBackground.Theme?.Url is string url && !string.IsNullOrEmpty(url))
+                    // _videoOverlayImage is null：空闲释放保留了叠加图，只有全量释放过才需要重新准备。
+                    // 少这个条件的话，PrepareVideoOverlayImageAsync 会先 Dispose 掉还在用的那张再重下一遍。
+                    if (_videoOverlayImage is null && CurrentGameBackground?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && CurrentGameBackground.Theme?.Url is string url && !string.IsNullOrEmpty(url))
                     {
                         _ = PrepareVideoOverlayImageAsync(url);
                     }

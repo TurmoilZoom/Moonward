@@ -13,6 +13,7 @@ using Starward.Features.GameLauncher;
 using Starward.Features.Overlay;
 using Starward.Features.Screenshot;
 using Starward.Frameworks;
+using Starward.Helpers;
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -480,14 +481,31 @@ public sealed partial class MainWindow : WindowEx
 
 
     /// <summary>
-    /// 隐藏主窗口并广播状态变化消息，触发背景资源释放与 GC。
+    /// 隐藏主窗口并广播状态变化消息，触发背景资源释放与内存回收。
     /// </summary>
     public override void Hide()
     {
         _hiddenToTray = true;
         base.Hide();
         WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { Hide = true, CurrentTime = DateTimeOffset.Now });
-        GC.Collect();
+        MemoryTrimmer.TrimLater(IsInvisible);
+    }
+
+
+    /// <summary>
+    /// 窗口当前是否不可见（隐藏到托盘或最小化）。延迟回收内存前用它确认用户没把窗口开回来。
+    /// </summary>
+    /// <returns>窗口已隐藏或最小化时为 true。</returns>
+    private bool IsInvisible()
+    {
+        try
+        {
+            return !AppWindow.IsVisible || User32.IsIconic(WindowHandle);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
 
@@ -571,7 +589,7 @@ public sealed partial class MainWindow : WindowEx
             {
                 // 窗口最小化，通知暂停/释放背景视频资源
                 WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { Hide = true, CurrentTime = DateTimeOffset.Now });
-                GC.Collect();
+                MemoryTrimmer.TrimLater(IsInvisible);
             }
         }
         else if (uMsg == (uint)User32.WindowMessage.WM_DEVICECHANGE)
