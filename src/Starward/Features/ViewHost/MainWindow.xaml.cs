@@ -481,13 +481,16 @@ public sealed partial class MainWindow : WindowEx
 
 
     /// <summary>
-    /// 隐藏主窗口并广播状态变化消息，触发背景资源释放与内存回收。
+    /// 隐藏主窗口并广播状态变化消息，再延迟回收内存。
+    /// 先通知背景把视频帧冻成静态图并暂停，再 Hide：合成器丢掉 SurfaceImageSource 之前，屏幕上已经是 CPU 位图。
+    /// 绝区零随机模式在窗口藏起来之后换壁纸，避免恢复时先画出上一张好感视频。
     /// </summary>
     public override void Hide()
     {
         _hiddenToTray = true;
-        base.Hide();
         WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { Hide = true, CurrentTime = DateTimeOffset.Now });
+        base.Hide();
+        AppBackground.Current?.BeginShuffleWhileHidden();
         MemoryTrimmer.TrimLater(IsInvisible);
     }
 

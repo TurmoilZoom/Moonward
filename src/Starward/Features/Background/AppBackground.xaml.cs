@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -53,7 +54,6 @@ public sealed partial class AppBackground : UserControl
         // 通过 Messenger 监听背景变更、主窗口状态变化、视频音量变化
         WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, OnBackgroundChanged);
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, OnMainWindowStateChanged);
-        WeakReferenceMessenger.Default.Register<MainWindowShownMessage>(this, OnMainWindowShown);
         WeakReferenceMessenger.Default.Register<VideoBgVolumeChangedMessage>(this, OnVideoBgVolumeChanged);
         this.Loaded += AppBackground_Loaded;
         this.Unloaded += AppBackground_Unloaded;
@@ -263,8 +263,19 @@ public sealed partial class AppBackground : UserControl
                         continue;
                     }
                 }
+                // 切走之前先把当前视频画面拍成一张独立快照当占位图。
+                // 视频背景重建要读盘、起解码器、等首帧，比静态图慢一个数量级，这期间 ImageEx 的主图
+                // Opacity 是 0，全靠占位图撑着；而占位图默认接手的是刚被弃用的 CanvasImageSource，
+                // 它的表面内容在窗口隐藏 / 停止绘制之后未必还在——表现就是从托盘恢复并随机换壁纸时闪一下。
+                // 占位图优先 CPU 位图：CanvasImageSource 在窗口隐藏后像素不可靠。
+                ImageSource? videoPlaceholder = TryCreateFrozenVideoBitmap() ?? (ImageSource?)TryCaptureVideoFrameSnapshot();
                 DisposeVideoResource();
                 BackgroundImageSource = null;
+                if (videoPlaceholder is not null)
+                {
+                    // 必须在 BackgroundImageSource 置空之后：那个 setter 会把旧图源塞进占位图，晚一步就被它覆盖。
+                    PlacehoderImageSource = videoPlaceholder;
+                }
                 if (filePath != null)
                 {
                     if (gameBackground?.Type is GameBackground.BACKGROUND_TYPE_VIDEO)
@@ -432,15 +443,18 @@ public sealed partial class AppBackground : UserControl
     /// <summary>最终作为背景显示的 CanvasImageSource（每帧更新）。</summary>
     private CanvasImageSource? _videoImageSource;
 
+    /// <summary>
+    /// 窗口隐藏时把视频画面冻成 <see cref="WriteableBitmap"/> 顶上。
+    /// <see cref="_videoImageSource"/> 是 SurfaceImageSource，藏窗口后合成器会丢掉像素，
+    /// 恢复时若仍拿它当 Source 就会先闪一下空白。CPU 位图不受影响。
+    /// </summary>
+    private bool _videoDisplayFrozen;
+
+    /// <summary>窗口再次可见并续播后，等成功画出下一帧再把 Source 切回 <see cref="_videoImageSource"/>。</summary>
+    private bool _resumeVideoSurfaceOnNextFrame;
+
     /// <summary>用于限制同时处理视频帧的信号量，避免 Win2D 绘制冲突。</summary>
     private SemaphoreSlim _videoSemaphore = new SemaphoreSlim(1, 1);
-
-    /// <summary>
-    /// 主窗口当前是否隐藏 / 最小化，释放解码资源的唯一依据。
-    /// 不能改用 _mediaPlayer 是否为 null 来判断：播放器由 fire-and-forget 的 <see cref="StartMediaPlayerAsync"/>
-    /// 异步创建，隐藏完全可能发生在它完成之前。
-    /// </summary>
-    private bool _windowHidden;
 
 
     /// <summary>
@@ -533,13 +547,6 @@ public sealed partial class AppBackground : UserControl
             _mediaPlayer.VideoFrameAvailable += MediaPlayer_VideoFrameAvailable;
             _mediaPlayer.MediaFailed += MediaPlayer_MediaFailed;
             _mediaPlayer.Play();
-            if (_windowHidden)
-            {
-                // 本方法是 fire-and-forget 且要先把视频读进内存，窗口可能在这期间被隐藏：
-                // 那一刻 Hide 分支的释放打在还不存在的播放器上，不在这里补一次，
-                // 就会一直对着看不见的窗口解码，且没有任何时机去收拾它。
-                ReleaseVideoDecodingResource();
-            }
         }
         catch (OperationCanceledException)
         {
@@ -734,10 +741,28 @@ public sealed partial class AppBackground : UserControl
                     int height = (int)sender.PlaybackSession.NaturalVideoHeight;
                     _videoSurface = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96);
                     _videoImageSource = new CanvasImageSource(CanvasDevice.GetSharedDevice(), width, height, 96);
-                    BackgroundImageSource = _videoImageSource;
+                    // 冻结期间屏幕上是 CPU 位图，这里先不要把空的 SurfaceImageSource 设回去。
+                    if (!_videoDisplayFrozen && IsMainWindowVisible())
+                    {
+                        BackgroundImageSource = _videoImageSource;
+                    }
                 }
-                // 将 MF 解码帧拷贝到 Direct2D 表面
+                // 将 MF 解码帧拷贝到 Direct2D 表面（窗口隐藏时这张纹理仍可用）。
                 sender.CopyFrameToVideoSurface(_videoSurface);
+                if (!IsMainWindowVisible())
+                {
+                    // 托盘里随机换到的新视频：冻成 CPU 位图，恢复时直接看到新角色，而不是先闪旧好感视频。
+                    WriteableBitmap? still = TryCreateFrozenVideoBitmap();
+                    if (still is not null)
+                    {
+                        PlacehoderImageSource = still;
+                        BackgroundImageSource = still;
+                        _videoDisplayFrozen = true;
+                        _resumeVideoSurfaceOnNextFrame = false;
+                    }
+                    sender.Pause();
+                    return;
+                }
                 using var ds = _videoImageSource.CreateDrawingSession(Microsoft.UI.Colors.Transparent);
                 ds.DrawImage(_videoSurface);
                 if (_videoOverlayImage is not null)
@@ -746,13 +771,186 @@ public sealed partial class AppBackground : UserControl
                     Rect dest = new Rect(0, 0, _videoImageSource.SizeInPixels.Width, _videoImageSource.SizeInPixels.Height);
                     ds.DrawImage(_videoOverlayImage, dest, source, 1, CanvasImageInterpolation.HighQualityCubic);
                 }
+                if (_videoDisplayFrozen || _resumeVideoSurfaceOnNextFrame)
+                {
+                    BackgroundImageSource = _videoImageSource;
+                    _resumeVideoSurfaceOnNextFrame = false;
+                    _videoDisplayFrozen = false;
+                }
             }
-            catch { }
+            catch
+            {
+                // 藏过窗口后 SurfaceImageSource 可能已经失效，丢掉让下一帧重建。
+                if (_videoDisplayFrozen || _resumeVideoSurfaceOnNextFrame)
+                {
+                    _videoSurface?.Dispose();
+                    _videoSurface = null;
+                    _videoImageSource = null;
+                }
+            }
             finally
             {
                 _videoSemaphore.Release();
             }
         });
+    }
+
+
+    /// <summary>
+    /// 把当前正在显示的视频画面（视频帧 + 主题叠加图）拍成一张独立的 <see cref="CanvasImageSource"/>，
+    /// 供切换背景期间当占位图用。
+    /// <para>
+    /// 不复用即将被弃用的 <see cref="_videoImageSource"/>：它是 SurfaceImageSource，表面内容归合成器所有，
+    /// 窗口隐藏过或停止绘制之后未必还在，拿来当占位图可能是一片空白。这里另建一张并立刻画上内容，
+    /// 只需要撑过新背景准备好之前那一两秒。<see cref="_videoSurface"/> 是普通的 D3D 纹理，隐藏不会丢内容。
+    /// </para>
+    /// </summary>
+    /// <returns>快照图源；当前不是视频背景或抓取失败时返回 null。</returns>
+    private CanvasImageSource? TryCaptureVideoFrameSnapshot()
+    {
+        try
+        {
+            if (_videoSurface is null)
+            {
+                return null;
+            }
+            int width = (int)_videoSurface.SizeInPixels.Width;
+            int height = (int)_videoSurface.SizeInPixels.Height;
+            if (width <= 0 || height <= 0)
+            {
+                return null;
+            }
+            CanvasImageSource snapshot = new CanvasImageSource(CanvasDevice.GetSharedDevice(), width, height, 96);
+            using (CanvasDrawingSession ds = snapshot.CreateDrawingSession(Microsoft.UI.Colors.Transparent))
+            {
+                ds.DrawImage(_videoSurface);
+                if (_videoOverlayImage is not null)
+                {
+                    Rect source = new Rect(0, 0, _videoOverlayImage.SizeInPixels.Width, _videoOverlayImage.SizeInPixels.Height);
+                    Rect dest = new Rect(0, 0, width, height);
+                    ds.DrawImage(_videoOverlayImage, dest, source, 1, CanvasImageInterpolation.HighQualityCubic);
+                }
+            }
+            return snapshot;
+        }
+        catch (Exception ex)
+        {
+            // 抓不到就退回原来的行为（占位图接手旧图源），不影响背景切换本身。
+            _logger.LogWarning(ex, "Capture video frame snapshot for placeholder");
+            return null;
+        }
+    }
+
+
+    /// <summary>
+    /// 把当前视频帧（含 overlay）读回 CPU，做成 <see cref="WriteableBitmap"/>。
+    /// 给窗口隐藏/托盘恢复用：合成器不会丢掉这份像素。
+    /// </summary>
+    /// <returns>冻结帧；当前不是视频背景或抓取失败时返回 null。</returns>
+    private WriteableBitmap? TryCreateFrozenVideoBitmap()
+    {
+        try
+        {
+            if (_videoSurface is null)
+            {
+                return null;
+            }
+            int width = (int)_videoSurface.SizeInPixels.Width;
+            int height = (int)_videoSurface.SizeInPixels.Height;
+            if (width <= 0 || height <= 0)
+            {
+                return null;
+            }
+            using CanvasRenderTarget composed = new(CanvasDevice.GetSharedDevice(), width, height, 96);
+            using (CanvasDrawingSession ds = composed.CreateDrawingSession())
+            {
+                ds.DrawImage(_videoSurface);
+                if (_videoOverlayImage is not null)
+                {
+                    Rect source = new Rect(0, 0, _videoOverlayImage.SizeInPixels.Width, _videoOverlayImage.SizeInPixels.Height);
+                    Rect dest = new Rect(0, 0, width, height);
+                    ds.DrawImage(_videoOverlayImage, dest, source, 1, CanvasImageInterpolation.HighQualityCubic);
+                }
+            }
+            byte[] pixelBytes = composed.GetPixelBytes();
+            WriteableBitmap still = new(width, height);
+            using (Stream stream = still.PixelBuffer.AsStream())
+            {
+                stream.Write(pixelBytes, 0, pixelBytes.Length);
+            }
+            still.Invalidate();
+            return still;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Freeze video frame for window hide");
+            return null;
+        }
+    }
+
+
+    /// <summary>
+    /// 窗口隐藏前把视频画面冻成静态图并暂停播放。播放器不释放，恢复后等下一帧再切回视频表面。
+    /// </summary>
+    private void FreezeVideoDisplayAndPause()
+    {
+        WriteableBitmap? still = TryCreateFrozenVideoBitmap();
+        if (still is not null)
+        {
+            PlacehoderImageSource = still;
+            BackgroundImageSource = still;
+            _videoDisplayFrozen = true;
+            _resumeVideoSurfaceOnNextFrame = false;
+        }
+        _mediaPlayer?.Pause();
+    }
+
+
+    /// <summary>
+    /// 主窗口是否处于可见状态。隐藏到托盘后 <see cref="CanvasImageSource"/> 不可靠，要用 CPU 位图顶上。
+    /// </summary>
+    private static bool IsMainWindowVisible()
+    {
+        try
+        {
+            return MainWindow.Current.AppWindow.IsVisible;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
+
+    /// <summary>
+    /// 藏到托盘后、窗口仍不可见时换好感壁纸。这样 Activate 把窗口拉回来时已经是新角色，
+    /// 不会先把上一张好感视频画出来再闪过去（切游戏不会有这个问题，因为那时屏幕上还是别的游戏）。
+    /// </summary>
+    public void BeginShuffleWhileHidden()
+    {
+        try
+        {
+            if (CurrentGameId is null)
+            {
+                return;
+            }
+            if (!_favorWallpaperService.TryShuffleWallpaper(CurrentGameId.GameBiz))
+            {
+                return;
+            }
+            if (BackgroundImageSource is not null)
+            {
+                PlacehoderImageSource = BackgroundImageSource;
+                BackgroundImageSource = null;
+            }
+            _resumeVideoSurfaceOnNextFrame = false;
+            _videoDisplayFrozen = true;
+            _ = UpdateBackgroundAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Shuffle wallpaper while main window hidden");
+        }
     }
 
 
@@ -817,41 +1015,15 @@ public sealed partial class AppBackground : UserControl
 
 
     /// <summary>
-    /// 窗口一进入托盘 / 最小化就释放视频里最大的两样：MediaPlayer（含整条 MF 解码管线）与内存视频流。
-    /// <para>
-    /// 渲染侧一律保留：<see cref="_videoSurface"/> 与 <see cref="_videoImageSource"/> 定格着最后一帧，
-    /// 窗口恢复时画面直接就在，也不会换掉 <see cref="BackgroundImageSource"/> 的引用触发 ImageEx 的占位图淡变；
-    /// <see cref="_videoOverlayImage"/> 重建要重新读盘解码；VP9 / Vorbis 的 MFT 是进程内注册，注销省不下内存，
-    /// 还会放开对缩略图路径误注销的保护。重新激活时由 <see cref="OnMainWindowStateChanged"/> 的兜底分支重建播放器。
-    /// </para>
-    /// </summary>
-    private void ReleaseVideoDecodingResource()
-    {
-        // 兜一道：StartMediaPlayerAsync 的收尾是异步的，跑到这里时窗口可能已经回到前台了。
-        if (!_windowHidden)
-        {
-            return;
-        }
-        try
-        {
-            _startMediaPlayerCts?.Cancel();
-            DisposeMediaPlayback();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Release video decoding resource");
-        }
-    }
-
-
-    /// <summary>
     /// 释放所有视频相关资源（MediaPlayer、内存视频流、Win2D 表面、叠加图、已注册的解码器 MFT）。
-    /// 用于切换背景、切换游戏与控件卸载；窗口隐藏走的是只放解码资源的 <see cref="ReleaseVideoDecodingResource"/>。
+    /// 必须在切换背景、窗口隐藏过久、控件卸载时调用。
     /// </summary>
     private void DisposeVideoResource()
     {
         _startMediaPlayerCts?.Cancel();
         DisposeMediaPlayback();
+        _videoDisplayFrozen = false;
+        _resumeVideoSurfaceOnNextFrame = false;
         _videoSurface?.Dispose();
         _videoSurface = null;
         _videoImageSource = null;
@@ -1013,70 +1185,47 @@ public sealed partial class AppBackground : UserControl
     }
 
 
-    /// <summary>
-    /// 从系统托盘重新打开主窗口：随机模式下换一张壁纸并重绘背景。
-    /// 只有真正从隐藏状态显示才会收到本消息（见 <see cref="MainWindow.Show"/>），
-    /// 最小化恢复、Alt+Tab 回到窗口等普通激活不会换图。
-    /// </summary>
-    private void OnMainWindowShown(object _, MainWindowShownMessage message)
-    {
-        try
-        {
-            if (CurrentGameId is not null && _favorWallpaperService.TryShuffleWallpaper(CurrentGameId.GameBiz))
-            {
-                _ = UpdateBackgroundAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Shuffle wallpaper on main window shown");
-        }
-    }
-
-
     private void OnMainWindowStateChanged(object _, MainWindowStateChangedMessage message)
     {
         try
         {
-            if (message.Hide || message.SessionLock)
+            if (message.Hide)
             {
-                if (message.Hide)
-                {
-                    // 进入托盘 / 最小化即刻释放解码资源。渲染侧保留着最后一帧，恢复时画面直接就在，
-                    // 只是视频要重新起解码（由下面 Activate 的兜底分支负责）。
-                    // 释放放在这里还有个好处：MainWindow.Hide 与 WM_SIZE 最小化都是先同步发本消息、
-                    // 紧接着才排上 MemoryTrimmer 的延迟回收，刚断开的 COM 对象正好赶上那一次回收。
-                    _windowHidden = true;
-                    ReleaseVideoDecodingResource();
-                }
-                else
-                {
-                    // 锁屏只暂停不释放：解锁未必产生 WM_ACTIVATE（锁屏前窗口不在前台时就不会），
-                    // 一旦释放就没有可靠的重建时机，背景会一直定格在最后一帧。
-                    _mediaPlayer?.Pause();
-                }
+                // 不要 Dispose 播放器：藏窗口丢掉的是合成器上的 SurfaceImageSource 像素，不是解码器。
+                // 先把当前帧冻成 CPU 位图再 Pause，恢复时先看到这张图，等下一帧画完再切回视频。
+                FreezeVideoDisplayAndPause();
+            }
+            else if (message.SessionLock)
+            {
+                _mediaPlayer?.Pause();
             }
             else if (message.Activate)
             {
-                _windowHidden = false;
                 // 关键：正在切换背景（UpdateBackgroundAsync 运行中）时不得在此兜底重启视频。
                 // 从视频切换到图片时，DisposeVideoResource 已把 _mediaPlayer 置空，而 _lastBackgroundFile
                 // 要等 await ChangeBackgroundImageAsync 完成后才更新为新图片；此空窗期内 _lastBackgroundFile 仍指向
                 // 旧视频。若此时收到窗口激活消息（如从「图库」窗口把图片拖到首页，落点激活主窗口），
                 // 兜底分支会用这个过期路径把刚释放的视频重新拉起，其帧回调再覆盖掉刚设好的图片，表现为「更换失败」。
-                if (!IsUpdateBackgroundRunning && _mediaPlayer is null && _startMediaPlayerCts is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
+                // 从托盘恢复且随机换壁纸时同样会进 UpdateBackgroundAsync，续播交给那边，不要在这里 Play。
+                if (IsUpdateBackgroundRunning)
+                {
+                    return;
+                }
+                if (_mediaPlayer is null && _startMediaPlayerCts is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
                 {
                     // 兜底：若播放器曾在其他路径被释放，则重新开始解码渲染背景视频
                     _ = StartMediaPlayerAsync(_lastBackgroundFile!);
-                    // _videoOverlayImage is null：空闲释放保留了叠加图，只有全量释放过才需要重新准备。
-                    // 少这个条件的话，PrepareVideoOverlayImageAsync 会先 Dispose 掉还在用的那张再重下一遍。
-                    if (_videoOverlayImage is null && CurrentGameBackground?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && CurrentGameBackground.Theme?.Url is string url && !string.IsNullOrEmpty(url))
+                    if (CurrentGameBackground?.Type is GameBackground.BACKGROUND_TYPE_VIDEO && CurrentGameBackground.Theme?.Url is string url && !string.IsNullOrEmpty(url))
                     {
                         _ = PrepareVideoOverlayImageAsync(url);
                     }
                 }
                 else if (_mediaPlayer is not null)
                 {
+                    if (_videoDisplayFrozen)
+                    {
+                        _resumeVideoSurfaceOnNextFrame = true;
+                    }
                     var state = _mediaPlayer.PlaybackSession.PlaybackState;
                     if (state is not MediaPlaybackState.Playing)
                     {
