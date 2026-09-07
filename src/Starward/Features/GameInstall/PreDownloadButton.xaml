@@ -6,6 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameInstall"
+             xmlns:sc="using:Starward.Controls"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -82,12 +83,15 @@
         </Style>
     </UserControl.Resources>
 
+    <!--  已就绪时按钮禁用，指针会落到本层（Background=Transparent），提示挂在这里才收得到悬浮  -->
     <Grid x:Name="Grid_Root"
           Height="44"
           Background="Transparent"
           CornerRadius="16"
           PointerEntered="Grid_Root_PointerEntered"
-          PointerExited="Grid_Root_PointerExited">
+          PointerExited="Grid_Root_PointerExited"
+          sc:InstantTooltip.Placement="Top"
+          sc:InstantTooltip.Text="{x:Bind FinishedTooltip}">
         <Grid.Resources>
             <cu:AttachedDropShadow x:Key="TextShadow"
                                    BlurRadius="6"

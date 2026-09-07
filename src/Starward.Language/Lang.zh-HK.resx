@@ -2017,6 +2017,9 @@
   <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
     <value>預先下載已完成</value>
   </data>
+  <data name="PreDownloadButton_PreInstallResourceReady" xml:space="preserve">
+    <value>預先下載資源已就緒</value>
+  </data>
   <data name="Common_Error" xml:space="preserve">
     <value>錯誤</value>
   </data>

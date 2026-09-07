@@ -2076,6 +2076,9 @@ Do you accept the risk and continue to use it?</value>
   <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
     <value>Pre-Install Finished</value>
   </data>
+  <data name="PreDownloadButton_PreInstallResourceReady" xml:space="preserve">
+    <value>Pre-install resources are ready</value>
+  </data>
   <data name="Common_Error" xml:space="preserve">
     <value>Error</value>
   </data>

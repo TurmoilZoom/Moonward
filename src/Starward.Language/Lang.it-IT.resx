@@ -2018,6 +2018,9 @@ Accetti il rischio e desideri continuare?</value>
   <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
     <value>Pre-installazione completata</value>
   </data>
+  <data name="PreDownloadButton_PreInstallResourceReady" xml:space="preserve">
+    <value>Le risorse di pre-installazione sono pronte</value>
+  </data>
   <data name="Common_Error" xml:space="preserve">
     <value>Errore</value>
   </data>

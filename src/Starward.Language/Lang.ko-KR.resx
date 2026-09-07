@@ -2018,6 +2018,9 @@
   <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
     <value>사전 다운로드 완료</value>
   </data>
+  <data name="PreDownloadButton_PreInstallResourceReady" xml:space="preserve">
+    <value>사전 다운로드 리소스가 준비되었습니다</value>
+  </data>
   <data name="Common_Error" xml:space="preserve">
     <value>오류</value>
   </data>

@@ -7396,6 +7396,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Pre-install resources are ready 的本地化字符串。
+        /// </summary>
+        public static string PreDownloadButton_PreInstallResourceReady {
+            get {
+                return ResourceManager.GetString("PreDownloadButton_PreInstallResourceReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Incompatibility Notice 的本地化字符串。
         /// </summary>
         public static string PreDownloadDialog_IncompatibilityNotice {

@@ -47,6 +47,12 @@ public sealed partial class PreDownloadButton : UserControl
     public bool IsButtonEnabled => !(IsPredownloadFinished || State is GameInstallState.Finish);
 
 
+    /// <summary>
+    /// 预下载已就绪时的悬停提示；未就绪时为 <see langword="null"/>，空文案会让 InstantTooltip 解除挂接。
+    /// </summary>
+    public string? FinishedTooltip => IsPredownloadFinished || State is GameInstallState.Finish ? Lang.PreDownloadButton_PreInstallResourceReady : null;
+
+
     public string ButtonIcon => GetButtonIcon();
 
     public string GetButtonIcon()
@@ -170,6 +176,7 @@ public sealed partial class PreDownloadButton : UserControl
     private void UpdateButtonState()
     {
         OnPropertyChanged(nameof(IsButtonEnabled));
+        OnPropertyChanged(nameof(FinishedTooltip));
         OnPropertyChanged(nameof(ButtonIcon));
         OnPropertyChanged(nameof(ButtonText));
         OnPropertyChanged(nameof(InstallStateText));

@@ -2076,6 +2076,9 @@
   <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
     <value>预下载已完成</value>
   </data>
+  <data name="PreDownloadButton_PreInstallResourceReady" xml:space="preserve">
+    <value>预下载资源已就绪</value>
+  </data>
   <data name="Common_Error" xml:space="preserve">
     <value>错误</value>
   </data>

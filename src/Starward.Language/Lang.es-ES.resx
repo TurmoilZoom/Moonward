@@ -2018,6 +2018,9 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
     <value>Preinstalación finalizada</value>
   </data>
+  <data name="PreDownloadButton_PreInstallResourceReady" xml:space="preserve">
+    <value>Los recursos de preinstalación están listos</value>
+  </data>
   <data name="Common_Error" xml:space="preserve">
     <value>Error</value>
   </data>

@@ -2018,6 +2018,9 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
     <value>Đã hoàn thành Cài đặt trước</value>
   </data>
+  <data name="PreDownloadButton_PreInstallResourceReady" xml:space="preserve">
+    <value>Tài nguyên cài đặt trước đã sẵn sàng</value>
+  </data>
   <data name="Common_Error" xml:space="preserve">
     <value>Lỗi</value>
   </data>

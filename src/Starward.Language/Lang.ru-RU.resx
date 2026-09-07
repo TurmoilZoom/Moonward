@@ -2019,6 +2019,9 @@
   <data name="PreDownloadButton_PreInstallFinished" xml:space="preserve">
     <value>Предварительная установка завершена</value>
   </data>
+  <data name="PreDownloadButton_PreInstallResourceReady" xml:space="preserve">
+    <value>Ресурсы предварительной установки готовы</value>
+  </data>
   <data name="Common_Error" xml:space="preserve">
     <value>Ошибка</value>
   </data>
