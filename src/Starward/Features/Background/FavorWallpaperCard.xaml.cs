@@ -47,6 +47,7 @@ public sealed partial class FavorWallpaperCard : UserControl
     private bool _pointerInside;
     private bool _previewing;
     private bool _coverHidden;
+    private bool _handlersHooked;
 
 
     public FavorWallpaperCard()
@@ -59,7 +60,53 @@ public sealed partial class FavorWallpaperCard : UserControl
         _hoverTimer = DispatcherQueue.CreateTimer();
         _hoverTimer.IsRepeating = false;
         _hoverTimer.Interval = HoverDelay;
+        HookHandlers();
+    }
+
+
+    /// <summary>
+    /// 成对挂接本卡片用到的全部事件。
+    /// 这些事件原先写在 XAML 里，声明式订阅没有退订入口，卸载后仍留着本机侧注册，
+    /// 实测每开一次壁纸对话框就把整批卡片（含 MediaPlayerElement）永久留在内存里。
+    /// </summary>
+    private void HookHandlers()
+    {
+        if (_handlersHooked)
+        {
+            return;
+        }
+        _handlersHooked = true;
+        RootVisual.PointerCanceled += Root_PointerCanceled;
+        RootVisual.PointerCaptureLost += Root_PointerCaptureLost;
+        RootVisual.PointerEntered += Root_PointerEntered;
+        RootVisual.PointerExited += Root_PointerExited;
+        RootVisual.PointerMoved += Root_PointerMoved;
+        Button_Action.Click += Action_Click;
+        Button_Action.Loaded += ActionButton_Loaded;
+        Button_Action.PointerEntered += ActionButton_PointerEntered;
+        Button_Action.PointerExited += ActionButton_PointerExited;
         _hoverTimer.Tick += HoverTimer_Tick;
+    }
+
+
+    /// <summary>退订 <see cref="HookHandlers"/> 挂接的全部事件；与之严格成对。</summary>
+    private void UnhookHandlers()
+    {
+        if (!_handlersHooked)
+        {
+            return;
+        }
+        _handlersHooked = false;
+        RootVisual.PointerCanceled -= Root_PointerCanceled;
+        RootVisual.PointerCaptureLost -= Root_PointerCaptureLost;
+        RootVisual.PointerEntered -= Root_PointerEntered;
+        RootVisual.PointerExited -= Root_PointerExited;
+        RootVisual.PointerMoved -= Root_PointerMoved;
+        Button_Action.Click -= Action_Click;
+        Button_Action.Loaded -= ActionButton_Loaded;
+        Button_Action.PointerEntered -= ActionButton_PointerEntered;
+        Button_Action.PointerExited -= ActionButton_PointerExited;
+        _hoverTimer.Tick -= HoverTimer_Tick;
     }
 
 
@@ -210,6 +257,7 @@ public sealed partial class FavorWallpaperCard : UserControl
 
 
     private void View_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        HookHandlers();
     {
         if (e.PropertyName is not (nameof(FavorWallpaperView.IsDownloaded) or nameof(FavorWallpaperView.IsDownloading)))
         {
@@ -225,6 +273,7 @@ public sealed partial class FavorWallpaperCard : UserControl
             SchedulePreview();
         }
     }
+        UnhookHandlers();
 
 
     private void Root_PointerEntered(object sender, PointerRoutedEventArgs e)

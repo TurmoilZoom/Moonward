@@ -12,15 +12,15 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
+    <!--
+        事件一律由 code-behind 成对订阅 / 退订（HookHandlers / UnhookHandlers），
+        不要在此写 Click= / PointerEntered= 等声明式处理器：声明式订阅没有退订入口，
+        实测会让整张卡片连同 MediaPlayerElement 在关闭对话框后仍被本机侧留住。
+    -->
     <Grid x:Name="RootVisual"
           Margin="4"
           Background="#CC1A1A1A"
           CornerRadius="8"
-          PointerCanceled="Root_PointerCanceled"
-          PointerCaptureLost="Root_PointerCaptureLost"
-          PointerEntered="Root_PointerEntered"
-          PointerExited="Root_PointerExited"
-          PointerMoved="Root_PointerMoved"
           sh:PointerCursor.CursorShape="Hand"
           ui:UIElementExtensions.ClipToBounds="True">
 
@@ -71,11 +71,7 @@
                 Padding="0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Click="Action_Click"
                 CornerRadius="8"
-                Loaded="ActionButton_Loaded"
-                PointerEntered="ActionButton_PointerEntered"
-                PointerExited="ActionButton_PointerExited"
                 sc:InstantTooltip.Placement="Top"
                 sc:InstantTooltip.Text="{x:Bind View.ActionTooltip, Mode=OneWay}"
                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"

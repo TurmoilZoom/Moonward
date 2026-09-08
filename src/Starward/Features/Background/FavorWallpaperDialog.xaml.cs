@@ -53,6 +53,10 @@ public sealed partial class FavorWallpaperDialog : ContentDialog
     private void FavorWallpaperDialog_Loaded(object sender, RoutedEventArgs e)
     {
         CurrentGameBiz = CurrentGameId?.GameBiz ?? GameBiz.None;
+        // 事件在 code-behind 成对订阅：XAML 声明式订阅没有退订入口，
+        // 会让整个对话框（连同壁纸面板与它的全部卡片）在关闭后仍被本机侧留住。
+        ToggleSwitch_Shuffle.Toggled -= ToggleSwitch_Shuffle_Toggled;
+        ToggleSwitch_Shuffle.Toggled += ToggleSwitch_Shuffle_Toggled;
         WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(this, OnAccentColorChanged);
         FavorPanel.CurrentGameId = CurrentGameId;
         FavorPanel.CurrentGameBiz = CurrentGameBiz;
@@ -71,6 +75,7 @@ public sealed partial class FavorWallpaperDialog : ContentDialog
 
     private void FavorWallpaperDialog_Unloaded(object sender, RoutedEventArgs e)
     {
+        ToggleSwitch_Shuffle.Toggled -= ToggleSwitch_Shuffle_Toggled;
         WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 

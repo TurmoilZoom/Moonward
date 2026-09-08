@@ -2,6 +2,9 @@
 <!--
     游戏启动页 Banner 轮播控件（PanelSlideshow 模式）。
     呈现区单槽 + Storyboard 推拉切页、PipsPager 圆点指示器、悬停淡入翻页按钮、5 秒自动轮播。
+    注意：本控件的事件一律由 code-behind 成对订阅 / 退订（见 HookHandlers / UnhookHandlers），
+    不要在此写 Click= / SizeChanged= 等声明式处理器——XAML 声明的订阅无法退订，
+    实测会让整棵控件树在页面卸载后仍被本机侧留住（切游戏时每次泄漏一个实例）。
     数据经 Banners 依赖属性由 GameBannerAndPost 绑定；PauseAutoPlay / ResumeAutoPlay 由父控件在窗口状态变化时调用。
 -->
 <UserControl x:Class="Starward.Features.GameLauncher.BannerCarousel"
@@ -115,11 +118,7 @@
     </UserControl.Resources>
 
     <!--  根容器：承接指针进入/离开（控制翻页按钮显隐与自动轮播暂停）、滚轮翻页  -->
-    <Grid x:Name="RootGrid"
-          Background="Transparent"
-          PointerEntered="RootGrid_PointerEntered"
-          PointerExited="RootGrid_PointerExited"
-          PointerWheelChanged="RootGrid_PointerWheelChanged">
+    <Grid x:Name="RootGrid" Background="Transparent">
 
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="CommonStates">
@@ -198,7 +197,7 @@
 
         <!--  轮播图呈现区：单槽 Grid，切页时新旧图各自滑动；外层 Border 负责圆角裁剪  -->
         <Border CornerRadius="8">
-            <Grid x:Name="PresenterGrid" SizeChanged="PresenterGrid_SizeChanged" />
+            <Grid x:Name="PresenterGrid" />
         </Border>
 
         <!--  上一张  -->
@@ -217,7 +216,6 @@
                     Width="28"
                     Height="44"
                     sh:PointerCursor.CursorShape="Hand"
-                    Click="PreviousButton_Click"
                     Style="{StaticResource CarouselNavButtonStyle}">
                 <FontIcon FontSize="14"
                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
@@ -241,7 +239,6 @@
                     Width="28"
                     Height="44"
                     sh:PointerCursor.CursorShape="Hand"
-                    Click="NextButton_Click"
                     Style="{StaticResource CarouselNavButtonStyle}">
                 <FontIcon FontSize="14"
                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
@@ -261,7 +258,6 @@
                        NextButtonVisibility="Collapsed"
                        NumberOfPages="0"
                        PreviousButtonVisibility="Collapsed"
-                       SelectedIndexChanged="BannerPipsPager_SelectedIndexChanged"
                        SelectedPageIndex="0" />
         </Border>
 

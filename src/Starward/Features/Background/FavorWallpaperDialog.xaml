@@ -81,8 +81,7 @@
                           Margin="8,0,0,0"
                           VerticalAlignment="Center"
                           OffContent="{x:Bind lang:Lang.FavorWallpaper_ShuffleMode}"
-                          OnContent="{x:Bind lang:Lang.FavorWallpaper_ShuffleMode}"
-                          Toggled="ToggleSwitch_Shuffle_Toggled" />
+                          OnContent="{x:Bind lang:Lang.FavorWallpaper_ShuffleMode}" />
 
             <!-- 后台校验/回源时的提示（数量对不上、正在补词条）；命中缓存与首次转圈时不显示。占剩余宽度，过长时省略。 -->
             <TextBlock Grid.Column="3"

@@ -78,9 +78,6 @@ internal sealed class InstantTooltipHost
     /// <summary>驱动 scale / opacity 关键帧动画的 Composition 合成器。</summary>
     private readonly Compositor _compositor;
 
-    /// <summary>解析 ThemeResource 时优先查此元素的 Resources，再回退 Application.Resources。</summary>
-    private readonly FrameworkElement _themeSource;
-
     /// <summary>已注册指针事件的锚点集合；用于去重与 Dispose 时批量解绑。</summary>
     private readonly HashSet<FrameworkElement> _elements = [];
 
@@ -172,7 +169,6 @@ internal sealed class InstantTooltipHost
     {
         _xamlRoot = xamlRoot;
         _dispatcherQueue = themeSource.DispatcherQueue;
-        _themeSource = themeSource;
 
         _text = new TextBlock
         {
@@ -181,13 +177,13 @@ internal sealed class InstantTooltipHost
             MaxWidth = 280,
             TextWrapping = TextWrapping.Wrap,
             FontSize = 12,
-            Foreground = GetThemeBrush("TextFillColorPrimaryBrush"),
+            Foreground = GetThemeBrush(themeSource, "TextFillColorPrimaryBrush"),
         };
 
         _inlineActionLink = new Hyperlink
         {
             UnderlineStyle = UnderlineStyle.None,
-            Foreground = GetThemeBrush("AccentTextFillColorPrimaryBrush"),
+            Foreground = GetThemeBrush(themeSource, "AccentTextFillColorPrimaryBrush"),
         };
         _inlineActionLink.Inlines.Add(_inlineActionRun);
         _inlineActionLink.Click += InlineActionLink_Click;
@@ -199,7 +195,7 @@ internal sealed class InstantTooltipHost
             HorizontalAlignment = HorizontalAlignment.Right,
             FontSize = 12,
             Visibility = Visibility.Collapsed,
-            Foreground = GetThemeBrush("AccentTextFillColorPrimaryBrush"),
+            Foreground = GetThemeBrush(themeSource, "AccentTextFillColorPrimaryBrush"),
         };
         _actionButton.Click += ActionButton_Click;
 
@@ -211,7 +207,7 @@ internal sealed class InstantTooltipHost
         _content = new Border
         {
             Padding = new Thickness(12, 8, 12, 8),
-            Background = GetThemeBrush("CustomOverlayAcrylicBrush"),
+            Background = GetThemeBrush(themeSource, "CustomOverlayAcrylicBrush"),
             BorderThickness = new Thickness(0),
             CornerRadius = new CornerRadius(6),
             // 默认不命中：纯文案提示应点击穿透，避免退场后透明 Popup 挡在下侧工具栏上。
@@ -1156,11 +1152,12 @@ internal sealed class InstantTooltipHost
     /// <summary>
     /// 从元素局部资源或应用资源字典解析主题画刷。
     /// </summary>
+    /// <param name="themeSource">优先查其 Resources 的元素；仅构造期使用，不得存为字段（否则静态宿主会钉住整棵页面树）。</param>
     /// <param name="resourceKey">ThemeResource 键名。</param>
     /// <returns>解析到的画刷；失败时返回透明画刷。</returns>
-    private Brush GetThemeBrush(string resourceKey)
+    private static Brush GetThemeBrush(FrameworkElement themeSource, string resourceKey)
     {
-        if (_themeSource.Resources.TryGetValue(resourceKey, out object? local) && local is Brush localBrush)
+        if (themeSource.Resources.TryGetValue(resourceKey, out object? local) && local is Brush localBrush)
         {
             return localBrush;
         }

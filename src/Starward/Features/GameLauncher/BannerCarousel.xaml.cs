@@ -79,6 +79,9 @@ public sealed partial class BannerCarousel : UserControl
     /// <summary>上一帧 <see cref="CompositionTarget.Rendering"/> 时间戳，用于计算 dt。</summary>
     private TimeSpan _lastRenderTime;
 
+    /// <summary>是否已挂接 <see cref="HookHandlers"/> 中的全部事件。</summary>
+    private bool _handlersHooked;
+
     /// <summary>是否已订阅 <see cref="CompositionTarget.Rendering"/>。</summary>
     private bool _renderingHooked;
 
@@ -91,9 +94,10 @@ public sealed partial class BannerCarousel : UserControl
         _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromSeconds(5);
         _timer.IsRepeating = true;
-        _timer.Tick += Timer_Tick;
         this.Loaded += BannerCarousel_Loaded;
         this.Unloaded += BannerCarousel_Unloaded;
+        // 首次布局会先于 Loaded 触发 PresenterGrid.SizeChanged，故构造期就挂上
+        HookHandlers();
     }
 
 
@@ -143,18 +147,65 @@ public sealed partial class BannerCarousel : UserControl
 
 
 
-    /// <summary>控件加载完成后尝试启动自动轮播（需满足窗口激活、无悬停、多张图等条件）。</summary>
+    /// <summary>控件加载完成后重新挂接事件并尝试启动自动轮播（需满足窗口激活、无悬停、多张图等条件）。</summary>
     private void BannerCarousel_Loaded(object sender, RoutedEventArgs e)
     {
+        HookHandlers();
         MaybeStartAutoPlay();
     }
 
 
-    /// <summary>卸载时停止定时器并取消渲染订阅，避免回调持有已卸载元素。</summary>
+    /// <summary>卸载时停止定时器、取消渲染订阅并退订全部事件，避免回调持有已卸载元素。</summary>
     private void BannerCarousel_Unloaded(object sender, RoutedEventArgs e)
     {
         _timer.Stop();
         CancelTransition();
+        UnhookHandlers();
+        // 不带过渡地回到 Normal：让翻页按钮的悬停 Storyboard 立刻结束，
+        // 否则停在 HoldEnd 的动画会由本机计时管理器继续持有目标元素。
+        VisualStateManager.GoToState(this, "Normal", false);
+    }
+
+
+    /// <summary>
+    /// 成对挂接本控件用到的全部事件。
+    /// 这些事件原先写在 XAML 里（<c>Click=</c> / <c>SizeChanged=</c> 等），声明式订阅没有退订入口，
+    /// 卸载后仍留着一份本机侧注册，实测会让整棵控件树留在内存里（切一次游戏漏一个实例）。
+    /// </summary>
+    private void HookHandlers()
+    {
+        if (_handlersHooked)
+        {
+            return;
+        }
+        _handlersHooked = true;
+        RootGrid.PointerEntered += RootGrid_PointerEntered;
+        RootGrid.PointerExited += RootGrid_PointerExited;
+        RootGrid.PointerWheelChanged += RootGrid_PointerWheelChanged;
+        PresenterGrid.SizeChanged += PresenterGrid_SizeChanged;
+        PreviousButton.Click += PreviousButton_Click;
+        NextButton.Click += NextButton_Click;
+        BannerPipsPager.SelectedIndexChanged += BannerPipsPager_SelectedIndexChanged;
+        _timer.Tick += Timer_Tick;
+    }
+
+
+    /// <summary>退订 <see cref="HookHandlers"/> 挂接的全部事件；与之严格成对。</summary>
+    private void UnhookHandlers()
+    {
+        if (!_handlersHooked)
+        {
+            return;
+        }
+        _handlersHooked = false;
+        RootGrid.PointerEntered -= RootGrid_PointerEntered;
+        RootGrid.PointerExited -= RootGrid_PointerExited;
+        RootGrid.PointerWheelChanged -= RootGrid_PointerWheelChanged;
+        PresenterGrid.SizeChanged -= PresenterGrid_SizeChanged;
+        PreviousButton.Click -= PreviousButton_Click;
+        NextButton.Click -= NextButton_Click;
+        BannerPipsPager.SelectedIndexChanged -= BannerPipsPager_SelectedIndexChanged;
+        _timer.Tick -= Timer_Tick;
     }
 
 
