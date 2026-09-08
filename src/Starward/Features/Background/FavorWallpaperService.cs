@@ -581,6 +581,10 @@ internal partial class FavorWallpaperService
     }
 
 
+    /// <summary>下载进度回报的最小间隔（毫秒）；避免高频 Report 淹没 UI 线程。</summary>
+    private const int ProgressReportIntervalMs = 200;
+
+
     private async Task DownloadToPathAsync(string url, string destPath, IProgress<double>? progress, CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
@@ -596,13 +600,26 @@ internal partial class FavorWallpaperService
                 byte[] buffer = new byte[81920];
                 long read = 0;
                 int n;
+                // 进度必须节流：Progress<T> 会把每次 Report 都 Post 回 UI 线程，
+                // 而 80KB 一报意味着一个 30MB 的壁纸要往 UI 线程塞近 400 个工作项。
+                // 视频背景的取帧渲染（VideoFrameAvailable → CanvasImageSource）也跑在 UI 线程上，
+                // 会被这串进度更新挤掉帧，表现就是下载时背景视频卡顿。
+                int lastPercent = -1;
+                long lastReportTicks = 0;
                 while ((n = await input.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
                 {
                     await output.WriteAsync(buffer.AsMemory(0, n), cancellationToken).ConfigureAwait(false);
                     read += n;
-                    if (total is > 0)
+                    if (total is > 0 && progress is not null)
                     {
-                        progress?.Report(read * 100.0 / total.Value);
+                        int percent = (int)(read * 100 / total.Value);
+                        long now = Environment.TickCount64;
+                        if (percent != lastPercent && now - lastReportTicks >= ProgressReportIntervalMs)
+                        {
+                            lastPercent = percent;
+                            lastReportTicks = now;
+                            progress.Report(percent);
+                        }
                     }
                 }
             }
