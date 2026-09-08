@@ -638,11 +638,17 @@
                     Grid.Column="1" />
 
 
-            <!--  定位游戏  -->
-            <TextBlock Grid.Row="1"
+            <!--
+                定位游戏。x:Load 与 Visibility 同条件：这两条提示平时都是隐藏的，
+                但只要元素存在，AttachedDropShadow 就会跟着 CastTo 目标（右下角按钮区）的尺寸变化
+                反复重算投影蒙版——实测 30 秒里白跑 119 次、约 1% 的 UI 线程。不创建就不会注册。
+            -->
+            <TextBlock x:Name="TextBlock_LocateGameTip"
+                       Grid.Row="1"
                        Grid.Column="1"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
+                       x:Load="{x:Bind InstalledLocateGameEnabled}"
                        cu:Effects.Shadow="{StaticResource TextShadow}"
                        FontSize="12"
                        Visibility="{x:Bind InstalledLocateGameEnabled}">
@@ -652,11 +658,13 @@
                 </Hyperlink>
             </TextBlock>
 
-            <!--  可移动存储设备未连接  -->
-            <TextBlock Grid.Row="1"
+            <!--  可移动存储设备未连接（同上，x:Load 避免常驻投影重算）  -->
+            <TextBlock x:Name="TextBlock_RemovableStorageTip"
+                       Grid.Row="1"
                        Grid.Column="1"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
+                       x:Load="{x:Bind IsInstallPathRemovableTipEnabled}"
                        cu:Effects.Shadow="{StaticResource TextShadow}"
                        FontSize="12"
                        Visibility="{x:Bind IsInstallPathRemovableTipEnabled}">
