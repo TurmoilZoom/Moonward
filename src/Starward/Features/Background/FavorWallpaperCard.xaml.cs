@@ -110,6 +110,20 @@ public sealed partial class FavorWallpaperCard : UserControl
     }
 
 
+    /// <summary>
+    /// realize 延迟创建的 <see cref="Player_Preview"/>（XAML 上是 <c>x:Load="False"</c>）。
+    /// 只有真正开始悬停预览时才付出 MediaPlayerElement 的构造开销。
+    /// </summary>
+    private MediaPlayerElement EnsurePlayerElement()
+    {
+        if (Player_Preview is null)
+        {
+            FindName(nameof(Player_Preview));
+        }
+        return Player_Preview;
+    }
+
+
     public FavorWallpaperView? View
     {
         get => (FavorWallpaperView?)GetValue(ViewProperty);
@@ -175,8 +189,13 @@ public sealed partial class FavorWallpaperCard : UserControl
     }
 
 
-    private static void ResetLottie(AnimatedVisualPlayer player)
+    /// <summary>停止并归零 Lottie；<paramref name="player"/> 可能因 <c>x:Load</c> 尚未创建而为 null。</summary>
+    private static void ResetLottie(AnimatedVisualPlayer? player)
     {
+        if (player is null)
+        {
+            return;
+        }
         player.Stop();
         player.SetProgress(0);
     }
@@ -238,6 +257,7 @@ public sealed partial class FavorWallpaperCard : UserControl
 
     private void FavorWallpaperCard_Loaded(object sender, RoutedEventArgs e)
     {
+        HookHandlers();
         if (View is not null)
         {
             View.PropertyChanged -= View_PropertyChanged;
@@ -253,11 +273,11 @@ public sealed partial class FavorWallpaperCard : UserControl
             View.PropertyChanged -= View_PropertyChanged;
         }
         StopPreview();
+        UnhookHandlers();
     }
 
 
     private void View_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        HookHandlers();
     {
         if (e.PropertyName is not (nameof(FavorWallpaperView.IsDownloaded) or nameof(FavorWallpaperView.IsDownloading)))
         {
@@ -273,7 +293,6 @@ public sealed partial class FavorWallpaperCard : UserControl
             SchedulePreview();
         }
     }
-        UnhookHandlers();
 
 
     private void Root_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -402,8 +421,9 @@ public sealed partial class FavorWallpaperCard : UserControl
 
             _mediaSource = MediaSource.CreateFromUri(new Uri(path));
             player.Source = _mediaSource;
-            Player_Preview.SetMediaPlayer(player);
-            Player_Preview.Visibility = Visibility.Visible;
+            MediaPlayerElement preview = EnsurePlayerElement();
+            preview.SetMediaPlayer(player);
+            preview.Visibility = Visibility.Visible;
             _player = player;
         }
         catch
@@ -466,7 +486,10 @@ public sealed partial class FavorWallpaperCard : UserControl
         _coverHidden = false;
         FadePreviewVisuals(showVideo: false);
         StopPlaybackOnly();
-        Player_Preview.Visibility = Visibility.Collapsed;
+        if (Player_Preview is not null)
+        {
+            Player_Preview.Visibility = Visibility.Collapsed;
+        }
         if (ReferenceEquals(s_activePreview, this))
         {
             s_activePreview = null;
@@ -485,7 +508,7 @@ public sealed partial class FavorWallpaperCard : UserControl
         _mediaSource = null;
         if (player is null)
         {
-            Player_Preview.SetMediaPlayer(null);
+            Player_Preview?.SetMediaPlayer(null);
             return;
         }
         player.MediaOpened -= Player_MediaOpened;
@@ -499,7 +522,7 @@ public sealed partial class FavorWallpaperCard : UserControl
         {
         }
         player.Source = null;
-        Player_Preview.SetMediaPlayer(null);
+        Player_Preview?.SetMediaPlayer(null);
         source?.Dispose();
         player.Dispose();
     }
@@ -510,7 +533,11 @@ public sealed partial class FavorWallpaperCard : UserControl
         float cover = showVideo ? 0f : 1f;
         float video = showVideo ? 1f : 0f;
         AnimateOpacity(Image_Cover, cover, showVideo ? 180 : 0);
-        AnimateOpacity(Player_Preview, video, showVideo ? 180 : 0);
+        // 没预览过就没有 Player_Preview（x:Load="False"），此时无需淡化视频层
+        if (Player_Preview is not null)
+        {
+            AnimateOpacity(Player_Preview, video, showVideo ? 180 : 0);
+        }
     }
 
 

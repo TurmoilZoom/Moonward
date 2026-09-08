@@ -45,7 +45,13 @@ public sealed partial class FavorWallpaperPanel : UserControl
     public bool IsMindscapeMode { get; set; }
 
 
-    public ObservableCollection<FavorWallpaperView> Items { get; } = [];
+    /// <summary>
+    /// 绑定给 GridView 的卡片集合。**整体替换**，不要 Clear + 逐个 Add：
+    /// 逐个 Add 会给 GridView 发 N 次 CollectionChanged，每次都触发一轮测量/排布，
+    /// 五十多张卡时这就是「打开对话框那一下」的主要卡顿来源。
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<FavorWallpaperView> items = [];
 
 
     private List<FavorWallpaperView> _favorViews = [];
@@ -123,7 +129,7 @@ public sealed partial class FavorWallpaperPanel : UserControl
         else
         {
             IsLoading = true;
-            Items.Clear();
+            Items = [];
         }
 
         // 2) 后台校验：数量一致则静默（仅就地补封面），对不上才整页强刷。
@@ -381,11 +387,7 @@ public sealed partial class FavorWallpaperPanel : UserControl
     private void BindCurrentModeItems()
     {
         List<FavorWallpaperView> source = IsMindscapeMode ? _mindscapeViews : _favorViews;
-        Items.Clear();
-        foreach (FavorWallpaperView view in source)
-        {
-            Items.Add(view);
-        }
+        Items = new ObservableCollection<FavorWallpaperView>(source);
     }
 
 

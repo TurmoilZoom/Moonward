@@ -27,11 +27,13 @@
         <sc:CachedImage x:Name="Image_Cover"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        DecodeWidth="490"
+                        DecodeWidth="240"
                         Source="{x:Bind View.CoverUrl, Mode=OneWay}"
                         Stretch="{x:Bind View.CoverStretch, Mode=OneWay}" />
 
+        <!--  MediaPlayerElement 构造开销大且仅悬停预览时才用到，延迟到第一次预览再实例化  -->
         <MediaPlayerElement x:Name="Player_Preview"
+                            x:Load="False"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             AreTransportControlsEnabled="False"
@@ -77,9 +79,11 @@
                 Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
                 Visibility="{x:Bind View.ShowActionButton, Mode=OneWay}">
             <Grid Width="40" Height="40">
+                <!--  两个 Lottie 任一时刻只显示一个，按条件延迟创建：AnimatedVisualPlayer 会建整套 Composition 动画图，白建一份很贵  -->
                 <AnimatedVisualPlayer x:Name="Lottie_Download"
                                       Width="40"
                                       Height="40"
+                                      x:Load="{x:Bind View.ShowDownloadButton, Mode=OneWay}"
                                       AutoPlay="False"
                                       Stretch="Uniform"
                                       Visibility="{x:Bind View.ShowDownloadButton, Mode=OneWay}">
@@ -88,6 +92,7 @@
                 <AnimatedVisualPlayer x:Name="Lottie_Delete"
                                       Width="40"
                                       Height="40"
+                                      x:Load="{x:Bind View.ShowLocalActions, Mode=OneWay}"
                                       AutoPlay="False"
                                       Stretch="Uniform"
                                       Visibility="{x:Bind View.ShowLocalActions, Mode=OneWay}">
@@ -102,7 +107,10 @@
                 IsHitTestVisible="False"
                 Visibility="{x:Bind View.IsInUse, Mode=OneWay}" />
 
-        <ProgressBar VerticalAlignment="Bottom"
+        <!--  只有正在下载的那张卡才需要进度条，其余卡不必付出模板与视觉状态的构造开销  -->
+        <ProgressBar x:Name="ProgressBar_Download"
+                     VerticalAlignment="Bottom"
+                     x:Load="{x:Bind View.IsDownloading, Mode=OneWay}"
                      Maximum="100"
                      ShowError="False"
                      ShowPaused="False"
