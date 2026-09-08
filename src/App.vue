@@ -540,8 +540,8 @@ onUnmounted(() => {
         <p class="section-lead">
           {{
             locale === 'zh'
-              ? '面向日常使用的能力卡片——点开启动器前，先知道它能帮你做什么。'
-              : 'Plain-language cards for everyday use — what the launcher can do for you.'
+              ? '日常会用到的功能，先看这些。'
+              : 'Everyday features, in short.'
           }}
         </p>
         <div class="cards">
@@ -568,8 +568,8 @@ onUnmounted(() => {
         <p class="section-lead">
           {{
             locale === 'zh'
-              ? '一套设置怎么变成桌面图标或一条链接、UAC 提示怎么跳过，以及签到到底什么时候跑。'
-              : 'How a profile becomes a shortcut or URL, how skip-UAC works, and when check-in runs.'
+              ? '一套设置如何变成桌面图标或链接，以及签到什么时候会跑。'
+              : 'How a setup becomes a shortcut or URL, and when check-in runs.'
           }}
         </p>
 
@@ -711,8 +711,8 @@ onUnmounted(() => {
             <span class="path-key">{{ locale === 'zh' ? '配置文件' : 'Profile' }}</span>
             <span class="path-val">{{
               locale === 'zh'
-                ? '玩哪个游戏 + 什么启动参数 + 哪个账号，可存多套'
-                : 'Which game, which launch options, which account — save several'
+                ? '游戏、启动参数、账号，可存多套'
+                : 'Game, launch options, account — save several'
             }}</span>
           </div>
           <div class="path-item">
@@ -761,8 +761,8 @@ onUnmounted(() => {
               <span class="fold-title">{{ t(checkInFlow.title) }}</span>
               <span class="fold-hint">{{
                 locale === 'zh'
-                  ? '按游戏开关 · 启动十秒后 · 依次签到'
-                  : 'Per-game toggle · ~10s after start · one by one'
+                  ? '按游戏开关 · 打开即领 · 过零点再签'
+                  : 'Per-game toggle · claims on enable · again after midnight'
               }}</span>
             </span>
           </summary>
@@ -792,13 +792,13 @@ onUnmounted(() => {
                 @mouseenter="activeCheckInStep = 'enable'"
               >
                 <span class="pipe-label">{{ locale === 'zh' ? '按游戏开启' : 'Enable per game' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '各自独立 · 下次打开生效' : 'independent · next start' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '各自独立 · 打开即生效' : 'independent · takes effect now' }}</span>
               </div>
             </div>
 
             <div class="pipe-join">
               <span class="pipe-v" />
-              <span class="pipe-hint">{{ locale === 'zh' ? '两种启动' : 'Two ways to start' }}</span>
+              <span class="pipe-hint">{{ locale === 'zh' ? '两种开法' : 'Two ways to start' }}</span>
             </div>
 
             <div class="pipe-row split">
@@ -832,7 +832,7 @@ onUnmounted(() => {
                 @mouseenter="activeCheckInStep = 'claim'"
               >
                 <span class="pipe-label">{{ locale === 'zh' ? '查询并签到' : 'Look up, then claim' }}</span>
-                <span class="pipe-sub">{{ locale === 'zh' ? '约 10 秒后 · 已签则跳过' : '~10s later · skip if done' }}</span>
+                <span class="pipe-sub">{{ locale === 'zh' ? '已签则跳过 · 过零点再签' : 'skip if done · again after midnight' }}</span>
               </div>
             </div>
           </div>
@@ -858,15 +858,15 @@ onUnmounted(() => {
           <div class="path-item">
             <span class="path-key">{{ locale === 'zh' ? '按游戏开关' : 'Per-game toggle' }}</span>
             <span class="path-val">{{
-              locale === 'zh' ? '各游戏互不影响，改完下次打开生效' : 'Independent; takes effect next time you open the app'
+              locale === 'zh' ? '各游戏互不影响，打开即生效' : 'Independent; takes effect as soon as you turn it on'
             }}</span>
           </div>
           <div class="path-item">
-            <span class="path-key">{{ locale === 'zh' ? '启动后批量' : 'Batch after start' }}</span>
+            <span class="path-key">{{ locale === 'zh' ? '运行即签' : 'While running' }}</span>
             <span class="path-val">{{
               locale === 'zh'
-                ? '启动约十秒后挨个领，中间隔几秒'
-                : 'Starts ~10s after launch, one game at a time, seconds apart'
+                ? '软件在运行就会领，已签则跳过'
+                : 'Claims while the app is running; skips days already done'
             }}</span>
           </div>
           <div class="path-item">
@@ -876,9 +876,9 @@ onUnmounted(() => {
             }}</span>
           </div>
           <div class="path-item">
-            <span class="path-key">{{ locale === 'zh' ? '失败冷却' : 'Cooldown' }}</span>
+            <span class="path-key">{{ locale === 'zh' ? '过零点再签' : 'After midnight' }}</span>
             <span class="path-val">{{
-              locale === 'zh' ? '出错后约十分钟内不再重试' : 'Waits about 10 minutes after a failure'
+              locale === 'zh' ? '软件一直开着时，第二天还会再签' : 'If it stays in the tray, it checks in again the next day'
             }}</span>
           </div>
         </div>

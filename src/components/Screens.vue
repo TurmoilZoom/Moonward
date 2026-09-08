@@ -236,8 +236,8 @@ onUnmounted(() => {
     <p class="section-lead">
       {{
         locale === 'zh'
-          ? '四张实际窗口：启动配置、BetterGI 参数、抽卡记录、每日签到。点选切换，点图放大。'
-          : 'Four real windows: launch profile, BetterGI args, gacha history, daily check-in. Pick a tab; click the shot to enlarge.'
+          ? '启动配置、BetterGI 参数、抽卡记录、每日签到。点选切换，点图放大。'
+          : 'Launch profile, BetterGI args, gacha history, daily check-in. Pick a tab; click the shot to enlarge.'
       }}
     </p>
 
