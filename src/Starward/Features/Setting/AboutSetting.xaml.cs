@@ -140,7 +140,11 @@ public sealed partial class AboutSetting : PageBase
             var release = await service.GetLatestVersionAsync();
             if (release is not null)
             {
-                new UpdateWindow { NewVersion = release }.Activate();
+                // 与前台自动检查可能复用同一次网络请求并同时走到这里，已有窗口就不再开第二个。
+                if (!UpdateWindow.TryActivateExisting())
+                {
+                    new UpdateWindow { NewVersion = release }.Activate();
+                }
             }
             else if (service.IsUpdaterAvailable)
             {

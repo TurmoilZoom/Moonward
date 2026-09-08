@@ -56,6 +56,41 @@ public sealed partial class UpdateWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 当前已打开的更新窗口，同一时刻只应有一个；关闭时置空。只在 UI 线程访问。
+    /// </summary>
+    public static UpdateWindow? Current { get; private set; }
+
+
+    /// <summary>
+    /// 已有更新窗口开着时把它带到前台并返回 <see langword="true"/>，调用方据此跳过再开一个。
+    /// <para>
+    /// 前台自动检查与关于页手动检查会复用同一次网络请求（<see cref="UpdateService.GetLatestVersionAsync"/> 合并并发调用），
+    /// 两边各自拿到结果后都会弹窗，不去重就会同时冒出两个更新窗口。
+    /// </para>
+    /// </summary>
+    /// <returns>已有窗口并已激活为 <see langword="true"/>；没有窗口（或它正在关闭）为 <see langword="false"/>。</returns>
+    public static bool TryActivateExisting()
+    {
+        if (Current is null)
+        {
+            return false;
+        }
+        try
+        {
+            Current.Activate();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // 窗口可能正处在关闭途中，此时 Activate 会抛；当作没有窗口，让调用方新开一个。
+            AppConfig.GetLogger<UpdateWindow>().LogWarning(ex, "Activate existing update window");
+            Current = null;
+            return false;
+        }
+    }
+
+
     public UpdateWindow()
     {
         this.InitializeComponent();
@@ -66,6 +101,7 @@ public sealed partial class UpdateWindow : WindowEx
         _timer.Tick += _timer_Tick;
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
         this.Closed += UpdateWindow_Closed;
+        Current = this;
     }
 
 
@@ -155,6 +191,10 @@ public sealed partial class UpdateWindow : WindowEx
 
     private void UpdateWindow_Closed(object sender, WindowEventArgs args)
     {
+        if (ReferenceEquals(Current, this))
+        {
+            Current = null;
+        }
         _timer.Stop();
         _timer.Tick -= _timer_Tick;
         if (_startedDownloadInThisWindow)

@@ -404,7 +404,10 @@ public sealed partial class MainView : UserControl
                 // 有新版本时：距上次弹窗超过 6 小时且不在同一天，才再弹窗
                 if (now - _lastShowUpdateTime > TimeSpan.FromHours(6) && now.Date != _lastShowUpdateTime.Date)
                 {
-                    new UpdateWindow { NewVersion = release }.Activate();
+                    if (!UpdateWindow.TryActivateExisting())
+                    {
+                        new UpdateWindow { NewVersion = release }.Activate();
+                    }
                     _lastShowUpdateTime = now;
                 }
             }
@@ -438,6 +441,12 @@ public sealed partial class MainView : UserControl
         if (lastVersion is not null && appVersion == lastVersion)
         {
             return false;
+        }
+        if (UpdateWindow.TryActivateExisting())
+        {
+            // 已有更新窗口开着，把它带到前台即可。标记不清，留到下次窗口激活时再展示发行说明，
+            // 否则这次的说明就被这个「有新版本」窗口顶掉、再也不会出现。
+            return true;
         }
         var window = new UpdateWindow();
         // 先构造以快照 LastAppVersion，再清标记，避免并发检查把起始版本改成当前版本
