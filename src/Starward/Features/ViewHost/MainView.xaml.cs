@@ -81,7 +81,16 @@ public sealed partial class MainView : UserControl
         UpdateNavigationView();
         WeakReferenceMessenger.Default.Register<MainViewNavigateMessage>(this, OnMainViewNavigateMessageReceived);
         WeakReferenceMessenger.Default.Register<BH3GlobalGameServerChangedMessage>(this, OnBH3GlobalGameServerChanged);
-        WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, (_, _) => _ = CheckUpdateOrShowRecentUpdateContentAsync());
+        // 只在窗口激活时检查：最小化 / 收进托盘 / 锁屏都会广播这条消息，不加过滤的话，
+        // 刚把窗口收起来就可能弹出更新窗口抢回前台。后台驻留期间的静默下载由
+        // UpdateService.StartResidentSilentUpdate 负责。
+        WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, (_, message) =>
+        {
+            if (message.Activate)
+            {
+                _ = CheckUpdateOrShowRecentUpdateContentAsync();
+            }
+        });
         // 切换软件语言后刷新导航文案/Tooltip，并异步把三个游戏的抽卡物品名称回写为新语言
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
     }
@@ -335,9 +344,6 @@ public sealed partial class MainView : UserControl
     #region Update
 
 
-    /// <summary>上次成功发起更新检查的时间，用于 1 小时节流。</summary>
-    private DateTimeOffset _lastCheckUpdateTime;
-
     /// <summary>上次弹出更新窗口的时间，用于 6 小时且跨日节流。</summary>
     private DateTimeOffset _lastShowUpdateTime;
 
@@ -366,10 +372,11 @@ public sealed partial class MainView : UserControl
 #pragma warning restore CS0162 // 检测到无法访问的代码
         try
         {
+            UpdateService service = AppConfig.GetService<UpdateService>();
             if (TryShowSilentUpdateContent())
             {
                 // 与原先一致：展示更新内容后推迟约 5 分钟再检查新版本
-                _lastCheckUpdateTime = DateTimeOffset.Now - TimeSpan.FromMinutes(55);
+                service.PostponeCheck(TimeSpan.FromMinutes(5));
                 return;
             }
             if (!AppConfig.PendingSilentUpdateContent)
@@ -381,11 +388,10 @@ public sealed partial class MainView : UserControl
                 return;
             }
             DateTimeOffset now = DateTimeOffset.Now;
-            if (now - _lastCheckUpdateTime > TimeSpan.FromHours(1))
+            // 节流时钟放在 UpdateService 上，与后台常驻循环共用，两处不会在同一小时里各查一遍。
+            if (service.IsCheckDue)
             {
-                var service = AppConfig.GetService<UpdateService>();
                 var release = await service.CheckUpdateAsync(false);
-                _lastCheckUpdateTime = now;
                 if (release is null)
                 {
                     return;

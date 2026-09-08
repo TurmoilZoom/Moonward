@@ -68,6 +68,26 @@ internal class UpdateService
     /// </summary>
     private static readonly TimeSpan GitHubFallbackTimeout = TimeSpan.FromSeconds(30);
 
+    /// <summary>
+    /// 两次检查更新之间的最小间隔。主窗口与后台常驻循环共用同一个时钟（<see cref="IsCheckDue"/>），
+    /// 避免两处入口各按各的节流、在同一小时里各查一遍。
+    /// </summary>
+    public static readonly TimeSpan CheckInterval = TimeSpan.FromHours(1);
+
+    /// <summary>常驻循环启动后的缓冲，避开启动阶段的网络与磁盘高峰。</summary>
+    private static readonly TimeSpan ResidentStartupDelay = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// 上次向更新源发起检查的时刻（UTC ticks），0 表示尚未检查过。
+    /// 主窗口（UI 线程）与常驻循环（线程池）都会读写它，故用 <see cref="Interlocked"/> 存取——
+    /// <see cref="DateTimeOffset"/> 是多字段结构体，直接赋值可能被撕裂读成远未来的时刻，
+    /// 那样 <see cref="IsCheckDue"/> 会永远为 false，检查更新就此停摆。
+    /// </summary>
+    private long _lastCheckTicks;
+
+    /// <summary>常驻静默更新循环的启动标记，保证每个进程只启动一次。</summary>
+    private int _residentStarted;
+
 
 
     public static bool UpdateFinished { get; private set; }
@@ -93,6 +113,11 @@ internal class UpdateService
     /// 此时得到的 <see cref="UpdateInfo"/> 只能由 GitHub 源下载（Velopack 的资产与源强绑定）。
     /// </summary>
     public UpdateDownloadSource LastCheckSource { get; private set; } = UpdateDownloadSource.Cnb;
+
+    /// <summary>
+    /// 距上次检查是否已超过 <see cref="CheckInterval"/>。
+    /// </summary>
+    public bool IsCheckDue => DateTimeOffset.UtcNow.UtcTicks - Interlocked.Read(ref _lastCheckTicks) > CheckInterval.Ticks;
 
 
 
@@ -173,6 +198,9 @@ internal class UpdateService
     /// </summary>
     public async Task<UpdateInfo?> GetLatestVersionAsync(CancellationToken cancellation = default)
     {
+        // 进入即记时：非 Velopack 部署、断网或被限流同样要计入节流，
+        // 否则常驻循环会立刻重试、窗口每次激活也会重跑一遍。
+        Interlocked.Exchange(ref _lastCheckTicks, DateTimeOffset.UtcNow.UtcTicks);
         var manager = GetManager();
         if (!manager.IsInstalled)
         {
@@ -394,6 +422,75 @@ internal class UpdateService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Silent update");
+        }
+    }
+
+
+    /// <summary>
+    /// 把下一次检查推迟 <paramref name="delay"/>，用于刚展示过更新说明、不必立即再查的情形。
+    /// </summary>
+    /// <param name="delay">距下一次可检查的时长。</param>
+    public void PostponeCheck(TimeSpan delay)
+    {
+        Interlocked.Exchange(ref _lastCheckTicks, (DateTimeOffset.UtcNow - CheckInterval + delay).UtcTicks);
+    }
+
+
+    /// <summary>
+    /// 启动后台常驻的静默更新循环：仅托盘驻留（<c>--hide</c>）或主窗口长期最小化时，
+    /// 也按 <see cref="CheckInterval"/> 检查并后台下载更新。
+    /// <para>
+    /// 只下载、不弹窗——「展示更新说明」与「提示有新版本」仍归主窗口，窗口激活时才触发。
+    /// 幂等：多次调用只生效一次。
+    /// </para>
+    /// </summary>
+    public void StartResidentSilentUpdate()
+    {
+#if DEBUG || DONOT_CHECK_UPDATE
+        return;
+#endif
+#pragma warning disable CS0162 // 检测到无法访问的代码
+        if (Interlocked.Exchange(ref _residentStarted, 1) == 1)
+        {
+            return;
+        }
+        _ = Task.Run(RunResidentSilentUpdateLoopAsync);
+#pragma warning restore CS0162 // 检测到无法访问的代码
+    }
+
+
+    /// <summary>
+    /// 常驻静默更新循环：缓冲后每 <see cref="CheckInterval"/> 醒一次，到点且开启静默更新时检查并下载。
+    /// 单轮异常只记日志并排下一轮，不能让循环在本进程内静默死掉。
+    /// </summary>
+    private async Task RunResidentSilentUpdateLoopAsync()
+    {
+        await Task.Delay(ResidentStartupDelay).ConfigureAwait(false);
+        while (true)
+        {
+            try
+            {
+                // 已下载待安装，或不是 Velopack 部署（开发态 / 裸发布目录），再轮询也不会有结果。
+                if (UpdateFinished || !IsUpdaterAvailable)
+                {
+                    return;
+                }
+                // 两个开关都能在设置页随时改，故每轮重新判断。未开静默更新时后台查没有意义：
+                // 弹窗要等主窗口激活，那时 MainView 自己会查。
+                if (AppConfig.EnableUpdateNotification && AppConfig.EnableSilentUpdate && IsCheckDue)
+                {
+                    UpdateInfo? release = await CheckUpdateAsync().ConfigureAwait(false);
+                    if (release is not null)
+                    {
+                        await TryStartSilentUpdateAsync(release).ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Resident silent update");
+            }
+            await Task.Delay(CheckInterval).ConfigureAwait(false);
         }
     }
 

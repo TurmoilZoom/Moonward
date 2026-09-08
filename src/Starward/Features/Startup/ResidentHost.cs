@@ -5,6 +5,7 @@ using Starward.Features.GamepadControl;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Features.RPC;
 using Starward.Features.Setting;
+using Starward.Features.Update;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,14 +13,15 @@ using System.Threading.Tasks;
 namespace Starward.Features.Startup;
 
 /// <summary>
-/// 常驻实例的后台宿主：全局热键、手柄驱动、GameBar 引导键接管、RPC 环境下发、抽卡物品名缓存与自动签到常驻循环。
+/// 常驻实例的后台宿主：全局热键、手柄驱动、GameBar 引导键接管、RPC 环境下发、抽卡物品名缓存、自动签到常驻循环与后台静默更新。
 /// <para>
 /// 这些职责过去全挂在 <c>MainView_Loaded</c> 上，导致仅托盘驻留（<c>--hide</c>）或快捷方式启动时统统缺席
 /// —— 用户按 Alt+D 截不了图，手柄与引导键接管也不生效。现由系统托盘窗口（常驻实例中唯一必然存在
 /// 且永不销毁的窗口）统一拉起，与主窗口彻底解耦。
 /// </para>
 /// <para>
-/// 不含「检查更新 / 展示更新说明」：那一步要弹 UI，仍留在 <c>MainView</c>，随主窗口显示时触发。
+/// 含「后台检查并静默下载更新」，但不含弹窗：展示更新说明与新版本提示都要弹 UI，
+/// 仍留在 <c>MainView</c>，随主窗口激活时触发。
 /// </para>
 /// </summary>
 internal static class ResidentHost
@@ -51,6 +53,9 @@ internal static class ResidentHost
             // 启动后批量签到，并在进程常驻期间跨日再签（绝对到期 + 休眠唤醒补判）。
             AppConfig.GetService<AutoSignInService>().StartResident();
             AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
+            // 后台驻留期间也检查并静默下载更新：仅托盘驻留或主窗口长期最小化时，
+            // MainView 那条「窗口激活才查」的路径永远不会触发。
+            AppConfig.GetService<UpdateService>().StartResidentSilentUpdate();
             _ = InitializeGamepadAsync(dispatcherQueue);
         }
         catch (Exception ex)
