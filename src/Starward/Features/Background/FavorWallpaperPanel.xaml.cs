@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
@@ -47,11 +48,23 @@ public sealed partial class FavorWallpaperPanel : UserControl
 
     /// <summary>
     /// 绑定给 GridView 的卡片集合。**整体替换**，不要 Clear + 逐个 Add：
-    /// 逐个 Add 会给 GridView 发 N 次 CollectionChanged，每次都触发一轮测量/排布，
-    /// 五十多张卡时这就是「打开对话框那一下」的主要卡顿来源。
+    /// 逐个 Add 会给 GridView 发 N 次 CollectionChanged，每次都触发一轮测量/排布。
+    /// 首屏之外的部分由 <see cref="FillRemainingItems"/> 分帧补齐。
     /// </summary>
     [ObservableProperty]
     private ObservableCollection<FavorWallpaperView> items = [];
+
+
+    /// <summary>首屏同步放入的卡片数：约等于视口能显示的行数，多余的留给分帧填充。</summary>
+    private const int FirstFillCount = 12;
+
+
+    /// <summary>每一帧补充的卡片数。</summary>
+    private const int FillChunkSize = 12;
+
+
+    /// <summary>填充代次；每次重新绑定就 +1，让在飞的分帧填充自行作废。</summary>
+    private int _fillGeneration;
 
 
     private List<FavorWallpaperView> _favorViews = [];
@@ -129,6 +142,7 @@ public sealed partial class FavorWallpaperPanel : UserControl
         else
         {
             IsLoading = true;
+            _fillGeneration++;
             Items = [];
         }
 
@@ -384,10 +398,55 @@ public sealed partial class FavorWallpaperPanel : UserControl
     }
 
 
+    /// <summary>
+    /// 绑定当前模式的卡片。首屏只放 <see cref="FirstFillCount"/> 张，其余分帧补齐。
+    /// 实测每张卡 realize 约 6ms（构造 2.1 + x:Bind 更新 3.9），一次性塞五十多张会让
+    /// GridView 在同一帧 realize 近 30 张，也就是打开对话框时那一下 300ms 的阻塞；
+    /// 拆成几帧后总时间不变，但不再有单帧长卡顿。
+    /// </summary>
     private void BindCurrentModeItems()
     {
         List<FavorWallpaperView> source = IsMindscapeMode ? _mindscapeViews : _favorViews;
-        Items = new ObservableCollection<FavorWallpaperView>(source);
+        int generation = ++_fillGeneration;
+        var first = new ObservableCollection<FavorWallpaperView>();
+        int count = Math.Min(FirstFillCount, source.Count);
+        for (int i = 0; i < count; i++)
+        {
+            first.Add(source[i]);
+        }
+        Items = first;
+        if (count < source.Count)
+        {
+            FillRemainingItems(generation, source, count);
+        }
+    }
+
+
+    /// <summary>
+    /// 低优先级分帧补齐剩余卡片；期间若又切了模式或重新加载（代次变化）则放弃。
+    /// </summary>
+    /// <param name="generation">发起时的填充代次。</param>
+    /// <param name="source">完整卡片列表。</param>
+    /// <param name="start">本次要补充的起始下标。</param>
+    private void FillRemainingItems(int generation, List<FavorWallpaperView> source, int start)
+    {
+        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        {
+            if (generation != _fillGeneration)
+            {
+                return;
+            }
+            ObservableCollection<FavorWallpaperView> target = Items;
+            int end = Math.Min(start + FillChunkSize, source.Count);
+            for (int i = start; i < end; i++)
+            {
+                target.Add(source[i]);
+            }
+            if (end < source.Count)
+            {
+                FillRemainingItems(generation, source, end);
+            }
+        });
     }
 
 
@@ -395,7 +454,8 @@ public sealed partial class FavorWallpaperPanel : UserControl
     {
         string? currentBg = AppConfig.GetCustomBg(CurrentGameBiz);
         bool enabled = AppConfig.GetEnableCustomBg(CurrentGameBiz);
-        foreach (FavorWallpaperView item in Items)
+        // 遍历源列表而不是 Items：分帧填充期间 Items 还没放全，漏掉的卡状态会不对
+        foreach (FavorWallpaperView item in IsMindscapeMode ? _mindscapeViews : _favorViews)
         {
             string fileName = FavorWallpaperService.GetCacheFileName(item.Record);
             item.IsInUse = enabled && string.Equals(currentBg, fileName, StringComparison.OrdinalIgnoreCase);

@@ -53,10 +53,13 @@
             </Border.Background>
         </Border>
 
-        <Border Margin="0,8,8,0"
+        <!--  「使用中」徽标与强调色边框：整页只有一张卡命中，且几乎不翻转，延迟创建是纯赚  -->
+        <Border x:Name="Border_InUseBadge"
+                Margin="0,8,8,0"
                 Padding="6,2"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
+                x:Load="{x:Bind View.IsInUse, Mode=OneWay}"
                 Background="{ThemeResource SystemAccentColor}"
                 CornerRadius="4"
                 IsHitTestVisible="False"
@@ -101,7 +104,9 @@
             </Grid>
         </Button>
 
-        <Border BorderBrush="{ThemeResource SystemAccentColor}"
+        <Border x:Name="Border_InUseOutline"
+                x:Load="{x:Bind View.IsInUse, Mode=OneWay}"
+                BorderBrush="{ThemeResource SystemAccentColor}"
                 BorderThickness="2"
                 CornerRadius="8"
                 IsHitTestVisible="False"
