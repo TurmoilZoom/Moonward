@@ -597,27 +597,33 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
 
 
-            <!--  预下载  -->
-            <sfg:PreDownloadButton x:Name="Button_Predownload"
-                                   Grid.Column="0"
-                                   IsPredownloadFinished="{x:Bind IsPredownloadFinished}"
-                                   PredownloadCommand="{x:Bind PredownloadCommand}"
-                                   Visibility="{x:Bind IsPredownloadButtonEnabled}" />
+            <!--  预下载 + 游戏时间：整体右对齐紧贴开始游戏按钮。
+                  间距写在游戏时间的 Margin 上而非 StackPanel.Spacing / ColumnSpacing，
+                  这样游戏时间隐藏时不会留下空档，预下载直接贴住开始游戏按钮  -->
+            <StackPanel Grid.Column="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                <!--  预下载  -->
+                <sfg:PreDownloadButton x:Name="Button_Predownload"
+                                       IsPredownloadFinished="{x:Bind IsPredownloadFinished}"
+                                       PredownloadCommand="{x:Bind PredownloadCommand}"
+                                       Visibility="{x:Bind IsPredownloadButtonEnabled}" />
 
-            <!--  游戏时间  -->
-            <sfp:PlayTimeButton x:Name="Button_PlayTime"
-                                Grid.Column="1"
-                                CurrentGameBiz="{x:Bind CurrentGameBiz}"
-                                Visibility="{x:Bind EnablePlayTime, Mode=OneWay}" />
+                <!--  游戏时间  -->
+                <sfp:PlayTimeButton x:Name="Button_PlayTime"
+                                    Margin="12,0,0,0"
+                                    CurrentGameBiz="{x:Bind CurrentGameBiz}"
+                                    Visibility="{x:Bind EnablePlayTime, Mode=OneWay}" />
+            </StackPanel>
 
             <!--  启动游戏  -->
             <local:StartGameButton x:Name="Button_StartGame"
-                                   Grid.Column="2"
+                                   Grid.Column="1"
                                    HorizontalAlignment="Right"
                                    CurrentGameId="{x:Bind CurrentGameId}"
                                    GameCommand="{x:Bind ClickStartGameButtonCommand}"
@@ -629,12 +635,12 @@
             <!--  文字阴影  -->
             <Border x:Name="Border_TextShadowTarget"
                     Grid.Row="1"
-                    Grid.Column="2" />
+                    Grid.Column="1" />
 
 
             <!--  定位游戏  -->
             <TextBlock Grid.Row="1"
-                       Grid.Column="2"
+                       Grid.Column="1"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        cu:Effects.Shadow="{StaticResource TextShadow}"
@@ -648,7 +654,7 @@
 
             <!--  可移动存储设备未连接  -->
             <TextBlock Grid.Row="1"
-                       Grid.Column="2"
+                       Grid.Column="1"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        cu:Effects.Shadow="{StaticResource TextShadow}"
@@ -663,7 +669,7 @@
             <!--  DX12 选项  -->
             <Border Grid.Row="1"
                     Grid.Column="0"
-                    Grid.ColumnSpan="3"
+                    Grid.ColumnSpan="2"
                     Padding="10,0,10,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
