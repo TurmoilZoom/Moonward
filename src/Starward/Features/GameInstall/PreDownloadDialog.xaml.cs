@@ -149,8 +149,8 @@ public sealed partial class PreDownloadDialog : ContentDialog
             }
             if (_gameSophonPatchBuild is null && _gameSophonChunkBuild is null)
             {
-                GamePackage package = await _hoYoPlayService.GetGamePackageAsync(CurrentGameId);
-                if (package.PreDownload.Major is null)
+                GamePackage? package = await _hoYoPlayService.GetGamePackageAsync(CurrentGameId);
+                if (package?.PreDownload.Major is null)
                 {
                     _logger.LogWarning("PreDownloadMajor of ({GameBiz}) is null.", CurrentGameId.GameBiz);
                     TextBlock_PredownloadUnavailable.Visibility = Visibility.Visible;

@@ -11269,5 +11269,14 @@ namespace Starward.Language {
                 return ResourceManager.GetString("MapTool_Kongying", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 No installation package has been released for this game yet. 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_NoGamePackage {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_NoGamePackage", resourceCulture);
+            }
+        }
     }
 }

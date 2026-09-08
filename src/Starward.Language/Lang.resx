@@ -3952,4 +3952,7 @@ Repository:</value>
   <data name="MapTool_Kongying" xml:space="preserve">
     <value>Kongying Tavern</value>
   </data>
+  <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
+    <value>No installation package has been released for this game yet.</value>
+  </data>
 </root>

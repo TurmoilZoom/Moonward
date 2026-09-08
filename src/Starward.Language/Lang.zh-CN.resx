@@ -3951,4 +3951,7 @@
   <data name="MapTool_Kongying" xml:space="preserve">
     <value>空荧酒馆</value>
   </data>
+  <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
+    <value>该游戏尚未发布安装包</value>
+  </data>
 </root>

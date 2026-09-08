@@ -3863,4 +3863,7 @@
   <data name="MapTool_Official" xml:space="preserve"><value>공식 지도</value></data>
   <data name="MapTool_AppSample" xml:space="preserve"><value>AppSample</value></data>
   <data name="MapTool_Kongying" xml:space="preserve"><value>Kongying Tavern</value></data>
+  <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
+    <value>이 게임의 설치 패키지가 아직 배포되지 않았습니다.</value>
+  </data>
 </root>

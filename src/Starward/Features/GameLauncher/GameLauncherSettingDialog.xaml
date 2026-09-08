@@ -306,7 +306,9 @@
             </StackPanel>
 
             <!--  游戏包体  -->
-            <Pivot Grid.Row="1" Margin="0,16,0,0">
+            <Pivot x:Name="Pivot_GamePackages"
+                   Grid.Row="1"
+                   Margin="0,16,0,0">
 
                 <!--  大小 -->
                 <Pivot.RightHeader>
@@ -375,6 +377,17 @@
                 </PivotItem>
 
             </Pivot>
+
+            <!--  尚未发布安装包的游戏没有包体信息  -->
+            <TextBlock x:Name="TextBlock_NoGamePackage"
+                       Grid.Row="1"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.GameLauncherSettingDialog_NoGamePackage}"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       Visibility="Collapsed" />
         </Grid>
 
 

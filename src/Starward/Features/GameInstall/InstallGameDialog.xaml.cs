@@ -154,6 +154,7 @@ public sealed partial class InstallGameDialog : ContentDialog
             {
                 _gamePackage = await _hoYoPlayService.GetGamePackageAsync(CurrentGameId);
             }
+            _gamePackageLoaded = true;
             ComputePackageSize();
             CheckCanStartInstallation();
         }
@@ -207,6 +208,12 @@ public sealed partial class InstallGameDialog : ContentDialog
 
 
     private GameSophonChunkBuild? _gameSophonChunkBuild;
+
+
+    /// <summary>
+    /// 包体信息是否已拉取完成，用于区分「仍在加载」和「确实没有安装包」
+    /// </summary>
+    private bool _gamePackageLoaded;
 
 
     private string _selectPath;
@@ -329,6 +336,11 @@ public sealed partial class InstallGameDialog : ContentDialog
                         Button_StartInstallation.IsEnabled = true;
                     }
                 }
+            }
+            else if (_gamePackageLoaded)
+            {
+                // 已在启动器中展示、但尚未发布安装包的新游戏（如星布谷地、崩坏：因缘精灵）无法安装
+                ErrorMessage = Lang.GameLauncherSettingDialog_NoGamePackage;
             }
         }
         catch (Exception ex)

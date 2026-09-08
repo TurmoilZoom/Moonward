@@ -173,7 +173,11 @@ public class HoYoPlayService
 
 
 
-    public async Task<GamePackage> GetGamePackageAsync(GameId gameId, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// 游戏安装包信息
+    /// </summary>
+    /// <returns>尚未发布安装包的游戏（如已在启动器中展示但未上线的新游戏）不在接口返回中，此时为 null</returns>
+    public async Task<GamePackage?> GetGamePackageAsync(GameId gameId, CancellationToken cancellationToken = default)
     {
         if (!_memoryCache.TryGetValue($"{nameof(GamePackage)}_{gameId.Id}", out GamePackage? package))
         {
@@ -185,7 +189,7 @@ public class HoYoPlayService
             }
             package = list.FirstOrDefault(x => x.GameId == gameId);
         }
-        return package!;
+        return package;
     }
 
 

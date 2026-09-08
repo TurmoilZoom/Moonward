@@ -3863,4 +3863,7 @@ You are welcome to submit exported data to:</value>
   <data name="MapTool_Official" xml:space="preserve"><value>Mapa oficial</value></data>
   <data name="MapTool_AppSample" xml:space="preserve"><value>AppSample</value></data>
   <data name="MapTool_Kongying" xml:space="preserve"><value>Kongying Tavern</value></data>
+  <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
+    <value>Este juego aún no tiene un paquete de instalación publicado.</value>
+  </data>
 </root>

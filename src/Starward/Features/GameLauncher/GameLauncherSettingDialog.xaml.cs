@@ -553,8 +553,16 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     {
         try
         {
-            var gamePackage = await _hoyoPlayService.GetGamePackageAsync(CurrentGameId);
-            LatestVersion = gamePackage.Main.Major!.Version;
+            GamePackage? gamePackage = await _hoyoPlayService.GetGamePackageAsync(CurrentGameId);
+            if (gamePackage?.Main.Major is null)
+            {
+                // 已在启动器中展示、但尚未发布安装包的游戏（如星布谷地、崩坏：因缘精灵）不在 getGamePackages 的返回中，没有包体可展示
+                _logger.LogInformation("Game package is not available, gameBiz: {gameBiz}", CurrentGameBiz);
+                Pivot_GamePackages.Visibility = Visibility.Collapsed;
+                TextBlock_NoGamePackage.Visibility = Visibility.Visible;
+                return;
+            }
+            LatestVersion = gamePackage.Main.Major.Version;
             var list = GetGameResourcePackageGroups(gamePackage.Main);
             var sdk = await _hoyoPlayService.GetGameChannelSDKAsync(CurrentGameId);
             if (sdk is not null)

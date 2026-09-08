@@ -3862,4 +3862,7 @@
   <data name="MapTool_Official" xml:space="preserve"><value>公式マップ</value></data>
   <data name="MapTool_AppSample" xml:space="preserve"><value>AppSample</value></data>
   <data name="MapTool_Kongying" xml:space="preserve"><value>空荧酒場</value></data>
+  <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
+    <value>このゲームのインストールパッケージはまだ配信されていません。</value>
+  </data>
 </root>

@@ -3861,4 +3861,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="MapTool_Official" xml:space="preserve"><value>Offizielle Karte</value></data>
   <data name="MapTool_AppSample" xml:space="preserve"><value>AppSample</value></data>
   <data name="MapTool_Kongying" xml:space="preserve"><value>Kongying Tavern</value></data>
+  <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
+    <value>Für dieses Spiel wurde noch kein Installationspaket veröffentlicht.</value>
+  </data>
 </root>

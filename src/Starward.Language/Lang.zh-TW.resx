@@ -3863,4 +3863,7 @@
   <data name="MapTool_Official" xml:space="preserve"><value>官方地圖</value></data>
   <data name="MapTool_AppSample" xml:space="preserve"><value>AppSample</value></data>
   <data name="MapTool_Kongying" xml:space="preserve"><value>空荧酒館</value></data>
+  <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
+    <value>該遊戲尚未發布安裝包</value>
+  </data>
 </root>

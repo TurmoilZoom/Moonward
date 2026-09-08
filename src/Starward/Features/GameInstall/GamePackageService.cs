@@ -99,7 +99,7 @@ internal partial class GamePackageService
         else
         {
             package = await _hoYoPlayService.GetGamePackageAsync(gameId, cancellationToken);
-            if (package.PreDownload.Major is null)
+            if (package?.PreDownload.Major is null)
             {
                 return false;
             }

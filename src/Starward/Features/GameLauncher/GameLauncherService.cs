@@ -201,7 +201,11 @@ internal partial class GameLauncherService
         }
         else
         {
-            GamePackage package = await _hoYoPlayService.GetGamePackageAsync(gameId);
+            GamePackage? package = await _hoYoPlayService.GetGamePackageAsync(gameId);
+            if (package is null)
+            {
+                throw new ArgumentOutOfRangeException($"Game package is null ({gameId.Id}, {gameId.GameBiz}).");
+            }
             _ = Version.TryParse(package.Main.Major?.Version, out Version? latestVersion);
             _ = Version.TryParse(package.PreDownload.Major?.Version, out Version? predownloadVersion);
             return (latestVersion, predownloadVersion);

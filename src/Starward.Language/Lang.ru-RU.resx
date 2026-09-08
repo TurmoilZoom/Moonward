@@ -3883,4 +3883,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="MapTool_Official" xml:space="preserve"><value>Официальная карта</value></data>
   <data name="MapTool_AppSample" xml:space="preserve"><value>AppSample</value></data>
   <data name="MapTool_Kongying" xml:space="preserve"><value>Kongying Tavern</value></data>
+  <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
+    <value>Для этой игры ещё не выпущен установочный пакет.</value>
+  </data>
 </root>
