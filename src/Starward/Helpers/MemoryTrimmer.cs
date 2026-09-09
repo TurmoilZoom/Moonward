@@ -26,7 +26,7 @@ public static partial class MemoryTrimmer
     private static readonly TimeSpan DefaultDelay = TimeSpan.FromSeconds(3);
 
     /// <summary>两次回收的最小间隔，避免反复开合窗口时空转。</summary>
-    private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(5);
 
     /// <summary>上次回收完成的时间戳（<see cref="Environment.TickCount64"/>），0 表示还没回收过。</summary>
     private static long _lastTrimTick;
