@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Web.WebView2.Core;
 using Starward.Core.GameRecord.Passport;
+using Starward.Helpers;
 using Starward.Language;
 using System;
 using System.Threading;
@@ -160,6 +161,7 @@ internal static class GeetestVerifyPopup
             {
                 try { webView.CoreWebView2.WebMessageReceived -= OnMessage; } catch { }
             }
+            WebView2Helper.Close(webView);
             try { popup.IsOpen = false; } catch { }
             xamlRoot.Changed -= OnXamlRootChanged;
         }

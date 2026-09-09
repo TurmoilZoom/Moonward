@@ -17,6 +17,8 @@ public sealed partial class BattleChronicleWindow : WindowEx
     {
         this.InitializeComponent();
         InitializeWindow();
+        // UserControl.Unloaded 在窗口关闭时不一定触发，Closed 里显式关掉内嵌 WebView2
+        Closed += (_, _) => bbsWebBridge.CloseWebView();
     }
 
 

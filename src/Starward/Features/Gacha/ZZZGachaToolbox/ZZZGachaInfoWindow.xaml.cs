@@ -53,10 +53,14 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
     private const string Source_global = "https://act.hoyolab.com/zzz/gt/character-builder-h/index.html";
 
 
+    private bool _webviewClosed;
+
+
     public ZZZGachaInfoWindow()
     {
         this.InitializeComponent();
         InitializeWindow();
+        Closed += (_, _) => CloseWebView();
     }
 
 
@@ -83,8 +87,10 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
             RefreshGameRecordFetchAvailability();
             RefreshPublishButtons();
             await webview2.EnsureCoreWebView2Async();
+            if (WebView2Helper.CloseIfRequested(webview2, _webviewClosed)) return;
             coreWebView2 = webview2.CoreWebView2;
             coreWebView2.Profile.PreferredColorScheme = CoreWebView2PreferredColorScheme.Dark;
+            coreWebView2.WebResourceResponseReceived -= CoreWebView2_WebResourceResponseReceived;
             coreWebView2.WebResourceResponseReceived += CoreWebView2_WebResourceResponseReceived;
         }
         catch (Exception ex)
@@ -99,10 +105,7 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         RootGrid.Loaded -= RootGrid_Loaded;
         RootGrid.Unloaded -= RootGrid_Unloaded;
         GridView_Languages.SelectionChanged -= GridView_Languages_SelectionChanged;
-        if (coreWebView2 is not null)
-        {
-            coreWebView2.WebResourceResponseReceived -= CoreWebView2_WebResourceResponseReceived;
-        }
+        CloseWebView();
         cts.Cancel();
         GachaInfoResult.Clear();
         GachaInfoResult = null!;
@@ -110,6 +113,18 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         iconInfoDict = null!;
         itemListDict = null!;
         headers = null!;
+    }
+
+
+    private void CloseWebView()
+    {
+        _webviewClosed = true;
+        if (coreWebView2 is not null)
+        {
+            try { coreWebView2.WebResourceResponseReceived -= CoreWebView2_WebResourceResponseReceived; } catch { }
+            coreWebView2 = null!;
+        }
+        WebView2Helper.Close(webview2);
     }
 
 

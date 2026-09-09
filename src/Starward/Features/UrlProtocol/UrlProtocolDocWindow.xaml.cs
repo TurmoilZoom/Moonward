@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Web.WebView2.Core;
 using Starward.Frameworks;
+using Starward.Helpers;
 using Starward.Language;
 using Starward.Setup.Core;
 using System;
@@ -50,10 +51,18 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
     private readonly HttpClient _httpClient = AppConfig.GetService<HttpClient>();
 
 
+    private bool _webviewClosed;
+
+
     public UrlProtocolDocWindow()
     {
         InitializeComponent();
         InitializeWindow();
+        Closed += (_, _) =>
+        {
+            _webviewClosed = true;
+            WebView2Helper.Close(webview);
+        };
     }
 
 
@@ -99,6 +108,7 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
             webview.Visibility = Visibility.Collapsed;
 
             await webview.EnsureCoreWebView2Async();
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             string ua = webview.CoreWebView2.Settings.UserAgent;
             if (!ua.Contains("Moonward"))
             {
@@ -113,7 +123,9 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
             webview.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
 
             string markdown = await GetDocumentMarkdownAsync();
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             string html = await RenderMarkdownAsync(markdown);
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             webview.NavigateToString(html);
         }
         catch (COMException ex)

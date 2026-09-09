@@ -9,6 +9,7 @@ using Starward.Core;
 using Starward.Features;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Frameworks;
+using Starward.Helpers;
 using Starward.Language;
 using System;
 using System.Linq;
@@ -72,11 +73,40 @@ public sealed partial class LoginPage : PageBase
 
 
 
+    private bool _webviewClosed;
+
+
     protected override async void OnLoaded()
     {
         await InitializeCoreWebView();
     }
 
+
+    /// <summary>
+    /// 切游戏或离开登录页时立刻关掉 WebView2，避免 msedgewebview2.exe 等到 GC 才退。
+    /// </summary>
+    protected override void OnUnloaded()
+    {
+        CloseWebView();
+    }
+
+
+    private void CloseWebView()
+    {
+        _webviewClosed = true;
+        try
+        {
+            if (webview.CoreWebView2 is { } core)
+            {
+                core.NavigationStarting -= CoreWebView2_NavigationStarting;
+                core.NavigationCompleted -= CoreWebView2_NavigationCompleted;
+                core.SourceChanged -= CoreWebView2_SourceChanged;
+                core.HistoryChanged -= CoreWebView2_HistoryChanged;
+            }
+        }
+        catch { }
+        WebView2Helper.Close(webview);
+    }
 
 
     private async Task InitializeCoreWebView()
@@ -84,19 +114,27 @@ public sealed partial class LoginPage : PageBase
         try
         {
             await webview.EnsureCoreWebView2Async();
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             webview.CoreWebView2.Profile.PreferredColorScheme = CoreWebView2PreferredColorScheme.Dark;
             var manager = webview.CoreWebView2.CookieManager;
             var url = GetGameBizUrl();
             var cookies = await manager.GetCookiesAsync(url);
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             foreach (var item in cookies)
             {
                 manager.DeleteCookie(item);
             }
-            webview.CoreWebView2.Navigate(url);
-            webview.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
-            webview.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
-            webview.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
-            webview.CoreWebView2.HistoryChanged += CoreWebView2_HistoryChanged;
+            var core = webview.CoreWebView2;
+            core.Navigate(url);
+            core.NavigationStarting -= CoreWebView2_NavigationStarting;
+            core.NavigationStarting += CoreWebView2_NavigationStarting;
+            core.NavigationCompleted -= CoreWebView2_NavigationCompleted;
+            core.NavigationCompleted += CoreWebView2_NavigationCompleted;
+            core.SourceChanged -= CoreWebView2_SourceChanged;
+            core.SourceChanged += CoreWebView2_SourceChanged;
+            core.HistoryChanged -= CoreWebView2_HistoryChanged;
+            core.HistoryChanged += CoreWebView2_HistoryChanged;
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             FlyoutBase.ShowAttachedFlyout(Button_Finish);
         }
         catch (Exception ex)

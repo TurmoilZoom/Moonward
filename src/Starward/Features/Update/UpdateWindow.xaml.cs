@@ -10,6 +10,7 @@ using NuGet.Versioning;
 using Starward.Features.RPC;
 using Starward.Features.Setting;
 using Starward.Frameworks;
+using Starward.Helpers;
 using Starward.Setup.Core;
 using Starward.Setup.Core.Github;
 using Velopack;
@@ -48,6 +49,8 @@ public sealed partial class UpdateWindow : WindowEx
     /// 本窗口是否发起了下载；关闭时仅在此情况下取消，避免打断后台静默更新。
     /// </summary>
     private bool _startedDownloadInThisWindow;
+
+    private bool _webviewClosed;
 
     /// <summary>
     /// 静默更新内容窗口的起始版本（构造时快照）。避免启动检查随后把 <see cref="AppConfig.LastAppVersion"/> 写成当前版本后，发行说明区间为空。
@@ -213,6 +216,8 @@ public sealed partial class UpdateWindow : WindowEx
         }
         WeakReferenceMessenger.Default.UnregisterAll(this);
         this.Closed -= UpdateWindow_Closed;
+        _webviewClosed = true;
+        WebView2Helper.Close(webview);
     }
 
 
@@ -578,6 +583,7 @@ public sealed partial class UpdateWindow : WindowEx
             StackPanel_Error.Visibility = Visibility.Collapsed;
 
             await webview.EnsureCoreWebView2Async();
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             string ua = webview.CoreWebView2.Settings.UserAgent;
             if (!ua.Contains("Moonward"))
             {
@@ -590,7 +596,9 @@ public sealed partial class UpdateWindow : WindowEx
             webview.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
 
             string markdown = await GetReleaseContentMarkdownAsync();
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             string html = await RenderMarkdownAsync(markdown);
+            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
             webview.NavigateToString(html);
             if (NewVersion is null)
             {

@@ -66,6 +66,8 @@ public sealed partial class BBSWebBridge : UserControl
 
     private bool initialized = false;
 
+    private bool _webviewClosed;
+
 
 
     public GameBiz CurrentGameBiz { get; set; }
@@ -110,12 +112,34 @@ public sealed partial class BBSWebBridge : UserControl
     public event EventHandler<object> WebPageClosed;
 
 
+    /// <summary>
+    /// 关闭内嵌 WebView2，由宿主窗口 Closed 调用（UserControl.Unloaded 在窗口关闭时不一定触发）；可重复进入。
+    /// </summary>
+    public void CloseWebView()
+    {
+        _webviewClosed = true;
+        try
+        {
+            if (webview2.CoreWebView2 is { } core)
+            {
+                core.NavigationStarting -= Corewebview2_NavigationStarting;
+                core.DOMContentLoaded -= Corewebview2_DOMContentLoaded;
+                core.WebMessageReceived -= CoreWebView2_WebMessageReceived;
+                core.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
+                core.WebResourceRequested -= CoreWebView2_WebResourceRequested;
+            }
+        }
+        catch { }
+        WebView2Helper.Close(webview2);
+    }
+
+
 
     private async Task InitializeWebViewAsync()
     {
         try
         {
-            if (initialized)
+            if (_webviewClosed || initialized)
             {
                 return;
             }
@@ -128,6 +152,7 @@ public sealed partial class BBSWebBridge : UserControl
                 _gameRecordClient = AppConfig.GetService<HyperionClient>();
             }
             await webview2.EnsureCoreWebView2Async();
+            if (WebView2Helper.CloseIfRequested(webview2, _webviewClosed)) return;
             var coreWebView2 = webview2.CoreWebView2;
             coreWebView2.Settings.UserAgent = _gameRecordClient.UAContent;
 
@@ -162,7 +187,9 @@ public sealed partial class BBSWebBridge : UserControl
     {
         try
         {
+            if (_webviewClosed) return;
             await InitializeWebViewAsync();
+            if (_webviewClosed) return;
 
             var coreWebView2 = webview2.CoreWebView2;
             if (coreWebView2.Source is "about:blank" || force)
@@ -178,6 +205,7 @@ public sealed partial class BBSWebBridge : UserControl
                 }
 
                 await Task.Delay(60);
+                if (_webviewClosed) return;
                 ParseCookie();
                 InjectDeviceFpCookies();
                 string cookieDomain = CurrentGameBiz.IsGlobalServer() ? ".hoyolab.com" : ".mihoyo.com";
