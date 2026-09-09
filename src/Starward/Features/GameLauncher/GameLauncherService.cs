@@ -13,7 +13,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Starward.Features.GameLauncher;
@@ -131,11 +130,10 @@ internal partial class GameLauncherService
     /// </summary>
     /// <param name="gameId"></param>
     /// <param name="installPath"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<Version?> GetLocalGameVersionAsync(GameId gameId, string? installPath = null, CancellationToken cancellationToken = default)
+    public async Task<Version?> GetLocalGameVersionAsync(GameId gameId, string? installPath = null)
     {
-        return await GetLocalGameVersionAsync(gameId.GameBiz, installPath, cancellationToken);
+        return await GetLocalGameVersionAsync(gameId.GameBiz, installPath);
     }
 
 
@@ -145,9 +143,8 @@ internal partial class GameLauncherService
     /// </summary>
     /// <param name="gameBiz"></param>
     /// <param name="installPath"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<Version?> GetLocalGameVersionAsync(GameBiz gameBiz, string? installPath = null, CancellationToken cancellationToken = default)
+    public async Task<Version?> GetLocalGameVersionAsync(GameBiz gameBiz, string? installPath = null)
     {
         installPath ??= GetGameInstallPath(gameBiz);
         if (string.IsNullOrWhiteSpace(installPath))
@@ -157,7 +154,7 @@ internal partial class GameLauncherService
         var config = Path.Join(installPath, "config.ini");
         if (File.Exists(config))
         {
-            var str = await File.ReadAllTextAsync(config, cancellationToken);
+            var str = await File.ReadAllTextAsync(config);
             var matches = GameVersionRegex().Matches(str);
             Version? version = null;
             if (matches.Count > 0)
@@ -182,19 +179,18 @@ internal partial class GameLauncherService
     /// <summary>
     /// 最新游戏版本
     /// </summary>
-    /// <param name="gameId"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="gameBiz"></param>
     /// <returns></returns>
-    public async Task<(Version? Latest, Version? Predownload)> GetLatestGameVersionAsync(GameId gameId, CancellationToken cancellationToken = default)
+    public async Task<(Version? Latest, Version? Predownload)> GetLatestGameVersionAsync(GameId gameId)
     {
-        GameConfig? config = await _hoYoPlayService.GetGameConfigAsync(gameId, cancellationToken);
+        GameConfig? config = await _hoYoPlayService.GetGameConfigAsync(gameId);
         if (config is null)
         {
             throw new ArgumentOutOfRangeException($"Game config is null ({gameId.Id}, {gameId.GameBiz}).");
         }
         if (config.DefaultDownloadMode is DownloadMode.DOWNLOAD_MODE_CHUNK or DownloadMode.DOWNLOAD_MODE_LDIFF)
         {
-            GameBranch? gameBranch = await _hoYoPlayService.GetGameBranchAsync(gameId, cancellationToken);
+            GameBranch? gameBranch = await _hoYoPlayService.GetGameBranchAsync(gameId);
             if (gameBranch is null)
             {
                 throw new ArgumentOutOfRangeException($"Game branch is null ({gameId.Id}, {gameId.GameBiz}).");
@@ -205,7 +201,7 @@ internal partial class GameLauncherService
         }
         else
         {
-            GamePackage? package = await _hoYoPlayService.GetGamePackageAsync(gameId, cancellationToken);
+            GamePackage? package = await _hoYoPlayService.GetGamePackageAsync(gameId);
             if (package is null)
             {
                 throw new ArgumentOutOfRangeException($"Game package is null ({gameId.Id}, {gameId.GameBiz}).");
@@ -223,14 +219,13 @@ internal partial class GameLauncherService
     /// 游戏进程名，带 .exe 扩展名
     /// </summary>
     /// <param name="gameId"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<string> GetGameExeNameAsync(GameId gameId, CancellationToken cancellationToken = default)
+    public async Task<string> GetGameExeNameAsync(GameId gameId)
     {
         string? name = GetGameExeName(gameId.GameBiz);
         if (string.IsNullOrWhiteSpace(name))
         {
-            var config = await _hoYoPlayService.GetGameConfigAsync(gameId, cancellationToken);
+            var config = await _hoYoPlayService.GetGameConfigAsync(gameId);
             name = config?.ExeFileName;
         }
         return name ?? throw new ArgumentOutOfRangeException($"Unknown game ({gameId.Id}, {gameId.GameBiz}).");
@@ -265,16 +260,15 @@ internal partial class GameLauncherService
     /// <summary>
     /// 游戏进程文件是否存在
     /// </summary>
-    /// <param name="gameId"></param>
+    /// <param name="biz"></param>
     /// <param name="installPath"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<bool> IsGameExeExistsAsync(GameId gameId, string? installPath = null, CancellationToken cancellationToken = default)
+    public async Task<bool> IsGameExeExistsAsync(GameId gameId, string? installPath = null)
     {
         installPath ??= GetGameInstallPath(gameId);
         if (!string.IsNullOrWhiteSpace(installPath))
         {
-            var exe = Path.Join(installPath, await GetGameExeNameAsync(gameId, cancellationToken));
+            var exe = Path.Join(installPath, await GetGameExeNameAsync(gameId));
             return File.Exists(exe);
         }
         return false;
@@ -286,13 +280,11 @@ internal partial class GameLauncherService
     /// 获取游戏进程
     /// </summary>
     /// <param name="gameId"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<Process?> GetGameProcessAsync(GameId gameId, CancellationToken cancellationToken = default)
+    public async Task<Process?> GetGameProcessAsync(GameId gameId)
     {
         int currentSessionId = Process.GetCurrentProcess().SessionId;
-        var name = (await GetGameExeNameAsync(gameId, cancellationToken)).Replace(".exe", "");
-        cancellationToken.ThrowIfCancellationRequested();
+        var name = (await GetGameExeNameAsync(gameId)).Replace(".exe", "");
         return Process.GetProcessesByName(name).Where(x => x.SessionId == currentSessionId && !IsProcessPending(x)).FirstOrDefault();
     }
 
@@ -313,7 +305,7 @@ internal partial class GameLauncherService
             }
             foreach (ProcessThread thread in process.Threads)
             {
-                if (thread.ThreadState is not System.Diagnostics.ThreadState.Wait)
+                if (thread.ThreadState is not ThreadState.Wait)
                 {
                     return false;
                 }
