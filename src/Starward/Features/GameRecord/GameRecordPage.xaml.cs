@@ -48,6 +48,8 @@ public sealed partial class GameRecordPage : PageBase
     public GameRecordPage()
     {
         this.InitializeComponent();
+        // NavigationView Left 模式默认展开；若上次收起，须在首次布局前关掉，避免先闪一整栏再收。
+        ApplyToolboxPaneState();
     }
 
 
@@ -101,15 +103,8 @@ public sealed partial class GameRecordPage : PageBase
         // 附加与「设置」页一致的流体导航动画效果（必须在 Loaded 后，视觉树就绪）。
         _navHoverEffect.Attach(NavigationView_Toolbox, NavIndicatorHost, _logger);
 
-        // 恢复上次工具箱左侧面板（角色列表+功能菜单）的展开状态。
-        if (AppConfig.HoyolabToolboxPaneOpen)
-        {
-            OpenNavigationViewPane();
-        }
-        else
-        {
-            CloseNavigationViewPane();
-        }
+        // 模板应用后可能把 Pane 打回默认展开，再同步一次上次收起/展开状态。
+        ApplyToolboxPaneState();
 
         // 注册跨组件消息：角色变更时刷新列表，验证账号时弹出战绩窗口。
         WeakReferenceMessenger.Default.Register<GameRecordRoleChangedMessage>(this, (r, m) =>
@@ -259,6 +254,23 @@ public sealed partial class GameRecordPage : PageBase
     private void Border_Avatar_2_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
     {
         OpenNavigationViewPane();
+    }
+
+
+    /// <summary>
+    /// 按设置恢复工具箱左侧面板展开/收起，须在首次绘制前调用以免闪一下。
+    /// 内部 Open/Close 会把状态回写设置；此处读写同值（写同值不落库），重复调用无副作用。
+    /// </summary>
+    private void ApplyToolboxPaneState()
+    {
+        if (AppConfig.HoyolabToolboxPaneOpen)
+        {
+            OpenNavigationViewPane();
+        }
+        else
+        {
+            CloseNavigationViewPane();
+        }
     }
 
 
