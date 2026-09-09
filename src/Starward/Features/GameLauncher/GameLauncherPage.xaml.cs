@@ -69,6 +69,9 @@ public sealed partial class GameLauncherPage : PageBase
 
     private bool _rightToolbarInitialized;
 
+    /// <summary>已按窗口尺寸恢复位置并显示；此前 Opacity=0，避免 Transform 原点在左上时首帧闪一下。</summary>
+    private bool _rightToolbarLayoutRevealed;
+
 
     public GameLauncherPage()
     {
@@ -1588,12 +1591,22 @@ public sealed partial class GameLauncherPage : PageBase
         Border_RightToolbar.AddHandler(UIElement.PointerReleasedEvent, _rightToolbarPointerReleasedHandler, handledEventsToo: true);
         Border_RightToolbar.AddHandler(UIElement.PointerCanceledEvent, _rightToolbarPointerCanceledHandler, handledEventsToo: true);
         Border_RightToolbar.AddHandler(UIElement.PointerCaptureLostEvent, _rightToolbarPointerCaptureLostHandler, handledEventsToo: true);
+        // 有宽度则立刻定位；否则等 SizeChanged。Low 队列只做 Flyout 挂接与兜底，避免再露出左上角默认位移。
+        TryRevealRightToolbarLayout();
         DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
         {
+            // 回调可能晚于 OnUnloaded 才跑：那时重挂 Flyout 会留下要等下次 teardown 才摘的处理器，
+            // 还会把 _rightToolbarLayoutRevealed 置回 true，导致同一实例再进页时跳过位置恢复。
+            if (!_rightToolbarInitialized)
+            {
+                return;
+            }
             EnsureRightToolbarFlyoutHooks();
-            RestoreRightToolbarLayout();
-            UpdateRightToolbarPopupSide();
-            TryShowRightToolbarDragTip();
+            // 尺寸未就绪时不弹引导：TryShowRightToolbarDragTip 会先抑制 Tooltip，而内层拿不到高度直接返回，抑制就留着了。
+            if (TryRevealRightToolbarLayout())
+            {
+                TryShowRightToolbarDragTip();
+            }
         });
     }
 
@@ -1605,7 +1618,11 @@ public sealed partial class GameLauncherPage : PageBase
     {
         // 离开页面时持久化当前布局；未关掉的引导下次再出。
         DismissRightToolbarDragTip(markSeen: false);
-        SaveRightToolbarLayout();
+        // 未 Restore 前 _rightToolbarX/Y 仍是 0，不能写回，否则会把上次位置覆盖成左上角。
+        if (_rightToolbarLayoutRevealed)
+        {
+            SaveRightToolbarLayout();
+        }
         _rightToolbarCollapseTimer.Tick -= RightToolbarCollapseTimer_Tick;
         _rightToolbarCollapseTimer.Stop();
         _rightToolbarHeightStoryboard?.Stop();
@@ -1637,6 +1654,9 @@ public sealed partial class GameLauncherPage : PageBase
         }
         _rightToolbarHookedFlyouts.Clear();
         _rightToolbarInitialized = false;
+        _rightToolbarLayoutRevealed = false;
+        Border_RightToolbar.Opacity = 0;
+        Border_RightToolbar.IsHitTestVisible = false;
     }
 
 
@@ -1647,6 +1667,15 @@ public sealed partial class GameLauncherPage : PageBase
     {
         if (e.NewSize.Width <= 0 || e.NewSize.Height <= 0)
         {
+            return;
+        }
+
+        if (!_rightToolbarLayoutRevealed)
+        {
+            if (TryRevealRightToolbarLayout())
+            {
+                TryShowRightToolbarDragTip();
+            }
             return;
         }
 
@@ -2248,6 +2277,32 @@ public sealed partial class GameLauncherPage : PageBase
     #region Position / Dock
 
 
+    /// <summary>
+    /// 在 RootGrid 已有有效尺寸后恢复位置并显示工具栏。
+    /// 未定位前 XAML 原点在左上，不能露出。
+    /// </summary>
+    /// <returns>已显示或本次成功恢复为 <see langword="true"/>；窗口尺寸尚未就绪为 <see langword="false"/>。</returns>
+    private bool TryRevealRightToolbarLayout()
+    {
+        if (_rightToolbarLayoutRevealed)
+        {
+            return true;
+        }
+
+        if (RootGrid.ActualWidth <= 0 || RootGrid.ActualHeight <= 0)
+        {
+            return false;
+        }
+
+        RestoreRightToolbarLayout();
+        UpdateRightToolbarPopupSide();
+        Border_RightToolbar.Opacity = 1;
+        Border_RightToolbar.IsHitTestVisible = true;
+        _rightToolbarLayoutRevealed = true;
+        return true;
+    }
+
+
     /// <summary>默认放在窗口右上（对齐原 Margin 右 12、上 48）。</summary>
     private void PlaceRightToolbarDefaultPosition()
     {
@@ -2718,6 +2773,11 @@ public sealed partial class GameLauncherPage : PageBase
     }
 
 
+    /// <summary>
+    /// 取工具栏宽度。首次布局前（OnLoaded 同步恢复位置时）Border 还没测量，只能按
+    /// 「按钮都是 <see cref="RightToolbarButtonSize"/> 宽」估算；若以后放进非该宽度的按钮，首次定位会偏。
+    /// </summary>
+    /// <returns>实际宽度，或未测量时的估算宽度。</returns>
     private double MeasureRightToolbarWidth()
     {
         double padding = Border_RightToolbar.Padding.Left + Border_RightToolbar.Padding.Right;
