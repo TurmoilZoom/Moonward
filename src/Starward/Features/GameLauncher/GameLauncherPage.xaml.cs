@@ -32,8 +32,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Storage;
@@ -71,6 +71,18 @@ public sealed partial class GameLauncherPage : PageBase
 
     /// <summary>已按窗口尺寸恢复位置并显示；此前 Opacity=0，避免 Transform 原点在左上时首帧闪一下。</summary>
     private bool _rightToolbarLayoutRevealed;
+
+    /// <summary>
+    /// 本页加载期间的取消源。切游戏 Navigate 卸页时 Cancel，打断版本检查 / 区服 / 背景列表的出网请求。
+    /// </summary>
+    private CancellationTokenSource? _loadCts;
+
+    /// <summary>
+    /// 卸页后为已取消，避免即发即忘的初始化再写 UI 或改共享 <see cref="GameId"/>。
+    /// <see cref="OnLoaded"/> 之前同样为已取消（此时 <see cref="_loadCts"/> 尚为 null），
+    /// 因此只在页面已加载的生命周期内取用，之外拿到的活儿会被静默跳过。
+    /// </summary>
+    private CancellationToken LoadCancellationToken => _loadCts?.Token ?? new CancellationToken(canceled: true);
 
 
     public GameLauncherPage()
@@ -114,6 +126,8 @@ public sealed partial class GameLauncherPage : PageBase
 
     protected override void OnLoaded()
     {
+        _loadCts = new CancellationTokenSource();
+        CancellationToken cancellationToken = _loadCts.Token;
         InitializeGameFeature();
         CheckGameVersion();
         UpdateGameInstallTask();
@@ -122,8 +136,8 @@ public sealed partial class GameLauncherPage : PageBase
         Border_SwitchBackgroundImage.Visibility = Visibility.Visible;
         SetBottomToolbarRevealed(AppConfig.ToolbarPinned);
         InitializeRightToolbarCollapse();
-        _ = InitializeGameServerAsync();
-        _ = InitializeBackgameImageSwitcherAsync();
+        _ = InitializeGameServerAsync(cancellationToken);
+        _ = InitializeBackgameImageSwitcherAsync(cancellationToken);
         WeakReferenceMessenger.Default.Register<GameInstallPathChangedMessage>(this, OnGameInstallPathChanged);
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, OnMainWindowStateChanged);
         WeakReferenceMessenger.Default.Register<GameStartedMessage>(this, OnGameStarted);
@@ -137,9 +151,15 @@ public sealed partial class GameLauncherPage : PageBase
 
     protected override void OnUnloaded()
     {
+        // 只 Cancel 不 Dispose：HttpClient 会在 token 上 Register，Dispose 后可能变成 ObjectDisposedException 而不是取消。
+        _loadCts?.Cancel();
+        _loadCts = null;
         WeakReferenceMessenger.Default.UnregisterAll(this);
         _dispatchTimer.Tick -= UpdateGameInstallTaskProgress;
         _dispatchTimer.Stop();
+        // 运行中的 System.Timers.Timer 由计时器队列持有，Elapsed 闭包又捕获了本页，
+        // 不停表则切游戏后旧页会被长期 root；游戏退出检测另由 RunningGameService 负责，与本表无关。
+        processTimer?.Stop();
         TeardownRightToolbarCollapse();
         BackgroundImages = null!;
     }
@@ -227,20 +247,22 @@ public sealed partial class GameLauncherPage : PageBase
     /// <summary>
     /// 初始化区服选项，仅崩坏三国际服使用
     /// </summary>
+    /// <param name="cancellationToken">页卸载时取消，避免改写共享 <see cref="GameId"/>。</param>
     /// <returns></returns>
-    private async Task InitializeGameServerAsync()
+    private async Task InitializeGameServerAsync(CancellationToken cancellationToken)
     {
         try
         {
             GameInfo? gameInfo;
             if (CurrentGameBiz == GameBiz.bh3_global)
             {
-                gameInfo = await _hoYoPlayService.GetGameInfoAsync(GameId.FromGameBiz(GameBiz.bh3_global)!);
+                gameInfo = await _hoYoPlayService.GetGameInfoAsync(GameId.FromGameBiz(GameBiz.bh3_global)!, cancellationToken);
             }
             else
             {
-                gameInfo = await _hoYoPlayService.GetGameInfoAsync(CurrentGameId);
+                gameInfo = await _hoYoPlayService.GetGameInfoAsync(CurrentGameId, cancellationToken);
             }
+            cancellationToken.ThrowIfCancellationRequested();
             if (gameInfo?.GameServerConfigs?.Count > 0)
             {
                 GameServers = gameInfo.GameServerConfigs;
@@ -257,6 +279,10 @@ public sealed partial class GameLauncherPage : PageBase
                     }
                 }
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // 切游戏卸页后取消，无需记录
         }
         catch (Exception ex)
         {
@@ -337,10 +363,17 @@ public sealed partial class GameLauncherPage : PageBase
     }
 
 
+    /// <summary>
+    /// 检查本地安装状态与最新版本，据此决定开始游戏按钮的状态。
+    /// 只能在页面已加载的生命周期内调用（<see cref="OnLoaded"/> 之后、<see cref="OnUnloaded"/> 之前）：
+    /// 之外取到的 <see cref="LoadCancellationToken"/> 已是取消态，整个方法会静默跳过且不留日志。
+    /// </summary>
     private async void CheckGameVersion()
     {
+        CancellationToken cancellationToken = LoadCancellationToken;
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             GameInstallPath = GameLauncherService.GetGameInstallPath(CurrentGameId, out bool storageRemoved);
             IsInstallPathRemovableTipEnabled = storageRemoved;
             if (GameInstallPath is null || storageRemoved)
@@ -348,8 +381,10 @@ public sealed partial class GameLauncherPage : PageBase
                 GameState = GameState.InstallGame;
                 return;
             }
-            isGameExeExists = await _gameLauncherService.IsGameExeExistsAsync(CurrentGameId);
-            localGameVersion = await _gameLauncherService.GetLocalGameVersionAsync(CurrentGameId);
+            isGameExeExists = await _gameLauncherService.IsGameExeExistsAsync(CurrentGameId, cancellationToken: cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            localGameVersion = await _gameLauncherService.GetLocalGameVersionAsync(CurrentGameId, cancellationToken: cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             if (isGameExeExists && localGameVersion != null)
             {
                 GameState = GameState.StartGame;
@@ -359,8 +394,10 @@ public sealed partial class GameLauncherPage : PageBase
                 GameState = GameState.ResumeDownload;
                 return;
             }
-            await CheckGameRunningAsync();
-            (latestGameVersion, predownloadGameVersion) = await _gameLauncherService.GetLatestGameVersionAsync(CurrentGameId);
+            await CheckGameRunningAsync(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            (latestGameVersion, predownloadGameVersion) = await _gameLauncherService.GetLatestGameVersionAsync(CurrentGameId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             if (latestGameVersion > localGameVersion)
             {
                 GameState = GameState.UpdateGame;
@@ -369,9 +406,14 @@ public sealed partial class GameLauncherPage : PageBase
             if (predownloadGameVersion > localGameVersion)
             {
                 IsPredownloadButtonEnabled = true;
-                IsPredownloadFinished = await _gamePackageService.CheckPreDownloadFinishedAsync(CurrentGameId);
+                IsPredownloadFinished = await _gamePackageService.CheckPreDownloadFinishedAsync(CurrentGameId, cancellationToken: cancellationToken);
             }
-            _ = CheckDX12ConfigAsync();
+            cancellationToken.ThrowIfCancellationRequested();
+            _ = CheckDX12ConfigAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // 切游戏卸页后取消，无需记录
         }
         catch (Exception ex)
         {
@@ -384,24 +426,31 @@ public sealed partial class GameLauncherPage : PageBase
     /// <summary>
     /// 检查 DX12 配置
     /// </summary>
+    /// <param name="cancellationToken">页卸载时取消。</param>
     /// <returns></returns>
-    private async Task CheckDX12ConfigAsync()
+    private async Task CheckDX12ConfigAsync(CancellationToken cancellationToken)
     {
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             EnableDX12 = AppConfig.GetEnableDX12(CurrentGameBiz);
             if (EnableDX12)
             {
                 IsDX12OptionVisible = true;
             }
 
-            List<GameDXConfig> dxConfigs = await _hoYoPlayService.GetGameDXConfigsAsync([CurrentGameId]);
+            List<GameDXConfig> dxConfigs = await _hoYoPlayService.GetGameDXConfigsAsync([CurrentGameId], cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             _dxConfig = dxConfigs.FirstOrDefault(x => x.GameId == CurrentGameId);
 
             if (_dxConfig?.EnableDXSwitch is true)
             {
                 IsDX12OptionVisible = true;
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // 切游戏卸页后取消，无需记录
         }
         catch (Exception ex)
         {
@@ -510,7 +559,7 @@ public sealed partial class GameLauncherPage : PageBase
             }
             else if (GameState is GameState.StartGame && GameProcess is null)
             {
-                await CheckGameRunningAsync();
+                await CheckGameRunningAsync(LoadCancellationToken);
             }
         }
         catch { }
@@ -541,7 +590,7 @@ public sealed partial class GameLauncherPage : PageBase
 
 
 
-    private Timer processTimer;
+    private System.Timers.Timer processTimer;
 
 
     [ObservableProperty]
@@ -575,11 +624,18 @@ public sealed partial class GameLauncherPage : PageBase
     public string? RunningGameTime { get; set => SetProperty(ref field, value); }
 
 
-    private async Task<bool> CheckGameRunningAsync()
+    /// <summary>
+    /// 检测当前游戏进程是否在运行，并更新按钮状态与计时。
+    /// </summary>
+    /// <param name="cancellationToken">页卸载时取消，避免给已卸页写 <see cref="GameState"/>。</param>
+    /// <returns>游戏正在运行时为 <see langword="true"/>。</returns>
+    private async Task<bool> CheckGameRunningAsync(CancellationToken cancellationToken)
     {
         try
         {
-            GameProcess = await _gameLauncherService.GetGameProcessAsync(CurrentGameId);
+            cancellationToken.ThrowIfCancellationRequested();
+            GameProcess = await _gameLauncherService.GetGameProcessAsync(CurrentGameId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             if (GameProcess != null)
             {
                 GameState = GameState.GameIsRunning;
@@ -587,6 +643,10 @@ public sealed partial class GameLauncherPage : PageBase
                 _logger.LogInformation("Game is running ({name}, {pid})", GameProcess.ProcessName, GameProcess.Id);
                 return true;
             }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch { }
         return false;
@@ -610,7 +670,7 @@ public sealed partial class GameLauncherPage : PageBase
             {
                 return;
             }
-            await CheckGameRunningAsync();
+            await CheckGameRunningAsync(LoadCancellationToken);
         }
         catch { }
     }
@@ -1083,7 +1143,7 @@ public sealed partial class GameLauncherPage : PageBase
     {
         if (message.GameBackground is null)
         {
-            _ = InitializeBackgameImageSwitcherAsync();
+            _ = InitializeBackgameImageSwitcherAsync(LoadCancellationToken);
         }
     }
 
@@ -1125,19 +1185,26 @@ public sealed partial class GameLauncherPage : PageBase
     }
 
 
-    private async Task InitializeBackgameImageSwitcherAsync()
+    /// <summary>
+    /// 拉取当前游戏背景列表，刷新底栏页码指示器。
+    /// </summary>
+    /// <param name="cancellationToken">页卸载时取消，避免给已卸页写背景列表。</param>
+    private async Task InitializeBackgameImageSwitcherAsync(CancellationToken cancellationToken)
     {
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             CanStopVideo = false;
-            BackgroundImages = await _backgroundService.GetGameBackgroundsAsync(CurrentGameId);
+            BackgroundImages = await _backgroundService.GetGameBackgroundsAsync(CurrentGameId, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             // 工具栏始终可用（承载「显示游戏公告」开关等），仅页码指示器与分隔符随是否多图显隐。
             CanSwitchBackgroundImage = BackgroundImages.Count > 1;
             Border_SwitchBackgroundImage.Visibility = Visibility.Visible;
             SetBottomToolbarRevealed(AppConfig.ToolbarPinned);
             if (CanSwitchBackgroundImage)
             {
-                GameBackground? currentBackground = await _backgroundService.GetSuggestedGameBackgroundAsync(CurrentGameId);
+                GameBackground? currentBackground = await _backgroundService.GetSuggestedGameBackgroundAsync(CurrentGameId, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
                 if (currentBackground != null && BackgroundImages.FirstOrDefault(x => x.Id == currentBackground.Id) is GameBackground current)
                 {
                     currentBackgroundImageIndex = Math.Clamp(BackgroundImages.IndexOf(current), 0, BackgroundImages.Count - 1);
@@ -1150,6 +1217,10 @@ public sealed partial class GameLauncherPage : PageBase
                     }
                 }
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // 切游戏卸页后取消，无需记录
         }
         catch (Exception ex)
         {
