@@ -15,7 +15,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Timers;
 
 
 namespace Starward;
@@ -32,18 +31,13 @@ public partial class App : Application
     private readonly DispatcherQueue _uiDispatcherQueue;
 
     /// <summary>
-    /// 定期触发 GC 的定时器，间隔 60 秒，用于缓解长时间运行时的内存占用。
-    /// </summary>
-    private readonly Timer _gcTimer = new(TimeSpan.FromSeconds(60));
-
-    /// <summary>
     /// 获取当前 <see cref="App"/> 实例（强类型封装 <see cref="Application.Current"/>）。
     /// </summary>
     public static new App Current => (App)Application.Current;
 
 
     /// <summary>
-    /// 初始化应用程序：加载 XAML 资源、设置默认主题、注册全局异常处理与 GC 定时器。
+    /// 初始化应用程序：加载 XAML 资源、设置默认主题、注册全局异常处理。
     /// </summary>
     public App()
     {
@@ -51,7 +45,6 @@ public partial class App : Application
         RequestedTheme = ApplicationTheme.Dark;
         _uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         UnhandledException += App_UnhandledException;
-        _gcTimer.Elapsed += (_, _) => GC.Collect();
     }
 
 
