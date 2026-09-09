@@ -20,6 +20,11 @@
 
 
         <Grid Name="Grid_Update" Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
             <StackPanel Spacing="8">
 
@@ -108,8 +113,8 @@
 
 
             <!--  下载进度条  -->
-            <Grid Margin="0,0,0,48"
-                  VerticalAlignment="Bottom"
+            <Grid Grid.Row="1"
+                  Margin="0,16,0,8"
                   RowSpacing="4">
                 <Grid.RowDefinitions>
                     <RowDefinition />
@@ -136,15 +141,13 @@
                            Text="{x:Bind ErrorMessage}"
                            TextWrapping="Wrap"
                            Visibility="{x:Bind local:UpdateWindow.StringToVisibility(ErrorMessage)}" />
-                <!--  防止内容隐藏后改变布局  -->
-                <TextBlock Grid.Row="2" />
             </Grid>
 
 
 
             <!--  更新按键  -->
-            <StackPanel HorizontalAlignment="Left"
-                        VerticalAlignment="Bottom"
+            <StackPanel Grid.Row="2"
+                        HorizontalAlignment="Left"
                         Orientation="Horizontal"
                         Spacing="24">
 

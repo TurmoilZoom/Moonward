@@ -114,43 +114,49 @@ public sealed partial class UpdateWindow : WindowEx
         SystemBackdrop = new DesktopAcrylicBackdrop();
         AdaptTitleBarButtonColorToActuallTheme();
         SetIcon();
+        if (AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.IsMaximizable = false;
+        }
     }
 
 
 
+    /// <summary>
+    /// 把更新窗口放到当前工作区居中，并限制为明显小于主窗口的默认尺寸。
+    /// 小屏 / 高 DPI 时按原比例缩小到工作区宽 80% / 高 90% 以内，避免铺满屏幕或把横窗翻成竖窗。
+    /// </summary>
     private void CenterInScreen()
     {
         RectInt32 workArea = GetDisplayAreaForCentering().WorkArea;
-        int w;
-        int h;
+        int widthDip;
+        int heightDip;
         if (NewVersion is null)
         {
             Grid_Update.Visibility = Visibility.Collapsed;
             Title = $"Moonward · {Lang.UpdateContentWindow_RecentlyUpdatedContent}";
-            h = (int)(workArea.Height * 0.95);
-            w = (int)(h / 4.0 * 3.0);
-            if (w > workArea.Width)
-            {
-                w = (int)(workArea.Width * 0.95);
-                h = (int)(w * 4.0 / 3.0);
-            }
+            widthDip = 800;
+            heightDip = 700;
         }
         else
         {
             Button_RemindLatter.Visibility = Visibility.Collapsed;
-            w = (int)(1000 * UIScale);
-            h = (int)(w / 4.0 * 3.0);
-            if (w > workArea.Width || h > workArea.Height)
-            {
-                h = (int)(workArea.Height * 0.9);
-                w = (int)(h / 4.0 * 3.0);
-                if (w > workArea.Width)
-                {
-                    w = (int)(workArea.Width * 0.9);
-                    h = (int)(w * 4.0 / 3.0);
-                }
-            }
+            widthDip = 880;
+            heightDip = 600;
         }
+
+        double scale = UIScale;
+        int w = (int)(widthDip * scale);
+        int h = (int)(heightDip * scale);
+        int maxW = (int)(workArea.Width * 0.8);
+        int maxH = (int)(workArea.Height * 0.9);
+        if (w > maxW || h > maxH)
+        {
+            double fit = Math.Min((double)maxW / w, (double)maxH / h);
+            w = Math.Max(1, (int)(w * fit));
+            h = Math.Max(1, (int)(h * fit));
+        }
+
         int x = workArea.X + (workArea.Width - w) / 2;
         int y = workArea.Y + (workArea.Height - h) / 2;
         AppWindow.MoveAndResize(new RectInt32(x, y, w, h));
