@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Starward.Features.GameRecord.SignIn;
@@ -8,11 +9,15 @@ using Starward.Features.Overlay;
 using Starward.Features.Screenshot;
 using Starward.Features.Setting;
 using Starward.Features.Startup;
+using Starward.Features.Update;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
+using System.Threading.Tasks;
 using Vanara.PInvoke;
+using Velopack;
 using Windows.Foundation;
+using Windows.Graphics;
 
 
 namespace Starward.Features.ViewHost;
@@ -31,6 +36,7 @@ public sealed partial class SystemTrayWindow : WindowEx
 {
 
 
+    private readonly ILogger<SystemTrayWindow> _logger = AppConfig.GetLogger<SystemTrayWindow>();
 
 
     public SystemTrayWindow()
@@ -139,6 +145,60 @@ public sealed partial class SystemTrayWindow : WindowEx
 
 
     /// <summary>
+    /// 手动检查更新：有新版本弹更新窗口（已开着就激活它），否则用托盘提示窗告知结果。
+    /// 是否包含预览版由 <see cref="AppConfig.EnablePreviewRelease"/> 决定，见 <c>UpdateService.GetManager</c>，此处不用判断。
+    /// </summary>
+    [RelayCommand]
+    private async Task CheckUpdateAsync()
+    {
+        // 先取菜单矩形：检查是异步的，结果回来时菜单多半已因失焦收起，届时再取位置就不准了
+        RectInt32 anchor = GetMenuRect();
+        try
+        {
+            UpdateService service = AppConfig.GetService<UpdateService>();
+            UpdateInfo? release = await service.GetLatestVersionAsync();
+            if (release is not null)
+            {
+                // 与关于页/首页自动检查可能复用同一次网络请求并同时走到这里，已有窗口就不再开第二个。
+                // 不显式 Hide()：更新窗口抢到焦点后托盘会因失焦自动收起，先 Hide 反而可能让新窗口拿不到前台。
+                if (!UpdateWindow.TryActivateExisting())
+                {
+                    new UpdateWindow { NewVersion = release }.Activate();
+                }
+            }
+            else if (service.IsUpdaterAvailable)
+            {
+                Hide();
+                UpdateTipWindow.Show(Lang.AboutSetting_UpdatedToTheLatestVersion, AppConfig.AppVersion, false, anchor);
+            }
+            else
+            {
+                // 非 Velopack 部署（开发态/裸发布目录），无法检查更新
+                Hide();
+                UpdateTipWindow.Show(Lang.UpdateService_CannotUpdateAutomatically, null, true, anchor);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Check update from system tray");
+            Hide();
+            UpdateTipWindow.Show(UpdateService.GetDisplayErrorMessage(ex), null, true, anchor);
+        }
+    }
+
+
+    /// <summary>
+    /// 取托盘菜单窗口当前的屏幕矩形，供检查更新的结果提示窗贴着菜单原位弹出。
+    /// </summary>
+    /// <returns>菜单窗口的屏幕矩形（物理像素）。</returns>
+    private RectInt32 GetMenuRect()
+    {
+        User32.GetWindowRect(WindowHandle, out RECT rect);
+        return new RectInt32(rect.X, rect.Y, rect.Width, rect.Height);
+    }
+
+
+    /// <summary>
     /// 「显示主窗口」热键当前是否启用。托盘菜单里以绿/红状态灯显示。
     /// </summary>
     public bool ShowMainWindowHotkeyEnabled { get; private set => SetProperty(ref field, value); }
@@ -176,6 +236,14 @@ public sealed partial class SystemTrayWindow : WindowEx
 
     /// <summary>关闭状态下把键帽淡化，与状态灯一起表达「这个键当前不生效」。</summary>
     private double ToOpacity(bool enabled) => enabled ? 1 : 0.4;
+
+
+    /// <summary>检查更新期间把静态图标淡出、转圈淡入。用 Opacity 而非 Visibility，两者始终占位，托盘窗口尺寸才不会变。</summary>
+    private double ToOpacityHiddenWhen(bool value) => value ? 0 : 1;
+
+
+    /// <inheritdoc cref="ToOpacityHiddenWhen"/>
+    private double ToOpacityVisibleWhen(bool value) => value ? 1 : 0;
 
 
     /// <summary>

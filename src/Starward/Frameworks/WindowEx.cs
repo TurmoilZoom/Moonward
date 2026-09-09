@@ -97,11 +97,35 @@ public abstract partial class WindowEx : Window
 
 
 
+    /// <summary>
+    /// 取用于「窗口居中」的显示器：优先跟随主窗口，让新窗口出现在用户正在看的那块屏上。
+    /// <para>
+    /// <see cref="MainWindowId"/> 只在 <c>MainWindow</c> 构造时赋值。纯托盘驻留（<c>--hide</c>、快捷方式启动游戏）
+    /// 与环境检查阶段（<c>WelcomeWindow</c> / <c>NoPermissionWindow</c>）主窗口尚未创建，它仍是默认值 0，
+    /// 拿去查显示器得不到预期结果。此时不能退回本窗口自身 —— 新窗口还没定过位，会落在系统默认那块屏；
+    /// 改用光标所在显示器，用户刚在那块屏上操作过。
+    /// </para>
+    /// </summary>
+    /// <returns>用于居中计算的显示区域，恒不为 <see langword="null"/>。</returns>
+    protected static DisplayArea GetDisplayAreaForCentering()
+    {
+        if (MainWindowId.Value is not 0)
+        {
+            return DisplayArea.GetFromWindowId(MainWindowId, DisplayAreaFallback.Nearest);
+        }
+        if (User32.GetCursorPos(out POINT point))
+        {
+            return DisplayArea.GetFromPoint(new PointInt32(point.X, point.Y), DisplayAreaFallback.Nearest);
+        }
+        return DisplayArea.Primary;
+    }
+
+
     public virtual void CenterInScreen(int? width = null, int? height = null)
     {
         width = width <= 0 ? null : width;
         height = height <= 0 ? null : height;
-        DisplayArea display = DisplayArea.GetFromWindowId(MainWindowId, DisplayAreaFallback.Nearest);
+        DisplayArea display = GetDisplayAreaForCentering();
         double scale = UIScale;
         int w = (int)((width * scale) ?? AppWindow.Size.Width);
         int h = (int)((height * scale) ?? AppWindow.Size.Height);

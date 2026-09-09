@@ -120,7 +120,7 @@ public sealed partial class UpdateWindow : WindowEx
 
     private void CenterInScreen()
     {
-        RectInt32 workArea = DisplayArea.GetFromWindowId(MainWindowId, DisplayAreaFallback.Nearest).WorkArea;
+        RectInt32 workArea = GetDisplayAreaForCentering().WorkArea;
         int w;
         int h;
         if (NewVersion is null)

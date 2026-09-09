@@ -34,6 +34,26 @@
                     <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.MainPage_Launcer}" />
                 </StackPanel>
             </Button>
+            <Button Height="36"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Left"
+                    Command="{x:Bind CheckUpdateCommand}"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <!--  检查期间图标原地换成转圈：两者叠在同一格并只切 Opacity（不切 Visibility），
+                          保证内容尺寸恒定 —— 托盘窗口的尺寸只在 Show() 时按内容量一次，中途变大就会被窗口边界裁掉。  -->
+                    <Grid VerticalAlignment="Center">
+                        <FontIcon FontSize="16"
+                                  Glyph="&#xE752;"
+                                  Opacity="{x:Bind ToOpacityHiddenWhen(CheckUpdateCommand.IsRunning)}" />
+                        <ProgressRing Width="16"
+                                      Height="16"
+                                      IsActive="{x:Bind CheckUpdateCommand.IsRunning}"
+                                      Opacity="{x:Bind ToOpacityVisibleWhen(CheckUpdateCommand.IsRunning)}" />
+                    </Grid>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.SettingPage_CheckForUpdate}" />
+                </StackPanel>
+            </Button>
             <!--  全局快捷键：分组标题（文字 + 延伸细线）圈出下面两行，明确它们是全局热键开关而非动作项。
                   托盘是个刚好包住菜单的独立小窗口，Popup 类提示（InstantTooltip）会被窗口边界裁掉，故用可见标题。  -->
             <Grid Margin="12,10,4,6" ColumnSpacing="8">
