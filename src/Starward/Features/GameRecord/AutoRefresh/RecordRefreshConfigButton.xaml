@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Features.GameRecord.AutoRefresh.RecordRefreshConfigButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
+             xmlns:sh="using:Starward.Helpers"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <!--  与各数据页右侧面板顶部那排小图标按钮同款（分享等），放在这一排的最左边  -->
+    <Button x:Name="Button_Root"
+            MinWidth="0"
+            MinHeight="0"
+            Padding="8,4,8,4"
+            VerticalAlignment="Center"
+            sc:InstantTooltip.Placement="Top"
+            sc:InstantTooltip.Text="{x:Bind lang:Lang.AutoRecordRefresh_Title}">
+        <Grid Width="16" Height="16">
+            <FontIcon HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      FontSize="14"
+                      Glyph="&#xE787;" />
+            <!--  只有这个账号的这个板块留下过异常记录时，才点这个红点  -->
+            <Ellipse Width="6"
+                     Height="6"
+                     Margin="0,-2,-2,0"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Top"
+                     Fill="{ThemeResource SystemFillColorCriticalBrush}"
+                     Visibility="{x:Bind HasError, Converter={StaticResource BoolToVisibilityConverter}}" />
+        </Grid>
+
+        <Button.Flyout>
+            <Flyout Opening="Flyout_Opening" Placement="LeftEdgeAlignedTop">
+                <StackPanel Width="300" Spacing="12">
+
+                    <!--  标题：板块名 + 这份配置属于哪个账号  -->
+                    <StackPanel Spacing="2">
+                        <TextBlock FontWeight="SemiBold" Text="{x:Bind ItemName}" />
+                        <TextBlock FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                   Text="{x:Bind RoleName}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+
+                    <!--  总开关；「不保证」的细则收进问号图标，悬浮才展开  -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center"
+                                    Orientation="Horizontal"
+                                    Spacing="6">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.AutoRecordRefresh_Enable}" />
+                            <!--  透明 Border 兜住命中区域，裸 FontIcon 命中不稳  -->
+                            <Border Padding="2"
+                                    VerticalAlignment="Center"
+                                    Background="Transparent"
+                                    sc:InstantTooltip.Placement="Bottom"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.AutoRecordRefresh_NotGuaranteed}"
+                                    sc:InstantTooltip.Trigger="Click"
+                                    sh:PointerCursor.CursorShape="Hand">
+                                <FontIcon FontSize="14"
+                                          Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                          Glyph="&#xE9CE;" />
+                            </Border>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1"
+                                      MinWidth="0"
+                                      IsEnabled="{x:Bind HasRole}"
+                                      IsOn="{x:Bind AutoRefreshEnabled, Mode=TwoWay}"
+                                      OffContent=""
+                                      OnContent="" />
+                    </Grid>
+
+                    <!--  频率：模式 + 该模式对应的参数  -->
+                    <StackPanel Spacing="8">
+                        <TextBlock FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.AutoRecordRefresh_Frequency}" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox HorizontalAlignment="Stretch"
+                                      IsEnabled="{x:Bind AutoRefreshEnabled}"
+                                      SelectedIndex="{x:Bind SelectedModeIndex, Mode=TwoWay}">
+                                <ComboBoxItem Content="{x:Bind lang:Lang.AutoRecordRefresh_ModeEveryDays}" />
+                                <ComboBoxItem Content="{x:Bind lang:Lang.AutoRecordRefresh_ModeWeekly}" />
+                                <ComboBoxItem Content="{x:Bind lang:Lang.AutoRecordRefresh_ModeMonthly}" />
+                            </ComboBox>
+
+                            <NumberBox Grid.Column="1"
+                                       HorizontalAlignment="Stretch"
+                                       IsEnabled="{x:Bind AutoRefreshEnabled}"
+                                       LargeChange="7"
+                                       Maximum="30"
+                                       Minimum="1"
+                                       PlaceholderText="{x:Bind lang:Lang.AutoRecordRefresh_Days}"
+                                       SmallChange="1"
+                                       SpinButtonPlacementMode="Compact"
+                                       Value="{x:Bind IntervalDays, Mode=TwoWay}"
+                                       Visibility="{x:Bind IsEveryDaysMode, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                            <ComboBox Grid.Column="1"
+                                      HorizontalAlignment="Stretch"
+                                      IsEnabled="{x:Bind AutoRefreshEnabled}"
+                                      ItemsSource="{x:Bind DayOfWeekNames}"
+                                      SelectedIndex="{x:Bind SelectedDayOfWeek, Mode=TwoWay}"
+                                      Visibility="{x:Bind IsWeeklyMode, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                            <ComboBox Grid.Column="1"
+                                      HorizontalAlignment="Stretch"
+                                      IsEnabled="{x:Bind AutoRefreshEnabled}"
+                                      ItemsSource="{x:Bind DayOfMonthNames}"
+                                      SelectedIndex="{x:Bind SelectedDayOfMonthIndex, Mode=TwoWay}"
+                                      Visibility="{x:Bind IsMonthlyMode, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <!--  上次 / 下次更新  -->
+                    <StackPanel Spacing="4">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind lang:Lang.AutoRecordRefresh_LastUpdate}" />
+                            <TextBlock Grid.Column="1"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind LastUpdateText}" />
+                        </Grid>
+                        <Grid Visibility="{x:Bind AutoRefreshEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind lang:Lang.AutoRecordRefresh_NextUpdate}" />
+                            <TextBlock Grid.Column="1"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind NextUpdateText}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <MenuFlyoutSeparator />
+
+                    <!--  异常记录：后台不自愈，出了什么事只在那里看  -->
+                    <Button HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Click="Button_ViewErrors_Click"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon FontSize="16" Glyph="&#xE7BA;" />
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.AutoRecordRefresh_Errors}" />
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+            </Flyout>
+        </Button.Flyout>
+    </Button>
+
+</UserControl>

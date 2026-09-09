@@ -3866,4 +3866,49 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
     <value>Per questo gioco non è ancora stato pubblicato un pacchetto di installazione.</value>
   </data>
+  <data name="AutoRecordRefresh_Title" xml:space="preserve">
+    <value>Aggiornamento automatico</value>
+  </data>
+  <data name="AutoRecordRefresh_Enable" xml:space="preserve">
+    <value>Attiva aggiornamento automatico</value>
+  </data>
+  <data name="AutoRecordRefresh_NotGuaranteed" xml:space="preserve">
+    <value>Nessuna garanzia: il controllo viene eseguito solo all'avvio dell'app; con l'app chiusa non si aggiorna nulla e una sezione che richiede verifica o incontra limiti viene saltata senza riprovare.</value>
+  </data>
+  <data name="AutoRecordRefresh_Frequency" xml:space="preserve">
+    <value>Frequenza</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeEveryDays" xml:space="preserve">
+    <value>Ogni tot giorni</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeWeekly" xml:space="preserve">
+    <value>Settimanale</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeMonthly" xml:space="preserve">
+    <value>Mensile</value>
+  </data>
+  <data name="AutoRecordRefresh_Days" xml:space="preserve">
+    <value>Giorni</value>
+  </data>
+  <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
+    <value>Giorno {0}</value>
+  </data>
+  <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
+    <value>Ultimo aggiornamento</value>
+  </data>
+  <data name="AutoRecordRefresh_NextUpdate" xml:space="preserve">
+    <value>Prossimo aggiornamento</value>
+  </data>
+  <data name="AutoRecordRefresh_NeverUpdated" xml:space="preserve">
+    <value>Mai</value>
+  </data>
+  <data name="AutoRecordRefresh_Errors" xml:space="preserve">
+    <value>Errori</value>
+  </data>
+  <data name="AutoRecordRefresh_NoErrors" xml:space="preserve">
+    <value>Nessun errore</value>
+  </data>
+  <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
+    <value>Account e sezioni di dati saltati durante l'aggiornamento automatico. Codice e messaggio provengono da HoYoLAB così come sono.</value>
+  </data>
 </root>

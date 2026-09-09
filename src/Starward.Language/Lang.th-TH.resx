@@ -3860,4 +3860,49 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
     <value>เกมนี้ยังไม่มีแพ็กเกจติดตั้งที่เผยแพร่</value>
   </data>
+  <data name="AutoRecordRefresh_Title" xml:space="preserve">
+    <value>อัปเดตอัตโนมัติ</value>
+  </data>
+  <data name="AutoRecordRefresh_Enable" xml:space="preserve">
+    <value>เปิดใช้การอัปเดตอัตโนมัติ</value>
+  </data>
+  <data name="AutoRecordRefresh_NotGuaranteed" xml:space="preserve">
+    <value>ไม่รับประกัน: จะตรวจสอบเพียงครั้งเดียวตอนเปิดแอป จะไม่อัปเดตขณะที่แอปไม่ได้ทำงาน และส่วนที่ติดการยืนยันตัวตนหรือการจำกัดจะถูกข้ามโดยไม่ลองใหม่</value>
+  </data>
+  <data name="AutoRecordRefresh_Frequency" xml:space="preserve">
+    <value>ความถี่</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeEveryDays" xml:space="preserve">
+    <value>ทุก ๆ กี่วัน</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeWeekly" xml:space="preserve">
+    <value>ทุกสัปดาห์</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeMonthly" xml:space="preserve">
+    <value>ทุกเดือน</value>
+  </data>
+  <data name="AutoRecordRefresh_Days" xml:space="preserve">
+    <value>จำนวนวัน</value>
+  </data>
+  <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
+    <value>วันที่ {0}</value>
+  </data>
+  <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
+    <value>อัปเดตล่าสุด</value>
+  </data>
+  <data name="AutoRecordRefresh_NextUpdate" xml:space="preserve">
+    <value>อัปเดตครั้งถัดไป</value>
+  </data>
+  <data name="AutoRecordRefresh_NeverUpdated" xml:space="preserve">
+    <value>ยังไม่เคย</value>
+  </data>
+  <data name="AutoRecordRefresh_Errors" xml:space="preserve">
+    <value>ข้อผิดพลาด</value>
+  </data>
+  <data name="AutoRecordRefresh_NoErrors" xml:space="preserve">
+    <value>ไม่มีข้อผิดพลาด</value>
+  </data>
+  <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
+    <value>บัญชีและส่วนข้อมูลที่ถูกข้ามระหว่างการอัปเดตอัตโนมัติ รหัสและข้อความมาจาก HoYoLAB โดยตรง</value>
+  </data>
 </root>

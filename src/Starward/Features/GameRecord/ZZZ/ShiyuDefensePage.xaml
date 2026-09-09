@@ -10,6 +10,7 @@
              xmlns:sc="using:Starward.Controls"
              xmlns:scgz="using:Starward.Core.GameRecord.ZZZ"
              xmlns:scgzs="using:Starward.Core.GameRecord.ZZZ.ShiyuDefense"
+             xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfgr="using:Starward.Features.GameRecord"
              xmlns:helpers="using:Starward.Helpers"
@@ -147,6 +148,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <!--  统计周期  -->
                 <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
@@ -156,7 +158,12 @@
                     <Run Text=" - " />
                     <Run Text="{x:Bind CurrentShiyuDefense.EndTime.LocalDateTime.ToString('yyyy/MM/dd', x:Null)}" />
                 </TextBlock>
-                <Button Grid.Column="1"
+                <sfgra:RecordRefreshConfigButton x:Name="RecordRefreshConfigButton_Auto"
+                                                 Grid.Column="1"
+                                                 Margin="0,0,4,0"
+                                                 VerticalAlignment="Center"
+                                                 Item="ShiyuDefense" />
+                <Button Grid.Column="2"
                         MinWidth="0"
                         MinHeight="0"
                         Padding="8,4,8,4"
@@ -918,6 +925,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <!--  统计周期  -->
                 <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
@@ -927,7 +935,12 @@
                     <Run Text=" - " />
                     <Run Text="{x:Bind CurrentShiyuDefenseV2.EndTime.LocalDateTime.ToString('yyyy/MM/dd', x:Null)}" />
                 </TextBlock>
-                <Button Grid.Column="1"
+                <sfgra:RecordRefreshConfigButton x:Name="RecordRefreshConfigButton_Auto2"
+                                                 Grid.Column="1"
+                                                 Margin="0,0,4,0"
+                                                 VerticalAlignment="Center"
+                                                 Item="ShiyuDefense" />
+                <Button Grid.Column="2"
                         MinWidth="0"
                         MinHeight="0"
                         Padding="8,4,8,4"

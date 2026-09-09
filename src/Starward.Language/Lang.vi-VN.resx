@@ -3866,4 +3866,49 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
     <value>Trò chơi này chưa phát hành gói cài đặt.</value>
   </data>
+  <data name="AutoRecordRefresh_Title" xml:space="preserve">
+    <value>Tự động cập nhật</value>
+  </data>
+  <data name="AutoRecordRefresh_Enable" xml:space="preserve">
+    <value>Bật tự động cập nhật</value>
+  </data>
+  <data name="AutoRecordRefresh_NotGuaranteed" xml:space="preserve">
+    <value>Không đảm bảo: chỉ kiểm tra một lần khi khởi động ứng dụng, không cập nhật khi ứng dụng không chạy, và mục gặp xác minh hoặc giới hạn sẽ bị bỏ qua và không thử lại.</value>
+  </data>
+  <data name="AutoRecordRefresh_Frequency" xml:space="preserve">
+    <value>Tần suất</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeEveryDays" xml:space="preserve">
+    <value>Cách vài ngày</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeWeekly" xml:space="preserve">
+    <value>Hằng tuần</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeMonthly" xml:space="preserve">
+    <value>Hằng tháng</value>
+  </data>
+  <data name="AutoRecordRefresh_Days" xml:space="preserve">
+    <value>Số ngày</value>
+  </data>
+  <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
+    <value>Ngày {0}</value>
+  </data>
+  <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
+    <value>Cập nhật lần cuối</value>
+  </data>
+  <data name="AutoRecordRefresh_NextUpdate" xml:space="preserve">
+    <value>Lần cập nhật tiếp theo</value>
+  </data>
+  <data name="AutoRecordRefresh_NeverUpdated" xml:space="preserve">
+    <value>Chưa từng</value>
+  </data>
+  <data name="AutoRecordRefresh_Errors" xml:space="preserve">
+    <value>Lỗi</value>
+  </data>
+  <data name="AutoRecordRefresh_NoErrors" xml:space="preserve">
+    <value>Không có lỗi</value>
+  </data>
+  <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
+    <value>Tài khoản và mục dữ liệu bị bỏ qua khi tự động cập nhật. Mã và thông báo lấy nguyên văn từ HoYoLAB.</value>
+  </data>
 </root>

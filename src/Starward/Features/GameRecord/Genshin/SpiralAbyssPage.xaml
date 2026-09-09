@@ -9,6 +9,7 @@
              xmlns:local="using:Starward.Features.GameRecord.Genshin"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sc="using:Starward.Controls"
+             xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.Gacha"
              xmlns:helpers="using:Starward.Helpers"
@@ -139,6 +140,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <!--  统计周期  -->
                 <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
@@ -148,7 +150,12 @@
                     <Run Text=" - " />
                     <Run Text="{x:Bind CurrentAbyss.EndTime.LocalDateTime.ToString('yyyy/MM/dd', x:Null)}" />
                 </TextBlock>
-                <Button Grid.Column="1"
+                <sfgra:RecordRefreshConfigButton x:Name="RecordRefreshConfigButton_Auto"
+                                                 Grid.Column="1"
+                                                 Margin="0,0,4,0"
+                                                 VerticalAlignment="Center"
+                                                 Item="SpiralAbyss" />
+                <Button Grid.Column="2"
                         MinWidth="0"
                         MinHeight="0"
                         Padding="8,4,8,4"

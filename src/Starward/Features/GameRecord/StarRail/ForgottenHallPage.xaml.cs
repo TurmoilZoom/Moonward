@@ -44,6 +44,7 @@ public sealed partial class ForgottenHallPage : PageBase
         if (e.Parameter is GameRecordRole role)
         {
             gameRole = role;
+            RecordRefreshConfigButton_Auto.GameRole = role;
         }
     }
 

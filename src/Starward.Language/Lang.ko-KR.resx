@@ -3866,4 +3866,49 @@
   <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
     <value>이 게임의 설치 패키지가 아직 배포되지 않았습니다.</value>
   </data>
+  <data name="AutoRecordRefresh_Title" xml:space="preserve">
+    <value>자동 업데이트</value>
+  </data>
+  <data name="AutoRecordRefresh_Enable" xml:space="preserve">
+    <value>자동 업데이트 사용</value>
+  </data>
+  <data name="AutoRecordRefresh_NotGuaranteed" xml:space="preserve">
+    <value>보장되지 않습니다: 확인은 앱 시작 시 한 번만 실행되며, 앱이 실행되지 않는 동안에는 갱신되지 않고, 인증이나 제한에 걸린 항목은 재시도 없이 건너뜁니다.</value>
+  </data>
+  <data name="AutoRecordRefresh_Frequency" xml:space="preserve">
+    <value>업데이트 주기</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeEveryDays" xml:space="preserve">
+    <value>며칠마다</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeWeekly" xml:space="preserve">
+    <value>매주</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeMonthly" xml:space="preserve">
+    <value>매월</value>
+  </data>
+  <data name="AutoRecordRefresh_Days" xml:space="preserve">
+    <value>일수</value>
+  </data>
+  <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
+    <value>{0}일</value>
+  </data>
+  <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
+    <value>마지막 업데이트</value>
+  </data>
+  <data name="AutoRecordRefresh_NextUpdate" xml:space="preserve">
+    <value>다음 업데이트</value>
+  </data>
+  <data name="AutoRecordRefresh_NeverUpdated" xml:space="preserve">
+    <value>없음</value>
+  </data>
+  <data name="AutoRecordRefresh_Errors" xml:space="preserve">
+    <value>오류</value>
+  </data>
+  <data name="AutoRecordRefresh_NoErrors" xml:space="preserve">
+    <value>오류 없음</value>
+  </data>
+  <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
+    <value>자동 업데이트에서 건너뛴 계정과 데이터 항목입니다. 코드와 메시지는 HoYoLAB 원문입니다.</value>
+  </data>
 </root>

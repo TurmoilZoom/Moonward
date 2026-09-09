@@ -3954,4 +3954,49 @@
   <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
     <value>该游戏尚未发布安装包</value>
   </data>
+  <data name="AutoRecordRefresh_Title" xml:space="preserve">
+    <value>自动更新</value>
+  </data>
+  <data name="AutoRecordRefresh_Enable" xml:space="preserve">
+    <value>启用自动更新</value>
+  </data>
+  <data name="AutoRecordRefresh_NotGuaranteed" xml:space="preserve">
+    <value>不保证成功：只在软件启动时检查一次，软件没运行就不会更新；触发验证或风控会直接跳过，不重试。</value>
+  </data>
+  <data name="AutoRecordRefresh_Frequency" xml:space="preserve">
+    <value>更新频率</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeEveryDays" xml:space="preserve">
+    <value>每隔几天</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeWeekly" xml:space="preserve">
+    <value>每周</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeMonthly" xml:space="preserve">
+    <value>每月</value>
+  </data>
+  <data name="AutoRecordRefresh_Days" xml:space="preserve">
+    <value>天数</value>
+  </data>
+  <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
+    <value>{0} 号</value>
+  </data>
+  <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
+    <value>上次更新</value>
+  </data>
+  <data name="AutoRecordRefresh_NextUpdate" xml:space="preserve">
+    <value>下次更新</value>
+  </data>
+  <data name="AutoRecordRefresh_NeverUpdated" xml:space="preserve">
+    <value>从未更新</value>
+  </data>
+  <data name="AutoRecordRefresh_Errors" xml:space="preserve">
+    <value>异常记录</value>
+  </data>
+  <data name="AutoRecordRefresh_NoErrors" xml:space="preserve">
+    <value>暂无异常</value>
+  </data>
+  <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
+    <value>自动更新时被跳过的账号与数据板块。返回码与提示为米游社原文。</value>
+  </data>
 </root>

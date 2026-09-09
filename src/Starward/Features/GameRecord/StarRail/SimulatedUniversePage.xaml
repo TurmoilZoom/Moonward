@@ -8,6 +8,7 @@
              xmlns:local="using:Starward.Features.GameRecord.StarRail"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sc="using:Starward.Controls"
+             xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.Gacha"
              xmlns:su="using:Starward.Core.GameRecord.StarRail.SimulatedUniverse"
@@ -124,6 +125,14 @@
                       Grid.Column="1"
                       Margin="0,24,0,0">
             <StackPanel Margin="24,0,24,24">
+
+                <!--  自动更新：本页右侧面板没有别的工具按钮，单独起一行放在同样的位置  -->
+                <Grid MinHeight="34" Margin="0,0,0,12">
+                    <sfgra:RecordRefreshConfigButton x:Name="RecordRefreshConfigButton_Auto"
+                                                     HorizontalAlignment="Right"
+                                                     VerticalAlignment="Center"
+                                                     Item="SimulatedUniverse" />
+                </Grid>
 
 
                 <!--  数据总览  -->

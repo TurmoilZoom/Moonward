@@ -2,6 +2,7 @@ using Microsoft.UI.Dispatching;
 using Serilog;
 using Starward.Features.Gacha;
 using Starward.Features.GamepadControl;
+using Starward.Features.GameRecord.AutoRefresh;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Features.RPC;
 using Starward.Features.Setting;
@@ -52,6 +53,9 @@ internal static class ResidentHost
             _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().EnsureCurrentLanguageOnStartupAsync());
             // 启动后批量签到，并在进程常驻期间跨日再签（绝对到期 + 休眠唤醒补判）。
             AppConfig.GetService<AutoSignInService>().StartResident();
+            // 自动更新战绩：启动后检查一次，把到期的「账号 + 数据板块」补上。只判这一次，不跨日重判。
+            // 挂在这里而不是主窗口：用户不必开启开机自启，软件（含仅托盘驻留）跑起来就有效。
+            AppConfig.GetService<AutoRecordRefreshService>().StartStartupCheck();
             AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
             // 后台驻留期间也检查并静默下载更新：仅托盘驻留或主窗口长期最小化时，
             // MainView 那条「窗口激活才查」的路径永远不会触发。

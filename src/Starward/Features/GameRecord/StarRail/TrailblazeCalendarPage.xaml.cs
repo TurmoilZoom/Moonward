@@ -66,6 +66,7 @@ public sealed partial class TrailblazeCalendarPage : PageBase
         if (e.Parameter is GameRecordRole role)
         {
             gameRole = role;
+            RecordRefreshConfigButton_Auto.GameRole = role;
         }
     }
 

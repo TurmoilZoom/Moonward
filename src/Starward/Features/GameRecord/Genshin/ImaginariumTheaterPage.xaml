@@ -9,6 +9,7 @@
              xmlns:sc="using:Starward.Controls"
              xmlns:scggi="using:Starward.Core.GameRecord.Genshin.ImaginariumTheater"
              xmlns:scv="using:Starward.Converters"
+             xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.Gacha"
              xmlns:helpers="using:Starward.Helpers"
@@ -160,6 +161,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <!--  演出回顾  -->
                 <TextBlock VerticalAlignment="Center"
@@ -179,7 +181,12 @@
                     <Run Text=" - " />
                     <Run Text="{x:Bind CurrentTheater.EndTime.ToString('yyyy/MM/dd', x:Null)}" />
                 </TextBlock>
-                <Button Grid.Column="2"
+                <sfgra:RecordRefreshConfigButton x:Name="RecordRefreshConfigButton_Auto"
+                                                 Grid.Column="2"
+                                                 Margin="0,0,4,0"
+                                                 VerticalAlignment="Center"
+                                                 Item="ImaginariumTheater" />
+                <Button Grid.Column="3"
                         MinWidth="0"
                         MinHeight="0"
                         Padding="8,4,8,4"

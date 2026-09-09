@@ -10,6 +10,7 @@
              xmlns:wdd="using:Starward.Features.GameRecord.WeeklyDailyData"
              xmlns:sc="using:Starward.Controls"
              xmlns:report="using:Starward.Core.GameRecord.ZZZ.InterKnotReport"
+             xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.GameRecord"
              xmlns:sp="using:Starward.Pages"
@@ -150,6 +151,9 @@
                             Orientation="Horizontal"
                             Spacing="4"
                             VerticalAlignment="Center">
+                    <sfgra:RecordRefreshConfigButton x:Name="RecordRefreshConfigButton_Auto"
+                                                     VerticalAlignment="Center"
+                                                     Item="InterKnotReport" />
                     <Button MinWidth="0"
                             MinHeight="0"
                             Padding="8,4,8,4"

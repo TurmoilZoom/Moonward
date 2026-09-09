@@ -3864,4 +3864,49 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
     <value>Für dieses Spiel wurde noch kein Installationspaket veröffentlicht.</value>
   </data>
+  <data name="AutoRecordRefresh_Title" xml:space="preserve">
+    <value>Automatische Aktualisierung</value>
+  </data>
+  <data name="AutoRecordRefresh_Enable" xml:space="preserve">
+    <value>Automatische Aktualisierung aktivieren</value>
+  </data>
+  <data name="AutoRecordRefresh_NotGuaranteed" xml:space="preserve">
+    <value>Keine Garantie: Die Prüfung läuft nur einmal beim Start der App; bei geschlossener App wird nichts aktualisiert, und ein Bereich mit Verifizierung oder Ratenbegrenzung wird ohne Wiederholung übersprungen.</value>
+  </data>
+  <data name="AutoRecordRefresh_Frequency" xml:space="preserve">
+    <value>Häufigkeit</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeEveryDays" xml:space="preserve">
+    <value>Alle paar Tage</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeWeekly" xml:space="preserve">
+    <value>Wöchentlich</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeMonthly" xml:space="preserve">
+    <value>Monatlich</value>
+  </data>
+  <data name="AutoRecordRefresh_Days" xml:space="preserve">
+    <value>Tage</value>
+  </data>
+  <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
+    <value>{0}.</value>
+  </data>
+  <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
+    <value>Letzte Aktualisierung</value>
+  </data>
+  <data name="AutoRecordRefresh_NextUpdate" xml:space="preserve">
+    <value>Nächste Aktualisierung</value>
+  </data>
+  <data name="AutoRecordRefresh_NeverUpdated" xml:space="preserve">
+    <value>Nie</value>
+  </data>
+  <data name="AutoRecordRefresh_Errors" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="AutoRecordRefresh_NoErrors" xml:space="preserve">
+    <value>Keine Fehler</value>
+  </data>
+  <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
+    <value>Konten und Datenbereiche, die bei der automatischen Aktualisierung übersprungen wurden. Code und Meldung stammen unverändert von HoYoLAB.</value>
+  </data>
 </root>

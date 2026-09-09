@@ -10,6 +10,7 @@
              xmlns:cc="using:CommunityToolkit.WinUI.Controls"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sc="using:Starward.Controls"
+             xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.Gacha"
              xmlns:sfgr="using:Starward.Features.GameRecord"
@@ -159,6 +160,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <!--  统计周期  -->
                 <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
@@ -172,7 +174,12 @@
                            Margin="12,0,12,0"
                            VerticalAlignment="Center"
                            Text="{x:Bind CurrentApocalypticShadow.Meta.Name}" />
-                <Button Grid.Column="2"
+                <sfgra:RecordRefreshConfigButton x:Name="RecordRefreshConfigButton_Auto"
+                                                 Grid.Column="2"
+                                                 Margin="0,0,4,0"
+                                                 VerticalAlignment="Center"
+                                                 Item="ApocalypticShadow" />
+                <Button Grid.Column="3"
                         MinWidth="0"
                         MinHeight="0"
                         Padding="8,4,8,4"

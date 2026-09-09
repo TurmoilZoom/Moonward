@@ -43,6 +43,8 @@ public sealed partial class ShiyuDefensePage : PageBase
         if (e.Parameter is GameRecordRole role)
         {
             gameRole = role;
+            RecordRefreshConfigButton_Auto.GameRole = role;
+            RecordRefreshConfigButton_Auto2.GameRole = role;
         }
     }
 

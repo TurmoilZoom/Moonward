@@ -42,6 +42,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
         if (e.Parameter is GameRecordRole role)
         {
             gameRole = role;
+            RecordRefreshConfigButton_Auto.GameRole = role;
         }
     }
 

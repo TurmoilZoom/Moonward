@@ -313,6 +313,141 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 自动更新 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_Title {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 启用自动更新 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_Enable {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_Enable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 不保证成功：只在软件启动时检查一次，软件没运行就不会更新；触发验证或风控会直接跳过，不重试。 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_NotGuaranteed {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_NotGuaranteed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 更新频率 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_Frequency {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_Frequency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 每隔几天 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_ModeEveryDays {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_ModeEveryDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 每周 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_ModeWeekly {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_ModeWeekly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 每月 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_ModeMonthly {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_ModeMonthly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 天数 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_Days {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} 号 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_DayOfMonthFormat {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_DayOfMonthFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 上次更新 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_LastUpdate {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_LastUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 下次更新 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_NextUpdate {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_NextUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 从未更新 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_NeverUpdated {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_NeverUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 自动更新时被跳过的账号与数据板块。返回码与提示为米游社原文。 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_ErrorsDescription {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_ErrorsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 异常记录 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_Errors {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_Errors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 暂无异常 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_NoErrors {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_NoErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 {0} duplicate file(s) has been deleted. 的本地化字符串。
         /// </summary>
         public static string BackgroundViewPage_0DuplicateFileSHasBeenDeleted {

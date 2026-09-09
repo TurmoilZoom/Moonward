@@ -3865,4 +3865,49 @@
   <data name="GameLauncherSettingDialog_NoGamePackage" xml:space="preserve">
     <value>このゲームのインストールパッケージはまだ配信されていません。</value>
   </data>
+  <data name="AutoRecordRefresh_Title" xml:space="preserve">
+    <value>自動更新</value>
+  </data>
+  <data name="AutoRecordRefresh_Enable" xml:space="preserve">
+    <value>自動更新を有効にする</value>
+  </data>
+  <data name="AutoRecordRefresh_NotGuaranteed" xml:space="preserve">
+    <value>保証はありません：確認はアプリ起動時に一度だけ行われ、アプリが起動していない間は更新されず、認証や制限に当たった項目は再試行せずにスキップされます。</value>
+  </data>
+  <data name="AutoRecordRefresh_Frequency" xml:space="preserve">
+    <value>更新頻度</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeEveryDays" xml:space="preserve">
+    <value>数日ごと</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeWeekly" xml:space="preserve">
+    <value>毎週</value>
+  </data>
+  <data name="AutoRecordRefresh_ModeMonthly" xml:space="preserve">
+    <value>毎月</value>
+  </data>
+  <data name="AutoRecordRefresh_Days" xml:space="preserve">
+    <value>日数</value>
+  </data>
+  <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
+    <value>{0}日</value>
+  </data>
+  <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
+    <value>前回の更新</value>
+  </data>
+  <data name="AutoRecordRefresh_NextUpdate" xml:space="preserve">
+    <value>次回の更新</value>
+  </data>
+  <data name="AutoRecordRefresh_NeverUpdated" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="AutoRecordRefresh_Errors" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="AutoRecordRefresh_NoErrors" xml:space="preserve">
+    <value>エラーなし</value>
+  </data>
+  <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
+    <value>自動更新でスキップされたアカウントとデータ項目です。コードとメッセージは HoYoLAB の原文です。</value>
+  </data>
 </root>

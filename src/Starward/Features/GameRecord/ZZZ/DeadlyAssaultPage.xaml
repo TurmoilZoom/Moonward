@@ -14,6 +14,7 @@
              xmlns:sf="using:Starward.Frameworks"
              xmlns:sfg="using:Starward.Features.Gacha"
              xmlns:sfgr="using:Starward.Features.GameRecord"
+             xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sh="using:Starward.Helpers"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -389,6 +390,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <!--  统计周期  -->
                 <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
@@ -398,7 +400,12 @@
                     <Run Text=" - " />
                     <Run Text="{x:Bind CurrentDeadlyAssault.EndTime.ToString('yyyy/MM/dd', x:Null)}" />
                 </TextBlock>
-                <Button Grid.Column="1"
+                <sfgra:RecordRefreshConfigButton x:Name="RecordRefreshConfigButton_Auto"
+                                                 Grid.Column="1"
+                                                 Margin="0,0,4,0"
+                                                 VerticalAlignment="Center"
+                                                 Item="DeadlyAssault" />
+                <Button Grid.Column="2"
                         MinWidth="0"
                         MinHeight="0"
                         Padding="8,4,8,4"

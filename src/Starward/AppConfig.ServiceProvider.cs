@@ -22,6 +22,7 @@ using Starward.Features.Gacha.ZZZGachaToolbox;
 using Starward.Features.GameInstall;
 using Starward.Features.GameLauncher;
 using Starward.Features.GameRecord;
+using Starward.Features.GameRecord.AutoRefresh;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Features.HoYoPlay;
 using Starward.Features.PlayTime;
@@ -99,6 +100,8 @@ public static partial class AppConfig
             // 每日签到：业务编排 + 常驻自动签到
             sc.AddSingleton<SignInService>();
             sc.AddSingleton<AutoSignInService>();
+            // 自动更新战绩：常驻循环按用户设定频率在后台拉取战绩与月报
+            sc.AddSingleton<AutoRecordRefreshService>();
 
             // 首页时间节点：百科 blackboard 卡池 / 活动倒计时（公开接口，无 Cookie）
             sc.AddSingleton<BlackboardClient>();
