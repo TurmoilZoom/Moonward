@@ -52,6 +52,7 @@ public sealed partial class PureFictionPage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializePureFictionInfoData);
         await Task.Delay(16);
         InitializePureFictionInfoData();
     }

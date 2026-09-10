@@ -51,6 +51,7 @@ public sealed partial class ChallengePeakPage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializeChallengePeakData);
         await Task.Delay(16);
         InitializeChallengePeakData();
     }

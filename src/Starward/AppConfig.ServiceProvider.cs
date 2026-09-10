@@ -97,10 +97,10 @@ public static partial class AppConfig
             sc.AddSingleton<GameRecordCookieRefreshService>();
             sc.AddSingleton<GameRecordService>();
             sc.AddSingleton<CaptchaLoginService>();
-            // 每日签到：业务编排 + 常驻自动签到
+            // 每日签到：业务编排 + 常驻循环（启动先签一轮，之后跨日再签）
             sc.AddSingleton<SignInService>();
             sc.AddSingleton<AutoSignInService>();
-            // 自动更新战绩：常驻循环按用户设定频率在后台拉取战绩与月报
+            // 自动更新战绩：启动时检查一次到期的账号+板块并补档；进程常驻期间不跨日再跑（与自动签到不同）
             sc.AddSingleton<AutoRecordRefreshService>();
 
             // 首页时间节点：百科 blackboard 卡池 / 活动倒计时（公开接口，无 Cookie）

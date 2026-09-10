@@ -68,6 +68,22 @@ internal class GameRecordService
 
     private readonly IMemoryCache _memoryCache;
 
+    /// <summary>
+    /// 大于 0 时遇到 aigis 不弹极验，直接把原异常抛给调用方（后台自动更新用）。
+    /// </summary>
+    private readonly AsyncLocal<int> _interactiveRiskChallengeSuppressDepth = new();
+
+    /// <summary>
+    /// 后台自动更新时，月报翻页与其它请求共用的间隔；手动刷新保持原速。
+    /// </summary>
+    private readonly AsyncLocal<Func<CancellationToken, Task>?> _requestPace = new();
+
+    /// <summary>
+    /// 后台自动更新翻页的页数上限。接口若因异常一直返回满页，无上限的循环会以请求间隔为节奏无限打下去，
+    /// 而后台没人看着，只能靠这个封顶兜住。
+    /// </summary>
+    private const int MaxBackgroundDetailPages = 200;
+
 
     public string Language { get => _hoyolabClient.Language; set => _hoyolabClient.Language = value; }
 
@@ -113,6 +129,209 @@ internal class GameRecordService
 
 
     /// <summary>
+    /// 抑制人机验证弹窗。后台自动更新遇到 aigis 时直接抛出原异常，由调用方记异常并跳过。
+    /// Cookie 静默换票与设备指纹更新仍可进行。
+    /// </summary>
+    /// <returns>结束抑制的作用域。</returns>
+    internal IDisposable SuppressInteractiveRiskChallenge()
+    {
+        _interactiveRiskChallengeSuppressDepth.Value++;
+        return new InteractiveRiskChallengeSuppressScope(this);
+    }
+
+
+    /// <summary>
+    /// 当前异步流是否禁止弹出极验。
+    /// </summary>
+    private bool IsInteractiveRiskChallengeSuppressed => _interactiveRiskChallengeSuppressDepth.Value > 0;
+
+
+    /// <summary>
+    /// 为当前异步流套上请求间隔。月报全量翻页会在页与页之间调用，避免连打。
+    /// </summary>
+    /// <param name="pace">间隔委托，通常与自动更新外层的 3–8 秒节奏是同一个。</param>
+    /// <returns>结束间隔的作用域。</returns>
+    internal IDisposable UseRequestPacing(Func<CancellationToken, Task> pace)
+    {
+        ArgumentNullException.ThrowIfNull(pace);
+        Func<CancellationToken, Task>? previous = _requestPace.Value;
+        _requestPace.Value = pace;
+        return new RequestPacingScope(this, previous);
+    }
+
+
+    /// <summary>
+    /// 当前异步流是否要对连续请求加间隔。
+    /// </summary>
+    private bool HasRequestPacing => _requestPace.Value is not null;
+
+
+    /// <summary>
+    /// 若已套上请求间隔则等待一档；手动刷新时为空操作。
+    /// </summary>
+    private Task PaceRequestAsync(CancellationToken cancellationToken)
+    {
+        Func<CancellationToken, Task>? pace = _requestPace.Value;
+        return pace is null ? Task.CompletedTask : pace(cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 结束 <see cref="UseRequestPacing"/> 的作用域。
+    /// </summary>
+    private sealed class RequestPacingScope : IDisposable
+    {
+        private GameRecordService? _owner;
+        private readonly Func<CancellationToken, Task>? _previous;
+
+        public RequestPacingScope(GameRecordService owner, Func<CancellationToken, Task>? previous)
+        {
+            _owner = owner;
+            _previous = previous;
+        }
+
+        public void Dispose()
+        {
+            if (_owner is null)
+            {
+                return;
+            }
+            _owner._requestPace.Value = _previous;
+            _owner = null;
+        }
+    }
+
+
+    /// <summary>
+    /// 拉齐旅行札记某类型当月全部明细。未套间隔时走客户端一次翻完；后台自动更新则按页请求并在页之间停顿。
+    /// </summary>
+    private async Task<TravelersDiaryDetail> FetchTravelersDiaryDetailAsync(GameRecordRole role, int month, int type, int limit, CancellationToken cancellationToken)
+    {
+        if (!HasRequestPacing)
+        {
+            return await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailAsync(role, month, type, limit, cancellationToken), cancellationToken);
+        }
+
+        var data = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, limit, cancellationToken), cancellationToken);
+        if (data.List.Count < limit)
+        {
+            return data;
+        }
+        for (int i = 2; i <= MaxBackgroundDetailPages; i++)
+        {
+            await PaceRequestAsync(cancellationToken);
+            var addData = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailByPageAsync(role, month, type, i, limit, cancellationToken), cancellationToken);
+            data.List.AddRange(addData.List);
+            if (addData.List.Count < limit)
+            {
+                return data;
+            }
+        }
+        // 走到这里说明每页都是满的：接口分页异常，不能让后台顺着无限翻下去
+        _logger.LogWarning("Travelers diary detail paging hit the page cap {max} (biz {biz}, uid {uid}, month {month}, type {type}).", MaxBackgroundDetailPages, role.GameBiz, role.Uid, month, type);
+        return data;
+    }
+
+
+    /// <summary>
+    /// 拉齐开拓月历某类型当月全部明细。未套间隔时走客户端一次翻完；后台自动更新则按页请求并在页之间停顿。
+    /// </summary>
+    private async Task<TrailblazeCalendarDetail> FetchTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type, CancellationToken cancellationToken)
+    {
+        if (!HasRequestPacing)
+        {
+            return await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailAsync(role, month, type, cancellationToken: cancellationToken), cancellationToken);
+        }
+
+        const int pageSize = 100;
+        var data = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, pageSize, cancellationToken), cancellationToken);
+        if (data.List.Count < pageSize)
+        {
+            return data;
+        }
+        for (int i = 2; i <= MaxBackgroundDetailPages; i++)
+        {
+            await PaceRequestAsync(cancellationToken);
+            var addData = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailByPageAsync(role, month, type, i, pageSize, cancellationToken), cancellationToken);
+            data.List.AddRange(addData.List);
+            if (addData.List.Count < pageSize)
+            {
+                return data;
+            }
+        }
+        // 走到这里说明每页都是满的：接口分页异常，不能让后台顺着无限翻下去
+        _logger.LogWarning("Trailblaze calendar detail paging hit the page cap {max} (biz {biz}, uid {uid}, month {month}, type {type}).", MaxBackgroundDetailPages, role.GameBiz, role.Uid, month, type);
+        return data;
+    }
+
+
+    /// <summary>
+    /// 拉齐绳网月报某类型当月全部明细。未套间隔时走客户端一次翻完；后台自动更新则按页请求并在页之间停顿。
+    /// </summary>
+    private async Task<InterKnotReportDetail> FetchInterKnotReportDetailAsync(GameRecordRole role, string month, string type, CancellationToken cancellationToken)
+    {
+        if (!HasRequestPacing)
+        {
+            return await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailAsync(role, month, type, cancellationToken: cancellationToken), cancellationToken);
+        }
+
+        const int pageSize = 100;
+        var data = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailByPageAsync(role, month, type, 1, pageSize, cancellationToken), cancellationToken);
+        if (data.List.Count < pageSize)
+        {
+            return data;
+        }
+        for (int i = 2; i <= MaxBackgroundDetailPages; i++)
+        {
+            await PaceRequestAsync(cancellationToken);
+            var addData = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailByPageAsync(role, month, type, i, pageSize, cancellationToken), cancellationToken);
+            data.List.AddRange(addData.List);
+            if (addData.List.Count < pageSize)
+            {
+                return data;
+            }
+        }
+        // 走到这里说明每页都是满的：接口分页异常，不能让后台顺着无限翻下去
+        _logger.LogWarning("Inter knot report detail paging hit the page cap {max} (biz {biz}, uid {uid}, month {month}, type {type}).", MaxBackgroundDetailPages, role.GameBiz, role.Uid, month, type);
+        return data;
+    }
+
+
+    /// <summary>
+    /// 业务错误是否带了需要交互完成的 aigis 挑战。
+    /// </summary>
+    private static bool HasAigisChallenge(miHoYoApiException ex)
+    {
+        return ex.Aigis is not null && !string.IsNullOrWhiteSpace(ex.Aigis.Data);
+    }
+
+
+    /// <summary>
+    /// 结束 <see cref="SuppressInteractiveRiskChallenge"/> 的作用域。
+    /// </summary>
+    private sealed class InteractiveRiskChallengeSuppressScope : IDisposable
+    {
+        private GameRecordService? _owner;
+
+        public InteractiveRiskChallengeSuppressScope(GameRecordService owner)
+        {
+            _owner = owner;
+        }
+
+        public void Dispose()
+        {
+            if (_owner is null)
+            {
+                return;
+            }
+            int depth = _owner._interactiveRiskChallengeSuppressDepth.Value;
+            _owner._interactiveRiskChallengeSuppressDepth.Value = depth > 0 ? depth - 1 : 0;
+            _owner = null;
+        }
+    }
+
+
+    /// <summary>
     /// 按角色区服选择固定的 GameRecord Client，避免并发请求受页面当前平台状态影响。
     /// </summary>
     /// <param name="role">用于判断国服或国际服的游戏角色。</param>
@@ -153,6 +372,12 @@ internal class GameRecordService
         }
         catch (miHoYoApiException ex)
         {
+            // 后台任务解不了人机验证：弹窗既打扰用户，取消后仍会失败
+            if (IsInteractiveRiskChallengeSuppressed && HasAigisChallenge(ex))
+            {
+                throw;
+            }
+
             var aigisRetry = await TryRetryAfterAigisAsync(client, ex, action, cancellationToken);
             if (aigisRetry.Handled)
             {
@@ -214,6 +439,11 @@ internal class GameRecordService
         }
         catch (miHoYoApiException ex)
         {
+            if (IsInteractiveRiskChallengeSuppressed && HasAigisChallenge(ex))
+            {
+                throw;
+            }
+
             var aigisRetry = await TryRetryAfterAigisAsync(client, ex, c => action(c, cookie), cancellationToken);
             if (aigisRetry.Handled)
             {
@@ -263,7 +493,7 @@ internal class GameRecordService
     /// </summary>
     private async Task<(bool Handled, T Result)> TryRetryAfterAigisAsync<T>(GameRecordClient client, miHoYoApiException ex, Func<GameRecordClient, Task<T>> action, CancellationToken cancellationToken)
     {
-        if (ex.Aigis is null || string.IsNullOrWhiteSpace(ex.Aigis.Data))
+        if (IsInteractiveRiskChallengeSuppressed || ex.Aigis is null || string.IsNullOrWhiteSpace(ex.Aigis.Data))
         {
             return (false, default!);
         }
@@ -878,12 +1108,13 @@ internal class GameRecordService
 
     //原数据库使用的是自增id，在做增量更新时，逻辑判断比较复杂
     /// <param name="forceOverwrite">为 true 时先删除该 (uid, year, month, type) 的全部旧记录，再全量写入 API 返回值；false 时走增量逻辑。</param>
-    public async Task<int> GetTravelersDiaryDetailAsync(GameRecordRole role, int month, int type, int limit = 100, bool forceOverwrite = false)
+    /// <param name="cancellationToken">取消令牌。</param>
+    public async Task<int> GetTravelersDiaryDetailAsync(GameRecordRole role, int month, int type, int limit = 100, bool forceOverwrite = false, CancellationToken cancellationToken = default)
     {
         if (forceOverwrite)
         {
             // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
-            var fwDetail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailAsync(role, month, type, limit));
+            var fwDetail = await FetchTravelersDiaryDetailAsync(role, month, type, limit, cancellationToken);
             var fwList = fwDetail.List;
             if (fwList.Count == 0)
             {
@@ -905,7 +1136,7 @@ internal class GameRecordService
         }
 
         // 探针请求：先获取第1页（limit=1）以同时得到总数和最新一条记录，避免冗余的全量查询
-        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, 1));
+        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailByPageAsync(role, month, type, 1, 1, cancellationToken), cancellationToken);
         int total = firstPage.Total;
         if (total == 0)
         {
@@ -943,7 +1174,8 @@ internal class GameRecordService
             return 0;
         }
         // 增量插入：仅在有新数据时才发起全量请求
-        var detail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTravelsDiaryDetailAsync(role, month, type, limit));
+        await PaceRequestAsync(cancellationToken);
+        var detail = await FetchTravelersDiaryDetailAsync(role, month, type, limit, cancellationToken);
         var list = detail.List;
         var existTimes = new HashSet<DateTime>(dapper.Query<DateTime>(
             "SELECT Time FROM GenshinTravelersDiaryAwardItem WHERE Uid=@Uid AND Year=@Year AND Month=@Month AND Type=@Type;",
@@ -1428,12 +1660,13 @@ internal class GameRecordService
 
     //原数据库使用的是自增id，在做增量更新时，逻辑判断比较复杂
     /// <param name="forceOverwrite">为 true 时先删除该 (uid, month, type) 的全部旧记录，再全量写入 API 返回值；false 时走增量逻辑。</param>
-    public async Task<int> GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type, bool forceOverwrite = false)
+    /// <param name="cancellationToken">取消令牌。</param>
+    public async Task<int> GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type, bool forceOverwrite = false, CancellationToken cancellationToken = default)
     {
         if (forceOverwrite)
         {
             // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
-            var fwDetail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailAsync(role, month, type));
+            var fwDetail = await FetchTrailblazeCalendarDetailAsync(role, month, type, cancellationToken);
             var fwList = fwDetail.List;
             if (fwList.Count == 0)
             {
@@ -1454,7 +1687,7 @@ internal class GameRecordService
         }
 
         // 先获取第一页（page_size=1）以同时得到总数和最新一条记录
-        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1));
+        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1, cancellationToken), cancellationToken);
         int total = firstPage.Total;
         if (total == 0)
         {
@@ -1491,7 +1724,8 @@ internal class GameRecordService
             return 0;
         }
         // 增量插入：仅插入 Time 不重复的新记录；同时刷新原有记录中最新的一条
-        var detail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetTrailblazeCalendarDetailAsync(role, month, type));
+        await PaceRequestAsync(cancellationToken);
+        var detail = await FetchTrailblazeCalendarDetailAsync(role, month, type, cancellationToken);
         var list = detail.List;
         var existTimes = new HashSet<DateTime>(dapper.Query<DateTime>(
             "SELECT Time FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @Uid AND Month = @Month AND Type = @Type;",
@@ -1607,12 +1841,13 @@ internal class GameRecordService
 
 
     /// <param name="forceOverwrite">为 true 时先删除该 (uid, month, type) 的全部旧记录，再全量写入 API 返回值；false 时走增量逻辑。</param>
-    public async Task<int> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type, bool forceOverwrite = false)
+    /// <param name="cancellationToken">取消令牌。</param>
+    public async Task<int> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type, bool forceOverwrite = false, CancellationToken cancellationToken = default)
     {
         if (forceOverwrite)
         {
             // 全量覆盖：先删除旧数据，再批量写入 API 全部记录
-            var fwDetail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailAsync(role, month, type));
+            var fwDetail = await FetchInterKnotReportDetailAsync(role, month, type, cancellationToken);
             var fwList = fwDetail.List;
             if (fwList.Count == 0)
             {
@@ -1633,7 +1868,7 @@ internal class GameRecordService
         }
 
         // 先获取第一页（page_size=1）以同时得到总数和最新一条记录，避免后续重复请求
-        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1));
+        var firstPage = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1, cancellationToken), cancellationToken);
         int total = firstPage.Total;
         if (total == 0)
         {
@@ -1660,7 +1895,8 @@ internal class GameRecordService
         }
         // 增量插入：INSERT OR IGNORE 跳过已存在记录（主键为 (Uid, Id)），仅写入新记录；
         // 同时刷新原有记录中最新的一条（INSERT OR REPLACE 利用主键做 upsert）
-        var detail = await ExecuteWithRequestRecoveryAsync(role, client => client.GetInterKnotReportDetailAsync(role, month, type));
+        await PaceRequestAsync(cancellationToken);
+        var detail = await FetchInterKnotReportDetailAsync(role, month, type, cancellationToken);
         int newCount = total - existCount;
         dapper.Execute("""
             INSERT OR IGNORE INTO ZZZInterKnotReportDetailItem (Uid, Id, DataMonth, DataType, Action, Time, Number)

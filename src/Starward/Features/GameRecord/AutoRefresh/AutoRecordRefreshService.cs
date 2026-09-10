@@ -1,6 +1,8 @@
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.GameRecord;
+using Starward.Features.ViewHost;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -184,31 +186,39 @@ internal class AutoRecordRefreshService
         }
 
         int success = 0;
-        foreach ((GameRecordRole role, RecordRefreshItem item, RecordRefreshConfig config) in targets)
+        // 遇到 aigis 不要弹极验；月报翻页也走同一套 3–8 秒间隔，避免一页接一页连打
+        using (_gameRecordService.SuppressInteractiveRiskChallenge())
+        using (_gameRecordService.UseRequestPacing(PaceAsync))
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            try
+            foreach ((GameRecordRole role, RecordRefreshItem item, RecordRefreshConfig config) in targets)
             {
-                await RefreshItemAsync(role, item, PaceAsync, cancellationToken);
-                config.LastRunTicks = DateTimeOffset.UtcNow.UtcTicks;
-                RecordRefreshConfigStore.Save(role.GameBiz, role.Uid, item, config);
-                RemoveError(role, item);
-                success++;
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (miHoYoApiException ex)
-            {
-                // 风控 / 需要验证 / Cookie 失效：后台解不开，记一条给用户看，直接跳过这个板块
-                _logger.LogWarning(ex, "Auto record refresh failed (biz {biz}, uid {uid}, item {item}, retcode {code}).", role.GameBiz, role.Uid, item, ex.ReturnCode);
-                RecordError(role, item, ex.ReturnCode, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Auto record refresh failed (biz {biz}, uid {uid}, item {item}).", role.GameBiz, role.Uid, item);
-                RecordError(role, item, 0, ex.Message);
+                cancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    await RefreshItemAsync(role, item, PaceAsync, cancellationToken);
+                    config.LastRunTicks = DateTimeOffset.UtcNow.UtcTicks;
+                    RecordRefreshConfigStore.Save(role.GameBiz, role.Uid, item, config);
+                    RemoveError(role, item);
+                    NotifyCompleted(role, item, succeeded: true);
+                    success++;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (miHoYoApiException ex)
+                {
+                    // 风控 / 需要验证 / Cookie 失效：后台解不开，记一条给用户看，直接跳过这个板块
+                    _logger.LogWarning(ex, "Auto record refresh failed (biz {biz}, uid {uid}, item {item}, retcode {code}).", role.GameBiz, role.Uid, item, ex.ReturnCode);
+                    RecordError(role, item, ex.ReturnCode, ex.Message);
+                    NotifyCompleted(role, item, succeeded: false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Auto record refresh failed (biz {biz}, uid {uid}, item {item}).", role.GameBiz, role.Uid, item);
+                    RecordError(role, item, 0, ex.Message);
+                    NotifyCompleted(role, item, succeeded: false);
+                }
             }
         }
 
@@ -218,7 +228,28 @@ internal class AutoRecordRefreshService
 
 
     /// <summary>
-    /// 更新一个数据板块。月报类只取当月，往前的月份留给用户手动补。
+    /// 通知当前打开的数据页：红点与列表必须在 UI 线程更新。
+    /// </summary>
+    private static void NotifyCompleted(GameRecordRole role, RecordRefreshItem item, bool succeeded)
+    {
+        var message = new RecordRefreshCompletedMessage(role.GameBiz, role.Uid, item, succeeded);
+        var dispatcher = MainWindow.Current?.DispatcherQueue;
+        if (dispatcher is null)
+        {
+            return;
+        }
+        if (dispatcher.HasThreadAccess)
+        {
+            WeakReferenceMessenger.Default.Send(message);
+            return;
+        }
+        dispatcher.TryEnqueue(() => WeakReferenceMessenger.Default.Send(message));
+    }
+
+
+    /// <summary>
+    /// 更新一个数据板块。月报类只取当月，往前的月份留给用户手动补；
+    /// 明细与页面「获取详情」一样全量覆盖（先删后写），不走已停用的增量探针。
     /// </summary>
     /// <param name="role">游戏角色。</param>
     /// <param name="item">数据板块。</param>
@@ -252,9 +283,9 @@ internal class AutoRecordRefreshService
                     if (summary.DataMonth > 0)
                     {
                         await pace(cancellationToken);
-                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, summary.DataMonth, 1);
+                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, summary.DataMonth, 1, forceOverwrite: true, cancellationToken: cancellationToken);
                         await pace(cancellationToken);
-                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, summary.DataMonth, 2);
+                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, summary.DataMonth, 2, forceOverwrite: true, cancellationToken: cancellationToken);
                     }
                     break;
                 }
@@ -297,9 +328,9 @@ internal class AutoRecordRefreshService
                     if (!string.IsNullOrWhiteSpace(summary.DataMonth))
                     {
                         await pace(cancellationToken);
-                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, summary.DataMonth, 1);
+                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, summary.DataMonth, 1, forceOverwrite: true, cancellationToken: cancellationToken);
                         await pace(cancellationToken);
-                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, summary.DataMonth, 2);
+                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, summary.DataMonth, 2, forceOverwrite: true, cancellationToken: cancellationToken);
                     }
                     break;
                 }
@@ -327,7 +358,7 @@ internal class AutoRecordRefreshService
                         foreach (var detail in list)
                         {
                             await pace(cancellationToken);
-                            await _gameRecordService.GetInterKnotReportDetailAsync(role, summary.DataMonth, detail.DataType);
+                            await _gameRecordService.GetInterKnotReportDetailAsync(role, summary.DataMonth, detail.DataType, forceOverwrite: true, cancellationToken: cancellationToken);
                         }
                     }
                     break;

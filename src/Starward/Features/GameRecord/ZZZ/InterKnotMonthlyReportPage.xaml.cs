@@ -80,6 +80,7 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, ReloadMonthDataFromLocal);
         await Task.Delay(16);
         await InitializeDataAsync();
     }
@@ -172,6 +173,11 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     /// </summary>
     private List<string>? _optionalMonths;
 
+    /// <summary>
+    /// 初始化是否已跑完。后台自动更新的重载要等它为 true 才动。
+    /// </summary>
+    private bool _monthDataInitialized;
+
     // 拖拽切周状态
     private double _pointerPressX;
     private bool _isPointerDragging;
@@ -213,14 +219,22 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
     [RelayCommand]
     private async Task InitializeDataAsync()
     {
-        await Task.Delay(16);
-        await GetCurrentSummaryAsync();   // 总是请求当前月最新数据（含 OptionalMonth）
-        InitializeSelectedWeek();         // 设置默认周为服务器今天所在周（周一）
-        GetMonthDataList();               // 从本地 DB 加载历史月份列表
-        // 若本地有统计数据，自动选中最新月份（列表已按 DataMonth DESC 排序，首项即最新）
-        if (MonthDataList?.Count > 0)
+        _monthDataInitialized = false;
+        try
         {
-            ListView_MonthDataList.SelectedItem = MonthDataList[0];
+            await Task.Delay(16);
+            await GetCurrentSummaryAsync();   // 总是请求当前月最新数据（含 OptionalMonth）
+            InitializeSelectedWeek();         // 设置默认周为服务器今天所在周（周一）
+            GetMonthDataList();               // 从本地 DB 加载历史月份列表
+            // 若本地有统计数据，自动选中最新月份（列表已按 DataMonth DESC 排序，首项即最新）
+            if (MonthDataList?.Count > 0)
+            {
+                ListView_MonthDataList.SelectedItem = MonthDataList[0];
+            }
+        }
+        finally
+        {
+            _monthDataInitialized = true;
         }
     }
 
@@ -298,6 +312,25 @@ public sealed partial class InterKnotMonthlyReportPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Load inter knot report month data ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
+        }
+    }
+
+
+    /// <summary>
+    /// 后台已把当月摘要和明细写入本地库，只重载列表，不再联网。
+    /// </summary>
+    private void ReloadMonthDataFromLocal()
+    {
+        // 初始化还没跑完就别插队：此时 _optionalMonths 尚未就绪，选中月会被判成「不可刷新」把按钮藏掉；
+        // 且初始化末尾本来就会再读一次本地库，后台刚写进去的数据不会漏
+        if (!_monthDataInitialized)
+        {
+            return;
+        }
+        GetMonthDataList();
+        if (MonthDataList?.Count > 0)
+        {
+            ListView_MonthDataList.SelectedItem = MonthDataList[0];
         }
     }
 

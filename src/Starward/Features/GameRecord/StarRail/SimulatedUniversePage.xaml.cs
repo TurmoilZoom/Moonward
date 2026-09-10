@@ -50,6 +50,7 @@ public sealed partial class SimulatedUniversePage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializeSimulatedUniverseRecord);
         await Task.Delay(16);
         InitializeSimulatedUniverseRecord();
     }

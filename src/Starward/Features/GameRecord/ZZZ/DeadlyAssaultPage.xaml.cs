@@ -51,6 +51,7 @@ public sealed partial class DeadlyAssaultPage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializeDeadlyAssaultInfoData);
         await Task.Delay(16);
         InitializeDeadlyAssaultInfoData();
     }

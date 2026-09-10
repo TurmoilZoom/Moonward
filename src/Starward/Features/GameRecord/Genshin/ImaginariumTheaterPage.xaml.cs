@@ -51,6 +51,7 @@ public sealed partial class ImaginariumTheaterPage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializeTheaterData);
         await Task.Delay(160);
         InitializeTheaterData();
     }

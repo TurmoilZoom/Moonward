@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -31,11 +32,69 @@ public sealed partial class RecordRefreshConfigButton : UserControl
     private bool _initialized;
 
 
+    /// <summary>
+    /// 后台自动更新成功写入本地库后触发，供所在数据页从数据库重载列表。
+    /// </summary>
+    public event EventHandler? LocalDataUpdated;
+
+
     public RecordRefreshConfigButton()
     {
         InitializeDayNames();
         InitializeComponent();
+        Loaded += RecordRefreshConfigButton_Loaded;
+        Unloaded += RecordRefreshConfigButton_Unloaded;
         _initialized = true;
+    }
+
+
+    private void RecordRefreshConfigButton_Loaded(object sender, RoutedEventArgs e)
+    {
+        WeakReferenceMessenger.Default.Register<RecordRefreshCompletedMessage>(this, (_, message) => OnBackgroundCompleted(message));
+    }
+
+
+    private void RecordRefreshConfigButton_Unloaded(object sender, RoutedEventArgs e)
+    {
+        WeakReferenceMessenger.Default.Unregister<RecordRefreshCompletedMessage>(this);
+    }
+
+
+    /// <summary>
+    /// 后台更新当前账号的本板块结束后：刷新红点；成功则通知页面重载本地数据。
+    /// </summary>
+    private void OnBackgroundCompleted(RecordRefreshCompletedMessage message)
+    {
+        if (GameRole is null || message.Uid != GameRole.Uid || message.GameBiz != GameRole.GameBiz || message.Item != Item)
+        {
+            return;
+        }
+        UpdateErrorState();
+        if (message.Succeeded)
+        {
+            LocalDataUpdated?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+
+    /// <summary>
+    /// 当前页在前台时，后台自动更新成功后从本地库重载。页面卸载时自动取消。
+    /// </summary>
+    /// <param name="host">所在页面，用它的 Unloaded 解绑。</param>
+    /// <param name="reloadFromLocal">只读本地库，不要再打网络。</param>
+    public void WatchPage(FrameworkElement host, Action reloadFromLocal)
+    {
+        ArgumentNullException.ThrowIfNull(host);
+        ArgumentNullException.ThrowIfNull(reloadFromLocal);
+        void OnUpdated(object? sender, EventArgs e) => reloadFromLocal();
+        LocalDataUpdated += OnUpdated;
+        RoutedEventHandler? onUnloaded = null;
+        onUnloaded = (_, _) =>
+        {
+            host.Unloaded -= onUnloaded;
+            LocalDataUpdated -= OnUpdated;
+        };
+        host.Unloaded += onUnloaded;
     }
 
 
@@ -99,7 +158,6 @@ public sealed partial class RecordRefreshConfigButton : UserControl
             _config.Enabled = value;
             if (value)
             {
-                // 记下开启时刻：第一次更新前用它当排期基准，改频率时「下次更新」才会跟着变
                 _config.EnabledTicks = DateTimeOffset.UtcNow.UtcTicks;
             }
             SaveConfig();
@@ -272,6 +330,9 @@ public sealed partial class RecordRefreshConfigButton : UserControl
         }
         try
         {
+            // 后台成功后只写 lastRun；浮层开着时这份 _config 可能是它之前读的，
+            // 落库前把这个字段从库里取回来，别拿旧值把成功记录盖掉
+            _config.LastRunTicks = RecordRefreshConfigStore.Load(GameRole, Item).LastRunTicks;
             RecordRefreshConfigStore.Save(GameRole.GameBiz, GameRole.Uid, Item, _config);
         }
         catch (Exception ex)
@@ -297,8 +358,8 @@ public sealed partial class RecordRefreshConfigButton : UserControl
 
     private void Flyout_Opening(object? sender, object e)
     {
-        UpdateScheduleTexts();
-        UpdateErrorState();
+        // 后台可能刚写过 lastRun / 清过异常；不重载的话会显示旧值，改频率还会把成功记录盖掉
+        LoadConfig();
     }
 
 

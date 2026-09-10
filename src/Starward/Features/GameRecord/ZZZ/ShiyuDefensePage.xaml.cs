@@ -52,6 +52,7 @@ public sealed partial class ShiyuDefensePage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializeShiyuDefenseInfoData);
         await Task.Delay(16);
         InitializeShiyuDefenseInfoData();
     }

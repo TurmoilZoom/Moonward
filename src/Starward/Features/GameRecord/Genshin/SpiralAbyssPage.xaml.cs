@@ -51,6 +51,7 @@ public sealed partial class SpiralAbyssPage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializeAbyssData);
         await Task.Delay(160);
         InitializeAbyssData();
     }

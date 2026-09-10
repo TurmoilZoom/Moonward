@@ -39,8 +39,7 @@ public class RecordRefreshConfig
     public long LastRunTicks { get; set; }
 
     /// <summary>
-    /// 用户打开开关的时刻（UTC ticks）。第一次更新前，排期以它为基准往后算，
-    /// 「下次更新」才能立刻反映刚选的频率，而不是一直显示今天。
+    /// 用户打开开关的时刻（UTC ticks）。只作记录，不参与排期：还没成功跑过就视为到期，下次启动先补档。
     /// </summary>
     [JsonPropertyName("enabledAt")]
     public long EnabledTicks { get; set; }
@@ -52,22 +51,14 @@ public class RecordRefreshConfig
 
 
     /// <summary>
-    /// 排期基准日：优先用上次更新日，还没更新过就用开启开关那天。
+    /// 排期基准日：只用上次成功更新日。从未跑过时为 null，视为立即到期，先补一轮档案。
     /// </summary>
-    /// <param name="utcNow">当前 UTC 时刻。</param>
-    /// <returns>基准日；两者都没有时为 null（视为立即到期）。</returns>
-    private DateOnly? GetBaselineDate(DateTimeOffset utcNow)
+    /// <returns>上次成功更新的 UTC+8 日期；从未跑过时为 null。</returns>
+    private DateOnly? GetBaselineDate()
     {
         if (LastRunTime is DateTimeOffset lastRun)
         {
             return RecordRefreshSchedule.GetServerDate(lastRun);
-        }
-        if (EnabledTicks > 0)
-        {
-            DateOnly enabled = RecordRefreshSchedule.GetServerDate(new DateTimeOffset(EnabledTicks, TimeSpan.Zero));
-            DateOnly today = RecordRefreshSchedule.GetServerDate(utcNow);
-            // 时钟被往回调过：基准日跑到未来会让排期永远不到期，退回今天
-            return enabled > today ? today : enabled;
         }
         return null;
     }
@@ -97,19 +88,19 @@ public class RecordRefreshConfig
             return false;
         }
         DateOnly today = RecordRefreshSchedule.GetServerDate(utcNow);
-        return RecordRefreshSchedule.IsDue(ToSettings(), today, GetBaselineDate(utcNow));
+        return RecordRefreshSchedule.IsDue(ToSettings(), today, GetBaselineDate());
     }
 
 
     /// <summary>
-    /// 下次该更新的日期。
+    /// 下次该更新的日期。从未成功跑过时返回今天，与启动检查的「先补档」一致。
     /// </summary>
     /// <param name="utcNow">当前 UTC 时刻。</param>
     /// <returns>下次到期的日历日。</returns>
     public DateOnly GetNextDueDate(DateTimeOffset utcNow)
     {
         DateOnly today = RecordRefreshSchedule.GetServerDate(utcNow);
-        return RecordRefreshSchedule.GetNextDueDate(ToSettings(), today, GetBaselineDate(utcNow));
+        return RecordRefreshSchedule.GetNextDueDate(ToSettings(), today, GetBaselineDate());
     }
 
 }

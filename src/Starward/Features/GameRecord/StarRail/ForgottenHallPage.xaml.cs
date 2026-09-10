@@ -52,6 +52,7 @@ public sealed partial class ForgottenHallPage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializeForgottenHallData);
         await Task.Delay(16);
         InitializeForgottenHallData();
     }

@@ -50,6 +50,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
 
     protected override async void OnLoaded()
     {
+        RecordRefreshConfigButton_Auto.WatchPage(this, InitializeAbyssData);
         await Task.Delay(160);
         InitializeAbyssData();
     }
