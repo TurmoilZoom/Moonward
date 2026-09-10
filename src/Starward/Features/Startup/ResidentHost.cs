@@ -52,10 +52,11 @@ internal static class ResidentHost
             // 启动时为三个游戏按当前语言确保物品名称映射缓存；首次启动/更新后会一次性迁移存量记录名称。
             _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().EnsureCurrentLanguageOnStartupAsync());
             // 启动后批量签到，并在进程常驻期间跨日再签（绝对到期 + 休眠唤醒补判）。
-            AppConfig.GetService<AutoSignInService>().StartResident();
-            // 自动更新战绩：启动后检查一次，把到期的「账号 + 数据板块」补上。只判这一次，不跨日重判。
+            AutoSignInService autoSignIn = AppConfig.GetService<AutoSignInService>();
+            autoSignIn.StartResident();
+            // 自动更新战绩：等签到首轮打完再检查一次到期板块。只判这一次，不跨日重判。
             // 挂在这里而不是主窗口：用户不必开启开机自启，软件（含仅托盘驻留）跑起来就有效。
-            AppConfig.GetService<AutoRecordRefreshService>().StartStartupCheck();
+            AppConfig.GetService<AutoRecordRefreshService>().StartStartupCheck(autoSignIn.StartupBatchCompleted);
             AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
             // 后台驻留期间也检查并静默下载更新：仅托盘驻留或主窗口长期最小化时，
             // MainView 那条「窗口激活才查」的路径永远不会触发。

@@ -20,6 +20,7 @@ namespace Starward.Features.GameRecord.AutoRefresh;
 /// </para>
 /// <para>
 /// 设计上刻意「不努力」：
+/// 启动后至少缓冲 45 秒，且要等自动签到的第一轮批量打完再检查，避免和签到抢请求（签到卡住则 15 分钟后照样开刷）；
 /// 只在启动时判一次到期，进程常驻期间不再跨日重判（错过的到期日等下次启动补上）；
 /// 某个板块出错（风控、需要验证、断网）就记一条异常直接跳过，不重试、不自愈、不弹窗，
 /// 用户在数据页的配置浮层里点进异常记录自己看。
@@ -29,9 +30,15 @@ internal class AutoRecordRefreshService
 {
 
     /// <summary>
-    /// 启动后先缓冲一段时间再检查，避开启动高峰；比自动签到的 10 秒更靠后，两者不抢同一个时间点。
+    /// 等自动签到首轮批量的上限。签到请求若卡住，不能把战绩补档挂到进程退出。
     /// </summary>
-    private static readonly TimeSpan StartupDelay = TimeSpan.FromSeconds(45);
+    private static readonly TimeSpan StartupSignInWaitTimeout = TimeSpan.FromMinutes(15);
+
+    /// <summary>
+    /// 启动后至少缓冲这么久再开刷。签到无角色 / 全部关闭时首轮瞬间就完成，
+    /// 那时首屏渲染、更新检查、抽卡名称迁移还都挤在启动这几十秒里，不能跟着一起打。
+    /// </summary>
+    private static readonly TimeSpan MinStartupDelay = TimeSpan.FromSeconds(45);
 
     /// <summary>
     /// 相邻两个请求之间的随机间隔（秒），与自动签到同一套节奏：宁可一轮跑几分钟，也不要一次性打完。
@@ -69,10 +76,14 @@ internal class AutoRecordRefreshService
 
 
     /// <summary>
-    /// 启动检查：缓冲一段时间后跑一轮到期的更新。幂等，每个进程只生效一次。
+    /// 启动检查：等自动签到首轮批量结束后，再跑一轮到期的更新。幂等，每个进程只生效一次。
     /// </summary>
-    public void StartStartupCheck()
+    /// <param name="waitForStartupBatch">
+    /// 通常是自动签到的 <c>StartupBatchCompleted</c>。无角色或签到全关时它也会很快完成。
+    /// </param>
+    public void StartStartupCheck(Task waitForStartupBatch)
     {
+        ArgumentNullException.ThrowIfNull(waitForStartupBatch);
         if (Interlocked.Exchange(ref _startupCheckStarted, 1) == 1)
         {
             return;
@@ -81,7 +92,7 @@ internal class AutoRecordRefreshService
         {
             try
             {
-                await Task.Delay(StartupDelay);
+                await WaitForStartupBatchAsync(waitForStartupBatch);
                 await RunBatchAsync(CancellationToken.None);
             }
             catch (Exception ex)
@@ -89,6 +100,52 @@ internal class AutoRecordRefreshService
                 _logger.LogError(ex, "Auto record refresh startup check failed.");
             }
         });
+    }
+
+
+    /// <summary>
+    /// 等到签到首轮打完；超时或门闩本身出错都不再等。签到刚结束时再隔 3–8 秒，避免和最后一次签到请求连打，
+    /// 最后补足 <see cref="MinStartupDelay"/> 的启动缓冲。
+    /// </summary>
+    /// <param name="waitForStartupBatch">自动签到首轮完成任务。</param>
+    private async Task WaitForStartupBatchAsync(Task waitForStartupBatch)
+    {
+        DateTimeOffset start = DateTimeOffset.UtcNow;
+        bool batchSettled = true;
+        using var timeout = new CancellationTokenSource(StartupSignInWaitTimeout);
+        try
+        {
+            await waitForStartupBatch.WaitAsync(timeout.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // 超时瞬间签到刚完成：不算超时，接着隔一档再刷
+            batchSettled = waitForStartupBatch.IsCompleted;
+            if (!batchSettled)
+            {
+                _logger.LogWarning("Auto record refresh: auto sign-in startup batch did not finish within {timeout}; starting anyway.", StartupSignInWaitTimeout);
+            }
+        }
+        catch (Exception ex)
+        {
+            // 门闩任务本身出错（当前的 TaskCompletionSource 不会走到这里）：一样只是不等了。
+            // 这里若把异常放出去，补档整轮都会被跳过，正好与「签到不能拖死补档」相反
+            _logger.LogWarning(ex, "Auto record refresh: waiting for auto sign-in startup batch failed; starting anyway.");
+        }
+
+        if (batchSettled)
+        {
+            int seconds = Random.Shared.Next(MinRequestDelaySeconds, MaxRequestDelaySeconds + 1);
+            _logger.LogInformation("Auto record refresh: delaying {seconds}s after the auto sign-in startup batch.", seconds);
+            await Task.Delay(TimeSpan.FromSeconds(seconds));
+        }
+
+        // 签到很快完成时上面这点间隔远不够避开启动高峰，补足下限；已经等超时的自然不再等
+        TimeSpan remaining = MinStartupDelay - (DateTimeOffset.UtcNow - start);
+        if (remaining > TimeSpan.Zero)
+        {
+            await Task.Delay(remaining);
+        }
     }
 
 

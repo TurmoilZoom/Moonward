@@ -65,6 +65,12 @@ internal class AutoSignInService
     /// <summary>保证常驻循环每个进程只启动一次。</summary>
     private int _residentStarted;
 
+    /// <summary>
+    /// 启动后第一轮批量结束（成功、失败、无角色、等待阶段就退出都算）。
+    /// 战绩自动更新等这一下再开，避免和签到抢请求；续体用异步，免得把签到循环线程卡住。
+    /// </summary>
+    private readonly TaskCompletionSource _startupBatchCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
     /// <summary>用户打开自动签到开关：必须带此标志，只 Wake 时 nextDue 可能已排到明天。</summary>
     private int _forceCheck;
 
@@ -103,6 +109,13 @@ internal class AutoSignInService
     /// <param name="biz">游戏业务线。</param>
     /// <param name="value">是否开启。</param>
     public void SetEnabled(GameBiz biz, bool value) => AppConfig.SetAutoSignInEnabled(biz, value);
+
+
+    /// <summary>
+    /// 启动后第一轮批量签到已结束。战绩自动更新等这一下再开始。
+    /// 无角色、全部关闭、本轮失败也会完成；常驻循环若在首轮前退出同样完成，避免把补档挂死。
+    /// </summary>
+    internal Task StartupBatchCompleted => _startupBatchCompleted.Task;
 
 
     /// <summary>
@@ -196,6 +209,11 @@ internal class AutoSignInService
                     _logger.LogError(ex, "Auto sign-in round failed.");
                     outcome = AutoSignInRoundOutcome.Incomplete;
                 }
+                finally
+                {
+                    // 只关心启动这一轮已经打完；后续跨日 TrySetResult 是空操作
+                    NotifyStartupBatchCompleted();
+                }
 
                 consecutiveEarly = outcome is AutoSignInRoundOutcome.Early ? consecutiveEarly + 1 : 0;
                 if (consecutiveEarly == MaxConsecutiveEarlyRetries + 1)
@@ -224,6 +242,20 @@ internal class AutoSignInService
         {
             _logger.LogError(ex, "Auto sign-in resident loop failed.");
         }
+        finally
+        {
+            // 首轮还没跑到（等待阶段就退出）也要放开，不能把战绩更新挂死
+            NotifyStartupBatchCompleted();
+        }
+    }
+
+
+    /// <summary>
+    /// 通知启动后第一轮批量已经结束。多次调用只生效一次。
+    /// </summary>
+    private void NotifyStartupBatchCompleted()
+    {
+        _startupBatchCompleted.TrySetResult();
     }
 
 
