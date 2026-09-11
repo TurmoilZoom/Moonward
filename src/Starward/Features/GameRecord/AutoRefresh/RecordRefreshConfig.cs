@@ -39,10 +39,12 @@ public class RecordRefreshConfig
     public long LastRunTicks { get; set; }
 
     /// <summary>
-    /// 用户打开开关的时刻（UTC ticks）。只作记录，不参与排期：还没成功跑过就视为到期，下次启动先补档。
+    /// 最后一次改动排期设置（打开开关、换频率）的时刻（UTC ticks）。
+    /// 改动之后一律从这天按新频率重排，当天若命中就算到期，不看当天是否已经更新过。
+    /// JSON 键沿用旧的 <c>enabledAt</c>：老配置里存的正是打开开关的时刻，语义相容。
     /// </summary>
     [JsonPropertyName("enabledAt")]
-    public long EnabledTicks { get; set; }
+    public long ScheduleBaseTicks { get; set; }
 
 
     /// <summary>上次成功自动更新的时刻，从未更新过时为 null。</summary>
@@ -51,16 +53,35 @@ public class RecordRefreshConfig
 
 
     /// <summary>
-    /// 排期基准日：只用上次成功更新日。从未跑过时为 null，视为立即到期，先补一轮档案。
+    /// 记下「排期设置刚被改过」：打开开关或改频率后调用，之后的排期从今天按新频率重算。
     /// </summary>
-    /// <returns>上次成功更新的 UTC+8 日期；从未跑过时为 null。</returns>
-    private DateOnly? GetBaselineDate()
+    public void MarkScheduleChanged()
     {
-        if (LastRunTime is DateTimeOffset lastRun)
+        ScheduleBaseTicks = DateTimeOffset.UtcNow.UtcTicks;
+    }
+
+
+    /// <summary>
+    /// 排期基准：改设置之后又成功跑过就以那次成功为准（同一周期内不再重复跑），
+    /// 否则以最后一次改设置的日子为准（当天命中就算到期）。
+    /// </summary>
+    /// <param name="today">当前 UTC+8 日期。</param>
+    /// <returns>排期基准。</returns>
+    private RecordRefreshBaseline GetBaseline(DateOnly today)
+    {
+        if (LastRunTime is DateTimeOffset lastRun && LastRunTicks >= ScheduleBaseTicks)
         {
-            return RecordRefreshSchedule.GetServerDate(lastRun);
+            return new RecordRefreshBaseline(RecordRefreshSchedule.GetServerDate(lastRun), true);
         }
-        return null;
+        long baseTicks = ScheduleBaseTicks > 0 ? ScheduleBaseTicks : LastRunTicks;
+        if (baseTicks <= 0)
+        {
+            // 老配置里两个时刻都没有：当作今天刚改过，按所选频率往后排
+            return new RecordRefreshBaseline(today, false);
+        }
+        DateOnly baseDate = RecordRefreshSchedule.GetServerDate(new DateTimeOffset(baseTicks, TimeSpan.Zero));
+        // 时钟被往回调过：基准日跑到未来会让排期永远不到期，退回今天
+        return new RecordRefreshBaseline(baseDate > today ? today : baseDate, false);
     }
 
 
@@ -88,19 +109,20 @@ public class RecordRefreshConfig
             return false;
         }
         DateOnly today = RecordRefreshSchedule.GetServerDate(utcNow);
-        return RecordRefreshSchedule.IsDue(ToSettings(), today, GetBaselineDate());
+        return RecordRefreshSchedule.IsDue(ToSettings(), today, GetBaseline(today));
     }
 
 
     /// <summary>
-    /// 下次该更新的日期。从未成功跑过时返回今天，与启动检查的「先补档」一致。
+    /// 下次该更新的日期。与 <see cref="IsDue(DateTimeOffset)"/> 共用同一套算法与基准，
+    /// 所以浮层里显示的日期就是启动检查会认的那天。
     /// </summary>
     /// <param name="utcNow">当前 UTC 时刻。</param>
     /// <returns>下次到期的日历日。</returns>
     public DateOnly GetNextDueDate(DateTimeOffset utcNow)
     {
         DateOnly today = RecordRefreshSchedule.GetServerDate(utcNow);
-        return RecordRefreshSchedule.GetNextDueDate(ToSettings(), today, GetBaselineDate());
+        return RecordRefreshSchedule.GetNextDueDate(ToSettings(), today, GetBaseline(today));
     }
 
 }

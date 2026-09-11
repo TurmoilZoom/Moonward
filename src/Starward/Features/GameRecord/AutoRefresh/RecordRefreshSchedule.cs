@@ -8,7 +8,7 @@ namespace Starward.Features.GameRecord.AutoRefresh;
 public enum RecordRefreshMode
 {
 
-    /// <summary>每隔 N 天，以「上次更新日期」为基准往后滚。</summary>
+    /// <summary>每隔 N 天，以排期基准日（上次更新日或最近一次改设置那天）为准往后滚。</summary>
     EveryDays = 0,
 
     /// <summary>每周固定星期几。</summary>
@@ -28,6 +28,17 @@ public enum RecordRefreshMode
 /// <param name="DayOfWeek">每周模式的星期几。</param>
 /// <param name="DayOfMonth">每月模式的日期（1-31）。</param>
 internal readonly record struct RecordRefreshSettings(RecordRefreshMode Mode, int IntervalDays, DayOfWeek DayOfWeek, int DayOfMonth);
+
+
+/// <summary>
+/// 排期基准：从这一天起按所选频率往后算。
+/// </summary>
+/// <param name="Date">基准日（UTC+8）。</param>
+/// <param name="Covered">
+/// 这一天是否已经跑过：true 为「上次成功更新日」，同一周期内不再重复；
+/// false 为「最后一次改动排期设置的日子」，当天若命中所选频率仍算到期。
+/// </param>
+internal readonly record struct RecordRefreshBaseline(DateOnly Date, bool Covered);
 
 
 /// <summary>
@@ -67,32 +78,42 @@ internal static class RecordRefreshSchedule
     /// <summary>
     /// 今天是否该跑一轮。
     /// <para>
-    /// <paramref name="lastRun"/> 为空（从未跑过 / 刚开启开关）时一律返回 true：先补一轮把数据种上，
-    /// 之后再按所选频率对齐到星期几或几号。
+    /// 基准日已经跑过（<see cref="RecordRefreshBaseline.Covered"/> 为 true）时，同一周期内不再重复；
+    /// 基准日是「刚改过排期设置的那天」时，当天命中所选频率就算到期
+    /// ——「改了频率就按新频率算」，不看当天是否已经更新过。
     /// </para>
     /// </summary>
     /// <param name="settings">排期参数。</param>
     /// <param name="today">当前 UTC+8 日期。</param>
-    /// <param name="lastRun">上次成功跑完一轮的 UTC+8 日期，从未跑过时为 null。</param>
+    /// <param name="baseline">排期基准。</param>
     /// <returns>该跑返回 true。</returns>
-    public static bool IsDue(RecordRefreshSettings settings, DateOnly today, DateOnly? lastRun)
+    public static bool IsDue(RecordRefreshSettings settings, DateOnly today, RecordRefreshBaseline baseline)
     {
-        if (lastRun is not DateOnly last)
-        {
-            return true;
-        }
-        // 用户把系统时间往回调过：上次运行日期在未来，按「已跑过」处理，等日期追上来
-        if (last > today)
+        // 用户把系统时间往回调过：基准日在未来，按「已跑过」处理，等日期追上来
+        if (baseline.Date > today)
         {
             return false;
         }
         return settings.Mode switch
         {
-            RecordRefreshMode.EveryDays => today >= last.AddDays(ClampIntervalDays(settings.IntervalDays)),
-            RecordRefreshMode.Weekly => last < GetLastWeeklyDate(settings.DayOfWeek, today),
-            RecordRefreshMode.Monthly => last < GetLastMonthlyDate(settings.DayOfMonth, today),
+            RecordRefreshMode.EveryDays => today >= baseline.Date.AddDays(ClampIntervalDays(settings.IntervalDays)),
+            RecordRefreshMode.Weekly => IsCalendarDue(baseline, GetLastWeeklyDate(settings.DayOfWeek, today)),
+            RecordRefreshMode.Monthly => IsCalendarDue(baseline, GetLastMonthlyDate(settings.DayOfMonth, today)),
             _ => false,
         };
+    }
+
+
+    /// <summary>
+    /// 日历对齐模式（每周 / 每月）的到期判定：最近一个命中日是否还没被基准覆盖。
+    /// </summary>
+    /// <param name="baseline">排期基准。</param>
+    /// <param name="lastHitDate">今天（含）之前最近一个命中日。</param>
+    /// <returns>该跑返回 true。</returns>
+    private static bool IsCalendarDue(RecordRefreshBaseline baseline, DateOnly lastHitDate)
+    {
+        // 基准日就是命中日时：已经跑过那天算完事，刚改过设置则照跑
+        return baseline.Covered ? baseline.Date < lastHitDate : baseline.Date <= lastHitDate;
     }
 
 
@@ -101,17 +122,17 @@ internal static class RecordRefreshSchedule
     /// </summary>
     /// <param name="settings">排期参数。</param>
     /// <param name="today">当前 UTC+8 日期。</param>
-    /// <param name="lastRun">上次成功跑完一轮的 UTC+8 日期，从未跑过时为 null。</param>
+    /// <param name="baseline">排期基准。</param>
     /// <returns>下次到期的日历日。</returns>
-    public static DateOnly GetNextDueDate(RecordRefreshSettings settings, DateOnly today, DateOnly? lastRun)
+    public static DateOnly GetNextDueDate(RecordRefreshSettings settings, DateOnly today, RecordRefreshBaseline baseline)
     {
-        if (IsDue(settings, today, lastRun))
+        if (IsDue(settings, today, baseline))
         {
             return today;
         }
         return settings.Mode switch
         {
-            RecordRefreshMode.EveryDays => lastRun!.Value.AddDays(ClampIntervalDays(settings.IntervalDays)),
+            RecordRefreshMode.EveryDays => baseline.Date.AddDays(ClampIntervalDays(settings.IntervalDays)),
             RecordRefreshMode.Weekly => GetLastWeeklyDate(settings.DayOfWeek, today).AddDays(7),
             RecordRefreshMode.Monthly => GetNextMonthlyDate(settings.DayOfMonth, GetLastMonthlyDate(settings.DayOfMonth, today)),
             _ => today,

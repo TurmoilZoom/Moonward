@@ -158,7 +158,7 @@ public sealed partial class RecordRefreshConfigButton : UserControl
             _config.Enabled = value;
             if (value)
             {
-                _config.EnabledTicks = DateTimeOffset.UtcNow.UtcTicks;
+                _config.MarkScheduleChanged();
             }
             SaveConfig();
             OnPropertyChanged();
@@ -178,6 +178,8 @@ public sealed partial class RecordRefreshConfigButton : UserControl
                 return;
             }
             _config.Mode = (RecordRefreshMode)value;
+            // 改了频率就以今天为起点重排，「下次更新」立刻反映新设置，也不受今天已经更新过的影响
+            _config.MarkScheduleChanged();
             SaveConfig();
             OnPropertyChanged();
             OnPropertyChanged(nameof(IsEveryDaysMode));
@@ -210,6 +212,7 @@ public sealed partial class RecordRefreshConfigButton : UserControl
                 return;
             }
             _config.IntervalDays = days;
+            _config.MarkScheduleChanged();
             SaveConfig();
             OnPropertyChanged();
             UpdateScheduleTexts();
@@ -228,6 +231,7 @@ public sealed partial class RecordRefreshConfigButton : UserControl
                 return;
             }
             _config.DayOfWeek = value;
+            _config.MarkScheduleChanged();
             SaveConfig();
             OnPropertyChanged();
             UpdateScheduleTexts();
@@ -246,6 +250,7 @@ public sealed partial class RecordRefreshConfigButton : UserControl
                 return;
             }
             _config.DayOfMonth = value + 1;
+            _config.MarkScheduleChanged();
             SaveConfig();
             OnPropertyChanged();
             UpdateScheduleTexts();

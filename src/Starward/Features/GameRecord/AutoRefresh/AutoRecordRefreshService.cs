@@ -204,7 +204,7 @@ internal class AutoRecordRefreshService
         }
 
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        var targets = new List<(GameRecordRole Role, RecordRefreshItem Item, RecordRefreshConfig Config)>();
+        var targets = new List<(GameRecordRole Role, RecordRefreshItem Item)>();
         foreach (GameRecordRole role in roles)
         {
             foreach (RecordRefreshItem item in RecordRefreshItemExtensions.GetItems(role.GameBiz))
@@ -218,7 +218,7 @@ internal class AutoRecordRefreshService
                 {
                     continue;
                 }
-                targets.Add((role, item, config));
+                targets.Add((role, item));
             }
         }
         if (targets.Count == 0)
@@ -247,14 +247,16 @@ internal class AutoRecordRefreshService
         using (_gameRecordService.SuppressInteractiveRiskChallenge())
         using (_gameRecordService.UseRequestPacing(PaceAsync))
         {
-            foreach ((GameRecordRole role, RecordRefreshItem item, RecordRefreshConfig config) in targets)
+            foreach ((GameRecordRole role, RecordRefreshItem item) in targets)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
                     await RefreshItemAsync(role, item, PaceAsync, cancellationToken);
-                    config.LastRunTicks = DateTimeOffset.UtcNow.UtcTicks;
-                    RecordRefreshConfigStore.Save(role.GameBiz, role.Uid, item, config);
+                    // 这一轮跑了几分钟，其间用户可能在浮层里改过频率：只把 lastRun 写回最新那份，别拿轮次开始时的旧配置盖掉
+                    RecordRefreshConfig latest = RecordRefreshConfigStore.Load(role.GameBiz, role.Uid, item);
+                    latest.LastRunTicks = DateTimeOffset.UtcNow.UtcTicks;
+                    RecordRefreshConfigStore.Save(role.GameBiz, role.Uid, item, latest);
                     RemoveError(role, item);
                     NotifyCompleted(role, item, succeeded: true);
                     success++;
