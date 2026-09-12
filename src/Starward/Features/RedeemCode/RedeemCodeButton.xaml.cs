@@ -98,6 +98,8 @@ public sealed partial class RedeemCodeButton : UserControl
 
     private bool _notStarted;
 
+    private bool _loadFailed;
+
 
     private void Button_RedeemCode_Loaded(object sender, RoutedEventArgs e)
     {
@@ -115,6 +117,8 @@ public sealed partial class RedeemCodeButton : UserControl
         Codes.Clear();
         HasCodes = false;
         ShowEmptyMessage = false;
+        _notStarted = false;
+        _loadFailed = false;
     }
 
 
@@ -151,8 +155,10 @@ public sealed partial class RedeemCodeButton : UserControl
 
     private async void Flyout_RedeemCode_Opened(object sender, object e)
     {
-        await LoadSnapshotAsync(forceRefresh: false);
+        // 定时器必须在 await 之前起：弹层若在加载期间被关闭，Closed 会先于续体执行，
+        // 那时 StopRefreshTimer 停不到还没创建的定时器，续体再起一个就成了关不掉的后台轮询
         StartRefreshTimer();
+        await LoadSnapshotAsync(forceRefresh: false);
     }
 
 
@@ -171,8 +177,9 @@ public sealed partial class RedeemCodeButton : UserControl
         }
 
         CancelLoad();
-        _loadCts = new CancellationTokenSource();
-        CancellationToken ct = _loadCts.Token;
+        var cts = new CancellationTokenSource();
+        _loadCts = cts;
+        CancellationToken ct = cts.Token;
 
         IsLoading = true;
         try
@@ -191,21 +198,15 @@ public sealed partial class RedeemCodeButton : UserControl
         }
         catch (Exception ex)
         {
-            // 本功能仅展示：API / 网络失败不显示红字，只记日志并回落空态
+            // 本功能仅展示：API / 网络失败不显示红字，只记日志并提示「加载失败」
             _logger.LogWarning(ex, "Load redeem code failed (biz {Biz})", CurrentGameId.GameBiz.Value);
-            if (Codes.Count == 0)
-            {
-                HasCodes = false;
-                _notStarted = false;
-                ActivityTitle = null;
-                DisplayTitle = Lang.RedeemCodeButton_Title;
-                ShowEmptyMessage = true;
-                EmptyMessage = Lang.RedeemCode_Empty;
-            }
+            ShowLoadFailed();
         }
         finally
         {
-            if (!ct.IsCancellationRequested)
+            // 只有被新一次加载取代时才不复位（进度环交给新加载）；其余情况含取消都要复位，
+            // 否则 IsLoading 会一直是 true，挡住 60 秒定时刷新里的 !IsLoading 判断
+            if (_loadCts is null || ReferenceEquals(_loadCts, cts))
             {
                 IsLoading = false;
             }
@@ -215,9 +216,16 @@ public sealed partial class RedeemCodeButton : UserControl
 
     private void ApplySnapshot(RedeemCodeSnapshot snapshot)
     {
+        if (snapshot.LoadFailed)
+        {
+            ShowLoadFailed();
+            return;
+        }
+
         ActivityTitle = snapshot.Title;
         DisplayTitle = string.IsNullOrWhiteSpace(snapshot.Title) ? Lang.RedeemCodeButton_Title : snapshot.Title!;
         _notStarted = snapshot.NotStarted;
+        _loadFailed = false;
 
         Codes.Clear();
         foreach (RedeemCodeItem item in snapshot.Codes)
@@ -225,6 +233,18 @@ public sealed partial class RedeemCodeButton : UserControl
             Codes.Add(RedeemCodeItemView.FromModel(item));
         }
 
+        HasCodes = Codes.Count > 0;
+        UpdateEmptyMessage();
+    }
+
+
+    /// <summary>
+    /// 标记本次加载失败：已有码时保留列表，只在没有内容时提示「加载失败」。
+    /// </summary>
+    private void ShowLoadFailed()
+    {
+        _notStarted = false;
+        _loadFailed = true;
         HasCodes = Codes.Count > 0;
         UpdateEmptyMessage();
     }
@@ -239,7 +259,9 @@ public sealed partial class RedeemCodeButton : UserControl
         }
 
         ShowEmptyMessage = true;
-        EmptyMessage = _notStarted ? Lang.RedeemCode_NotStarted : Lang.RedeemCode_Empty;
+        EmptyMessage = _loadFailed ? Lang.RedeemCode_LoadFailed
+                     : _notStarted ? Lang.RedeemCode_NotStarted
+                     : Lang.RedeemCode_Empty;
     }
 
 

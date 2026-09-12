@@ -23,6 +23,9 @@ internal class RedeemCodeSnapshot
     /// <summary>非空兑换码列表。</summary>
     public IReadOnlyList<RedeemCodeItem> Codes { get; init; } = [];
 
+    /// <summary>本次加载失败（网络 / 超时 / 解析异常）；与「本期无码」区分，失败的快照不进缓存。</summary>
+    public bool LoadFailed { get; init; }
+
 }
 
 
