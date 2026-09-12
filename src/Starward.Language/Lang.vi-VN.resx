@@ -3893,6 +3893,18 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
     <value>Ngày {0}</value>
   </data>
+  <data name="AutoRecordRefresh_EnableCurrentMonth" xml:space="preserve">
+    <value>Cập nhật tháng hiện tại</value>
+  </data>
+  <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
+    <value>Cập nhật tháng trước</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
+    <value>Tháng hiện tại</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthPrevious" xml:space="preserve">
+    <value>Tháng trước</value>
+  </data>
   <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
     <value>Cập nhật lần cuối</value>
   </data>

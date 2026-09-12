@@ -3887,6 +3887,18 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
     <value>วันที่ {0}</value>
   </data>
+  <data name="AutoRecordRefresh_EnableCurrentMonth" xml:space="preserve">
+    <value>อัปเดตเดือนปัจจุบัน</value>
+  </data>
+  <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
+    <value>อัปเดตเดือนก่อนหน้า</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
+    <value>เดือนปัจจุบัน</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthPrevious" xml:space="preserve">
+    <value>เดือนก่อนหน้า</value>
+  </data>
   <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
     <value>อัปเดตล่าสุด</value>
   </data>

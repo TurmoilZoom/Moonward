@@ -3892,6 +3892,18 @@
   <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
     <value>{0} 號</value>
   </data>
+  <data name="AutoRecordRefresh_EnableCurrentMonth" xml:space="preserve">
+    <value>更新當月</value>
+  </data>
+  <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
+    <value>更新上月</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
+    <value>當月</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthPrevious" xml:space="preserve">
+    <value>上月</value>
+  </data>
   <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
     <value>上次更新</value>
   </data>

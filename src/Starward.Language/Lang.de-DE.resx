@@ -3891,6 +3891,18 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
     <value>{0}.</value>
   </data>
+  <data name="AutoRecordRefresh_EnableCurrentMonth" xml:space="preserve">
+    <value>Aktuellen Monat aktualisieren</value>
+  </data>
+  <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
+    <value>Vormonat aktualisieren</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
+    <value>Aktueller Monat</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthPrevious" xml:space="preserve">
+    <value>Vorheriger Monat</value>
+  </data>
   <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
     <value>Letzte Aktualisierung</value>
   </data>

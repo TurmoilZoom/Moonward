@@ -3,17 +3,18 @@ using Starward.Core;
 namespace Starward.Features.GameRecord.AutoRefresh;
 
 /// <summary>
-/// 后台自动更新某个「账号 + 数据板块」结束。成功表示本地库已写入；失败表示已记入异常列表。
+/// 后台自动更新某个任务（账号 + 数据板块 + 月份）结束。成功表示本地库已写入；失败表示已记入异常列表。
 /// 在 UI 线程发送，供当前打开的数据页刷新红点与列表。
 /// </summary>
 internal sealed class RecordRefreshCompletedMessage
 {
 
-    public RecordRefreshCompletedMessage(GameBiz gameBiz, long uid, RecordRefreshItem item, bool succeeded)
+    public RecordRefreshCompletedMessage(GameBiz gameBiz, long uid, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget, bool succeeded)
     {
         GameBiz = gameBiz;
         Uid = uid;
         Item = item;
+        MonthTarget = monthTarget;
         Succeeded = succeeded;
     }
 
@@ -25,6 +26,9 @@ internal sealed class RecordRefreshCompletedMessage
 
     /// <summary>数据板块。</summary>
     public RecordRefreshItem Item { get; }
+
+    /// <summary>该板块的哪个月份任务。非月报板块恒为当月。</summary>
+    public RecordRefreshMonthTarget MonthTarget { get; }
 
     /// <summary>本地库已写入为 true；记了异常为 false。</summary>
     public bool Succeeded { get; }

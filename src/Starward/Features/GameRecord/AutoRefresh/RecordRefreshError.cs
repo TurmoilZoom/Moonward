@@ -24,6 +24,9 @@ public class RecordRefreshError
     /// <summary>出错的数据板块。</summary>
     public RecordRefreshItem Item { get; set; }
 
+    /// <summary>出错的是该板块的哪个月份任务。非月报板块恒为当月。</summary>
+    public RecordRefreshMonthTarget MonthTarget { get; set; }
+
     /// <summary>出错时刻（UTC）。</summary>
     public DateTimeOffset Time { get; set; }
 

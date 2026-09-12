@@ -5,6 +5,7 @@ using Starward.Core.GameRecord;
 using Starward.Features.ViewHost;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -17,6 +18,10 @@ namespace Starward.Features.GameRecord.AutoRefresh;
 /// <para>
 /// 存在的意义是补齐档案而不是省一次点击：米游社的战绩接口只给「当期 + 上期」，月报只给
 /// <c>optional_month</c> 里那几个月，超窗口没刷过的那一期在本地库里就是永久空缺。
+/// </para>
+/// <para>
+/// 排期单位是「任务」而不是「板块」：月报类板块拆成「当月」「上月」两个任务，各自开关、各自频率、
+/// 各自「上次更新」与异常记录（当月适合几天一次跟进度，上月适合月初跑一次归档）。
 /// </para>
 /// <para>
 /// 设计上刻意「不努力」：
@@ -204,21 +209,25 @@ internal class AutoRecordRefreshService
         }
 
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        var targets = new List<(GameRecordRole Role, RecordRefreshItem Item)>();
+        var targets = new List<(GameRecordRole Role, RecordRefreshItem Item, RecordRefreshMonthTarget MonthTarget)>();
         foreach (GameRecordRole role in roles)
         {
             foreach (RecordRefreshItem item in RecordRefreshItemExtensions.GetItems(role.GameBiz))
             {
-                RecordRefreshConfig config = RecordRefreshConfigStore.Load(role, item);
-                if (!config.Enabled)
+                // 月报类在这里展开成「当月」「上月」两个独立任务，两者的开关与到期各判各的
+                foreach (RecordRefreshMonthTarget monthTarget in item.GetMonthTargets())
                 {
-                    continue;
+                    RecordRefreshConfig config = RecordRefreshConfigStore.Load(role, item, monthTarget);
+                    if (!config.Enabled)
+                    {
+                        continue;
+                    }
+                    if (!config.IsDue(now))
+                    {
+                        continue;
+                    }
+                    targets.Add((role, item, monthTarget));
                 }
-                if (!config.IsDue(now))
-                {
-                    continue;
-                }
-                targets.Add((role, item));
             }
         }
         if (targets.Count == 0)
@@ -247,18 +256,18 @@ internal class AutoRecordRefreshService
         using (_gameRecordService.SuppressInteractiveRiskChallenge())
         using (_gameRecordService.UseRequestPacing(PaceAsync))
         {
-            foreach ((GameRecordRole role, RecordRefreshItem item) in targets)
+            foreach ((GameRecordRole role, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget) in targets)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    await RefreshItemAsync(role, item, PaceAsync, cancellationToken);
+                    await RefreshItemAsync(role, item, monthTarget, PaceAsync, cancellationToken);
                     // 这一轮跑了几分钟，其间用户可能在浮层里改过频率：只把 lastRun 写回最新那份，别拿轮次开始时的旧配置盖掉
-                    RecordRefreshConfig latest = RecordRefreshConfigStore.Load(role.GameBiz, role.Uid, item);
+                    RecordRefreshConfig latest = RecordRefreshConfigStore.Load(role.GameBiz, role.Uid, item, monthTarget);
                     latest.LastRunTicks = DateTimeOffset.UtcNow.UtcTicks;
-                    RecordRefreshConfigStore.Save(role.GameBiz, role.Uid, item, latest);
-                    RemoveError(role, item);
-                    NotifyCompleted(role, item, succeeded: true);
+                    RecordRefreshConfigStore.Save(role.GameBiz, role.Uid, item, latest, monthTarget);
+                    RemoveError(role, item, monthTarget);
+                    NotifyCompleted(role, item, monthTarget, succeeded: true);
                     success++;
                 }
                 catch (OperationCanceledException)
@@ -267,16 +276,16 @@ internal class AutoRecordRefreshService
                 }
                 catch (miHoYoApiException ex)
                 {
-                    // 风控 / 需要验证 / Cookie 失效：后台解不开，记一条给用户看，直接跳过这个板块
-                    _logger.LogWarning(ex, "Auto record refresh failed (biz {biz}, uid {uid}, item {item}, retcode {code}).", role.GameBiz, role.Uid, item, ex.ReturnCode);
-                    RecordError(role, item, ex.ReturnCode, ex.Message);
-                    NotifyCompleted(role, item, succeeded: false);
+                    // 风控 / 需要验证 / Cookie 失效：后台解不开，记一条给用户看，直接跳过这个任务
+                    _logger.LogWarning(ex, "Auto record refresh failed (biz {biz}, uid {uid}, item {item}, month {month}, retcode {code}).", role.GameBiz, role.Uid, item, monthTarget, ex.ReturnCode);
+                    RecordError(role, item, monthTarget, ex.ReturnCode, ex.Message);
+                    NotifyCompleted(role, item, monthTarget, succeeded: false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Auto record refresh failed (biz {biz}, uid {uid}, item {item}).", role.GameBiz, role.Uid, item);
-                    RecordError(role, item, 0, ex.Message);
-                    NotifyCompleted(role, item, succeeded: false);
+                    _logger.LogWarning(ex, "Auto record refresh failed (biz {biz}, uid {uid}, item {item}, month {month}).", role.GameBiz, role.Uid, item, monthTarget);
+                    RecordError(role, item, monthTarget, 0, ex.Message);
+                    NotifyCompleted(role, item, monthTarget, succeeded: false);
                 }
             }
         }
@@ -289,9 +298,9 @@ internal class AutoRecordRefreshService
     /// <summary>
     /// 通知当前打开的数据页：红点与列表必须在 UI 线程更新。
     /// </summary>
-    private static void NotifyCompleted(GameRecordRole role, RecordRefreshItem item, bool succeeded)
+    private static void NotifyCompleted(GameRecordRole role, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget, bool succeeded)
     {
-        var message = new RecordRefreshCompletedMessage(role.GameBiz, role.Uid, item, succeeded);
+        var message = new RecordRefreshCompletedMessage(role.GameBiz, role.Uid, item, monthTarget, succeeded);
         var dispatcher = MainWindow.Current?.DispatcherQueue;
         if (dispatcher is null)
         {
@@ -307,14 +316,15 @@ internal class AutoRecordRefreshService
 
 
     /// <summary>
-    /// 更新一个数据板块。月报类只取当月，往前的月份留给用户手动补；
+    /// 跑一个任务。月报类按任务取当月或上月，再往前的月份留给用户手动补；
     /// 明细与页面「获取详情」一样全量覆盖（先删后写），不走已停用的增量探针。
     /// </summary>
     /// <param name="role">游戏角色。</param>
     /// <param name="item">数据板块。</param>
+    /// <param name="monthTarget">要取的月份；非月报板块恒为当月且不参与分支。</param>
     /// <param name="pace">请求节奏控制委托，在每次 API 调用前执行。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    private async Task RefreshItemAsync(GameRecordRole role, RecordRefreshItem item, Func<CancellationToken, Task> pace, CancellationToken cancellationToken)
+    private async Task RefreshItemAsync(GameRecordRole role, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget, Func<CancellationToken, Task> pace, CancellationToken cancellationToken)
     {
         switch (item)
         {
@@ -337,14 +347,29 @@ internal class AutoRecordRefreshService
 
             case RecordRefreshItem.TravelersDiary:
                 {
+                    // 先拿一次当月：月份要以接口返回的 data_month 为准而不是本机日期（账号服务器与本机可能差一天），
+                    // 顺带把当月摘要写库、拿到 optional_month
                     await pace(cancellationToken);
                     var summary = await _gameRecordService.GetTravelersDiarySummaryAsync(role);
-                    if (summary.DataMonth > 0)
+                    int month = summary.DataMonth;
+                    if (monthTarget is RecordRefreshMonthTarget.Previous)
+                    {
+                        month = GetPreviousMonth(summary.DataMonth, summary.OptionalMonth);
+                        if (month <= 0)
+                        {
+                            LogPreviousMonthUnavailable(role, item, summary.DataMonth.ToString(CultureInfo.InvariantCulture));
+                            break;
+                        }
+                        // 上月的统计摘要也要覆盖一遍，否则本地库里那个月还停在它当月时的半程快照
+                        await pace(cancellationToken);
+                        await _gameRecordService.GetTravelersDiarySummaryAsync(role, month);
+                    }
+                    if (month > 0)
                     {
                         await pace(cancellationToken);
-                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, summary.DataMonth, 1, forceOverwrite: true, cancellationToken: cancellationToken);
+                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, month, 1, forceOverwrite: true, cancellationToken: cancellationToken);
                         await pace(cancellationToken);
-                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, summary.DataMonth, 2, forceOverwrite: true, cancellationToken: cancellationToken);
+                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, month, 2, forceOverwrite: true, cancellationToken: cancellationToken);
                     }
                     break;
                 }
@@ -384,12 +409,24 @@ internal class AutoRecordRefreshService
                 {
                     await pace(cancellationToken);
                     var summary = await _gameRecordService.GetTrailblazeCalendarSummaryAsync(role);
-                    if (!string.IsNullOrWhiteSpace(summary.DataMonth))
+                    string? month = summary.DataMonth;
+                    if (monthTarget is RecordRefreshMonthTarget.Previous)
+                    {
+                        month = GetPreviousMonth(summary.DataMonth, summary.OptionalMonth);
+                        if (month is null)
+                        {
+                            LogPreviousMonthUnavailable(role, item, summary.DataMonth);
+                            break;
+                        }
+                        await pace(cancellationToken);
+                        await _gameRecordService.GetTrailblazeCalendarSummaryAsync(role, month);
+                    }
+                    if (!string.IsNullOrWhiteSpace(month))
                     {
                         await pace(cancellationToken);
-                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, summary.DataMonth, 1, forceOverwrite: true, cancellationToken: cancellationToken);
+                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, month, 1, forceOverwrite: true, cancellationToken: cancellationToken);
                         await pace(cancellationToken);
-                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, summary.DataMonth, 2, forceOverwrite: true, cancellationToken: cancellationToken);
+                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, month, 2, forceOverwrite: true, cancellationToken: cancellationToken);
                     }
                     break;
                 }
@@ -412,6 +449,18 @@ internal class AutoRecordRefreshService
                 {
                     await pace(cancellationToken);
                     var summary = await _gameRecordService.GetInterKnotReportSummaryAsync(role);
+                    if (monthTarget is RecordRefreshMonthTarget.Previous)
+                    {
+                        string? previous = GetPreviousMonth(summary.DataMonth, summary.OptionalMonth);
+                        if (previous is null)
+                        {
+                            LogPreviousMonthUnavailable(role, item, summary.DataMonth);
+                            break;
+                        }
+                        // 明细要按目标月自己的 month_data 列数据类型，不能沿用当月那一份
+                        await pace(cancellationToken);
+                        summary = await _gameRecordService.GetInterKnotReportSummaryAsync(role, previous);
+                    }
                     if (!string.IsNullOrWhiteSpace(summary.DataMonth) && summary.MonthData?.List is { Count: > 0 } list)
                     {
                         foreach (var detail in list)
@@ -427,24 +476,85 @@ internal class AutoRecordRefreshService
 
 
     /// <summary>
-    /// 记录一条异常。同一「账号 + 板块」只保留最新一条，整体最多 <see cref="MaxErrorCount"/> 条。
+    /// 「上月」模式要拉的月份（原神用月份号 1–12）。
+    /// <para>
+    /// 一律从接口返回的当月往前推一个月，再用 <c>optional_month</c> 复核：那个列表就是接口愿意受理的月份，
+    /// 不在里面的月份请求了也拿不到数据（新号开服首月就是这种情况）。
+    /// </para>
+    /// </summary>
+    /// <param name="dataMonth">接口返回的当月月份号。</param>
+    /// <param name="optionalMonths">接口给出的可查询月份；为空时不复核。</param>
+    /// <returns>要拉的月份号；查不到时返回 0。</returns>
+    private static int GetPreviousMonth(int dataMonth, List<int>? optionalMonths)
+    {
+        if (dataMonth is < 1 or > 12)
+        {
+            return 0;
+        }
+        int previous = dataMonth == 1 ? 12 : dataMonth - 1;
+        if (optionalMonths is { Count: > 0 } && !optionalMonths.Contains(previous))
+        {
+            return 0;
+        }
+        return previous;
+    }
+
+
+    /// <summary>
+    /// 「上月」模式要拉的月份（星铁 / 绝区零用 <c>yyyyMM</c>）。判定规则同 <see cref="GetPreviousMonth(int, List{int})"/>。
+    /// </summary>
+    /// <param name="dataMonth">接口返回的当月，形如 <c>202609</c>。</param>
+    /// <param name="optionalMonths">接口给出的可查询月份；为空时不复核。</param>
+    /// <returns>要拉的月份；查不到时返回 null。</returns>
+    private static string? GetPreviousMonth(string? dataMonth, List<string>? optionalMonths)
+    {
+        if (!DateTime.TryParseExact(dataMonth, "yyyyMM", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime month))
+        {
+            return null;
+        }
+        string previous = month.AddMonths(-1).ToString("yyyyMM", CultureInfo.InvariantCulture);
+        if (optionalMonths is { Count: > 0 } && !optionalMonths.Contains(previous))
+        {
+            return null;
+        }
+        return previous;
+    }
+
+
+    /// <summary>
+    /// 选了「上月」但接口不给那个月：记一条日志就算这轮做完，不当失败也不写异常记录
+    /// ——重试一百次结果也一样，留给下个月自然恢复。
+    /// </summary>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="item">数据板块。</param>
+    /// <param name="dataMonth">接口返回的当月。</param>
+    private void LogPreviousMonthUnavailable(GameRecordRole role, RecordRefreshItem item, string? dataMonth)
+    {
+        _logger.LogInformation("Auto record refresh: previous month is not available (biz {biz}, uid {uid}, item {item}, data month {month}).", role.GameBiz, role.Uid, item, dataMonth);
+    }
+
+
+    /// <summary>
+    /// 记录一条异常。同一个任务只保留最新一条，整体最多 <see cref="MaxErrorCount"/> 条。
     /// </summary>
     /// <param name="role">出错的角色。</param>
     /// <param name="item">出错的数据板块。</param>
+    /// <param name="monthTarget">出错的月份任务。</param>
     /// <param name="returnCode">米哈游接口返回码；非接口错误为 0。</param>
     /// <param name="message">异常消息，保留服务端原文。</param>
-    private void RecordError(GameRecordRole role, RecordRefreshItem item, int returnCode, string? message)
+    private void RecordError(GameRecordRole role, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget, int returnCode, string? message)
     {
         try
         {
             List<RecordRefreshError> errors = GetErrors();
-            errors.RemoveAll(x => x.Uid == role.Uid && x.GameBiz == role.GameBiz && x.Item == item);
+            errors.RemoveAll(x => x.Uid == role.Uid && x.GameBiz == role.GameBiz && x.Item == item && x.MonthTarget == monthTarget);
             errors.Insert(0, new RecordRefreshError
             {
                 GameBiz = role.GameBiz,
                 Uid = role.Uid,
                 Nickname = role.Nickname,
                 Item = item,
+                MonthTarget = monthTarget,
                 Time = DateTimeOffset.UtcNow,
                 ReturnCode = returnCode,
                 Message = message,
@@ -463,16 +573,17 @@ internal class AutoRecordRefreshService
 
 
     /// <summary>
-    /// 这个板块这次更新成功了，清掉它上次留下的异常记录。
+    /// 这个任务这次更新成功了，清掉它上次留下的异常记录。
     /// </summary>
     /// <param name="role">更新成功的角色。</param>
     /// <param name="item">更新成功的数据板块。</param>
-    private void RemoveError(GameRecordRole role, RecordRefreshItem item)
+    /// <param name="monthTarget">更新成功的月份任务。</param>
+    private void RemoveError(GameRecordRole role, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget)
     {
         try
         {
             List<RecordRefreshError> errors = GetErrors();
-            if (errors.RemoveAll(x => x.Uid == role.Uid && x.GameBiz == role.GameBiz && x.Item == item) > 0)
+            if (errors.RemoveAll(x => x.Uid == role.Uid && x.GameBiz == role.GameBiz && x.Item == item && x.MonthTarget == monthTarget) > 0)
             {
                 AppConfig.SetValue(JsonSerializer.Serialize(errors), ErrorsSettingKey);
             }

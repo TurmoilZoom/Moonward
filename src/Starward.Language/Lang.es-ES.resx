@@ -3893,6 +3893,18 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
     <value>Día {0}</value>
   </data>
+  <data name="AutoRecordRefresh_EnableCurrentMonth" xml:space="preserve">
+    <value>Actualizar el mes actual</value>
+  </data>
+  <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
+    <value>Actualizar el mes anterior</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
+    <value>Mes actual</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthPrevious" xml:space="preserve">
+    <value>Mes anterior</value>
+  </data>
   <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
     <value>Última actualización</value>
   </data>

@@ -57,6 +57,25 @@ public enum RecordRefreshItem
 
 
 /// <summary>
+/// 月报类板块（旅行札记 / 开拓月历 / 绳网月报）拆出的两个自动更新任务。
+/// <para>
+/// 两个任务各存一份 <see cref="RecordRefreshConfig"/>、各自开关与频率，互不影响；
+/// 枚举名会进 Setting 表的键，不要重命名。非月报板块只有 <see cref="Current"/> 一个任务。
+/// </para>
+/// </summary>
+public enum RecordRefreshMonthTarget
+{
+
+    /// <summary>当月。数据还在滚动，适合配高频率跟踪本月进度。</summary>
+    Current = 0,
+
+    /// <summary>上月。数据已定稿，适合配「每月几号」在月初把上个月归档。</summary>
+    Previous = 1,
+
+}
+
+
+/// <summary>
 /// 数据板块与游戏、显示名的对应关系。
 /// </summary>
 public static class RecordRefreshItemExtensions
@@ -122,6 +141,70 @@ public static class RecordRefreshItemExtensions
             ],
             _ => [],
         };
+    }
+
+
+    /// <summary>
+    /// 是不是按月出数据的板块。只有这类板块才拆成「当月」「上月」两个任务，
+    /// 其余板块的接口只给「当期 + 上期」，没有月份可选。
+    /// </summary>
+    /// <param name="item">数据板块。</param>
+    /// <returns>是月报类返回 true。</returns>
+    public static bool IsMonthlyReport(this RecordRefreshItem item)
+    {
+        return item is RecordRefreshItem.TravelersDiary
+            or RecordRefreshItem.TrailblazeCalendar
+            or RecordRefreshItem.InterKnotReport;
+    }
+
+
+    /// <summary>
+    /// 这个板块拆出来的自动更新任务。月报类两个（当月、上月），其余只有当月那一个。
+    /// </summary>
+    /// <param name="item">数据板块。</param>
+    /// <returns>该板块的全部任务。</returns>
+    public static IReadOnlyList<RecordRefreshMonthTarget> GetMonthTargets(this RecordRefreshItem item)
+    {
+        return item.IsMonthlyReport()
+            ? [RecordRefreshMonthTarget.Current, RecordRefreshMonthTarget.Previous]
+            : [RecordRefreshMonthTarget.Current];
+    }
+
+
+    /// <summary>
+    /// 单个任务的显示名。月报类带上月份后缀（如「旅行札记 · 上月」），其余板块就是板块名。
+    /// </summary>
+    /// <param name="item">数据板块。</param>
+    /// <param name="monthTarget">任务对应的月份。</param>
+    /// <returns>当前语言下的显示名。</returns>
+    public static string GetDisplayName(this RecordRefreshItem item, RecordRefreshMonthTarget monthTarget)
+    {
+        if (!item.IsMonthlyReport())
+        {
+            return item.GetDisplayName();
+        }
+        string month = monthTarget is RecordRefreshMonthTarget.Previous
+            ? Lang.AutoRecordRefresh_MonthPrevious
+            : Lang.AutoRecordRefresh_MonthCurrent;
+        return $"{item.GetDisplayName()} · {month}";
+    }
+
+
+    /// <summary>
+    /// 单个任务在配置浮层里那一行的标题：月报类写「更新当月 / 更新上月」，其余板块写「启用自动更新」。
+    /// </summary>
+    /// <param name="item">数据板块。</param>
+    /// <param name="monthTarget">任务对应的月份。</param>
+    /// <returns>当前语言下的标题。</returns>
+    public static string GetJobTitle(this RecordRefreshItem item, RecordRefreshMonthTarget monthTarget)
+    {
+        if (!item.IsMonthlyReport())
+        {
+            return Lang.AutoRecordRefresh_Enable;
+        }
+        return monthTarget is RecordRefreshMonthTarget.Previous
+            ? Lang.AutoRecordRefresh_EnablePreviousMonth
+            : Lang.AutoRecordRefresh_EnableCurrentMonth;
     }
 
 }

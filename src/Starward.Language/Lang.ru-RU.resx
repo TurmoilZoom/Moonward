@@ -3913,6 +3913,18 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="AutoRecordRefresh_DayOfMonthFormat" xml:space="preserve">
     <value>{0}-е число</value>
   </data>
+  <data name="AutoRecordRefresh_EnableCurrentMonth" xml:space="preserve">
+    <value>Обновлять текущий месяц</value>
+  </data>
+  <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
+    <value>Обновлять прошлый месяц</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
+    <value>Текущий месяц</value>
+  </data>
+  <data name="AutoRecordRefresh_MonthPrevious" xml:space="preserve">
+    <value>Прошлый месяц</value>
+  </data>
   <data name="AutoRecordRefresh_LastUpdate" xml:space="preserve">
     <value>Последнее обновление</value>
   </data>

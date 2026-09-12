@@ -89,7 +89,7 @@ public sealed class RecordRefreshErrorItem
         GameBiz biz = error.GameBiz;
         var icon = new GameBizIcon(biz);
         GameIcon = icon.GameIcon;
-        Title = error.Item.GetDisplayName();
+        Title = error.Item.GetDisplayName(error.MonthTarget);
         Account = $"{icon.GameName} · {icon.ServerName} · {error.Nickname} · {error.Uid}";
         string time = error.Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentUICulture);
         // 服务端原文不本地化：出问题时原始返回码与文案比翻译过的更有用
@@ -100,7 +100,7 @@ public sealed class RecordRefreshErrorItem
     /// <summary>游戏图标。</summary>
     public string? GameIcon { get; set; }
 
-    /// <summary>出错的数据板块名。</summary>
+    /// <summary>出错的任务名（月报类带「· 当月 / · 上月」后缀）。</summary>
     public string Title { get; set; }
 
     /// <summary>游戏 · 区服 · 昵称 · uid。</summary>

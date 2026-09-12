@@ -8,8 +8,12 @@ using System.Text.Json.Serialization;
 namespace Starward.Features.GameRecord.AutoRefresh;
 
 /// <summary>
-/// 一个「账号 + 数据板块」的自动更新配置。整体序列化成 JSON 存进 Setting 表的一个键，
+/// 一个自动更新任务的配置（账号 + 数据板块 + 月份）。整体序列化成 JSON 存进 Setting 表的一个键，
 /// 避免每项配置各占一行导致键爆炸。
+/// <para>
+/// 月报类板块的「当月」「上月」各存一份，所以这里没有月份字段——月份是键的一部分，见
+/// <see cref="RecordRefreshConfigStore"/>。
+/// </para>
 /// </summary>
 public class RecordRefreshConfig
 {
@@ -129,33 +133,35 @@ public class RecordRefreshConfig
 
 
 /// <summary>
-/// 自动更新配置的存取：按「游戏区服 + uid + 数据板块」一把钥匙，落在 Setting 表。
+/// 自动更新配置的存取：按「游戏区服 + uid + 数据板块 + 月份」一把钥匙，落在 Setting 表。
 /// </summary>
 public static class RecordRefreshConfigStore
 {
 
     /// <summary>
-    /// 读取指定账号在指定数据板块上的配置；没配置过时返回一份默认值（未启用）。
+    /// 读取一个任务的配置；没配置过时返回一份默认值（未启用）。
     /// </summary>
     /// <param name="role">游戏角色。</param>
     /// <param name="item">数据板块。</param>
+    /// <param name="monthTarget">月报类板块的月份；其余板块保持默认。</param>
     /// <returns>配置对象，永不为 null。</returns>
-    public static RecordRefreshConfig Load(GameRecordRole role, RecordRefreshItem item)
+    public static RecordRefreshConfig Load(GameRecordRole role, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget = RecordRefreshMonthTarget.Current)
     {
-        return Load(role.GameBiz, role.Uid, item);
+        return Load(role.GameBiz, role.Uid, item, monthTarget);
     }
 
 
     /// <summary>
-    /// 读取指定账号在指定数据板块上的配置；没配置过时返回一份默认值（未启用）。
+    /// 读取一个任务的配置；没配置过时返回一份默认值（未启用）。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>
     /// <param name="uid">角色 uid。</param>
     /// <param name="item">数据板块。</param>
+    /// <param name="monthTarget">月报类板块的月份；其余板块保持默认。</param>
     /// <returns>配置对象，永不为 null。</returns>
-    public static RecordRefreshConfig Load(GameBiz biz, long uid, RecordRefreshItem item)
+    public static RecordRefreshConfig Load(GameBiz biz, long uid, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget = RecordRefreshMonthTarget.Current)
     {
-        string? json = AppConfig.GetValue<string>(default, GetKey(biz, uid, item));
+        string? json = AppConfig.GetValue<string>(default, GetKey(biz, uid, item, monthTarget));
         if (string.IsNullOrWhiteSpace(json))
         {
             return new RecordRefreshConfig();
@@ -166,31 +172,36 @@ public static class RecordRefreshConfigStore
         }
         catch (Exception ex)
         {
-            AppConfig.GetLogger<RecordRefreshConfig>().LogWarning(ex, "Parse record refresh config failed ({biz}, {uid}, {item}).", biz, uid, item);
+            AppConfig.GetLogger<RecordRefreshConfig>().LogWarning(ex, "Parse record refresh config failed ({biz}, {uid}, {item}, {month}).", biz, uid, item, monthTarget);
             return new RecordRefreshConfig();
         }
     }
 
 
     /// <summary>
-    /// 保存指定账号在指定数据板块上的配置。
+    /// 保存一个任务的配置。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>
     /// <param name="uid">角色 uid。</param>
     /// <param name="item">数据板块。</param>
     /// <param name="config">要保存的配置。</param>
-    public static void Save(GameBiz biz, long uid, RecordRefreshItem item, RecordRefreshConfig config)
+    /// <param name="monthTarget">月报类板块的月份；其余板块保持默认。</param>
+    public static void Save(GameBiz biz, long uid, RecordRefreshItem item, RecordRefreshConfig config, RecordRefreshMonthTarget monthTarget = RecordRefreshMonthTarget.Current)
     {
-        AppConfig.SetValue(JsonSerializer.Serialize(config), GetKey(biz, uid, item));
+        AppConfig.SetValue(JsonSerializer.Serialize(config), GetKey(biz, uid, item, monthTarget));
     }
 
 
     /// <summary>
     /// 配置在 Setting 表中的键名。
+    /// <para>
+    /// 「当月」不加后缀，与月报拆成两个任务之前的键一字不差——老用户已经配好的那份自然变成当月任务，不需要迁移。
+    /// </para>
     /// </summary>
-    private static string GetKey(GameBiz biz, long uid, RecordRefreshItem item)
+    private static string GetKey(GameBiz biz, long uid, RecordRefreshItem item, RecordRefreshMonthTarget monthTarget)
     {
-        return $"auto_record_refresh_{item}_{biz}_{uid}";
+        string suffix = monthTarget is RecordRefreshMonthTarget.Current ? string.Empty : $"_{monthTarget}";
+        return $"auto_record_refresh_{item}{suffix}_{biz}_{uid}";
     }
 
 }
