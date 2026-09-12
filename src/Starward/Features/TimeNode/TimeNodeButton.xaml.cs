@@ -136,8 +136,10 @@ public sealed partial class TimeNodeButton : UserControl
 
     private async void Flyout_TimeNode_Opened(object sender, object e)
     {
-        await LoadSnapshotAsync(forceRefresh: false);
+        // 定时器必须在 await 之前起：弹层若在加载期间被关闭，Closed 会先于续体执行，
+        // 那时 StopCountdownTimer 停不到还没创建的定时器，续体再起一个就成了每秒空转的后台轮询
         StartCountdownTimer();
+        await LoadSnapshotAsync(forceRefresh: false);
     }
 
 
@@ -156,8 +158,9 @@ public sealed partial class TimeNodeButton : UserControl
         }
 
         CancelLoad();
-        _loadCts = new CancellationTokenSource();
-        CancellationToken ct = _loadCts.Token;
+        var cts = new CancellationTokenSource();
+        _loadCts = cts;
+        CancellationToken ct = cts.Token;
 
         IsLoading = true;
         ErrorMessage = null;
@@ -200,7 +203,8 @@ public sealed partial class TimeNodeButton : UserControl
         }
         finally
         {
-            if (!ct.IsCancellationRequested)
+            // 只有被新一次加载取代时才不复位（进度环交给新加载）；其余情况含取消都要复位
+            if (_loadCts is null || ReferenceEquals(_loadCts, cts))
             {
                 IsLoading = false;
             }

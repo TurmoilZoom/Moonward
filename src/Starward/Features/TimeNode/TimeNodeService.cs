@@ -80,6 +80,11 @@ internal class TimeNodeService
                     sections.Add(hot);
                 }
             }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // 调用方取消：不要吞成「热点加载失败」，否则下面还会拿同一个已取消的 token 再打一次
+                throw;
+            }
             catch (Exception ex)
             {
                 // 热点失败不阻断调频
