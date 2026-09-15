@@ -26,6 +26,153 @@
         </Style>
 
         <local:GachaPityProgressBackgroundBrushConverter x:Key="GachaPityProgressBackgroundBrushConverter" />
+
+        <!--  紧凑视图（图标网格）资源：卡片入树前按 RecordViewMode 替换两个记录 ItemsControl 的 ItemsPanel / ItemTemplate，列表视图沿用下方内联模板。与 GachaStatsCard 保持一致。  -->
+        <SolidColorBrush x:Key="Rarity5TileBackgroundBrush">#40FFA500</SolidColorBrush>
+        <SolidColorBrush x:Key="Rarity4TileBackgroundBrush">#40C864E0</SolidColorBrush>
+
+        <!--  每行 5 个：5×44 + 4×4 = 236 ≤ 238（卡宽 262 − 左右 Padding 24），留 2px 吸收 DPI 取整；方块再加宽或间距再加大都会掉成每行 4 个。  -->
+        <ItemsPanelTemplate x:Key="GachaRecordTilePanelTemplate">
+            <cwc:WrapPanel HorizontalSpacing="4" VerticalSpacing="4" />
+        </ItemsPanelTemplate>
+
+        <!--  S 级图标方块：图标 + 右上 UP 角标 + 同名悬停描边，下方迷你保底条 + 抽数。装饰层全部不参与命中，由根 Grid 统一接收指针与提示。
+              方块内文字须显式 VerticalAlignment="Center"：Tight 行框只有字高，按默认 Stretch 排布会贴顶，不要依赖卡片的隐式 TextBlock 样式。  -->
+        <DataTemplate x:Key="Rarity5TileTemplate" x:DataType="local:GachaLogItemEx">
+            <Grid Width="44"
+                  Height="62"
+                  Background="Transparent"
+                  PointerEntered="Grid_Rarity5Item_PointerEntered"
+                  PointerExited="Grid_Rarity5Item_PointerExited"
+                  RowSpacing="2"
+                  Tag="{x:Bind}"
+                  sc:InstantTooltip.Placement="Top"
+                  sc:InstantTooltip.Text="{x:Bind RecordTooltipText}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="44" />
+                    <RowDefinition Height="16" />
+                </Grid.RowDefinitions>
+                <Border Background="{StaticResource Rarity5TileBackgroundBrush}"
+                        CornerRadius="6"
+                        IsHitTestVisible="False" />
+                <sc:CachedImage Width="44"
+                                Height="44"
+                                CornerRadius="6"
+                                IsHitTestVisible="False"
+                                Source="{x:Bind Icon}" />
+                <!--  图标缺失（新物品尚未同步维基）时退化为名称  -->
+                <TextBlock Margin="2"
+                           VerticalAlignment="Center"
+                           FontSize="10"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsHitTestVisible="False"
+                           IsTextScaleFactorEnabled="False"
+                           LineHeight="12"
+                           LineStackingStrategy="BlockLineHeight"
+                           MaxLines="3"
+                           Text="{x:Bind Name}"
+                           TextAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind Icon, Converter={StaticResource ObjectToVisibilityReversedConverter}}" />
+                <Border Width="24"
+                        Height="13"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Background="{StaticResource Rarity5ForegroundBrush}"
+                        CornerRadius="0,6,0,4"
+                        IsHitTestVisible="False"
+                        Visibility="{x:Bind IsUp, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               Foreground="#FF1F1F1F"
+                               IsTextScaleFactorEnabled="False"
+                               Text="UP"
+                               TextLineBounds="Tight" />
+                </Border>
+                <!--  同名悬停描边：复用列表视图的 IsPointerIn 联动  -->
+                <Border BorderBrush="{StaticResource Rarity5ForegroundBrush}"
+                        BorderThickness="2"
+                        CornerRadius="6"
+                        IsHitTestVisible="False"
+                        Visibility="{x:Bind IsPointerIn, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <!--  迷你保底条：中性轨道 + 与列表同一转换器的绿/红条；不挂 GachaPityBarAnimation（方块内不做 Composition 缩放）  -->
+                <Grid Grid.Row="1"
+                      Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                      CornerRadius="4"
+                      IsHitTestVisible="False">
+                    <Border Background="{x:Bind Converter={StaticResource GachaPityProgressBackgroundBrushConverter}}" CornerRadius="4" />
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind Pity}"
+                               TextLineBounds="Tight" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <!--  A 级图标方块：结构同 S 级，无 UP 角标；A 级抽数不超过 10，底部只显示轨道与抽数、不画保底条。  -->
+        <DataTemplate x:Key="Rarity4TileTemplate" x:DataType="local:GachaLogItemEx">
+            <Grid Width="44"
+                  Height="62"
+                  Background="Transparent"
+                  PointerEntered="Grid_Rarity4Item_PointerEntered"
+                  PointerExited="Grid_Rarity4Item_PointerExited"
+                  RowSpacing="2"
+                  Tag="{x:Bind}"
+                  sc:InstantTooltip.Placement="Top"
+                  sc:InstantTooltip.Text="{x:Bind RecordTooltipText}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="44" />
+                    <RowDefinition Height="16" />
+                </Grid.RowDefinitions>
+                <Border Background="{StaticResource Rarity4TileBackgroundBrush}"
+                        CornerRadius="6"
+                        IsHitTestVisible="False" />
+                <sc:CachedImage Width="44"
+                                Height="44"
+                                CornerRadius="6"
+                                IsHitTestVisible="False"
+                                Source="{x:Bind Icon}" />
+                <TextBlock Margin="2"
+                           VerticalAlignment="Center"
+                           FontSize="10"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           IsHitTestVisible="False"
+                           IsTextScaleFactorEnabled="False"
+                           LineHeight="12"
+                           LineStackingStrategy="BlockLineHeight"
+                           MaxLines="3"
+                           Text="{x:Bind Name}"
+                           TextAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind Icon, Converter={StaticResource ObjectToVisibilityReversedConverter}}" />
+                <Border BorderBrush="{StaticResource Rarity4ForegroundBrush}"
+                        BorderThickness="2"
+                        CornerRadius="6"
+                        IsHitTestVisible="False"
+                        Visibility="{x:Bind IsPointerIn, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Grid Grid.Row="1"
+                      Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                      CornerRadius="4"
+                      IsHitTestVisible="False">
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind Pity}"
+                               TextLineBounds="Tight" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Padding="12,8,12,8"

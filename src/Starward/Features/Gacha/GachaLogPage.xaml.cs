@@ -60,6 +60,9 @@ public sealed partial class GachaLogPage : PageBase
     /// <summary>上次重建卡片所基于的统计数据引用</summary>
     private List<GachaTypeStats>? _reconciledStatsSource;
 
+    /// <summary>当前记录区视图模式（列表 / 紧凑图标网格）；全局持久化，新建卡片与分享图均按此模式。</summary>
+    private GachaRecordViewMode _recordViewMode;
+
     /// <summary>当前软件 UI 语言代码。</summary>
     private static string CurrentLanguage => System.Globalization.CultureInfo.CurrentUICulture.Name;
 
@@ -67,8 +70,12 @@ public sealed partial class GachaLogPage : PageBase
 
     public GachaLogPage()
     {
+        // 先读出视图模式再给 Segmented 赋选中项：赋值触发的 SelectionChanged 因模式未变而被忽略，不会提前重建卡片。
+        // 设置里若存了未定义的数值，一律按列表处理。
+        _recordViewMode = AppConfig.GachaRecordViewMode is GachaRecordViewMode.Compact ? GachaRecordViewMode.Compact : GachaRecordViewMode.List;
         this.InitializeComponent();
         _dragReorder = new GachaStatsCardDragReorder(ScrollViewer_GachaStats, Grid_GachaStats, StackPanel_GachaStats, SaveGachaCardOrder);
+        Segmented_RecordViewMode.SelectedIndex = (int)_recordViewMode;
     }
 
 
@@ -590,7 +597,7 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 将当前所选卡池统计渲染为分享图并打开内置图片查看器。
+    /// 将当前所选卡池统计渲染为分享图并打开内置图片查看器；记录区按当前视图（列表 / 紧凑图标网格）绘制。
     /// 视频背景通过 AppBackground 捕获当前帧快照（官方视频移除 overlay），渲染器对整个大背景应用浅亚克力 + 卡片亚克力。
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanShareGachaImage))]
@@ -621,8 +628,9 @@ public sealed partial class GachaLogPage : PageBase
 
             // 强调色须在 UI 线程读取；Win2D 离屏渲染放到后台线程，避免 Application.Current 跨线程 COM 异常。
             Color accentColor = GetShareImageAccentColor();
+            GachaRecordViewMode viewMode = _recordViewMode;
             string file = await Task.Run(async () =>
-                await GachaShareImageRenderer.RenderAndSaveAsync(stats, CurrentGameBiz, backgroundFile, uid, accentColor));
+                await GachaShareImageRenderer.RenderAndSaveAsync(stats, CurrentGameBiz, backgroundFile, uid, accentColor, viewMode));
             await new ImageViewWindow2().ShowWindowAsync(this.XamlRoot.ContentIslandEnvironment.AppWindowId, file, false);
         }
         catch (Exception ex)
@@ -800,10 +808,63 @@ public sealed partial class GachaLogPage : PageBase
         FrameworkElement element = (FrameworkElement)card;
         element.Width = GachaStatsCardWidth;
         element.DataContext = stats;     // 供拖拽手柄识别其卡池数据
+        card.RecordViewMode = _recordViewMode; // 须在加入可视化树前赋值：紧凑模式要在记录列表生成容器前换好面板与模板
         card.WarpTypeStats = stats;      // 须在加入可视化树前赋值，卡片内 OneTime x:Bind 才能取到
         _dragReorder.Attach(card.DragHandle);
         _gachaCardPool[stats.GachaType] = element;
         return element;
+    }
+
+
+    /// <summary>
+    /// 标题栏视图切换回调：选中项变化时持久化新视图并重建卡片。
+    /// <para>构造函数赋初值、Segmented 首次应用模板时回写选中项也会触发本事件，模式未变则直接忽略；
+    /// 单选模式下 Ctrl+点击会取消选中（索引为 -1），此时恢复为当前模式。</para>
+    /// </summary>
+    /// <param name="sender">视图切换 Segmented。</param>
+    /// <param name="e">选择变更参数（未使用，以 SelectedIndex 为准）。</param>
+    private void Segmented_RecordViewMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        int index = Segmented_RecordViewMode.SelectedIndex;
+        if (index < 0)
+        {
+            // 延后恢复，避免在选择变更回调里重入修改选中项。
+            DispatcherQueue.TryEnqueue(() => Segmented_RecordViewMode.SelectedIndex = (int)_recordViewMode);
+            return;
+        }
+        GachaRecordViewMode mode = index == (int)GachaRecordViewMode.Compact ? GachaRecordViewMode.Compact : GachaRecordViewMode.List;
+        if (mode == _recordViewMode)
+        {
+            return;
+        }
+        _recordViewMode = mode;
+        AppConfig.GachaRecordViewMode = mode;
+        RebuildGachaCardsForViewMode();
+    }
+
+
+    /// <summary>
+    /// 视图模式变化后重建全部卡片：清掉上次重建所基于的数据引用，让 <see cref="ReconcileGachaCards"/> 走与切换 UID 相同的整体重建路径，
+    /// 新卡片在入树前按 <see cref="_recordViewMode"/> 配置记录区。
+    /// </summary>
+    /// <remarks>
+    /// 不在运行中替换已有卡片的 ItemsPanel：本页有跨 DPI 布局崩溃的历史，整卡重建最稳。代价是 5★/4★ 选项卡与列表滚动位置复位。
+    /// </remarks>
+    private void RebuildGachaCardsForViewMode()
+    {
+        try
+        {
+            if (gachaTypeStats is null)
+            {
+                return;
+            }
+            _reconciledStatsSource = null;
+            UpdateDisplayGachaTypeStats(playEntranceAnimation: true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Rebuild gacha cards for view mode {mode}", _recordViewMode);
+        }
     }
 
 

@@ -68,6 +68,40 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
 
 
     /// <summary>
+    /// 记录区视图模式。须在卡片加入可视化树前由页面赋值；运行中切换视图由页面重建卡片完成，本卡片不做回切。
+    /// </summary>
+    public GachaRecordViewMode RecordViewMode
+    {
+        get;
+        set
+        {
+            field = value;
+            ApplyRecordViewMode();
+        }
+    }
+
+
+    /// <summary>
+    /// 紧凑模式下把 5/4 星记录列表换成 WrapPanel 面板 + 图标方块模板；列表模式保持 XAML 内联模板不动。
+    /// </summary>
+    /// <remarks>
+    /// 只在 ItemsControl 生成容器之前调用：入树前 x:Bind 尚未给 ItemsSource 赋值，替换面板不会触发已有容器的重新生成。
+    /// </remarks>
+    private void ApplyRecordViewMode()
+    {
+        if (RecordViewMode != GachaRecordViewMode.Compact)
+        {
+            return;
+        }
+        var panel = (ItemsPanelTemplate)Resources["GachaRecordTilePanelTemplate"];
+        ItemsRepeater_List_5.ItemsPanel = panel;
+        ItemsRepeater_List_5.ItemTemplate = (DataTemplate)Resources["Rarity5TileTemplate"];
+        ItemsRepeater_List_4.ItemsPanel = panel;
+        ItemsRepeater_List_4.ItemTemplate = (DataTemplate)Resources["Rarity4TileTemplate"];
+    }
+
+
+    /// <summary>
     /// 指针进入 5 星记录项时：按角色/武器名高亮同名项（设置 <see cref="GachaLogItemEx.IsPointerIn"/>），用于展开该行详情并弱化其余行。
     /// </summary>
     /// <param name="sender">触发进入的列表项根元素；其 <c>Tag</c> 应为 <see cref="GachaLogItemEx"/>。</param>

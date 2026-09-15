@@ -91,4 +91,10 @@ public partial class GachaLogItemEx : GachaLogItem
     /// <returns>IsUp 为 true 时返回 1，否则返回 0。直接用于 XAML Opacity 绑定。</returns>
     public double UpTextOpacity => IsUp ? 1 : 0;
 
+
+    /// <summary>
+    /// 紧凑视图图标方块的悬停提示：名称 + 换行 + 抽取时间（InstantTooltip 会把 \n 转成换行）。
+    /// </summary>
+    public string RecordTooltipText => $"{Name}\n{Time:yyyy-MM-dd HH:mm:ss}";
+
 }

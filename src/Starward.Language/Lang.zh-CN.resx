@@ -3078,6 +3078,12 @@
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>分享</value>
   </data>
+  <data name="GachaLogPage_ListView" xml:space="preserve">
+    <value>列表视图</value>
+  </data>
+  <data name="GachaLogPage_CompactView" xml:space="preserve">
+    <value>紧凑视图</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>输出文件夹</value>
   </data>

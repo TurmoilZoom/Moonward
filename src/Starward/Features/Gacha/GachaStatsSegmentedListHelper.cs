@@ -132,22 +132,21 @@ internal static class GachaStatsSegmentedListHelper
 
 
     /// <summary>复位元素的不透明度与位移到默认值（完全可见、无偏移）。</summary>
+    /// <param name="element">要复位的列表元素。</param>
     private static void ResetVisual(UIElement element)
     {
         Visual visual = ElementCompositionPreview.GetElementVisual(element);
         try
         {
+            // 必须先启用 Translation 再停它的动画：未启用时视觉上没有 Translation 属性，StopAnimation("Translation") 返回 E_INVALIDARG，
+            // 由 WinRT.Runtime 抛出 ArgumentException。卡片构造时两个列表都还没启用过，旧写法每建一张卡就白抛两次首次异常。
+            ElementCompositionPreview.SetIsTranslationEnabled(element, true);
             visual.StopAnimation("Translation");
             visual.StopAnimation(nameof(Visual.Opacity));
-        }
-        catch { }
-        visual.Opacity = 1;
-        try
-        {
-            ElementCompositionPreview.SetIsTranslationEnabled(element, true);
             visual.Properties.InsertVector3("Translation", Vector3.Zero);
         }
         catch { }
+        visual.Opacity = 1;
     }
 
 

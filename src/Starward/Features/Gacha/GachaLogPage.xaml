@@ -2,6 +2,7 @@
 <sf:PageBase x:Class="Starward.Features.Gacha.GachaLogPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:helpers="using:Starward.Helpers"
              xmlns:lang="using:Starward.Language"
@@ -123,6 +124,25 @@
                     </Flyout>
                 </DropDownButton.Flyout>
             </DropDownButton>
+            <!--  记录视图：列表 / 紧凑图标网格。项顺序与 GachaRecordViewMode 数值对应；全局持久化，切换时重建卡片，分享图按当前视图绘制。  -->
+            <cwc:Segmented x:Name="Segmented_RecordViewMode"
+                           VerticalAlignment="Center"
+                           SelectionChanged="Segmented_RecordViewMode_SelectionChanged">
+                <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_ListView}"
+                                   sc:InstantTooltip.Placement="Top"
+                                   sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ListView}">
+                    <cwc:SegmentedItem.Icon>
+                        <FontIcon Glyph="&#xE8FD;" />
+                    </cwc:SegmentedItem.Icon>
+                </cwc:SegmentedItem>
+                <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CompactView}"
+                                   sc:InstantTooltip.Placement="Top"
+                                   sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_CompactView}">
+                    <cwc:SegmentedItem.Icon>
+                        <FontIcon Glyph="&#xF0E2;" />
+                    </cwc:SegmentedItem.Icon>
+                </cwc:SegmentedItem>
+            </cwc:Segmented>
             <Button Height="34"
                     VerticalAlignment="Center"
                     helpers:FluentAnimations.PressScale="0.94"

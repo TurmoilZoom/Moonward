@@ -3020,6 +3020,12 @@ You are welcome to submit exported data to:</value>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>Compartir</value>
   </data>
+  <data name="GachaLogPage_ListView" xml:space="preserve">
+    <value>Vista de lista</value>
+  </data>
+  <data name="GachaLogPage_CompactView" xml:space="preserve">
+    <value>Vista compacta</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Carpeta de salida</value>
   </data>

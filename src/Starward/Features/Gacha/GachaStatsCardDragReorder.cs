@@ -12,7 +12,7 @@ using Windows.Foundation;
 namespace Starward.Features.Gacha;
 
 
-/// <summary>抽卡统计卡片公开给拖拽逻辑的接口：拖拽手柄 + 其对应的数据。</summary>
+/// <summary>抽卡统计卡片公开给页面与拖拽逻辑的接口：拖拽手柄、对应数据与记录区视图模式。</summary>
 internal interface IGachaStatsDragCard
 {
     /// <summary>可发起拖拽的区域（tab 标签上方的卡池统计信息部分）。</summary>
@@ -20,6 +20,9 @@ internal interface IGachaStatsDragCard
 
     /// <summary>卡片对应的卡池统计数据（页面复用卡片时会重新赋值）。</summary>
     GachaTypeStats WarpTypeStats { get; set; }
+
+    /// <summary>记录区视图模式；须在卡片加入可视化树前赋值，运行中切换由页面重建卡片完成。</summary>
+    GachaRecordViewMode RecordViewMode { get; set; }
 }
 
 

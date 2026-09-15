@@ -3019,6 +3019,12 @@
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>共有</value>
   </data>
+  <data name="GachaLogPage_ListView" xml:space="preserve">
+    <value>リスト表示</value>
+  </data>
+  <data name="GachaLogPage_CompactView" xml:space="preserve">
+    <value>コンパクト表示</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>出力先</value>
   </data>

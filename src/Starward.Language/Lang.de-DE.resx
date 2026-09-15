@@ -3018,6 +3018,12 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>Teilen</value>
   </data>
+  <data name="GachaLogPage_ListView" xml:space="preserve">
+    <value>Listenansicht</value>
+  </data>
+  <data name="GachaLogPage_CompactView" xml:space="preserve">
+    <value>Kompaktansicht</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Ausgabeordner</value>
   </data>

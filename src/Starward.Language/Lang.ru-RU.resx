@@ -3040,6 +3040,12 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>Поделиться</value>
   </data>
+  <data name="GachaLogPage_ListView" xml:space="preserve">
+    <value>Вид списка</value>
+  </data>
+  <data name="GachaLogPage_CompactView" xml:space="preserve">
+    <value>Компактный вид</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Папка для сохранения</value>
   </data>

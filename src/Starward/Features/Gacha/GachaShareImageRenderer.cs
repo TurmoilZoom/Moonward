@@ -27,7 +27,8 @@ using Windows.UI.Text;
 namespace Starward.Features.Gacha;
 
 /// <summary>
-/// 使用 Win2D 离屏绘制抽卡统计分享图（统计头 + 完整 5★/S 列表），保存为 PNG。
+/// 使用 Win2D 离屏绘制抽卡统计分享图（统计头 + 完整 5★/S 记录），保存为 PNG。
+/// 记录区跟随页面视图：列表为逐行绘制，紧凑为 5 列图标网格（高度约为列表的一半，适合记录很多的账号）。
 /// 壁纸经降饱和、曝光与暗角后再做磨砂；卡片为等高玻璃板（投影 + 细顶缘 + 主题色薄雾），字色分主/次/辅三级。
 /// </summary>
 internal static class GachaShareImageRenderer
@@ -62,6 +63,20 @@ internal static class GachaShareImageRenderer
     private const float PityProgressLabelHeight = 16f;
     private const float PityProgressBlockHeight = PityProgressMarginTop + PityProgressLabelHeight + PityProgressRowSpacing + PityProgressBarHeight + PityProgressMarginBottom;
 
+    // 紧凑视图方块（对齐 GachaStatsCard / ZZZGachaStatsCard 的 Rarity5TileTemplate：图标 44 + 间隔 2 + 保底条 16，行距 4，每行 5 个）
+    private const int CompactColumns = 5;
+    private const float CompactIconSize = 44f;
+    private const float CompactStripGap = 2f;
+    private const float CompactStripHeight = 16f;
+    private const float CompactTileHeight = CompactIconSize + CompactStripGap + CompactStripHeight;
+    private const float CompactRowSpacing = 4f;
+    private const float CompactTileCornerRadius = 6f;
+    private const float CompactStripCornerRadius = 4f;
+    private const float CompactBadgeWidth = 24f;
+    private const float CompactBadgeHeight = 13f;
+    private const float CompactBadgeCornerRadius = 4f;
+    private const float CompactNameInset = 2f;
+
     private static readonly Color PrimaryText = Color.FromArgb(0xFF, 0xF7, 0xF7, 0xF7);
     private static readonly Color SecondaryText = Color.FromArgb(0xFF, 0xD8, 0xD8, 0xD8);
     private static readonly Color TertiaryText = Color.FromArgb(0xFF, 0xA3, 0xA3, 0xA3);
@@ -77,6 +92,9 @@ internal static class GachaShareImageRenderer
     private static readonly Color PityRed = Color.FromArgb(0xFF, 0xCC, 0x42, 0x2E);
     private static readonly Color SeparatorColor = Color.FromArgb(0x3D, 0xFF, 0xFF, 0xFF);
     private static readonly Color PityProgressTrack = Color.FromArgb(0x2E, 0xFF, 0xFF, 0xFF);
+    // 紧凑方块底板取 Rarity5 的 25% 透明度，与页面 #40FFA500 同一观感
+    private static readonly Color CompactTileBackground = Color.FromArgb(0x40, 0xFF, 0xB4, 0x2E);
+    private static readonly Color CompactBadgeText = Color.FromArgb(0xFF, 0x1F, 0x1F, 0x1F);
 
     // 预暗化只压高光，避免浅壁纸把亚克力洗白，同时保留更多原图颜色
     private static readonly Color BgPreDarkenOverlay = Color.FromArgb(0x28, 0x00, 0x00, 0x00);
@@ -113,6 +131,7 @@ internal static class GachaShareImageRenderer
     /// <param name="backgroundFile">背景图/快照本地路径（由调用方确保视频已转为当前帧快照 PNG）；为 null 或不存在时使用纯色背景。</param>
     /// <param name="uid">玩家 UID，用于输出文件名与图脚标。</param>
     /// <param name="accentColor">主题强调色（须在 UI 线程读取后传入，渲染在后台线程执行）。</param>
+    /// <param name="viewMode">记录区视图：列表逐行绘制；紧凑按 5 列图标网格绘制。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>已保存 PNG 的完整路径。</returns>
     /// <exception cref="ArgumentException"><paramref name="stats"/> 为空时抛出。</exception>
@@ -122,6 +141,7 @@ internal static class GachaShareImageRenderer
         string? backgroundFile,
         long uid,
         Color accentColor,
+        GachaRecordViewMode viewMode,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(stats);
@@ -146,8 +166,13 @@ internal static class GachaShareImageRenderer
             using var smallFormat = CreateTextFormat(12f);
             using var capsuleFormat = CreateTextFormat(11f, SemiBoldFontWeight);
             using var upFormat = CreateTextFormat(12f, NormalFontWeight, FontStyle.Italic);
+            using var tilePityFormat = CreateTextFormat(12f, SemiBoldFontWeight);
+            using var tileBadgeFormat = CreateTextFormat(10f, SemiBoldFontWeight);
+            using var tileNameFormat = CreateTextFormat(10f, trimming: true);
+            tileNameFormat.WordWrapping = CanvasWordWrapping.Wrap;
+            tileNameFormat.HorizontalAlignment = CanvasHorizontalAlignment.Center;
 
-            var cardHeights = stats.Select(MeasureCardHeight).ToArray();
+            var cardHeights = stats.Select(s => MeasureCardHeight(s, viewMode)).ToArray();
             var iconBitmaps = iconLoads.ToDictionary(x => x.Key, x => x.Value.Result, StringComparer.Ordinal);
             float contentHeight = cardHeights.Max();
             float canvasWidth = OuterMargin * 2 + stats.Count * CardWidth + Math.Max(0, stats.Count - 1) * CardSpacing;
@@ -175,8 +200,9 @@ internal static class GachaShareImageRenderer
                 for (int i = 0; i < stats.Count; i++)
                 {
                     GachaTypeStats stat = stats[i];
-                    DrawCard(ds, device, stat, cardLeft, cardTop, contentHeight, rarityLabel, accentColor,
-                             titleFormat, bodyFormat, smallFormat, capsuleFormat, upFormat, iconBitmaps, bgLayer);
+                    DrawCard(ds, device, stat, cardLeft, cardTop, contentHeight, rarityLabel, accentColor, viewMode,
+                             titleFormat, bodyFormat, smallFormat, capsuleFormat, upFormat,
+                             tilePityFormat, tileBadgeFormat, tileNameFormat, iconBitmaps, bgLayer);
                     cardLeft += CardWidth + CardSpacing;
                 }
 
@@ -233,9 +259,12 @@ internal static class GachaShareImageRenderer
 
 
     /// <summary>
-    /// 按单张卡的内容测量高度（顶对齐，列表区随 5★ 条数伸缩）。绘制时会拉齐到本批最高卡。
+    /// 按单张卡的内容测量高度（顶对齐，记录区随 5★ 条数与视图伸缩）。绘制时会拉齐到本批最高卡。
     /// </summary>
-    private static float MeasureCardHeight(GachaTypeStats stats)
+    /// <param name="stats">卡池统计。</param>
+    /// <param name="viewMode">记录区视图，决定 5★ 记录按行还是按网格计高。</param>
+    /// <returns>卡片总高度（逻辑像素）。</returns>
+    private static float MeasureCardHeight(GachaTypeStats stats, GachaRecordViewMode viewMode)
     {
         float height = CardPaddingV * 2;
         height += 22f;
@@ -248,13 +277,30 @@ internal static class GachaShareImageRenderer
             height += PityProgressBlockHeight;
         }
         height += ListSectionSpacing;
-        height += (stats.List_5?.Count ?? 0) * ItemRowHeight;
+        int count = stats.List_5?.Count ?? 0;
+        height += viewMode == GachaRecordViewMode.Compact ? MeasureCompactGridHeight(count) : count * ItemRowHeight;
         return height;
     }
 
 
     /// <summary>
-    /// 绘制单张统计卡片（投影 → 玻璃底 → 头部统计 → 5★ 列表）。
+    /// 紧凑网格的记录区高度：<c>行数 × 方块高 + (行数 − 1) × 行距</c>，每行 <see cref="CompactColumns"/> 个。
+    /// </summary>
+    /// <param name="count">记录条数。</param>
+    /// <returns>网格高度；无记录时为 0。</returns>
+    private static float MeasureCompactGridHeight(int count)
+    {
+        if (count <= 0)
+        {
+            return 0f;
+        }
+        int rows = (count + CompactColumns - 1) / CompactColumns;
+        return rows * CompactTileHeight + (rows - 1) * CompactRowSpacing;
+    }
+
+
+    /// <summary>
+    /// 绘制单张统计卡片（投影 → 玻璃底 → 头部统计 → 5★ 列表或紧凑网格）。
     /// 背景层 bgLayer 用于对卡片区域做局部高斯模糊 + 磨砂着色。
     /// </summary>
     private static void DrawCard(
@@ -266,11 +312,15 @@ internal static class GachaShareImageRenderer
         float height,
         string rarityLabel,
         Color accentColor,
+        GachaRecordViewMode viewMode,
         CanvasTextFormat titleFormat,
         CanvasTextFormat bodyFormat,
         CanvasTextFormat smallFormat,
         CanvasTextFormat capsuleFormat,
         CanvasTextFormat upFormat,
+        CanvasTextFormat tilePityFormat,
+        CanvasTextFormat tileBadgeFormat,
+        CanvasTextFormat tileNameFormat,
         IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps,
         CanvasBitmap bgLayer)
     {
@@ -345,6 +395,12 @@ internal static class GachaShareImageRenderer
 
         if (stats.List_5 is { Count: > 0 })
         {
+            if (viewMode == GachaRecordViewMode.Compact)
+            {
+                DrawCompactGrid(ds, device, stats.List_5, x, y, innerWidth, tilePityFormat, tileBadgeFormat, tileNameFormat, iconBitmaps);
+                return;
+            }
+
             float nameX = x + IconColumnWidth;
             float nameWidth = innerWidth - IconColumnWidth - 48f;
             foreach (GachaLogItemEx item in stats.List_5)
@@ -353,6 +409,186 @@ internal static class GachaShareImageRenderer
                 y += ItemRowHeight;
             }
         }
+    }
+
+
+    /// <summary>
+    /// 紧凑视图：把 5★/S 记录按 <see cref="CompactColumns"/> 列图标网格绘制（新→旧，自左向右、自上而下）。
+    /// 列间距按内容区宽度两端对齐；页面内 WrapPanel 为固定间距左对齐，差值不到 2px。
+    /// </summary>
+    /// <param name="ds">绘制会话。</param>
+    /// <param name="device">用于创建圆角几何。</param>
+    /// <param name="items">5★/S 记录（按时间倒序）。</param>
+    /// <param name="left">内容区左缘。</param>
+    /// <param name="top">网格顶部。</param>
+    /// <param name="innerWidth">内容区宽度。</param>
+    /// <param name="pityFormat">方块抽数字体。</param>
+    /// <param name="badgeFormat">UP 角标字体。</param>
+    /// <param name="nameFormat">图标缺失时的名称回退字体（可换行）。</param>
+    /// <param name="iconBitmaps">已预加载的图标位图。</param>
+    private static void DrawCompactGrid(
+        CanvasDrawingSession ds,
+        CanvasDevice device,
+        IReadOnlyList<GachaLogItemEx> items,
+        float left,
+        float top,
+        float innerWidth,
+        CanvasTextFormat pityFormat,
+        CanvasTextFormat badgeFormat,
+        CanvasTextFormat nameFormat,
+        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps)
+    {
+        float columnSpacing = Math.Max(0f, (innerWidth - CompactColumns * CompactIconSize) / (CompactColumns - 1));
+        for (int i = 0; i < items.Count; i++)
+        {
+            float tileLeft = left + (i % CompactColumns) * (CompactIconSize + columnSpacing);
+            float tileTop = top + (i / CompactColumns) * (CompactTileHeight + CompactRowSpacing);
+            DrawCompactTile(ds, device, items[i], tileLeft, tileTop, pityFormat, badgeFormat, nameFormat, iconBitmaps);
+        }
+    }
+
+
+    /// <summary>
+    /// 绘制单个紧凑方块（对应页面 Rarity5TileTemplate）：圆角稀有度底板 → 等比图标或名称回退 → 右上 UP 角标 → 下方迷你保底条与抽数。
+    /// </summary>
+    /// <param name="ds">绘制会话。</param>
+    /// <param name="device">用于创建圆角几何。</param>
+    /// <param name="item">记录。</param>
+    /// <param name="left">方块左缘。</param>
+    /// <param name="top">方块顶部。</param>
+    /// <param name="pityFormat">抽数字体。</param>
+    /// <param name="badgeFormat">UP 角标字体。</param>
+    /// <param name="nameFormat">名称回退字体。</param>
+    /// <param name="iconBitmaps">已预加载的图标位图。</param>
+    private static void DrawCompactTile(
+        CanvasDrawingSession ds,
+        CanvasDevice device,
+        GachaLogItemEx item,
+        float left,
+        float top,
+        CanvasTextFormat pityFormat,
+        CanvasTextFormat badgeFormat,
+        CanvasTextFormat nameFormat,
+        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps)
+    {
+        using var plate = CanvasGeometry.CreateRoundedRectangle(
+            device, left, top, CompactIconSize, CompactIconSize, CompactTileCornerRadius, CompactTileCornerRadius);
+        ds.FillGeometry(plate, CompactTileBackground);
+
+        using (ds.CreateLayer(1f, plate))
+        {
+            if (!string.IsNullOrWhiteSpace(item.Icon)
+                && iconBitmaps.TryGetValue(item.Icon, out CanvasBitmap? icon)
+                && icon is not null)
+            {
+                DrawImageHighQuality(ds, icon, FitUniform(icon, left, top, CompactIconSize));
+            }
+            else
+            {
+                DrawTileNameFallback(ds, item.Name, left, top, CompactIconSize, nameFormat);
+            }
+
+            if (item.HasUpItem && item.IsUp)
+            {
+                // 角标向上、向右各多出一个圆角半径，被底板裁剪层裁掉后只剩左下圆角，右上角随底板圆角，对应 XAML CornerRadius="0,6,0,4"
+                float badgeLeft = left + CompactIconSize - CompactBadgeWidth;
+                using var badge = CanvasGeometry.CreateRoundedRectangle(
+                    device,
+                    badgeLeft,
+                    top - CompactBadgeCornerRadius,
+                    CompactBadgeWidth + CompactBadgeCornerRadius,
+                    CompactBadgeHeight + CompactBadgeCornerRadius,
+                    CompactBadgeCornerRadius,
+                    CompactBadgeCornerRadius);
+                ds.FillGeometry(badge, Rarity5);
+                DrawTextInkCentered(ds, "UP", badgeLeft, top, CompactBadgeWidth, CompactBadgeHeight, badgeFormat, CompactBadgeText);
+            }
+        }
+
+        float stripTop = top + CompactIconSize + CompactStripGap;
+        using var strip = CanvasGeometry.CreateRoundedRectangle(
+            device, left, stripTop, CompactIconSize, CompactStripHeight, CompactStripCornerRadius, CompactStripCornerRadius);
+        ds.FillGeometry(strip, PityProgressTrack);
+        DrawPityBar(ds, device, item, left, stripTop, CompactIconSize, CompactStripHeight);
+        DrawTextInkCentered(ds, item.Pity.ToString(), left, stripTop, CompactIconSize, CompactStripHeight, pityFormat, PrimaryText);
+    }
+
+
+    /// <summary>
+    /// 图标缺失（新物品尚未同步维基）时，在方块内居中绘制名称，对应页面方块的名称回退。
+    /// </summary>
+    /// <param name="ds">绘制会话。</param>
+    /// <param name="name">物品名称。</param>
+    /// <param name="left">方块左缘。</param>
+    /// <param name="top">方块顶部。</param>
+    /// <param name="size">方块边长。</param>
+    /// <param name="format">可换行、居中、带省略号的名称字体。</param>
+    private static void DrawTileNameFallback(CanvasDrawingSession ds, string? name, float left, float top, float size, CanvasTextFormat format)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return;
+        }
+        float boxSize = size - CompactNameInset * 2;
+        using var layout = new CanvasTextLayout(ds, name, format, boxSize, boxSize);
+        float y = top + CompactNameInset + Math.Max(0f, (boxSize - (float)layout.LayoutBounds.Height) / 2f);
+        ds.DrawTextLayout(layout, left + CompactNameInset, y, SecondaryText);
+    }
+
+
+    /// <summary>
+    /// 按字形墨迹边界把单行短文本（抽数、角标）居中到矩形内，效果对应 XAML 的 <c>TextLineBounds="Tight"</c>。
+    /// </summary>
+    /// <param name="ds">绘制会话。</param>
+    /// <param name="text">文本。</param>
+    /// <param name="left">矩形左缘。</param>
+    /// <param name="top">矩形顶部。</param>
+    /// <param name="width">矩形宽度。</param>
+    /// <param name="height">矩形高度。</param>
+    /// <param name="format">字体。</param>
+    /// <param name="color">字色。</param>
+    private static void DrawTextInkCentered(
+        CanvasDrawingSession ds,
+        string text,
+        float left,
+        float top,
+        float width,
+        float height,
+        CanvasTextFormat format,
+        Color color)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+        using var layout = new CanvasTextLayout(ds, text, format, 4096f, 0);
+        Rect ink = layout.DrawBounds;
+        float x = left + (width - (float)ink.Width) / 2f - (float)ink.X;
+        float y = top + (height - (float)ink.Height) / 2f - (float)ink.Y;
+        ds.DrawTextLayout(layout, x, y, color);
+    }
+
+
+    /// <summary>
+    /// 按等比缩放（Uniform）把位图放进正方形区域并居中，非正方形图标不变形。
+    /// </summary>
+    /// <param name="bitmap">图标位图。</param>
+    /// <param name="left">区域左缘。</param>
+    /// <param name="top">区域顶部。</param>
+    /// <param name="size">区域边长。</param>
+    /// <returns>绘制目标矩形。</returns>
+    private static Rect FitUniform(CanvasBitmap bitmap, float left, float top, float size)
+    {
+        float imgW = bitmap.SizeInPixels.Width;
+        float imgH = bitmap.SizeInPixels.Height;
+        if (imgW <= 0 || imgH <= 0)
+        {
+            return new Rect(left, top, size, size);
+        }
+        float scale = Math.Min(size / imgW, size / imgH);
+        float drawW = imgW * scale;
+        float drawH = imgH * scale;
+        return new Rect(left + (size - drawW) / 2f, top + (size - drawH) / 2f, drawW, drawH);
     }
 
 

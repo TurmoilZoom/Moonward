@@ -3078,6 +3078,12 @@ Repository:</value>
   <data name="GachaLogPage_ShareImage" xml:space="preserve">
     <value>Share</value>
   </data>
+  <data name="GachaLogPage_ListView" xml:space="preserve">
+    <value>List view</value>
+  </data>
+  <data name="GachaLogPage_CompactView" xml:space="preserve">
+    <value>Compact view</value>
+  </data>
   <data name="ImageBatchConvertWindow_OutputFolder" xml:space="preserve">
     <value>Output Folder</value>
   </data>

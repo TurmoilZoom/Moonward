@@ -105,6 +105,15 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 抽卡记录页记录区视图（列表 / 紧凑图标网格），全局共享、不分游戏；分享图按此视图绘制。默认列表。
+    /// </summary>
+    public static Starward.Features.Gacha.GachaRecordViewMode GachaRecordViewMode
+    {
+        get => GetValue<Starward.Features.Gacha.GachaRecordViewMode>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 上次完成抽卡物品名称回写所用的语言（规整后的语言键，如 "zh-cn"）。
     /// 用于判断软件语言是否变化：与当前 UI 语言不一致（含首次启动后为 null）时触发存量记录名称迁移。
     /// 取代旧的 GachaLanguage（抽卡名称现跟随软件 UI 语言）。
