@@ -3994,6 +3994,9 @@ Repository:</value>
   <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
     <value>Update previous month</value>
   </data>
+  <data name="AutoRecordRefresh_MonthTarget" xml:space="preserve">
+    <value>Month</value>
+  </data>
   <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
     <value>Current month</value>
   </data>

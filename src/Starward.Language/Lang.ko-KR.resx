@@ -3905,6 +3905,9 @@
   <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
     <value>지난달 업데이트</value>
   </data>
+  <data name="AutoRecordRefresh_MonthTarget" xml:space="preserve">
+    <value>월</value>
+  </data>
   <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
     <value>이번 달</value>
   </data>

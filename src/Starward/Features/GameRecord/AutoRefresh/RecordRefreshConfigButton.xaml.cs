@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.WinUI.Controls;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -12,7 +13,8 @@ namespace Starward.Features.GameRecord.AutoRefresh;
 /// 挂在各数据页右侧面板顶部那排小图标按钮最左边的「自动更新」配置按钮：一个按钮 + 一个配置浮层。
 /// <para>
 /// 配置粒度是「当前账号 + 本页数据板块 + 月份」——同一个号的深渊和月报可以各配各的频率，
-/// 月报类板块还会拆成「当月」「上月」两个任务，各开各的。页面只需给 <see cref="GameRole"/> 赋值。
+/// 月报类板块还会拆成「当月」「上月」两个任务，各开各的；浮层里用月份切换选择编辑哪个任务。
+/// 页面只需给 <see cref="GameRole"/> 赋值。
 /// </para>
 /// </summary>
 [INotifyPropertyChanged]
@@ -99,8 +101,7 @@ public sealed partial class RecordRefreshConfigButton : UserControl
         set
         {
             field = value;
-            JobPanel_Current.Item = value;
-            JobPanel_Previous.Item = value;
+            JobPanel.Item = value;
             OnPropertyChanged(nameof(ItemName));
             OnPropertyChanged(nameof(IsMonthlyReportItem));
         }
@@ -116,8 +117,7 @@ public sealed partial class RecordRefreshConfigButton : UserControl
         set
         {
             field = value;
-            JobPanel_Current.GameRole = value;
-            JobPanel_Previous.GameRole = value;
+            JobPanel.GameRole = value;
             OnPropertyChanged(nameof(RoleName));
             UpdateErrorState();
         }
@@ -130,11 +130,35 @@ public sealed partial class RecordRefreshConfigButton : UserControl
     /// <summary>配置归属的账号，展示成「昵称 · uid」。</summary>
     public string RoleName => GameRole is null ? string.Empty : $"{GameRole.Nickname} · {GameRole.Uid}";
 
-    /// <summary>月报类板块才拆出「上月」那个任务，其余板块浮层里只有一块设置。</summary>
+    /// <summary>月报类板块才显示「当月 / 上月」切换，其余板块浮层里没有月份选择。</summary>
     public bool IsMonthlyReportItem => Item.IsMonthlyReport();
 
     /// <summary>这个账号的这个板块留下过异常记录：按钮右上角点个红点。</summary>
     public bool HasError { get; private set => SetProperty(ref field, value); }
+
+    /// <summary>
+    /// 当前在浮层里编辑的月份（月报类板块）。切换后配置块改读对应月份的配置；其余板块恒为当月。
+    /// </summary>
+    public RecordRefreshMonthTarget MonthTarget
+    {
+        get => field;
+        set
+        {
+            if (field == value)
+            {
+                return;
+            }
+            field = value;
+            if (Segmented_MonthTarget is not null)
+            {
+                Segmented_MonthTarget.SelectedIndex = (int)value;
+            }
+            if (JobPanel is not null)
+            {
+                JobPanel.MonthTarget = value;
+            }
+        }
+    }
 
 
     /// <summary>
@@ -162,9 +186,28 @@ public sealed partial class RecordRefreshConfigButton : UserControl
     private void Flyout_Opening(object? sender, object e)
     {
         // 后台可能刚写过 lastRun / 清过异常；不重载的话会显示旧值，改频率还会把成功记录盖掉
-        JobPanel_Current.Reload();
-        JobPanel_Previous.Reload();
+        JobPanel.Reload();
         UpdateErrorState();
+    }
+
+
+    /// <summary>
+    /// 月份切换：把下面唯一那份配置块切到所选月份的配置。
+    /// </summary>
+    private void Segmented_MonthTarget_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not Segmented segmented)
+        {
+            return;
+        }
+        int index = segmented.SelectedIndex;
+        if (index < 0)
+        {
+            // 单选下 Ctrl+点击会取消选中，恢复到当前月份，不让它停在空选
+            DispatcherQueue.TryEnqueue(() => segmented.SelectedIndex = (int)MonthTarget);
+            return;
+        }
+        MonthTarget = (RecordRefreshMonthTarget)index;
     }
 
 

@@ -3,6 +3,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -46,14 +47,17 @@
                                    TextTrimming="CharacterEllipsis" />
                     </StackPanel>
 
-                    <!--  非月报板块只有这一个任务；月报类这一个是「当月」  -->
-                    <local:RecordRefreshJobPanel x:Name="JobPanel_Current" ShowHint="True" />
+                    <!--  月报类板块先选月份（当月 / 上月），下面只显示一份配置；其余板块不出现这段  -->
+                    <cwc:Segmented x:Name="Segmented_MonthTarget"
+                                   SelectedIndex="0"
+                                   SelectionChanged="Segmented_MonthTarget_SelectionChanged"
+                                   Visibility="{x:Bind IsMonthlyReportItem, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <cwc:SegmentedItem Content="{x:Bind lang:Lang.AutoRecordRefresh_MonthCurrent}" />
+                        <cwc:SegmentedItem Content="{x:Bind lang:Lang.AutoRecordRefresh_MonthPrevious}" />
+                    </cwc:Segmented>
 
-                    <!--  月报类才拆出来的第二个任务：上月，与上面那个各开各的、各配各的频率  -->
-                    <MenuFlyoutSeparator Visibility="{x:Bind IsMonthlyReportItem, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <local:RecordRefreshJobPanel x:Name="JobPanel_Previous"
-                                                 MonthTarget="Previous"
-                                                 Visibility="{x:Bind IsMonthlyReportItem, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <!--  单一任务配置块：月报类按上面选的月份读写对应配置，其余板块恒为当月  -->
+                    <local:RecordRefreshJobPanel x:Name="JobPanel" ShowHint="True" />
 
                     <MenuFlyoutSeparator />
 

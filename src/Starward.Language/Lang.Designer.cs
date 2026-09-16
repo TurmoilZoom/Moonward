@@ -412,6 +412,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Month 的本地化字符串。
+        /// </summary>
+        public static string AutoRecordRefresh_MonthTarget {
+            get {
+                return ResourceManager.GetString("AutoRecordRefresh_MonthTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 当月 的本地化字符串。
         /// </summary>
         public static string AutoRecordRefresh_MonthCurrent {

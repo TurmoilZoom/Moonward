@@ -3899,6 +3899,9 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_EnablePreviousMonth" xml:space="preserve">
     <value>อัปเดตเดือนก่อนหน้า</value>
   </data>
+  <data name="AutoRecordRefresh_MonthTarget" xml:space="preserve">
+    <value>เดือน</value>
+  </data>
   <data name="AutoRecordRefresh_MonthCurrent" xml:space="preserve">
     <value>เดือนปัจจุบัน</value>
   </data>
