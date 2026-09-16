@@ -29,6 +29,12 @@ internal partial class VideoTranscodeService
     /// <summary>单个文件的转码上限，超时视为失败并丢弃产物。</summary>
     private static readonly TimeSpan TranscodeTimeout = TimeSpan.FromMinutes(5);
 
+    /// <summary>
+    /// 首播最多等转码这么久，超时先交给 libvpx 软解播放，转码留在后台继续。
+    /// 官方背景（5 秒 1080p60）硬件编码约 3 秒、多核软件编码 2.5–7.6 秒，只有单线程软件编码或自定义长视频会超时。
+    /// </summary>
+    private static readonly TimeSpan MaxPlaybackWait = TimeSpan.FromSeconds(10);
+
     private readonly ILogger<VideoTranscodeService> _logger;
 
     /// <summary>同一时刻只转一个文件，避免抢占用户的 CPU 与编码器。</summary>
@@ -111,6 +117,7 @@ internal partial class VideoTranscodeService
     /// <summary>
     /// 等转码完成并返回本次播放应使用的文件：已有可用产物就直接返回；否则当场排队转码并等待完成，
     /// 成功后返回 H.264 产物，失败或被跳过则退回源文件（由播放端继续 libvpx 软解）。
+    /// 最多等 <see cref="MaxPlaybackWait"/>（含排队时间），超时同样退回源文件，转码留在后台继续，下次播放直接用产物。
     /// <para/>
     /// 注册要求与 <see cref="QueueTranscode"/> 相同：调用前必须已通过 <see cref="VP9Helper.RegisterVP9Decoder"/>
     /// 注册好 libvpx 解码器，本方法自身从不注册。
@@ -140,9 +147,14 @@ internal partial class VideoTranscodeService
         }
         try
         {
-            // 只取消「等待」，不取消转码：背景切走后转码照常完成，别白转一半
-            await task.WaitAsync(cancellationToken).ConfigureAwait(false);
+            // 取消与超时都只结束「等待」，不打断转码：背景切走或先软解播放后，转码照常写完，别白转一半
+            await task.WaitAsync(MaxPlaybackWait, cancellationToken).ConfigureAwait(false);
             return IsTranscodedFileUsable(file, target) ? target : file;
+        }
+        catch (TimeoutException)
+        {
+            _logger.LogInformation("Transcode '{file}' not finished within {seconds}s, play the source first", Path.GetFileName(file), MaxPlaybackWait.TotalSeconds);
+            return file;
         }
         catch (OperationCanceledException)
         {
