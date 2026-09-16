@@ -50,10 +50,11 @@ internal static class GachaStatsListDragScrollHelper
     /// 为指定的 <see cref="ScrollViewer"/> 注入鼠标拖拽滚动 + 回弹行为。
     /// </summary>
     /// <param name="scrollViewer">包含记录列表的竖直滚动容器。</param>
+    /// <param name="onDragEnd">拖拽结束（松手 / 捕获丢失）时回调，用于清理记录项的悬停高亮等拖拽期间被指针捕获压制的状态。</param>
     /// <returns>绑定句柄，须在控件 Unloaded 时调用 <see cref="GachaStatsListDragScrollBinding.Dispose"/> 解除绑定。</returns>
-    public static GachaStatsListDragScrollBinding Bind(ScrollViewer scrollViewer)
+    public static GachaStatsListDragScrollBinding Bind(ScrollViewer scrollViewer, Action? onDragEnd = null)
     {
-        return new GachaStatsListDragScrollBinding(scrollViewer);
+        return new GachaStatsListDragScrollBinding(scrollViewer, onDragEnd);
     }
 
 
@@ -69,6 +70,7 @@ internal static class GachaStatsListDragScrollHelper
         private readonly ScrollViewer _scrollViewer;
         private readonly FrameworkElement _content;
         private readonly Visual _contentVisual;
+        private readonly Action? _onDragEnd;
         private bool _disposed;
 
         // 拖拽状态
@@ -94,13 +96,14 @@ internal static class GachaStatsListDragScrollHelper
         private static readonly double TickToSeconds = 1.0 / Stopwatch.Frequency;
 
 
-        public GachaStatsListDragScrollBinding(ScrollViewer scrollViewer)
+        public GachaStatsListDragScrollBinding(ScrollViewer scrollViewer, Action? onDragEnd = null)
         {
             _scrollViewer = scrollViewer;
             _content = scrollViewer.Content as FrameworkElement
                 ?? throw new InvalidOperationException("ScrollViewer.Content must be a FrameworkElement.");
             _contentVisual = ElementCompositionPreview.GetElementVisual(_content);
             ElementCompositionPreview.SetIsTranslationEnabled(_content, true);
+            _onDragEnd = onDragEnd;
 
             _scrollViewer.PointerPressed += OnPointerPressed;
             _scrollViewer.PointerMoved += OnPointerMoved;
@@ -215,6 +218,10 @@ internal static class GachaStatsListDragScrollHelper
                 return;
             }
             EndDragSession();
+
+            // 拖拽期间指针被本容器捕获，记录项收不到 PointerExited；松手时指针可能已不在任何记录上，
+            // 回调让卡片清理残留的悬停高亮（IsPointerIn）。
+            _onDragEnd?.Invoke();
 
             if (Math.Abs(_overscrollY) > OverscrollEpsilon)
             {
