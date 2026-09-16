@@ -12,8 +12,8 @@ namespace Starward.Features.GameRecord.AutoRefresh;
 /// <summary>
 /// 一个自动更新任务（账号 + 数据板块 + 月份）的设置块：开关、频率、上次 / 下次更新。
 /// <para>
-/// 月报类板块在配置浮层里放两份（当月、上月），两份各读各的配置、各存各的键，互不影响；
-/// 其余板块只放一份（月份恒为 <see cref="RecordRefreshMonthTarget.Current"/>，界面上不出现月份字样）。
+/// 配置浮层里只放一份。月报类板块由外层的月份切换改写 <see cref="MonthTarget"/>，切到哪个月就读写哪个月的配置，
+/// 当月、上月各存各的键，互不影响；其余板块月份恒为 <see cref="RecordRefreshMonthTarget.Current"/>，界面上不出现月份字样。
 /// </para>
 /// </summary>
 [INotifyPropertyChanged]
@@ -51,7 +51,7 @@ public sealed partial class RecordRefreshJobPanel : UserControl
 
 
     /// <summary>
-    /// 本任务对应的月份。非月报板块保持默认的当月，在 XAML 上写死，如 <c>MonthTarget="Previous"</c>。
+    /// 本任务对应的月份，赋值后立即载入该月份的配置。月报类板块由外层按钮的月份切换赋值；非月报板块保持默认的当月。
     /// </summary>
     public RecordRefreshMonthTarget MonthTarget
     {
@@ -79,7 +79,7 @@ public sealed partial class RecordRefreshJobPanel : UserControl
 
 
     /// <summary>
-    /// 是否在任务名旁边显示「不保证」的问号图标。同一个浮层里只让第一个任务显示，免得同一句话说两遍。
+    /// 是否在任务名旁边显示「不保证」的问号图标。
     /// </summary>
     public bool ShowHint
     {
