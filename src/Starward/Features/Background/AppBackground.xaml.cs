@@ -483,8 +483,8 @@ public sealed partial class AppBackground : UserControl
     /// <param name="cancellationToken">取消令牌。</param>
     private async Task StartMediaPlayerAsync(string file, CancellationToken cancellationToken = default)
     {
-        // 解不动的 VP9（Profile 1 / RGB）若已转码成 H.264 就改播产物，否则原样播放并在后台排队转码。
-        file = _videoTranscodeService.PrepareVideoFile(file);
+        // 解不动的 VP9（Profile 1 / RGB）若已转码成 H.264 就改播产物。
+        file = _videoTranscodeService.GetPlaybackFile(file);
         if (Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
         {
             bool decoderInstalled = VP9Helper.IsVP9DecoderInstalled();
@@ -503,6 +503,11 @@ public sealed partial class AppBackground : UserControl
                 if (!decoderInstalled || highProfileOrRgb)
                 {
                     VP9Helper.RegisterVP9Decoder(true);
+                }
+                if (highProfileOrRgb)
+                {
+                    // 必须排在注册之后：转码借用这份注册，自己不注册（见 VideoTranscodeService.QueueTranscode）。
+                    _videoTranscodeService.QueueTranscode(file);
                 }
                 if (!decoderInstalled && !highProfileOrRgb)
                 {

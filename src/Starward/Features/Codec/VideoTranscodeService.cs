@@ -52,12 +52,11 @@ internal partial class VideoTranscodeService
 
 
     /// <summary>
-    /// 返回本次播放应当使用的视频文件：已有转码产物就用产物，否则用原文件并在后台排队转码。
-    /// 调用方无需关心是否需要转码，也无需等待。
+    /// 返回本次播放应当使用的视频文件：已有可用的转码产物就用产物，否则原样返回。不触发转码。
     /// </summary>
     /// <param name="file">原始视频文件完整路径。</param>
     /// <returns>应当交给播放器的文件路径；任何异常情况下都退回 <paramref name="file"/>。</returns>
-    public string PrepareVideoFile(string file)
+    public string GetPlaybackFile(string file)
     {
         try
         {
@@ -67,20 +66,41 @@ internal partial class VideoTranscodeService
                 return file;
             }
             string target = GetTranscodedFilePath(file);
-            if (IsTranscodedFileUsable(file, target))
-            {
-                return target;
-            }
-            if (!_skipped.ContainsKey(file))
-            {
-                QueueTranscode(file, target);
-            }
-            return file;
+            return IsTranscodedFileUsable(file, target) ? target : file;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Prepare video file '{file}'", file);
+            _logger.LogWarning(ex, "Get playback file '{file}'", file);
             return file;
+        }
+    }
+
+
+    /// <summary>
+    /// 在后台排队转码一个正在播放的高 Profile / RGB VP9 视频。
+    /// <para/>
+    /// 必须在播放端已经用 <see cref="VP9Helper.RegisterVP9Decoder"/> 注册 libvpx 之后调用：转码借用这份注册，自己从不注册。
+    /// 进程内注册的解码器优先级高于官方 VP9 扩展，若由转码服务在后台注册，会截走随后打开的 Profile 0 播放器
+    /// （实测解码从 2% 升到 22% 单核）；而由它注销又可能拆掉背景正在用的注册。
+    /// </summary>
+    /// <param name="file">原始视频文件完整路径。</param>
+    public void QueueTranscode(string file)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(file) || !Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+            string target = GetTranscodedFilePath(file);
+            if (!IsTranscodedFileUsable(file, target) && !_skipped.ContainsKey(file))
+            {
+                QueueTranscode(file, target);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Queue transcode '{file}'", file);
         }
     }
 
@@ -203,6 +223,12 @@ internal partial class VideoTranscodeService
             // 游戏运行时不要抢 CPU 和编码器；不记入跳过表，下次播放时再试。
             return;
         }
+        if (!VP9Helper.VP9MFTRegistered)
+        {
+            // 排队期间背景已经切走、libvpx 被注销，本次无从解码；不记入跳过表，下次播放到它时再转。
+            // SourceReader 建好解码器实例之后再被注销则不受影响（实测照常写完全部帧）。
+            return;
+        }
 
         Directory.CreateDirectory(GetTranscodedFolder());
         // 临时文件也必须以 .mp4 结尾：MFCreateSinkWriterFromURL 按扩展名挑封装器，
@@ -243,8 +269,7 @@ internal partial class VideoTranscodeService
     private static TranscodeResult Transcode(string source, string target)
     {
         EnsureMediaFoundationStarted();
-        // SourceReader 用的是注册到本进程的 libvpx 解码器，必须先注册。
-        VP9Helper.RegisterVP9Decoder();
+        // SourceReader 用的是播放端注册到本进程的 libvpx 解码器（见 QueueTranscode 的说明），这里不自行注册。
 
         Marshal.ThrowExceptionForHR(MediaFoundation.MFCreateAttributes(out IMFAttributes readerAttributes, 2));
         readerAttributes.SetUINT32(ref MediaFoundation.MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, 1);
