@@ -44,12 +44,14 @@ public class InAppToast : Behavior<StackPanel>
         {
             MainWindow = this;
         }
+        _dismissTimer.Start();
     }
 
 
     protected override void OnDetaching()
     {
         base.OnDetaching();
+        _dismissTimer.Stop();
         if (Tag is nameof(MainWindow))
         {
             MainWindow = null;
@@ -126,6 +128,35 @@ public class InAppToast : Behavior<StackPanel>
             }
         }
         catch { }
+    }
+
+
+    /// <summary>
+    /// 在指定毫秒后关闭 InfoBar。用于进度条在成功或取消后短暂保留结果、再自动消失的场景。
+    /// </summary>
+    /// <param name="infoBar">要关闭的 InfoBar；为 null 时无操作。</param>
+    /// <param name="duration">自动关闭毫秒数。</param>
+    public static void DismissAfter(InfoBar? infoBar, int duration)
+    {
+        if (infoBar is null)
+        {
+            return;
+        }
+        _ = DismissAfterAsync(infoBar, duration);
+    }
+
+
+    private static async Task DismissAfterAsync(InfoBar infoBar, int duration)
+    {
+        try
+        {
+            await Task.Delay(duration);
+            infoBar.IsOpen = false;
+        }
+        catch
+        {
+            // UI 已卸载时忽略
+        }
     }
 
 

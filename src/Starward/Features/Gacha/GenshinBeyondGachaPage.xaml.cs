@@ -363,6 +363,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
             keepProgressInfoBar = true;
+            InAppToast.DismissAfter(infoBar, 5000);
             ApplyFetchedGachaUid(newUid);
         }
         catch (TaskCanceledException)
@@ -374,6 +375,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
                 progressInfoBar.ActionButton = null;
             }
             keepProgressInfoBar = true;
+            InAppToast.DismissAfter(progressInfoBar, 5000);
         }
         catch (GachaApiException ex)
         {

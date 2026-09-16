@@ -1010,7 +1010,7 @@ public sealed partial class GachaLogPage : PageBase
     private async Task UpdateGachaLogInternalAsync(string url, bool all = false)
     {
         InfoBar? progressInfoBar = null;
-        // 成功或用户取消后保留进度条（Success / 已取消文案）；失败则在 finally 关闭
+        // 成功或用户取消后短暂保留进度条（Success / 已取消文案）再自动关闭；失败则在 finally 关闭
         bool keepProgressInfoBar = false;
         try
         {
@@ -1045,6 +1045,7 @@ public sealed partial class GachaLogPage : PageBase
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
             keepProgressInfoBar = true;
+            InAppToast.DismissAfter(infoBar, 5000);
             ApplyFetchedGachaUid(newUid);
         }
         catch (TaskCanceledException)
@@ -1052,6 +1053,7 @@ public sealed partial class GachaLogPage : PageBase
             _logger.LogInformation("Get gacha log canceled");
             MarkProgressInfoBarCanceled(progressInfoBar);
             keepProgressInfoBar = true;
+            InAppToast.DismissAfter(progressInfoBar, 5000);
         }
         catch (GachaApiException ex)
         {
@@ -1240,6 +1242,7 @@ public sealed partial class GachaLogPage : PageBase
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
             keepProgressInfoBar = true;
+            InAppToast.DismissAfter(infoBar, 5000);
             ApplyFetchedGachaUid(uid);
             // 本地已有该 UID 时刷新统计（增量 0 条也要更新当前页）
             if (uid <= 0 && role.Uid > 0 && SelectUid == role.Uid)
@@ -1252,6 +1255,7 @@ public sealed partial class GachaLogPage : PageBase
             _logger.LogInformation("Sync gacha record from miyoushe canceled");
             MarkProgressInfoBarCanceled(progressInfoBar);
             keepProgressInfoBar = true;
+            InAppToast.DismissAfter(progressInfoBar, 5000);
         }
         catch (miHoYoApiException ex)
         {
