@@ -1,6 +1,8 @@
+using Microsoft.UI.Composition;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Starward.Controls;
@@ -8,6 +10,7 @@ using Starward.Core.HoYoPlay;
 using Starward.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Windows.Foundation;
 using Windows.System;
 
@@ -17,18 +20,18 @@ namespace Starward.Features.GameLauncher;
 /// <summary>
 /// 软件首页的游戏轮播图控件，PanelSlideshow：
 /// <list type="bullet">
-/// <item>单槽呈现：呈现区始终只放当前一张图，切页时新旧两张各自做平移推拉（逐帧插值），首尾连续无回滚。</item>
+/// <item>单槽呈现：呈现区始终只放当前一张图，切页时新旧两张各自做合成线程平移推拉，首尾连续无回滚。</item>
 /// <item>可点击的 <see cref="PipsPager"/> 圆点指示器（替代原右下角「页数/总数」文字）。</item>
 /// <item>悬停时淡入并放大的左右翻页按钮（VisualState Storyboard 动画）。</item>
 /// <item>5 秒自动轮播，鼠标悬停或窗口隐藏时暂停。</item>
-/// <item>滚轮/按钮/自动轮播共用同一过渡驱动；过渡中同向输入忽略，反向输入从当前视觉位置无缝反转。</item>
+/// <item>滚轮/按钮/自动轮播共用同一过渡驱动；过渡中忽略所有翻页输入，不打断进行中的动画。</item>
 /// </list>
 /// </summary>
 public sealed partial class BannerCarousel : UserControl
 {
 
     /// <summary>切页动画时长（毫秒）。</summary>
-    private const double SlideDurationMs = 600;
+    private const double SlideDurationMs = 500;
 
     /// <summary>呈现区尚未完成布局量测时的回退宽度，用于计算推拉位移。</summary>
     private const double DefaultPresenterWidth = 380;
@@ -52,7 +55,7 @@ public sealed partial class BannerCarousel : UserControl
     /// <summary>程序性更新 <see cref="PipsPager.SelectedPageIndex"/> 时抑制回调，避免与 <see cref="NavigateTo"/> 互相触发。</summary>
     private bool _suppressPipsCallback;
 
-    /// <summary>是否正在进行切页过渡（逐帧插值驱动）。</summary>
+    /// <summary>是否正在进行切页过渡（合成线程 Composition 驱动）。</summary>
     private bool _transitionActive;
 
     /// <summary>过渡起点下标（A 图）。</summary>
@@ -64,26 +67,14 @@ public sealed partial class BannerCarousel : UserControl
     /// <summary>推拉位移符号（+1 新图从右滑入，-1 从左滑入），由 <see cref="ComputeDirection"/> 推算。</summary>
     private int _direction;
 
-    /// <summary>过渡进度 p∈[0,1]；0 停在 A，1 停在 B。</summary>
-    private double _progress;
-
-    /// <summary>过渡目标：1 朝 B 推进，0 朝 A 回退。</summary>
-    private int _target = 1;
-
-    /// <summary>当前过渡的逻辑朝向（+1 前进，-1 后退），用于判断同向输入是否应忽略。</summary>
-    private int _scrollDir = 1;
-
     /// <summary>呈现区宽度缓存，过渡期间用于计算位移。</summary>
     private double _width;
 
-    /// <summary>上一帧 <see cref="CompositionTarget.Rendering"/> 时间戳，用于计算 dt。</summary>
-    private TimeSpan _lastRenderTime;
+    /// <summary>过渡代数；每次启动 / 取消 / 完成递增，用于让旧的 <see cref="CompositionScopedBatch.Completed"/> 回调失效。</summary>
+    private int _generation;
 
     /// <summary>是否已挂接 <see cref="HookHandlers"/> 中的全部事件。</summary>
     private bool _handlersHooked;
-
-    /// <summary>是否已订阅 <see cref="CompositionTarget.Rendering"/>。</summary>
-    private bool _renderingHooked;
 
 
 
@@ -244,7 +235,6 @@ public sealed partial class BannerCarousel : UserControl
                 VerticalAlignment = VerticalAlignment.Stretch,
                 IsRightTapEnabled = false,
                 DataContext = banner,
-                RenderTransform = new TranslateTransform(),
             };
             PointerCursor.SetCursorShape(image, InputSystemCursorShape.Hand);
             if (!string.IsNullOrWhiteSpace(banner.Image?.Url))
@@ -266,26 +256,14 @@ public sealed partial class BannerCarousel : UserControl
 
 
     /// <summary>
-    /// 请求前进一步（+1）或后退一步（-1）。过渡中同向输入忽略；反向输入翻转 target 从当前视觉位置无缝反转。
+    /// 请求前进一步（+1）或后退一步（-1）。过渡进行中忽略所有翻页输入，不打断动画。
     /// </summary>
     /// <param name="delta">+1 下一张，-1 上一张。</param>
     private void RequestStep(int delta)
     {
         int count = _imageElements.Count;
-        if (count <= 1 || delta is not (1 or -1))
+        if (count <= 1 || delta is not (1 or -1) || _transitionActive)
         {
-            return;
-        }
-
-        if (_transitionActive)
-        {
-            // 当前逻辑朝向：target=1 朝 B（_scrollDir），target=0 朝 A（-_scrollDir）
-            int logicalDir = _target == 1 ? _scrollDir : -_scrollDir;
-            if (delta == logicalDir)
-            {
-                return;
-            }
-            _target = _target == 1 ? 0 : 1;
             return;
         }
 
@@ -316,20 +294,20 @@ public sealed partial class BannerCarousel : UserControl
         _fromIndex = from;
         _toIndex = to;
         _direction = ComputeDirection(from, to, count);
-        _scrollDir = _direction;
-        _progress = 0;
-        _target = 1;
         _width = GetPresenterWidth();
         _transitionActive = true;
 
         CachedImage fromElement = _imageElements[from];
         CachedImage toElement = _imageElements[to];
 
+        // 先挂 B 图并在动画启动前就把它放到屏幕外，避免首帧布局 / 栅格化造成跳变
         PresenterGrid.Children.Clear();
         PresenterGrid.Children.Add(fromElement);
+        SetTranslation(fromElement, 0);
         PresenterGrid.Children.Add(toElement);
-        ApplyTransitionPositions(_progress);
-        HookRendering();
+        SetTranslation(toElement, _direction * (float)_width);
+
+        StartSlidePair(-_direction * (float)_width, 0);
     }
 
 
@@ -355,7 +333,7 @@ public sealed partial class BannerCarousel : UserControl
 
         if (_transitionActive)
         {
-            CompleteTransition(_target == 1 ? _toIndex : _fromIndex);
+            CompleteTransition(_toIndex);
             if (newIndex == _currentIndex)
             {
                 return;
@@ -373,75 +351,55 @@ public sealed partial class BannerCarousel : UserControl
 
 
 
-    /// <summary>订阅每帧渲染回调，推进切页过渡进度。</summary>
-    private void HookRendering()
+    /// <summary>
+    /// 启动一组合成线程位移动画：A、B 两张图各自滑向目标 X，并以 <see cref="CompositionScopedBatch"/>
+    /// 统一收尾。旧的批次 Completed 回调靠 <see cref="_generation"/> 判废。
+    /// </summary>
+    /// <param name="fromTargetX">A 图目标位移。</param>
+    /// <param name="toTargetX">B 图目标位移。</param>
+    private void StartSlidePair(float fromTargetX, float toTargetX)
     {
-        if (_renderingHooked)
-        {
-            return;
-        }
-        _renderingHooked = true;
-        _lastRenderTime = TimeSpan.Zero;
-        CompositionTarget.Rendering += OnRendering;
-    }
+        Visual fromVisual = GetVisual(_imageElements[_fromIndex]);
+        Visual toVisual = GetVisual(_imageElements[_toIndex]);
+        Compositor compositor = fromVisual.Compositor;
+        TimeSpan duration = TimeSpan.FromMilliseconds(SlideDurationMs);
 
+        Vector3KeyFrameAnimation fromSlide = CreateSlideAnimation(compositor, fromTargetX, duration);
+        Vector3KeyFrameAnimation toSlide = CreateSlideAnimation(compositor, toTargetX, duration);
 
-    /// <summary>取消每帧渲染回调。</summary>
-    private void UnhookRendering()
-    {
-        if (!_renderingHooked)
+        int myGeneration = ++_generation;
+
+        CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        fromVisual.StartAnimation("Translation", fromSlide);
+        toVisual.StartAnimation("Translation", toSlide);
+        batch.End();
+
+        batch.Completed += (_, _) =>
         {
-            return;
-        }
-        _renderingHooked = false;
-        CompositionTarget.Rendering -= OnRendering;
+            if (!_transitionActive || _generation != myGeneration)
+            {
+                return;
+            }
+            CompleteTransition(_toIndex);
+        };
     }
 
 
     /// <summary>
-    /// 每帧按 dt 推进过渡进度；到达 0 或 1 时完成过渡。
+    /// 创建「从当前视觉位置滑到目标 X」的减速位移动画；关键帧 0 用 <c>this.StartingValue</c> 表达式，
+    /// 保证动画从提交前的预置位置起步，不必在 UI 线程逐帧插值。
     /// </summary>
-    private void OnRendering(object? sender, object e)
+    /// <param name="compositor">合成器。</param>
+    /// <param name="targetX">目标水平位移（像素）。</param>
+    /// <param name="duration">动画时长。</param>
+    private static Vector3KeyFrameAnimation CreateSlideAnimation(Compositor compositor, float targetX, TimeSpan duration)
     {
-        if (!_transitionActive)
-        {
-            return;
-        }
-
-        double dt = 1.0 / 60;
-        if (e is RenderingEventArgs args)
-        {
-            if (_lastRenderTime > TimeSpan.Zero)
-            {
-                dt = (args.RenderingTime - _lastRenderTime).TotalSeconds;
-            }
-            _lastRenderTime = args.RenderingTime;
-        }
-        if (dt <= 0 || dt > 0.1)
-        {
-            dt = 1.0 / 60;
-        }
-
-        double dp = dt / (SlideDurationMs / 1000.0);
-        if (_target == 1)
-        {
-            _progress += dp;
-        }
-        else
-        {
-            _progress -= dp;
-        }
-
-        ApplyTransitionPositions(_progress);
-
-        if (_progress >= 1)
-        {
-            CompleteTransition(_toIndex);
-        }
-        else if (_progress <= 0)
-        {
-            CompleteTransition(_fromIndex);
-        }
+        CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0f, 0f), new Vector2(0f, 1f));
+        Vector3KeyFrameAnimation animation = compositor.CreateVector3KeyFrameAnimation();
+        animation.InsertExpressionKeyFrame(0f, "this.StartingValue");
+        animation.InsertKeyFrame(1f, new Vector3(targetX, 0, 0), ease);
+        animation.Duration = duration;
+        return animation;
     }
 
 
@@ -449,15 +407,16 @@ public sealed partial class BannerCarousel : UserControl
     /// <param name="finalIndex">最终停留的下标。</param>
     private void CompleteTransition(int finalIndex)
     {
-        UnhookRendering();
         _transitionActive = false;
+        // 使仍在途的批次 Completed 回调失效
+        _generation++;
 
         int otherIndex = finalIndex == _toIndex ? _fromIndex : _toIndex;
         if (otherIndex >= 0 && otherIndex < _imageElements.Count)
         {
             CachedImage other = _imageElements[otherIndex];
             PresenterGrid.Children.Remove(other);
-            SetTranslateX(other, 0);
+            ResetTranslation(other);
         }
 
         _currentIndex = finalIndex;
@@ -469,23 +428,23 @@ public sealed partial class BannerCarousel : UserControl
             PresenterGrid.Children.Clear();
             PresenterGrid.Children.Add(current);
         }
-        SetTranslateX(current, 0);
+        ResetTranslation(current);
     }
 
 
-    /// <summary>取消进行中的过渡并卸载渲染订阅（不更新 <see cref="_currentIndex"/>）。</summary>
+    /// <summary>取消进行中的过渡并停掉合成动画（不更新 <see cref="_currentIndex"/>）。</summary>
     private void CancelTransition()
     {
-        UnhookRendering();
         if (!_transitionActive)
         {
             return;
         }
         _transitionActive = false;
+        _generation++;
 
         foreach (UIElement child in PresenterGrid.Children)
         {
-            SetTranslateX(child, 0);
+            ResetTranslation(child);
         }
     }
 
@@ -502,32 +461,10 @@ public sealed partial class BannerCarousel : UserControl
 
         CachedImage element = _imageElements[index];
         PresenterGrid.Children.Clear();
-        SetTranslateX(element, 0);
+        ResetTranslation(element);
         PresenterGrid.Children.Add(element);
         _currentIndex = index;
         SyncPipsSelection(index);
-    }
-
-
-    /// <summary>按当前进度 p 更新 A/B 两张图的水平位移。</summary>
-    /// <param name="p">过渡进度，0 为起点 A，1 为终点 B。</param>
-    private void ApplyTransitionPositions(double p)
-    {
-        double eased = Ease(Math.Clamp(p, 0, 1));
-        CachedImage fromElement = _imageElements[_fromIndex];
-        CachedImage toElement = _imageElements[_toIndex];
-        // B 从 d*w 外滑到 0，A 从 0 滑到 -d*w 外
-        SetTranslateX(toElement, _direction * _width * (1 - eased));
-        SetTranslateX(fromElement, -_direction * _width * eased);
-    }
-
-
-    /// <summary>smootherstep 缓动：反转时位置连续，速度在反转瞬间反号。</summary>
-    /// <param name="t">归一化进度，期望在 [0,1]。</param>
-    /// <returns>缓动后的 [0,1] 值。</returns>
-    private static double Ease(double t)
-    {
-        return t * t * t * (t * (t * 6 - 15) + 10);
     }
 
 
@@ -636,7 +573,6 @@ public sealed partial class BannerCarousel : UserControl
         if (_transitionActive)
         {
             _width = e.NewSize.Width > 0 ? e.NewSize.Width : DefaultPresenterWidth;
-            ApplyTransitionPositions(_progress);
         }
     }
 
@@ -697,27 +633,38 @@ public sealed partial class BannerCarousel : UserControl
     }
 
 
-    /// <summary>获取元素的 <see cref="TranslateTransform"/>；不存在时创建并挂到 <see cref="UIElement.RenderTransform"/>。</summary>
+    /// <summary>
+    /// 取得元素的 Composition 视觉并启用 Translation。启用后即可用 <c>Translation</c> 属性做合成线程位移动画。
+    /// </summary>
     /// <param name="element">目标 UI 元素。</param>
-    /// <returns>可用于读写 X 的变换对象。</returns>
-    private static TranslateTransform GetTranslate(UIElement element)
+    private static Visual GetVisual(UIElement element)
     {
-        if (element.RenderTransform is TranslateTransform transform)
-        {
-            return transform;
-        }
-        TranslateTransform created = new();
-        element.RenderTransform = created;
-        return created;
+        ElementCompositionPreview.SetIsTranslationEnabled(element, true);
+        return ElementCompositionPreview.GetElementVisual(element);
     }
 
 
-    /// <summary>设置元素水平平移量。</summary>
+    /// <summary>设置元素水平平移量（不带动画，直接落到合成视觉上）。</summary>
     /// <param name="element">目标 UI 元素。</param>
-    /// <param name="x">TranslateTransform.X 值。</param>
-    private static void SetTranslateX(UIElement element, double x)
+    /// <param name="x">目标水平位移（像素）。</param>
+    private static void SetTranslation(UIElement element, float x)
     {
-        GetTranslate(element).X = x;
+        GetVisual(element).Properties.InsertVector3("Translation", new Vector3(x, 0, 0));
+    }
+
+
+    /// <summary>停止元素的位移动画并把水平平移复位为 0。</summary>
+    /// <param name="element">目标 UI 元素。</param>
+    private static void ResetTranslation(UIElement element)
+    {
+        Visual visual = GetVisual(element);
+        try
+        {
+            // 未启用 Translation 时 StopAnimation("Translation") 会抛 E_INVALIDARG，先启用再停
+            visual.StopAnimation("Translation");
+        }
+        catch { }
+        visual.Properties.InsertVector3("Translation", Vector3.Zero);
     }
 
 
