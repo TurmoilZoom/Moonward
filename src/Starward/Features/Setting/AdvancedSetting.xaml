@@ -152,6 +152,20 @@
                 </StackPanel>
             </Grid>
 
+            <!--  背景视频转码  -->
+            <TextBlock Margin="0,24,0,0"
+                       FontSize="20"
+                       Text="{x:Bind lang:Lang.SettingPage_VideoBackgroundTranscode}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="14"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.SettingPage_VideoBackgroundTranscodeDesc}"
+                       TextWrapping="Wrap" />
+            <ToggleSwitch Margin="0,8,0,0"
+                          IsOn="{x:Bind EnableVideoBackgroundTranscode, Mode=TwoWay}"
+                          OffContent="{x:Bind lang:Lang.SettingPage_AutoTranscodeVideoBackground}"
+                          OnContent="{x:Bind lang:Lang.SettingPage_AutoTranscodeVideoBackground}" />
+
         </StackPanel>
     </ScrollViewer>
 

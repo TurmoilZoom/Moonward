@@ -14,6 +14,7 @@ using Starward.Core.SelfQuery;
 using Starward.Features.RedeemCode;
 using Starward.Features.TimeNode;
 using Starward.Features.Background;
+using Starward.Features.Codec;
 using Starward.Features.Database;
 using Starward.Features.Feedback;
 using Starward.Features.Gacha;
@@ -70,6 +71,7 @@ public static partial class AppConfig
             sc.AddSingleton<GameNoticeClient>();
             sc.AddSingleton<HoYoPlayService>();
             sc.AddSingleton<BackgroundService>();
+            sc.AddSingleton<VideoTranscodeService>();
             sc.AddSingleton<FavorWallpaperService>();
             sc.AddSingleton<GameLauncherService>();
             sc.AddSingleton<GamePackageService>();

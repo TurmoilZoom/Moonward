@@ -273,4 +273,26 @@ public sealed partial class AdvancedSetting : PageBase
     #endregion
 
 
+    #region Video Background Transcode
+
+
+    /// <summary>
+    /// 自动把无法硬件解码的背景视频转成 H.264。关闭时已有的转码产物保留（纯缓存，重新开启即可复用）。
+    /// </summary>
+    public bool EnableVideoBackgroundTranscode
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.EnableVideoBackgroundTranscode = value;
+            }
+        }
+    } = AppConfig.EnableVideoBackgroundTranscode;
+
+
+    #endregion
+
+
 }

@@ -3923,4 +3923,13 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>บัญชีและส่วนข้อมูลที่ถูกข้ามระหว่างการอัปเดตอัตโนมัติ รหัสและข้อความมาจาก HoYoLAB โดยตรง</value>
   </data>
+  <data name="SettingPage_VideoBackgroundTranscode" xml:space="preserve">
+    <value>Video Background Transcoding</value>
+  </data>
+  <data name="SettingPage_VideoBackgroundTranscodeDesc" xml:space="preserve">
+    <value>Some official background videos use a codec that cannot be hardware decoded, causing high CPU usage during playback. When enabled, they are transcoded to H.264 in the background and cached, so later playback uses hardware decoding. Each video takes up tens of MB of extra disk space.</value>
+  </data>
+  <data name="SettingPage_AutoTranscodeVideoBackground" xml:space="preserve">
+    <value>Automatically transcode background videos that cannot be hardware decoded</value>
+  </data>
 </root>

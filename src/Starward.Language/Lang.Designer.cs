@@ -11467,5 +11467,32 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GameLauncherSettingDialog_NoGamePackage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Video Background Transcoding 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_VideoBackgroundTranscode {
+            get {
+                return ResourceManager.GetString("SettingPage_VideoBackgroundTranscode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Some official background videos use a codec that cannot be hardware decoded, causing high CPU usage during playback. 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_VideoBackgroundTranscodeDesc {
+            get {
+                return ResourceManager.GetString("SettingPage_VideoBackgroundTranscodeDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Automatically transcode background videos that cannot be hardware decoded 的本地化字符串。
+        /// </summary>
+        public static string SettingPage_AutoTranscodeVideoBackground {
+            get {
+                return ResourceManager.GetString("SettingPage_AutoTranscodeVideoBackground", resourceCulture);
+            }
+        }
     }
 }

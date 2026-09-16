@@ -46,6 +46,8 @@ public sealed partial class AppBackground : UserControl
 
     private readonly FavorWallpaperService _favorWallpaperService = AppConfig.GetService<FavorWallpaperService>();
 
+    private readonly VideoTranscodeService _videoTranscodeService = AppConfig.GetService<VideoTranscodeService>();
+
 
     public AppBackground()
     {
@@ -481,6 +483,8 @@ public sealed partial class AppBackground : UserControl
     /// <param name="cancellationToken">取消令牌。</param>
     private async Task StartMediaPlayerAsync(string file, CancellationToken cancellationToken = default)
     {
+        // 解不动的 VP9（Profile 1 / RGB）若已转码成 H.264 就改播产物，否则原样播放并在后台排队转码。
+        file = _videoTranscodeService.PrepareVideoFile(file);
         if (Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
         {
             bool decoderInstalled = VP9Helper.IsVP9DecoderInstalled();
