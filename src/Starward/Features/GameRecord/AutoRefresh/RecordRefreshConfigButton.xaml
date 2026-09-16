@@ -49,6 +49,7 @@
 
                     <!--  月报类板块先选月份（当月 / 上月），下面只显示一份配置；其余板块不出现这段  -->
                     <cwc:Segmented x:Name="Segmented_MonthTarget"
+                                   AutomationProperties.Name="{x:Bind lang:Lang.AutoRecordRefresh_MonthTarget}"
                                    SelectedIndex="0"
                                    SelectionChanged="Segmented_MonthTarget_SelectionChanged"
                                    Visibility="{x:Bind IsMonthlyReportItem, Converter={StaticResource BoolToVisibilityConverter}}">
