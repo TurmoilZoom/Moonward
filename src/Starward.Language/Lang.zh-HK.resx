@@ -3928,13 +3928,4 @@
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>自動更新時被略過的帳號與資料區塊。回傳碼與提示為米遊社原文。</value>
   </data>
-  <data name="SettingPage_VideoBackgroundTranscode" xml:space="preserve">
-    <value>背景影片轉碼</value>
-  </data>
-  <data name="SettingPage_VideoBackgroundTranscodeDesc" xml:space="preserve">
-    <value>部分官方背景影片採用無法硬件解碼的編碼格式，播放時 CPU 佔用較高。開啟後會在背景將它們轉成 H.264 並快取，之後播放改用硬件解碼；每個影片會多佔用數十 MB 磁碟空間。</value>
-  </data>
-  <data name="SettingPage_AutoTranscodeVideoBackground" xml:space="preserve">
-    <value>自動轉碼無法硬件解碼的背景影片</value>
-  </data>
 </root>

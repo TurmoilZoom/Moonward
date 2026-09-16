@@ -4018,13 +4018,4 @@ Repository:</value>
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>Accounts and data sections skipped during auto update. The code and message come from HoYoLAB as they are.</value>
   </data>
-  <data name="SettingPage_VideoBackgroundTranscode" xml:space="preserve">
-    <value>Video Background Transcoding</value>
-  </data>
-  <data name="SettingPage_VideoBackgroundTranscodeDesc" xml:space="preserve">
-    <value>Some official background videos use a codec that cannot be hardware decoded, causing high CPU usage during playback. When enabled, they are transcoded to H.264 in the background and cached, so later playback uses hardware decoding. Each video takes up tens of MB of extra disk space.</value>
-  </data>
-  <data name="SettingPage_AutoTranscodeVideoBackground" xml:space="preserve">
-    <value>Automatically transcode background videos that cannot be hardware decoded</value>
-  </data>
 </root>

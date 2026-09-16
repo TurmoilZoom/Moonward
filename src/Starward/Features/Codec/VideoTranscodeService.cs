@@ -61,10 +61,6 @@ internal partial class VideoTranscodeService
     {
         try
         {
-            if (!AppConfig.EnableVideoBackgroundTranscode)
-            {
-                return file;
-            }
             if (string.IsNullOrEmpty(file) || !Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
             {
                 // 只有 webm 才可能是解不动的 VP9；mp4 / mkv 一般本来就能硬解。

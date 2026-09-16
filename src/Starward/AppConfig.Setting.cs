@@ -566,17 +566,6 @@ public static partial class AppConfig
     }
 
 
-    /// <summary>
-    /// 是否把无法硬件解码的背景视频（VP9 Profile 1 / RGB）自动转码成 H.264，以降低播放时的 CPU 占用。
-    /// 转码产物是缓存，代价是每个视频多占几到几十 MB 磁盘。
-    /// </summary>
-    public static bool EnableVideoBackgroundTranscode
-    {
-        get => GetValue(true);
-        set => SetValue(value);
-    }
-
-
     public static bool GetUseVersionPoster(GameBiz biz)
     {
         return GetValue<bool>(default, $"use_version_poster_{biz}");

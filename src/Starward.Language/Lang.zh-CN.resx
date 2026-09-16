@@ -4017,13 +4017,4 @@
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>自动更新时被跳过的账号与数据板块。返回码与提示为米游社原文。</value>
   </data>
-  <data name="SettingPage_VideoBackgroundTranscode" xml:space="preserve">
-    <value>背景视频转码</value>
-  </data>
-  <data name="SettingPage_VideoBackgroundTranscodeDesc" xml:space="preserve">
-    <value>部分官方背景视频采用无法硬件解码的编码格式，播放时 CPU 占用较高。开启后会在后台把它们转成 H.264 并缓存，之后播放改用硬件解码；每个视频会多占用几十 MB 磁盘空间。</value>
-  </data>
-  <data name="SettingPage_AutoTranscodeVideoBackground" xml:space="preserve">
-    <value>自动转码无法硬件解码的背景视频</value>
-  </data>
 </root>
