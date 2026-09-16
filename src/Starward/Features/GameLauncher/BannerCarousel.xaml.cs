@@ -67,9 +67,6 @@ public sealed partial class BannerCarousel : UserControl
     /// <summary>推拉位移符号（+1 新图从右滑入，-1 从左滑入），由 <see cref="ComputeDirection"/> 推算。</summary>
     private int _direction;
 
-    /// <summary>呈现区宽度缓存，过渡期间用于计算位移。</summary>
-    private double _width;
-
     /// <summary>过渡代数；每次启动 / 取消 / 完成递增，用于让旧的 <see cref="CompositionScopedBatch.Completed"/> 回调失效。</summary>
     private int _generation;
 
@@ -294,7 +291,8 @@ public sealed partial class BannerCarousel : UserControl
         _fromIndex = from;
         _toIndex = to;
         _direction = ComputeDirection(from, to, count);
-        _width = GetPresenterWidth();
+        // 位移只在启动时取一次：两段合成动画的终点已提交给合成线程，过渡中改尺寸不会再重定目标
+        float width = (float)GetPresenterWidth();
         _transitionActive = true;
 
         CachedImage fromElement = _imageElements[from];
@@ -305,9 +303,9 @@ public sealed partial class BannerCarousel : UserControl
         PresenterGrid.Children.Add(fromElement);
         SetTranslation(fromElement, 0);
         PresenterGrid.Children.Add(toElement);
-        SetTranslation(toElement, _direction * (float)_width);
+        SetTranslation(toElement, _direction * width);
 
-        StartSlidePair(-_direction * (float)_width, 0);
+        StartSlidePair(-_direction * width, 0);
     }
 
 
@@ -570,10 +568,6 @@ public sealed partial class BannerCarousel : UserControl
     {
         // 圆角由外层 Border 负责，此处仅做矩形裁剪
         PresenterGrid.Clip = new RectangleGeometry { Rect = new Rect(0, 0, e.NewSize.Width, e.NewSize.Height) };
-        if (_transitionActive)
-        {
-            _width = e.NewSize.Width > 0 ? e.NewSize.Width : DefaultPresenterWidth;
-        }
     }
 
 
