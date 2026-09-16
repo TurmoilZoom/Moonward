@@ -40,6 +40,9 @@ internal partial class VideoTranscodeService
     /// <summary>正在排队或转码中的源文件。</summary>
     private readonly ConcurrentDictionary<string, byte> _running = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>每个源文件正在进行的转码任务，完成后移除；等待方据此共享同一次转码。</summary>
+    private readonly ConcurrentDictionary<string, Task> _transcodeTasks = new(StringComparer.OrdinalIgnoreCase);
+
     private static bool _mediaFoundationStarted;
 
     private int _orphanSwept;
@@ -95,12 +98,60 @@ internal partial class VideoTranscodeService
             string target = GetTranscodedFilePath(file);
             if (!IsTranscodedFileUsable(file, target) && !_skipped.ContainsKey(file))
             {
-                QueueTranscode(file, target);
+                GetOrStartTranscode(file, target);
             }
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Queue transcode '{file}'", file);
+        }
+    }
+
+
+    /// <summary>
+    /// 等转码完成并返回本次播放应使用的文件：已有可用产物就直接返回；否则当场排队转码并等待完成，
+    /// 成功后返回 H.264 产物，失败或被跳过则退回源文件（由播放端继续 libvpx 软解）。
+    /// <para/>
+    /// 注册要求与 <see cref="QueueTranscode"/> 相同：调用前必须已通过 <see cref="VP9Helper.RegisterVP9Decoder"/>
+    /// 注册好 libvpx 解码器，本方法自身从不注册。
+    /// </summary>
+    /// <param name="file">原始视频文件完整路径。</param>
+    /// <param name="cancellationToken">取消令牌。等待转码完成后若已取消，抛出 <see cref="OperationCanceledException"/>。</param>
+    /// <returns>应交给播放器的文件路径（转码产物或源文件）。</returns>
+    public async Task<string> EnsureTranscodedAsync(string file, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(file) || !Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
+        {
+            return file;
+        }
+        string target = GetTranscodedFilePath(file);
+        if (IsTranscodedFileUsable(file, target))
+        {
+            return target;
+        }
+        if (_skipped.ContainsKey(file))
+        {
+            return file;
+        }
+        Task? task = GetOrStartTranscode(file, target);
+        if (task is null)
+        {
+            return file;
+        }
+        try
+        {
+            await task.ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            return IsTranscodedFileUsable(file, target) ? target : file;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Ensure transcoded '{file}'", file);
+            return file;
         }
     }
 
@@ -165,13 +216,24 @@ internal partial class VideoTranscodeService
     }
 
 
-    private void QueueTranscode(string source, string target)
+    /// <summary>
+    /// 返回源文件对应的转码任务；没有进行中的任务就新建一个。同一源文件的多个等待方共享同一次转码。
+    /// </summary>
+    /// <param name="source">原始视频文件完整路径。</param>
+    /// <param name="target">转码产物路径。</param>
+    /// <returns>进行中的转码任务；竞态下取不到任务时返回 null（调用方退回软解即可）。</returns>
+    private Task? GetOrStartTranscode(string source, string target)
     {
+        if (_transcodeTasks.TryGetValue(source, out Task? existing))
+        {
+            return existing;
+        }
         if (!_running.TryAdd(source, 0))
         {
-            return;
+            // 已在排队但任务表尚未落上（极小竞态窗口）：拿得到就等，拿不到退回软解，不影响播放。
+            return _transcodeTasks.TryGetValue(source, out existing) ? existing : null;
         }
-        _ = Task.Run(async () =>
+        Task task = Task.Run(async () =>
         {
             try
             {
@@ -198,8 +260,11 @@ internal partial class VideoTranscodeService
             finally
             {
                 _running.TryRemove(source, out _);
+                _transcodeTasks.TryRemove(source, out _);
             }
         });
+        _transcodeTasks[source] = task;
+        return task;
     }
 
 

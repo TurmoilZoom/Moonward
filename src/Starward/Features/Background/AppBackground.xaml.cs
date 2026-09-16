@@ -559,8 +559,9 @@ public sealed partial class AppBackground : UserControl
                 }
                 if (highProfileOrRgb)
                 {
-                    // 必须排在注册之后：转码借用这份注册，自己不注册（见 VideoTranscodeService.QueueTranscode）。
-                    _videoTranscodeService.QueueTranscode(file);
+                    // 首播高 Profile / RGB 的 VP9 先等 libvpx 转成 H.264 再播，避免软解与转码同时抢 CPU。
+                    // 必须排在注册之后：转码借用这份注册，自己不注册（见 VideoTranscodeService.EnsureTranscodedAsync）。
+                    file = await _videoTranscodeService.EnsureTranscodedAsync(file, cancellationToken);
                 }
                 if (!decoderInstalled && !highProfileOrRgb)
                 {
