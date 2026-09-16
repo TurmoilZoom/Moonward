@@ -11467,5 +11467,14 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GameLauncherSettingDialog_NoGamePackage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 This video background requires the VP9 Video Extensions, so it has been paused and a static image is shown. After installing, click Play to play it. 的本地化字符串。
+        /// </summary>
+        public static string AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions {
+            get {
+                return ResourceManager.GetString("AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions", resourceCulture);
+            }
+        }
     }
 }

@@ -3929,4 +3929,7 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>Account e sezioni di dati saltati durante l'aggiornamento automatico. Codice e messaggio provengono da HoYoLAB così come sono.</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>Questo sfondo video richiede le estensioni video VP9, quindi è stato messo in pausa e viene mostrata un'immagine statica. Dopo l'installazione, fai clic su Riproduci.</value>
+  </data>
 </root>

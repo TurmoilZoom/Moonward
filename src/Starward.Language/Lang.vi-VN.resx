@@ -3929,4 +3929,7 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>Tài khoản và mục dữ liệu bị bỏ qua khi tự động cập nhật. Mã và thông báo lấy nguyên văn từ HoYoLAB.</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>Hình nền video này cần tiện ích mở rộng video VP9 nên đã tạm dừng và hiển thị ảnh tĩnh. Sau khi cài đặt, hãy nhấn nút Phát để phát.</value>
+  </data>
 </root>

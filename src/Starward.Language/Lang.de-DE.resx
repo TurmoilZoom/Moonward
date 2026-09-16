@@ -3927,4 +3927,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>Konten und Datenbereiche, die bei der automatischen Aktualisierung übersprungen wurden. Code und Meldung stammen unverändert von HoYoLAB.</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>Für diesen Videohintergrund werden die VP9-Videoerweiterungen benötigt. Er wurde pausiert und es wird ein Standbild angezeigt. Klicken Sie nach der Installation auf Wiedergabe.</value>
+  </data>
 </root>

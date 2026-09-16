@@ -4017,4 +4017,7 @@
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>自动更新时被跳过的账号与数据板块。返回码与提示为米游社原文。</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>此视频背景需要 VP9 视频扩展才能播放，已暂停并显示静态图。安装后点击播放按钮即可播放。</value>
+  </data>
 </root>

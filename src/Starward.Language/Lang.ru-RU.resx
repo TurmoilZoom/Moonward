@@ -3949,4 +3949,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>Аккаунты и разделы данных, пропущенные при автообновлении. Код и сообщение приведены как есть из HoYoLAB.</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>Для этого видеофона требуются расширения видео VP9, поэтому он приостановлен и показано статичное изображение. После установки нажмите «Воспроизвести».</value>
+  </data>
 </root>

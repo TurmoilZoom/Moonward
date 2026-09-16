@@ -3929,4 +3929,7 @@
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>자동 업데이트에서 건너뛴 계정과 데이터 항목입니다. 코드와 메시지는 HoYoLAB 원문입니다.</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>이 비디오 배경을 재생하려면 VP9 비디오 확장이 필요하므로 일시 정지하고 정지 이미지를 표시합니다. 설치한 후 재생 버튼을 누르면 재생됩니다.</value>
+  </data>
 </root>

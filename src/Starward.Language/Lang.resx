@@ -4018,4 +4018,7 @@ Repository:</value>
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>Accounts and data sections skipped during auto update. The code and message come from HoYoLAB as they are.</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>This video background requires the VP9 Video Extensions, so it has been paused and a static image is shown. After installing, click Play to play it.</value>
+  </data>
 </root>

@@ -234,6 +234,14 @@ public sealed partial class AppBackground : UserControl
                     else if (gameBackground.Type is GameBackground.BACKGROUND_TYPE_VIDEO && !gameBackground.StopVideo)
                     {
                         filePath = await _backgroundService.GetBackgroundFileAsync(gameBackground.Video.Url, downloadCancellationToken);
+                        if (!string.IsNullOrWhiteSpace(gameBackground.Background?.Url) && IsVP9VideoExtensionRequiredButMissing(filePath))
+                        {
+                            // 官方扩展能播、只是没装：不再退回 libvpx 软解，而是像用户手动暂停一样显示该视频的静态图并提示安装。
+                            // 暂停状态随后照常被记住（SetStopOfficialVideo），装好扩展后要用户点播放才会重新检查并播放。
+                            gameBackground.StopVideo = true;
+                            ShowVP9ExtensionRequiredToast();
+                            filePath = await _backgroundService.GetBackgroundFileAsync(gameBackground.Background.Url, downloadCancellationToken);
+                        }
                     }
                     else
                     {
@@ -471,6 +479,51 @@ public sealed partial class AppBackground : UserControl
         }
         var biz = CurrentGameId.GameBiz;
         return AppConfig.GetEnableCustomBg(biz) ? AppConfig.GetVideoBgVolume(biz) : 0;
+    }
+
+
+    /// <summary>「需要 VP9 扩展」提示是否还停留在界面上（用户未点关闭）。</summary>
+    private bool _vp9ExtensionRequiredToastOpen;
+
+
+    /// <summary>
+    /// 提示此视频背景需要 VP9 视频扩展。带下载按钮的提示不会自动消失，上一条还开着时不再叠加，
+    /// 否则反复点播放、或更新背景的两轮尝试会叠出多条。
+    /// </summary>
+    private void ShowVP9ExtensionRequiredToast()
+    {
+        if (_vp9ExtensionRequiredToastOpen || InAppToast.MainWindow is not { } toast)
+        {
+            return;
+        }
+        _vp9ExtensionRequiredToastOpen = true;
+        toast.ShowWithButton(InfoBarSeverity.Warning,
+                             null,
+                             Lang.AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions,
+                             Lang.Common_Download,
+                             async () => await Launcher.LaunchUriAsync(new("https://apps.microsoft.com/detail/9n4d0msmp0pt")),
+                             () => _vp9ExtensionRequiredToastOpen = false);
+    }
+
+
+    /// <summary>
+    /// 视频是否属于「官方 VP9 视频扩展能播，但系统没装扩展」：webm 且为 VP8，或非 RGB 的 Profile 0 VP9。
+    /// 高 Profile / RGB 的 VP9 扩展也解不了，照旧走 libvpx 软解 + 后台转码，不在此列。
+    /// </summary>
+    /// <param name="file">视频文件完整路径。</param>
+    /// <returns>需要提示安装扩展并改用静态图时返回 true。</returns>
+    private static bool IsVP9VideoExtensionRequiredButMissing(string? file)
+    {
+        if (file is null || !Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+        // 先查扩展：已安装时不必读文件头
+        if (VP9Helper.IsVP9DecoderInstalled())
+        {
+            return false;
+        }
+        return VP9Helper.IsVP8VideoFile(file) || !VP9Helper.IsVP9HighProfileOrRGB(file);
     }
 
 

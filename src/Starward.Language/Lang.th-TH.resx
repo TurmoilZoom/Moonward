@@ -3923,4 +3923,7 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>บัญชีและส่วนข้อมูลที่ถูกข้ามระหว่างการอัปเดตอัตโนมัติ รหัสและข้อความมาจาก HoYoLAB โดยตรง</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>พื้นหลังวิดีโอนี้ต้องใช้ส่วนขยายวิดีโอ VP9 จึงหยุดไว้ชั่วคราวและแสดงภาพนิ่งแทน หลังจากติดตั้งแล้วให้กดปุ่มเล่น</value>
+  </data>
 </root>

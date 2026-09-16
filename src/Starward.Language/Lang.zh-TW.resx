@@ -3929,4 +3929,7 @@
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>自動更新時被略過的帳號與資料區塊。回傳碼與提示為米遊社原文。</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>此影片背景需要VP9影片擴展才能播放，已暫停並顯示靜態圖片。安裝後點擊播放按鈕即可播放。</value>
+  </data>
 </root>

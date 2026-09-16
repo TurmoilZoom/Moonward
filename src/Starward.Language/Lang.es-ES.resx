@@ -3929,4 +3929,7 @@ You are welcome to submit exported data to:</value>
   <data name="AutoRecordRefresh_ErrorsDescription" xml:space="preserve">
     <value>Cuentas y secciones de datos omitidas durante la actualización automática. El código y el mensaje provienen tal cual de HoYoLAB.</value>
   </data>
+  <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
+    <value>Este fondo de video requiere las extensiones de video VP9, por lo que se ha pausado y se muestra una imagen estática. Después de instalarlas, haga clic en Reproducir.</value>
+  </data>
 </root>
