@@ -116,7 +116,7 @@ internal partial class VideoTranscodeService
     /// 注册好 libvpx 解码器，本方法自身从不注册。
     /// </summary>
     /// <param name="file">原始视频文件完整路径。</param>
-    /// <param name="cancellationToken">取消令牌。等待转码完成后若已取消，抛出 <see cref="OperationCanceledException"/>。</param>
+    /// <param name="cancellationToken">取消令牌。取消时立即停止等待并抛出 <see cref="OperationCanceledException"/>；转码本身留在后台继续，下次播放直接用产物。</param>
     /// <returns>应交给播放器的文件路径（转码产物或源文件）。</returns>
     public async Task<string> EnsureTranscodedAsync(string file, CancellationToken cancellationToken = default)
     {
@@ -140,8 +140,8 @@ internal partial class VideoTranscodeService
         }
         try
         {
-            await task.ConfigureAwait(false);
-            cancellationToken.ThrowIfCancellationRequested();
+            // 只取消「等待」，不取消转码：背景切走后转码照常完成，别白转一半
+            await task.WaitAsync(cancellationToken).ConfigureAwait(false);
             return IsTranscodedFileUsable(file, target) ? target : file;
         }
         catch (OperationCanceledException)

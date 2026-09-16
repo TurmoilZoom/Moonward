@@ -194,13 +194,15 @@ public sealed partial class AppBackground : UserControl
     public async Task UpdateBackgroundAsync(GameBackground? background = null)
     {
         string? imageFilePath = null;
+        CancellationTokenSource? updateCts = null;
         try
         {
             IsUpdateBackgroundRunning = true;
 
             updateBackgroundCts?.Cancel();
-            updateBackgroundCts = new();
-            CancellationToken cancellationToken = updateBackgroundCts.Token;
+            updateCts = new();
+            updateBackgroundCts = updateCts;
+            CancellationToken cancellationToken = updateCts.Token;
 
             if (CurrentGameId is null)
             {
@@ -350,7 +352,12 @@ public sealed partial class AppBackground : UserControl
         }
         finally
         {
-            IsUpdateBackgroundRunning = false;
+            // 只有最新一轮才能收起「正在更新」：被取代的旧一轮可能晚于新一轮结束，若它也置 false，
+            // 新一轮还没播上时窗口激活的兜底分支就会误判背景空闲，把过期的视频重新拉起。
+            if (updateCts is null || ReferenceEquals(updateBackgroundCts, updateCts))
+            {
+                IsUpdateBackgroundRunning = false;
+            }
         }
     }
 
@@ -530,48 +537,16 @@ public sealed partial class AppBackground : UserControl
     /// <summary>
     /// 为指定的视频文件启动 MediaPlayer（使用帧服务器模式）。
     /// 文件不超过 <see cref="InMemoryVideoBackgroundMaxBytes"/> 时读入内存循环播放；更大或失败则从文件流式播放。
-    /// .webm 文件会根据检测结果注册 VP9/Vorbis 本地解码器。
+    /// .webm 文件会根据检测结果注册 VP9/Vorbis 本地解码器；首播高 Profile / RGB 的 VP9 会先等转码。
+    /// 同一时刻只认最新一次启动：新的启动或 <see cref="DisposeVideoResource"/> 会取消仍在进行中的旧启动。
     /// </summary>
     /// <param name="file">视频文件完整路径（支持 mp4/mkv/webm）。</param>
     /// <param name="cancellationToken">取消令牌。</param>
+    /// <exception cref="OperationCanceledException">调用方取消了 <paramref name="cancellationToken"/>；仅被新的启动取代时静默返回。</exception>
     private async Task StartMediaPlayerAsync(string file, CancellationToken cancellationToken = default)
     {
-        // 解不动的 VP9（Profile 1 / RGB）若已转码成 H.264 就改播产物。
-        file = _videoTranscodeService.GetPlaybackFile(file);
-        if (Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
-        {
-            bool decoderInstalled = VP9Helper.IsVP9DecoderInstalled();
-            bool vp8 = VP9Helper.IsVP8VideoFile(file);
-            if (vp8)
-            {
-                if (!decoderInstalled)
-                {
-                    _needToInstallVp9VideoExtension = true;
-                }
-            }
-            else
-            {
-                bool highProfileOrRgb = VP9Helper.IsVP9HighProfileOrRGB(file);
-                // 高 Profile 或 RGB 格式官方扩展不支持，必须使用我们提供的 libvpx 软件解码器
-                if (!decoderInstalled || highProfileOrRgb)
-                {
-                    VP9Helper.RegisterVP9Decoder(true);
-                }
-                if (highProfileOrRgb)
-                {
-                    // 首播高 Profile / RGB 的 VP9 先等 libvpx 转成 H.264 再播，避免软解与转码同时抢 CPU。
-                    // 必须排在注册之后：转码借用这份注册，自己不注册（见 VideoTranscodeService.EnsureTranscodedAsync）。
-                    file = await _videoTranscodeService.EnsureTranscodedAsync(file, cancellationToken);
-                }
-                if (!decoderInstalled && !highProfileOrRgb)
-                {
-                    SuggestToInstallVP9Decoder();
-                }
-            }
-        }
-        // 无论是否 webm，只要是视频背景都注册 Vorbis（部分 mkv/webm 可能包含 Vorbis 音频）
-        VP9Helper.RegisterVorbisDecoder();
-
+        // 必须在第一个 await 之前接管：首播等转码可能要好几秒，接管若排在等待之后，这段时间里
+        // DisposeVideoResource 取消不到本次启动，窗口激活时的兜底重启也看不到它，切走后旧视频可能又被拉起来。
         var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var previousCts = _startMediaPlayerCts;
         _startMediaPlayerCts = cts;
@@ -581,6 +556,42 @@ public sealed partial class AppBackground : UserControl
         InMemoryRandomAccessStream? memoryStream = null;
         try
         {
+            // 解不动的 VP9（Profile 1 / RGB）若已转码成 H.264 就改播产物。
+            file = _videoTranscodeService.GetPlaybackFile(file);
+            if (Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
+            {
+                bool decoderInstalled = VP9Helper.IsVP9DecoderInstalled();
+                bool vp8 = VP9Helper.IsVP8VideoFile(file);
+                if (vp8)
+                {
+                    if (!decoderInstalled)
+                    {
+                        _needToInstallVp9VideoExtension = true;
+                    }
+                }
+                else
+                {
+                    bool highProfileOrRgb = VP9Helper.IsVP9HighProfileOrRGB(file);
+                    // 高 Profile 或 RGB 格式官方扩展不支持，必须使用我们提供的 libvpx 软件解码器
+                    if (!decoderInstalled || highProfileOrRgb)
+                    {
+                        VP9Helper.RegisterVP9Decoder(true);
+                    }
+                    if (highProfileOrRgb)
+                    {
+                        // 首播高 Profile / RGB 的 VP9 先等 libvpx 转成 H.264 再播，避免软解与转码同时抢 CPU。
+                        // 必须排在注册之后：转码借用这份注册，自己不注册（见 VideoTranscodeService.EnsureTranscodedAsync）。
+                        file = await _videoTranscodeService.EnsureTranscodedAsync(file, cts.Token);
+                    }
+                    if (!decoderInstalled && !highProfileOrRgb)
+                    {
+                        SuggestToInstallVP9Decoder();
+                    }
+                }
+            }
+            // 无论是否 webm，只要是视频背景都注册 Vorbis（部分 mkv/webm 可能包含 Vorbis 音频）
+            VP9Helper.RegisterVorbisDecoder();
+
             (source, memoryStream) = await CreateVideoMediaSourceAsync(file, cts.Token);
             cts.Token.ThrowIfCancellationRequested();
             if (!ReferenceEquals(_startMediaPlayerCts, cts))
@@ -615,6 +626,11 @@ public sealed partial class AppBackground : UserControl
         {
             source?.Dispose();
             memoryStream?.Dispose();
+            if (cancellationToken.IsCancellationRequested)
+            {
+                // 调用方（背景更新）已被新一轮取代：继续上抛，别让它把过期的背景文件与背景状态写回去
+                throw;
+            }
         }
         catch (Exception ex)
         {
