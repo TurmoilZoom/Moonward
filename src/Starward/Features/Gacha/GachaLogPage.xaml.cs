@@ -1045,7 +1045,7 @@ public sealed partial class GachaLogPage : PageBase
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
             keepProgressInfoBar = true;
-            InAppToast.DismissAfter(infoBar, 5000);
+            InAppToast.DismissAfter(infoBar);
             ApplyFetchedGachaUid(newUid);
         }
         catch (TaskCanceledException)
@@ -1053,7 +1053,7 @@ public sealed partial class GachaLogPage : PageBase
             _logger.LogInformation("Get gacha log canceled");
             MarkProgressInfoBarCanceled(progressInfoBar);
             keepProgressInfoBar = true;
-            InAppToast.DismissAfter(progressInfoBar, 5000);
+            InAppToast.DismissAfter(progressInfoBar);
         }
         catch (GachaApiException ex)
         {
@@ -1242,7 +1242,7 @@ public sealed partial class GachaLogPage : PageBase
             infoBar.Severity = InfoBarSeverity.Success;
             infoBar.ActionButton = null;
             keepProgressInfoBar = true;
-            InAppToast.DismissAfter(infoBar, 5000);
+            InAppToast.DismissAfter(infoBar);
             ApplyFetchedGachaUid(uid);
             // 本地已有该 UID 时刷新统计（增量 0 条也要更新当前页）
             if (uid <= 0 && role.Uid > 0 && SelectUid == role.Uid)
@@ -1255,7 +1255,7 @@ public sealed partial class GachaLogPage : PageBase
             _logger.LogInformation("Sync gacha record from miyoushe canceled");
             MarkProgressInfoBarCanceled(progressInfoBar);
             keepProgressInfoBar = true;
-            InAppToast.DismissAfter(progressInfoBar, 5000);
+            InAppToast.DismissAfter(progressInfoBar);
         }
         catch (miHoYoApiException ex)
         {

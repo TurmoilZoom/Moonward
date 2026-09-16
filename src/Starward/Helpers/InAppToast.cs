@@ -11,6 +11,10 @@ namespace Starward.Helpers;
 public class InAppToast : Behavior<StackPanel>
 {
 
+    /// <summary>进度条完成（成功或已取消）后保留结果文案的默认时长（毫秒），见 <see cref="DismissAfter"/>。</summary>
+    public const int ProgressResultDuration = 5000;
+
+
     private readonly DispatcherQueueTimer _dismissTimer;
 
 
@@ -123,8 +127,7 @@ public class InAppToast : Behavior<StackPanel>
             }
             if (duration > 0)
             {
-                await Task.Delay(duration);
-                infoBar.IsOpen = false;
+                await DismissAfterAsync(infoBar, duration);
             }
         }
         catch { }
@@ -135,8 +138,8 @@ public class InAppToast : Behavior<StackPanel>
     /// 在指定毫秒后关闭 InfoBar。用于进度条在成功或取消后短暂保留结果、再自动消失的场景。
     /// </summary>
     /// <param name="infoBar">要关闭的 InfoBar；为 null 时无操作。</param>
-    /// <param name="duration">自动关闭毫秒数。</param>
-    public static void DismissAfter(InfoBar? infoBar, int duration)
+    /// <param name="duration">自动关闭毫秒数，默认 <see cref="ProgressResultDuration"/>。</param>
+    public static void DismissAfter(InfoBar? infoBar, int duration = ProgressResultDuration)
     {
         if (infoBar is null)
         {
@@ -146,6 +149,11 @@ public class InAppToast : Behavior<StackPanel>
     }
 
 
+    /// <summary>
+    /// 等待 <paramref name="duration"/> 毫秒后关闭 InfoBar，期间控件卸载等异常一律忽略。
+    /// </summary>
+    /// <param name="infoBar">要关闭的 InfoBar。</param>
+    /// <param name="duration">延迟毫秒数。</param>
     private static async Task DismissAfterAsync(InfoBar infoBar, int duration)
     {
         try
