@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Starward.Features.Overlay;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -43,11 +44,8 @@ internal partial class VideoTranscodeService
     /// <summary>本次运行中已判定「不需要或转不了」的源文件，避免每次播放都重试。</summary>
     private readonly ConcurrentDictionary<string, byte> _skipped = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>正在排队或转码中的源文件。</summary>
-    private readonly ConcurrentDictionary<string, byte> _running = new(StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>每个源文件正在进行的转码任务，完成后移除；等待方据此共享同一次转码。</summary>
-    private readonly ConcurrentDictionary<string, Task> _transcodeTasks = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>每个源文件正在排队或转码中的任务，完成后移除；同一源文件的多个等待方共享同一次转码。</summary>
+    private readonly ConcurrentDictionary<string, Lazy<Task>> _transcodeTasks = new(StringComparer.OrdinalIgnoreCase);
 
     private static bool _mediaFoundationStarted;
 
@@ -86,41 +84,13 @@ internal partial class VideoTranscodeService
 
 
     /// <summary>
-    /// 在后台排队转码一个正在播放的高 Profile / RGB VP9 视频。
-    /// <para/>
-    /// 必须在播放端已经用 <see cref="VP9Helper.RegisterVP9Decoder"/> 注册 libvpx 之后调用：转码借用这份注册，自己从不注册。
-    /// 进程内注册的解码器优先级高于官方 VP9 扩展，若由转码服务在后台注册，会截走随后打开的 Profile 0 播放器
-    /// （实测解码从 2% 升到 22% 单核）；而由它注销又可能拆掉背景正在用的注册。
-    /// </summary>
-    /// <param name="file">原始视频文件完整路径。</param>
-    public void QueueTranscode(string file)
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(file) || !Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-            string target = GetTranscodedFilePath(file);
-            if (!IsTranscodedFileUsable(file, target) && !_skipped.ContainsKey(file))
-            {
-                GetOrStartTranscode(file, target);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Queue transcode '{file}'", file);
-        }
-    }
-
-
-    /// <summary>
     /// 等转码完成并返回本次播放应使用的文件：已有可用产物就直接返回；否则当场排队转码并等待完成，
     /// 成功后返回 H.264 产物，失败或被跳过则退回源文件（由播放端继续 libvpx 软解）。
     /// 最多等 <see cref="MaxPlaybackWait"/>（含排队时间），超时同样退回源文件，转码留在后台继续，下次播放直接用产物。
     /// <para/>
-    /// 注册要求与 <see cref="QueueTranscode"/> 相同：调用前必须已通过 <see cref="VP9Helper.RegisterVP9Decoder"/>
-    /// 注册好 libvpx 解码器，本方法自身从不注册。
+    /// 必须在播放端已经用 <see cref="VP9Helper.RegisterVP9Decoder"/> 注册 libvpx 之后调用：转码借用这份注册，自己从不注册。
+    /// 进程内注册的解码器优先级高于官方 VP9 扩展，若由转码服务在后台注册，会截走随后打开的 Profile 0 播放器
+    /// （实测解码从 2% 升到 22% 单核）；而由它注销又可能拆掉背景正在用的注册。
     /// </summary>
     /// <param name="file">原始视频文件完整路径。</param>
     /// <param name="cancellationToken">取消令牌。取消时立即停止等待并抛出 <see cref="OperationCanceledException"/>；转码本身留在后台继续，下次播放直接用产物。</param>
@@ -140,11 +110,7 @@ internal partial class VideoTranscodeService
         {
             return file;
         }
-        Task? task = GetOrStartTranscode(file, target);
-        if (task is null)
-        {
-            return file;
-        }
+        Task task = GetOrStartTranscode(file, target);
         try
         {
             // 取消与超时都只结束「等待」，不打断转码：背景切走或先软解播放后，转码照常写完，别白转一半
@@ -233,19 +199,13 @@ internal partial class VideoTranscodeService
     /// </summary>
     /// <param name="source">原始视频文件完整路径。</param>
     /// <param name="target">转码产物路径。</param>
-    /// <returns>进行中的转码任务；竞态下取不到任务时返回 null（调用方退回软解即可）。</returns>
-    private Task? GetOrStartTranscode(string source, string target)
+    /// <returns>排队或进行中的转码任务。</returns>
+    private Task GetOrStartTranscode(string source, string target)
     {
-        if (_transcodeTasks.TryGetValue(source, out Task? existing))
-        {
-            return existing;
-        }
-        if (!_running.TryAdd(source, 0))
-        {
-            // 已在排队但任务表尚未落上（极小竞态窗口）：拿得到就等，拿不到退回软解，不影响播放。
-            return _transcodeTasks.TryGetValue(source, out existing) ? existing : null;
-        }
-        Task task = Task.Run(async () =>
+        // 先登记、后启动：Lazy 保证并发调用只启动一次，任务结束时只移除自己这一项；
+        // 若先启动后登记，任务极快结束时会留下一个已完成的旧任务，挡住本次运行里之后的重试。
+        Lazy<Task>? entry = null;
+        entry = new Lazy<Task>(() => Task.Run(async () =>
         {
             try
             {
@@ -271,12 +231,10 @@ internal partial class VideoTranscodeService
             }
             finally
             {
-                _running.TryRemove(source, out _);
-                _transcodeTasks.TryRemove(source, out _);
+                _transcodeTasks.TryRemove(KeyValuePair.Create(source, entry!));
             }
-        });
-        _transcodeTasks[source] = task;
-        return task;
+        }));
+        return _transcodeTasks.GetOrAdd(source, entry).Value;
     }
 
 
@@ -346,7 +304,7 @@ internal partial class VideoTranscodeService
     private static TranscodeResult Transcode(string source, string target)
     {
         EnsureMediaFoundationStarted();
-        // SourceReader 用的是播放端注册到本进程的 libvpx 解码器（见 QueueTranscode 的说明），这里不自行注册。
+        // SourceReader 用的是播放端注册到本进程的 libvpx 解码器（见 EnsureTranscodedAsync 的说明），这里不自行注册。
 
         Marshal.ThrowExceptionForHR(MediaFoundation.MFCreateAttributes(out IMFAttributes readerAttributes, 2));
         readerAttributes.SetUINT32(ref MediaFoundation.MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, 1);
