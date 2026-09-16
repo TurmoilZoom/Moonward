@@ -268,4 +268,27 @@ public class GachaTypeStats
     /// </summary>
     public string MaxFiftyFiftyMissStreakText => string.Format(Lang.GachaStatsCard_MissStreak, MaxFiftyFiftyMissStreak);
 
+
+    /// <summary>
+    /// 清除 5 星与 4 星记录上的悬停高亮（<see cref="GachaLogItemEx.IsPointerIn"/>）。
+    /// 统计卡片在记录列表拖拽滚动结束时调用：拖拽期间指针被列表捕获，记录项收不到 PointerExited，松手后高亮可能残留。
+    /// </summary>
+    public void ClearPointerIn()
+    {
+        if (List_5 is not null)
+        {
+            foreach (GachaLogItemEx item in List_5)
+            {
+                item.IsPointerIn = false;
+            }
+        }
+        if (List_4 is not null)
+        {
+            foreach (GachaLogItemEx item in List_4)
+            {
+                item.IsPointerIn = false;
+            }
+        }
+    }
+
 }

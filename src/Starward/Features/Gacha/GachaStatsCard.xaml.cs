@@ -28,7 +28,7 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
         this.InitializeComponent();
         // Bind 返回需 Dispose 的句柄；卡片从视觉树移除时在 OnCardUnloaded 统一释放。
         _segmentedListBinding = GachaStatsSegmentedListHelper.Bind(Segmented_GachaItemList, ItemsRepeater_List_5, ItemsRepeater_List_4, ScrollViewer_GachaItemList);
-        _dragScrollBinding = GachaStatsListDragScrollHelper.Bind(ScrollViewer_GachaItemList, ClearPointerHover);
+        _dragScrollBinding = GachaStatsListDragScrollHelper.Bind(ScrollViewer_GachaItemList, () => WarpTypeStats?.ClearPointerIn());
         Unloaded += OnCardUnloaded;
     }
 
@@ -214,30 +214,6 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
         //{
         //    sender.FontSize = 12;
         //}
-    }
-
-
-    /// <summary>
-    /// 清除记录项上所有残留的悬停高亮。
-    /// 拖拽滚动时指针被列表 ScrollViewer 捕获，记录项收不到 PointerExited；松手后指针可能已落在列表外，高亮会残留。
-    /// 由 <see cref="GachaStatsListDragScrollHelper"/> 在拖拽结束时回调。
-    /// </summary>
-    private void ClearPointerHover()
-    {
-        if (WarpTypeStats?.List_5 is not null)
-        {
-            foreach (var l5 in WarpTypeStats.List_5)
-            {
-                l5.IsPointerIn = false;
-            }
-        }
-        if (WarpTypeStats?.List_4 is not null)
-        {
-            foreach (var l4 in WarpTypeStats.List_4)
-            {
-                l4.IsPointerIn = false;
-            }
-        }
     }
 
 
