@@ -128,25 +128,6 @@ internal partial class VideoTranscodeService
 
 
     /// <summary>
-    /// 删除源文件对应的转码产物。导入同名的新文件覆盖原片时调用：复制会保留原文件的修改时间，
-    /// 新文件若比旧产物「旧」，旧产物仍会被当成可用，播出来的就是上一个视频。
-    /// </summary>
-    /// <param name="file">被覆盖的原始视频文件完整路径；不是 webm 时什么也不做。</param>
-    public static void DeleteTranscodedFile(string? file)
-    {
-        if (!IsWebmFile(file))
-        {
-            return;
-        }
-        try
-        {
-            File.Delete(GetTranscodedFilePath(file));
-        }
-        catch { }
-    }
-
-
-    /// <summary>
     /// 等转码完成并返回本次播放应使用的文件：已有可用产物就直接返回；否则当场排队转码并等待完成，
     /// 成功后返回 H.264 产物，失败或被跳过则退回源文件（由播放端继续 libvpx 软解）。返回产物时会在后台校验后删掉原片。
     /// 最多等 <see cref="MaxPlaybackWait"/>（含排队时间），超时同样退回源文件，转码留在后台继续，下次播放直接用产物。
