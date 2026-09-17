@@ -303,9 +303,52 @@ public partial class BackgroundService
             return existing;
         }
         var bytes = await _httpClient.GetByteArrayAsync(url, cancellationToken);
-        Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-        await File.WriteAllBytesAsync(file, bytes, cancellationToken);
-        return file;
+        return await WriteBackgroundFileAsync(file, bytes, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 把下载好的背景文件写进 bg 目录：先写临时文件，写完再改成正式文件名。
+    /// 正式文件名一出现就是完整文件，<see cref="ResolveBackgroundFile"/> 按内容 MD5 找其他区服的文件时不会读到写了一半的，
+    /// 进程中途被结束也不会留下残缺的正式文件（否则之后一直当作已下载，所有同内容的区服都会用它）。
+    /// </summary>
+    /// <param name="path">正式文件的完整路径。</param>
+    /// <param name="bytes">文件内容。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>正式文件路径。</returns>
+    /// <exception cref="IOException">写入或改名失败，且正式文件不存在。</exception>
+    internal static async Task<string> WriteBackgroundFileAsync(string path, byte[] bytes, CancellationToken cancellationToken = default)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        // 临时文件名各不相同：版本海报预下载和首页背景可能同时下载同一个文件。
+        // 「名.随机.tmp」不符合官方命名格式，不会被按 MD5 前缀的查找当成同内容文件。
+        string temp = $"{path}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            // 独占打开：图库列表与去重读到它会跳过，不会拿写了一半的内容算 MD5
+            await using (FileStream fs = new(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous))
+            {
+                await fs.WriteAsync(bytes, cancellationToken);
+            }
+            // 不覆盖：正式文件已存在只可能是并发下载的另一方先写完了，它可能正被播放或显示
+            File.Move(temp, path);
+            return path;
+        }
+        catch (IOException) when (File.Exists(path))
+        {
+            return path;
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(temp);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // 删不掉只是留下一个临时文件
+            }
+        }
     }
 
 

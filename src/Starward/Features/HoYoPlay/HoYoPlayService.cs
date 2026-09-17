@@ -126,7 +126,7 @@ public class HoYoPlayService
                         if (!BackgroundService.BackgroundFileExists(path))
                         {
                             byte[] bytes = await _httpClient.GetByteArrayAsync(url);
-                            await File.WriteAllBytesAsync(path, bytes);
+                            await BackgroundService.WriteBackgroundFileAsync(path, bytes);
                         }
                         AppConfig.SetVersionPoster(info.GameBiz, name);
                     }
