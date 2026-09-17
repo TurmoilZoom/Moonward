@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Starward.Features.Background;
 using Starward.Features.Overlay;
 using System;
 using System.Collections.Concurrent;
@@ -95,6 +96,7 @@ internal partial class VideoTranscodeService
 
     /// <summary>
     /// 查找源文件对应的可用转码产物。只查文件，不触发转码、不删原片，可在任意线程调用。
+    /// 自己的产物没有时，官方背景还会找同内容、不同编号的原片转出来的产物（见 <see cref="TryGetSameContentTranscodedFile"/>）。
     /// </summary>
     /// <param name="file">原始视频文件完整路径，原片本身可以已经不存在。</param>
     /// <param name="target">可用的转码产物路径。</param>
@@ -108,12 +110,50 @@ internal partial class VideoTranscodeService
             return false;
         }
         string path = GetTranscodedFilePath(file);
-        if (!IsTranscodedFileUsable(file, path))
+        if (IsTranscodedFileUsable(file, path))
+        {
+            target = path;
+            return true;
+        }
+        return TryGetSameContentTranscodedFile(file, out target);
+    }
+
+
+    /// <summary>
+    /// 找同内容原片转出来的产物。官方背景文件名是「内容 MD5_编号.webm」，各区服的同一个视频只是编号不同，
+    /// 转出来的产物可以通用；图库「删除重复文件」后各区服只剩一份产物，不必每个区服再转一遍。
+    /// </summary>
+    /// <param name="file">原始视频文件完整路径。</param>
+    /// <param name="target">同内容原片的转码产物路径。</param>
+    /// <returns>找到非空产物时返回 true；文件名不是官方格式时总是 false。</returns>
+    private static bool TryGetSameContentTranscodedFile(string file, [NotNullWhen(true)] out string? target)
+    {
+        target = null;
+        string? folder = Path.GetDirectoryName(file);
+        if (string.IsNullOrEmpty(folder) || !BackgroundService.TryParseContentAddressedFileName(Path.GetFileName(file), out string? md5, out _))
         {
             return false;
         }
-        target = path;
-        return true;
+        try
+        {
+            foreach (string item in Directory.EnumerateFiles(folder, $"{md5}_*.webm.mp4"))
+            {
+                // 通配符只按前缀筛，编号格式要再核对一遍
+                if (BackgroundService.TryParseContentAddressedFileName(Path.GetFileName(item)[..^".mp4".Length], out string? otherMd5, out string? extension)
+                    && otherMd5.Equals(md5, StringComparison.OrdinalIgnoreCase)
+                    && extension.Equals(".webm", StringComparison.OrdinalIgnoreCase)
+                    && new FileInfo(item).Length > 0)
+                {
+                    target = item;
+                    return true;
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // 目录读不了，当作没有
+        }
+        return false;
     }
 
 
@@ -145,22 +185,21 @@ internal partial class VideoTranscodeService
         {
             return file;
         }
-        string target = GetTranscodedFilePath(file);
-        if (IsTranscodedFileUsable(file, target))
+        if (TryGetTranscodedFile(file, out string? existing))
         {
-            DeleteSourceInBackground(file, target);
-            return target;
+            DeleteSourceInBackground(file, existing);
+            return existing;
         }
         if (_skipped.ContainsKey(file))
         {
             return file;
         }
-        Task task = GetOrStartTranscode(file, target);
+        Task task = GetOrStartTranscode(file, GetTranscodedFilePath(file));
         try
         {
             // 取消与超时都只结束「等待」，不打断转码：背景切走或先软解播放后，转码照常写完，别白转一半
             await task.WaitAsync(MaxPlaybackWait, cancellationToken).ConfigureAwait(false);
-            if (IsTranscodedFileUsable(file, target))
+            if (TryGetTranscodedFile(file, out string? target))
             {
                 DeleteSourceInBackground(file, target);
                 return target;
@@ -313,7 +352,7 @@ internal partial class VideoTranscodeService
     /// </summary>
     private void TranscodeCore(string source, string target)
     {
-        if (!File.Exists(source) || IsTranscodedFileUsable(source, target))
+        if (!File.Exists(source) || TryGetTranscodedFile(source, out _))
         {
             return;
         }
@@ -418,7 +457,8 @@ internal partial class VideoTranscodeService
     /// <exception cref="UnauthorizedAccessException">没有删除原片的权限。</exception>
     private void DeleteSourceCore(string source, string target)
     {
-        if (!File.Exists(source) || !IsTranscodedFileUsable(source, target))
+        // 产物可能是同内容原片转出来的，修改时间与本原片无关，只看它还在不在；是否完整由下面的校验把关
+        if (!File.Exists(source) || new FileInfo(target) is not { Exists: true, Length: > 0 })
         {
             return;
         }

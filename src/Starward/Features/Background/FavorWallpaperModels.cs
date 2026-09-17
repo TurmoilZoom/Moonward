@@ -87,8 +87,7 @@ public partial class FavorWallpaperView : ObservableObject
         {
             if (IsStatic && IsDownloaded)
             {
-                string path = BackgroundService.GetBgFilePath(FavorWallpaperService.GetCacheFileName(Record));
-                if (File.Exists(path))
+                if (BackgroundService.ResolveBackgroundFile(BackgroundService.GetBgFilePath(FavorWallpaperService.GetCacheFileName(Record))) is string path && File.Exists(path))
                 {
                     return new Uri(path).AbsoluteUri;
                 }

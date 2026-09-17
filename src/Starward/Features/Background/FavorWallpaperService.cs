@@ -362,7 +362,7 @@ internal partial class FavorWallpaperService
         IEnumerable<FavorWallpaperRecord> downloaded = GetDownloadedWallpapers(mindscape);
         if (!mindscape)
         {
-            downloaded = downloaded.Where(x => !HevcHelper.IsHevcDecoderRequiredButMissing(BackgroundService.GetBgFilePath(GetCacheFileName(x))));
+            downloaded = downloaded.Where(x => !HevcHelper.IsHevcDecoderRequiredButMissing(BackgroundService.ResolveBackgroundFile(BackgroundService.GetBgFilePath(GetCacheFileName(x)))));
         }
         return downloaded.ToList();
     }
@@ -526,16 +526,20 @@ internal partial class FavorWallpaperService
 
 
     /// <summary>
-    /// 删除本地 bg 缓存，连同转码产物一起删。若文件正被背景播放占用，稍等后重试。
+    /// 删除本地 bg 缓存，连同转码产物、同内容不同编号的文件一起删。若文件正被背景播放占用，稍等后重试。
     /// </summary>
     public async Task DeleteLocalCacheAsync(FavorWallpaperRecord item, CancellationToken cancellationToken = default)
     {
-        string path = BackgroundService.GetBgFilePath(GetCacheFileName(item));
-        await DeleteFileWithRetryAsync(path, cancellationToken).ConfigureAwait(false);
-        if (Path.GetExtension(path).Equals(".webm", StringComparison.OrdinalIgnoreCase))
+        string cachePath = BackgroundService.GetBgFilePath(GetCacheFileName(item));
+        // 同内容的文件和只剩转码产物的 webm 都会让卡片显示「已下载」，要删到查不到为止；设上限防止删不掉时死循环
+        for (int i = 0; i < 16 && BackgroundService.ResolveBackgroundFile(cachePath) is string path; i++)
         {
-            // 解不动的 webm 转码后原片会被删掉、只剩产物，只删原片的话卡片仍显示「已下载」
-            await DeleteFileWithRetryAsync(VideoTranscodeService.GetTranscodedFilePath(path), cancellationToken).ConfigureAwait(false);
+            await DeleteFileWithRetryAsync(path, cancellationToken).ConfigureAwait(false);
+            // 先删原片再查产物：原片在时比它旧的产物不算可用，查不到
+            if (VideoTranscodeService.TryGetTranscodedFile(path, out string? transcoded))
+            {
+                await DeleteFileWithRetryAsync(transcoded, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 
@@ -591,7 +595,7 @@ internal partial class FavorWallpaperService
     /// </summary>
     public async Task DownloadToFileAsync(FavorWallpaperRecord item, string destPath, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
     {
-        string cached = BackgroundService.GetBgFilePath(GetCacheFileName(item));
+        string? cached = BackgroundService.ResolveBackgroundFile(BackgroundService.GetBgFilePath(GetCacheFileName(item)));
         // 只认原片：原片转码后被删、只剩有损的 H.264 产物时，重新下载原文件给用户
         if (File.Exists(cached))
         {
@@ -612,7 +616,7 @@ internal partial class FavorWallpaperService
     public async Task<bool> SetAsCustomBackgroundAsync(GameBiz gameBiz, FavorWallpaperRecord item, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
     {
         string name = await DownloadToBgFolderAsync(item, progress, cancellationToken).ConfigureAwait(false);
-        if (HevcHelper.IsHevcDecoderRequiredButMissing(BackgroundService.GetBgFilePath(name)))
+        if (HevcHelper.IsHevcDecoderRequiredButMissing(BackgroundService.ResolveBackgroundFile(BackgroundService.GetBgFilePath(name))))
         {
             _logger.LogWarning("HEVC decoder is not available, favor wallpaper {Id} ({Title}) is not set as background", item.ContentId, item.Title);
             return false;

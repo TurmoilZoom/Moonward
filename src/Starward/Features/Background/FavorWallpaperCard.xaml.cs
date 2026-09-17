@@ -378,7 +378,7 @@ public sealed partial class FavorWallpaperCard : UserControl
         {
             return null;
         }
-        string path = BackgroundService.GetBgFilePath(FavorWallpaperService.GetCacheFileName(View.Record));
+        string? path = BackgroundService.ResolveBackgroundFile(BackgroundService.GetBgFilePath(FavorWallpaperService.GetCacheFileName(View.Record)));
         // 解不动的 webm 设为背景播过之后会转码并删掉原片，预览改播转码产物
         if (VideoTranscodeService.TryGetTranscodedFile(path, out string? transcoded))
         {

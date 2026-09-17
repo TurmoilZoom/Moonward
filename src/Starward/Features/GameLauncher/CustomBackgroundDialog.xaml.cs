@@ -188,7 +188,7 @@ public sealed partial class CustomBackgroundDialog : ContentDialog
     {
         try
         {
-            string path = Path.Join(AppConfig.CacheFolder, "bg", CustomBg);
+            string path = BackgroundService.ResolveBackgroundFile(Path.Join(AppConfig.CacheFolder, "bg", CustomBg)) ?? string.Empty;
             // 解不动的 webm 转码后原片会被删掉，打开实际在播的转码产物
             if (VideoTranscodeService.TryGetTranscodedFile(path, out string? transcoded))
             {

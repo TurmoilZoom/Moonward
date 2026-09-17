@@ -149,13 +149,11 @@ public sealed partial class BackgroundViewPage : PageBase
                 ConcurrentDictionary<string, bool> dict = new();
                 await Parallel.ForEachAsync(files, async (file, _) =>
                 {
-                    using FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                    string hash = Convert.ToHexString(await MD5.HashDataAsync(fs));
-                    if (dict.TryAdd(hash, true))
+                    string key = await GetDuplicateKeyAsync(file);
+                    if (dict.TryAdd(key, true))
                     {
                         return;
                     }
-                    fs.Dispose();
                     File.Delete(file);
                     Interlocked.Increment(ref count);
                 });
@@ -168,6 +166,26 @@ public sealed partial class BackgroundViewPage : PageBase
         {
             _logger.LogError(ex, "Delete duplicate background files.");
         }
+    }
+
+
+    /// <summary>
+    /// 判重用的键，键相同的文件只保留一份。普通文件用整个文件的 MD5；
+    /// 官方背景的转码产物（「内容 MD5_编号.webm.mp4」）的 MP4 文件头带创建时间，同一个视频转出来的字节也不一样，
+    /// 改用原片文件名里的内容 MD5。删掉的产物不影响播放：原片或其他区服查找产物时会用到留下的那一份。
+    /// </summary>
+    /// <param name="file">bg 目录中的文件完整路径。</param>
+    /// <returns>判重键。</returns>
+    private static async Task<string> GetDuplicateKeyAsync(string file)
+    {
+        string name = Path.GetFileName(file);
+        if (name.EndsWith(".webm.mp4", StringComparison.OrdinalIgnoreCase)
+            && BackgroundService.TryParseContentAddressedFileName(name[..^".mp4".Length], out string? md5, out _))
+        {
+            return $"transcoded:{md5.ToUpperInvariant()}";
+        }
+        using FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        return Convert.ToHexString(await MD5.HashDataAsync(fs));
     }
 
 

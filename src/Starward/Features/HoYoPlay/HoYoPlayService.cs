@@ -2,6 +2,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
+using Starward.Features.Background;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -121,7 +122,8 @@ public class HoYoPlayService
                     {
                         string name = Path.GetFileName(url);
                         string path = Path.Combine(bg, name);
-                        if (!File.Exists(path))
+                        // 各区服海报内容相同、文件名编号不同：同内容的已下载过（含去重后留下的那份）就不再下载
+                        if (!BackgroundService.BackgroundFileExists(path))
                         {
                             byte[] bytes = await _httpClient.GetByteArrayAsync(url);
                             await File.WriteAllBytesAsync(path, bytes);

@@ -232,6 +232,9 @@ public sealed partial class AppBackground : UserControl
             {
                 bool apiCancelled = false;
                 string? filePath = null;
+                // 记入设置的背景文件名，取自本区服的链接或自定义背景设置。filePath 可能是其他区服下载的同内容文件（见 BackgroundService.ResolveBackgroundFile），
+                // 不能拿它的文件名记录：GetSuggestedGameBackgroundAsync 靠这个名字在背景列表里认出上次用的是哪一张。
+                string? bgName = null;
                 GameBackground? gameBackground = null;
                 try
                 {
@@ -245,10 +248,12 @@ public sealed partial class AppBackground : UserControl
                     }
                     else if (gameBackground.Type is GameBackground.BACKGROUND_TYPE_CUSTOM)
                     {
-                        filePath = gameBackground.Background.Url;
+                        bgName = Path.GetFileName(gameBackground.Background.Url);
+                        filePath = BackgroundService.ResolveBackgroundFile(gameBackground.Background.Url) ?? gameBackground.Background.Url;
                     }
                     else if (gameBackground.Type is GameBackground.BACKGROUND_TYPE_VIDEO && !gameBackground.StopVideo)
                     {
+                        bgName = Path.GetFileName(gameBackground.Video.Url);
                         filePath = await _backgroundService.GetBackgroundFileAsync(gameBackground.Video.Url, downloadCancellationToken);
                         if (!string.IsNullOrWhiteSpace(gameBackground.Background?.Url) && IsVP9VideoExtensionRequiredButMissing(filePath))
                         {
@@ -256,21 +261,26 @@ public sealed partial class AppBackground : UserControl
                             // 暂停状态随后照常被记住（SetStopOfficialVideo），装好扩展后要用户点播放才会重新检查并播放。
                             gameBackground.StopVideo = true;
                             ShowVP9ExtensionRequiredToast();
+                            bgName = Path.GetFileName(gameBackground.Background.Url);
                             filePath = await _backgroundService.GetBackgroundFileAsync(gameBackground.Background.Url, downloadCancellationToken);
                         }
                     }
                     else
                     {
+                        bgName = Path.GetFileName(gameBackground.Background.Url);
                         filePath = await _backgroundService.GetBackgroundFileAsync(gameBackground.Background.Url, downloadCancellationToken);
                     }
                 }
                 catch (OperationCanceledException)
                 {
                     apiCancelled = true;
+                    // 回落显示的是设置里记的背景，名字保持不变（它的文件也可能换成了同内容文件）
+                    bgName = AppConfig.GetBg(CurrentGameId.GameBiz);
                     filePath = BackgroundService.GetFallbackBackgroundImage(CurrentGameId);
                 }
                 catch (Exception ex)
                 {
+                    bgName = AppConfig.GetBg(CurrentGameId.GameBiz);
                     filePath = BackgroundService.GetFallbackBackgroundImage(CurrentGameId);
                     _logger.LogError(ex, "Update background image");
                 }
@@ -326,7 +336,7 @@ public sealed partial class AppBackground : UserControl
                     if (!apiCancelled && gameBackground is not null)
                     {
                         // 记录最后使用的背景（包括自定义背景），用于下次启动、切换游戏或移动显示器时恢复。
-                        AppConfig.SetBg(CurrentGameId.GameBiz, Path.GetFileName(filePath));
+                        AppConfig.SetBg(CurrentGameId.GameBiz, bgName ?? Path.GetFileName(filePath));
                         // 记录上次是否使用官方版本海报：背景列表更新后据此恢复海报（见 GetSuggestedGameBackgroundAsync）。
                         AppConfig.SetUseVersionPoster(CurrentGameId.GameBiz, gameBackground.Type is GameBackground.BACKGROUND_TYPE_POSTER);
                         // 官方视频：记忆播放/暂停，列表更新后仍按偏好恢复（见 GetSuggestedGameBackgroundAsync）。

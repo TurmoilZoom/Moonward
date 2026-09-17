@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
@@ -18,7 +19,7 @@ using Windows.Storage;
 
 namespace Starward.Features.Background;
 
-public class BackgroundService
+public partial class BackgroundService
 {
 
     private readonly ILogger<BackgroundService> _logger;
@@ -51,19 +52,99 @@ public class BackgroundService
 
 
     /// <summary>
-    /// 背景文件是否存在。解不动的 webm 转码成 H.264 后原片会被删掉、只剩同目录的转码产物，这种情况也算存在；
-    /// 设置里记录的仍是原片文件名，播放时由 <see cref="VideoTranscodeService"/> 换成产物。
+    /// 背景文件是否存在，规则同 <see cref="ResolveBackgroundFile"/>：同内容、不同编号的文件，以及只剩转码产物的 webm 都算存在。
     /// </summary>
     /// <param name="path">背景文件完整路径。</param>
-    /// <returns>原片或其可用的转码产物存在时返回 true。</returns>
+    /// <returns>能找到可用的背景文件时返回 true。</returns>
     public static bool BackgroundFileExists([NotNullWhen(true)] string? path)
+    {
+        return ResolveBackgroundFile(path) is not null;
+    }
+
+
+    /// <summary>
+    /// 找到背景文件实际可用的路径。设置里记录、下载链接拼出的始终是本区服的文件名，实际文件可能换了名字：
+    /// <list type="bullet">
+    /// <item>官方 CDN 的文件名是「内容 MD5_编号.扩展名」，各区服的同一张背景只是编号不同。被图库「删除重复文件」删掉其中几份后，
+    /// 用剩下的那份，不必重新下载。</item>
+    /// <item>解不动的 webm 转码成 H.264 后原片会被删掉，只剩「原名 + .mp4」的产物；返回的仍是原片路径，播放时由 <see cref="VideoTranscodeService"/> 换成产物。</item>
+    /// </list>
+    /// </summary>
+    /// <param name="path">背景文件完整路径。</param>
+    /// <returns>本文件或同内容文件的路径（webm 可能只剩转码产物）；都找不到时返回 null。</returns>
+    public static string? ResolveBackgroundFile(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+        if (IsBackgroundFileAvailable(path))
+        {
+            return path;
+        }
+        string? folder = Path.GetDirectoryName(path);
+        if (string.IsNullOrEmpty(folder) || !TryParseContentAddressedFileName(Path.GetFileName(path), out string? md5, out string? extension))
+        {
+            return null;
+        }
+        try
+        {
+            foreach (string file in Directory.EnumerateFiles(folder, $"{md5}_*"))
+            {
+                string candidate = file;
+                if (extension.Equals(".webm", StringComparison.OrdinalIgnoreCase) && candidate.EndsWith(".webm.mp4", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 只剩转码产物：还原成原片路径，交给转码服务映射
+                    candidate = candidate[..^".mp4".Length];
+                }
+                // 通配符只按前缀筛，扩展名与编号格式要再核对一遍
+                if (TryParseContentAddressedFileName(Path.GetFileName(candidate), out string? otherMd5, out string? otherExtension)
+                    && otherMd5.Equals(md5, StringComparison.OrdinalIgnoreCase)
+                    && otherExtension.Equals(extension, StringComparison.OrdinalIgnoreCase)
+                    && IsBackgroundFileAvailable(candidate))
+                {
+                    return candidate;
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // 目录不存在或读不了，当作没有
+        }
+        return null;
+    }
+
+
+    /// <summary>文件本身存在，或 webm 原片已删但有可用的转码产物。</summary>
+    private static bool IsBackgroundFileAvailable(string path)
     {
         return File.Exists(path) || VideoTranscodeService.TryGetTranscodedFile(path, out _);
     }
 
 
     /// <summary>
-    /// 获取自定义背景图文件路径
+    /// 解析官方 CDN 的背景文件名「内容 MD5_编号.扩展名」。MD5 相同的文件内容相同，可以互相替代。
+    /// </summary>
+    /// <param name="fileName">文件名（不含目录）。</param>
+    /// <param name="md5">32 位十六进制的内容 MD5。</param>
+    /// <param name="extension">扩展名，含点。</param>
+    /// <returns>符合该格式时返回 true。</returns>
+    internal static bool TryParseContentAddressedFileName(string? fileName, [NotNullWhen(true)] out string? md5, [NotNullWhen(true)] out string? extension)
+    {
+        Match match = ContentAddressedFileNameRegex().Match(fileName ?? string.Empty);
+        md5 = match.Success ? match.Groups["md5"].Value : null;
+        extension = match.Success ? match.Groups["ext"].Value : null;
+        return match.Success;
+    }
+
+
+    /// <summary>官方 CDN 背景文件名：32 位小写十六进制的内容 MD5 + 下划线 + 数字编号 + 扩展名。</summary>
+    [GeneratedRegex(@"^(?<md5>[0-9a-f]{32})_\d+(?<ext>\.[0-9A-Za-z]+)$")]
+    private static partial Regex ContentAddressedFileNameRegex();
+
+
+    /// <summary>
+    /// 获取自定义背景图文件路径（按设置里的文件名拼出，未必是实际文件，打开前用 <see cref="ResolveBackgroundFile"/>）
     /// </summary>
     /// <param name="gameId"></param>
     /// <param name="path"></param>
@@ -118,8 +199,7 @@ public class BackgroundService
         string? customBg = AppConfig.GetCustomBg(gameId.GameBiz);
         if (!(lastBg == customBg && !AppConfig.GetEnableCustomBg(gameId.GameBiz)))
         {
-            string? path = GetBgFilePath(lastBg);
-            if (BackgroundFileExists(path))
+            if (ResolveBackgroundFile(GetBgFilePath(lastBg)) is string path)
             {
                 return path;
             }
@@ -127,7 +207,7 @@ public class BackgroundService
         // 回退到自定义背景
         if (TryGetCustomBgFilePath(gameId, out string? custom))
         {
-            return custom;
+            return ResolveBackgroundFile(custom);
         }
         return null;
     }
@@ -203,17 +283,27 @@ public class BackgroundService
 
 
 
+    /// <summary>
+    /// 获取背景文件，本地没有才下载到 CacheFolder\bg。
+    /// </summary>
+    /// <param name="url">背景文件链接。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>
+    /// 实际可用的文件路径。其他区服下载过同内容的文件、或 webm 原片已转码时，返回的文件名与链接里的不同；
+    /// 要记入设置的文件名请用 <c>Path.GetFileName(url)</c>。
+    /// </returns>
     public async Task<string> GetBackgroundFileAsync(string url, CancellationToken cancellationToken = default)
     {
         string name = Path.GetFileName(url);
         string file = GetBgFilePath(name);
-        // 原片转码后已删除、只剩产物时也不重新下载，否则每次启动都要重下一遍再重转
-        if (!BackgroundFileExists(file))
+        // 同内容的文件已在本地（其他区服下过、去重后只剩一份、原片已转码）就直接用，否则每次切换区服都要重下一遍
+        if (ResolveBackgroundFile(file) is string existing)
         {
-            var bytes = await _httpClient.GetByteArrayAsync(url, cancellationToken);
-            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-            await File.WriteAllBytesAsync(file, bytes, cancellationToken);
+            return existing;
         }
+        var bytes = await _httpClient.GetByteArrayAsync(url, cancellationToken);
+        Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+        await File.WriteAllBytesAsync(file, bytes, cancellationToken);
         return file;
     }
 
@@ -227,8 +317,8 @@ public class BackgroundService
     /// <returns></returns>
     public static string? GetFallbackBackgroundImage(GameId gameId)
     {
-        string? bg = GetBgFilePath(AppConfig.GetBg(gameId.GameBiz));
-        if (!BackgroundFileExists(bg))
+        string? bg = ResolveBackgroundFile(GetBgFilePath(AppConfig.GetBg(gameId.GameBiz)));
+        if (bg is null)
         {
             string baseFolder = AppContext.BaseDirectory;
             string path = Path.Combine(baseFolder, @"Assets\Image\UI_CutScene_1130320101A.png");
@@ -321,7 +411,7 @@ public class BackgroundService
                 }
                 continue;
             }
-            if (VideoTranscodeService.TryGetTranscodedFile(path, out _))
+            if (Path.GetExtension(path).Equals(".webm", StringComparison.OrdinalIgnoreCase) && File.Exists(VideoTranscodeService.GetTranscodedFilePath(path)))
             {
                 // 原片转码后已删、只剩有损的转码产物，比不了内容，当作名字已被占用
                 continue;
