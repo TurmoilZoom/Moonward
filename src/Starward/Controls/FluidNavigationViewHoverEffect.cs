@@ -27,6 +27,7 @@ namespace Starward.Controls;
 /// <item>悬停文字右移：仅 <c>ContentPresenter</c> 的 <c>Translation.X</c> 做 Spring，不影响图标。</item>
 /// <item>按下物理反馈：整项（LayoutRoot/Presenter）缩放 + Z 轴下沉，抬起 Spring 回弹。</item>
 /// </list>
+/// 系统关闭「动画效果」时：高亮条直接定位、直接显隐，不做文字右移与按压反馈（每次交互时读取开关，切换后立即生效）。
 /// </para>
 /// <para>
 /// 架构要点：高亮条不画在 <see cref="NavigationViewItem"/> 上，而是画在独立 overlay
@@ -488,7 +489,7 @@ public sealed class FluidNavigationViewHoverEffect
 
     /// <summary>
     /// 将共享高亮条对齐到目标导航项的高亮区域（模板中的 LayoutRoot），
-    /// 已定位过则用弹簧动画移动 <c>Offset</c>，否则直接定位并显示。
+    /// 已定位过且系统允许动画时用弹簧动画移动 <c>Offset</c>，否则直接定位并显示。
     /// </summary>
     /// <param name="item">当前悬停的导航项；用其 LayoutRoot 的边界作为高亮框。</param>
     private void MoveHoverIndicatorTo(NavigationViewItem item)
@@ -516,7 +517,7 @@ public sealed class FluidNavigationViewHoverEffect
             //左上角对齐
             _hoverGeometry!.Size = size;
             var offset = new Vector3((float)point.X, (float)point.Y, 0);
-            if (_hoverPositioned)
+            if (_hoverPositioned && EntranceAnimation.AnimationsEnabled())
             {
                 // 同一 ShapeVisual 改 Offset：看起来像高亮在列表上滑动，而非两项各自闪背景
                 SpringVector3NaturalMotionAnimation spring = _compositor!.CreateSpringVector3Animation();
@@ -527,7 +528,9 @@ public sealed class FluidNavigationViewHoverEffect
             }
             else
             {
-                // 首次出现直接定位，避免从 host 左上角 (0,0) 滑入造成错觉
+                // 首次出现直接定位，避免从 host 左上角 (0,0) 滑入造成错觉；
+                // 关闭动画时也走这里，先停掉开关切换前可能还在跑的弹簧，否则赋值会被覆盖
+                _hoverVisual.StopAnimation(nameof(Visual.Offset));
                 _hoverVisual.Offset = offset;
                 _hoverPositioned = true;
             }
@@ -611,14 +614,7 @@ public sealed class FluidNavigationViewHoverEffect
     /// </summary>
     private void ShowHoverIndicator()
     {
-        if (_hoverVisual is null || _compositor is null)
-        {
-            return;
-        }
-        ScalarKeyFrameAnimation fade = _compositor.CreateScalarKeyFrameAnimation();
-        fade.InsertKeyFrame(1f, 1f);
-        fade.Duration = TimeSpan.FromMilliseconds(150);
-        _hoverVisual.StartAnimation(nameof(Visual.Opacity), fade);
+        FadeHoverIndicator(1f);
     }
 
 
@@ -628,12 +624,28 @@ public sealed class FluidNavigationViewHoverEffect
     /// </summary>
     private void HideHoverIndicator()
     {
+        FadeHoverIndicator(0f);
+    }
+
+
+    /// <summary>
+    /// 高亮条透明度过渡（150ms）；系统关闭动画时直接设为目标值。
+    /// </summary>
+    /// <param name="to">目标不透明度，0 或 1。</param>
+    private void FadeHoverIndicator(float to)
+    {
         if (_hoverVisual is null || _compositor is null)
         {
             return;
         }
+        if (!EntranceAnimation.AnimationsEnabled())
+        {
+            _hoverVisual.StopAnimation(nameof(Visual.Opacity));
+            _hoverVisual.Opacity = to;
+            return;
+        }
         ScalarKeyFrameAnimation fade = _compositor.CreateScalarKeyFrameAnimation();
-        fade.InsertKeyFrame(1f, 0f);
+        fade.InsertKeyFrame(1f, to);
         fade.Duration = TimeSpan.FromMilliseconds(150);
         _hoverVisual.StartAnimation(nameof(Visual.Opacity), fade);
     }
@@ -655,6 +667,13 @@ public sealed class FluidNavigationViewHoverEffect
             Visual visual = ElementCompositionPreview.GetElementVisual(presenter);
             if (_compositor is null)
             {
+                return;
+            }
+            if (!EntranceAnimation.AnimationsEnabled())
+            {
+                // 不右移；开关切换前已经右移的文字直接归位
+                visual.StopAnimation("Translation.X");
+                SetTranslation(visual, x: 0f, z: null);
                 return;
             }
             if (hovered)
@@ -700,6 +719,15 @@ public sealed class FluidNavigationViewHoverEffect
             {
                 return;
             }
+            if (!EntranceAnimation.AnimationsEnabled())
+            {
+                // 不做按压反馈；开关切换前停在按下态的项直接复原
+                visual.StopAnimation("Scale");
+                visual.StopAnimation("Translation.Z");
+                visual.Scale = Vector3.One;
+                SetTranslation(visual, x: null, z: 0f);
+                return;
+            }
             if (pressed)
             {
                 // 按下用短关键帧（响应快）；抬起用弹簧（回弹手感）
@@ -732,6 +760,21 @@ public sealed class FluidNavigationViewHoverEffect
         {
             _logger?.LogError(ex, "Animate nav item press.");
         }
+    }
+
+
+    /// <summary>
+    /// 直接改写元素 Visual 的 <c>Translation</c> 分量（需已 <c>SetIsTranslationEnabled</c>），未指定的分量保持不变。
+    /// </summary>
+    /// <param name="visual">元素的 hand-off Visual。</param>
+    /// <param name="x">新的 X 分量；null 表示不改。</param>
+    /// <param name="z">新的 Z 分量；null 表示不改。</param>
+    private static void SetTranslation(Visual visual, float? x, float? z)
+    {
+        visual.Properties.TryGetVector3("Translation", out Vector3 translation);
+        translation.X = x ?? translation.X;
+        translation.Z = z ?? translation.Z;
+        visual.Properties.InsertVector3("Translation", translation);
     }
 
 
