@@ -3800,7 +3800,7 @@
     <value>このリンクの処理に失敗しました。</value>
   </data>
   <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
-    <value>この構成では起動時に -use-d3d12 を付けません（グローバルな DX12 設定は変わりません）</value>
+    <value>このプロファイルでは起動時に -use-d3d12 を付けません（グローバルな DX12 設定は変わりません）</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>プレイ時間の統計</value>
@@ -3936,5 +3936,17 @@
   </data>
   <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
     <value>この動画はHEVC（H.265）でエンコードされているため、再生にはHEVC Video Extensionsのインストールが必要です。</value>
+  </data>
+  <data name="Common_More" xml:space="preserve">
+    <value>その他</value>
+  </data>
+  <data name="GameLaunchProfileDialog_Dx12ArgumentAutoAppended" xml:space="preserve">
+    <value>「DX12で起動」により自動で付加されます</value>
+  </data>
+  <data name="GameLaunchProfileDialog_DismissDx12Argument" xml:space="preserve">
+    <value>このプロファイルでは付けない</value>
+  </data>
+  <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
+    <value>すべてのプロファイルに適用され、カスタム起動プログラムとは併用できません</value>
   </data>
 </root>

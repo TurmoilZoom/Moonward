@@ -1961,6 +1961,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 More 的本地化字符串。
+        /// </summary>
+        public static string Common_More {
+            get {
+                return ResourceManager.GetString("Common_More", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Network Error 的本地化字符串。
         /// </summary>
         public static string Common_NetworkError {
@@ -4706,6 +4715,33 @@ namespace Starward.Language {
             }
         }
 
+        /// <summary>
+        ///   查找类似 Appended automatically by &quot;Launch with DX12&quot; 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_Dx12ArgumentAutoAppended {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_Dx12ArgumentAutoAppended", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Don't append for this profile 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_DismissDx12Argument {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_DismissDx12Argument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Applies to all profiles and can't be used with a custom startup executable. 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_CmdLaunchScopeHint {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_CmdLaunchScopeHint", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   查找类似 Don't append -use-d3d12 for this profile. The global DX12 option is unchanged. 的本地化字符串。
         /// </summary>

@@ -3938,4 +3938,16 @@ You are welcome to submit exported data to:</value>
   <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
     <value>Video này được mã hóa bằng HEVC (H.265), cần cài đặt tiện ích mở rộng video HEVC để phát.</value>
   </data>
+  <data name="Common_More" xml:space="preserve">
+    <value>Thêm</value>
+  </data>
+  <data name="GameLaunchProfileDialog_Dx12ArgumentAutoAppended" xml:space="preserve">
+    <value>Tự động thêm bởi "Khởi chạy với DX12"</value>
+  </data>
+  <data name="GameLaunchProfileDialog_DismissDx12Argument" xml:space="preserve">
+    <value>Không thêm cho hồ sơ này</value>
+  </data>
+  <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
+    <value>Áp dụng cho mọi hồ sơ và không dùng cùng chương trình khởi chạy tùy chỉnh.</value>
+  </data>
 </root>

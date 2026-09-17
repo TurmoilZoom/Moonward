@@ -3932,4 +3932,16 @@ You are welcome to submit exported data to:</value>
   <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
     <value>วิดีโอนี้เข้ารหัสแบบ HEVC (H.265) ต้องติดตั้งส่วนขยายวิดีโอ HEVC ก่อนจึงจะเล่นได้</value>
   </data>
+  <data name="Common_More" xml:space="preserve">
+    <value>เพิ่มเติม</value>
+  </data>
+  <data name="GameLaunchProfileDialog_Dx12ArgumentAutoAppended" xml:space="preserve">
+    <value>แนบโดยอัตโนมัติจาก "เปิดตัวด้วย DX12"</value>
+  </data>
+  <data name="GameLaunchProfileDialog_DismissDx12Argument" xml:space="preserve">
+    <value>ไม่แนบสำหรับโปรไฟล์นี้</value>
+  </data>
+  <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
+    <value>มีผลกับทุกโปรไฟล์ และใช้ร่วมกับตัวเรียกใช้งานที่กำหนดเองไม่ได้</value>
+  </data>
 </root>

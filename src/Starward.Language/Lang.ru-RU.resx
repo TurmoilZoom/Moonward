@@ -3958,4 +3958,16 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
     <value>Это видео закодировано в HEVC (H.265). Установите расширения видео HEVC, чтобы воспроизвести его.</value>
   </data>
+  <data name="Common_More" xml:space="preserve">
+    <value>Ещё</value>
+  </data>
+  <data name="GameLaunchProfileDialog_Dx12ArgumentAutoAppended" xml:space="preserve">
+    <value>Добавляется автоматически параметром «Запуск с DX12»</value>
+  </data>
+  <data name="GameLaunchProfileDialog_DismissDx12Argument" xml:space="preserve">
+    <value>Не добавлять для этого профиля</value>
+  </data>
+  <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
+    <value>Действует для всех профилей и не сочетается с пользовательской программой запуска.</value>
+  </data>
 </root>

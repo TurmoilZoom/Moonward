@@ -3938,4 +3938,16 @@
   <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
     <value>此影片為HEVC（H.265）編碼，需要安裝HEVC影片擴展才能播放。</value>
   </data>
+  <data name="Common_More" xml:space="preserve">
+    <value>更多</value>
+  </data>
+  <data name="GameLaunchProfileDialog_Dx12ArgumentAutoAppended" xml:space="preserve">
+    <value>由「使用 DX12 啟動」自動附加</value>
+  </data>
+  <data name="GameLaunchProfileDialog_DismissDx12Argument" xml:space="preserve">
+    <value>此設定檔不附加</value>
+  </data>
+  <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
+    <value>對所有設定檔生效，與自訂啟動程式互斥</value>
+  </data>
 </root>

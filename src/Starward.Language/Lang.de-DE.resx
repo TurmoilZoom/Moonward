@@ -3936,4 +3936,16 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
     <value>Dieses Video ist in HEVC (H.265) codiert. Installieren Sie die HEVC-Videoerweiterungen, um es abzuspielen.</value>
   </data>
+  <data name="Common_More" xml:space="preserve">
+    <value>Mehr</value>
+  </data>
+  <data name="GameLaunchProfileDialog_Dx12ArgumentAutoAppended" xml:space="preserve">
+    <value>Automatisch angehängt durch „Mit DX12 starten“</value>
+  </data>
+  <data name="GameLaunchProfileDialog_DismissDx12Argument" xml:space="preserve">
+    <value>Für dieses Profil nicht anhängen</value>
+  </data>
+  <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
+    <value>Gilt für alle Profile und lässt sich nicht mit einem benutzerdefinierten Startprogramm kombinieren.</value>
+  </data>
 </root>

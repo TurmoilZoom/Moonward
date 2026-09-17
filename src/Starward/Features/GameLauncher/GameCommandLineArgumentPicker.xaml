@@ -10,7 +10,8 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
-    <Grid Width="420" RowSpacing="12">
+    <!--  488 + 宿主卡片内边距 16×2 = 520，比启动参数配置对话框（600）窄，叠在其上时两侧各露出 40 的压暗对话框，层级一眼可辨  -->
+    <Grid Width="488" RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -67,7 +68,7 @@
                                                                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                                                    Text="{x:Bind TokenPreview, Mode=OneWay}" />
                                                     </StackPanel>
-                                                    <TextBlock MaxWidth="280"
+                                                    <TextBlock MaxWidth="420"
                                                                FontSize="12"
                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                                Text="{x:Bind Description}"

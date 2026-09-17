@@ -7,7 +7,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Starward.Controls;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
@@ -54,7 +53,6 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         this.InitializeComponent();
         this.Loaded += GameLaunchProfileDialog_Loaded;
         this.Unloaded += GameLaunchProfileDialog_Unloaded;
-        InstantTooltip.SetActionCallback(Button_CmdLaunchHint, OpenCmdLaunchIssue);
     }
 
 
@@ -224,7 +222,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 是否显示配置文件名称编辑区（点击重命名按钮后为 true）。
+    /// 是否正在重命名配置文件（「更多」菜单点重命名后为 true，名称输入框替换下拉框显示）。
     /// </summary>
     public bool IsRenamingProfile
     {
@@ -234,6 +232,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(RenameAreaVisibility));
+                OnPropertyChanged(nameof(ProfileSelectorVisibility));
             }
         }
     }
@@ -241,6 +240,10 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
     /// <summary>配置文件名称编辑区可见性（避免在根上的 x:Bind 使用 StaticResource 转换器）。</summary>
     public Visibility RenameAreaVisibility => IsRenamingProfile ? Visibility.Visible : Visibility.Collapsed;
+
+
+    /// <summary>配置文件下拉框可见性：重命名时让位给名称输入框。</summary>
+    public Visibility ProfileSelectorVisibility => IsRenamingProfile ? Visibility.Collapsed : Visibility.Visible;
 
 
     /// <summary>
@@ -287,14 +290,19 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             {
                 UpdateIsDirty();
                 OnPropertyChanged(nameof(ThirdPartyToolPathVisibility));
+                OnPropertyChanged(nameof(ThirdPartyToolHintVisibility));
                 OnPropertyChanged(nameof(IsCmdToggleEnabled));
             }
         }
     }
 
 
-    /// <summary>自定义启动程序路径行可见性（路径非空时显示）。</summary>
+    /// <summary>自定义启动程序路径条可见性（路径非空时显示）。</summary>
     public Visibility ThirdPartyToolPathVisibility => string.IsNullOrEmpty(EditingThirdPartyToolPath) ? Visibility.Collapsed : Visibility.Visible;
+
+
+    /// <summary>自定义启动程序未设置时的说明占位可见性（与路径条互斥）。</summary>
+    public Visibility ThirdPartyToolHintVisibility => string.IsNullOrEmpty(EditingThirdPartyToolPath) ? Visibility.Visible : Visibility.Collapsed;
 
 
     /// <summary>
@@ -469,6 +477,9 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     }
 
 
+    /// <summary>
+    /// 让登录账号下拉框选中与 <see cref="EditingLoginUid"/> 对应的选项；未指定或角色已不在列表中时选中「不指定」。
+    /// </summary>
     private void SyncSelectedLoginAccountOption()
     {
         LoginAccountOption? match = LoginAccountOptions.FirstOrDefault(o => o.Uid == EditingLoginUid)
@@ -501,6 +512,8 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         EditingArgument = profile.Argument;
         EditingThirdPartyToolPath = profile.ThirdPartyToolPath;
         EditingLoginUid = NormalizeLoginUid(profile.LoginUid);
+        // uid 未变化时 setter 不会同步下拉框（如新建配置文件、首次打开时都是 0），会留空而不是显示「不指定」
+        SyncSelectedLoginAccountOption();
         EditingSkipAutoDx12 = profile.SkipAutoDx12;
         IsRenamingProfile = false;
         IsDirty = false;
@@ -517,7 +530,62 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             return;
         }
         IsRenamingProfile = true;
-        DispatcherQueue.TryEnqueue(() => TextBox_ProfileName?.Focus(FocusState.Programmatic));
+        // 输入框此刻才从折叠变为可见，等布局后再聚焦
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            TextBox_ProfileName.Focus(FocusState.Programmatic);
+            TextBox_ProfileName.SelectAll();
+        });
+    }
+
+
+    /// <summary>
+    /// 名称输入框按键：Enter 保存（未改动则仅退出重命名），Esc 取消重命名。
+    /// 用 PreviewKeyDown 抢在 ContentDialog 之前处理，否则 Esc 会直接关闭对话框。
+    /// </summary>
+    private void TextBox_ProfileName_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key is VirtualKey.Enter)
+        {
+            e.Handled = true;
+            if (IsDirty)
+            {
+                SaveProfile();
+            }
+            else
+            {
+                IsRenamingProfile = false;
+            }
+            FocusProfileSelector();
+        }
+        else if (e.Key is VirtualKey.Escape)
+        {
+            e.Handled = true;
+            CancelRenameProfile();
+            FocusProfileSelector();
+        }
+    }
+
+
+    /// <summary>
+    /// 取消重命名：名称还原为已保存的值（其余未保存改动保留）。
+    /// </summary>
+    private void CancelRenameProfile()
+    {
+        if (SelectedProfile is GameLaunchProfile p)
+        {
+            EditingName = p.Name;
+        }
+        IsRenamingProfile = false;
+    }
+
+
+    /// <summary>
+    /// 退出重命名后把焦点还给配置文件下拉框（它刚从折叠恢复可见，需等布局）。
+    /// </summary>
+    private void FocusProfileSelector()
+    {
+        DispatcherQueue.TryEnqueue(() => ComboBox_LaunchProfile.Focus(FocusState.Programmatic));
     }
 
 
@@ -537,7 +605,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             ComboBox_LaunchProfile.SelectedItem = current;
             _suppressProfileSelectionChanged = false;
             _pendingDiscardAction = () => SelectProfileCore(target);
-            FlyoutBase.ShowAttachedFlyout(ComboBox_LaunchProfile);
+            FlyoutBase.ShowAttachedFlyout(Grid_ProfileBar);
         }
         else
         {
@@ -548,7 +616,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
     private void DiscardProfileChanges_Confirm_Click(object sender, RoutedEventArgs e)
     {
-        FlyoutBase.GetAttachedFlyout(ComboBox_LaunchProfile)?.Hide();
+        FlyoutBase.GetAttachedFlyout(Grid_ProfileBar)?.Hide();
         Action? action = _pendingDiscardAction;
         _pendingDiscardAction = null;
         action?.Invoke();
@@ -557,7 +625,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
     private void DiscardProfileChanges_Cancel_Click(object sender, RoutedEventArgs e)
     {
-        FlyoutBase.GetAttachedFlyout(ComboBox_LaunchProfile)?.Hide();
+        FlyoutBase.GetAttachedFlyout(Grid_ProfileBar)?.Hide();
         _pendingDiscardAction = null;
     }
 
@@ -620,7 +688,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         if (IsDirty && SelectedProfile is not null)
         {
             _pendingDiscardAction = CreateNewProfileCore;
-            FlyoutBase.ShowAttachedFlyout(ComboBox_LaunchProfile);
+            FlyoutBase.ShowAttachedFlyout(Grid_ProfileBar);
             return;
         }
         CreateNewProfileCore();
@@ -642,9 +710,19 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     }
 
 
+    /// <summary>
+    /// 「更多」菜单点删除：菜单关闭后在同一按钮上弹出删除确认。
+    /// </summary>
+    private void MenuFlyoutItem_DeleteProfile_Click(object sender, RoutedEventArgs e)
+    {
+        // 菜单此时正在关闭，同步弹出确认 Flyout 可能被关闭流程吞掉，排队到下一轮再弹
+        DispatcherQueue.TryEnqueue(() => FlyoutBase.ShowAttachedFlyout(Button_ProfileMore));
+    }
+
+
     private void DeleteProfile_Confirm_Click(object sender, RoutedEventArgs e)
     {
-        Button_DeleteProfile.Flyout?.Hide();
+        FlyoutBase.GetAttachedFlyout(Button_ProfileMore)?.Hide();
         if (SelectedProfile is not GameLaunchProfile p || p.IsDefault)
         {
             return;
@@ -657,7 +735,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
     private void DeleteProfile_Cancel_Click(object sender, RoutedEventArgs e)
     {
-        Button_DeleteProfile.Flyout?.Hide();
+        FlyoutBase.GetAttachedFlyout(Button_ProfileMore)?.Hide();
     }
 
 
@@ -728,22 +806,6 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
                 PersistExtraProfiles();
             }
             UpdateIsDirty();
-        }
-    }
-
-
-    /// <summary>
-    /// 打开 CMD 启动说明对应的上游 Issue。
-    /// </summary>
-    private async void OpenCmdLaunchIssue()
-    {
-        try
-        {
-            await Launcher.LaunchUriAsync(new Uri("https://github.com/Scighost/Starward/issues/1634"));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Open CMD launch issue");
         }
     }
 
