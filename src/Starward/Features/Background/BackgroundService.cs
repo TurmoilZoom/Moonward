@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -388,10 +389,13 @@ public partial class BackgroundService
     /// <summary>
     /// 把导入的背景文件复制进 bg 目录，返回实际保存的文件名。从不覆盖 bg 里已有的文件（它可能正被别的游戏区服用作背景）：
     /// 已有同名文件且内容完全相同就直接复用；内容不同则依次另存为「名称 (1).扩展名」「名称 (2).扩展名」……
+    /// <para/>
+    /// 有两种名字即使没有同名文件也不用，同样往后编号：「*.webm.mp4」是转码产物的名字；官方命名「内容 MD5_编号」但内容对不上 MD5 的，
+    /// 会被 <see cref="ResolveBackgroundFile"/> 当作同内容文件。官方命名且内容相符、bg 里已有同内容文件时不再复制，直接返回这个名字。
     /// </summary>
     /// <param name="name">导入文件的原始文件名。</param>
     /// <param name="source">导入文件的只读流，须支持 Seek 与 Length；不会被释放。</param>
-    /// <returns>保存在 bg 目录中的文件名。</returns>
+    /// <returns>保存在 bg 目录中的文件名；可能只是能解析到同内容文件的名字，实际文件名不同。</returns>
     /// <exception cref="IOException">复制失败（含这期间恰好出现同名文件），写了一半的文件已删除。</exception>
     private static async Task<string> ImportBackgroundFileAsync(string name, Stream source)
     {
@@ -410,6 +414,25 @@ public partial class BackgroundService
                     return candidate;
                 }
                 continue;
+            }
+            if (candidate.EndsWith(".webm.mp4", StringComparison.OrdinalIgnoreCase))
+            {
+                // 叫这个名字的新文件会被当成同名 webm 的转码产物：播放那个 webm 时改播它，校验通过后还会删掉 webm
+                continue;
+            }
+            if (TryParseContentAddressedFileName(candidate, out string? md5, out _))
+            {
+                source.Position = 0;
+                if (!Convert.ToHexString(await MD5.HashDataAsync(source)).Equals(md5, StringComparison.OrdinalIgnoreCase))
+                {
+                    // 沿用了官方文件名、内容却改过（如剪辑后没改名）：存成这个名字会顶替其他区服的同内容背景
+                    continue;
+                }
+                if (ResolveBackgroundFile(path) is string existing && (!File.Exists(existing) || await IsSameContentAsync(source, existing)))
+                {
+                    // 同内容的文件已在 bg：其他区服的编号，或原片转码后只剩产物（existing 不存在）。不必再存一份，也免得再转一遍
+                    return candidate;
+                }
             }
             if (Path.GetExtension(path).Equals(".webm", StringComparison.OrdinalIgnoreCase) && File.Exists(VideoTranscodeService.GetTranscodedFilePath(path)))
             {
