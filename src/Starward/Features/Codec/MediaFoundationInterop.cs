@@ -23,6 +23,9 @@ internal static partial class MediaFoundation
 
     public const uint MF_SOURCE_READER_ALL_STREAMS = 0xFFFFFFFE;
 
+    /// <summary>ReadSample 输出的流状态标志：读取出错，之后不应再调用该 reader 的任何方法。</summary>
+    public const uint MF_SOURCE_READERF_ERROR = 0x00000001;
+
     /// <summary>ReadSample 输出的流状态标志：已到流尾。</summary>
     public const uint MF_SOURCE_READERF_ENDOFSTREAM = 0x00000002;
 

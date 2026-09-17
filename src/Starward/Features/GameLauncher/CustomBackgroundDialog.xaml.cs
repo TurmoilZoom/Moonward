@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Background;
+using Starward.Features.Codec;
 using System;
 using System.IO;
 using System.Linq;
@@ -188,6 +189,11 @@ public sealed partial class CustomBackgroundDialog : ContentDialog
         try
         {
             string path = Path.Join(AppConfig.CacheFolder, "bg", CustomBg);
+            // 解不动的 webm 转码后原片会被删掉，打开实际在播的转码产物
+            if (VideoTranscodeService.TryGetTranscodedFile(path, out string? transcoded))
+            {
+                path = transcoded;
+            }
             if (File.Exists(path))
             {
                 await Launcher.LaunchUriAsync(new Uri(path));

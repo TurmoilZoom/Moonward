@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -20,12 +21,15 @@ namespace Starward.Features.Codec;
 /// 转码走 Media Foundation 的 SourceReader + SinkWriter：SourceReader 会使用 <c>MFTRegisterLocal</c>
 /// 注册到本进程的 libvpx 解码器（<c>MediaTranscoder</c> 不会），SinkWriter 用系统内置（通常硬件加速的）H.264 编码器，
 /// 因此不需要引入任何第三方编解码二进制。
+/// <para/>
+/// 产物与原片同放在 bg 目录，命名为「原文件名 + .mp4」。播放端改用产物后，校验产物完整就删掉 bg 里的原片，
+/// 此后产物就是这个背景本身；设置里记的仍是原片文件名，判断背景文件在不在要用 <see cref="TryGetTranscodedFile"/> 兜住只剩产物的情况。
 /// </summary>
 internal partial class VideoTranscodeService
 {
 
-    /// <summary>转码产物所在的子目录，放在 bg 下面，不会污染背景图列表（那边用的是非递归枚举）。</summary>
-    public const string TranscodedFolderName = "transcoded";
+    /// <summary>2026.9.6-beta1 存放产物的旧子目录（bg\transcoded），首次转码前会把里面的产物挪回 bg。</summary>
+    private const string LegacyTranscodedFolderName = "transcoded";
 
     /// <summary>单个文件的转码上限，超时视为失败并丢弃产物。</summary>
     private static readonly TimeSpan TranscodeTimeout = TimeSpan.FromMinutes(5);
@@ -47,9 +51,15 @@ internal partial class VideoTranscodeService
     /// <summary>每个源文件正在排队或转码中的任务，完成后移除；同一源文件的多个等待方共享同一次转码。</summary>
     private readonly ConcurrentDictionary<string, Lazy<Task>> _transcodeTasks = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>本次运行中产物没通过校验、不再尝试删除的原片。</summary>
+    private readonly ConcurrentDictionary<string, byte> _keptSources = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>正在排队校验并删除的原片，同一文件只排一次。</summary>
+    private readonly ConcurrentDictionary<string, byte> _deletingSources = new(StringComparer.OrdinalIgnoreCase);
+
     private static bool _mediaFoundationStarted;
 
-    private int _orphanSwept;
+    private int _foldersSwept;
 
 
     public VideoTranscodeService(ILogger<VideoTranscodeService> logger)
@@ -59,21 +69,21 @@ internal partial class VideoTranscodeService
 
 
     /// <summary>
-    /// 返回本次播放应当使用的视频文件：已有可用的转码产物就用产物，否则原样返回。不触发转码。
+    /// 返回本次播放应当使用的视频文件：已有可用的转码产物就用产物，并在后台校验后删掉原片；否则原样返回。不触发转码。
+    /// 只给马上要播放的调用方用；只想知道文件在不在，用 <see cref="TryGetTranscodedFile"/>。
     /// </summary>
-    /// <param name="file">原始视频文件完整路径。</param>
+    /// <param name="file">原始视频文件完整路径，原片可能已被删除、只剩产物。</param>
     /// <returns>应当交给播放器的文件路径；任何异常情况下都退回 <paramref name="file"/>。</returns>
     public string GetPlaybackFile(string file)
     {
         try
         {
-            if (string.IsNullOrEmpty(file) || !Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
+            if (TryGetTranscodedFile(file, out string? target))
             {
-                // 只有 webm 才可能是解不动的 VP9；mp4 / mkv 一般本来就能硬解。
-                return file;
+                DeleteSourceInBackground(file, target);
+                return target;
             }
-            string target = GetTranscodedFilePath(file);
-            return IsTranscodedFileUsable(file, target) ? target : file;
+            return file;
         }
         catch (Exception ex)
         {
@@ -84,8 +94,61 @@ internal partial class VideoTranscodeService
 
 
     /// <summary>
+    /// 查找源文件对应的可用转码产物。只查文件，不触发转码、不删原片，可在任意线程调用。
+    /// </summary>
+    /// <param name="file">原始视频文件完整路径，原片本身可以已经不存在。</param>
+    /// <param name="target">可用的转码产物路径。</param>
+    /// <returns>有可用产物时返回 true。</returns>
+    public static bool TryGetTranscodedFile([NotNullWhen(true)] string? file, [NotNullWhen(true)] out string? target)
+    {
+        target = null;
+        if (!IsWebmFile(file))
+        {
+            // 只有 webm 才可能是解不动的 VP9；mp4 / mkv 一般本来就能硬解。
+            return false;
+        }
+        string path = GetTranscodedFilePath(file);
+        if (!IsTranscodedFileUsable(file, path))
+        {
+            return false;
+        }
+        target = path;
+        return true;
+    }
+
+
+    /// <summary>
+    /// 源文件对应的转码产物路径：与源文件同目录，「源文件名 + .mp4」。不检查文件是否存在，只对 webm 有意义。
+    /// </summary>
+    /// <param name="file">原始视频文件完整路径。</param>
+    public static string GetTranscodedFilePath(string file)
+    {
+        return $"{file}.mp4";
+    }
+
+
+    /// <summary>
+    /// 删除源文件对应的转码产物。导入同名的新文件覆盖原片时调用：复制会保留原文件的修改时间，
+    /// 新文件若比旧产物「旧」，旧产物仍会被当成可用，播出来的就是上一个视频。
+    /// </summary>
+    /// <param name="file">被覆盖的原始视频文件完整路径；不是 webm 时什么也不做。</param>
+    public static void DeleteTranscodedFile(string? file)
+    {
+        if (!IsWebmFile(file))
+        {
+            return;
+        }
+        try
+        {
+            File.Delete(GetTranscodedFilePath(file));
+        }
+        catch { }
+    }
+
+
+    /// <summary>
     /// 等转码完成并返回本次播放应使用的文件：已有可用产物就直接返回；否则当场排队转码并等待完成，
-    /// 成功后返回 H.264 产物，失败或被跳过则退回源文件（由播放端继续 libvpx 软解）。
+    /// 成功后返回 H.264 产物，失败或被跳过则退回源文件（由播放端继续 libvpx 软解）。返回产物时会在后台校验后删掉原片。
     /// 最多等 <see cref="MaxPlaybackWait"/>（含排队时间），超时同样退回源文件，转码留在后台继续，下次播放直接用产物。
     /// <para/>
     /// 必须在播放端已经用 <see cref="VP9Helper.RegisterVP9Decoder"/> 注册 libvpx 之后调用：转码借用这份注册，自己从不注册。
@@ -97,13 +160,14 @@ internal partial class VideoTranscodeService
     /// <returns>应交给播放器的文件路径（转码产物或源文件）。</returns>
     public async Task<string> EnsureTranscodedAsync(string file, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(file) || !Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
+        if (!IsWebmFile(file))
         {
             return file;
         }
         string target = GetTranscodedFilePath(file);
         if (IsTranscodedFileUsable(file, target))
         {
+            DeleteSourceInBackground(file, target);
             return target;
         }
         if (_skipped.ContainsKey(file))
@@ -115,10 +179,16 @@ internal partial class VideoTranscodeService
         {
             // 取消与超时都只结束「等待」，不打断转码：背景切走或先软解播放后，转码照常写完，别白转一半
             await task.WaitAsync(MaxPlaybackWait, cancellationToken).ConfigureAwait(false);
-            return IsTranscodedFileUsable(file, target) ? target : file;
+            if (IsTranscodedFileUsable(file, target))
+            {
+                DeleteSourceInBackground(file, target);
+                return target;
+            }
+            return file;
         }
         catch (TimeoutException)
         {
+            // 这次改播原片，所以转码写完时不能顺手删它，留到下次改播产物时再删
             _logger.LogInformation("Transcode '{file}' not finished within {seconds}s, play the source first", Path.GetFileName(file), MaxPlaybackWait.TotalSeconds);
             return file;
         }
@@ -135,51 +205,70 @@ internal partial class VideoTranscodeService
 
 
     /// <summary>
-    /// 删除源文件已不存在的转码产物。整个目录都是可再生的缓存，删错也只是下次重转。
+    /// 整理转码用到的目录：清掉上次运行残留的临时文件；把 2026.9.6-beta1 放在 bg\transcoded 的产物挪回 bg，再删掉旧目录。
+    /// 只在本次运行第一次转码前调用，此时持有 <see cref="_semaphore"/>，不会有转码正在写临时文件。
     /// </summary>
-    public void CleanupOrphans()
+    private void SweepFolders()
     {
         try
         {
-            string folder = GetTranscodedFolder();
-            if (!Directory.Exists(folder))
+            string tempFolder = GetTempFolder();
+            if (Directory.Exists(tempFolder))
+            {
+                foreach (string item in Directory.GetFiles(tempFolder))
+                {
+                    File.Delete(item);
+                }
+            }
+            string bgFolder = Path.Join(AppConfig.CacheFolder, "bg");
+            string legacyFolder = Path.Join(bgFolder, LegacyTranscodedFolderName);
+            if (!Directory.Exists(legacyFolder))
             {
                 return;
             }
-            string bgFolder = Path.Join(AppConfig.CacheFolder, "bg");
-            foreach (string item in Directory.GetFiles(folder, "*.mp4"))
+            foreach (string item in Directory.GetFiles(legacyFolder))
             {
-                // 产物名是「源文件名 + .mp4」，去掉尾缀就还原成源文件名。
-                string sourceName = Path.GetFileNameWithoutExtension(item);
-                if (!File.Exists(Path.Combine(bgFolder, sourceName)))
+                // 产物名是「源文件名 + .mp4」，去掉尾缀就还原成源文件名；
+                // 临时文件（.partial.mp4）和源文件已删的孤儿产物还原不出存在的源文件，直接删。
+                string target = Path.Combine(bgFolder, Path.GetFileName(item));
+                if (File.Exists(Path.Combine(bgFolder, Path.GetFileNameWithoutExtension(item))) && !File.Exists(target))
+                {
+                    File.Move(item, target);
+                }
+                else
                 {
                     File.Delete(item);
-                    _logger.LogInformation("Deleted orphan transcoded video '{name}'", Path.GetFileName(item));
                 }
             }
+            Directory.Delete(legacyFolder);
+            _logger.LogInformation("Moved transcoded videos out of legacy folder '{folder}'", legacyFolder);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Cleanup orphan transcoded videos");
+            _logger.LogWarning(ex, "Sweep transcoded video folders");
         }
     }
 
 
-    /// <summary>转码产物所在目录：CacheFolder\bg\transcoded。</summary>
-    public static string GetTranscodedFolder()
+    /// <summary>
+    /// 转码临时文件目录：CacheFolder\cache\transcode。不能放 bg，否则转码时打开背景图库会列出写到一半的文件。
+    /// </summary>
+    private static string GetTempFolder()
     {
-        return Path.Join(AppConfig.CacheFolder, "bg", TranscodedFolderName);
+        return Path.Join(AppConfig.CacheFolder, "cache", "transcode");
     }
 
 
-    /// <summary>源文件对应的转码产物路径。</summary>
-    private static string GetTranscodedFilePath(string file)
+    /// <summary>文件扩展名是否为 .webm。</summary>
+    private static bool IsWebmFile([NotNullWhen(true)] string? file)
     {
-        return Path.Combine(GetTranscodedFolder(), $"{Path.GetFileName(file)}.mp4");
+        return !string.IsNullOrEmpty(file) && Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase);
     }
 
 
-    /// <summary>产物存在、非空，且不早于源文件（源被同名替换过就重转）。</summary>
+    /// <summary>
+    /// 产物存在、非空，且不早于源文件（源被同名替换过就重转）。原片已删时 <c>File.GetLastWriteTimeUtc</c> 返回 1601 年，只看产物本身。
+    /// </summary>
     private static bool IsTranscodedFileUsable(string source, string target)
     {
         try
@@ -212,9 +301,9 @@ internal partial class VideoTranscodeService
                 await _semaphore.WaitAsync().ConfigureAwait(false);
                 try
                 {
-                    if (Interlocked.Exchange(ref _orphanSwept, 1) == 0)
+                    if (Interlocked.Exchange(ref _foldersSwept, 1) == 0)
                     {
-                        CleanupOrphans();
+                        SweepFolders();
                     }
                     TranscodeCore(source, target);
                 }
@@ -265,10 +354,11 @@ internal partial class VideoTranscodeService
             return;
         }
 
-        Directory.CreateDirectory(GetTranscodedFolder());
+        string tempFolder = GetTempFolder();
+        Directory.CreateDirectory(tempFolder);
         // 临时文件也必须以 .mp4 结尾：MFCreateSinkWriterFromURL 按扩展名挑封装器，
         // 给个 .tmp 会直接返回 MF_E_NOT_FOUND。
-        string temp = Path.Combine(GetTranscodedFolder(), $"{Path.GetFileName(source)}.partial.mp4");
+        string temp = Path.Combine(tempFolder, $"{Path.GetFileName(source)}.partial.mp4");
         var stopwatch = Stopwatch.StartNew();
         try
         {
@@ -290,6 +380,176 @@ internal partial class VideoTranscodeService
             try { File.Delete(temp); } catch { }
             _skipped.TryAdd(source, 0);
             throw;
+        }
+    }
+
+
+    /// <summary>
+    /// 在后台校验转码产物完整后删掉 bg 里的原片，省一份磁盘，背景图库里也不会出现两份。
+    /// 只删 bg 目录里的文件：导入自定义背景时用户选的那份原文件在别处，不受影响。
+    /// <para/>
+    /// 只在播放端已经拿到产物路径时调用，这时不会再有人去读原片。若在转码刚写完时删，
+    /// 等待超时后改播原片的那一次播放可能正要打开它。Media Foundation 打开文件时允许删除
+    /// （实测 SourceReader 仍持有文件时照样删得掉），所以不必等 COM 对象被回收。
+    /// </summary>
+    /// <param name="source">原片完整路径。</param>
+    /// <param name="target">可用的转码产物路径。</param>
+    private void DeleteSourceInBackground(string source, string target)
+    {
+        if (_keptSources.ContainsKey(source) || !File.Exists(source) || !IsInBackgroundFolder(source) || !_deletingSources.TryAdd(source, 0))
+        {
+            return;
+        }
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                // 与转码共用信号量：校验也要开解码器，别和正在进行的转码抢
+                await _semaphore.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    DeleteSourceCore(source, target);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+            catch (Exception ex)
+            {
+                // 删不掉（被其他程序占用等）不影响播放，下次播放到它时再删
+                _logger.LogWarning(ex, "Delete source video '{file}' after transcoding", Path.GetFileName(source));
+            }
+            finally
+            {
+                _deletingSources.TryRemove(source, out _);
+            }
+        });
+    }
+
+
+    /// <summary>
+    /// 校验转码产物，通过后删除原片。产物有问题时保留原片，本次运行不再尝试。
+    /// </summary>
+    /// <param name="source">原片完整路径。</param>
+    /// <param name="target">转码产物路径。</param>
+    /// <exception cref="IOException">原片被占用，删除失败。</exception>
+    /// <exception cref="UnauthorizedAccessException">没有删除原片的权限。</exception>
+    private void DeleteSourceCore(string source, string target)
+    {
+        if (!File.Exists(source) || !IsTranscodedFileUsable(source, target))
+        {
+            return;
+        }
+        int sourceFrames, targetFrames;
+        bool decodable;
+        try
+        {
+            EnsureMediaFoundationStarted();
+            sourceFrames = CountVideoSamples(source);
+            targetFrames = CountVideoSamples(target);
+            decodable = CanDecodeFirstFrame(target);
+        }
+        catch (Exception ex)
+        {
+            _keptSources.TryAdd(source, 0);
+            _logger.LogWarning(ex, "Verify transcoded video '{name}' failed, keep the source", Path.GetFileName(source));
+            return;
+        }
+        // 上游 libvpx MFT 结束时不 drain 最后一帧，产物固定比原片少一帧；少得更多说明产物不完整，原片删了就找不回来
+        if (targetFrames <= 0 || targetFrames < sourceFrames - 1 || !decodable)
+        {
+            _keptSources.TryAdd(source, 0);
+            _logger.LogWarning("Transcoded video '{name}' failed verification ({targetFrames}/{sourceFrames} frames, decodable: {decodable}), keep the source",
+                               Path.GetFileName(source), targetFrames, sourceFrames, decodable);
+            return;
+        }
+        File.Delete(source);
+        _logger.LogInformation("Deleted source video '{name}' after transcoding ({targetFrames}/{sourceFrames} frames)",
+                               Path.GetFileName(source), targetFrames, sourceFrames);
+    }
+
+
+    /// <summary>文件是否直接位于 bg 目录（即背景图库里）。</summary>
+    private static bool IsInBackgroundFolder(string file)
+    {
+        string folder = Path.GetDirectoryName(Path.GetFullPath(file)) ?? string.Empty;
+        string bgFolder = Path.GetFullPath(Path.Join(AppConfig.CacheFolder, "bg"));
+        return string.Equals(Path.TrimEndingDirectorySeparator(folder), Path.TrimEndingDirectorySeparator(bgFolder), StringComparison.OrdinalIgnoreCase);
+    }
+
+
+    /// <summary>
+    /// 只解封装、不解码，数出第一条视频轨的帧数。16MB 的 1080p60 webm 实测约 60ms。
+    /// </summary>
+    /// <param name="file">视频文件完整路径。</param>
+    /// <returns>视频帧数。</returns>
+    /// <exception cref="COMException">打不开文件或读取出错。</exception>
+    /// <exception cref="InvalidOperationException">读取中途报告流错误。</exception>
+    private static int CountVideoSamples(string file)
+    {
+        Marshal.ThrowExceptionForHR(MediaFoundation.MFCreateSourceReaderFromURL(file, null, out IMFSourceReader reader));
+        reader.SetStreamSelection(MediaFoundation.MF_SOURCE_READER_ALL_STREAMS, 0);
+        reader.SetStreamSelection(MediaFoundation.MF_SOURCE_READER_FIRST_VIDEO_STREAM, 1);
+        int count = 0;
+        while (true)
+        {
+            // 没设输出类型，读到的是压缩数据，不会加载解码器
+            int hr = reader.ReadSample(MediaFoundation.MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0,
+                                       out _, out uint streamFlags, out _, out IMFSample? sample);
+            Marshal.ThrowExceptionForHR(hr);
+            if ((streamFlags & MediaFoundation.MF_SOURCE_READERF_ERROR) != 0)
+            {
+                throw new InvalidOperationException($"Source reader error after {count} samples.");
+            }
+            if ((streamFlags & MediaFoundation.MF_SOURCE_READERF_ENDOFSTREAM) != 0)
+            {
+                return count;
+            }
+            if (sample is not null)
+            {
+                count++;
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 本机能否解出转码产物的第一帧（系统 H.264 解码器，可硬解）。
+    /// </summary>
+    /// <param name="file">转码产物路径。</param>
+    /// <returns>解出第一帧返回 true；没有可用的解码器或文件损坏时返回 false。</returns>
+    private static bool CanDecodeFirstFrame(string file)
+    {
+        try
+        {
+            Marshal.ThrowExceptionForHR(MediaFoundation.MFCreateAttributes(out IMFAttributes attributes, 1));
+            attributes.SetUINT32(ref MediaFoundation.MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, 1);
+            Marshal.ThrowExceptionForHR(MediaFoundation.MFCreateSourceReaderFromURL(file, attributes, out IMFSourceReader reader));
+            reader.SetStreamSelection(MediaFoundation.MF_SOURCE_READER_ALL_STREAMS, 0);
+            reader.SetStreamSelection(MediaFoundation.MF_SOURCE_READER_FIRST_VIDEO_STREAM, 1);
+            // H.264 解码器原生输出 NV12；要 RGB32 得另开视频处理（实测直接要会 MF_E_INVALIDMEDIATYPE），这里只关心解不解得开
+            Marshal.ThrowExceptionForHR(MediaFoundation.MFCreateMediaType(out IMFMediaType wantType));
+            wantType.SetGUID(ref MediaFoundation.MF_MT_MAJOR_TYPE, ref MediaFoundation.MFMediaType_Video);
+            wantType.SetGUID(ref MediaFoundation.MF_MT_SUBTYPE, ref MediaFoundation.MFVideoFormat_NV12);
+            reader.SetCurrentMediaType(MediaFoundation.MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, wantType);
+            while (true)
+            {
+                int hr = reader.ReadSample(MediaFoundation.MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0,
+                                           out _, out uint streamFlags, out _, out IMFSample? sample);
+                if (hr < 0 || (streamFlags & (MediaFoundation.MF_SOURCE_READERF_ERROR | MediaFoundation.MF_SOURCE_READERF_ENDOFSTREAM)) != 0)
+                {
+                    return false;
+                }
+                if (sample is not null)
+                {
+                    return true;
+                }
+            }
+        }
+        catch
+        {
+            return false;
         }
     }
 

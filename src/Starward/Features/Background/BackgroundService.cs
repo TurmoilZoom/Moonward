@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Starward.Core.HoYoPlay;
+using Starward.Features.Codec;
 using Starward.Features.HoYoPlay;
 using Starward.Helpers;
 using System;
@@ -50,6 +51,18 @@ public class BackgroundService
 
 
     /// <summary>
+    /// 背景文件是否存在。解不动的 webm 转码成 H.264 后原片会被删掉、只剩同目录的转码产物，这种情况也算存在；
+    /// 设置里记录的仍是原片文件名，播放时由 <see cref="VideoTranscodeService"/> 换成产物。
+    /// </summary>
+    /// <param name="path">背景文件完整路径。</param>
+    /// <returns>原片或其可用的转码产物存在时返回 true。</returns>
+    public static bool BackgroundFileExists([NotNullWhen(true)] string? path)
+    {
+        return File.Exists(path) || VideoTranscodeService.TryGetTranscodedFile(path, out _);
+    }
+
+
+    /// <summary>
     /// 获取自定义背景图文件路径
     /// </summary>
     /// <param name="gameId"></param>
@@ -65,7 +78,7 @@ public class BackgroundService
         if (AppConfig.GetEnableCustomBg(gameId.GameBiz))
         {
             path = GetBgFilePath(AppConfig.GetCustomBg(gameId.GameBiz));
-            if (File.Exists(path))
+            if (BackgroundFileExists(path))
             {
                 return true;
             }
@@ -106,7 +119,7 @@ public class BackgroundService
         if (!(lastBg == customBg && !AppConfig.GetEnableCustomBg(gameId.GameBiz)))
         {
             string? path = GetBgFilePath(lastBg);
-            if (File.Exists(path))
+            if (BackgroundFileExists(path))
             {
                 return path;
             }
@@ -194,7 +207,8 @@ public class BackgroundService
     {
         string name = Path.GetFileName(url);
         string file = GetBgFilePath(name);
-        if (!File.Exists(file))
+        // 原片转码后已删除、只剩产物时也不重新下载，否则每次启动都要重下一遍再重转
+        if (!BackgroundFileExists(file))
         {
             var bytes = await _httpClient.GetByteArrayAsync(url, cancellationToken);
             Directory.CreateDirectory(Path.GetDirectoryName(file)!);
@@ -214,7 +228,7 @@ public class BackgroundService
     public static string? GetFallbackBackgroundImage(GameId gameId)
     {
         string? bg = GetBgFilePath(AppConfig.GetBg(gameId.GameBiz));
-        if (!File.Exists(bg))
+        if (!BackgroundFileExists(bg))
         {
             string baseFolder = AppContext.BaseDirectory;
             string path = Path.Combine(baseFolder, @"Assets\Image\UI_CutScene_1130320101A.png");
@@ -245,6 +259,7 @@ public class BackgroundService
         if (path != file)
         {
             File.Copy(file, path, true);
+            VideoTranscodeService.DeleteTranscodedFile(path);
         }
         return name;
     }
@@ -278,6 +293,7 @@ public class BackgroundService
                 using var stream = await file.OpenReadAsync();
                 await stream.AsStream().CopyToAsync(dest);
             }
+            VideoTranscodeService.DeleteTranscodedFile(Path.Combine(bg, file.Name));
         }
         return file.Name;
     }

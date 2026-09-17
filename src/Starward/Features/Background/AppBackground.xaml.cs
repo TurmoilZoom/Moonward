@@ -538,7 +538,7 @@ public sealed partial class AppBackground : UserControl
 
     /// <summary>
     /// 视频是否属于「官方 VP9 视频扩展能播，但系统没装扩展」：webm 且为 VP8，或非 RGB 的 Profile 0 VP9。
-    /// 高 Profile / RGB 的 VP9 扩展也解不了，照旧走 libvpx 软解 + 后台转码，不在此列。
+    /// 高 Profile / RGB 的 VP9 扩展也解不了，照旧走 libvpx 软解 + 后台转码，不在此列；已经转码成 H.264 的也不在此列。
     /// </summary>
     /// <param name="file">视频文件完整路径。</param>
     /// <returns>需要提示安装扩展并改用静态图时返回 true。</returns>
@@ -550,6 +550,11 @@ public sealed partial class AppBackground : UserControl
         }
         // 先查扩展：已安装时不必读文件头
         if (VP9Helper.IsVP9DecoderInstalled())
+        {
+            return false;
+        }
+        // 转码后原片会被删掉，读不到文件头时下面两个判断都返回 false，会被误判成「需要安装扩展」
+        if (VideoTranscodeService.TryGetTranscodedFile(file, out _))
         {
             return false;
         }
@@ -580,7 +585,7 @@ public sealed partial class AppBackground : UserControl
         string requestedFile = file;
         try
         {
-            // 解不动的 VP9（Profile 1 / RGB）若已转码成 H.264 就改播产物。
+            // 解不动的 VP9（Profile 1 / RGB）若已转码成 H.264 就改播产物，原片随后在后台删除。
             file = _videoTranscodeService.GetPlaybackFile(file);
             if (HevcHelper.IsHevcDecoderRequiredButMissing(file))
             {
@@ -1287,7 +1292,7 @@ public sealed partial class AppBackground : UserControl
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(_lastBackgroundFile) || !File.Exists(_lastBackgroundFile))
+            if (string.IsNullOrWhiteSpace(_lastBackgroundFile) || !BackgroundService.BackgroundFileExists(_lastBackgroundFile))
             {
                 return null;
             }

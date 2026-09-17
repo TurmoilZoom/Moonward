@@ -516,21 +516,38 @@ internal partial class FavorWallpaperService
 
 
     /// <summary>
-    /// 本地 bg 目录中是否已有该媒体文件。
+    /// 本地 bg 目录中是否已有该媒体文件（含转码后只剩产物的情况）。
     /// </summary>
     public static bool IsCached(FavorWallpaperRecord item)
     {
         string path = BackgroundService.GetBgFilePath(GetCacheFileName(item));
-        return File.Exists(path);
+        return BackgroundService.BackgroundFileExists(path);
     }
 
 
     /// <summary>
-    /// 删除本地 bg 缓存。若文件正被背景播放占用，稍等后重试。
+    /// 删除本地 bg 缓存，连同转码产物一起删。若文件正被背景播放占用，稍等后重试。
     /// </summary>
     public async Task DeleteLocalCacheAsync(FavorWallpaperRecord item, CancellationToken cancellationToken = default)
     {
         string path = BackgroundService.GetBgFilePath(GetCacheFileName(item));
+        await DeleteFileWithRetryAsync(path, cancellationToken).ConfigureAwait(false);
+        if (Path.GetExtension(path).Equals(".webm", StringComparison.OrdinalIgnoreCase))
+        {
+            // 解不动的 webm 转码后原片会被删掉、只剩产物，只删原片的话卡片仍显示「已下载」
+            await DeleteFileWithRetryAsync(VideoTranscodeService.GetTranscodedFilePath(path), cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+
+    /// <summary>
+    /// 删除文件；文件正被占用时稍等后重试，最多 5 次。
+    /// </summary>
+    /// <param name="path">文件完整路径，不存在时直接返回。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <exception cref="IOException">重试用尽后文件仍被占用。</exception>
+    private static async Task DeleteFileWithRetryAsync(string path, CancellationToken cancellationToken)
+    {
         if (!File.Exists(path))
         {
             return;
@@ -559,7 +576,7 @@ internal partial class FavorWallpaperService
     {
         string name = GetCacheFileName(item);
         string path = BackgroundService.GetBgFilePath(name);
-        if (File.Exists(path))
+        if (BackgroundService.BackgroundFileExists(path))
         {
             progress?.Report(100);
             return name;
@@ -575,6 +592,7 @@ internal partial class FavorWallpaperService
     public async Task DownloadToFileAsync(FavorWallpaperRecord item, string destPath, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
     {
         string cached = BackgroundService.GetBgFilePath(GetCacheFileName(item));
+        // 只认原片：原片转码后被删、只剩有损的 H.264 产物时，重新下载原文件给用户
         if (File.Exists(cached))
         {
             Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
