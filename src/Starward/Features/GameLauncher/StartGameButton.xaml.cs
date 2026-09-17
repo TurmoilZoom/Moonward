@@ -31,7 +31,7 @@ public sealed partial class StartGameButton : UserControl
     private static Brush TextOnAccentFillColorPrimaryBrush => (Brush)Application.Current.Resources["TextOnAccentFillColorPrimaryBrush"];
 
 
-    /// <summary>胶囊按钮的呼吸光晕 / 流光 / 聚光 / 点击光爆 Composition 动效。</summary>
+    /// <summary>胶囊按钮的聚光 / 点击光爆 Composition 动效。</summary>
     private readonly StartGameButtonEffects _effects = new();
 
 
@@ -52,7 +52,7 @@ public sealed partial class StartGameButton : UserControl
     /// <param name="e">路由事件参数。</param>
     private void StartGameButton_Loaded(object sender, RoutedEventArgs e)
     {
-        _effects.Attach(Grid_Root, Grid_GlowHost, Grid_EffectHost, Button_GameAction);
+        _effects.Attach(Grid_Root, Grid_EffectHost, Button_GameAction);
         UpdateEffectsState();
         _menuCloseTimer = DispatcherQueue.CreateTimer();
         _menuCloseTimer.Interval = TimeSpan.FromMilliseconds(120);
@@ -63,12 +63,11 @@ public sealed partial class StartGameButton : UserControl
 
 
     /// <summary>
-    /// 同步动效启用状态：呼吸光晕仅在「可开始游戏」时亮；
-    /// 流光 / 聚光灯 / 点击光爆在所有显示强调色背景的可操作状态（开始 / 安装 / 更新 等）都亮。
+    /// 同步动效启用状态：聚光灯 / 点击光爆在所有显示强调色背景的可操作状态（开始 / 安装 / 更新 等）启用。
     /// </summary>
     private void UpdateEffectsState()
     {
-        _effects.SetState(GameState is GameState.StartGame, IsAccentColorBackgroundVisible);
+        _effects.SetState(IsAccentColorBackgroundVisible);
     }
 
 
