@@ -50,7 +50,7 @@ internal static class GachaStatsListDragScrollHelper
     /// 为指定的 <see cref="ScrollViewer"/> 注入鼠标拖拽滚动 + 回弹行为。
     /// </summary>
     /// <param name="scrollViewer">包含记录列表的竖直滚动容器。</param>
-    /// <param name="onDragEnd">拖拽结束（松手 / 捕获丢失）时、释放指针捕获之前回调，用于清理记录项的悬停高亮等拖拽期间被指针捕获压制的状态。</param>
+    /// <param name="onDragEnd">拖拽结束（松手 / 捕获丢失）时、释放指针捕获之前回调（原地单击未移动不回调），用于清理记录项的悬停高亮等拖拽期间被指针捕获压制的状态。</param>
     /// <returns>绑定句柄，须在控件 Unloaded 时调用 <see cref="GachaStatsListDragScrollBinding.Dispose"/> 解除绑定。</returns>
     public static GachaStatsListDragScrollBinding Bind(ScrollViewer scrollViewer, Action? onDragEnd = null)
     {
@@ -75,6 +75,7 @@ internal static class GachaStatsListDragScrollHelper
 
         // 拖拽状态
         private bool _isDragging;
+        private bool _dragMoved;       // 本次按下后指针是否移动过；原地单击不算拖拽，不触发 _onDragEnd
         private Pointer? _capturedPointer;
         private Point _lastPosition;
         private long _lastTimestamp;   // Stopwatch.GetTimestamp()
@@ -144,6 +145,7 @@ internal static class GachaStatsListDragScrollHelper
             _lastPosition = e.GetCurrentPoint(_scrollViewer).Position;
             _lastTimestamp = Stopwatch.GetTimestamp();
             _velocity = 0;
+            _dragMoved = false;
             _isDragging = true;
             // 拖拽滚动时隐藏记录项上的时间气泡，并避免列表移动时反复弹出。
             InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, true);
@@ -165,6 +167,10 @@ internal static class GachaStatsListDragScrollHelper
             }
 
             Point pos = point.Position;
+            if (pos != _lastPosition)
+            {
+                _dragMoved = true;
+            }
             double deltaY = pos.Y - _lastPosition.Y;
             long now = Stopwatch.GetTimestamp();
             double dt = (now - _lastTimestamp) * TickToSeconds;
@@ -219,10 +225,13 @@ internal static class GachaStatsListDragScrollHelper
             }
 
             // 拖拽期间指针被本容器捕获，记录项收不到 PointerExited；松手时指针可能已不在任何记录上，
-            // 回调让卡片清理残留的悬停高亮（IsPointerIn）。
+            // 回调让卡片清理残留的悬停高亮（IsPointerIn）。原地单击记录时指针没离开过该记录，高亮仍然有效，不回调。
             // 必须排在 EndDragSession 释放捕获之前：释放捕获时指针下方的记录会补发 PointerEntered，
-            // 先清后放，高亮才会落回指针所在的记录；反过来会把刚补回的高亮清掉（单击记录不拖动时最明显）。
-            _onDragEnd?.Invoke();
+            // 先清后放，高亮才会落回指针所在的记录；反过来会把刚补回的高亮清掉。
+            if (_dragMoved)
+            {
+                _onDragEnd?.Invoke();
+            }
             EndDragSession();
 
             if (Math.Abs(_overscrollY) > OverscrollEpsilon)
