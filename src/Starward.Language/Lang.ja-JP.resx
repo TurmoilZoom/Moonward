@@ -3934,4 +3934,7 @@
   <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>この動画背景の再生にはVP9 Video Extensionsが必要なため、一時停止して静止画を表示しています。インストール後に再生ボタンを押すと再生できます。</value>
   </data>
+  <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
+    <value>この動画はHEVC（H.265）でエンコードされているため、再生にはHEVC Video Extensionsのインストールが必要です。</value>
+  </data>
 </root>

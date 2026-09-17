@@ -3935,4 +3935,7 @@
   <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>이 비디오 배경을 재생하려면 VP9 비디오 확장이 필요하므로 일시 정지하고 정지 이미지를 표시합니다. 설치한 후 재생 버튼을 누르면 재생됩니다.</value>
   </data>
+  <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
+    <value>이 비디오는 HEVC(H.265)로 인코딩되어 있어 재생하려면 HEVC 비디오 확장을 설치해야 합니다.</value>
+  </data>
 </root>

@@ -20,8 +20,10 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Foundation.Collections;
 using Windows.Graphics.Imaging;
 using Windows.Media.Core;
+using Windows.Media.MediaProperties;
 using Windows.Media.Playback;
 using Windows.Storage.Streams;
 using Windows.System;
@@ -140,6 +142,18 @@ public sealed partial class AppBackground : UserControl
 
     /// <summary>标记是否因为缺少 VP9 扩展而触发过失败提示。</summary>
     private bool _needToInstallVp9VideoExtension;
+
+    /// <summary>
+    /// 解不了、没能播放的视频背景文件（转码前的原始路径），期间显示默认背景图。
+    /// 窗口激活时的兜底重启要跳过它，否则每次激活都会重试、重弹提示。
+    /// </summary>
+    private string? _undecodableVideoFile;
+
+    /// <summary>
+    /// <see cref="_undecodableVideoFile"/> 是否因系统缺 HEVC 解码器而在播放前被拦下。只有这种情况在装好扩展后自动重试；
+    /// 播放时才发现视频轨解不了的，重试也还是失败，不自动重试。
+    /// </summary>
+    private bool _undecodableVideoMissingHevcDecoder;
 
 
     /// <summary>
@@ -268,9 +282,12 @@ public sealed partial class AppBackground : UserControl
                 {
                     if (BackgroundService.FileIsSupportedVideo(filePath))
                     {
-                        continue;
+                        if (!CanRetryUndecodableVideo(filePath))
+                        {
+                            continue;
+                        }
                     }
-                    if (_lastScale == this.XamlRoot.GetUIScaleFactor())
+                    else if (_lastScale == this.XamlRoot.GetUIScaleFactor())
                     {
                         continue;
                     }
@@ -448,6 +465,12 @@ public sealed partial class AppBackground : UserControl
     /// <summary>内存播放时持有的视频数据；MediaPlayer 释放前不可关掉。</summary>
     private InMemoryRandomAccessStream? _mediaStream;
 
+    /// <summary>包住 <see cref="_mediaSource"/> 的播放项，用来监听视频轨打开失败。</summary>
+    private MediaPlaybackItem? _mediaPlaybackItem;
+
+    /// <summary><see cref="_mediaPlaybackItem"/> 对应的背景文件（转码前的原始路径）。</summary>
+    private string? _mediaPlaybackFile;
+
     /// <summary>用于取消尚未完成的内存读入 / 启动，避免切换背景后旧任务再创建播放器。</summary>
     private CancellationTokenSource? _startMediaPlayerCts;
 
@@ -554,10 +577,18 @@ public sealed partial class AppBackground : UserControl
 
         MediaSource? source = null;
         InMemoryRandomAccessStream? memoryStream = null;
+        string requestedFile = file;
         try
         {
             // 解不动的 VP9（Profile 1 / RGB）若已转码成 H.264 就改播产物。
             file = _videoTranscodeService.GetPlaybackFile(file);
+            if (HevcHelper.IsHevcDecoderRequiredButMissing(file))
+            {
+                // 缺 HEVC 解码器时 MediaPlayer 不报错，只放声音、一帧画面都不出，背景会一直空着：干脆不播，显示默认图并提示安装扩展。
+                _logger.LogWarning("HEVC decoder is not available, skip playing video background '{File}'", file);
+                ShowUndecodableVideoFallback(requestedFile, missingHevcDecoder: true, isHevc: true);
+                return;
+            }
             if (Path.GetExtension(file).Equals(".webm", StringComparison.OrdinalIgnoreCase))
             {
                 bool decoderInstalled = VP9Helper.IsVP9DecoderInstalled();
@@ -607,6 +638,11 @@ public sealed partial class AppBackground : UserControl
             source = null;
             memoryStream = null;
 
+            // 套一层播放项才能监听视频轨打开失败：缺解码器不会有 MediaFailed，见 VideoTrack_OpenFailed。
+            _mediaPlaybackItem = new MediaPlaybackItem(_mediaSource);
+            _mediaPlaybackItem.VideoTracksChanged += MediaPlaybackItem_VideoTracksChanged;
+            _mediaPlaybackFile = requestedFile;
+
             _mediaPlayer = new MediaPlayer
             {
                 IsLoopingEnabled = true,
@@ -614,7 +650,7 @@ public sealed partial class AppBackground : UserControl
                 IsMuted = false,
                 // 关键：启用帧服务器模式，后续通过 VideoFrameAvailable + CopyFrameToVideoSurface 手动获取帧
                 IsVideoFrameServerEnabled = true,
-                Source = _mediaSource
+                Source = _mediaPlaybackItem
             };
             _mediaPlayer.CommandManager.IsEnabled = false;
             _mediaPlayer.SystemMediaTransportControls.IsEnabled = false;
@@ -793,6 +829,94 @@ public sealed partial class AppBackground : UserControl
         {
             InAppToast.MainWindow?.Warning(Lang.AppBackground_VideoDecodingFailed);
         }
+    }
+
+
+    /// <summary>
+    /// 给新加入的视频轨挂上 <see cref="VideoTrack_OpenFailed"/>（实测循环播放不会重复加入）。
+    /// 不拿 SupportInfo.DecoderStatus 提前下结论：它只看这种编码有没有注册过解码器（VP9 Profile 1 一帧都解不出也报 FullySupported），
+    /// 也无法确认算不算本进程用 MFTRegisterLocal 注册的 libvpx，没装 VP9 扩展时可能把能播的 webm 误判成解不了。
+    /// </summary>
+    private void MediaPlaybackItem_VideoTracksChanged(MediaPlaybackItem sender, IVectorChangedEventArgs args)
+    {
+        try
+        {
+            if (args.CollectionChange is CollectionChange.ItemInserted && args.Index < sender.VideoTracks.Count)
+            {
+                sender.VideoTracks[(int)args.Index].OpenFailed += VideoTrack_OpenFailed;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Watch video track of video background");
+        }
+    }
+
+
+    /// <summary>
+    /// 视频轨打开失败。系统里没有对应解码器时 MediaPlayer 不触发 MediaFailed，只报这个（实测 0xC00D5212，找不到解码器），
+    /// 声音照放、进度照走，帧却一帧都不来，背景会一直空着。于是停掉播放，改显示默认图并提示。
+    /// 回到 UI 线程后先确认仍是当前播放项，已经换了背景就不管。
+    /// </summary>
+    private void VideoTrack_OpenFailed(VideoTrack sender, VideoTrackOpenFailedEventArgs args)
+    {
+        MediaPlaybackItem? item = null;
+        string? subtype = null;
+        MediaDecoderStatus status = default;
+        try
+        {
+            item = sender.PlaybackItem;
+            subtype = sender.GetEncodingProperties().Subtype;
+            status = sender.SupportInfo.DecoderStatus;
+        }
+        catch { }
+        Exception? error = args.ExtendedError;
+        DispatcherQueue?.TryEnqueue(() =>
+        {
+            if (item is null || !ReferenceEquals(item, _mediaPlaybackItem) || _mediaPlaybackFile is not string file)
+            {
+                return;
+            }
+            _logger.LogWarning(error, "Video track of video background failed to open (subtype {Subtype}, decoder status {Status}): '{File}'", subtype, status, file);
+            DisposeMediaPlayback();
+            bool isHevc = string.Equals(subtype, MediaEncodingSubtypes.Hevc, StringComparison.OrdinalIgnoreCase);
+            ShowUndecodableVideoFallback(file, missingHevcDecoder: false, isHevc: isHevc);
+        });
+    }
+
+
+    /// <summary>
+    /// 视频背景解不了时的退路：记下该文件，显示默认背景图并提示。设置里的背景选择不动，装好解码器后还能恢复。
+    /// </summary>
+    /// <param name="file">解不了的背景文件（转码前的原始路径）。</param>
+    /// <param name="missingHevcDecoder">是否因系统缺 HEVC 解码器在播放前被拦下；是的话装好扩展后会自动重试。</param>
+    /// <param name="isHevc">视频是否为 HEVC：是则提示安装 HEVC 视频扩展，否则只提示解码失败。</param>
+    private void ShowUndecodableVideoFallback(string file, bool missingHevcDecoder, bool isHevc)
+    {
+        _undecodableVideoFile = file;
+        _undecodableVideoMissingHevcDecoder = missingHevcDecoder;
+        BackgroundImageSource = new BitmapImage(new Uri("ms-appx:///Assets/Image/UI_CutScene_1130320101A.png"));
+        if (isHevc)
+        {
+            HevcVideoExtensionToast.Show();
+        }
+        else
+        {
+            InAppToast.MainWindow?.Warning(Lang.AppBackground_VideoDecodingFailed);
+        }
+    }
+
+
+    /// <summary>
+    /// 因缺 HEVC 解码器没播的视频背景，在解码器装上之后可以重试。窗口激活、再次设为同一背景时都会检查。
+    /// </summary>
+    /// <param name="file">当前背景文件。</param>
+    private bool CanRetryUndecodableVideo(string? file)
+    {
+        return file is not null
+            && file == _undecodableVideoFile
+            && _undecodableVideoMissingHevcDecoder
+            && HevcHelper.IsHevcDecoderAvailable();
     }
 
 
@@ -1101,6 +1225,8 @@ public sealed partial class AppBackground : UserControl
     {
         _startMediaPlayerCts?.Cancel();
         DisposeMediaPlayback();
+        _undecodableVideoFile = null;
+        _undecodableVideoMissingHevcDecoder = false;
         _videoDisplayFrozen = false;
         _resumeVideoSurfaceOnNextFrame = false;
         _videoSurface?.Dispose();
@@ -1115,10 +1241,24 @@ public sealed partial class AppBackground : UserControl
 
 
     /// <summary>
-    /// 释放播放器及其媒体源、内存流，不碰 Win2D 表面与解码器。
+    /// 释放播放器及其播放项、媒体源、内存流，不碰 Win2D 表面与解码器。
     /// </summary>
     private void DisposeMediaPlayback()
     {
+        if (_mediaPlaybackItem is not null)
+        {
+            _mediaPlaybackItem.VideoTracksChanged -= MediaPlaybackItem_VideoTracksChanged;
+            try
+            {
+                foreach (VideoTrack track in _mediaPlaybackItem.VideoTracks)
+                {
+                    track.OpenFailed -= VideoTrack_OpenFailed;
+                }
+            }
+            catch { }
+            _mediaPlaybackItem = null;
+        }
+        _mediaPlaybackFile = null;
         if (_mediaPlayer is not null)
         {
             // 必须先退订再 Dispose：已在飞行中的帧回调若在 Dispose 之后才跑到 UI 线程，
@@ -1156,6 +1296,13 @@ public sealed partial class AppBackground : UserControl
             {
                 // 静态图片直接复用原始文件（与渲染器中“按实际样子”一致）
                 return _lastBackgroundFile;
+            }
+
+            if (_lastBackgroundFile == _undecodableVideoFile)
+            {
+                // 视频没能播放，界面上显示的是默认背景图
+                string defaultImage = Path.Combine(AppContext.BaseDirectory, @"Assets\Image\UI_CutScene_1130320101A.png");
+                return File.Exists(defaultImage) ? defaultImage : null;
             }
 
             // 视频：需要抓取当前合成帧，必须在 UI 线程操作 Win2D 资源
@@ -1290,7 +1437,16 @@ public sealed partial class AppBackground : UserControl
                 {
                     return;
                 }
-                if (_mediaPlayer is null && _startMediaPlayerCts is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
+                if (_undecodableVideoFile is not null && _undecodableVideoFile == _lastBackgroundFile)
+                {
+                    // 解不了的视频背景不走下面的兜底重启，否则每次激活都会重试、重弹提示。
+                    // 但如果是缺 HEVC 解码器，用户可能刚从商店装完扩展回来，这时重新更新一次背景就能播了。
+                    if (CanRetryUndecodableVideo(_lastBackgroundFile))
+                    {
+                        _ = UpdateBackgroundAsync();
+                    }
+                }
+                else if (_mediaPlayer is null && _startMediaPlayerCts is null && BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
                 {
                     // 兜底：若播放器曾在其他路径被释放，则重新开始解码渲染背景视频
                     _ = StartMediaPlayerAsync(_lastBackgroundFile!);

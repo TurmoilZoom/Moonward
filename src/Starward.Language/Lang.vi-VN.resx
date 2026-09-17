@@ -3935,4 +3935,7 @@ You are welcome to submit exported data to:</value>
   <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>Hình nền video này cần tiện ích mở rộng video VP9 nên đã tạm dừng và hiển thị ảnh tĩnh. Sau khi cài đặt, hãy nhấn nút Phát để phát.</value>
   </data>
+  <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
+    <value>Video này được mã hóa bằng HEVC (H.265), cần cài đặt tiện ích mở rộng video HEVC để phát.</value>
+  </data>
 </root>

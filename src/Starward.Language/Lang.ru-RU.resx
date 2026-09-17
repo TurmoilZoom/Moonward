@@ -3955,4 +3955,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>Для этого видеофона требуются расширения видео VP9, поэтому он приостановлен и показано статичное изображение. После установки нажмите «Воспроизвести».</value>
   </data>
+  <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
+    <value>Это видео закодировано в HEVC (H.265). Установите расширения видео HEVC, чтобы воспроизвести его.</value>
+  </data>
 </root>

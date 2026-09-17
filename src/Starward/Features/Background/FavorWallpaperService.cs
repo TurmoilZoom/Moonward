@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.Blackboard;
+using Starward.Features.Codec;
 using Starward.Features.Database;
 using System;
 using System.Collections.Concurrent;
@@ -352,10 +353,26 @@ internal partial class FavorWallpaperService
 
 
     /// <summary>
-    /// 随机模式候选池：好感与满影画互不混用，只取「当前背景所属类别」中已下载的壁纸。
+    /// 随机模式真正能用的候选：已下载，并且在本机播得出来。
+    /// 系统缺 HEVC 解码器时，HEVC 编码的好感壁纸抽中了也只有声音没有画面，要排除。
+    /// </summary>
+    /// <param name="mindscape">true 取满影画静态壁纸，false 取好感动态壁纸。</param>
+    public List<FavorWallpaperRecord> GetShuffleCandidates(bool mindscape)
+    {
+        IEnumerable<FavorWallpaperRecord> downloaded = GetDownloadedWallpapers(mindscape);
+        if (!mindscape)
+        {
+            downloaded = downloaded.Where(x => !HevcHelper.IsHevcDecoderRequiredButMissing(BackgroundService.GetBgFilePath(GetCacheFileName(x))));
+        }
+        return downloaded.ToList();
+    }
+
+
+    /// <summary>
+    /// 随机模式候选池：好感与满影画互不混用，只取「当前背景所属类别」中已下载、且本机播得出来的壁纸。
     /// </summary>
     /// <param name="gameBiz">游戏业务线。</param>
-    /// <returns>该类别已下载的壁纸；该类别未开随机模式时为空。</returns>
+    /// <returns>该类别的候选壁纸；该类别未开随机模式时为空。</returns>
     public List<FavorWallpaperRecord> GetShufflePool(GameBiz gameBiz)
     {
         bool favorShuffle = AppConfig.GetFavorWallpaperShuffle(gameBiz);
@@ -371,7 +388,7 @@ internal partial class FavorWallpaperService
             // 当前背景属于另一类，而那一类没开随机——不跨类别换图。
             return [];
         }
-        return GetDownloadedWallpapers(mindscape).ToList();
+        return GetShuffleCandidates(mindscape);
     }
 
 
@@ -571,13 +588,21 @@ internal partial class FavorWallpaperService
 
     /// <summary>
     /// 下载并设为当前游戏的自定义背景（动态视频或满影画静态图）。
+    /// 视频是 HEVC 而系统没有 HEVC 解码器时只下载、不改背景：设上去也只有声音没有画面。
     /// </summary>
-    public async Task SetAsCustomBackgroundAsync(GameBiz gameBiz, FavorWallpaperRecord item, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
+    /// <returns>已设为背景返回 true；因缺 HEVC 解码器没有设置时返回 false。</returns>
+    public async Task<bool> SetAsCustomBackgroundAsync(GameBiz gameBiz, FavorWallpaperRecord item, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
     {
         string name = await DownloadToBgFolderAsync(item, progress, cancellationToken).ConfigureAwait(false);
+        if (HevcHelper.IsHevcDecoderRequiredButMissing(BackgroundService.GetBgFilePath(name)))
+        {
+            _logger.LogWarning("HEVC decoder is not available, favor wallpaper {Id} ({Title}) is not set as background", item.ContentId, item.Title);
+            return false;
+        }
         AppConfig.SetCustomBg(gameBiz, name);
         AppConfig.SetEnableCustomBg(gameBiz, true);
         AppConfig.SetBg(gameBiz, name);
+        return true;
     }
 
 

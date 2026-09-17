@@ -353,7 +353,7 @@ public sealed partial class FavorWallpaperPanel : UserControl
 
 
     /// <summary>
-    /// 点击封面：下载（如需要）并设为当前自定义背景。
+    /// 点击封面：下载（如需要）并设为当前自定义背景。系统缺 HEVC 解码器、设了也播不出来时只下载，并提示安装扩展。
     /// </summary>
     public async Task UseAsBackgroundAsync(FavorWallpaperView view)
     {
@@ -366,8 +366,13 @@ public sealed partial class FavorWallpaperPanel : UserControl
             view.IsDownloading = true;
             view.DownloadProgress = 0;
             var progress = new Progress<double>(p => view.DownloadProgress = p);
-            await _service.SetAsCustomBackgroundAsync(CurrentGameBiz, view.Record, progress);
+            bool applied = await _service.SetAsCustomBackgroundAsync(CurrentGameBiz, view.Record, progress);
             view.IsDownloaded = true;
+            if (!applied)
+            {
+                HevcVideoExtensionToast.Show();
+                return;
+            }
             RefreshInUseState();
             WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
             InAppToast.MainWindow?.Success(Lang.FavorWallpaper_SetSuccess);

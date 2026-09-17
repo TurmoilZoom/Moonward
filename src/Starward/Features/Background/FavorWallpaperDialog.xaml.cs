@@ -172,10 +172,17 @@ public sealed partial class FavorWallpaperDialog : ContentDialog
         try
         {
             bool enable = ToggleSwitch_Shuffle.IsOn;
-            if (enable && _service.GetDownloadedWallpapers(IsMindscapeMode).Count == 0)
+            if (enable && _service.GetShuffleCandidates(IsMindscapeMode).Count == 0)
             {
-                // 候选池空开了也没用，提示先下载并把开关拨回去。
-                InAppToast.MainWindow?.Warning(Lang.FavorWallpaper_ShuffleNeedDownload);
+                // 候选池空开了也没用，把开关拨回去。有下载却全被排除，只可能是缺 HEVC 解码器，这时提示去装扩展而不是去下载。
+                if (_service.GetDownloadedWallpapers(IsMindscapeMode).Count == 0)
+                {
+                    InAppToast.MainWindow?.Warning(Lang.FavorWallpaper_ShuffleNeedDownload);
+                }
+                else
+                {
+                    HevcVideoExtensionToast.Show();
+                }
                 SyncShuffleToggle();
                 return;
             }

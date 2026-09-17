@@ -5,7 +5,8 @@ using System.Runtime.InteropServices.Marshalling;
 namespace Starward.Features.Codec;
 
 /// <summary>
-/// Media Foundation 的最小互操作定义，供 <see cref="VideoTranscodeService"/> 用 SourceReader + SinkWriter 转码背景视频。
+/// Media Foundation 的最小互操作定义，供 <see cref="VideoTranscodeService"/> 用 SourceReader + SinkWriter 转码背景视频，
+/// 以及 <see cref="HevcHelper"/> 枚举系统里的解码器。
 /// <para/>
 /// 只声明用得到的方法，其余 vtable 槽位用 <c>SlotNN</c> 占位——<b>顺序必须与 COM 接口完全一致</b>，
 /// 少一个或错一个都会调用到别的函数上。新增方法时务必核对 Windows SDK 头文件中的声明顺序。
@@ -55,6 +56,26 @@ internal static partial class MediaFoundation
     /// </summary>
     public static Guid MFVideoFormat_RGB32 = new("00000016-0000-0010-8000-00AA00389B71");
 
+    public static Guid MFVideoFormat_HEVC = new("43564548-0000-0010-8000-00AA00389B71");
+
+    // MFT 类别 GUID
+    public static Guid MFT_CATEGORY_VIDEO_DECODER = new("d6c02d4b-6833-45b4-971a-05a4b04bab91");
+
+    /// <summary>
+    /// MFT_ENUM_FLAG_SYNCMFT | ASYNCMFT | HARDWARE | LOCALMFT | SORTANDFILTER：同步、异步、硬件与本进程注册的 MFT 都算，
+    /// 并按优先级过滤排序。实测商店扩展（如 HEVC 视频扩展）不加 UNTRUSTED_STOREMFT 也在结果里。
+    /// </summary>
+    public const uint MFT_ENUM_FLAG_PLAYBACK_DECODERS = 0x1 | 0x2 | 0x4 | 0x10 | 0x40;
+
+
+    /// <summary>MFT_REGISTER_TYPE_INFO，按主类型 + 子类型筛选 MFT。</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MFT_REGISTER_TYPE_INFO
+    {
+        public Guid guidMajorType;
+        public Guid guidSubtype;
+    }
+
 
     /// <summary>把两个 32 位值打包进 UINT64 属性（高位在前），用于帧尺寸、帧率、像素宽高比。</summary>
     public static ulong Pack(uint high, uint low) => ((ulong)high << 32) | low;
@@ -77,6 +98,12 @@ internal static partial class MediaFoundation
 
     [LibraryImport("mfreadwrite.dll", StringMarshalling = StringMarshalling.Utf16)]
     public static partial int MFCreateSinkWriterFromURL(string url, nint byteStream, IMFAttributes? attributes, out IMFSinkWriter writer);
+
+    /// <summary>
+    /// 枚举 MFT。<paramref name="activates"/> 是 IMFActivate* 数组：用完要逐个 Release，再用 CoTaskMemFree 释放数组本身。
+    /// </summary>
+    [LibraryImport("mfplat.dll")]
+    public static partial int MFTEnumEx(Guid guidCategory, uint flags, in MFT_REGISTER_TYPE_INFO inputType, nint outputType, out nint activates, out uint count);
 
 }
 

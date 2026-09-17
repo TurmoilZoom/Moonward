@@ -4024,4 +4024,7 @@ Repository:</value>
   <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>This video background requires the VP9 Video Extensions, so it has been paused and a static image is shown. After installing, click Play to play it.</value>
   </data>
+  <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
+    <value>This video is encoded in HEVC (H.265). Install the HEVC Video Extensions to play it.</value>
+  </data>
 </root>

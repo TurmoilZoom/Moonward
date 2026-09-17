@@ -3933,4 +3933,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>Für diesen Videohintergrund werden die VP9-Videoerweiterungen benötigt. Er wurde pausiert und es wird ein Standbild angezeigt. Klicken Sie nach der Installation auf Wiedergabe.</value>
   </data>
+  <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
+    <value>Dieses Video ist in HEVC (H.265) codiert. Installieren Sie die HEVC-Videoerweiterungen, um es abzuspielen.</value>
+  </data>
 </root>

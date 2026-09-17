@@ -11485,5 +11485,14 @@ namespace Starward.Language {
                 return ResourceManager.GetString("AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 This video is encoded in HEVC (H.265). Install the HEVC Video Extensions to play it. 的本地化字符串。
+        /// </summary>
+        public static string AppBackground_HEVCVideoExtensionsRequired {
+            get {
+                return ResourceManager.GetString("AppBackground_HEVCVideoExtensionsRequired", resourceCulture);
+            }
+        }
     }
 }

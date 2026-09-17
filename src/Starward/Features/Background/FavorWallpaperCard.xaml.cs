@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -6,10 +7,13 @@ using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Starward.Controls;
 using Starward.Features.Codec;
+using Starward.Helpers;
 using System;
 using System.ComponentModel;
 using System.IO;
+using Windows.Foundation.Collections;
 using Windows.Media.Core;
+using Windows.Media.MediaProperties;
 using Windows.Media.Playback;
 
 namespace Starward.Features.Background;
@@ -39,15 +43,30 @@ public sealed partial class FavorWallpaperCard : UserControl
     /// <summary>同一画廊同时只播一张，避免多路解码占满 CPU。</summary>
     private static FavorWallpaperCard? s_activePreview;
 
+    /// <summary>「视频解码失败」本次运行是否提示过；悬停不是用户主动操作，只提示一次。</summary>
+    private static bool s_decodeFailedToastShown;
+
+    private static readonly ILogger<FavorWallpaperCard> s_logger = AppConfig.GetLogger<FavorWallpaperCard>();
+
 
     private readonly DispatcherQueueTimer _hoverTimer;
 
     private MediaPlayer? _player;
     private MediaSource? _mediaSource;
+
+    /// <summary>包住 <see cref="_mediaSource"/> 的播放项，用来监听视频轨打开失败。</summary>
+    private MediaPlaybackItem? _playbackItem;
+
     private bool _pointerInside;
     private bool _previewing;
     private bool _coverHidden;
     private bool _handlersHooked;
+
+    /// <summary>
+    /// 这次悬停已经判定预览播不了（缺 HEVC 解码器或视频轨解不了），封面保持不动；
+    /// 鼠标移出卡片前不再尝试，否则每次移动鼠标都会重新走一遍。
+    /// </summary>
+    private bool _previewUnavailable;
 
 
     public FavorWallpaperCard()
@@ -151,6 +170,7 @@ public sealed partial class FavorWallpaperCard : UserControl
             oldView.PropertyChanged -= View_PropertyChanged;
         }
         StopPreview();
+        _previewUnavailable = false;
         if (newView is not null)
         {
             newView.PropertyChanged += View_PropertyChanged;
@@ -321,6 +341,7 @@ public sealed partial class FavorWallpaperCard : UserControl
     private void Root_PointerExited(object sender, PointerRoutedEventArgs e)
     {
         _pointerInside = false;
+        _previewUnavailable = false;
         StopPreview();
     }
 
@@ -328,6 +349,7 @@ public sealed partial class FavorWallpaperCard : UserControl
     private void Root_PointerCanceled(object sender, PointerRoutedEventArgs e)
     {
         _pointerInside = false;
+        _previewUnavailable = false;
         StopPreview();
     }
 
@@ -346,7 +368,7 @@ public sealed partial class FavorWallpaperCard : UserControl
     /// </summary>
     private bool CanPreview()
     {
-        return View is { IsDownloaded: true, IsDownloading: false, IsStatic: false } && TryGetLocalVideoPath() is not null;
+        return View is { IsDownloaded: true, IsDownloading: false, IsStatic: false } && !_previewUnavailable && TryGetLocalVideoPath() is not null;
     }
 
 
@@ -393,6 +415,13 @@ public sealed partial class FavorWallpaperCard : UserControl
         {
             return;
         }
+        if (HevcHelper.IsHevcDecoderRequiredButMissing(path))
+        {
+            // 缺 HEVC 解码器时播放器不报错，预览只有黑屏：保留封面，并提示一次去装扩展。
+            _previewUnavailable = true;
+            HevcVideoExtensionToast.Show(oncePerRun: true);
+            return;
+        }
 
         if (s_activePreview is { } other && !ReferenceEquals(other, this))
         {
@@ -420,7 +449,10 @@ public sealed partial class FavorWallpaperCard : UserControl
             player.PlaybackSession.PositionChanged += PlaybackSession_PositionChanged;
 
             _mediaSource = MediaSource.CreateFromUri(new Uri(path));
-            player.Source = _mediaSource;
+            // 套一层播放项才能监听视频轨打开失败：解不了时不会有 MediaFailed，见 VideoTrack_OpenFailed。
+            _playbackItem = new MediaPlaybackItem(_mediaSource);
+            _playbackItem.VideoTracksChanged += PlaybackItem_VideoTracksChanged;
+            player.Source = _playbackItem;
             MediaPlayerElement preview = EnsurePlayerElement();
             preview.SetMediaPlayer(player);
             preview.Visibility = Visibility.Visible;
@@ -449,6 +481,62 @@ public sealed partial class FavorWallpaperCard : UserControl
     private void Player_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
     {
         DispatcherQueue.TryEnqueue(StopPreview);
+    }
+
+
+    /// <summary>
+    /// 给新加入的视频轨挂上 <see cref="VideoTrack_OpenFailed"/>。
+    /// 不拿 SupportInfo.DecoderStatus 提前下结论，原因见 AppBackground 的同名处理。
+    /// </summary>
+    private void PlaybackItem_VideoTracksChanged(MediaPlaybackItem sender, IVectorChangedEventArgs args)
+    {
+        try
+        {
+            if (args.CollectionChange is CollectionChange.ItemInserted && args.Index < sender.VideoTracks.Count)
+            {
+                sender.VideoTracks[(int)args.Index].OpenFailed += VideoTrack_OpenFailed;
+            }
+        }
+        catch { }
+    }
+
+
+    /// <summary>
+    /// 视频轨打开失败（缺解码器时实测 0xC00D5212）。MediaPlayer 不会触发 MediaFailed，开播后封面一藏就是黑屏，
+    /// 所以停掉预览把封面放回来，写日志并提示。回到 UI 线程后先确认仍是当前预览，已经换了就不管。
+    /// </summary>
+    private void VideoTrack_OpenFailed(VideoTrack sender, VideoTrackOpenFailedEventArgs args)
+    {
+        MediaPlaybackItem? item = null;
+        string? subtype = null;
+        MediaDecoderStatus status = default;
+        try
+        {
+            item = sender.PlaybackItem;
+            subtype = sender.GetEncodingProperties().Subtype;
+            status = sender.SupportInfo.DecoderStatus;
+        }
+        catch { }
+        Exception? error = args.ExtendedError;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (item is null || !ReferenceEquals(item, _playbackItem))
+            {
+                return;
+            }
+            s_logger.LogWarning(error, "Video track of favor wallpaper preview failed to open (subtype {Subtype}, decoder status {Status}): '{File}'", subtype, status, TryGetLocalVideoPath());
+            _previewUnavailable = true;
+            StopPreview();
+            if (string.Equals(subtype, MediaEncodingSubtypes.Hevc, StringComparison.OrdinalIgnoreCase))
+            {
+                HevcVideoExtensionToast.Show(oncePerRun: true);
+            }
+            else if (!s_decodeFailedToastShown)
+            {
+                s_decodeFailedToastShown = true;
+                InAppToast.MainWindow?.Warning(Lang.AppBackground_VideoDecodingFailed);
+            }
+        });
     }
 
 
@@ -504,8 +592,22 @@ public sealed partial class FavorWallpaperCard : UserControl
     {
         MediaPlayer? player = _player;
         MediaSource? source = _mediaSource;
+        MediaPlaybackItem? item = _playbackItem;
         _player = null;
         _mediaSource = null;
+        _playbackItem = null;
+        if (item is not null)
+        {
+            item.VideoTracksChanged -= PlaybackItem_VideoTracksChanged;
+            try
+            {
+                foreach (VideoTrack track in item.VideoTracks)
+                {
+                    track.OpenFailed -= VideoTrack_OpenFailed;
+                }
+            }
+            catch { }
+        }
         if (player is null)
         {
             Player_Preview?.SetMediaPlayer(null);

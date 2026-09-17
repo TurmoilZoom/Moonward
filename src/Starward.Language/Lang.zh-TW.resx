@@ -3935,4 +3935,7 @@
   <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>此影片背景需要VP9影片擴展才能播放，已暫停並顯示靜態圖片。安裝後點擊播放按鈕即可播放。</value>
   </data>
+  <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
+    <value>此影片為HEVC（H.265）編碼，需要安裝HEVC影片擴展才能播放。</value>
+  </data>
 </root>

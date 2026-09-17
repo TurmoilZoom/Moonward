@@ -3935,4 +3935,7 @@ You are welcome to submit exported data to:</value>
   <data name="AppBackground_VideoPausedPleaseInstallTheVP9VideoExtensions" xml:space="preserve">
     <value>Este fondo de video requiere las extensiones de video VP9, por lo que se ha pausado y se muestra una imagen estática. Después de instalarlas, haga clic en Reproducir.</value>
   </data>
+  <data name="AppBackground_HEVCVideoExtensionsRequired" xml:space="preserve">
+    <value>Este video está codificado en HEVC (H.265). Instale las extensiones de video HEVC para reproducirlo.</value>
+  </data>
 </root>
