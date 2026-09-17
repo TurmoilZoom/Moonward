@@ -85,7 +85,7 @@ public sealed partial class BackgroundViewPage : PageBase
             if (Directory.Exists(folder))
             {
                 string[] files = Directory.GetFiles(folder);
-                var result = files.Select(x => new BackgroundFileItem(x));
+                var result = files.Select(TryCreateBackgroundFileItem).OfType<BackgroundFileItem>();
                 if (RadioMenuFlyoutItem_Filter_Image.IsChecked)
                 {
                     result = result.Where(x => !x.IsVideo);
@@ -117,6 +117,24 @@ public sealed partial class BackgroundViewPage : PageBase
     }
 
 
+    /// <summary>
+    /// 为 bg 目录中的文件创建列表项。
+    /// </summary>
+    /// <param name="file">文件完整路径。</param>
+    /// <returns>列表项；文件在枚举之后被删掉（如转码服务校验后删除原片）或读不了时返回 null。</returns>
+    private static BackgroundFileItem? TryCreateBackgroundFileItem(string file)
+    {
+        try
+        {
+            return new BackgroundFileItem(file);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+
 
     [RelayCommand]
     private async Task OpenFolderAsync()
@@ -139,15 +157,19 @@ public sealed partial class BackgroundViewPage : PageBase
     [RelayCommand]
     private async Task DeleteDuplicateBgAsync()
     {
+        string folder = Path.Join(AppConfig.CacheFolder, "bg");
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+        int count = 0;
         try
         {
-            string folder = Path.Join(AppConfig.CacheFolder, "bg");
-            if (Directory.Exists(folder))
+            string[] files = Directory.GetFiles(folder);
+            ConcurrentDictionary<string, bool> dict = new();
+            await Parallel.ForEachAsync(files, async (file, _) =>
             {
-                int count = 0;
-                string[] files = Directory.GetFiles(folder);
-                ConcurrentDictionary<string, bool> dict = new();
-                await Parallel.ForEachAsync(files, async (file, _) =>
+                try
                 {
                     string key = await GetDuplicateKeyAsync(file);
                     if (dict.TryAdd(key, true))
@@ -156,15 +178,24 @@ public sealed partial class BackgroundViewPage : PageBase
                     }
                     File.Delete(file);
                     Interlocked.Increment(ref count);
-                });
-                DeleteInfoText = string.Format(Lang.BackgroundViewPage_0DuplicateFileSHasBeenDeleted, count);
-                LoadBackgroundItems();
-                WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
-            }
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    // 刚被转码服务删掉的原片、下载中被独占的临时文件等：只跳过这一个，别让它把整次去重打断
+                    _logger.LogWarning(ex, "Skip background file '{file}' when deleting duplicates.", file);
+                }
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Delete duplicate background files.");
+        }
+        finally
+        {
+            // 出错前可能已经删了一部分，照样刷新列表，并让首页重新解析背景文件
+            DeleteInfoText = string.Format(Lang.BackgroundViewPage_0DuplicateFileSHasBeenDeleted, count);
+            LoadBackgroundItems();
+            WeakReferenceMessenger.Default.Send(new BackgroundChangedMessage());
         }
     }
 
