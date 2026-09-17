@@ -97,6 +97,9 @@ if ($prev) { git log "$prev..HEAD" --oneline } else { git log --oneline -20 }
 ```powershell
 git log "$prev..$target" --pretty=format:"%h|%s|%an|%ae" --no-merges
 git diff "$prev..$target" --stat
+# issue 链接用：引用了 issue 的提交，以及区间内来自上游 Scighost/Starward 的提交（后者不加链接）
+git log "$prev..$target" --no-merges --grep="#[0-9]" --pretty=format:"%h|%s%n%b---"
+git log "$(git merge-base $target upstream/main)" "^$prev" --no-merges --pretty=format:"%h|%s|%an"
 ```
 
 产出两段文本：
@@ -105,6 +108,8 @@ git diff "$prev..$target" --stat
 2. **完整 Markdown 正文**（直接从 `### 新功能` 等分类起；**无**首部大标题/日期；**无 emoji**）
 
 正文结构与文风严格遵循 release-notes（新功能 / 问题修复 / 体验与性能 / 重要变更 / 文档与其他；无内容的组省略；面向普通用户）。
+
+条目末尾按 release-notes「Issue 链接」附上 issue 超链接：**只链接本仓库 issue**，写成 `[#N](https://github.com/TurmoilZoom/Moonward/issues/N)`；上游 Starward 提交的编号不加链接。
 
 ### 5. 写入 annotated tag 并创建
 
@@ -214,5 +219,6 @@ gh release edit <tag> --notes-file <path>
 - tag 注释只写三五行要点，完整 notes 只出现在对话里（CI 读不到）  
 - 在 notes 正文首部写 `## 版本（日期）` 或「与上一版相比…」导语（直接分类即可）  
 - 不遵循 release-notes 的分组与「无 emoji / 面向用户」文风  
+- 条目末尾漏掉本仓库 issue 链接、写成裸 `#N`，或给上游 Starward 提交的编号加链接  
 - 在汇报里写「已发布」但 origin push 实际失败  
 - 修改业务源码或 `global.json` / NuGet 版本来「配合发版」（版本号由 tag / CI 的 `-p:Version=` 注入）

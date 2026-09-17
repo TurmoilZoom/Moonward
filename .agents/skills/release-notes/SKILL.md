@@ -69,8 +69,14 @@ git log <old>..<new> --pretty=format:"%h|%s|%an"
 # 文件级统计（辅助判断影响面，不写进用户正文细表）
 git diff <old>..<new> --stat
 
-# 远程（可选 compare 链接）
+# 远程（compare 链接、issue 链接的仓库地址）
 git remote get-url origin
+
+# 引用了 issue 的提交（标题末尾 #N，正文可能有 Closes #N），用于条目末尾的 issue 链接
+git log <old>..<new> --no-merges --grep="#[0-9]" --pretty=format:"%h|%s%n%b---"
+
+# 区间内来自上游 Scighost/Starward 的提交：其 #N 属于上游仓库，不加链接（无 upstream 远程则跳过）
+git log "$(git merge-base <new> upstream/main)" "^<old>" --no-merges --pretty=format:"%h|%s|%an"
 ```
 
 若 commit 很多（例如 >80），优先按 Conventional Commits 前缀与路径聚类，再抽样读关键提交的 body（`git show -s --format=%B <hash>`），不要把上百条标题丢给用户。
@@ -101,6 +107,22 @@ git remote get-url origin
 - 破坏性变更单独标出：**重要变更**（需重装、改设置、行为不兼容等）。
 - **禁止**在输出 Markdown 中使用任何 emoji、图标符号（如 ✨ 🐛 ⚡ 🔧 📝 📦 ⚠️ 等）。
 
+#### Issue 链接
+
+条目**末尾**附上对应的 issue 超链接，与 commit-push 在提交标题末尾写的 `#N` 对应：
+
+- **只链接本仓库（origin，即 `TurmoilZoom/Moonward`）的 issue**。上游 Scighost/Starward 合入的提交（上面「上游提交」命令列出的，常见 `(#1933)`）编号属于上游仓库：**不加链接**，也不要链到本仓库。
+- 某条说明合并了哪几个提交，就收集这些提交标题末尾（或正文 `Closes #N`）的编号，去重、按编号升序、空格分隔；来源提交都没有编号的条目不加。
+- 写成**完整 URL 的 Markdown 链接** `[#N](https://github.com/<owner>/<repo>/issues/N)`（仓库地址由 `git remote get-url origin` 规范化）：tag 注释与 CNB 不会把裸 `#N` 识别成链接。编号是 PR 时 GitHub 会自动跳到 `/pull/N`。
+- 紧跟句号之后，不加空格；多个链接之间一个空格：
+
+  ```markdown
+  - 修复首次播放等待转码期间切换背景可能被旧视频覆盖的问题。[#18](https://github.com/TurmoilZoom/Moonward/issues/18)
+  - 月报自动更新配置改为月份切换，界面更简洁。[#16](https://github.com/TurmoilZoom/Moonward/issues/16) [#18](https://github.com/TurmoilZoom/Moonward/issues/18)
+  ```
+
+- 只认提交里真实写出的 issue 引用；颜色值等非引用的 `#数字` 忽略。**不要**根据改动内容猜编号。
+
 ### 4. 输出 Markdown
 
 默认**打印到对话**；若用户要求写入文件，再写入指定路径（如 `RELEASE_NOTES.md` 或 `docs/releases/<tag>.md`），**先确认路径**再写，避免覆盖未约定文件。
@@ -110,11 +132,12 @@ git remote get-url origin
 ```markdown
 ### 新功能
 
-- …
+- …。[#16](https://github.com/TurmoilZoom/Moonward/issues/16)
 
 ### 问题修复
 
-- …
+- …。[#18](https://github.com/TurmoilZoom/Moonward/issues/18)
+- …（来源提交无本仓库 issue 编号则不加链接）
 
 ### 体验与性能
 
@@ -224,5 +247,6 @@ git for-each-ref "refs/tags/$version" --format="%(contents:body)"
 - 不要把 `git log` 原样当发布说明
 - 不要写只有开发者能懂的重构清单（除非用户明确要求技术版）
 - 不要在标题或正文中使用 emoji / 图标
+- 不要漏掉条目末尾的本仓库 issue 链接，也不要写成裸 `#N`；不要给上游 Starward 提交的编号加链接；不要编造编号
 - **不要**在正文首部生成 `## 版本号（日期）` 或「与上一版相比…」导语；直接分类总结
 - 不要把完整用户向 notes 只打印在对话里却不写进 tag（tag-release 场景）
