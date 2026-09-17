@@ -19,7 +19,7 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <ScrollViewer Grid.Column="0">
-            <StackPanel Padding="0,0,24,0">
+            <StackPanel x:Name="StackPanel_About" Padding="0,0,24,0">
 
                 <TextBlock FontSize="24"
                            FontWeight="Bold"
@@ -162,7 +162,8 @@
         </Border>
 
         <!--  致谢卡片：功能 / 设计参考的开源项目，固定在页面右侧顶部。项目名为专有名词故用字面量，不进 resx；仅标题与说明本地化。声明在 Lottie 之后以确保重叠时卡片在上层  -->
-        <Border Grid.Column="1"
+        <Border x:Name="Border_Acknowledgements"
+                Grid.Column="1"
                 Width="280"
                 Padding="16,12,16,14"
                 VerticalAlignment="Top"

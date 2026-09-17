@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using Windows.UI.ViewManagement;
 
@@ -62,6 +63,11 @@ public static class EntranceAnimation
         {
             return;
         }
+        if (page is IEntranceAnimationElements provider)
+        {
+            Play(provider.GetEntranceAnimationElements());
+            return;
+        }
         Panel? panel = ResolveContentPanel(page.Content);
         if (panel is not null)
         {
@@ -79,32 +85,30 @@ public static class EntranceAnimation
                             int durationMs = DefaultDurationMs,
                             int staggerMs = DefaultStaggerMs)
     {
-        if (panel is null || panel.Children.Count == 0)
+        if (panel is null)
         {
             return;
         }
+        Play(panel.Children, delayMs, fromOffsetY, durationMs, staggerMs);
+    }
 
-        // 关闭系统动画时直接返回，保持内容默认可见。
-        if (!AnimationsEnabled())
-        {
-            return;
-        }
 
-        Compositor compositor = ElementCompositionPreview.GetElementVisual(panel).Compositor;
-        // Fluent 减速曲线
-        CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0f, 0f), new Vector2(0f, 1f));
-        int fadeDurationMs = Math.Max(1, (int)(durationMs * FadeFraction));
-        int start = delayMs;
-
-        foreach (UIElement child in panel.Children)
-        {
-            if (child is null)
-            {
-                continue;
-            }
-            Animate(compositor, child, new Vector3(0, fromOffsetY, 0), start, durationMs, fadeDurationMs, ease);
-            start += staggerMs;
-        }
+    /// <summary>
+    /// 按给定顺序对一组元素逐个播放「上滑 + 淡入」的错峰级联动画。
+    /// 用于内容分散在多个容器中的页面（如「关于」页：左侧滚动区 + 右侧致谢卡片），由调用方决定出场顺序。
+    /// </summary>
+    /// <param name="elements">参与级联的元素，按出场顺序排列；null 项跳过且不占错峰位。</param>
+    /// <param name="delayMs">首个元素的起始延迟（毫秒）。</param>
+    /// <param name="fromOffsetY">由下方上滑的初始位移量（像素）。</param>
+    /// <param name="durationMs">位移动画时长（毫秒）。</param>
+    /// <param name="staggerMs">相邻元素之间的错峰间隔（毫秒）。</param>
+    public static void Play(IEnumerable<UIElement?> elements,
+                            int delayMs = DefaultDelayMs,
+                            float fromOffsetY = DefaultFromOffsetY,
+                            int durationMs = DefaultDurationMs,
+                            int staggerMs = DefaultStaggerMs)
+    {
+        PlayCascade(elements, new Vector3(0, fromOffsetY, 0), delayMs, durationMs, staggerMs);
     }
 
 
@@ -117,6 +121,11 @@ public static class EntranceAnimation
     {
         if (page is null)
         {
+            return;
+        }
+        if (page is IEntranceAnimationElements provider)
+        {
+            PlayCascade(provider.GetEntranceAnimationElements(), new Vector3(DefaultFromOffsetX, 0, 0), DefaultDelayMs, DefaultDurationMs, DefaultStaggerMs);
             return;
         }
         Panel? panel = ResolveContentPanel(page.Content);
@@ -132,7 +141,7 @@ public static class EntranceAnimation
     /// <list type="bullet">
     /// <item><c>ScrollViewer &gt; Panel</c>：与原先一致，动画内容区直接子项。</item>
     /// <item>根为 <see cref="Panel"/> 且仅有「一个可交互的 <c>ScrollViewer &gt; Panel</c> + 装饰层」时
-    /// （装饰层 <see cref="UIElement.IsHitTestVisible"/> 为 false，如「关于」页右下角小猫）：
+    /// （装饰层 <see cref="UIElement.IsHitTestVisible"/> 为 false）：
     /// 深入到 ScrollViewer 内的 Panel，避免把整页叠层 Grid 的直接子项（整块 ScrollViewer / 装饰）当成级联目标。</item>
     /// <item>其它 Panel 根（如战绩子页：工具栏 + ScrollViewer 并列）：仍动画根面板直接子项，行为与改前一致。</item>
     /// </list>
@@ -189,7 +198,29 @@ public static class EntranceAnimation
                                      int durationMs = DefaultDurationMs,
                                      int staggerMs = DefaultStaggerMs)
     {
-        if (panel is null || panel.Children.Count == 0)
+        if (panel is null)
+        {
+            return;
+        }
+        PlayCascade(panel.Children, new Vector3(fromOffsetX, 0, 0), delayMs, durationMs, staggerMs);
+    }
+
+
+    /// <summary>
+    /// 级联动画公共实现：按顺序对元素播放「位移 + 淡入」，每个元素比前一个晚 <paramref name="staggerMs"/> 出场。
+    /// </summary>
+    /// <param name="elements">参与级联的元素；为 null 或为空时直接返回，null 项跳过。</param>
+    /// <param name="fromOffset">起始位移（Translation）。</param>
+    /// <param name="delayMs">首个元素的起始延迟（毫秒）。</param>
+    /// <param name="durationMs">位移动画时长（毫秒）。</param>
+    /// <param name="staggerMs">相邻元素之间的错峰间隔（毫秒）。</param>
+    private static void PlayCascade(IEnumerable<UIElement?>? elements,
+                                    Vector3 fromOffset,
+                                    int delayMs,
+                                    int durationMs,
+                                    int staggerMs)
+    {
+        if (elements is null)
         {
             return;
         }
@@ -200,19 +231,24 @@ public static class EntranceAnimation
             return;
         }
 
-        Compositor compositor = ElementCompositionPreview.GetElementVisual(panel).Compositor;
-        // Fluent 减速曲线
-        CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0f, 0f), new Vector2(0f, 1f));
+        Compositor? compositor = null;
+        CubicBezierEasingFunction? ease = null;
         int fadeDurationMs = Math.Max(1, (int)(durationMs * FadeFraction));
         int start = delayMs;
 
-        foreach (UIElement child in panel.Children)
+        foreach (UIElement? child in elements)
         {
             if (child is null)
             {
                 continue;
             }
-            Animate(compositor, child, new Vector3(fromOffsetX, 0, 0), start, durationMs, fadeDurationMs, ease);
+            if (compositor is null)
+            {
+                compositor = ElementCompositionPreview.GetElementVisual(child).Compositor;
+                // Fluent 减速曲线
+                ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0f, 0f), new Vector2(0f, 1f));
+            }
+            Animate(compositor, child, fromOffset, start, durationMs, fadeDurationMs, ease!);
             start += staggerMs;
         }
     }
@@ -296,4 +332,20 @@ public static class EntranceAnimation
             visual.Properties.InsertVector3("Translation", Vector3.Zero);
         }
     }
+}
+
+
+/// <summary>
+/// 页面自行指定入场级联的元素与顺序。
+/// <see cref="EntranceAnimation.Play(Page)"/> / <see cref="EntranceAnimation.PlayFromRight(Page)"/> 遇到实现此接口的页面时，
+/// 不再按 <c>ScrollViewer &gt; Panel</c> 规则推断内容根，直接对返回的元素逐个播放。
+/// 适用于内容分散在多个容器、且含可交互叠层的页面（推断规则会把整块滚动区当成一个子项，失去逐项错峰）。
+/// </summary>
+public interface IEntranceAnimationElements
+{
+    /// <summary>
+    /// 返回参与入场级联的元素，按出场顺序排列。在页面 Loaded 之后调用。
+    /// </summary>
+    /// <returns>参与级联的元素序列；null 项会被跳过。</returns>
+    IEnumerable<UIElement?> GetEntranceAnimationElements();
 }

@@ -1,17 +1,20 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Starward.Controls;
 using Starward.Features.Feedback;
 using Starward.Features.Update;
 using Starward.Frameworks;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 
 namespace Starward.Features.Setting;
 
-public sealed partial class AboutSetting : PageBase
+public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
 {
 
 
@@ -33,6 +36,25 @@ public sealed partial class AboutSetting : PageBase
     protected override void OnLoaded()
     {
         Lottie_AboutLogo.SetProgress(0);
+    }
+
+
+    /// <summary>
+    /// 入场级联：左侧逐项上滑，致谢卡片紧随标题出场。
+    /// 根 Grid 上并列可交互的致谢卡片与小猫命中层，通用推断会把整块滚动区当成一项，故在此显式列出；小猫为装饰，保持静止。
+    /// </summary>
+    /// <returns>按出场顺序排列的元素。</returns>
+    public IEnumerable<UIElement?> GetEntranceAnimationElements()
+    {
+        var children = StackPanel_About.Children;
+        for (int i = 0; i < children.Count; i++)
+        {
+            yield return children[i];
+            if (i == 0)
+            {
+                yield return Border_Acknowledgements;
+            }
+        }
     }
 
 
