@@ -45,6 +45,18 @@ internal static class DatabaseService
     }
 
 
+    /// <summary>
+    /// 创建不进连接池的连接。需要 ATTACH 其他库时用它：池化连接会带着附加库被别处复用，关闭时也不会真正释放附加的文件。
+    /// </summary>
+    /// <returns>已打开的连接，关闭即释放全部附加库。</returns>
+    public static SqliteConnection CreateUnpooledConnection()
+    {
+        var con = new SqliteConnection($"{_connectionString}Pooling=False;");
+        con.Open();
+        return con;
+    }
+
+
 
     public static void SetDatabase(string folder)
     {

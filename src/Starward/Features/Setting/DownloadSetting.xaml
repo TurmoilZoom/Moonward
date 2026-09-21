@@ -11,7 +11,7 @@
              mc:Ignorable="d">
 
     <ScrollViewer>
-        <StackPanel>
+        <StackPanel Padding="{StaticResource SettingPageContentPadding}">
 
 
             <!--  默认游戏安装路径  -->

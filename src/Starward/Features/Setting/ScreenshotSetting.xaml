@@ -13,7 +13,7 @@
 
 
     <ScrollViewer Background="Transparent">
-        <StackPanel Padding="0,0,24,24">
+        <StackPanel Padding="{StaticResource SettingPageContentPadding}">
 
             <!--  游戏截图  -->
             <TextBlock FontSize="20" Text="{x:Bind lang:Lang.MainPage_GameScreenshot}" />

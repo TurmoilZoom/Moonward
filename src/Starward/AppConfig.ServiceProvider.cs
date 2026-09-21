@@ -26,6 +26,7 @@ using Starward.Features.GameRecord;
 using Starward.Features.GameRecord.AutoRefresh;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Features.HoYoPlay;
+using Starward.Features.LanSync;
 using Starward.Features.PlayTime;
 using Starward.Features.RPC;
 using Starward.Features.Screenshot;
@@ -77,6 +78,8 @@ public static partial class AppConfig
             sc.AddSingleton<GamePackageService>();
             sc.AddSingleton<PlayTimeRecordService>();
             sc.AddSingleton<PlayTimeStatsService>();
+            // 局域网同步：共享本机快照 / 从其他设备拉取并增量合并（不含账号 Cookie）
+            sc.AddSingleton<LanSyncService>();
             sc.AddSingleton<GameNoticeService>();
 
             sc.AddSingleton<GenshinGachaClient>();

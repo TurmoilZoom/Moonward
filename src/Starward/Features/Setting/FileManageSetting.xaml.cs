@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
 using SharpSevenZip;
 using Starward.Features.Database;
+using Starward.Features.LanSync;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
@@ -183,7 +184,12 @@ public sealed partial class FileManageSetting : PageBase
 
 
 
-    public string LastDatabaseBackupTime { get; set => SetProperty(ref field, value); }
+    /// <summary>备份卡片的说明：有备份后显示上次备份时间，备份失败时显示错误。</summary>
+    public string BackupDescription { get; set => SetProperty(ref field, value); } = Lang.FileSettingPage_BackupDatabaseDesc;
+
+
+    /// <summary>上次备份的文件仍在，可以打开所在位置。</summary>
+    public bool HasLastBackup { get; set => SetProperty(ref field, value); }
 
 
     private void GetLastBackupTime()
@@ -195,7 +201,8 @@ public sealed partial class FileManageSetting : PageBase
                 file = Path.Join(AppConfig.UserDataFolder, "DatabaseBackup", file);
                 if (File.Exists(file))
                 {
-                    LastDatabaseBackupTime = $"{Lang.SettingPage_LastBackup}  {time:yyyy-MM-dd HH:mm:ss}";
+                    BackupDescription = $"{Lang.SettingPage_LastBackup}  {time:yyyy-MM-dd HH:mm:ss}";
+                    HasLastBackup = true;
                 }
                 else
                 {
@@ -227,13 +234,14 @@ public sealed partial class FileManageSetting : PageBase
                     DatabaseService.SetValue("LastBackupDatabase", Path.GetFileName(archive), time);
                     File.Delete(file);
                 });
-                LastDatabaseBackupTime = $"{Lang.SettingPage_LastBackup}  {time:yyyy-MM-dd HH:mm:ss}";
+                BackupDescription = $"{Lang.SettingPage_LastBackup}  {time:yyyy-MM-dd HH:mm:ss}";
+                HasLastBackup = true;
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Backup database");
-            LastDatabaseBackupTime = ex.Message;
+            BackupDescription = ex.Message;
         }
     }
 
@@ -272,6 +280,50 @@ public sealed partial class FileManageSetting : PageBase
 
 
 
+
+
+
+    #endregion
+
+
+
+
+    #region 局域网同步
+
+
+
+    /// <summary>
+    /// 从局域网内其他设备同步记录到本机。
+    /// </summary>
+    [RelayCommand]
+    private async Task SyncFromLanDeviceAsync()
+    {
+        try
+        {
+            await new LanSyncPullDialog { XamlRoot = this.XamlRoot }.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Show LAN sync pull dialog");
+        }
+    }
+
+
+    /// <summary>
+    /// 共享本机数据，对话框打开期间允许其他设备同步。
+    /// </summary>
+    [RelayCommand]
+    private async Task ShareToLanDevicesAsync()
+    {
+        try
+        {
+            await new LanSyncShareDialog { XamlRoot = this.XamlRoot }.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Show LAN sync share dialog");
+        }
+    }
 
 
 

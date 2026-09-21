@@ -2160,9 +2160,6 @@
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Moonward，启动！</value>
   </data>
-  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
-    <value>迁移并启动</value>
-  </data>
   <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
     <value>检测到旧版本数据，升级后需要将其迁移到新的数据文件夹才能继续使用。当前数据位置：</value>
   </data>
@@ -2176,7 +2173,7 @@
     <value>需要管理员权限才能完成迁移</value>
   </data>
   <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
-    <value>从 Starward 导入数据</value>
+    <value>从 Starward 导入</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
     <value>可使用自动识别的位置，或指定数据目录、便携版安装目录。导入前请完全退出 Starward，并确保目标磁盘空间充足；导入过程中请勿关闭本程序，也不要拔出或断开相关磁盘。</value>
@@ -4037,5 +4034,167 @@
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
     <value>对所有配置文件生效，与自定义启动程序互斥</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="LanSync_Title" xml:space="preserve">
+    <value>局域网同步</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDevice" xml:space="preserve">
+    <value>从其他设备同步</value>
+  </data>
+  <data name="LanSync_ShareThisDevice" xml:space="preserve">
+    <value>共享本机数据</value>
+  </data>
+  <data name="LanSync_ShareDialogDescription" xml:space="preserve">
+    <value>在另一台设备的 Moonward 中点击「{0}」，选择本机并输入下方验证码。关闭此窗口即停止共享。</value>
+  </data>
+  <data name="LanSync_VerificationCode" xml:space="preserve">
+    <value>验证码</value>
+  </data>
+  <data name="LanSync_ThisDevice" xml:space="preserve">
+    <value>本机</value>
+  </data>
+  <data name="LanSync_WaitingForConnection" xml:space="preserve">
+    <value>等待另一台设备连接…</value>
+  </data>
+  <data name="LanSync_SentToDevice" xml:space="preserve">
+    <value>已向 {0}（{1}）发送数据。</value>
+  </data>
+  <data name="LanSync_TooManyAttempts" xml:space="preserve">
+    <value>验证码错误次数过多，已停止共享。重新打开此窗口可获取新的验证码。</value>
+  </data>
+  <data name="LanSync_StartSharingFailed" xml:space="preserve">
+    <value>无法开始共享：{0}</value>
+  </data>
+  <data name="LanSync_DiscoveryUnavailable" xml:space="preserve">
+    <value>自动发现不可用，请在另一台设备上手动输入本机地址。</value>
+  </data>
+  <data name="LanSync_FirewallHint" xml:space="preserve">
+    <value>若另一台设备找不到本机，请确认两台设备在同一网络，且 Windows 防火墙允许 Moonward 在专用网络中通信。</value>
+  </data>
+  <data name="LanSync_StopSharing" xml:space="preserve">
+    <value>停止共享</value>
+  </data>
+  <data name="LanSync_SyncDialogDescription" xml:space="preserve">
+    <value>只会把对方有、本机没有的记录添加到本机，两台设备上已有的记录都不会被修改或删除。账号登录信息不会同步。同步前会自动备份本机数据库。</value>
+  </data>
+  <data name="LanSync_OpenShareFirst" xml:space="preserve">
+    <value>请先在另一台设备上打开「{0} → {1}」，点击「{2}」。</value>
+  </data>
+  <data name="LanSync_Devices" xml:space="preserve">
+    <value>局域网内的设备</value>
+  </data>
+  <data name="LanSync_NoDeviceFound" xml:space="preserve">
+    <value>未找到设备。请确认另一台设备已开启共享，或在下方手动输入地址。</value>
+  </data>
+  <data name="LanSync_ManualAddress" xml:space="preserve">
+    <value>或手动输入地址</value>
+  </data>
+  <data name="LanSync_ManualAddressPlaceholder" xml:space="preserve">
+    <value>IP 或计算机名，如 192.168.1.10</value>
+  </data>
+  <data name="LanSync_CodePlaceholder" xml:space="preserve">
+    <value>6 位数字</value>
+  </data>
+  <data name="LanSync_DataToSync" xml:space="preserve">
+    <value>同步内容</value>
+  </data>
+  <data name="LanSync_Category_Gacha" xml:space="preserve">
+    <value>抽卡记录</value>
+  </data>
+  <data name="LanSync_Category_GameRecord" xml:space="preserve">
+    <value>米游社 / HoYoLAB 工具箱数据</value>
+  </data>
+  <data name="LanSync_Category_PlayTime" xml:space="preserve">
+    <value>游戏时长</value>
+  </data>
+  <data name="LanSync_Sync" xml:space="preserve">
+    <value>同步</value>
+  </data>
+  <data name="LanSync_Receiving" xml:space="preserve">
+    <value>正在接收数据… {0}</value>
+  </data>
+  <data name="LanSync_Merging" xml:space="preserve">
+    <value>正在将记录添加到本机…</value>
+  </data>
+  <data name="LanSync_Completed" xml:space="preserve">
+    <value>同步完成，新增抽卡记录 {0} 条、工具箱记录 {1} 条、游戏时长 {2} 段。</value>
+  </data>
+  <data name="LanSync_NothingNew" xml:space="preserve">
+    <value>同步完成，本机已包含对方的全部记录。</value>
+  </data>
+  <data name="LanSync_SelectDeviceFirst" xml:space="preserve">
+    <value>请选择设备或输入地址。</value>
+  </data>
+  <data name="LanSync_EnterCodeFirst" xml:space="preserve">
+    <value>请输入 6 位验证码。</value>
+  </data>
+  <data name="LanSync_SelectDataFirst" xml:space="preserve">
+    <value>请至少选择一类数据。</value>
+  </data>
+  <data name="LanSync_Error_InvalidAddress" xml:space="preserve">
+    <value>地址无效。</value>
+  </data>
+  <data name="LanSync_Error_ConnectFailed" xml:space="preserve">
+    <value>无法连接到 {0}。请确认对方已开启共享，且两台设备在同一网络。</value>
+  </data>
+  <data name="LanSync_Error_InvalidCode" xml:space="preserve">
+    <value>验证码错误。</value>
+  </data>
+  <data name="LanSync_Error_Locked" xml:space="preserve">
+    <value>验证码错误次数过多，对方已停止共享。请在对方设备上重新开启共享以获取新的验证码。</value>
+  </data>
+  <data name="LanSync_Error_ProtocolMismatch" xml:space="preserve">
+    <value>两台设备的 Moonward 版本不兼容，请都更新到最新版本后再试。</value>
+  </data>
+  <data name="LanSync_Error_Failed" xml:space="preserve">
+    <value>同步失败：{0}</value>
+  </data>
+  <data name="WelcomeView_DoNotImport" xml:space="preserve">
+    <value>不导入</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDevice" xml:space="preserve">
+    <value>从局域网设备同步</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDeviceDescription" xml:space="preserve">
+    <value>点击「{0}」后将搜索局域网内的设备。请先在另一台设备上打开「{1} → {2}」，点击「{3}」。会同步抽卡记录、工具箱数据和游戏时长，不会同步账号登录信息。</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectStarwardFolder" xml:space="preserve">
+    <value>请先选择 Starward 文件夹。</value>
+  </data>
+  <data name="LanSync_SharedData" xml:space="preserve">
+    <value>共享内容</value>
+  </data>
+  <data name="LanSync_Counts" xml:space="preserve">
+    <value>抽卡记录 {0} 条 · 工具箱记录 {1} 条 · 游戏时长 {2} 段</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDeviceDesc" xml:space="preserve">
+    <value>把局域网内另一台设备上有、本机没有的记录添加到本机</value>
+  </data>
+  <data name="LanSync_ShareThisDeviceDesc" xml:space="preserve">
+    <value>共享期间，其他设备输入验证码即可从本机同步；不含账号登录信息</value>
+  </data>
+  <data name="LanSync_StartSharing" xml:space="preserve">
+    <value>开始共享</value>
+  </data>
+  <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
+    <value>备份与重置</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
+    <value>将数据库压缩备份到数据文件夹下的 DatabaseBackup 目录</value>
+  </data>
+  <data name="FileSettingPage_BackupNow" xml:space="preserve">
+    <value>立即备份</value>
+  </data>
+  <data name="FileSettingPage_DeleteAllSettingsDesc" xml:space="preserve">
+    <value>清空所有设置项并重启软件，记录数据和已登录的账号不受影响</value>
+  </data>
+  <data name="WelcomeView_ImportExistingData" xml:space="preserve">
+    <value>导入已有数据</value>
+  </data>
+  <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
+    <value>之后也可以在「{0} → {1}」中从局域网内其他设备同步。</value>
   </data>
 </root>

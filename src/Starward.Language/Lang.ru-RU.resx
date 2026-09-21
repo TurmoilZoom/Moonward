@@ -2103,9 +2103,6 @@
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Moonward, начинаем!</value>
   </data>
-  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
-    <value>Мигрировать и запустить</value>
-  </data>
   <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
     <value>Обнаружены данные предыдущей версии. Их нужно перенести в новую папку данных перед продолжением. Текущее расположение:</value>
   </data>
@@ -2119,7 +2116,7 @@
     <value>Для завершения миграции нужны права администратора</value>
   </data>
   <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
-    <value>Import data from Starward</value>
+    <value>Импорт из Starward</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
     <value>A detected location can be used, or a data folder or portable install folder can be specified. Fully quit Starward before importing, and make sure the destination disk has enough free space. Do not close this app, and do not unplug or disconnect the disks involved, until import finishes.</value>
@@ -3969,5 +3966,167 @@ ChatGPT может допускать ошибки. Проверьте важн�
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
     <value>Действует для всех профилей и не сочетается с пользовательской программой запуска.</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="LanSync_Title" xml:space="preserve">
+    <value>Синхронизация по локальной сети</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDevice" xml:space="preserve">
+    <value>Синхронизировать с другого устройства</value>
+  </data>
+  <data name="LanSync_ShareThisDevice" xml:space="preserve">
+    <value>Открыть доступ к данным этого устройства</value>
+  </data>
+  <data name="LanSync_ShareDialogDescription" xml:space="preserve">
+    <value>На другом устройстве выберите в Moonward «{0}», укажите это устройство и введите код ниже. Общий доступ прекратится, когда вы закроете это окно.</value>
+  </data>
+  <data name="LanSync_VerificationCode" xml:space="preserve">
+    <value>Код подтверждения</value>
+  </data>
+  <data name="LanSync_ThisDevice" xml:space="preserve">
+    <value>Это устройство</value>
+  </data>
+  <data name="LanSync_WaitingForConnection" xml:space="preserve">
+    <value>Ожидание другого устройства…</value>
+  </data>
+  <data name="LanSync_SentToDevice" xml:space="preserve">
+    <value>Данные отправлены на {0} ({1}).</value>
+  </data>
+  <data name="LanSync_TooManyAttempts" xml:space="preserve">
+    <value>Слишком много неверных кодов, общий доступ остановлен. Откройте это окно снова, чтобы получить новый код.</value>
+  </data>
+  <data name="LanSync_StartSharingFailed" xml:space="preserve">
+    <value>Не удалось открыть общий доступ: {0}</value>
+  </data>
+  <data name="LanSync_DiscoveryUnavailable" xml:space="preserve">
+    <value>Автоматический поиск недоступен. Введите адрес этого устройства вручную на другом устройстве.</value>
+  </data>
+  <data name="LanSync_FirewallHint" xml:space="preserve">
+    <value>Если другое устройство не находит это, убедитесь, что оба устройства в одной сети, а брандмауэр Windows разрешает Moonward работу в частных сетях.</value>
+  </data>
+  <data name="LanSync_StopSharing" xml:space="preserve">
+    <value>Закрыть доступ</value>
+  </data>
+  <data name="LanSync_SyncDialogDescription" xml:space="preserve">
+    <value>На это устройство добавляются только записи, которые есть на другом устройстве и отсутствуют здесь; существующие записи на обоих устройствах не изменяются и не удаляются. Данные для входа в аккаунты не синхронизируются. Перед синхронизацией создаётся резервная копия базы данных этого устройства.</value>
+  </data>
+  <data name="LanSync_OpenShareFirst" xml:space="preserve">
+    <value>Сначала на другом устройстве откройте «{0} → {1}» и выберите «{2}».</value>
+  </data>
+  <data name="LanSync_Devices" xml:space="preserve">
+    <value>Устройства в сети</value>
+  </data>
+  <data name="LanSync_NoDeviceFound" xml:space="preserve">
+    <value>Устройства не найдены. Убедитесь, что на другом устройстве открыт общий доступ, или введите его адрес ниже.</value>
+  </data>
+  <data name="LanSync_ManualAddress" xml:space="preserve">
+    <value>Или введите адрес</value>
+  </data>
+  <data name="LanSync_ManualAddressPlaceholder" xml:space="preserve">
+    <value>IP или имя компьютера, например 192.168.1.10</value>
+  </data>
+  <data name="LanSync_CodePlaceholder" xml:space="preserve">
+    <value>6 цифр</value>
+  </data>
+  <data name="LanSync_DataToSync" xml:space="preserve">
+    <value>Что синхронизировать</value>
+  </data>
+  <data name="LanSync_Category_Gacha" xml:space="preserve">
+    <value>Записи гачи</value>
+  </data>
+  <data name="LanSync_Category_GameRecord" xml:space="preserve">
+    <value>Данные инструментов Miyoushe / HoYoLAB</value>
+  </data>
+  <data name="LanSync_Category_PlayTime" xml:space="preserve">
+    <value>Время в игре</value>
+  </data>
+  <data name="LanSync_Sync" xml:space="preserve">
+    <value>Синхронизировать</value>
+  </data>
+  <data name="LanSync_Receiving" xml:space="preserve">
+    <value>Получение данных… {0}</value>
+  </data>
+  <data name="LanSync_Merging" xml:space="preserve">
+    <value>Добавление записей на это устройство…</value>
+  </data>
+  <data name="LanSync_Completed" xml:space="preserve">
+    <value>Синхронизация завершена. Добавлено записей гачи: {0}, записей инструментов: {1}, игровых сеансов: {2}.</value>
+  </data>
+  <data name="LanSync_NothingNew" xml:space="preserve">
+    <value>Синхронизация завершена. На этом устройстве уже есть все записи другого устройства.</value>
+  </data>
+  <data name="LanSync_SelectDeviceFirst" xml:space="preserve">
+    <value>Выберите устройство или введите адрес.</value>
+  </data>
+  <data name="LanSync_EnterCodeFirst" xml:space="preserve">
+    <value>Введите 6-значный код подтверждения.</value>
+  </data>
+  <data name="LanSync_SelectDataFirst" xml:space="preserve">
+    <value>Выберите хотя бы один тип данных.</value>
+  </data>
+  <data name="LanSync_Error_InvalidAddress" xml:space="preserve">
+    <value>Недопустимый адрес.</value>
+  </data>
+  <data name="LanSync_Error_ConnectFailed" xml:space="preserve">
+    <value>Не удаётся подключиться к {0}. Убедитесь, что на другом устройстве открыт общий доступ и оба устройства в одной сети.</value>
+  </data>
+  <data name="LanSync_Error_InvalidCode" xml:space="preserve">
+    <value>Неверный код подтверждения.</value>
+  </data>
+  <data name="LanSync_Error_Locked" xml:space="preserve">
+    <value>Слишком много неверных кодов, другое устройство закрыло общий доступ. Откройте доступ на нём снова, чтобы получить новый код.</value>
+  </data>
+  <data name="LanSync_Error_ProtocolMismatch" xml:space="preserve">
+    <value>Версии Moonward на двух устройствах несовместимы. Обновите обе до последней версии и повторите попытку.</value>
+  </data>
+  <data name="LanSync_Error_Failed" xml:space="preserve">
+    <value>Ошибка синхронизации: {0}</value>
+  </data>
+  <data name="WelcomeView_DoNotImport" xml:space="preserve">
+    <value>Не импортировать</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDevice" xml:space="preserve">
+    <value>Синхронизация с устройства в сети</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDeviceDescription" xml:space="preserve">
+    <value>После нажатия «{0}» Moonward найдёт устройства в локальной сети. Сначала на другом устройстве откройте «{1} → {2}» и выберите «{3}». Синхронизируются записи гачи, данные инструментов и время в игре, но не данные для входа в аккаунты.</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectStarwardFolder" xml:space="preserve">
+    <value>Сначала выберите папку Starward.</value>
+  </data>
+  <data name="LanSync_SharedData" xml:space="preserve">
+    <value>Общие данные</value>
+  </data>
+  <data name="LanSync_Counts" xml:space="preserve">
+    <value>Записи гачи: {0} · записи инструментов: {1} · игровые сеансы: {2}</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDeviceDesc" xml:space="preserve">
+    <value>Добавляет записи, которые есть на другом устройстве в сети и отсутствуют на этом</value>
+  </data>
+  <data name="LanSync_ShareThisDeviceDesc" xml:space="preserve">
+    <value>Пока доступ открыт, другие устройства могут синхронизироваться с этим по коду подтверждения; данные для входа в аккаунты не передаются</value>
+  </data>
+  <data name="LanSync_StartSharing" xml:space="preserve">
+    <value>Открыть доступ</value>
+  </data>
+  <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
+    <value>Резервное копирование и сброс</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
+    <value>Сжатая резервная копия базы данных сохраняется в папку DatabaseBackup внутри папки данных</value>
+  </data>
+  <data name="FileSettingPage_BackupNow" xml:space="preserve">
+    <value>Создать копию</value>
+  </data>
+  <data name="FileSettingPage_DeleteAllSettingsDesc" xml:space="preserve">
+    <value>Удаляет все настройки и перезапускает приложение; записи и выполненные входы в аккаунты сохраняются</value>
+  </data>
+  <data name="WelcomeView_ImportExistingData" xml:space="preserve">
+    <value>Импорт имеющихся данных</value>
+  </data>
+  <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
+    <value>Позже можно синхронизировать данные с другого устройства в сети в разделе «{0} → {1}».</value>
   </data>
 </root>

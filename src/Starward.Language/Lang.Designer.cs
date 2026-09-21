@@ -10485,15 +10485,6 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Migrate and Start 的本地化字符串。
-        /// </summary>
-        public static string WelcomeView_MigrateAndStart {
-            get {
-                return ResourceManager.GetString("WelcomeView_MigrateAndStart", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   查找类似 Legacy data from a previous version was detected. 的本地化字符串。
         /// </summary>
         public static string WelcomeView_LegacyDataMigrationNotice {
@@ -10530,7 +10521,7 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Import data from Starward 的本地化字符串。
+        ///   查找类似 Import from Starward 的本地化字符串。
         /// </summary>
         public static string WelcomeView_MigrateFromStarward {
             get {
@@ -11528,6 +11519,492 @@ namespace Starward.Language {
         public static string AppBackground_HEVCVideoExtensionsRequired {
             get {
                 return ResourceManager.GetString("AppBackground_HEVCVideoExtensionsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Close 的本地化字符串。
+        /// </summary>
+        public static string Common_Close {
+            get {
+                return ResourceManager.GetString("Common_Close", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 LAN Sync 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Title {
+            get {
+                return ResourceManager.GetString("LanSync_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sync from Another Device 的本地化字符串。
+        /// </summary>
+        public static string LanSync_SyncFromOtherDevice {
+            get {
+                return ResourceManager.GetString("LanSync_SyncFromOtherDevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Share This Device's Data 的本地化字符串。
+        /// </summary>
+        public static string LanSync_ShareThisDevice {
+            get {
+                return ResourceManager.GetString("LanSync_ShareThisDevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 On the other device, choose "{0}" in Moonward, select this device and enter the code below. Sharing stops when you close this window. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_ShareDialogDescription {
+            get {
+                return ResourceManager.GetString("LanSync_ShareDialogDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Verification code 的本地化字符串。
+        /// </summary>
+        public static string LanSync_VerificationCode {
+            get {
+                return ResourceManager.GetString("LanSync_VerificationCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This device 的本地化字符串。
+        /// </summary>
+        public static string LanSync_ThisDevice {
+            get {
+                return ResourceManager.GetString("LanSync_ThisDevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Waiting for the other device… 的本地化字符串。
+        /// </summary>
+        public static string LanSync_WaitingForConnection {
+            get {
+                return ResourceManager.GetString("LanSync_WaitingForConnection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sent data to {0} ({1}). 的本地化字符串。
+        /// </summary>
+        public static string LanSync_SentToDevice {
+            get {
+                return ResourceManager.GetString("LanSync_SentToDevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Too many wrong codes, so sharing has stopped. Reopen this window to get a new code. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_TooManyAttempts {
+            get {
+                return ResourceManager.GetString("LanSync_TooManyAttempts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Can't start sharing: {0} 的本地化字符串。
+        /// </summary>
+        public static string LanSync_StartSharingFailed {
+            get {
+                return ResourceManager.GetString("LanSync_StartSharingFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Automatic discovery isn't available. Enter this device's address manually on the other device. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_DiscoveryUnavailable {
+            get {
+                return ResourceManager.GetString("LanSync_DiscoveryUnavailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 If the other device can't find this one, make sure both devices are on the same network and Windows Firewall allows Moonward on private networks. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_FirewallHint {
+            get {
+                return ResourceManager.GetString("LanSync_FirewallHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Stop Sharing 的本地化字符串。
+        /// </summary>
+        public static string LanSync_StopSharing {
+            get {
+                return ResourceManager.GetString("LanSync_StopSharing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Only records that the other device has and this device lacks are added to this device; existing records on both devices are never modified or deleted. Account sign-in information isn't synced. This device's database is backed up before syncing. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_SyncDialogDescription {
+            get {
+                return ResourceManager.GetString("LanSync_SyncDialogDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 First, on the other device, go to {0} → {1} and choose "{2}". 的本地化字符串。
+        /// </summary>
+        public static string LanSync_OpenShareFirst {
+            get {
+                return ResourceManager.GetString("LanSync_OpenShareFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Devices on the network 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Devices {
+            get {
+                return ResourceManager.GetString("LanSync_Devices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No device found. Make sure the other device is sharing, or enter its address below. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_NoDeviceFound {
+            get {
+                return ResourceManager.GetString("LanSync_NoDeviceFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Or enter an address 的本地化字符串。
+        /// </summary>
+        public static string LanSync_ManualAddress {
+            get {
+                return ResourceManager.GetString("LanSync_ManualAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 IP or computer name, e.g. 192.168.1.10 的本地化字符串。
+        /// </summary>
+        public static string LanSync_ManualAddressPlaceholder {
+            get {
+                return ResourceManager.GetString("LanSync_ManualAddressPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 6 digits 的本地化字符串。
+        /// </summary>
+        public static string LanSync_CodePlaceholder {
+            get {
+                return ResourceManager.GetString("LanSync_CodePlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Data to sync 的本地化字符串。
+        /// </summary>
+        public static string LanSync_DataToSync {
+            get {
+                return ResourceManager.GetString("LanSync_DataToSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Gacha records 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Category_Gacha {
+            get {
+                return ResourceManager.GetString("LanSync_Category_Gacha", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Miyoushe / HoYoLAB toolbox data 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Category_GameRecord {
+            get {
+                return ResourceManager.GetString("LanSync_Category_GameRecord", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Playtime 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Category_PlayTime {
+            get {
+                return ResourceManager.GetString("LanSync_Category_PlayTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sync 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Sync {
+            get {
+                return ResourceManager.GetString("LanSync_Sync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Receiving data… {0} 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Receiving {
+            get {
+                return ResourceManager.GetString("LanSync_Receiving", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Adding records to this device… 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Merging {
+            get {
+                return ResourceManager.GetString("LanSync_Merging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sync complete. Added {0} gacha record(s), {1} toolbox record(s) and {2} playtime session(s). 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Completed {
+            get {
+                return ResourceManager.GetString("LanSync_Completed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sync complete. This device already has all of the other device's records. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_NothingNew {
+            get {
+                return ResourceManager.GetString("LanSync_NothingNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Select a device or enter an address. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_SelectDeviceFirst {
+            get {
+                return ResourceManager.GetString("LanSync_SelectDeviceFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enter the 6-digit verification code. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_EnterCodeFirst {
+            get {
+                return ResourceManager.GetString("LanSync_EnterCodeFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Select at least one type of data. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_SelectDataFirst {
+            get {
+                return ResourceManager.GetString("LanSync_SelectDataFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The address is invalid. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Error_InvalidAddress {
+            get {
+                return ResourceManager.GetString("LanSync_Error_InvalidAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Can't connect to {0}. Make sure the other device is sharing and both devices are on the same network. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Error_ConnectFailed {
+            get {
+                return ResourceManager.GetString("LanSync_Error_ConnectFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Wrong verification code. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Error_InvalidCode {
+            get {
+                return ResourceManager.GetString("LanSync_Error_InvalidCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Too many wrong codes, so the other device has stopped sharing. Reopen sharing there to get a new code. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Error_Locked {
+            get {
+                return ResourceManager.GetString("LanSync_Error_Locked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The Moonward versions on the two devices are incompatible. Update both to the latest version and try again. 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Error_ProtocolMismatch {
+            get {
+                return ResourceManager.GetString("LanSync_Error_ProtocolMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sync failed: {0} 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Error_Failed {
+            get {
+                return ResourceManager.GetString("LanSync_Error_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Don't import 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_DoNotImport {
+            get {
+                return ResourceManager.GetString("WelcomeView_DoNotImport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sync from a LAN device 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_SyncFromLanDevice {
+            get {
+                return ResourceManager.GetString("WelcomeView_SyncFromLanDevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 After you click "{0}", Moonward searches the local network for other devices. First, on the other device, go to {1} → {2} and choose "{3}". Gacha records, toolbox data and playtime are synced; account sign-in information isn't. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_SyncFromLanDeviceDescription {
+            get {
+                return ResourceManager.GetString("WelcomeView_SyncFromLanDeviceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Choose the Starward folder first. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_PleaseSelectStarwardFolder {
+            get {
+                return ResourceManager.GetString("WelcomeView_PleaseSelectStarwardFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Shared data 的本地化字符串。
+        /// </summary>
+        public static string LanSync_SharedData {
+            get {
+                return ResourceManager.GetString("LanSync_SharedData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} gacha records · {1} toolbox records · {2} playtime sessions 的本地化字符串。
+        /// </summary>
+        public static string LanSync_Counts {
+            get {
+                return ResourceManager.GetString("LanSync_Counts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add records that another device on the network has and this device doesn't 的本地化字符串。
+        /// </summary>
+        public static string LanSync_SyncFromOtherDeviceDesc {
+            get {
+                return ResourceManager.GetString("LanSync_SyncFromOtherDeviceDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 While sharing, other devices can sync from this one with a verification code; account sign-in information isn't shared 的本地化字符串。
+        /// </summary>
+        public static string LanSync_ShareThisDeviceDesc {
+            get {
+                return ResourceManager.GetString("LanSync_ShareThisDeviceDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start Sharing 的本地化字符串。
+        /// </summary>
+        public static string LanSync_StartSharing {
+            get {
+                return ResourceManager.GetString("LanSync_StartSharing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backup &amp; Reset 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupAndReset {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupAndReset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Compress the database into the DatabaseBackup folder in the data folder 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupDatabaseDesc {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupDatabaseDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Back Up Now 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupNow {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Clears all settings and restarts the app; records and signed-in accounts are kept 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_DeleteAllSettingsDesc {
+            get {
+                return ResourceManager.GetString("FileSettingPage_DeleteAllSettingsDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Import existing data 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_ImportExistingData {
+            get {
+                return ResourceManager.GetString("WelcomeView_ImportExistingData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 You can also sync from another device on the network later in {0} → {1}. 的本地化字符串。
+        /// </summary>
+        public static string WelcomeView_ImportLaterHint {
+            get {
+                return ResourceManager.GetString("WelcomeView_ImportLaterHint", resourceCulture);
             }
         }
     }

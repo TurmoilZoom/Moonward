@@ -13,13 +13,14 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
-    <Grid>
+    <!--  右列的致谢卡片与右下角的猫不在滚动区内，自己与窗口右缘留出 24（设置页 Frame 右侧不留边）  -->
+    <Grid Margin="0,0,24,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <ScrollViewer Grid.Column="0">
-            <StackPanel x:Name="StackPanel_About" Padding="0,0,24,0">
+            <StackPanel x:Name="StackPanel_About" Padding="{StaticResource SettingPageContentPadding}">
 
                 <TextBlock FontSize="24"
                            FontWeight="Bold"

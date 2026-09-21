@@ -50,6 +50,9 @@
                           TintColor="{ThemeResource ControlOnImageFillColorDefault}"
                           TintOpacity="0.4" />
 
+            <!--  设置页右侧各子页的滚动内容边距。设置页 Frame 右、下不留边，滚动条贴窗口右缘；内容自己右侧让出滚动条、底部滚到底时留白  -->
+            <Thickness x:Key="SettingPageContentPadding">0,0,24,24</Thickness>
+
             <Thickness x:Key="NavigationViewBorderThickness">0</Thickness>
             <StaticResource x:Key="NavigationViewDefaultPaneBackground" ResourceKey="CustomAcrylicBrush" />
             <StaticResource x:Key="ContentDialogTopOverlay" ResourceKey="ControlFillColorTransparentBrush" />

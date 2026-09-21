@@ -2102,9 +2102,6 @@ Accetti il rischio e desideri continuare?</value>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Moonward, Avvia!</value>
   </data>
-  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
-    <value>Migra e avvia</value>
-  </data>
   <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
     <value>Rilevati dati di una versione precedente. Devono essere migrati nella nuova cartella dati prima di continuare. Posizione attuale:</value>
   </data>
@@ -2118,7 +2115,7 @@ Accetti il rischio e desideri continuare?</value>
     <value>Sono richiesti permessi di amministratore per completare la migrazione</value>
   </data>
   <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
-    <value>Import data from Starward</value>
+    <value>Importa da Starward</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
     <value>A detected location can be used, or a data folder or portable install folder can be specified. Fully quit Starward before importing, and make sure the destination disk has enough free space. Do not close this app, and do not unplug or disconnect the disks involved, until import finishes.</value>
@@ -3949,5 +3946,167 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
     <value>Si applica a tutti i profili e non può essere usato con un eseguibile di avvio personalizzato.</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="LanSync_Title" xml:space="preserve">
+    <value>Sincronizzazione LAN</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDevice" xml:space="preserve">
+    <value>Sincronizza da un altro dispositivo</value>
+  </data>
+  <data name="LanSync_ShareThisDevice" xml:space="preserve">
+    <value>Condividi i dati di questo dispositivo</value>
+  </data>
+  <data name="LanSync_ShareDialogDescription" xml:space="preserve">
+    <value>Sull'altro dispositivo, scegli "{0}" in Moonward, seleziona questo dispositivo e inserisci il codice qui sotto. La condivisione si interrompe quando chiudi questa finestra.</value>
+  </data>
+  <data name="LanSync_VerificationCode" xml:space="preserve">
+    <value>Codice di verifica</value>
+  </data>
+  <data name="LanSync_ThisDevice" xml:space="preserve">
+    <value>Questo dispositivo</value>
+  </data>
+  <data name="LanSync_WaitingForConnection" xml:space="preserve">
+    <value>In attesa dell'altro dispositivo…</value>
+  </data>
+  <data name="LanSync_SentToDevice" xml:space="preserve">
+    <value>Dati inviati a {0} ({1}).</value>
+  </data>
+  <data name="LanSync_TooManyAttempts" xml:space="preserve">
+    <value>Troppi codici errati: la condivisione è stata interrotta. Riapri questa finestra per ottenere un nuovo codice.</value>
+  </data>
+  <data name="LanSync_StartSharingFailed" xml:space="preserve">
+    <value>Impossibile avviare la condivisione: {0}</value>
+  </data>
+  <data name="LanSync_DiscoveryUnavailable" xml:space="preserve">
+    <value>Il rilevamento automatico non è disponibile. Inserisci manualmente l'indirizzo di questo dispositivo sull'altro dispositivo.</value>
+  </data>
+  <data name="LanSync_FirewallHint" xml:space="preserve">
+    <value>Se l'altro dispositivo non trova questo, verifica che entrambi siano sulla stessa rete e che Windows Firewall consenta Moonward sulle reti private.</value>
+  </data>
+  <data name="LanSync_StopSharing" xml:space="preserve">
+    <value>Interrompi condivisione</value>
+  </data>
+  <data name="LanSync_SyncDialogDescription" xml:space="preserve">
+    <value>Vengono aggiunti a questo dispositivo solo i registri che l'altro dispositivo ha e che mancano qui; i registri esistenti su entrambi i dispositivi non vengono mai modificati o eliminati. Le informazioni di accesso degli account non vengono sincronizzate. Prima della sincronizzazione viene eseguito il backup del database di questo dispositivo.</value>
+  </data>
+  <data name="LanSync_OpenShareFirst" xml:space="preserve">
+    <value>Per prima cosa, sull'altro dispositivo apri {0} → {1} e scegli "{2}".</value>
+  </data>
+  <data name="LanSync_Devices" xml:space="preserve">
+    <value>Dispositivi in rete</value>
+  </data>
+  <data name="LanSync_NoDeviceFound" xml:space="preserve">
+    <value>Nessun dispositivo trovato. Verifica che l'altro dispositivo stia condividendo oppure inserisci il suo indirizzo qui sotto.</value>
+  </data>
+  <data name="LanSync_ManualAddress" xml:space="preserve">
+    <value>Oppure inserisci un indirizzo</value>
+  </data>
+  <data name="LanSync_ManualAddressPlaceholder" xml:space="preserve">
+    <value>IP o nome del computer, ad es. 192.168.1.10</value>
+  </data>
+  <data name="LanSync_CodePlaceholder" xml:space="preserve">
+    <value>6 cifre</value>
+  </data>
+  <data name="LanSync_DataToSync" xml:space="preserve">
+    <value>Dati da sincronizzare</value>
+  </data>
+  <data name="LanSync_Category_Gacha" xml:space="preserve">
+    <value>Registri Gacha</value>
+  </data>
+  <data name="LanSync_Category_GameRecord" xml:space="preserve">
+    <value>Dati degli Strumenti Miyoushe / HoYoLAB</value>
+  </data>
+  <data name="LanSync_Category_PlayTime" xml:space="preserve">
+    <value>Tempo di gioco</value>
+  </data>
+  <data name="LanSync_Sync" xml:space="preserve">
+    <value>Sincronizza</value>
+  </data>
+  <data name="LanSync_Receiving" xml:space="preserve">
+    <value>Ricezione dei dati… {0}</value>
+  </data>
+  <data name="LanSync_Merging" xml:space="preserve">
+    <value>Aggiunta dei registri a questo dispositivo…</value>
+  </data>
+  <data name="LanSync_Completed" xml:space="preserve">
+    <value>Sincronizzazione completata. Aggiunti {0} registri Gacha, {1} registri degli Strumenti e {2} sessioni di gioco.</value>
+  </data>
+  <data name="LanSync_NothingNew" xml:space="preserve">
+    <value>Sincronizzazione completata. Questo dispositivo ha già tutti i registri dell'altro dispositivo.</value>
+  </data>
+  <data name="LanSync_SelectDeviceFirst" xml:space="preserve">
+    <value>Seleziona un dispositivo o inserisci un indirizzo.</value>
+  </data>
+  <data name="LanSync_EnterCodeFirst" xml:space="preserve">
+    <value>Inserisci il codice di verifica a 6 cifre.</value>
+  </data>
+  <data name="LanSync_SelectDataFirst" xml:space="preserve">
+    <value>Seleziona almeno un tipo di dati.</value>
+  </data>
+  <data name="LanSync_Error_InvalidAddress" xml:space="preserve">
+    <value>L'indirizzo non è valido.</value>
+  </data>
+  <data name="LanSync_Error_ConnectFailed" xml:space="preserve">
+    <value>Impossibile connettersi a {0}. Verifica che l'altro dispositivo stia condividendo e che entrambi i dispositivi siano sulla stessa rete.</value>
+  </data>
+  <data name="LanSync_Error_InvalidCode" xml:space="preserve">
+    <value>Codice di verifica errato.</value>
+  </data>
+  <data name="LanSync_Error_Locked" xml:space="preserve">
+    <value>Troppi codici errati: l'altro dispositivo ha interrotto la condivisione. Riavviala lì per ottenere un nuovo codice.</value>
+  </data>
+  <data name="LanSync_Error_ProtocolMismatch" xml:space="preserve">
+    <value>Le versioni di Moonward dei due dispositivi non sono compatibili. Aggiorna entrambi all'ultima versione e riprova.</value>
+  </data>
+  <data name="LanSync_Error_Failed" xml:space="preserve">
+    <value>Sincronizzazione non riuscita: {0}</value>
+  </data>
+  <data name="WelcomeView_DoNotImport" xml:space="preserve">
+    <value>Non importare</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDevice" xml:space="preserve">
+    <value>Sincronizza da un dispositivo LAN</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDeviceDescription" xml:space="preserve">
+    <value>Dopo aver fatto clic su "{0}", Moonward cerca altri dispositivi nella rete locale. Prima, sull'altro dispositivo, apri {1} → {2} e scegli "{3}". Vengono sincronizzati registri Gacha, dati degli Strumenti e tempo di gioco, ma non le informazioni di accesso degli account.</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectStarwardFolder" xml:space="preserve">
+    <value>Scegli prima la cartella di Starward.</value>
+  </data>
+  <data name="LanSync_SharedData" xml:space="preserve">
+    <value>Dati condivisi</value>
+  </data>
+  <data name="LanSync_Counts" xml:space="preserve">
+    <value>{0} registri Gacha · {1} registri degli Strumenti · {2} sessioni di gioco</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDeviceDesc" xml:space="preserve">
+    <value>Aggiunge i registri che un altro dispositivo in rete ha e che mancano su questo</value>
+  </data>
+  <data name="LanSync_ShareThisDeviceDesc" xml:space="preserve">
+    <value>Durante la condivisione, altri dispositivi possono sincronizzarsi da questo con un codice di verifica; le informazioni di accesso non vengono condivise</value>
+  </data>
+  <data name="LanSync_StartSharing" xml:space="preserve">
+    <value>Avvia condivisione</value>
+  </data>
+  <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
+    <value>Backup e ripristino</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
+    <value>Salva un backup compresso del database nella cartella DatabaseBackup della cartella dati</value>
+  </data>
+  <data name="FileSettingPage_BackupNow" xml:space="preserve">
+    <value>Esegui backup</value>
+  </data>
+  <data name="FileSettingPage_DeleteAllSettingsDesc" xml:space="preserve">
+    <value>Cancella tutte le impostazioni e riavvia l'app; i registri e gli account connessi vengono mantenuti</value>
+  </data>
+  <data name="WelcomeView_ImportExistingData" xml:space="preserve">
+    <value>Importa dati esistenti</value>
+  </data>
+  <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
+    <value>Puoi anche sincronizzare più tardi da un altro dispositivo in rete in {0} → {1}.</value>
   </data>
 </root>

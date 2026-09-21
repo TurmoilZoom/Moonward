@@ -2102,9 +2102,6 @@
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Moonward, 시작!</value>
   </data>
-  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
-    <value>마이그레이션 후 시작</value>
-  </data>
   <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
     <value>이전 버전 데이터가 감지되었습니다. 계속하려면 새 데이터 폴더로 마이그레이션해야 합니다. 현재 데이터 위치:</value>
   </data>
@@ -2118,7 +2115,7 @@
     <value>마이그레이션을 완료하려면 관리자 권한이 필요합니다.</value>
   </data>
   <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
-    <value>Import data from Starward</value>
+    <value>Starward에서 가져오기</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
     <value>자동 감지된 위치를 사용하거나, 데이터 폴더 또는 포터블 설치 폴더를 지정할 수 있습니다. 가져오기 전에 Starward를 완전히 종료하고, 대상 디스크에 충분한 공간이 있는지 확인하세요. 가져오기가 끝날 때까지 이 앱을 닫거나 관련 디스크를 분리·차단하지 마세요.</value>
@@ -3949,5 +3946,167 @@
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
     <value>모든 프로필에 적용되며 사용자 지정 시작 프로그램과 함께 사용할 수 없습니다.</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="LanSync_Title" xml:space="preserve">
+    <value>LAN 동기화</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDevice" xml:space="preserve">
+    <value>다른 기기에서 동기화</value>
+  </data>
+  <data name="LanSync_ShareThisDevice" xml:space="preserve">
+    <value>이 기기의 데이터 공유</value>
+  </data>
+  <data name="LanSync_ShareDialogDescription" xml:space="preserve">
+    <value>다른 기기의 Moonward에서 '{0}'을(를) 선택하고 이 기기를 고른 뒤 아래 인증 코드를 입력하세요. 이 창을 닫으면 공유가 중지됩니다.</value>
+  </data>
+  <data name="LanSync_VerificationCode" xml:space="preserve">
+    <value>인증 코드</value>
+  </data>
+  <data name="LanSync_ThisDevice" xml:space="preserve">
+    <value>이 기기</value>
+  </data>
+  <data name="LanSync_WaitingForConnection" xml:space="preserve">
+    <value>다른 기기의 연결을 기다리는 중…</value>
+  </data>
+  <data name="LanSync_SentToDevice" xml:space="preserve">
+    <value>{0}({1})에 데이터를 보냈습니다.</value>
+  </data>
+  <data name="LanSync_TooManyAttempts" xml:space="preserve">
+    <value>잘못된 인증 코드 입력이 너무 많아 공유를 중지했습니다. 이 창을 다시 열면 새 코드를 받을 수 있습니다.</value>
+  </data>
+  <data name="LanSync_StartSharingFailed" xml:space="preserve">
+    <value>공유를 시작할 수 없습니다: {0}</value>
+  </data>
+  <data name="LanSync_DiscoveryUnavailable" xml:space="preserve">
+    <value>자동 검색을 사용할 수 없습니다. 다른 기기에서 이 기기의 주소를 직접 입력하세요.</value>
+  </data>
+  <data name="LanSync_FirewallHint" xml:space="preserve">
+    <value>다른 기기에서 이 기기를 찾을 수 없으면 두 기기가 같은 네트워크에 있고 Windows 방화벽이 개인 네트워크에서 Moonward를 허용하는지 확인하세요.</value>
+  </data>
+  <data name="LanSync_StopSharing" xml:space="preserve">
+    <value>공유 중지</value>
+  </data>
+  <data name="LanSync_SyncDialogDescription" xml:space="preserve">
+    <value>상대 기기에는 있고 이 기기에는 없는 기록만 이 기기에 추가하며, 두 기기의 기존 기록은 수정되거나 삭제되지 않습니다. 계정 로그인 정보는 동기화되지 않습니다. 동기화 전에 이 기기의 데이터베이스를 자동으로 백업합니다.</value>
+  </data>
+  <data name="LanSync_OpenShareFirst" xml:space="preserve">
+    <value>먼저 다른 기기에서 '{0} → {1}'을(를) 열고 '{2}'을(를) 선택하세요.</value>
+  </data>
+  <data name="LanSync_Devices" xml:space="preserve">
+    <value>네트워크의 기기</value>
+  </data>
+  <data name="LanSync_NoDeviceFound" xml:space="preserve">
+    <value>기기를 찾을 수 없습니다. 다른 기기에서 공유가 켜져 있는지 확인하거나 아래에 주소를 입력하세요.</value>
+  </data>
+  <data name="LanSync_ManualAddress" xml:space="preserve">
+    <value>또는 주소 입력</value>
+  </data>
+  <data name="LanSync_ManualAddressPlaceholder" xml:space="preserve">
+    <value>IP 또는 컴퓨터 이름(예: 192.168.1.10)</value>
+  </data>
+  <data name="LanSync_CodePlaceholder" xml:space="preserve">
+    <value>숫자 6자리</value>
+  </data>
+  <data name="LanSync_DataToSync" xml:space="preserve">
+    <value>동기화할 데이터</value>
+  </data>
+  <data name="LanSync_Category_Gacha" xml:space="preserve">
+    <value>뽑기 기록</value>
+  </data>
+  <data name="LanSync_Category_GameRecord" xml:space="preserve">
+    <value>미유시 / HoYoLAB 도구상자 데이터</value>
+  </data>
+  <data name="LanSync_Category_PlayTime" xml:space="preserve">
+    <value>플레이 시간</value>
+  </data>
+  <data name="LanSync_Sync" xml:space="preserve">
+    <value>동기화</value>
+  </data>
+  <data name="LanSync_Receiving" xml:space="preserve">
+    <value>데이터 수신 중… {0}</value>
+  </data>
+  <data name="LanSync_Merging" xml:space="preserve">
+    <value>기록을 이 기기에 추가하는 중…</value>
+  </data>
+  <data name="LanSync_Completed" xml:space="preserve">
+    <value>동기화를 완료했습니다. 뽑기 기록 {0}개, 도구상자 기록 {1}개, 플레이 시간 {2}건을 추가했습니다.</value>
+  </data>
+  <data name="LanSync_NothingNew" xml:space="preserve">
+    <value>동기화를 완료했습니다. 이 기기에 상대 기기의 모든 기록이 이미 있습니다.</value>
+  </data>
+  <data name="LanSync_SelectDeviceFirst" xml:space="preserve">
+    <value>기기를 선택하거나 주소를 입력하세요.</value>
+  </data>
+  <data name="LanSync_EnterCodeFirst" xml:space="preserve">
+    <value>6자리 인증 코드를 입력하세요.</value>
+  </data>
+  <data name="LanSync_SelectDataFirst" xml:space="preserve">
+    <value>동기화할 데이터를 하나 이상 선택하세요.</value>
+  </data>
+  <data name="LanSync_Error_InvalidAddress" xml:space="preserve">
+    <value>주소가 올바르지 않습니다.</value>
+  </data>
+  <data name="LanSync_Error_ConnectFailed" xml:space="preserve">
+    <value>{0}에 연결할 수 없습니다. 상대 기기에서 공유가 켜져 있고 두 기기가 같은 네트워크에 있는지 확인하세요.</value>
+  </data>
+  <data name="LanSync_Error_InvalidCode" xml:space="preserve">
+    <value>인증 코드가 올바르지 않습니다.</value>
+  </data>
+  <data name="LanSync_Error_Locked" xml:space="preserve">
+    <value>잘못된 인증 코드 입력이 너무 많아 상대 기기가 공유를 중지했습니다. 상대 기기에서 공유를 다시 열어 새 코드를 받으세요.</value>
+  </data>
+  <data name="LanSync_Error_ProtocolMismatch" xml:space="preserve">
+    <value>두 기기의 Moonward 버전이 호환되지 않습니다. 둘 다 최신 버전으로 업데이트한 뒤 다시 시도하세요.</value>
+  </data>
+  <data name="LanSync_Error_Failed" xml:space="preserve">
+    <value>동기화 실패: {0}</value>
+  </data>
+  <data name="WelcomeView_DoNotImport" xml:space="preserve">
+    <value>가져오지 않음</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDevice" xml:space="preserve">
+    <value>LAN 기기에서 동기화</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDeviceDescription" xml:space="preserve">
+    <value>'{0}'을(를) 클릭하면 로컬 네트워크에서 기기를 검색합니다. 먼저 다른 기기에서 '{1} → {2}'을(를) 열고 '{3}'을(를) 선택하세요. 뽑기 기록, 도구상자 데이터, 플레이 시간이 동기화되며 계정 로그인 정보는 동기화되지 않습니다.</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectStarwardFolder" xml:space="preserve">
+    <value>먼저 Starward 폴더를 선택하세요.</value>
+  </data>
+  <data name="LanSync_SharedData" xml:space="preserve">
+    <value>공유 데이터</value>
+  </data>
+  <data name="LanSync_Counts" xml:space="preserve">
+    <value>뽑기 기록 {0}개 · 도구상자 기록 {1}개 · 플레이 시간 {2}건</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDeviceDesc" xml:space="preserve">
+    <value>네트워크의 다른 기기에는 있고 이 기기에는 없는 기록을 추가합니다</value>
+  </data>
+  <data name="LanSync_ShareThisDeviceDesc" xml:space="preserve">
+    <value>공유하는 동안 다른 기기가 인증 코드를 입력해 이 기기에서 동기화할 수 있습니다. 계정 로그인 정보는 공유되지 않습니다</value>
+  </data>
+  <data name="LanSync_StartSharing" xml:space="preserve">
+    <value>공유 시작</value>
+  </data>
+  <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
+    <value>백업 및 초기화</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
+    <value>데이터베이스를 압축해 데이터 폴더의 DatabaseBackup 폴더에 백업합니다</value>
+  </data>
+  <data name="FileSettingPage_BackupNow" xml:space="preserve">
+    <value>지금 백업</value>
+  </data>
+  <data name="FileSettingPage_DeleteAllSettingsDesc" xml:space="preserve">
+    <value>모든 설정을 지우고 앱을 다시 시작합니다. 기록 데이터와 로그인한 계정은 유지됩니다</value>
+  </data>
+  <data name="WelcomeView_ImportExistingData" xml:space="preserve">
+    <value>기존 데이터 가져오기</value>
+  </data>
+  <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
+    <value>나중에 '{0} → {1}'에서 네트워크의 다른 기기와 동기화할 수도 있습니다.</value>
   </data>
 </root>

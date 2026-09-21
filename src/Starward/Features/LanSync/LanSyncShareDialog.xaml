@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog x:Class="Starward.Features.LanSync.LanSyncShareDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:lang="using:Starward.Language"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:s="using:Starward"
+               xmlns:sh="using:Starward.Helpers"
+               x:DefaultBindMode="OneWay"
+               Background="{ThemeResource CustomAcrylicBrush}"
+               BorderThickness="0"
+               Closed="ContentDialog_Closed"
+               Loaded="ContentDialog_Loaded"
+               Style="{ThemeResource DefaultContentDialogStyle}"
+               mc:Ignorable="d">
+
+    <StackPanel Width="420" Spacing="12">
+        <TextBlock FontSize="20"
+                   Text="{x:Bind lang:Lang.LanSync_ShareThisDevice}"
+                   TextWrapping="Wrap" />
+        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="{x:Bind DescriptionText}"
+                   TextWrapping="Wrap" />
+
+        <!--  验证码与本机地址  -->
+        <Border Padding="16,12"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Visibility="{x:Bind sh:BindConverter.BoolToVisibility(IsSharing)}">
+            <StackPanel Spacing="12">
+                <StackPanel Spacing="2">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.LanSync_VerificationCode}" />
+                    <TextBlock CharacterSpacing="120"
+                               FontSize="32"
+                               FontWeight="SemiBold"
+                               IsTextSelectionEnabled="True"
+                               Text="{x:Bind CodeText}" />
+                </StackPanel>
+                <StackPanel Spacing="2">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.LanSync_ThisDevice}" />
+                    <TextBlock IsTextSelectionEnabled="True"
+                               Text="{x:Bind DeviceText}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+                <!--  共享内容与数据文件夹：让用户确认共享的是哪份数据（调试版用的是程序目录下另一份库）  -->
+                <StackPanel Spacing="2">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.LanSync_SharedData}" />
+                    <TextBlock Text="{x:Bind SummaryText}" TextWrapping="Wrap" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               IsTextSelectionEnabled="True"
+                               Text="{x:Bind s:AppConfig.UserDataFolder}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!--  共享状态：等待连接 / 已发送  -->
+        <Grid ColumnSpacing="8" Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StatusText)}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ProgressRing Width="16"
+                          Height="16"
+                          IsActive="{x:Bind IsWaiting}"
+                          Visibility="{x:Bind sh:BindConverter.BoolToVisibility(IsWaiting)}" />
+            <TextBlock Grid.Column="1"
+                       VerticalAlignment="Center"
+                       Text="{x:Bind StatusText}"
+                       TextWrapping="Wrap" />
+        </Grid>
+        <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                   Text="{x:Bind ErrorText}"
+                   TextWrapping="Wrap"
+                   Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(ErrorText)}" />
+        <TextBlock FontSize="12"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="{x:Bind lang:Lang.LanSync_FirewallHint}"
+                   TextWrapping="Wrap" />
+
+        <Button MinWidth="100"
+                Margin="0,8,0,0"
+                HorizontalAlignment="Right"
+                Click="Button_Close_Click"
+                Content="{x:Bind DismissButtonText}"
+                Style="{ThemeResource AccentButtonStyle}" />
+    </StackPanel>
+
+</ContentDialog>

@@ -15,6 +15,11 @@ internal sealed class PlayTimeStatsService
 
     private const long MAX_INTERVAL = 60_000;
 
+    /// <summary>
+    /// 心跳记录归档成会话前的等待时间：结束超过一天的会话才算定型，更近的可能还在记录（记录进程重启会接着补心跳）。
+    /// </summary>
+    private static readonly TimeSpan ArchiveDelay = TimeSpan.FromDays(1);
+
 
 
     public PlayTimeStatsService(ILogger<PlayTimeStatsService> logger)
@@ -28,7 +33,7 @@ internal sealed class PlayTimeStatsService
     {
         try
         {
-            long ago = DateTimeOffset.Now.AddDays(-1).ToUnixTimeMilliseconds();
+            long ago = DateTimeOffset.Now.Subtract(ArchiveDelay).ToUnixTimeMilliseconds();
             using var dapper = DatabaseService.CreateConnection();
             List<PlayTimeItemStruct> items = dapper.Query<PlayTimeItemStruct>("SELECT * FROM PlayTimeItem ORDER BY TimeStamp;").ToList();
             List<PlayTimeStats> stats = GetPlayTimeStats(items);
@@ -51,7 +56,21 @@ internal sealed class PlayTimeStatsService
 
 
 
-    public List<PlayTimeStats> GetPlayTimeStats(List<PlayTimeItemStruct> items)
+    /// <summary>
+    /// 从心跳记录中取已定型的会话，与 <see cref="ConvertItemToStats"/> 归档用同一条件。
+    /// 局域网同步据此把本机尚未归档的历史时长一并发给对方，不改动本机的心跳表。
+    /// </summary>
+    /// <param name="items">按时间升序的心跳记录。</param>
+    /// <returns>结束时间早于一天前的会话。</returns>
+    public static List<PlayTimeStats> GetFinishedStats(List<PlayTimeItemStruct> items)
+    {
+        long before = DateTimeOffset.Now.Subtract(ArchiveDelay).ToUnixTimeMilliseconds();
+        return GetPlayTimeStats(items).Where(x => x.EndTime < before).ToList();
+    }
+
+
+
+    public static List<PlayTimeStats> GetPlayTimeStats(List<PlayTimeItemStruct> items)
     {
         List<PlayTimeStats> list = new();
         Dictionary<(GameBiz, int), PlayTimeStats> statsSession = new();

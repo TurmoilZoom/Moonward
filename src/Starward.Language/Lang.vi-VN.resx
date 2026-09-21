@@ -2102,9 +2102,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Moonward, Bắt đầu thôi!</value>
   </data>
-  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
-    <value>Di chuyển và khởi động</value>
-  </data>
   <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
     <value>Phát hiện dữ liệu phiên bản cũ. Cần di chuyển sang thư mục dữ liệu mới trước khi tiếp tục. Vị trí dữ liệu hiện tại:</value>
   </data>
@@ -2118,7 +2115,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Cần quyền quản trị để hoàn tất di chuyển dữ liệu</value>
   </data>
   <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
-    <value>Import data from Starward</value>
+    <value>Nhập từ Starward</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
     <value>A detected location can be used, or a data folder or portable install folder can be specified. Fully quit Starward before importing, and make sure the destination disk has enough free space. Do not close this app, and do not unplug or disconnect the disks involved, until import finishes.</value>
@@ -3949,5 +3946,167 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
     <value>Áp dụng cho mọi hồ sơ và không dùng cùng chương trình khởi chạy tùy chỉnh.</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="LanSync_Title" xml:space="preserve">
+    <value>Đồng bộ qua mạng LAN</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDevice" xml:space="preserve">
+    <value>Đồng bộ từ thiết bị khác</value>
+  </data>
+  <data name="LanSync_ShareThisDevice" xml:space="preserve">
+    <value>Chia sẻ dữ liệu của thiết bị này</value>
+  </data>
+  <data name="LanSync_ShareDialogDescription" xml:space="preserve">
+    <value>Trên thiết bị kia, chọn "{0}" trong Moonward, chọn thiết bị này rồi nhập mã bên dưới. Việc chia sẻ sẽ dừng khi bạn đóng cửa sổ này.</value>
+  </data>
+  <data name="LanSync_VerificationCode" xml:space="preserve">
+    <value>Mã xác minh</value>
+  </data>
+  <data name="LanSync_ThisDevice" xml:space="preserve">
+    <value>Thiết bị này</value>
+  </data>
+  <data name="LanSync_WaitingForConnection" xml:space="preserve">
+    <value>Đang chờ thiết bị kia…</value>
+  </data>
+  <data name="LanSync_SentToDevice" xml:space="preserve">
+    <value>Đã gửi dữ liệu tới {0} ({1}).</value>
+  </data>
+  <data name="LanSync_TooManyAttempts" xml:space="preserve">
+    <value>Nhập sai mã quá nhiều lần nên đã dừng chia sẻ. Mở lại cửa sổ này để nhận mã mới.</value>
+  </data>
+  <data name="LanSync_StartSharingFailed" xml:space="preserve">
+    <value>Không thể bắt đầu chia sẻ: {0}</value>
+  </data>
+  <data name="LanSync_DiscoveryUnavailable" xml:space="preserve">
+    <value>Không thể tự động tìm thiết bị. Hãy nhập thủ công địa chỉ của thiết bị này trên thiết bị kia.</value>
+  </data>
+  <data name="LanSync_FirewallHint" xml:space="preserve">
+    <value>Nếu thiết bị kia không tìm thấy thiết bị này, hãy đảm bảo cả hai cùng một mạng và Tường lửa Windows cho phép Moonward trên mạng riêng tư.</value>
+  </data>
+  <data name="LanSync_StopSharing" xml:space="preserve">
+    <value>Dừng chia sẻ</value>
+  </data>
+  <data name="LanSync_SyncDialogDescription" xml:space="preserve">
+    <value>Chỉ những bản ghi mà thiết bị kia có còn thiết bị này chưa có mới được thêm vào thiết bị này; bản ghi hiện có trên cả hai thiết bị không bao giờ bị sửa hay xóa. Thông tin đăng nhập tài khoản không được đồng bộ. Cơ sở dữ liệu của thiết bị này sẽ được tự động sao lưu trước khi đồng bộ.</value>
+  </data>
+  <data name="LanSync_OpenShareFirst" xml:space="preserve">
+    <value>Trước tiên, trên thiết bị kia, vào {0} → {1} rồi chọn "{2}".</value>
+  </data>
+  <data name="LanSync_Devices" xml:space="preserve">
+    <value>Thiết bị trong mạng</value>
+  </data>
+  <data name="LanSync_NoDeviceFound" xml:space="preserve">
+    <value>Không tìm thấy thiết bị. Hãy đảm bảo thiết bị kia đang chia sẻ, hoặc nhập địa chỉ của nó bên dưới.</value>
+  </data>
+  <data name="LanSync_ManualAddress" xml:space="preserve">
+    <value>Hoặc nhập địa chỉ</value>
+  </data>
+  <data name="LanSync_ManualAddressPlaceholder" xml:space="preserve">
+    <value>IP hoặc tên máy tính, ví dụ 192.168.1.10</value>
+  </data>
+  <data name="LanSync_CodePlaceholder" xml:space="preserve">
+    <value>6 chữ số</value>
+  </data>
+  <data name="LanSync_DataToSync" xml:space="preserve">
+    <value>Dữ liệu cần đồng bộ</value>
+  </data>
+  <data name="LanSync_Category_Gacha" xml:space="preserve">
+    <value>Bản ghi gacha</value>
+  </data>
+  <data name="LanSync_Category_GameRecord" xml:space="preserve">
+    <value>Dữ liệu hộp công cụ Miyoushe / HoYoLAB</value>
+  </data>
+  <data name="LanSync_Category_PlayTime" xml:space="preserve">
+    <value>Thời gian chơi</value>
+  </data>
+  <data name="LanSync_Sync" xml:space="preserve">
+    <value>Đồng bộ</value>
+  </data>
+  <data name="LanSync_Receiving" xml:space="preserve">
+    <value>Đang nhận dữ liệu… {0}</value>
+  </data>
+  <data name="LanSync_Merging" xml:space="preserve">
+    <value>Đang thêm bản ghi vào thiết bị này…</value>
+  </data>
+  <data name="LanSync_Completed" xml:space="preserve">
+    <value>Đồng bộ hoàn tất. Đã thêm {0} bản ghi gacha, {1} bản ghi hộp công cụ và {2} phiên chơi.</value>
+  </data>
+  <data name="LanSync_NothingNew" xml:space="preserve">
+    <value>Đồng bộ hoàn tất. Thiết bị này đã có tất cả bản ghi của thiết bị kia.</value>
+  </data>
+  <data name="LanSync_SelectDeviceFirst" xml:space="preserve">
+    <value>Hãy chọn một thiết bị hoặc nhập địa chỉ.</value>
+  </data>
+  <data name="LanSync_EnterCodeFirst" xml:space="preserve">
+    <value>Hãy nhập mã xác minh gồm 6 chữ số.</value>
+  </data>
+  <data name="LanSync_SelectDataFirst" xml:space="preserve">
+    <value>Hãy chọn ít nhất một loại dữ liệu.</value>
+  </data>
+  <data name="LanSync_Error_InvalidAddress" xml:space="preserve">
+    <value>Địa chỉ không hợp lệ.</value>
+  </data>
+  <data name="LanSync_Error_ConnectFailed" xml:space="preserve">
+    <value>Không thể kết nối tới {0}. Hãy đảm bảo thiết bị kia đang chia sẻ và cả hai thiết bị cùng một mạng.</value>
+  </data>
+  <data name="LanSync_Error_InvalidCode" xml:space="preserve">
+    <value>Mã xác minh không đúng.</value>
+  </data>
+  <data name="LanSync_Error_Locked" xml:space="preserve">
+    <value>Nhập sai mã quá nhiều lần nên thiết bị kia đã dừng chia sẻ. Hãy mở lại chia sẻ trên thiết bị đó để nhận mã mới.</value>
+  </data>
+  <data name="LanSync_Error_ProtocolMismatch" xml:space="preserve">
+    <value>Phiên bản Moonward trên hai thiết bị không tương thích. Hãy cập nhật cả hai lên phiên bản mới nhất rồi thử lại.</value>
+  </data>
+  <data name="LanSync_Error_Failed" xml:space="preserve">
+    <value>Đồng bộ thất bại: {0}</value>
+  </data>
+  <data name="WelcomeView_DoNotImport" xml:space="preserve">
+    <value>Không nhập</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDevice" xml:space="preserve">
+    <value>Đồng bộ từ thiết bị LAN</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDeviceDescription" xml:space="preserve">
+    <value>Sau khi bạn nhấn "{0}", Moonward sẽ tìm các thiết bị trong mạng cục bộ. Trước tiên, trên thiết bị kia, vào {1} → {2} rồi chọn "{3}". Bản ghi gacha, dữ liệu hộp công cụ và thời gian chơi sẽ được đồng bộ, còn thông tin đăng nhập tài khoản thì không.</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectStarwardFolder" xml:space="preserve">
+    <value>Hãy chọn thư mục Starward trước.</value>
+  </data>
+  <data name="LanSync_SharedData" xml:space="preserve">
+    <value>Dữ liệu chia sẻ</value>
+  </data>
+  <data name="LanSync_Counts" xml:space="preserve">
+    <value>{0} bản ghi gacha · {1} bản ghi hộp công cụ · {2} phiên chơi</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDeviceDesc" xml:space="preserve">
+    <value>Thêm những bản ghi mà thiết bị khác trong mạng có còn thiết bị này chưa có</value>
+  </data>
+  <data name="LanSync_ShareThisDeviceDesc" xml:space="preserve">
+    <value>Trong khi chia sẻ, thiết bị khác có thể nhập mã xác minh để đồng bộ từ thiết bị này; thông tin đăng nhập tài khoản không được chia sẻ</value>
+  </data>
+  <data name="LanSync_StartSharing" xml:space="preserve">
+    <value>Bắt đầu chia sẻ</value>
+  </data>
+  <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
+    <value>Sao lưu và đặt lại</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
+    <value>Nén và sao lưu cơ sở dữ liệu vào thư mục DatabaseBackup trong thư mục dữ liệu</value>
+  </data>
+  <data name="FileSettingPage_BackupNow" xml:space="preserve">
+    <value>Sao lưu ngay</value>
+  </data>
+  <data name="FileSettingPage_DeleteAllSettingsDesc" xml:space="preserve">
+    <value>Xóa mọi cài đặt và khởi động lại ứng dụng; bản ghi và tài khoản đã đăng nhập vẫn được giữ</value>
+  </data>
+  <data name="WelcomeView_ImportExistingData" xml:space="preserve">
+    <value>Nhập dữ liệu hiện có</value>
+  </data>
+  <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
+    <value>Bạn cũng có thể đồng bộ từ thiết bị khác trong mạng sau này tại {0} → {1}.</value>
   </data>
 </root>

@@ -2101,9 +2101,6 @@
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Moonward、起動!</value>
   </data>
-  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
-    <value>移行して起動</value>
-  </data>
   <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
     <value>以前のバージョンのデータが検出されました。続行するには新しいデータフォルダーに移行する必要があります。現在のデータの場所：</value>
   </data>
@@ -2117,7 +2114,7 @@
     <value>移行を完了するには管理者権限が必要です。</value>
   </data>
   <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
-    <value>Import data from Starward</value>
+    <value>Starward からインポート</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
     <value>自動検出された場所を使うか、データフォルダーまたはポータブル版のインストールフォルダーを指定できます。取り込み前に Starward を完全に終了し、保存先ディスクの空き容量を確保してください。取り込みが終わるまで、このアプリを閉じたり、関係するディスクを取り外したり切断したりしないでください。</value>
@@ -3948,5 +3945,167 @@
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
     <value>すべてのプロファイルに適用され、カスタム起動プログラムとは併用できません</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="LanSync_Title" xml:space="preserve">
+    <value>LAN 同期</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDevice" xml:space="preserve">
+    <value>他のデバイスから同期</value>
+  </data>
+  <data name="LanSync_ShareThisDevice" xml:space="preserve">
+    <value>このデバイスのデータを共有</value>
+  </data>
+  <data name="LanSync_ShareDialogDescription" xml:space="preserve">
+    <value>もう一方のデバイスの Moonward で「{0}」を選び、このデバイスを選択して下の認証コードを入力してください。このウィンドウを閉じると共有が停止します。</value>
+  </data>
+  <data name="LanSync_VerificationCode" xml:space="preserve">
+    <value>認証コード</value>
+  </data>
+  <data name="LanSync_ThisDevice" xml:space="preserve">
+    <value>このデバイス</value>
+  </data>
+  <data name="LanSync_WaitingForConnection" xml:space="preserve">
+    <value>もう一方のデバイスの接続を待っています…</value>
+  </data>
+  <data name="LanSync_SentToDevice" xml:space="preserve">
+    <value>{0}（{1}）にデータを送信しました。</value>
+  </data>
+  <data name="LanSync_TooManyAttempts" xml:space="preserve">
+    <value>認証コードの誤りが多すぎるため、共有を停止しました。このウィンドウを開き直すと新しいコードが発行されます。</value>
+  </data>
+  <data name="LanSync_StartSharingFailed" xml:space="preserve">
+    <value>共有を開始できません：{0}</value>
+  </data>
+  <data name="LanSync_DiscoveryUnavailable" xml:space="preserve">
+    <value>自動検出を利用できません。もう一方のデバイスでこのデバイスのアドレスを手動で入力してください。</value>
+  </data>
+  <data name="LanSync_FirewallHint" xml:space="preserve">
+    <value>もう一方のデバイスからこのデバイスが見つからない場合は、両方が同じネットワークに接続され、Windows ファイアウォールでプライベート ネットワーク上の Moonward の通信が許可されていることを確認してください。</value>
+  </data>
+  <data name="LanSync_StopSharing" xml:space="preserve">
+    <value>共有を停止</value>
+  </data>
+  <data name="LanSync_SyncDialogDescription" xml:space="preserve">
+    <value>相手にあってこのデバイスにない記録だけをこのデバイスに追加します。どちらのデバイスでも既存の記録が変更・削除されることはありません。アカウントのログイン情報は同期されません。同期の前にこのデバイスのデータベースを自動でバックアップします。</value>
+  </data>
+  <data name="LanSync_OpenShareFirst" xml:space="preserve">
+    <value>先にもう一方のデバイスで「{0} → {1}」を開き、「{2}」を選んでください。</value>
+  </data>
+  <data name="LanSync_Devices" xml:space="preserve">
+    <value>ネットワーク上のデバイス</value>
+  </data>
+  <data name="LanSync_NoDeviceFound" xml:space="preserve">
+    <value>デバイスが見つかりません。もう一方のデバイスで共有が開始されているか確認するか、下にアドレスを入力してください。</value>
+  </data>
+  <data name="LanSync_ManualAddress" xml:space="preserve">
+    <value>またはアドレスを入力</value>
+  </data>
+  <data name="LanSync_ManualAddressPlaceholder" xml:space="preserve">
+    <value>IP またはコンピューター名（例: 192.168.1.10）</value>
+  </data>
+  <data name="LanSync_CodePlaceholder" xml:space="preserve">
+    <value>6 桁の数字</value>
+  </data>
+  <data name="LanSync_DataToSync" xml:space="preserve">
+    <value>同期するデータ</value>
+  </data>
+  <data name="LanSync_Category_Gacha" xml:space="preserve">
+    <value>ガチャ記録</value>
+  </data>
+  <data name="LanSync_Category_GameRecord" xml:space="preserve">
+    <value>米游社 / HoYoLAB ツールボックスのデータ</value>
+  </data>
+  <data name="LanSync_Category_PlayTime" xml:space="preserve">
+    <value>プレイ時間</value>
+  </data>
+  <data name="LanSync_Sync" xml:space="preserve">
+    <value>同期</value>
+  </data>
+  <data name="LanSync_Receiving" xml:space="preserve">
+    <value>データを受信中… {0}</value>
+  </data>
+  <data name="LanSync_Merging" xml:space="preserve">
+    <value>記録をこのデバイスに追加しています…</value>
+  </data>
+  <data name="LanSync_Completed" xml:space="preserve">
+    <value>同期が完了しました。ガチャ記録 {0} 件、ツールボックスの記録 {1} 件、プレイ時間 {2} 件を追加しました。</value>
+  </data>
+  <data name="LanSync_NothingNew" xml:space="preserve">
+    <value>同期が完了しました。このデバイスには相手の記録がすべてそろっています。</value>
+  </data>
+  <data name="LanSync_SelectDeviceFirst" xml:space="preserve">
+    <value>デバイスを選択するか、アドレスを入力してください。</value>
+  </data>
+  <data name="LanSync_EnterCodeFirst" xml:space="preserve">
+    <value>6 桁の認証コードを入力してください。</value>
+  </data>
+  <data name="LanSync_SelectDataFirst" xml:space="preserve">
+    <value>同期するデータを 1 つ以上選択してください。</value>
+  </data>
+  <data name="LanSync_Error_InvalidAddress" xml:space="preserve">
+    <value>アドレスが無効です。</value>
+  </data>
+  <data name="LanSync_Error_ConnectFailed" xml:space="preserve">
+    <value>{0} に接続できません。相手が共有を開始しているか、両方のデバイスが同じネットワークにあるか確認してください。</value>
+  </data>
+  <data name="LanSync_Error_InvalidCode" xml:space="preserve">
+    <value>認証コードが正しくありません。</value>
+  </data>
+  <data name="LanSync_Error_Locked" xml:space="preserve">
+    <value>認証コードの誤りが多すぎるため、相手のデバイスは共有を停止しました。相手側で共有を開き直して新しいコードを取得してください。</value>
+  </data>
+  <data name="LanSync_Error_ProtocolMismatch" xml:space="preserve">
+    <value>2 台のデバイスの Moonward のバージョンに互換性がありません。両方を最新バージョンに更新してから、もう一度お試しください。</value>
+  </data>
+  <data name="LanSync_Error_Failed" xml:space="preserve">
+    <value>同期に失敗しました：{0}</value>
+  </data>
+  <data name="WelcomeView_DoNotImport" xml:space="preserve">
+    <value>インポートしない</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDevice" xml:space="preserve">
+    <value>LAN のデバイスから同期</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDeviceDescription" xml:space="preserve">
+    <value>「{0}」をクリックすると、ローカルネットワーク内のデバイスを検索します。先にもう一方のデバイスで「{1} → {2}」を開き、「{3}」を選んでください。ガチャ記録・ツールボックスのデータ・プレイ時間が同期され、アカウントのログイン情報は同期されません。</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectStarwardFolder" xml:space="preserve">
+    <value>先に Starward のフォルダーを選択してください。</value>
+  </data>
+  <data name="LanSync_SharedData" xml:space="preserve">
+    <value>共有するデータ</value>
+  </data>
+  <data name="LanSync_Counts" xml:space="preserve">
+    <value>ガチャ記録 {0} 件 · ツールボックスの記録 {1} 件 · プレイ時間 {2} 件</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDeviceDesc" xml:space="preserve">
+    <value>ネットワーク上の別のデバイスにあって、このデバイスにない記録を追加します</value>
+  </data>
+  <data name="LanSync_ShareThisDeviceDesc" xml:space="preserve">
+    <value>共有中は、他のデバイスが認証コードを入力してこのデバイスから同期できます。アカウントのログイン情報は共有されません</value>
+  </data>
+  <data name="LanSync_StartSharing" xml:space="preserve">
+    <value>共有を開始</value>
+  </data>
+  <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
+    <value>バックアップとリセット</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
+    <value>データベースを圧縮して、データフォルダー内の DatabaseBackup フォルダーにバックアップします</value>
+  </data>
+  <data name="FileSettingPage_BackupNow" xml:space="preserve">
+    <value>今すぐバックアップ</value>
+  </data>
+  <data name="FileSettingPage_DeleteAllSettingsDesc" xml:space="preserve">
+    <value>すべての設定を消去してアプリを再起動します。記録データとログイン済みのアカウントはそのまま残ります</value>
+  </data>
+  <data name="WelcomeView_ImportExistingData" xml:space="preserve">
+    <value>既存データの取り込み</value>
+  </data>
+  <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
+    <value>あとから「{0} → {1}」で LAN 内の他のデバイスから同期することもできます。</value>
   </data>
 </root>

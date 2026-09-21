@@ -2101,9 +2101,6 @@
   <data name="WelcomeView_StarwardStart" xml:space="preserve">
     <value>Moonward เริ่ม!</value>
   </data>
-  <data name="WelcomeView_MigrateAndStart" xml:space="preserve">
-    <value>ย้ายข้อมูลและเริ่มต้น</value>
-  </data>
   <data name="WelcomeView_LegacyDataMigrationNotice" xml:space="preserve">
     <value>ตรวจพบข้อมูลเวอร์ชันเก่า ต้องย้ายไปยังโฟลเดอร์ข้อมูลใหม่ก่อนดำเนินการต่อ ตำแหน่งข้อมูลปัจจุบัน:</value>
   </data>
@@ -2117,7 +2114,7 @@
     <value>ต้องการสิทธิ์ผู้ดูแลระบบเพื่อย้ายข้อมูลให้เสร็จสิ้น</value>
   </data>
   <data name="WelcomeView_MigrateFromStarward" xml:space="preserve">
-    <value>Import data from Starward</value>
+    <value>นำเข้าจาก Starward</value>
   </data>
   <data name="WelcomeView_MigrateFromStarwardDescription" xml:space="preserve">
     <value>A detected location can be used, or a data folder or portable install folder can be specified. Fully quit Starward before importing, and make sure the destination disk has enough free space. Do not close this app, and do not unplug or disconnect the disks involved, until import finishes.</value>
@@ -3943,5 +3940,167 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
     <value>มีผลกับทุกโปรไฟล์ และใช้ร่วมกับตัวเรียกใช้งานที่กำหนดเองไม่ได้</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>ปิด</value>
+  </data>
+  <data name="LanSync_Title" xml:space="preserve">
+    <value>ซิงค์ผ่าน LAN</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDevice" xml:space="preserve">
+    <value>ซิงค์จากอุปกรณ์อื่น</value>
+  </data>
+  <data name="LanSync_ShareThisDevice" xml:space="preserve">
+    <value>แชร์ข้อมูลของอุปกรณ์นี้</value>
+  </data>
+  <data name="LanSync_ShareDialogDescription" xml:space="preserve">
+    <value>บนอีกอุปกรณ์ ให้เลือก "{0}" ใน Moonward แล้วเลือกอุปกรณ์นี้และป้อนรหัสด้านล่าง การแชร์จะหยุดเมื่อปิดหน้าต่างนี้</value>
+  </data>
+  <data name="LanSync_VerificationCode" xml:space="preserve">
+    <value>รหัสยืนยัน</value>
+  </data>
+  <data name="LanSync_ThisDevice" xml:space="preserve">
+    <value>อุปกรณ์นี้</value>
+  </data>
+  <data name="LanSync_WaitingForConnection" xml:space="preserve">
+    <value>กำลังรออีกอุปกรณ์…</value>
+  </data>
+  <data name="LanSync_SentToDevice" xml:space="preserve">
+    <value>ส่งข้อมูลไปยัง {0} ({1}) แล้ว</value>
+  </data>
+  <data name="LanSync_TooManyAttempts" xml:space="preserve">
+    <value>ป้อนรหัสผิดหลายครั้งเกินไป จึงหยุดการแชร์แล้ว เปิดหน้าต่างนี้อีกครั้งเพื่อรับรหัสใหม่</value>
+  </data>
+  <data name="LanSync_StartSharingFailed" xml:space="preserve">
+    <value>ไม่สามารถเริ่มการแชร์ได้: {0}</value>
+  </data>
+  <data name="LanSync_DiscoveryUnavailable" xml:space="preserve">
+    <value>ไม่สามารถใช้การค้นหาอัตโนมัติได้ โปรดป้อนที่อยู่ของอุปกรณ์นี้ด้วยตนเองบนอีกอุปกรณ์</value>
+  </data>
+  <data name="LanSync_FirewallHint" xml:space="preserve">
+    <value>หากอีกอุปกรณ์หาอุปกรณ์นี้ไม่พบ โปรดตรวจสอบว่าทั้งสองอุปกรณ์อยู่ในเครือข่ายเดียวกัน และ Windows Firewall อนุญาตให้ Moonward สื่อสารบนเครือข่ายส่วนตัว</value>
+  </data>
+  <data name="LanSync_StopSharing" xml:space="preserve">
+    <value>หยุดแชร์</value>
+  </data>
+  <data name="LanSync_SyncDialogDescription" xml:space="preserve">
+    <value>จะเพิ่มเฉพาะบันทึกที่อีกอุปกรณ์มีแต่อุปกรณ์นี้ไม่มีเข้ามาในอุปกรณ์นี้ บันทึกที่มีอยู่แล้วบนทั้งสองอุปกรณ์จะไม่ถูกแก้ไขหรือลบ จะไม่ซิงค์ข้อมูลการเข้าสู่ระบบบัญชี และจะสำรองฐานข้อมูลของอุปกรณ์นี้โดยอัตโนมัติก่อนซิงค์</value>
+  </data>
+  <data name="LanSync_OpenShareFirst" xml:space="preserve">
+    <value>ก่อนอื่น บนอีกอุปกรณ์ ให้ไปที่ {0} → {1} แล้วเลือก "{2}"</value>
+  </data>
+  <data name="LanSync_Devices" xml:space="preserve">
+    <value>อุปกรณ์ในเครือข่าย</value>
+  </data>
+  <data name="LanSync_NoDeviceFound" xml:space="preserve">
+    <value>ไม่พบอุปกรณ์ โปรดตรวจสอบว่าอีกอุปกรณ์เปิดการแชร์อยู่ หรือป้อนที่อยู่ด้านล่าง</value>
+  </data>
+  <data name="LanSync_ManualAddress" xml:space="preserve">
+    <value>หรือป้อนที่อยู่</value>
+  </data>
+  <data name="LanSync_ManualAddressPlaceholder" xml:space="preserve">
+    <value>IP หรือชื่อคอมพิวเตอร์ เช่น 192.168.1.10</value>
+  </data>
+  <data name="LanSync_CodePlaceholder" xml:space="preserve">
+    <value>ตัวเลข 6 หลัก</value>
+  </data>
+  <data name="LanSync_DataToSync" xml:space="preserve">
+    <value>ข้อมูลที่จะซิงค์</value>
+  </data>
+  <data name="LanSync_Category_Gacha" xml:space="preserve">
+    <value>ประวัติการสุ่ม</value>
+  </data>
+  <data name="LanSync_Category_GameRecord" xml:space="preserve">
+    <value>ข้อมูลกล่องเครื่องมือ Miyoushe / HoYoLAB</value>
+  </data>
+  <data name="LanSync_Category_PlayTime" xml:space="preserve">
+    <value>เวลาเล่น</value>
+  </data>
+  <data name="LanSync_Sync" xml:space="preserve">
+    <value>ซิงค์</value>
+  </data>
+  <data name="LanSync_Receiving" xml:space="preserve">
+    <value>กำลังรับข้อมูล… {0}</value>
+  </data>
+  <data name="LanSync_Merging" xml:space="preserve">
+    <value>กำลังเพิ่มบันทึกลงในอุปกรณ์นี้…</value>
+  </data>
+  <data name="LanSync_Completed" xml:space="preserve">
+    <value>ซิงค์เสร็จสิ้น เพิ่มประวัติการสุ่ม {0} รายการ บันทึกกล่องเครื่องมือ {1} รายการ และเวลาเล่น {2} ช่วง</value>
+  </data>
+  <data name="LanSync_NothingNew" xml:space="preserve">
+    <value>ซิงค์เสร็จสิ้น อุปกรณ์นี้มีบันทึกทั้งหมดของอีกอุปกรณ์อยู่แล้ว</value>
+  </data>
+  <data name="LanSync_SelectDeviceFirst" xml:space="preserve">
+    <value>โปรดเลือกอุปกรณ์หรือป้อนที่อยู่</value>
+  </data>
+  <data name="LanSync_EnterCodeFirst" xml:space="preserve">
+    <value>โปรดป้อนรหัสยืนยัน 6 หลัก</value>
+  </data>
+  <data name="LanSync_SelectDataFirst" xml:space="preserve">
+    <value>โปรดเลือกข้อมูลอย่างน้อยหนึ่งประเภท</value>
+  </data>
+  <data name="LanSync_Error_InvalidAddress" xml:space="preserve">
+    <value>ที่อยู่ไม่ถูกต้อง</value>
+  </data>
+  <data name="LanSync_Error_ConnectFailed" xml:space="preserve">
+    <value>ไม่สามารถเชื่อมต่อกับ {0} ได้ โปรดตรวจสอบว่าอีกอุปกรณ์เปิดการแชร์อยู่ และทั้งสองอุปกรณ์อยู่ในเครือข่ายเดียวกัน</value>
+  </data>
+  <data name="LanSync_Error_InvalidCode" xml:space="preserve">
+    <value>รหัสยืนยันไม่ถูกต้อง</value>
+  </data>
+  <data name="LanSync_Error_Locked" xml:space="preserve">
+    <value>ป้อนรหัสผิดหลายครั้งเกินไป อีกอุปกรณ์จึงหยุดการแชร์แล้ว โปรดเปิดการแชร์บนอุปกรณ์นั้นอีกครั้งเพื่อรับรหัสใหม่</value>
+  </data>
+  <data name="LanSync_Error_ProtocolMismatch" xml:space="preserve">
+    <value>Moonward บนทั้งสองอุปกรณ์เป็นเวอร์ชันที่เข้ากันไม่ได้ โปรดอัปเดตทั้งสองเครื่องเป็นเวอร์ชันล่าสุดแล้วลองอีกครั้ง</value>
+  </data>
+  <data name="LanSync_Error_Failed" xml:space="preserve">
+    <value>ซิงค์ไม่สำเร็จ: {0}</value>
+  </data>
+  <data name="WelcomeView_DoNotImport" xml:space="preserve">
+    <value>ไม่นำเข้า</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDevice" xml:space="preserve">
+    <value>ซิงค์จากอุปกรณ์ใน LAN</value>
+  </data>
+  <data name="WelcomeView_SyncFromLanDeviceDescription" xml:space="preserve">
+    <value>หลังจากคลิก "{0}" Moonward จะค้นหาอุปกรณ์ในเครือข่ายท้องถิ่น ก่อนอื่นบนอีกอุปกรณ์ ให้ไปที่ {1} → {2} แล้วเลือก "{3}" ระบบจะซิงค์ประวัติการสุ่ม ข้อมูลกล่องเครื่องมือ และเวลาเล่น แต่จะไม่ซิงค์ข้อมูลการเข้าสู่ระบบบัญชี</value>
+  </data>
+  <data name="WelcomeView_PleaseSelectStarwardFolder" xml:space="preserve">
+    <value>โปรดเลือกโฟลเดอร์ Starward ก่อน</value>
+  </data>
+  <data name="LanSync_SharedData" xml:space="preserve">
+    <value>ข้อมูลที่แชร์</value>
+  </data>
+  <data name="LanSync_Counts" xml:space="preserve">
+    <value>ประวัติการสุ่ม {0} รายการ · บันทึกกล่องเครื่องมือ {1} รายการ · เวลาเล่น {2} ช่วง</value>
+  </data>
+  <data name="LanSync_SyncFromOtherDeviceDesc" xml:space="preserve">
+    <value>เพิ่มบันทึกที่อุปกรณ์อื่นในเครือข่ายมี แต่อุปกรณ์นี้ยังไม่มี</value>
+  </data>
+  <data name="LanSync_ShareThisDeviceDesc" xml:space="preserve">
+    <value>ระหว่างแชร์ อุปกรณ์อื่นสามารถป้อนรหัสยืนยันเพื่อซิงค์จากอุปกรณ์นี้ได้ โดยไม่รวมข้อมูลการเข้าสู่ระบบบัญชี</value>
+  </data>
+  <data name="LanSync_StartSharing" xml:space="preserve">
+    <value>เริ่มแชร์</value>
+  </data>
+  <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
+    <value>สำรองข้อมูลและรีเซ็ต</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
+    <value>บีบอัดฐานข้อมูลแล้วสำรองไว้ในโฟลเดอร์ DatabaseBackup ภายในโฟลเดอร์ข้อมูล</value>
+  </data>
+  <data name="FileSettingPage_BackupNow" xml:space="preserve">
+    <value>สำรองข้อมูลเลย</value>
+  </data>
+  <data name="FileSettingPage_DeleteAllSettingsDesc" xml:space="preserve">
+    <value>ล้างการตั้งค่าทั้งหมดแล้วรีสตาร์ตแอป บันทึกข้อมูลและบัญชีที่ลงชื่อเข้าใช้จะยังคงอยู่</value>
+  </data>
+  <data name="WelcomeView_ImportExistingData" xml:space="preserve">
+    <value>นำเข้าข้อมูลที่มีอยู่</value>
+  </data>
+  <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
+    <value>คุณยังสามารถซิงค์จากอุปกรณ์อื่นในเครือข่ายภายหลังได้ที่ {0} → {1}</value>
   </data>
 </root>

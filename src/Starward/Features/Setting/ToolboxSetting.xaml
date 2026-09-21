@@ -11,7 +11,10 @@
              mc:Ignorable="d">
 
 
-    <GridView ItemsSource="{x:Bind ToolboxItems}" SelectionMode="None">
+    <!--  GridView 的 Padding 加在滚动区内的 ItemsPresenter 上，与其他子页的滚动内容边距一致  -->
+    <GridView Padding="{StaticResource SettingPageContentPadding}"
+              ItemsSource="{x:Bind ToolboxItems}"
+              SelectionMode="None">
         <GridView.ItemTemplate>
             <DataTemplate x:DataType="local:ToolboxItem">
 

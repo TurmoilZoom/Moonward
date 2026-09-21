@@ -2,6 +2,7 @@
 <sf:WindowEx x:Class="Starward.Features.ViewHost.WelcomeWindow"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.ViewHost"
@@ -14,6 +15,23 @@
 
 
     <Grid Loaded="Grid_Loaded">
+        <Grid.Resources>
+            <!--  已有数据来源的说明：可见的一段与三段占位共用排版；占位只参与测量，不显示、不可命中、不进无障碍树  -->
+            <Style x:Key="DataSourceDescriptionStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="IsTextScaleFactorEnabled" Value="False" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            <Style x:Key="DataSourceDescriptionSizerStyle"
+                   BasedOn="{StaticResource DataSourceDescriptionStyle}"
+                   TargetType="TextBlock">
+                <Setter Property="Opacity" Value="0" />
+                <Setter Property="IsHitTestVisible" Value="False" />
+                <Setter Property="AutomationProperties.AccessibilityView" Value="Raw" />
+            </Style>
+        </Grid.Resources>
+
         <Image HorizontalAlignment="Center"
                VerticalAlignment="Center"
                Source="ms-appx:///Assets/Image/UI_CutScene_1130320101A.png"
@@ -37,6 +55,8 @@
                        Text="{x:Bind lang:Lang.WelcomeView_WelcomeToStarwardDescription}"
                        TextWrapping="Wrap" />
 
+            <!--  以下各功能区之间统一隔 28，区内标题到内容统一隔 12；区内不留常驻空行，间距只由这些边距决定  -->
+
             <!--  数据文件夹  -->
             <TextBlock Margin="0,28,0,0"
                        FontSize="16"
@@ -44,17 +64,11 @@
                        IsTextScaleFactorEnabled="False"
                        Text="{x:Bind lang:Lang.WelcomeView_SelectUserDataFolderDescription}"
                        TextWrapping="Wrap" />
-            <Grid Margin="0,12,0,0"
-                  ColumnSpacing="12"
-                  RowSpacing="2">
+            <Grid Margin="0,12,0,0" ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" MinHeight="16" />
-                </Grid.RowDefinitions>
                 <Button VerticalAlignment="Center"
                         BorderThickness="0"
                         Command="{x:Bind ChangeUserDataFolderCommand}"
@@ -62,81 +76,122 @@
                         IsEnabled="{x:Bind CanChangeUserDataFolder}"
                         IsTextScaleFactorEnabled="False"
                         Style="{ThemeResource AccentButtonStyle}" />
+                <!--  提示（未选择、需要管理员权限等）紧跟在路径后面，与按钮同一行，不另起一行占位  -->
                 <TextBlock Grid.Column="1"
                            VerticalAlignment="Center"
                            FontSize="12"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            IsTextScaleFactorEnabled="False"
-                           Text="{x:Bind UserDataFolder}"
                            TextTrimming="CharacterEllipsis"
-                           Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(UserDataFolder)}" />
-                <!--  单独占一行并预留高度，避免报错把路径顶离按钮中线  -->
-                <TextBlock Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           MinHeight="16"
-                           FontSize="12"
-                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                           IsTextScaleFactorEnabled="False"
-                           Text="{x:Bind UserDataFolderErrorMessage}"
-                           TextWrapping="Wrap" />
+                           ToolTipService.ToolTip="{x:Bind UserDataFolderErrorMessage}">
+                    <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind UserDataFolder}" /><Run Text="{x:Bind PathMessageSeparator(UserDataFolder, UserDataFolderErrorMessage)}" /><Run Foreground="{ThemeResource SystemFillColorCautionBrush}" Text="{x:Bind UserDataFolderErrorMessage}" />
+                </TextBlock>
             </Grid>
 
-            <!--  从 Starward 导入  -->
-            <CheckBox Margin="0,16,0,0"
-                      IsChecked="{x:Bind MigrateFromStarward, Mode=TwoWay}"
-                      IsEnabled="{x:Bind CanMigrateFromStarward}"
-                      IsTextScaleFactorEnabled="False">
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           IsTextScaleFactorEnabled="False"
-                           Text="{x:Bind lang:Lang.WelcomeView_MigrateFromStarward}"
-                           TextWrapping="Wrap" />
-            </CheckBox>
-            <TextBlock Margin="0,4,0,0"
-                       FontSize="12"
+            <!--  导入已有数据（三选一，默认不导入）：与月报自动更新里「当月 / 上月」同款 Segmented  -->
+            <TextBlock Margin="0,28,0,0"
+                       FontSize="16"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        IsTextScaleFactorEnabled="False"
-                       Text="{x:Bind lang:Lang.WelcomeView_MigrateFromStarwardDescription}"
-                       TextWrapping="Wrap" />
-            <Grid Margin="0,8,0,0"
-                  ColumnSpacing="12"
-                  RowSpacing="2">
+                       Text="{x:Bind lang:Lang.WelcomeView_ImportExistingData}" />
+            <!--  选「从 Starward 导入」时，选择目录的按钮和解析到的位置跟在切换按钮右边；行高至少 32（与该按钮同高），切换时不变  -->
+            <Grid Margin="0,12,0,0"
+                  MinHeight="32"
+                  ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" MinHeight="16" />
-                </Grid.RowDefinitions>
-                <Button VerticalAlignment="Center"
-                        BorderThickness="0"
-                        Command="{x:Bind SelectStarwardFolderCommand}"
-                        Content="{x:Bind lang:Lang.WelcomeView_SelectStarwardFolder}"
-                        IsEnabled="{x:Bind CanPickStarwardFolder}"
-                        IsTextScaleFactorEnabled="False"
-                        Style="{ThemeResource AccentButtonStyle}" />
-                <Grid Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock FontSize="12"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               IsTextScaleFactorEnabled="False"
-                               Text="{x:Bind StarwardSourcePath}"
-                               TextTrimming="CharacterEllipsis"
-                               Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardSourcePath)}" />
-                    <TextBlock FontSize="12"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               IsTextScaleFactorEnabled="False"
-                               Text="{x:Bind lang:Lang.WelcomeView_StarwardDataNotFound}"
-                               TextTrimming="CharacterEllipsis"
-                               Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowStarwardNotFoundHint)}" />
+                <cwc:Segmented x:Name="Segmented_DataSource"
+                               VerticalAlignment="Center"
+                               AutomationProperties.Name="{x:Bind lang:Lang.WelcomeView_ImportExistingData}"
+                               IsEnabled="{x:Bind CanOperate}"
+                               SelectedIndex="0"
+                               SelectionChanged="Segmented_DataSource_SelectionChanged">
+                    <!--
+                        选中项整块填充与「选择文件夹」按钮（AccentButtonStyle，本页无边框）相同的强调色，不要底部的高亮条：
+                        控件模板里「选中 / 选中悬停 / 选中按下」都读下面这几个键，高亮条只读 Pill 系列，改成透明即不显示。只在本页生效；高对比度用系统高亮色
+                    -->
+                    <cwc:Segmented.Resources>
+                        <ResourceDictionary>
+                            <ResourceDictionary.ThemeDictionaries>
+                                <ResourceDictionary x:Key="Light">
+                                    <StaticResource x:Key="SegmentedItemBackgroundSelected" ResourceKey="AccentFillColorDefaultBrush" />
+                                    <StaticResource x:Key="SegmentedItemBorderBrushSelected" ResourceKey="AccentFillColorDefaultBrush" />
+                                    <StaticResource x:Key="SegmentedItemForegroundSelected" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackground" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundPointerOver" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundPressed" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundDisabled" ResourceKey="ControlFillColorTransparentBrush" />
+                                </ResourceDictionary>
+                                <ResourceDictionary x:Key="Dark">
+                                    <StaticResource x:Key="SegmentedItemBackgroundSelected" ResourceKey="AccentFillColorDefaultBrush" />
+                                    <StaticResource x:Key="SegmentedItemBorderBrushSelected" ResourceKey="AccentFillColorDefaultBrush" />
+                                    <StaticResource x:Key="SegmentedItemForegroundSelected" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackground" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundPointerOver" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundPressed" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundDisabled" ResourceKey="ControlFillColorTransparentBrush" />
+                                </ResourceDictionary>
+                                <ResourceDictionary x:Key="HighContrast">
+                                    <StaticResource x:Key="SegmentedItemBackgroundSelected" ResourceKey="SystemColorHighlightColorBrush" />
+                                    <StaticResource x:Key="SegmentedItemBorderBrushSelected" ResourceKey="SystemColorHighlightColorBrush" />
+                                    <StaticResource x:Key="SegmentedItemForegroundSelected" ResourceKey="SystemColorHighlightTextColorBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackground" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundPointerOver" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundPressed" ResourceKey="ControlFillColorTransparentBrush" />
+                                    <StaticResource x:Key="SegmentedPillBackgroundDisabled" ResourceKey="ControlFillColorTransparentBrush" />
+                                </ResourceDictionary>
+                            </ResourceDictionary.ThemeDictionaries>
+                        </ResourceDictionary>
+                    </cwc:Segmented.Resources>
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.WelcomeView_DoNotImport}" IsTextScaleFactorEnabled="False" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.WelcomeView_MigrateFromStarward}" IsTextScaleFactorEnabled="False" />
+                    <cwc:SegmentedItem Content="{x:Bind lang:Lang.WelcomeView_SyncFromLanDevice}" IsTextScaleFactorEnabled="False" />
+                </cwc:Segmented>
+                <Grid Grid.Column="1"
+                      ColumnSpacing="12"
+                      Visibility="{x:Bind sh:BindConverter.BoolToVisibility(IsStarwardSourceSelected)}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Height="32"
+                            VerticalAlignment="Center"
+                            BorderThickness="0"
+                            Command="{x:Bind SelectStarwardFolderCommand}"
+                            Content="{x:Bind lang:Lang.WelcomeView_SelectStarwardFolder}"
+                            IsEnabled="{x:Bind CanPickStarwardFolder}"
+                            IsTextScaleFactorEnabled="False"
+                            Style="{ThemeResource AccentButtonStyle}" />
+                    <Grid Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   IsTextScaleFactorEnabled="False"
+                                   Text="{x:Bind StarwardSourcePath}"
+                                   TextTrimming="CharacterEllipsis"
+                                   Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardSourcePath)}" />
+                        <TextBlock FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   IsTextScaleFactorEnabled="False"
+                                   Text="{x:Bind lang:Lang.WelcomeView_StarwardDataNotFound}"
+                                   TextTrimming="CharacterEllipsis"
+                                   Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowStarwardNotFoundHint)}" />
+                    </Grid>
                 </Grid>
-                <TextBlock Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           MinHeight="16"
-                           FontSize="12"
-                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                           IsTextScaleFactorEnabled="False"
+            </Grid>
+            <!--  当前选项的说明，选 Starward 目录出错时换成报错（切到其他选项会清空）。高度恒为三段说明里最长的一段，切换选项时整页不跳（本页垂直居中）  -->
+            <Grid Margin="0,8,0,0">
+                <!--  占位：三段说明都参与测量，窗口变窄换行时也按最长一段撑开  -->
+                <TextBlock Style="{StaticResource DataSourceDescriptionSizerStyle}" Text="{x:Bind ImportLaterHint}" />
+                <TextBlock Style="{StaticResource DataSourceDescriptionSizerStyle}" Text="{x:Bind lang:Lang.WelcomeView_MigrateFromStarwardDescription}" />
+                <TextBlock Style="{StaticResource DataSourceDescriptionSizerStyle}" Text="{x:Bind LanSyncDescription}" />
+                <TextBlock Style="{StaticResource DataSourceDescriptionStyle}"
+                           Text="{x:Bind DataSourceDescription}"
+                           Visibility="{x:Bind sh:BindConverter.ObjectToVisibilityReversed(StarwardFolderErrorMessage)}" />
+                <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                           Style="{StaticResource DataSourceDescriptionStyle}"
                            Text="{x:Bind StarwardFolderErrorMessage}"
-                           TextWrapping="Wrap" />
+                           Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardFolderErrorMessage)}" />
             </Grid>
 
             <!--  旧版本数据迁移提示  -->
@@ -163,7 +218,7 @@
             </StackPanel>
 
             <!--  必要的检查  -->
-            <TextBlock Margin="0,32,0,0"
+            <TextBlock Margin="0,28,0,0"
                        FontSize="16"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        IsTextScaleFactorEnabled="False"
@@ -237,7 +292,7 @@
             </StackPanel>
 
             <!--  透明/动画效果  -->
-            <TextBlock Margin="0,32,0,0"
+            <TextBlock Margin="0,28,0,0"
                        HorizontalAlignment="Left"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        Text="{x:Bind lang:Lang.SettingPage_ForABetterExperiencePleaseEnableTheFollowingFeaturesInSystemSettings}"
@@ -258,7 +313,7 @@
             </TextBlock>
 
             <!--  智能应用控制提醒  -->
-            <TextBlock Margin="0,20,0,0"
+            <TextBlock Margin="0,28,0,0"
                        HorizontalAlignment="Left"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        Text="{x:Bind lang:Lang.WelcomeView_IfStarwardTakesALongTimeToStartItIsRecommendedToDisableSmartAppControlInWindowsSecurity}"
@@ -285,7 +340,7 @@
         </StackPanel>
 
 
-        <!--  Starward 启动  -->
+        <!--  Moonward 启动：文案固定，不随导入选项、旧数据迁移变化  -->
         <Button Height="40"
                 Margin="0,0,80,48"
                 HorizontalAlignment="Right"
@@ -298,7 +353,7 @@
             <TextBlock Margin="4,0,8,0"
                        FontSize="14"
                        IsTextScaleFactorEnabled="False"
-                       Text="{x:Bind StartButtonText}" />
+                       Text="{x:Bind lang:Lang.WelcomeView_StarwardStart}" />
         </Button>
 
 

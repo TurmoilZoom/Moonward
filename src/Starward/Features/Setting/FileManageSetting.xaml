@@ -2,6 +2,7 @@
 <sf:PageBase x:Class="Starward.Features.Setting.FileManageSetting"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.Setting"
@@ -12,69 +13,82 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
+    <!--  本页四组内容共用同一种卡片行（前导图标 · 标题与说明 · 右侧操作），各组密度一致；样式只在本页生效  -->
+    <sf:PageBase.Resources>
+        <Style x:Key="DataCardStyle" TargetType="Border">
+            <Setter Property="MinHeight" Value="64" />
+            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+        <Style x:Key="DataCardDescriptionStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="DataCardIconButtonStyle"
+               BasedOn="{StaticResource DateTimePickerFlyoutButtonStyle}"
+               TargetType="Button">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+        <Style x:Key="DataCardActionButtonStyle"
+               BasedOn="{StaticResource DefaultButtonStyle}"
+               TargetType="Button">
+            <Setter Property="MinWidth" Value="104" />
+        </Style>
+    </sf:PageBase.Resources>
+
     <ScrollViewer>
-        <StackPanel>
-            <!--  文件路径（模块标题）  -->
-            <TextBlock FontSize="20"
-                       Text="{x:Bind lang:Lang.FileSettingPage_FilePath}" />
-            <!--  数据文件夹 / 日志文件夹：对齐的路径行（前导图标 · 名称 / 完整路径 · 右侧图标操作按钮），两行共用同一套三列网格以保持对齐  -->
-            <StackPanel Margin="0,12,0,0"
-                        Spacing="12">
+        <StackPanel Padding="{StaticResource SettingPageContentPadding}">
+
+            <!--  文件路径  -->
+            <TextBlock FontSize="20" Text="{x:Bind lang:Lang.FileSettingPage_FilePath}" />
+            <StackPanel Margin="0,12,0,0" Spacing="8">
                 <!--  数据文件夹  -->
-                <Border Padding="16,10"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
+                <Border Style="{StaticResource DataCardStyle}">
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <FontIcon Grid.Column="0"
-                                  Width="24"
+                        <FontIcon Width="24"
                                   VerticalAlignment="Center"
                                   FontSize="20"
                                   Glyph="&#xE8F1;" />
                         <StackPanel Grid.Column="1"
                                     VerticalAlignment="Center"
                                     Spacing="2">
-                            <TextBlock Text="{x:Bind lang:Lang.FileSettingPage_DataFolder}" />
-                            <TextBlock FontSize="12"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       IsTextSelectionEnabled="True"
+                            <TextBlock Text="{x:Bind lang:Lang.FileSettingPage_DataFolder}" TextWrapping="Wrap" />
+                            <TextBlock IsTextSelectionEnabled="True"
                                        MaxLines="2"
+                                       Style="{StaticResource DataCardDescriptionStyle}"
                                        Text="{x:Bind s:AppConfig.UserDataFolder}"
-                                       TextTrimming="CharacterEllipsis"
-                                       TextWrapping="Wrap" />
+                                       TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <StackPanel Grid.Column="2"
-                                    Orientation="Horizontal"
                                     VerticalAlignment="Center"
+                                    Orientation="Horizontal"
                                     Spacing="8">
                             <!--  重新选择数据文件夹  -->
-                            <Button Width="36"
-                                    Height="36"
-                                    Padding="0"
-                                    Command="{x:Bind ChangeUserDataFolderCommand}"
-                                    CornerRadius="8"
+                            <Button Command="{x:Bind ChangeUserDataFolderCommand}"
                                     sc:InstantTooltip.Placement="Top"
                                     sc:InstantTooltip.Text="{x:Bind lang:Lang.SettingPage_ReselectDataFolder}"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                                    Style="{StaticResource DataCardIconButtonStyle}">
                                 <FontIcon FontSize="16"
                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                           Glyph="&#xE8DE;" />
                             </Button>
                             <!--  打开数据文件夹  -->
-                            <Button Width="36"
-                                    Height="36"
-                                    Padding="0"
-                                    Command="{x:Bind OpenUserDataFolderCommand}"
-                                    CornerRadius="8"
+                            <Button Command="{x:Bind OpenUserDataFolderCommand}"
                                     sc:InstantTooltip.Placement="Top"
                                     sc:InstantTooltip.Text="{x:Bind lang:Lang.ScreenshotPage_OpenFolder}"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                                    Style="{StaticResource DataCardIconButtonStyle}">
                                 <FontIcon FontSize="16"
                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                           Glyph="&#xE838;" />
@@ -82,164 +96,227 @@
                         </StackPanel>
                     </Grid>
                 </Border>
-                <!--  日志文件夹（与数据文件夹同处一个模块，日志目录即数据文件夹下的 log 子目录）  -->
-                <Border Padding="16,10"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
+                <!--  日志文件夹（数据文件夹下的 log 子目录）  -->
+                <Border Style="{StaticResource DataCardStyle}">
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <FontIcon Grid.Column="0"
-                                  Width="24"
+                        <FontIcon Width="24"
                                   VerticalAlignment="Center"
                                   FontSize="20"
                                   Glyph="&#xE9D9;" />
                         <StackPanel Grid.Column="1"
                                     VerticalAlignment="Center"
                                     Spacing="2">
-                            <TextBlock Text="{x:Bind lang:Lang.FileSettingPage_LogFolder}" />
-                            <TextBlock FontSize="12"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       IsTextSelectionEnabled="True"
+                            <TextBlock Text="{x:Bind lang:Lang.FileSettingPage_LogFolder}" TextWrapping="Wrap" />
+                            <TextBlock IsTextSelectionEnabled="True"
                                        MaxLines="2"
+                                       Style="{StaticResource DataCardDescriptionStyle}"
                                        Text="{x:Bind LogFolder}"
-                                       TextTrimming="CharacterEllipsis"
-                                       TextWrapping="Wrap" />
+                                       TextTrimming="CharacterEllipsis" />
                         </StackPanel>
-                        <StackPanel Grid.Column="2"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    Spacing="8">
-                            <!--  打开日志文件夹  -->
-                            <Button Width="36"
-                                    Height="36"
-                                    Padding="0"
-                                    Command="{x:Bind OpenLogFolderCommand}"
-                                    CornerRadius="8"
-                                    sc:InstantTooltip.Placement="Top"
-                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.SettingPage_OpenLogFolder}"
-                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                                <FontIcon FontSize="16"
-                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                          Glyph="&#xE838;" />
-                            </Button>
-                        </StackPanel>
+                        <!--  打开日志文件夹  -->
+                        <Button Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Command="{x:Bind OpenLogFolderCommand}"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.SettingPage_OpenLogFolder}"
+                                Style="{StaticResource DataCardIconButtonStyle}">
+                            <FontIcon FontSize="16"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE838;" />
+                        </Button>
                     </Grid>
                 </Border>
             </StackPanel>
 
 
-            <!--  删除个人设置（单独一行）  -->
-            <Button Margin="0,20,0,0"
-                    Height="40"
-                    Padding="16,0,16,0"
-                    BorderThickness="0"
-                    Command="{x:Bind DeleteAllSettingCommand}"
-                    CornerRadius="8,20,20,8"
-                    Style="{ThemeResource AccentButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Glyph="&#xE74D;" />
-                    <TextBlock Text="{x:Bind lang:Lang.SettingPage_DeleteAllSettings}" />
-                </StackPanel>
-            </Button>
-
-            <!--  备份数据库（单独一行）  -->
-            <StackPanel Margin="0,12,0,0"
-                        Orientation="Horizontal"
-                        Spacing="16">
-                <Button Height="40"
-                        Padding="16,0,16,0"
-                        BorderThickness="0"
-                        Command="{x:Bind BackupDatabaseCommand}"
-                        CornerRadius="8,20,20,8"
-                        Style="{ThemeResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xF413;" />
-                        <TextBlock Text="{x:Bind lang:Lang.SettingPage_BackupDatabase}" />
-                    </StackPanel>
-                </Button>
-                <ProgressRing Width="28"
-                              Height="28"
-                              VerticalAlignment="Center"
-                              IsIndeterminate="{x:Bind BackupDatabaseCommand.IsRunning}"
-                              Visibility="{x:Bind BackupDatabaseCommand.IsRunning}" />
-                <Button Height="40"
-                        Padding="20,0,20,1"
-                        VerticalAlignment="Center"
-                        BorderThickness="0"
-                        Command="{x:Bind OpenLastBackupDatabaseCommand}"
-                        CornerRadius="20"
-                        Visibility="{x:Bind LastDatabaseBackupTime, Converter={StaticResource ObjectToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   Text="{x:Bind LastDatabaseBackupTime}" />
-                        <FontIcon Margin="8,2,2,0"
-                                  FontSize="16"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                  Glyph="&#xE8A7;" />
-                    </StackPanel>
-                </Button>
+            <!--  备份与重置  -->
+            <TextBlock Margin="0,28,0,0"
+                       FontSize="20"
+                       Text="{x:Bind lang:Lang.FileSettingPage_BackupAndReset}" />
+            <StackPanel Margin="0,12,0,0" Spacing="8">
+                <!--  备份数据库：说明位在有备份后显示上次备份时间，右侧可打开备份所在位置  -->
+                <Border Style="{StaticResource DataCardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Width="24"
+                                  VerticalAlignment="Center"
+                                  FontSize="20"
+                                  Glyph="&#xF413;" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind lang:Lang.SettingPage_BackupDatabase}" TextWrapping="Wrap" />
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind BackupDescription}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                            <ProgressRing Width="20"
+                                          Height="20"
+                                          IsActive="{x:Bind BackupDatabaseCommand.IsRunning}"
+                                          Visibility="{x:Bind BackupDatabaseCommand.IsRunning}" />
+                            <Button Command="{x:Bind OpenLastBackupDatabaseCommand}"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.ScreenshotPage_OpenFolder}"
+                                    Style="{StaticResource DataCardIconButtonStyle}"
+                                    Visibility="{x:Bind HasLastBackup}">
+                                <FontIcon FontSize="16"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE838;" />
+                            </Button>
+                            <Button Command="{x:Bind BackupDatabaseCommand}"
+                                    Content="{x:Bind lang:Lang.FileSettingPage_BackupNow}"
+                                    Style="{StaticResource DataCardActionButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <!--  删除个人设置：只清 Setting 表，确认后自动重启  -->
+                <Border Style="{StaticResource DataCardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Width="24"
+                                  VerticalAlignment="Center"
+                                  FontSize="20"
+                                  Glyph="&#xE74D;" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind lang:Lang.SettingPage_DeleteAllSettings}" TextWrapping="Wrap" />
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind lang:Lang.FileSettingPage_DeleteAllSettingsDesc}" />
+                        </StackPanel>
+                        <Button Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Command="{x:Bind DeleteAllSettingCommand}"
+                                Content="{x:Bind lang:Lang.Common_Delete}"
+                                Style="{StaticResource DataCardActionButtonStyle}" />
+                    </Grid>
+                </Border>
             </StackPanel>
 
 
-            
+            <!--  局域网同步  -->
+            <TextBlock Margin="0,28,0,0"
+                       FontSize="20"
+                       Text="{x:Bind lang:Lang.LanSync_Title}" />
+            <StackPanel Margin="0,12,0,0" Spacing="8">
+                <!--  从其他设备同步：只把对方有、本机没有的记录加到本机  -->
+                <Border Style="{StaticResource DataCardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Width="24"
+                                  VerticalAlignment="Center"
+                                  FontSize="20"
+                                  Glyph="&#xE895;" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind lang:Lang.LanSync_SyncFromOtherDevice}" TextWrapping="Wrap" />
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind lang:Lang.LanSync_SyncFromOtherDeviceDesc}" />
+                        </StackPanel>
+                        <Button Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Command="{x:Bind SyncFromLanDeviceCommand}"
+                                Content="{x:Bind lang:Lang.LanSync_Sync}"
+                                Style="{StaticResource DataCardActionButtonStyle}" />
+                    </Grid>
+                </Border>
+                <!--  共享本机数据：对话框打开期间允许其他设备凭验证码同步  -->
+                <Border Style="{StaticResource DataCardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Width="24"
+                                  VerticalAlignment="Center"
+                                  FontSize="20"
+                                  Glyph="&#xE72D;" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind lang:Lang.LanSync_ShareThisDevice}" TextWrapping="Wrap" />
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind lang:Lang.LanSync_ShareThisDeviceDesc}" />
+                        </StackPanel>
+                        <Button Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Command="{x:Bind ShareToLanDevicesCommand}"
+                                Content="{x:Bind lang:Lang.LanSync_StartSharing}"
+                                Style="{StaticResource DataCardActionButtonStyle}" />
+                    </Grid>
+                </Border>
+            </StackPanel>
 
 
             <!--  缓存  -->
-            <TextBlock Margin="0,20,0,0"
+            <TextBlock Margin="0,28,0,0"
                        FontSize="20"
                        Text="{x:Bind lang:Lang.FileSettingPage_Cache}" />
-            <StackPanel Margin="0,8,0,0"
-                        Orientation="Horizontal"
-                        Spacing="20">
-                <TextBlock>
-                    <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.FileSettingPage_Log}" />
-                    <LineBreak />
-                    <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.FileSettingPage_Image}" />
-                    <LineBreak />
-                    <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.FileSettingPage_Browser}" />
-                    <LineBreak />
-                    <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.FileSettingPage_GameResource}" />
-                </TextBlock>
-                <TextBlock>
-                    <Run Text="{x:Bind LogCacheSize}" />
-                    <LineBreak />
-                    <Run Text="{x:Bind ImageCacheSize}" />
-                    <LineBreak />
-                    <Run Text="{x:Bind WebCacheSize}" />
-                    <LineBreak />
-                    <Run Text="{x:Bind GameCacheSize}" />
-                </TextBlock>
-            </StackPanel>
-            <!--  清理缓存  -->
-            <StackPanel Margin="0,12,0,0"
-                        Orientation="Horizontal"
-                        Spacing="16">
-                <Button Height="40"
-                        Padding="16,0,16,0"
-                        BorderThickness="0"
-                        Command="{x:Bind ClearCacheCommand}"
-                        CornerRadius="8,20,20,8"
-                        Style="{ThemeResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xEA99;" />
-                        <TextBlock Text="{x:Bind lang:Lang.FileSettingPage_ClearCache}" />
-                    </StackPanel>
-                </Button>
-                <ProgressRing Width="28"
-                              Height="28"
+            <Border Margin="0,12,0,0" Style="{StaticResource DataCardStyle}">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Width="24"
                               VerticalAlignment="Center"
-                              IsIndeterminate="{x:Bind ClearCacheCommand.IsRunning}"
-                              Visibility="{x:Bind ClearCacheCommand.IsRunning}" />
-            </StackPanel>
-
-
+                              FontSize="20"
+                              Glyph="&#xEA99;" />
+                    <!--  各类缓存占用：名称在上、大小在下；窗口窄时换行  -->
+                    <cwc:WrapPanel Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   HorizontalSpacing="32"
+                                   VerticalSpacing="8">
+                        <StackPanel Spacing="2">
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind lang:Lang.FileSettingPage_Log}" />
+                            <TextBlock Text="{x:Bind LogCacheSize}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind lang:Lang.FileSettingPage_Image}" />
+                            <TextBlock Text="{x:Bind ImageCacheSize}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind lang:Lang.FileSettingPage_Browser}" />
+                            <TextBlock Text="{x:Bind WebCacheSize}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind lang:Lang.FileSettingPage_GameResource}" />
+                            <TextBlock Text="{x:Bind GameCacheSize}" />
+                        </StackPanel>
+                    </cwc:WrapPanel>
+                    <StackPanel Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                        <ProgressRing Width="20"
+                                      Height="20"
+                                      IsActive="{x:Bind ClearCacheCommand.IsRunning}"
+                                      Visibility="{x:Bind ClearCacheCommand.IsRunning}" />
+                        <Button Command="{x:Bind ClearCacheCommand}"
+                                Content="{x:Bind lang:Lang.FileSettingPage_ClearCache}"
+                                Style="{StaticResource DataCardActionButtonStyle}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
 
         </StackPanel>
     </ScrollViewer>

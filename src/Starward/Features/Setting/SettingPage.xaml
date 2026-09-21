@@ -103,7 +103,8 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
-            <Frame Name="Frame_Setting" Margin="24,24,24,0" />
+            <!--  右、下不留边：子页滚动条贴窗口右缘、内容能滚到窗口底；与滚动条和底部的间距统一由子页内容的 SettingPageContentPadding 留出  -->
+            <Frame Name="Frame_Setting" Margin="24,24,0,0" />
 
         </NavigationView>
 

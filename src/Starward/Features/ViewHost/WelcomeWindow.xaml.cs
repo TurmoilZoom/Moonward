@@ -1,10 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.WinUI.Controls;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using Starward.Features.Database;
+using Starward.Features.LanSync;
 using Starward.Features.Setting;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -40,7 +42,23 @@ public sealed partial class WelcomeWindow : WindowEx
 
     private readonly bool _importStarwardPreset;
 
+    /// <summary>提权子进程带 <c>--lan-sync</c> 时预选局域网同步。</summary>
+    private readonly bool _lanSyncPreset;
+
     private StarwardDataImportService.StarwardInstallInfo? _starwardSource;
+
+    private DataSource _dataSource;
+
+
+    /// <summary>
+    /// 已有数据的来源，三者互斥。
+    /// </summary>
+    private enum DataSource
+    {
+        None,
+        Starward,
+        LanDevice,
+    }
 
     private bool _needsElevation;
 
@@ -57,6 +75,7 @@ public sealed partial class WelcomeWindow : WindowEx
         _presetTarget = presetTarget;
         _presetIsDataDirectory = presetIsDataDirectory;
         _importStarwardPreset = HasCommandLineFlag("--import-starward");
+        _lanSyncPreset = HasCommandLineFlag("--lan-sync");
         // 权威的 UserDataFolder 在前（数据库以它为准），缓存根在后。
         _sourceRoots = new List<string?> { legacyUserDataFolder, legacyCacheFolder };
         InitializeComponent();
@@ -129,22 +148,76 @@ public sealed partial class WelcomeWindow : WindowEx
     public bool HasStarwardData { get; set => SetProperty(ref field, value); }
 
 
-    /// <summary>用户是否选择从 Starward 导入（仅探测到源库时可选）。</summary>
-    public bool MigrateFromStarward
+    /// <summary>选中「从 Starward 导入」，显示选择目录一行。未探测到源库时也可选，再手动选择目录。</summary>
+    public bool IsStarwardSourceSelected => _dataSource == DataSource.Starward;
+
+
+    /// <summary>当前来源的说明，显示在切换按钮下方。</summary>
+    public string DataSourceDescription => _dataSource switch
     {
-        get;
-        set
+        DataSource.Starward => Lang.WelcomeView_MigrateFromStarwardDescription,
+        DataSource.LanDevice => LanSyncDescription,
+        _ => ImportLaterHint,
+    };
+
+
+    /// <summary>用户是否选择从 Starward 导入。</summary>
+    private bool MigrateFromStarward => _dataSource == DataSource.Starward;
+
+
+    /// <summary>用户是否选择从局域网内其他设备同步。</summary>
+    private bool SyncFromLanDevice => _dataSource == DataSource.LanDevice;
+
+
+    /// <summary>选择局域网同步时的说明，引用开始按钮与设置页的实际文案。</summary>
+    public string LanSyncDescription { get; } = string.Format(Lang.WelcomeView_SyncFromLanDeviceDescription, Lang.WelcomeView_StarwardStart, Lang.Common_Setting, Lang.SettingPage_FileManagement, Lang.LanSync_ShareThisDevice);
+
+
+    /// <summary>选「不导入」时的提示：之后还能在设置页从局域网设备同步。</summary>
+    public string ImportLaterHint { get; } = string.Format(Lang.WelcomeView_ImportLaterHint, Lang.Common_Setting, Lang.SettingPage_FileManagement);
+
+
+    /// <summary>
+    /// 切换已有数据来源，并让切换按钮与之保持一致（代码预选时也会走这里）。
+    /// </summary>
+    private void SetDataSource(DataSource source)
+    {
+        if (_dataSource == source)
         {
-            if (SetProperty(ref field, value))
-            {
-                UpdateStartButtonText();
-            }
+            return;
         }
+        _dataSource = source;
+        // 先记下新来源再改控件：改 SelectedIndex 会回调 SelectionChanged，届时来源已相同直接返回
+        if (Segmented_DataSource is not null && Segmented_DataSource.SelectedIndex != (int)source)
+        {
+            Segmented_DataSource.SelectedIndex = (int)source;
+        }
+        if (source != DataSource.Starward)
+        {
+            // 选目录的报错只针对「从 Starward 导入」，切走时清掉，切回来不再挂着旧提示
+            StarwardFolderErrorMessage = null;
+        }
+        OnPropertyChanged(nameof(IsStarwardSourceSelected));
+        OnPropertyChanged(nameof(DataSourceDescription));
     }
 
 
-    /// <summary>勾选框是否可操作：已解析到 Starward 库且当前未在迁移。</summary>
-    public bool CanMigrateFromStarward { get; set => SetProperty(ref field, value); }
+    private void Segmented_DataSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // 用 sender 而不是字段：XAML 里的 SelectedIndex 可能在 InitializeComponent 期间就触发，那时字段还没赋值
+        if (sender is not Segmented segmented)
+        {
+            return;
+        }
+        int index = segmented.SelectedIndex;
+        if (index is < 0 or > (int)DataSource.LanDevice)
+        {
+            // 单选下 Ctrl+点击会取消选中，延后恢复到当前来源，避免在选择变更回调里重入
+            DispatcherQueue.TryEnqueue(() => segmented.SelectedIndex = (int)_dataSource);
+            return;
+        }
+        SetDataSource((DataSource)index);
+    }
 
 
     /// <summary>是否允许浏览选择 Starward 数据/便携安装目录。</summary>
@@ -185,7 +258,6 @@ public sealed partial class WelcomeWindow : WindowEx
         {
             if (SetProperty(ref field, value))
             {
-                UpdateStarwardImportEnabled();
                 CanChangeUserDataFolder = value && !_presetIsDataDirectory;
                 CanPickStarwardFolder = value;
             }
@@ -209,7 +281,14 @@ public sealed partial class WelcomeWindow : WindowEx
     public string? MigrationNoticeText { get; set => SetProperty(ref field, value); }
 
 
-    public string StartButtonText { get; set => SetProperty(ref field, value); } = Lang.WelcomeView_StarwardStart;
+    /// <summary>
+    /// 路径与跟在其后的提示之间的间隔：两者都有时才留空，只有提示时提示顶格。
+    /// x:Bind 函数绑定经实例调用，不能是 static。
+    /// </summary>
+    public string PathMessageSeparator(string? path, string? message)
+    {
+        return string.IsNullOrEmpty(path) || string.IsNullOrEmpty(message) ? string.Empty : "    ";
+    }
 
 
 
@@ -218,6 +297,10 @@ public sealed partial class WelcomeWindow : WindowEx
         IsWin11 = Environment.OSVersion.Version >= new Version(10, 0, 22000);
         DetectLegacyData();
         DetectStarwardData();
+        if (_lanSyncPreset)
+        {
+            SetDataSource(DataSource.LanDevice);
+        }
         if (!string.IsNullOrEmpty(_presetTarget))
         {
             UserDataFolder = _presetTarget;
@@ -248,7 +331,6 @@ public sealed partial class WelcomeWindow : WindowEx
             HasLegacyData = DataMigrationService.HasLegacyData(_sourceRoots, string.Empty);
             if (HasLegacyData)
             {
-                StartButtonText = Lang.WelcomeView_MigrateAndStart;
                 IEnumerable<string> locations = _sourceRoots.Where(x => !string.IsNullOrWhiteSpace(x) && Directory.Exists(x))
                                                             .Select(x => x!)
                                                             .Distinct(StringComparer.OrdinalIgnoreCase);
@@ -264,8 +346,8 @@ public sealed partial class WelcomeWindow : WindowEx
 
     /// <summary>
     /// 解析 Starward 数据：命令行指定目录优先，否则自动探测。
-    /// 提权子进程带 <c>--import-starward</c> 时强制勾选。
-    /// 已有旧版 Moonward 数据时默认不勾；即使用户再勾选，目标里已有的库也不会被覆盖。
+    /// 探测到也默认「不导入」；提权子进程带 <c>--import-starward</c> 时强制选中。
+    /// 即使用户选中，目标里已有的库也不会被覆盖。
     /// </summary>
     private void DetectStarwardData()
     {
@@ -281,7 +363,8 @@ public sealed partial class WelcomeWindow : WindowEx
 
             if (StarwardDataImportService.TryDetect(out StarwardDataImportService.StarwardInstallInfo detected))
             {
-                ApplyStarwardSource(detected, checkByDefault: _importStarwardPreset || !HasLegacyData);
+                // 探测到也默认「不导入」，由用户自己切过去；只有提权子进程延续用户已做的选择
+                ApplyStarwardSource(detected, checkByDefault: _importStarwardPreset);
                 return;
             }
 
@@ -301,9 +384,11 @@ public sealed partial class WelcomeWindow : WindowEx
         HasStarwardData = install.HasDatabase;
         StarwardFolderErrorMessage = null;
         StarwardSourcePath = install.UserDataFolder ?? Path.GetDirectoryName(install.DatabasePath);
-        MigrateFromStarward = checkByDefault;
-        UpdateStarwardImportEnabled();
-        UpdateStartButtonText();
+        if (checkByDefault)
+        {
+            SetDataSource(DataSource.Starward);
+        }
+        UpdateStarwardNotFoundHint();
     }
 
 
@@ -311,10 +396,12 @@ public sealed partial class WelcomeWindow : WindowEx
     {
         _starwardSource = null;
         HasStarwardData = false;
-        MigrateFromStarward = false;
+        if (MigrateFromStarward)
+        {
+            SetDataSource(DataSource.None);
+        }
         StarwardSourcePath = null;
-        UpdateStarwardImportEnabled();
-        UpdateStartButtonText();
+        UpdateStarwardNotFoundHint();
     }
 
 
@@ -346,22 +433,9 @@ public sealed partial class WelcomeWindow : WindowEx
     }
 
 
-    private void UpdateStarwardImportEnabled()
-    {
-        CanMigrateFromStarward = HasStarwardData && CanOperate;
-        UpdateStarwardNotFoundHint();
-    }
-
-
     private void UpdateStarwardNotFoundHint()
     {
         ShowStarwardNotFoundHint = !HasStarwardData && string.IsNullOrWhiteSpace(StarwardFolderErrorMessage);
-    }
-
-
-    private void UpdateStartButtonText()
-    {
-        StartButtonText = (HasLegacyData || MigrateFromStarward) ? Lang.WelcomeView_MigrateAndStart : Lang.WelcomeView_StarwardStart;
     }
 
 
@@ -503,6 +577,13 @@ public sealed partial class WelcomeWindow : WindowEx
             }
             string selected = Path.GetFullPath(UserDataFolder);
 
+            // 选了从 Starward 导入却没有解析到源库：提示选择目录，不能静默跳过导入
+            if (MigrateFromStarward && _starwardSource is null)
+            {
+                StarwardFolderErrorMessage = Lang.WelcomeView_PleaseSelectStarwardFolder;
+                return;
+            }
+
             if (_needsElevation)
             {
                 // 目标目录需要管理员权限：以管理员身份重启并带 --migrate-to 完成迁移（按需提权）。传所选目录，data 子目录由提权实例统一拼接。
@@ -554,6 +635,13 @@ public sealed partial class WelcomeWindow : WindowEx
             {
                 IsMigrating = false;
                 await ShowStarwardImportReloginDialogAsync();
+            }
+
+            if (SyncFromLanDevice)
+            {
+                // 合并要写库，必须等数据目录与数据库就绪后再同步
+                IsMigrating = false;
+                await ShowLanSyncDialogAsync();
             }
 
             _taskCompletionSource.TrySetResult(true);
@@ -619,7 +707,8 @@ public sealed partial class WelcomeWindow : WindowEx
                     i++; // 跳过其后紧跟的值
                     continue;
                 }
-                if (string.Equals(existing[i], "--import-starward", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(existing[i], "--import-starward", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(existing[i], "--lan-sync", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -627,6 +716,10 @@ public sealed partial class WelcomeWindow : WindowEx
             }
             info.ArgumentList.Add("--migrate-to");
             info.ArgumentList.Add(target);
+            if (SyncFromLanDevice)
+            {
+                info.ArgumentList.Add("--lan-sync");
+            }
             if (MigrateFromStarward)
             {
                 info.ArgumentList.Add("--import-starward");
@@ -671,6 +764,22 @@ public sealed partial class WelcomeWindow : WindowEx
                 XamlRoot = Content.XamlRoot,
             };
             await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+
+    /// <summary>
+    /// 数据目录就绪后弹出局域网同步对话框。取消或失败都继续启动，之后可在「数据管理」里再同步。
+    /// </summary>
+    private async Task ShowLanSyncDialogAsync()
+    {
+        try
+        {
+            await new LanSyncPullDialog { XamlRoot = Content.XamlRoot }.ShowAsync();
         }
         catch (Exception ex)
         {

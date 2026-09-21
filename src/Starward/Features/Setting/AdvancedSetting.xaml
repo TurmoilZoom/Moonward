@@ -13,7 +13,7 @@
              mc:Ignorable="d">
 
     <ScrollViewer>
-        <StackPanel>
+        <StackPanel Padding="{StaticResource SettingPageContentPadding}">
 
             <!--  URL Protocol  -->
             <TextBlock FontSize="20" Text="{x:Bind lang:Lang.SettingPage_URLProtocolExperimental}" />
