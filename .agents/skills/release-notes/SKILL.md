@@ -19,9 +19,10 @@ description: >
 
 | 项 | 默认 |
 |----|------|
-| 对比范围 | 最新 tag ↔ 再上一个 tag |
-| 指定 tag | 用户给了 `v1.2.3` / `2026.6.4` 等 → 用该 tag ↔ 它的上一个 tag |
-| 发版前（tag-release） | 新 = 待打 tag 的提交（多为 `HEAD`）；旧 = 上一 tag |
+| 对比范围 | 最新 tag ↔ 它的「上一版」（规则见下方「上一版怎么取」） |
+| 指定 tag | 用户给了 `v1.2.3` / `2026.6.4` 等 → 用该 tag ↔ 它的上一版 |
+| 发版前（tag-release） | 新 = 待打 tag 的提交（多为 `HEAD`）；旧 = 上一版 |
+| 正式版 | tag 名**不含** `-` → 从**上一个正式版**累计，覆盖中间所有 beta 的改动 |
 | 语言 | 简体中文 |
 | 受众 | 普通用户（少术语，讲「能做什么 / 修了什么」） |
 | 格式 | 纯文本 Markdown 分类小节与列表；**无**首部大标题/日期；**不使用任何 emoji / 图标** |
@@ -35,8 +36,8 @@ description: >
 在仓库根目录执行：
 
 ```powershell
-# 按版本排序的 tag（日历版 年.月.序号 或 semver 都尽量可用）
-git tag --sort=-v:refname
+# 按版本排序的 tag；versionsort.suffix=- 让 2026.9.6-beta2 排在 2026.9.6 之后（更旧），默认会反过来
+git -c versionsort.suffix=- tag --sort=-v:refname
 # 若上面结果怪异，再试创建时间
 git tag --sort=-creatordate
 ```
@@ -44,9 +45,22 @@ git tag --sort=-creatordate
 解析规则：
 
 1. **用户指定了两个 tag**（如 `2026.6.3` 和 `2026.6.4`，或 `A..B` / `A...B`）→ 旧 = A，新 = B。
-2. **用户只指定了一个 tag** → 新 = 该 tag；旧 = 在排序列表里紧挨其前的那个（比它旧的最近一个）。
-3. **用户未指定** → 新 = 最新 tag；旧 = 第二新 tag。
-4. **tag-release 发版前**（新 tag 尚未创建）→ 新 = 目标提交（`HEAD` 或指定 hash）；旧 = `git describe --tags --abbrev=0`（无则见下条）。
+2. **用户只指定了一个 tag** → 新 = 该 tag；旧 = 它的上一版。
+3. **用户未指定** → 新 = 最新 tag；旧 = 它的上一版。
+4. **tag-release 发版前**（新 tag 尚未创建）→ 新 = 目标提交（`HEAD` 或指定 hash）；旧 = 按待打 tag 名取上一版（无则见下条）。
+
+**上一版怎么取**（只认版本号 tag，`backup/*` 等非版本 tag 排除）：
+
+```powershell
+# 新 tag 为正式版（名不含 -）：上一个正式版，跳过中间的 beta
+git describe --tags --abbrev=0 --match "[0-9]*" --exclude "*-*" "$new^"
+# 新 tag 为预览版（名含 -）：上一个任意版本 tag（含 beta）
+git describe --tags --abbrev=0 --match "[0-9]*" "$new^"
+```
+
+- `$new` 已是 tag 时用 `$new^` 避免取到它自己；发版前 `$new` 为目标提交，直接用 `$new`（尚未打 tag）。
+- 例：`2026.9.6` 的上一版是 `2026.9.5`（覆盖 `-beta1`、`-beta2` 的全部改动），不是 `2026.9.6-beta2`。
+- 用户明确指定了旧 ref 时以用户为准。
 5. **仓库只有一个 tag / 无上一 tag** → 旧 = 首次提交（`git rev-list --max-parents=0 HEAD`）；可在正文末脚注一句「首个正式版本 / 无可对比的上一 tag」，**不要**因此加首部大标题。
 6. **没有任何 tag 且非发版场景** → 停止并告知用户先打 tag，或请其指定两个 commit/分支再总结。
 
@@ -69,14 +83,8 @@ git log <old>..<new> --pretty=format:"%h|%s|%an"
 # 文件级统计（辅助判断影响面，不写进用户正文细表）
 git diff <old>..<new> --stat
 
-# 远程（compare 链接、issue 链接的仓库地址）
+# 远程（compare 链接的仓库地址）
 git remote get-url origin
-
-# 引用了 issue 的提交（标题末尾 #N，正文可能有 Closes #N），用于条目末尾的 issue 链接
-git log <old>..<new> --no-merges --grep="#[0-9]" --pretty=format:"%h|%s%n%b---"
-
-# 区间内来自上游 Scighost/Starward 的提交：其 #N 属于上游仓库，不加链接（无 upstream 远程则跳过）
-git log "$(git merge-base <new> upstream/main)" "^<old>" --no-merges --pretty=format:"%h|%s|%an"
 ```
 
 若 commit 很多（例如 >80），优先按 Conventional Commits 前缀与路径聚类，再抽样读关键提交的 body（`git show -s --format=%B <hash>`），不要把上百条标题丢给用户。
@@ -107,21 +115,9 @@ git log "$(git merge-base <new> upstream/main)" "^<old>" --no-merges --pretty=fo
 - 破坏性变更单独标出：**重要变更**（需重装、改设置、行为不兼容等）。
 - **禁止**在输出 Markdown 中使用任何 emoji、图标符号（如 ✨ 🐛 ⚡ 🔧 📝 📦 ⚠️ 等）。
 
-#### Issue 链接
+#### 不引用 issue
 
-条目**末尾**附上对应的 issue 超链接，与 commit-push 在提交标题末尾写的 `#N` 对应：
-
-- **只链接本仓库（origin，即 `TurmoilZoom/Moonward`）的 issue**。上游 Scighost/Starward 合入的提交（上面「上游提交」命令列出的，常见 `(#1933)`）编号属于上游仓库：**不加链接**，也不要链到本仓库。
-- 某条说明合并了哪几个提交，就收集这些提交标题末尾（或正文 `Closes #N`）的编号，去重、按编号升序、空格分隔；来源提交都没有编号的条目不加。
-- 写成**完整 URL 的 Markdown 链接** `[#N](https://github.com/<owner>/<repo>/issues/N)`（仓库地址由 `git remote get-url origin` 规范化）：tag 注释与 CNB 不会把裸 `#N` 识别成链接。编号是 PR 时 GitHub 会自动跳到 `/pull/N`。
-- 紧跟句号之后，不加空格；多个链接之间一个空格：
-
-  ```markdown
-  - 修复首次播放等待转码期间切换背景可能被旧视频覆盖的问题。[#18](https://github.com/TurmoilZoom/Moonward/issues/18)
-  - 月报自动更新配置改为月份切换，界面更简洁。[#16](https://github.com/TurmoilZoom/Moonward/issues/16) [#18](https://github.com/TurmoilZoom/Moonward/issues/18)
-  ```
-
-- 只认提交里真实写出的 issue 引用；颜色值等非引用的 `#数字` 忽略。**不要**根据改动内容猜编号。
+发布说明**不引用任何 issue / PR**：不写 `#N`、不加 issue 链接、不写「感谢 #N」。提交标题末尾的 `#N`、上游合入提交的 `(#1933)` 在归纳时一律去掉，只保留对用户有意义的改动描述。
 
 ### 4. 输出 Markdown
 
@@ -132,12 +128,11 @@ git log "$(git merge-base <new> upstream/main)" "^<old>" --no-merges --pretty=fo
 ```markdown
 ### 新功能
 
-- …。[#16](https://github.com/TurmoilZoom/Moonward/issues/16)
+- …
 
 ### 问题修复
 
-- …。[#18](https://github.com/TurmoilZoom/Moonward/issues/18)
-- …（来源提交无本仓库 issue 编号则不加链接）
+- …
 
 ### 体验与性能
 
@@ -247,6 +242,6 @@ git for-each-ref "refs/tags/$version" --format="%(contents:body)"
 - 不要把 `git log` 原样当发布说明
 - 不要写只有开发者能懂的重构清单（除非用户明确要求技术版）
 - 不要在标题或正文中使用 emoji / 图标
-- 不要漏掉条目末尾的本仓库 issue 链接，也不要写成裸 `#N`；不要给上游 Starward 提交的编号加链接；不要编造编号
+- 不要引用 issue / PR：不写 `#N`、不加 issue 链接（含提交标题里带的和上游合入的编号）
 - **不要**在正文首部生成 `## 版本号（日期）` 或「与上一版相比…」导语；直接分类总结
 - 不要把完整用户向 notes 只打印在对话里却不写进 tag（tag-release 场景）

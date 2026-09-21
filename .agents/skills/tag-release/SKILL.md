@@ -54,10 +54,11 @@ git branch --show-current
 git log -1 --pretty=format:"%H%n%h %s%n%ci"
 git status --short
 git remote -v
-git tag --sort=-v:refname
-# 上一 tag 以来的提交（有 tag 时）
-$prev = git describe --tags --abbrev=0 2>$null
-if ($prev) { git log "$prev..HEAD" --oneline } else { git log --oneline -20 }
+# versionsort.suffix=- 让 beta 排在同号正式版之后（更旧）
+git -c versionsort.suffix=- tag --sort=-v:refname | Select-Object -First 10
+# 最近的任意版本 tag / 最近的正式版（第 4 步按待打 tag 是否含 - 二选一）
+git describe --tags --abbrev=0 --match "[0-9]*" 2>$null
+git describe --tags --abbrev=0 --match "[0-9]*" --exclude "*-*" 2>$null
 ```
 
 若本地分支与其上游不一致，先 `git status -sb` / `git fetch` 对齐；用户要「远程最新提交」时，确保本地 tip 已是 `origin/<branch>`（或先 fetch + checkout 该 commit），再打 tag。
@@ -89,17 +90,18 @@ if ($prev) { git log "$prev..HEAD" --oneline } else { git log --oneline -20 }
 
 对比范围：
 
-- 旧 = `$prev`（`git describe --tags --abbrev=0`；无则首次提交）
+- 旧 = `$prev`，按待打 tag 名取（见 release-notes「上一版怎么取」）：
+  - **正式版**（不含 `-`）：上一个**正式版**，覆盖中间所有 beta：`git describe --tags --abbrev=0 --match "[0-9]*" --exclude "*-*" $target`
+  - **预览版**（含 `-`）：上一个任意版本 tag：`git describe --tags --abbrev=0 --match "[0-9]*" $target`
+  - 都没有则首次提交
 - 新 = 目标提交（尚未打 tag 的 `$target`）
+- 向用户确认 tag 名时一并说明对比范围（如 `2026.9.5..HEAD`，含 `-beta1`、`-beta2`）
 
 必做材料：
 
 ```powershell
 git log "$prev..$target" --pretty=format:"%h|%s|%an|%ae" --no-merges
 git diff "$prev..$target" --stat
-# issue 链接用：引用了 issue 的提交，以及区间内来自上游 Scighost/Starward 的提交（后者不加链接）
-git log "$prev..$target" --no-merges --grep="#[0-9]" --pretty=format:"%h|%s%n%b---"
-git log "$(git merge-base $target upstream/main)" "^$prev" --no-merges --pretty=format:"%h|%s|%an"
 ```
 
 产出两段文本：
@@ -109,7 +111,7 @@ git log "$(git merge-base $target upstream/main)" "^$prev" --no-merges --pretty=
 
 正文结构与文风严格遵循 release-notes（新功能 / 问题修复 / 体验与性能 / 重要变更 / 文档与其他；无内容的组省略；面向普通用户）。
 
-条目末尾按 release-notes「Issue 链接」附上 issue 超链接：**只链接本仓库 issue**，写成 `[#N](https://github.com/TurmoilZoom/Moonward/issues/N)`；上游 Starward 提交的编号不加链接。
+**不引用 issue / PR**：不写 `#N`、不加 issue 链接；提交标题里的 `#N` 与上游合入的 `(#1933)` 归纳时一律去掉。
 
 ### 5. 写入 annotated tag 并创建
 
@@ -213,12 +215,13 @@ gh release edit <tag> --notes-file <path>
 
 - 只推 `origin` 而漏掉 `cnb` 或其他 remote  
 - 未确认就擅自决定正式版号  
+- 正式版只从最近的 beta 起算，漏掉之前各 beta 的改动  
 - `git tag -f` / `git push --force` 覆盖已有 tag（除非用户明确要求）  
 - 工作区脏时不提醒就打 tag  
 - 把 `git log` 原样当发布说明  
 - tag 注释只写三五行要点，完整 notes 只出现在对话里（CI 读不到）  
 - 在 notes 正文首部写 `## 版本（日期）` 或「与上一版相比…」导语（直接分类即可）  
 - 不遵循 release-notes 的分组与「无 emoji / 面向用户」文风  
-- 条目末尾漏掉本仓库 issue 链接、写成裸 `#N`，或给上游 Starward 提交的编号加链接  
+- 在说明里引用 issue / PR（写 `#N` 或加 issue 链接）  
 - 在汇报里写「已发布」但 origin push 实际失败  
 - 修改业务源码或 `global.json` / NuGet 版本来「配合发版」（版本号由 tag / CI 的 `-p:Version=` 注入）
