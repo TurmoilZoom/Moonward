@@ -1564,6 +1564,9 @@ public sealed partial class GameLauncherPage : PageBase
     private PointerEventHandler? _rightToolbarRootReleasedHandler;
     private bool _rightToolbarRootHandlersAttached;
 
+    /// <summary>子按钮 Visibility 回调（元素 + 注销令牌），卸载时逐个注销。</summary>
+    private readonly List<(UIElement Element, long Token)> _rightToolbarVisibilityCallbacks = new();
+
     /// <summary>进页时记下的 XamlRoot；卸载时 XamlRoot 可能已空，仍要靠它解除 Tooltip 抑制。</summary>
     private XamlRoot? _instantTooltipXamlRoot;
 
@@ -1594,6 +1597,13 @@ public sealed partial class GameLauncherPage : PageBase
         Border_RightToolbar.AddHandler(UIElement.PointerReleasedEvent, _rightToolbarPointerReleasedHandler, handledEventsToo: true);
         Border_RightToolbar.AddHandler(UIElement.PointerCanceledEvent, _rightToolbarPointerCanceledHandler, handledEventsToo: true);
         Border_RightToolbar.AddHandler(UIElement.PointerCaptureLostEvent, _rightToolbarPointerCaptureLostHandler, handledEventsToo: true);
+        // 整条折叠后 StackPanel 不再参与布局、收不到 SizeChanged，只能盯子项自身的 Visibility。
+        foreach (UIElement child in StackPanel_RightToolbar.Children)
+        {
+            long token = child.RegisterPropertyChangedCallback(UIElement.VisibilityProperty, RightToolbarChild_VisibilityChanged);
+            _rightToolbarVisibilityCallbacks.Add((child, token));
+        }
+        UpdateRightToolbarEmptyState();
         // 有宽度则立刻定位；否则等 SizeChanged。Low 队列只做 Flyout 挂接与兜底，避免再露出左上角默认位移。
         TryRevealRightToolbarLayout();
         DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
@@ -1649,6 +1659,11 @@ public sealed partial class GameLauncherPage : PageBase
                 Border_RightToolbar.RemoveHandler(UIElement.PointerCaptureLostEvent, _rightToolbarPointerCaptureLostHandler!);
             }
         }
+        foreach ((UIElement element, long token) in _rightToolbarVisibilityCallbacks)
+        {
+            element.UnregisterPropertyChangedCallback(UIElement.VisibilityProperty, token);
+        }
+        _rightToolbarVisibilityCallbacks.Clear();
 
         foreach (FlyoutBase flyout in _rightToolbarHookedFlyouts)
         {
@@ -1724,11 +1739,56 @@ public sealed partial class GameLauncherPage : PageBase
                 Point revealed = GetRightToolbarRevealedPosition(_rightToolbarDockEdge);
                 SetRightToolbarPosition(revealed.X, revealed.Y, animate: false);
             }
+
+            // 进页时按钮多是异步出现，整条先折叠着；等真正有高度后再补弹拖拽引导。
+            if (_rightToolbarLayoutRevealed && e.NewSize.Height > 0 && !TeachingTip_RightToolbarDrag.IsOpen)
+            {
+                TryShowRightToolbarDragTip();
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Right toolbar size changed");
         }
+    }
+
+
+    private void RightToolbarChild_VisibilityChanged(DependencyObject sender, DependencyProperty dp)
+    {
+        UpdateRightToolbarEmptyState();
+    }
+
+
+    /// <summary>
+    /// 没有任何可见按钮（如星布谷地等暂无功能的游戏）时折叠整条工具栏，避免只剩 Padding 的空壳；
+    /// 有按钮出现时再显示。
+    /// </summary>
+    private void UpdateRightToolbarEmptyState()
+    {
+        bool hasButtons = CountVisibleRightToolbarButtons() > 0;
+        Visibility target = hasButtons ? Visibility.Visible : Visibility.Collapsed;
+        if (Border_RightToolbar.Visibility == target)
+        {
+            return;
+        }
+
+        if (hasButtons)
+        {
+            Border_RightToolbar.Visibility = Visibility.Visible;
+            // 高度按按钮数直接算，不等下一轮 SizeChanged，避免首帧沿用空态高度。
+            SyncRightToolbarHeightForState(animate: false);
+            return;
+        }
+
+        // 折叠后收不到 PointerExited，悬停 / 浮出 / 引导状态都要在这里收干净。
+        DismissRightToolbarDragTip(markSeen: false);
+        StopRightToolbarCollapseTimer();
+        _rightToolbarPointerOver = false;
+        if (_rightToolbarState is RightToolbarState.DockRevealed)
+        {
+            TransitionRightToolbar(RightToolbarState.Docked, animate: false);
+        }
+        Border_RightToolbar.Visibility = Visibility.Collapsed;
     }
 
 
@@ -2176,6 +2236,11 @@ public sealed partial class GameLauncherPage : PageBase
         {
             return;
         }
+        // 空条已折叠：没有可指向的目标。
+        if (Border_RightToolbar.Visibility != Visibility.Visible)
+        {
+            return;
+        }
         StopRightToolbarCollapseTimer();
         InstantTooltip.SetSuppressed(XamlRoot, true);
         DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
@@ -2184,8 +2249,13 @@ public sealed partial class GameLauncherPage : PageBase
             {
                 return;
             }
-            if (Border_RightToolbar.ActualHeight <= 0)
+            if (Border_RightToolbar.Visibility != Visibility.Visible || Border_RightToolbar.ActualHeight <= 0)
             {
+                // 弹不出引导就别留着窗口级抑制，否则下侧工具栏 / 导航的 InstantTooltip 也会一起失效。
+                if (!_rightToolbarDragging && !_rightToolbarPressed)
+                {
+                    InstantTooltip.SetSuppressed(XamlRoot, false);
+                }
                 return;
             }
             TeachingTip_RightToolbarDrag.IsOpen = true;
@@ -2777,18 +2847,15 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// 取工具栏宽度。首次布局前（OnLoaded 同步恢复位置时）Border 还没测量，只能按
-    /// 「按钮都是 <see cref="RightToolbarButtonSize"/> 宽」估算；若以后放进非该宽度的按钮，首次定位会偏。
+    /// 取工具栏宽度。首次布局前、空条折叠时 ActualWidth 只有 0 或 Padding 宽，
+    /// 这时按「按钮都是 <see cref="RightToolbarButtonSize"/> 宽」取下限，否则按空条宽度定的位置在按钮出现后会向右溢出；
+    /// 若以后放进非该宽度的按钮，首次定位会偏。
     /// </summary>
-    /// <returns>实际宽度，或未测量时的估算宽度。</returns>
+    /// <returns>实际宽度，至少为一个按钮加 Padding 的宽度。</returns>
     private double MeasureRightToolbarWidth()
     {
         double padding = Border_RightToolbar.Padding.Left + Border_RightToolbar.Padding.Right;
-        if (Border_RightToolbar.ActualWidth > 0)
-        {
-            return Border_RightToolbar.ActualWidth;
-        }
-        return padding + RightToolbarButtonSize;
+        return Math.Max(Border_RightToolbar.ActualWidth, padding + RightToolbarButtonSize);
     }
 
 

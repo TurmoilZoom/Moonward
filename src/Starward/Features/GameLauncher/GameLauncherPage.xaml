@@ -739,7 +739,8 @@
 
         <!--  右侧功能工具栏：状态机见 GameLauncherPage 中 Right Toolbar 区域
               Expanded / Dragging / Docked / DockRevealed；位置由 TranslateTransform 控制。
-              拖拽原点必须是左上，Transform 默认 (0,48)；未 Restore 前 Opacity=0，避免首帧闪在左侧。  -->
+              拖拽原点必须是左上，Transform 默认 (0,48)；未 Restore 前 Opacity=0，避免首帧闪在左侧。
+              子按钮全部隐藏时整条 Collapsed（UpdateRightToolbarEmptyState）。  -->
         <!--  Pressed/Moved/Released 在 code-behind 用 AddHandler(handledEventsToo) 挂接：子 Button 会 Handled 并捕获指针，XAML 路由收不到  -->
         <Border x:Name="Border_RightToolbar"
                 Padding="4"
