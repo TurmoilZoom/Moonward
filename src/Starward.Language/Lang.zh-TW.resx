@@ -2156,6 +2156,45 @@
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>雲端遊戲</value>
   </data>
+  <data name="CloudGameButton_FreeTime" xml:space="preserve">
+    <value>免費時長</value>
+  </data>
+  <data name="CloudGameButton_YuanPointsTime" xml:space="preserve">
+    <value>原點時長</value>
+  </data>
+  <data name="CloudGameButton_AutoClaimFreeTime" xml:space="preserve">
+    <value>自動取得免費時長</value>
+  </data>
+  <data name="CloudGameButton_BangbooPointsTime" xml:space="preserve">
+    <value>邦邦點時長</value>
+  </data>
+  <data name="CloudGameButton_PlayCard" xml:space="preserve">
+    <value>暢玩卡</value>
+  </data>
+  <data name="CloudGameButton_PlayCardInactive" xml:space="preserve">
+    <value>未開通</value>
+  </data>
+  <data name="CloudGameButton_Days" xml:space="preserve">
+    <value>{0} 天</value>
+  </data>
+  <data name="CloudGameButton_DaysHours" xml:space="preserve">
+    <value>{0} 天 {1} 小時</value>
+  </data>
+  <data name="CloudGameButton_Minutes" xml:space="preserve">
+    <value>{0} 分鐘</value>
+  </data>
+  <data name="CloudGameButton_Hours" xml:space="preserve">
+    <value>{0} 小時</value>
+  </data>
+  <data name="CloudGameButton_HoursMinutes" xml:space="preserve">
+    <value>{0} 小時 {1} 分鐘</value>
+  </data>
+  <data name="CloudGameButton_CredentialFromClient" xml:space="preserve">
+    <value>登入憑證需要在雲遊戲客戶端登入後才能取得。</value>
+  </data>
+  <data name="CloudGameButton_LoginRequired" xml:space="preserve">
+    <value>請先安裝雲遊戲客戶端並登入一次，憑證從客戶端讀取。</value>
+  </data>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>實時便箋</value>
   </data>
@@ -3331,6 +3370,9 @@
   </data>
   <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
     <value>登入狀態已失效，請重新登入。</value>
+  </data>
+  <data name="MiHoYoApiError_CloudGameTokenExpired" xml:space="preserve">
+    <value>雲遊戲憑證已失效，請開啟雲遊戲客戶端重新登入。</value>
   </data>
   <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
     <value>帳號、裝置或網路需要完成驗證。</value>

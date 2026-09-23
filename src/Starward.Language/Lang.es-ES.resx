@@ -2156,6 +2156,45 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Juego en la nube</value>
   </data>
+  <data name="CloudGameButton_FreeTime" xml:space="preserve">
+    <value>Tiempo gratuito</value>
+  </data>
+  <data name="CloudGameButton_YuanPointsTime" xml:space="preserve">
+    <value>Tiempo de puntos Yuan</value>
+  </data>
+  <data name="CloudGameButton_AutoClaimFreeTime" xml:space="preserve">
+    <value>Reclamar tiempo gratis automáticamente</value>
+  </data>
+  <data name="CloudGameButton_BangbooPointsTime" xml:space="preserve">
+    <value>Tiempo de puntos Bangboo</value>
+  </data>
+  <data name="CloudGameButton_PlayCard" xml:space="preserve">
+    <value>Tarjeta de juego</value>
+  </data>
+  <data name="CloudGameButton_PlayCardInactive" xml:space="preserve">
+    <value>No activada</value>
+  </data>
+  <data name="CloudGameButton_Days" xml:space="preserve">
+    <value>{0} d</value>
+  </data>
+  <data name="CloudGameButton_DaysHours" xml:space="preserve">
+    <value>{0} d {1} h</value>
+  </data>
+  <data name="CloudGameButton_Minutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="CloudGameButton_Hours" xml:space="preserve">
+    <value>{0} h</value>
+  </data>
+  <data name="CloudGameButton_HoursMinutes" xml:space="preserve">
+    <value>{0} h {1} min</value>
+  </data>
+  <data name="CloudGameButton_CredentialFromClient" xml:space="preserve">
+    <value>Las credenciales solo pueden leerse después de iniciar sesión en el cliente del juego en la nube.</value>
+  </data>
+  <data name="CloudGameButton_LoginRequired" xml:space="preserve">
+    <value>Instala el cliente del juego en la nube e inicia sesión una vez: las credenciales se leen del cliente.</value>
+  </data>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Nota en tiempo real</value>
   </data>
@@ -3331,6 +3370,9 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
     <value>La sesión ha caducado. Vuelve a iniciar sesión.</value>
+  </data>
+  <data name="MiHoYoApiError_CloudGameTokenExpired" xml:space="preserve">
+    <value>Las credenciales del juego en la nube han caducado. Abre el cliente del juego en la nube e inicia sesión de nuevo.</value>
   </data>
   <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
     <value>Se requiere verificación de la cuenta, el dispositivo o la red.</value>

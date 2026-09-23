@@ -2156,6 +2156,45 @@ Accetti il rischio e desideri continuare?</value>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Gioco cloud</value>
   </data>
+  <data name="CloudGameButton_FreeTime" xml:space="preserve">
+    <value>Tempo gratuito</value>
+  </data>
+  <data name="CloudGameButton_YuanPointsTime" xml:space="preserve">
+    <value>Tempo punti Yuan</value>
+  </data>
+  <data name="CloudGameButton_AutoClaimFreeTime" xml:space="preserve">
+    <value>Riscatta tempo gratuito automaticamente</value>
+  </data>
+  <data name="CloudGameButton_BangbooPointsTime" xml:space="preserve">
+    <value>Tempo punti Bangboo</value>
+  </data>
+  <data name="CloudGameButton_PlayCard" xml:space="preserve">
+    <value>Carta di gioco</value>
+  </data>
+  <data name="CloudGameButton_PlayCardInactive" xml:space="preserve">
+    <value>Non attiva</value>
+  </data>
+  <data name="CloudGameButton_Days" xml:space="preserve">
+    <value>{0} gg</value>
+  </data>
+  <data name="CloudGameButton_DaysHours" xml:space="preserve">
+    <value>{0} gg {1} h</value>
+  </data>
+  <data name="CloudGameButton_Minutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="CloudGameButton_Hours" xml:space="preserve">
+    <value>{0} h</value>
+  </data>
+  <data name="CloudGameButton_HoursMinutes" xml:space="preserve">
+    <value>{0} h {1} min</value>
+  </data>
+  <data name="CloudGameButton_CredentialFromClient" xml:space="preserve">
+    <value>Le credenziali possono essere lette solo dopo aver effettuato l’accesso nel client del gioco in cloud.</value>
+  </data>
+  <data name="CloudGameButton_LoginRequired" xml:space="preserve">
+    <value>Installa il client del gioco in cloud e accedi una volta: le credenziali vengono lette dal client.</value>
+  </data>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Nota in tempo reale</value>
   </data>
@@ -3331,6 +3370,9 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
     <value>Accesso scaduto. Effettua di nuovo l'accesso.</value>
+  </data>
+  <data name="MiHoYoApiError_CloudGameTokenExpired" xml:space="preserve">
+    <value>Le credenziali del gioco in cloud sono scadute. Apri il client del gioco in cloud e accedi di nuovo.</value>
   </data>
   <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
     <value>È richiesta la verifica dell'account, del dispositivo o della rete.</value>

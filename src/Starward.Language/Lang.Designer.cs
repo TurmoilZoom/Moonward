@@ -1645,6 +1645,123 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Free Time 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_FreeTime {
+            get {
+                return ResourceManager.GetString("CloudGameButton_FreeTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bangboo Points Time 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_BangbooPointsTime {
+            get {
+                return ResourceManager.GetString("CloudGameButton_BangbooPointsTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Yuan Points Time 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_YuanPointsTime {
+            get {
+                return ResourceManager.GetString("CloudGameButton_YuanPointsTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Auto-claim free time 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_AutoClaimFreeTime {
+            get {
+                return ResourceManager.GetString("CloudGameButton_AutoClaimFreeTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Play Card 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_PlayCard {
+            get {
+                return ResourceManager.GetString("CloudGameButton_PlayCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not activated 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_PlayCardInactive {
+            get {
+                return ResourceManager.GetString("CloudGameButton_PlayCardInactive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} d 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_Days {
+            get {
+                return ResourceManager.GetString("CloudGameButton_Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} d {1} h 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_DaysHours {
+            get {
+                return ResourceManager.GetString("CloudGameButton_DaysHours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} min 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_Minutes {
+            get {
+                return ResourceManager.GetString("CloudGameButton_Minutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} h 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_Hours {
+            get {
+                return ResourceManager.GetString("CloudGameButton_Hours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} h {1} min 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_HoursMinutes {
+            get {
+                return ResourceManager.GetString("CloudGameButton_HoursMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The sign-in credential can only be read after you sign in to the cloud game client. 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_CredentialFromClient {
+            get {
+                return ResourceManager.GetString("CloudGameButton_CredentialFromClient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Install the cloud game client and sign in once — the credential is read from the client. 的本地化字符串。
+        /// </summary>
+        public static string CloudGameButton_LoginRequired {
+            get {
+                return ResourceManager.GetString("CloudGameButton_LoginRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Real-time Note 的本地化字符串。
         /// </summary>
         public static string DailyNoteButton_Title {

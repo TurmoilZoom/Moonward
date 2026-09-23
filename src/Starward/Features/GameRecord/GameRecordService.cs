@@ -977,17 +977,25 @@ internal class GameRecordService
     public bool DeleteGameRole(GameRecordRole role)
     {
         bool deletedUser = false;
+        long accountId = 0;
         using var dapper = DatabaseService.CreateConnection();
         using var t = dapper.BeginTransaction();
         dapper.Execute("DELETE FROM GameRecordRole WHERE GameBiz = @GameBiz AND Uid = @Uid;", role, t);
         _logger.LogInformation("Deleted game roles with ({nickname}, {gameBiz}, {uid}).", role.Nickname, role.GameBiz, role.Uid);
         if (dapper.QueryFirstOrDefault<int>("SELECT Count(*) FROM GameRecordRole WHERE Cookie = @Cookie;", role, t) == 0)
         {
+            // 账号行删掉前先记下通行证 ID，提交后据此清理挂在该账号下的其他本机凭证
+            accountId = dapper.QueryFirstOrDefault<long>("SELECT Uid FROM GameRecordUser WHERE Cookie = @Cookie LIMIT 1;", role, t);
             dapper.Execute("DELETE FROM GameRecordUser WHERE Cookie = @Cookie;", role, t);
             _logger.LogInformation("Deleted all relative accounts of ({nickname}, {gameBiz}, {uid})", role.Nickname, role.GameBiz, role.Uid);
             deletedUser = true;
         }
         t.Commit();
+        if (deletedUser && accountId > 0)
+        {
+            // 云游戏凭证等同云游戏的登录态，账号都删了就不该留在本机
+            AppConfig.DeleteCloudGameComboTokens(accountId.ToString());
+        }
         return deletedUser;
     }
 

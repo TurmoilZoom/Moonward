@@ -2155,6 +2155,45 @@
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>クラウドゲーム</value>
   </data>
+  <data name="CloudGameButton_FreeTime" xml:space="preserve">
+    <value>無料時間</value>
+  </data>
+  <data name="CloudGameButton_YuanPointsTime" xml:space="preserve">
+    <value>Yuan ポイント時間</value>
+  </data>
+  <data name="CloudGameButton_AutoClaimFreeTime" xml:space="preserve">
+    <value>無料時間を自動受取</value>
+  </data>
+  <data name="CloudGameButton_BangbooPointsTime" xml:space="preserve">
+    <value>ボンプポイント時間</value>
+  </data>
+  <data name="CloudGameButton_PlayCard" xml:space="preserve">
+    <value>プレイカード</value>
+  </data>
+  <data name="CloudGameButton_PlayCardInactive" xml:space="preserve">
+    <value>未加入</value>
+  </data>
+  <data name="CloudGameButton_Days" xml:space="preserve">
+    <value>{0} 日</value>
+  </data>
+  <data name="CloudGameButton_DaysHours" xml:space="preserve">
+    <value>{0} 日 {1} 時間</value>
+  </data>
+  <data name="CloudGameButton_Minutes" xml:space="preserve">
+    <value>{0} 分</value>
+  </data>
+  <data name="CloudGameButton_Hours" xml:space="preserve">
+    <value>{0} 時間</value>
+  </data>
+  <data name="CloudGameButton_HoursMinutes" xml:space="preserve">
+    <value>{0} 時間 {1} 分</value>
+  </data>
+  <data name="CloudGameButton_CredentialFromClient" xml:space="preserve">
+    <value>認証情報はクラウドゲームクライアントでログインした後にのみ取得できます。</value>
+  </data>
+  <data name="CloudGameButton_LoginRequired" xml:space="preserve">
+    <value>クラウドゲームクライアントをインストールし、1 度ログインしてください。認証情報はクライアントから読み取ります。</value>
+  </data>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>リアルタイムメモ</value>
   </data>
@@ -3330,6 +3369,9 @@
   </data>
   <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
     <value>ログインの有効期限が切れました。再度ログインしてください。</value>
+  </data>
+  <data name="MiHoYoApiError_CloudGameTokenExpired" xml:space="preserve">
+    <value>クラウドゲームの認証情報の有効期限が切れました。クラウドゲームクライアントを開いて再ログインしてください。</value>
   </data>
   <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
     <value>アカウント、デバイス、またはネットワークの認証が必要です。</value>

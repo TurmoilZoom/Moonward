@@ -2156,6 +2156,45 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Trò Chơi Đám Mây</value>
   </data>
+  <data name="CloudGameButton_FreeTime" xml:space="preserve">
+    <value>Thời gian miễn phí</value>
+  </data>
+  <data name="CloudGameButton_YuanPointsTime" xml:space="preserve">
+    <value>Thời gian điểm Yuan</value>
+  </data>
+  <data name="CloudGameButton_AutoClaimFreeTime" xml:space="preserve">
+    <value>Tự động nhận thời gian miễn phí</value>
+  </data>
+  <data name="CloudGameButton_BangbooPointsTime" xml:space="preserve">
+    <value>Thời gian từ Điểm Bangboo</value>
+  </data>
+  <data name="CloudGameButton_PlayCard" xml:space="preserve">
+    <value>Thẻ chơi game</value>
+  </data>
+  <data name="CloudGameButton_PlayCardInactive" xml:space="preserve">
+    <value>Chưa kích hoạt</value>
+  </data>
+  <data name="CloudGameButton_Days" xml:space="preserve">
+    <value>{0} ngày</value>
+  </data>
+  <data name="CloudGameButton_DaysHours" xml:space="preserve">
+    <value>{0} ngày {1} giờ</value>
+  </data>
+  <data name="CloudGameButton_Minutes" xml:space="preserve">
+    <value>{0} phút</value>
+  </data>
+  <data name="CloudGameButton_Hours" xml:space="preserve">
+    <value>{0} giờ</value>
+  </data>
+  <data name="CloudGameButton_HoursMinutes" xml:space="preserve">
+    <value>{0} giờ {1} phút</value>
+  </data>
+  <data name="CloudGameButton_CredentialFromClient" xml:space="preserve">
+    <value>Thông tin xác thực chỉ đọc được sau khi bạn đăng nhập vào phần mềm game đám mây.</value>
+  </data>
+  <data name="CloudGameButton_LoginRequired" xml:space="preserve">
+    <value>Hãy cài đặt phần mềm game đám mây và đăng nhập một lần — thông tin xác thực được đọc từ phần mềm đó.</value>
+  </data>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Ghi chú thời gian thực</value>
   </data>
@@ -3331,6 +3370,9 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
     <value>Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</value>
+  </data>
+  <data name="MiHoYoApiError_CloudGameTokenExpired" xml:space="preserve">
+    <value>Thông tin xác thực game đám mây đã hết hạn. Hãy mở phần mềm game đám mây và đăng nhập lại.</value>
   </data>
   <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
     <value>Cần xác minh tài khoản, thiết bị hoặc mạng.</value>

@@ -2155,6 +2155,45 @@
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>เกมคลาวด์</value>
   </data>
+  <data name="CloudGameButton_FreeTime" xml:space="preserve">
+    <value>เวลาเล่นฟรี</value>
+  </data>
+  <data name="CloudGameButton_YuanPointsTime" xml:space="preserve">
+    <value>เวลาจากแต้ม Yuan</value>
+  </data>
+  <data name="CloudGameButton_AutoClaimFreeTime" xml:space="preserve">
+    <value>รับเวลาฟรีอัตโนมัติ</value>
+  </data>
+  <data name="CloudGameButton_BangbooPointsTime" xml:space="preserve">
+    <value>เวลาจากแต้ม Bangboo</value>
+  </data>
+  <data name="CloudGameButton_PlayCard" xml:space="preserve">
+    <value>บัตรเล่นไม่อั้น</value>
+  </data>
+  <data name="CloudGameButton_PlayCardInactive" xml:space="preserve">
+    <value>ยังไม่เปิดใช้งาน</value>
+  </data>
+  <data name="CloudGameButton_Days" xml:space="preserve">
+    <value>{0} วัน</value>
+  </data>
+  <data name="CloudGameButton_DaysHours" xml:space="preserve">
+    <value>{0} วัน {1} ชั่วโมง</value>
+  </data>
+  <data name="CloudGameButton_Minutes" xml:space="preserve">
+    <value>{0} นาที</value>
+  </data>
+  <data name="CloudGameButton_Hours" xml:space="preserve">
+    <value>{0} ชั่วโมง</value>
+  </data>
+  <data name="CloudGameButton_HoursMinutes" xml:space="preserve">
+    <value>{0} ชั่วโมง {1} นาที</value>
+  </data>
+  <data name="CloudGameButton_CredentialFromClient" xml:space="preserve">
+    <value>ข้อมูลรับรองจะอ่านได้หลังจากเข้าสู่ระบบในไคลเอนต์เกมคลาวด์แล้วเท่านั้น</value>
+  </data>
+  <data name="CloudGameButton_LoginRequired" xml:space="preserve">
+    <value>ติดตั้งไคลเอนต์เกมคลาวด์และเข้าสู่ระบบหนึ่งครั้ง ระบบจะอ่านข้อมูลรับรองจากไคลเอนต์</value>
+  </data>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>บันทึกเรียลไทม์</value>
   </data>
@@ -3325,6 +3364,9 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
     <value>การเข้าสู่ระบบหมดอายุแล้ว โปรดเข้าสู่ระบบอีกครั้ง</value>
+  </data>
+  <data name="MiHoYoApiError_CloudGameTokenExpired" xml:space="preserve">
+    <value>ข้อมูลรับรองเกมคลาวด์หมดอายุ กรุณาเปิดไคลเอนต์เกมคลาวด์และเข้าสู่ระบบอีกครั้ง</value>
   </data>
   <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
     <value>ต้องยืนยันบัญชี อุปกรณ์ หรือเครือข่าย</value>

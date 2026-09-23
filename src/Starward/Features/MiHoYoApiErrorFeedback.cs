@@ -7,6 +7,7 @@ using System;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Starward.Features;
 
@@ -29,6 +30,8 @@ internal enum MiHoYoApiContext
     LauncherPublicApi,
     /// <summary>国服 passport 短信验证码登录（createLoginCaptcha / loginByMobileCaptcha / 换票）。</summary>
     PassportCaptcha,
+    /// <summary>云游戏接口（鉴权用请求头 x-rpc-combo_token，由账号 stoken 换取；retcode 与米游社接口不同义）。</summary>
+    CloudGame,
 }
 
 /// <summary>
@@ -101,6 +104,19 @@ internal static class MiHoYoApiErrorFeedbackFactory
             return CreateHttpFeedback(httpException, context);
         }
 
+        // HttpClient 请求超时抛的是 TaskCanceledException，按未知异常展示会变成「A task was canceled.」这类内部英文
+        if (exception is TaskCanceledException or TimeoutException)
+        {
+            return CreateKnownFeedback("MiHoYoApiError_NetworkRequestFailed", null);
+        }
+
+        // 云游戏走到这里的都是本地异常（响应结构对不上、区服未接入等），没有「保留服务端原文」的价值，
+        // 统一给通用文案，真实异常由调用方记日志
+        if (context is MiHoYoApiContext.CloudGame)
+        {
+            return CreateKnownFeedback("MiHoYoApiError_RequestRejected", null);
+        }
+
         return CreateUnknownFeedback(exception.Message, null);
     }
 
@@ -164,6 +180,19 @@ internal static class MiHoYoApiErrorFeedbackFactory
         if (context is MiHoYoApiContext.GachaLog or MiHoYoApiContext.SelfQuery && exception.ReturnCode is -100 or -101 or -1)
         {
             return CreateKnownFeedback("MiHoYoApiError_AuthkeyExpired", exception.ReturnCode, MiHoYoApiRecoveryAction.RefreshUrl);
+        }
+
+        if (context is MiHoYoApiContext.CloudGame)
+        {
+            return exception.ReturnCode switch
+            {
+                // -100 = 客户端给的凭证失效。凭证只从云游戏客户端读（本应用里的游戏账号换不来，见 CloudGameClient.BuildComboToken），
+                // 所以要提示的是「去云游戏客户端重新登录」，不是重新登录本应用的账号
+                -100 => CreateKnownFeedback("MiHoYoApiError_CloudGameTokenExpired", exception.ReturnCode, MiHoYoApiRecoveryAction.Relogin),
+                // SDK 改版导致响应结构对不上时，Client 自己抛的也是 -1，走通用文案，不要把内部英文描述甩给用户
+                -1 => CreateKnownFeedback("MiHoYoApiError_RequestRejected", exception.ReturnCode),
+                _ => CreateUnknownFeedback(exception.ResponseMessage, exception.ReturnCode),
+            };
         }
 
         if (context is MiHoYoApiContext.GameRecord or MiHoYoApiContext.SignIn or MiHoYoApiContext.AccountAuth)
@@ -305,6 +334,7 @@ internal static class MiHoYoApiErrorFeedbackFactory
         }
         // 账号类错误不再使用「账号异常」类通用标题，仅展示具体本地化说明；网络类仍用 NetworkError 作标题。
         string title = resourceKey is "MiHoYoApiError_LoginExpired"
+            or "MiHoYoApiError_CloudGameTokenExpired"
             or "MiHoYoApiError_VerificationRequired"
             or "MiHoYoApiError_GameRoleNotFound"
             or "MiHoYoApiError_AccountQueryLimit"

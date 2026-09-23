@@ -25,6 +25,7 @@
 
         <Button.Flyout>
             <Flyout Opened="Flyout_Opened"
+                    Opening="Flyout_Opening"
                     Placement="LeftEdgeAlignedTop"
                     FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
                     sc:FlyoutGap.Horizontal="12">
@@ -32,6 +33,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
@@ -86,11 +88,191 @@
                     <TextBlock x:Name="TextBlock_RunningProcessInfo"
                                Grid.Row="2"
                                Grid.ColumnSpan="2"
-                               Margin="8,0,8,4"
+                               Margin="12,0,12,4"
                                FontSize="12"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                Text="{x:Bind RunningProcessInfo}"
                                Visibility="{x:Bind RunningProcessInfo, Converter={StaticResource ObjectToVisibilityConverter}}" />
+
+                    <!--  云游戏账号（及其可用时长），仅 GameFeatureConfig.SupportCloudGameWallet 的区服显示。
+                          主从关系：账号是主，时长与自动领取都是该账号名下的东西，所以账号行当小标题排在最上。
+                          MaxWidth = 上半部分自然宽度 228（宽度不受限时星号列按内容计：图 100 + 间距 8 + 按钮 120）减左右边距，
+                          换行的提示 / 错误文案不会把弹层撑宽；
+                          内容区固定高度：查询结果回填前后高度一致，不会跳动  -->
+                    <Grid Grid.Row="3"
+                          Grid.ColumnSpan="2"
+                          MaxWidth="204"
+                          Margin="12,0,12,10"
+                          Visibility="{x:Bind IsWalletSupported, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="76" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <MenuFlyoutSeparator Margin="0,8,0,0" />
+
+                        <!--  账号行（主）：通行证下拉 + 刷新。用户在云游戏客户端登过几个账号这里就列几个；
+                              只有一个时仍然显示（能看出下面的数字是哪个 uid 的），但不可点。
+                              负外边距抵消按钮自带的 8px 内边距，让账号文字与下方时长文字对齐到同一条竖线  -->
+                        <Grid Grid.Row="1"
+                              Margin="-8,8,-8,0"
+                              ColumnSpacing="4"
+                              Visibility="{x:Bind IsAccountRowVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <DropDownButton x:Name="Button_Account"
+                                            Height="28"
+                                            Padding="8,0,8,0"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            BorderThickness="0"
+                                            CornerRadius="4"
+                                            IsEnabled="{x:Bind IsAccountSwitchEnabled}"
+                                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                            sc:InstantTooltip.Placement="Top"
+                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.CloudGameButton_CredentialFromClient}">
+                                <Grid ColumnSpacing="6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock VerticalAlignment="Center"
+                                               FontSize="12"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind SelectedAccountText}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <FontIcon Grid.Column="1"
+                                              FontSize="10"
+                                              Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                              Glyph="&#xE972;"
+                                              Visibility="{x:Bind IsAccountSwitchEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                </Grid>
+                                <DropDownButton.Flyout>
+                                    <MenuFlyout x:Name="MenuFlyout_Account" Placement="Bottom" />
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
+                            <Button Grid.Column="1"
+                                    Width="28"
+                                    Height="28"
+                                    Padding="0"
+                                    BorderThickness="0"
+                                    Command="{x:Bind RefreshWalletCommand}"
+                                    CornerRadius="4"
+                                    IsEnabled="{x:Bind IsWalletLoading, Converter={StaticResource BoolReversedConverter}}"
+                                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
+                                <FontIcon FontSize="12"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE72C;" />
+                            </Button>
+                        </Grid>
+
+                        <!--  内容区（从）：该账号的时长 / 无可用凭证 / 查询失败 / 首次查询中，四选一。
+                              三行值自带标题，不再重复一个「可用时长」小标题  -->
+                        <Grid Grid.Row="2" Margin="0,8,0,0">
+                            <StackPanel VerticalAlignment="Center"
+                                        Spacing="4"
+                                        Visibility="{x:Bind IsWalletValueVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <!--  畅玩卡生效期间不限时长游玩，扣费顺序也排在免费时长与付费货币之前，这里按同样的顺序展示  -->
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="13"
+                                               Text="{x:Bind lang:Lang.CloudGameButton_PlayCard}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <!--  兜底展示的服务端文案长度不可控，裁掉超出部分，别把弹层撑宽  -->
+                                    <TextBlock Grid.Column="1"
+                                               FontSize="13"
+                                               Text="{x:Bind PlayCardText}"
+                                               TextTrimming="CharacterEllipsis" />
+                                </Grid>
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="13"
+                                               Text="{x:Bind lang:Lang.CloudGameButton_FreeTime}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1"
+                                               FontSize="13"
+                                               Text="{x:Bind FreeTimeText}" />
+                                </Grid>
+                                <!--  付费货币名按游戏不同（云·原神为原点、云·绝区零为邦邦点），文案由 code-behind 按当前区服给出  -->
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="13"
+                                               Text="{x:Bind CoinTimeLabel}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1"
+                                               FontSize="13"
+                                               Text="{x:Bind CoinTimeText}" />
+                                </Grid>
+                            </StackPanel>
+
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       MaxLines="4"
+                                       Text="{x:Bind lang:Lang.CloudGameButton_CredentialFromClient}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap"
+                                       Visibility="{x:Bind IsWalletHintVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                       MaxLines="4"
+                                       Text="{x:Bind WalletError}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap"
+                                       Visibility="{x:Bind IsWalletErrorVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                            <ProgressRing Width="20"
+                                          Height="20"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          IsActive="{x:Bind IsWalletRingVisible}"
+                                          Visibility="{x:Bind IsWalletRingVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Grid>
+
+                        <!--  自动获取免费时长开关（从）：开了就把该区服下全部通行证都领一遍  -->
+                        <Grid Grid.Row="3"
+                              Margin="0,8,0,0"
+                              ColumnSpacing="8"
+                              Visibility="{x:Bind IsAutoClaimVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind lang:Lang.CloudGameButton_AutoClaimFreeTime}"
+                                       TextTrimming="CharacterEllipsis" />
+                            <!--  负边距抑掉 ToggleSwitch 模板自带的空白：轨道（40×20）右侧固定有一列
+                                  Width="12" MaxWidth="12"（留给 On/OffContent，此处为空仍占位），上下各有一行
+                                  ToggleSwitchPre/PostContentMargin（都是 10）。不抵消的话轨道会比上方数值右缘少 12px，
+                                  行高也多出 20px。数据来自 WinUI ToggleSwitch_themeresources.xaml 模板  -->
+                            <ToggleSwitch Grid.Column="1"
+                                          MinWidth="0"
+                                          Margin="0,-10,-12,-10"
+                                          VerticalAlignment="Center"
+                                          IsOn="{x:Bind AutoClaimFreeTimeEnabled, Mode=TwoWay}"
+                                          OffContent=""
+                                          OnContent="" />
+                        </Grid>
+                    </Grid>
 
                 </Grid>
             </Flyout>

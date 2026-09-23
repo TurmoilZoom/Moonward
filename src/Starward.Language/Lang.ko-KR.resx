@@ -2156,6 +2156,45 @@
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>클라우드 게임</value>
   </data>
+  <data name="CloudGameButton_FreeTime" xml:space="preserve">
+    <value>무료 시간</value>
+  </data>
+  <data name="CloudGameButton_YuanPointsTime" xml:space="preserve">
+    <value>Yuan 포인트 시간</value>
+  </data>
+  <data name="CloudGameButton_AutoClaimFreeTime" xml:space="preserve">
+    <value>무료 시간 자동 수령</value>
+  </data>
+  <data name="CloudGameButton_BangbooPointsTime" xml:space="preserve">
+    <value>방부 포인트 시간</value>
+  </data>
+  <data name="CloudGameButton_PlayCard" xml:space="preserve">
+    <value>플레이 카드</value>
+  </data>
+  <data name="CloudGameButton_PlayCardInactive" xml:space="preserve">
+    <value>미개통</value>
+  </data>
+  <data name="CloudGameButton_Days" xml:space="preserve">
+    <value>{0}일</value>
+  </data>
+  <data name="CloudGameButton_DaysHours" xml:space="preserve">
+    <value>{0}일 {1}시간</value>
+  </data>
+  <data name="CloudGameButton_Minutes" xml:space="preserve">
+    <value>{0}분</value>
+  </data>
+  <data name="CloudGameButton_Hours" xml:space="preserve">
+    <value>{0}시간</value>
+  </data>
+  <data name="CloudGameButton_HoursMinutes" xml:space="preserve">
+    <value>{0}시간 {1}분</value>
+  </data>
+  <data name="CloudGameButton_CredentialFromClient" xml:space="preserve">
+    <value>로그인 자격 증명은 클라우드 게임 클라이언트에 로그인한 다에만 가지올 수 있습니다.</value>
+  </data>
+  <data name="CloudGameButton_LoginRequired" xml:space="preserve">
+    <value>클라우드 게임 클라이언트를 설치하고 한 번 로그인하세요. 자격 증명은 클라이언트에서 읽습니다.</value>
+  </data>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>실시간 메모</value>
   </data>
@@ -3331,6 +3370,9 @@
   </data>
   <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
     <value>로그인이 만료되었습니다. 다시 로그인해 주세요.</value>
+  </data>
+  <data name="MiHoYoApiError_CloudGameTokenExpired" xml:space="preserve">
+    <value>클라우드 게임 자격 증명이 만료되었습니다. 클라우드 게임 클라이언트를 열어 다시 로그인하세요.</value>
   </data>
   <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
     <value>계정, 기기 또는 네트워크 인증이 필요합니다.</value>

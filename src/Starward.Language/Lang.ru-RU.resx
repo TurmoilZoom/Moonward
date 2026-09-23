@@ -2157,6 +2157,45 @@
   <data name="CloudGameButton_CloudGame" xml:space="preserve">
     <value>Облачный гейминг</value>
   </data>
+  <data name="CloudGameButton_FreeTime" xml:space="preserve">
+    <value>Бесплатное время</value>
+  </data>
+  <data name="CloudGameButton_YuanPointsTime" xml:space="preserve">
+    <value>Время за очки Yuan</value>
+  </data>
+  <data name="CloudGameButton_AutoClaimFreeTime" xml:space="preserve">
+    <value>Автополучение бесплатного времени</value>
+  </data>
+  <data name="CloudGameButton_BangbooPointsTime" xml:space="preserve">
+    <value>Время за очки Банбу</value>
+  </data>
+  <data name="CloudGameButton_PlayCard" xml:space="preserve">
+    <value>Игровая карта</value>
+  </data>
+  <data name="CloudGameButton_PlayCardInactive" xml:space="preserve">
+    <value>Не активна</value>
+  </data>
+  <data name="CloudGameButton_Days" xml:space="preserve">
+    <value>{0} д</value>
+  </data>
+  <data name="CloudGameButton_DaysHours" xml:space="preserve">
+    <value>{0} д {1} ч</value>
+  </data>
+  <data name="CloudGameButton_Minutes" xml:space="preserve">
+    <value>{0} мин</value>
+  </data>
+  <data name="CloudGameButton_Hours" xml:space="preserve">
+    <value>{0} ч</value>
+  </data>
+  <data name="CloudGameButton_HoursMinutes" xml:space="preserve">
+    <value>{0} ч {1} мин</value>
+  </data>
+  <data name="CloudGameButton_CredentialFromClient" xml:space="preserve">
+    <value>Учётные данные можно прочитать только после входа в клиент облачной игры.</value>
+  </data>
+  <data name="CloudGameButton_LoginRequired" xml:space="preserve">
+    <value>Установите клиент облачной игры и войдите один раз — учётные данные читаются из клиента.</value>
+  </data>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Заметка в реальном времени</value>
   </data>
@@ -3351,6 +3390,9 @@ ChatGPT может допускать ошибки. Проверьте важн�
   </data>
   <data name="MiHoYoApiError_LoginExpired" xml:space="preserve">
     <value>Срок входа истёк. Войдите снова.</value>
+  </data>
+  <data name="MiHoYoApiError_CloudGameTokenExpired" xml:space="preserve">
+    <value>Учётные данные облачной игры устарели. Откройте клиент облачной игры и войдите снова.</value>
   </data>
   <data name="MiHoYoApiError_VerificationRequired" xml:space="preserve">
     <value>Требуется проверка аккаунта, устройства или сети.</value>

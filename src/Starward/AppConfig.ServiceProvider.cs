@@ -7,6 +7,7 @@ using Starward.Core.Gacha.StarRail;
 using Starward.Core.Gacha.ZZZ;
 using Starward.Core.GameNotice;
 using Starward.Core.Blackboard;
+using Starward.Core.CloudGame;
 using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
 using Starward.Core.MiyoLive;
@@ -14,6 +15,7 @@ using Starward.Core.SelfQuery;
 using Starward.Features.RedeemCode;
 using Starward.Features.TimeNode;
 using Starward.Features.Background;
+using Starward.Features.CloudGame;
 using Starward.Features.Codec;
 using Starward.Features.Database;
 using Starward.Features.Feedback;
@@ -115,6 +117,12 @@ public static partial class AppConfig
             // 首页兑换码：国服前瞻直播 miyolive（公开接口，无 Cookie，只展示）
             sc.AddSingleton<MiyoLiveClient>();
             sc.AddSingleton<RedeemCodeService>();
+
+            // 云游戏可用时长：凭证由当前登录账号的通行证 stoken 自动换取，无需用户手动输入
+            sc.AddSingleton<CloudGameClient>();
+            sc.AddSingleton<CloudGameClientCredentialProvider>();
+            sc.AddSingleton<CloudGameWalletService>();
+            sc.AddSingleton<AutoCloudGameFreeTimeService>();
 
             sc.AddSingleton<SelfQueryClient>();
             sc.AddSingleton<SelfQueryService>();

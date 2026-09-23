@@ -6,6 +6,7 @@ using Starward.Features.ViewHost;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -705,6 +706,152 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 自动领取云游戏每日免费时长（软件启动后静默领取，并在常驻期间跨日再领），按游戏区分，默认关闭。
+    /// </summary>
+    /// <param name="biz">游戏业务线，如 hk4e_cn。</param>
+    /// <returns>该游戏是否已开启自动领取。</returns>
+    public static bool GetAutoCloudGameFreeTimeEnabled(GameBiz biz)
+    {
+        return GetValue<bool>(default, $"auto_cloud_game_free_time_enabled_{biz}");
+    }
+
+    /// <summary>
+    /// 设置指定游戏的自动领取云游戏免费时长开关。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">是否开启。</param>
+    public static void SetAutoCloudGameFreeTimeEnabled(GameBiz biz, bool value)
+    {
+        SetValue(value, $"auto_cloud_game_free_time_enabled_{biz}");
+    }
+
+
+    /// <summary>
+    /// 获取指定游戏、指定账号最近一次成功领取免费时长的云游戏日历日（见 <see cref="Features.CloudGame.CloudGameFreeTimeSchedule.GetServerDate"/>）。
+    /// 钱包接口不下发「今天是否已领」，只能由本机记账避免同一天重复领取。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="accountId">通行证账号 ID。免费时长按账号发放，换账号必须重新领。</param>
+    /// <returns>已领日期；从未领过或记录损坏时为 null。</returns>
+    public static DateOnly? GetCloudGameFreeTimeClaimedDate(GameBiz biz, string accountId)
+    {
+        string? value = GetValue<string>(default, $"{CloudGameFreeTimeClaimedDateKeyPrefix}{biz}_{accountId}");
+        if (DateOnly.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly date))
+        {
+            return date;
+        }
+        return null;
+    }
+
+
+    /// <summary>
+    /// 记录指定游戏、指定账号成功领取免费时长的云游戏日历日。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="accountId">通行证账号 ID。</param>
+    /// <param name="date">云游戏日历日。</param>
+    public static void SetCloudGameFreeTimeClaimedDate(GameBiz biz, string accountId, DateOnly date)
+    {
+        SetValue(date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), $"{CloudGameFreeTimeClaimedDateKeyPrefix}{biz}_{accountId}");
+    }
+
+
+    /// <summary>
+    /// 获取云游戏弹层当前选中的通行证账号 ID。用户可能在云游戏客户端里登过多个通行证，
+    /// 这里记住上次查的是哪个。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <returns>账号 ID；从未选过时为 null（由调用方回落到第一个可用账号）。</returns>
+    public static string? GetCloudGameSelectedAccount(GameBiz biz)
+    {
+        return GetValue<string>(default, $"cloud_game_selected_account_{biz}");
+    }
+
+
+    /// <summary>
+    /// 记住云游戏弹层选中的通行证账号 ID。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="accountId">账号 ID；null 表示清除。</param>
+    public static void SetCloudGameSelectedAccount(GameBiz biz, string? accountId)
+    {
+        SetValue(accountId, $"cloud_game_selected_account_{biz}");
+    }
+
+
+    /// <summary>
+    /// 云游戏凭证在 Setting 表中的键前缀，完整键形如 <c>cloud_game_combo_token_{biz}_{accountId}</c>。
+    /// </summary>
+    private const string CloudGameComboTokenKeyPrefix = "cloud_game_combo_token_";
+
+
+    /// <summary>
+    /// 获取指定游戏、指定米哈游通行证账号的云游戏凭证（请求头 x-rpc-combo_token 的值）。
+    /// 凭证等同云游戏账号的登录态：只存本机数据库，不得写入日志。
+    /// </summary>
+    /// <param name="biz">游戏业务线，如 nap_cn。</param>
+    /// <param name="accountId">通行证账号 ID。凭证与账号绑定，换账号必须换凭证，所以不设区服级的公共键。</param>
+    /// <returns>凭证；未保存时为 null。</returns>
+    public static string? GetCloudGameComboToken(GameBiz biz, string accountId)
+    {
+        return GetValue<string>(default, $"{CloudGameComboTokenKeyPrefix}{biz}_{accountId}");
+    }
+
+
+    /// <summary>
+    /// 保存指定游戏、指定米哈游通行证账号的云游戏凭证。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="accountId">通行证账号 ID。</param>
+    /// <param name="value">凭证；null 表示清除。</param>
+    public static void SetCloudGameComboToken(GameBiz biz, string accountId, string? value)
+    {
+        SetValue(value, $"{CloudGameComboTokenKeyPrefix}{biz}_{accountId}");
+    }
+
+
+    /// <summary>
+    /// 列出本机已保存过凭证的通行证账号 ID。云游戏客户端的日志会被清理或轮转，
+    /// 日志里没了但本机存过的账号也应该继续可选。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <returns>账号 ID 列表，顺序不保证。</returns>
+    public static List<string> GetCloudGameComboTokenAccountIds(GameBiz biz)
+    {
+        string prefix = $"{CloudGameComboTokenKeyPrefix}{biz}_";
+        return GetKeys(key => key.StartsWith(prefix, StringComparison.Ordinal))
+            .Select(key => key[prefix.Length..])
+            .Where(id => !string.IsNullOrEmpty(id))
+            .ToList();
+    }
+
+
+    /// <summary>
+    /// 云游戏免费时长领取记录在 Setting 表中的键前缀，完整键形如 <c>cloud_game_free_time_claimed_date_{biz}_{accountId}</c>。
+    /// </summary>
+    private const string CloudGameFreeTimeClaimedDateKeyPrefix = "cloud_game_free_time_claimed_date_";
+
+
+    /// <summary>
+    /// 删除指定米哈游通行证账号在所有游戏下保存的云游戏凭证与免费时长领取记录。
+    /// 凭证等同云游戏账号的登录态，账号被移除后不应继续留在本机；领取记录一并清掉，免得留下无主行。
+    /// </summary>
+    /// <param name="accountId">通行证账号 ID。</param>
+    public static void DeleteCloudGameComboTokens(string accountId)
+    {
+        if (string.IsNullOrWhiteSpace(accountId))
+        {
+            return;
+        }
+        // 键中间的 biz 段不固定，按「前缀 + _账号ID 结尾」精确匹配，不依赖已接入的区服清单
+        string suffix = $"_{accountId}";
+        DeleteValues(key => key.EndsWith(suffix, StringComparison.Ordinal)
+                            && (key.StartsWith(CloudGameComboTokenKeyPrefix, StringComparison.Ordinal)
+                                || key.StartsWith(CloudGameFreeTimeClaimedDateKeyPrefix, StringComparison.Ordinal)));
+    }
+
+
+    /// <summary>
     /// 获取指定游戏的安装路径。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>
@@ -1256,6 +1403,60 @@ public static partial class AppConfig
         {
             using var dapper = DatabaseService.CreateConnection();
             dapper.Execute("DELETE FROM Setting WHERE TRUE;");
+        }
+        catch { }
+    }
+
+
+    /// <summary>
+    /// 删除全部满足条件的设置项，数据库与内存缓存一并清除。
+    /// </summary>
+    /// <param name="predicate">按设置键判断是否删除。</param>
+    /// <summary>
+    /// 按谓词筛出 Setting 表中的键名。缓存已载入整张表，直接在内存里筛，不依赖 LIKE 的通配符语义。
+    /// </summary>
+    /// <param name="predicate">键名筛选条件。</param>
+    /// <returns>匹配的键名；设置未就绪时为空列表。</returns>
+    private static List<string> GetKeys(Func<string, bool> predicate)
+    {
+        if (string.IsNullOrWhiteSpace(UserDataFolder))
+        {
+            return [];
+        }
+        InitializeSettingProvider();
+        if (_settingCache is null)
+        {
+            return [];
+        }
+        return _settingCache.Keys.Where(predicate).ToList();
+    }
+
+
+    private static void DeleteValues(Func<string, bool> predicate)
+    {
+        if (string.IsNullOrWhiteSpace(UserDataFolder))
+        {
+            return;
+        }
+        InitializeSettingProvider();
+        if (_settingCache is null)
+        {
+            return;
+        }
+        try
+        {
+            // 缓存在初始化时已载入整张 Setting 表，直接在内存里筛键，避免依赖 LIKE 的通配符语义
+            List<string> keys = _settingCache.Keys.Where(predicate).ToList();
+            if (keys.Count == 0)
+            {
+                return;
+            }
+            using var dapper = DatabaseService.CreateConnection();
+            dapper.Execute("DELETE FROM Setting WHERE Key=@key;", keys.Select(x => new { key = x }));
+            foreach (string key in keys)
+            {
+                _settingCache.Remove(key);
+            }
         }
         catch { }
     }

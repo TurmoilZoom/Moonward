@@ -45,6 +45,13 @@ internal partial class GameFeatureConfig
 
 
     /// <summary>
+    /// 支持在云游戏弹层查询可用时长（免费时长 / 付费货币时长），凭证由当前登录账号自动换取；
+    /// 接口配置见 <see cref="Starward.Core.CloudGame.CloudGameApiConfig"/>
+    /// </summary>
+    public bool SupportCloudGameWallet { get; init; }
+
+
+    /// <summary>
     /// 支持实时便笺
     /// </summary>
     public bool SupportDailyNote { get; init; }
@@ -170,6 +177,7 @@ internal partial class GameFeatureConfig
         InGameNoticesWindow = true,
         SupportHardLink = true,
         SupportCloudGame = true,
+        SupportCloudGameWallet = true,
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportTimeNode = true,
@@ -301,6 +309,7 @@ internal partial class GameFeatureConfig
         SupportDailyNote = true,
         SupportSignIn = true,
         SupportCloudGame = true,
+        SupportCloudGameWallet = true,
         SupportTimeNode = true,
         SupportRedeemCode = true,
         SupportFavorWallpaper = true,

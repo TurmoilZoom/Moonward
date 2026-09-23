@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Starward.Features.GameRecord.SignIn;
+using Starward.Features.CloudGame;
 using Starward.Features.Overlay;
 using Starward.Features.Screenshot;
 using Starward.Features.Setting;
@@ -329,6 +330,7 @@ public sealed partial class SystemTrayWindow : WindowEx
                 or User32.PowerBroadcastType.PBT_APMRESUMECRITICAL)
             {
                 AppConfig.GetService<AutoSignInService>().NotifySystemResumed();
+                AppConfig.GetService<AutoCloudGameFreeTimeService>().NotifySystemResumed();
             }
         }
         return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
