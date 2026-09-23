@@ -447,7 +447,7 @@ internal partial class GameLauncherService
                 arg = $"""/c start "" /d "{Path.GetDirectoryName(exe)}" "{exe}" {arg}""";
                 exe = "cmd.exe";
             }
-            _logger.LogInformation("Start game ({biz})\r\npath: {exe}\r\narg: {arg}", gameId, exe, arg);
+            _logger.LogInformation("Start game ({biz})\r\npath: {exe}\r\narg: {arg}", gameId.GameBiz, exe, MaskLoginAuthTicket(arg));
             var info = new ProcessStartInfo
             {
                 FileName = exe,
@@ -477,6 +477,27 @@ internal partial class GameLauncherService
         }
         return null;
     }
+
+
+    /// <summary>
+    /// 把启动参数里的 <c>login_auth_ticket</c> 打码后再写日志。
+    /// 票据能直接登录游戏账号，而用户报问题时常整份贴出日志，故记录的一律是掩码值。
+    /// </summary>
+    /// <param name="arg">实际传给游戏的启动参数。</param>
+    /// <returns>票据值替换为 <c>***</c> 后的参数；无票据时原样返回。</returns>
+    private static string? MaskLoginAuthTicket(string? arg)
+    {
+        if (string.IsNullOrEmpty(arg))
+        {
+            return arg;
+        }
+        return LoginAuthTicketRegex().Replace(arg, "login_auth_ticket=***");
+    }
+
+
+    /// <summary>StartGameWithCMD 会把参数再包一层引号，故票据值以空白或引号为界。</summary>
+    [GeneratedRegex("""login_auth_ticket=[^\s"]+""")]
+    private static partial Regex LoginAuthTicketRegex();
 
 
     /// <summary>

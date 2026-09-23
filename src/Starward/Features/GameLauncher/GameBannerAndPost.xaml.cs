@@ -182,7 +182,7 @@ public sealed partial class GameBannerAndPost : UserControl
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Get game launcher content ({CurrentGameId})", CurrentGameId);
+            _logger.LogError(ex, "Get game launcher content ({biz})", CurrentGameId?.GameBiz);
         }
     }
 
@@ -202,7 +202,7 @@ public sealed partial class GameBannerAndPost : UserControl
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Update game notice button visibility ({CurrentGameId})", CurrentGameId);
+            _logger.LogError(ex, "Update game notice button visibility ({biz})", CurrentGameId?.GameBiz);
         }
     }
 
