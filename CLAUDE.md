@@ -101,7 +101,7 @@ dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeI
 | 设置 / DI | `AppConfig.Setting` / `ServiceProvider` | 按游戏设置、注册 |
 | 文案 | 全部 `Lang.*.resx` + `Designer` | 见「本地化」 |
 
-客户端约定：`CommonSendAsync`；JSON 一律 `*JsonContext.Default`。**不实现**米游社 DS 签名算法，源码中不包含 DS salt。签到 act_id 等以 `SignInActivityConfig` 文件头注释为准（部分游戏/区服为待核对猜测，**只改该文件即可**）。
+客户端约定：`CommonSendAsync`；JSON 一律 `*JsonContext.Default`。签到 act_id 等以 `SignInActivityConfig` 文件头注释为准（部分游戏/区服为待核对猜测，**只改该文件即可**）。
 
 ### 米哈游 API 错误反馈
 
