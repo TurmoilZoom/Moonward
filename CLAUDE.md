@@ -50,8 +50,8 @@ dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeI
 
 - **0 error 即视为通过**（无单元测试；必要时手动跑应用）。Release 全量约数分钟级。
 - SDK 由 `global.json` 锁定——**不要擅自升级 SDK 或 NuGet 包**。
-- 平台：`x86` / `x64` / `ARM64`。CI（`.github/workflows/build.yml`）跑 Debug×Release × x64×arm64，使用 `dotnet publish ... -r win-<plat> -p:DefineConstants=DONOT_CHECK_UPDATE`。
-- 常量：`DONOT_CHECK_UPDATE` 跳过启动更新检查（CI）；`DISABLE_XAML_GENERATED_MAIN` 由 `Program.Main` 接管入口。
+- 平台：`x86` / `x64` / `ARM64`。**没有编译类 CI**，改动是否通过以本地构建为准；发版产物由 `.github/workflows/release.yml` 按 tag 构建（Release × x64/arm64）。
+- 常量：`DONOT_CHECK_UPDATE` 跳过启动更新检查（需手动加 `-p:DefineConstants=DONOT_CHECK_UPDATE`）；`DISABLE_XAML_GENERATED_MAIN` 由 `Program.Main` 接管入口。
 - 不提交 `bin/`、`obj/`、日志。
 
 ## 解决方案结构

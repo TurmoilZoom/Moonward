@@ -83,9 +83,7 @@ dotnet build src/Starward/Starward.csproj -c Debug -p:Platform=x64
 dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeIdentifier=win-x64
 ```
 
-改完代码后至少保证 **0 error** 构建通过。项目目前没有单元测试，构建通过 + 必要时手动运行应用即为主要验证手段。
-
-CI 会在 `main` 与 `dev/*` 分支的 push / pull_request 时运行，覆盖 Debug/Release × x64/arm64 四种组合（见 [`.github/workflows/build.yml`](.github/workflows/build.yml)）。
+改完代码后至少保证 **0 error** 构建通过。项目目前没有单元测试，也没有编译类 CI，构建通过 + 必要时手动运行应用即为主要验证手段，请在提交前本地跑一遍。
 
 > **注意**：开发版可能损坏个人数据库 `StarwardDatabase.db`，测试前请备份。
 
