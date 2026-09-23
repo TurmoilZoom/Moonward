@@ -546,12 +546,16 @@ public sealed partial class CloudGameButton : UserControl
                     await Task.Delay(3000);
                     if (!p.HasExited)
                     {
-                        Process.Start(new ProcessStartInfo
+                        // 云客户端进程名与游戏本体不同，过不了 PlayTimeRecordService 的进程名校验，只能在此自行拉起；
+                        // 但数据目录参数必须照传，否则子进程只能回落去读注册表里持久化的目录。
+                        Process? recorder = Process.Start(new ProcessStartInfo
                         {
                             FileName = AppConfig.MoonwardExecutePath,
-                            Arguments = $"playtime --biz {CurrentGameId.GameBiz} --pid {p.Id}",
+                            Arguments = $"playtime --biz {CurrentGameId.GameBiz} --pid {p.Id} {AppConfig.GetDataFolderArgument()}",
                             CreateNoWindow = true,
                         });
+                        _logger.LogInformation("Start process to log cloud game play time: GameBiz {biz}, Pid {pid}, ProcessId {processId}",
+                                               CurrentGameId.GameBiz, p.Id, recorder?.Id);
                     }
                 }
             }
