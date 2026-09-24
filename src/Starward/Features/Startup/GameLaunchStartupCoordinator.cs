@@ -1,6 +1,10 @@
 using Serilog;
 using Starward.Core;
+using Starward.Features.GameLauncher;
+using Starward.Language;
+using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace Starward.Features.Startup;
 
@@ -50,5 +54,22 @@ internal static class GameLaunchStartupCoordinator
     {
         return context.LaunchedGame is null ? StartupOutcome.Exit : StartupOutcome.Continue;
     }
+
+
+    /// <summary>
+    /// 把启动失败的异常映射为用户可见文案，两条启动路径（<c>moonward://startgame</c> 与命令行
+    /// <c>startgame</c>）共用。异常类与日志仍保留实现原文，不本地化。
+    /// </summary>
+    /// <param name="ex">启动过程中抛出的异常。</param>
+    /// <returns>可直接展示给用户的文案。</returns>
+    public static string GetLaunchErrorMessage(Exception ex) => ex switch
+    {
+        FileNotFoundException => Lang.UrlProtocol_GameExeNotFound,
+        ArgumentOutOfRangeException => Lang.UrlProtocol_InvalidGameBiz,
+        ArgumentException when ex.Message.StartsWith("Cannot parse the game_biz", StringComparison.Ordinal)
+            => Lang.UrlProtocol_InvalidGameBiz,
+        GameRunningException => Lang.LauncherPage_GameIsRunning,
+        _ => $"{Lang.UrlProtocol_UnhandledError}\n{ex.Message}",
+    };
 
 }

@@ -1,10 +1,12 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Vanara.PInvoke;
 
 namespace Starward.Features.Startup;
 
@@ -26,11 +28,31 @@ internal sealed class StartGameStartupHandler : IStartupHandler
         GameBiz biz = (GameBiz)context.Configuration.GetValue<string>("biz");
         if (GameId.FromGameBiz(biz) is GameId gameId)
         {
-            // 与首页「开始游戏」一致：按当前生效的启动方式（默认「无」）。
-            AppConfig.ResolveLaunchProfile(biz, AppConfig.GetActiveLaunchProfileId(biz), out bool useNone, out GameLaunchProfile? profile);
-            Process? process = await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, profile: profile, useNoneLaunchMethod: useNone);
-            GameLaunchStartupCoordinator.AfterGameStarted(context, biz, process);
-            return GameLaunchStartupCoordinator.ResolveOutcome(context);
+            try
+            {
+                // 与首页「开始游戏」一致：按当前生效的启动方式（默认「无」）。
+                AppConfig.ResolveLaunchProfile(biz, AppConfig.GetActiveLaunchProfileId(biz), out bool useNone, out GameLaunchProfile? profile);
+                Process? process = await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId, profile: profile, useNoneLaunchMethod: useNone);
+                GameLaunchStartupCoordinator.AfterGameStarted(context, biz, process);
+                return GameLaunchStartupCoordinator.ResolveOutcome(context);
+            }
+            catch (Exception ex)
+            {
+                // 必须就地收口：本处理器由 async void 的 App.OnLaunched 驱动，异常逃出去会被抛回消息泵，
+                // App_UnhandledException 只记日志不置 Handled，进程直接终止且用户看不到任何提示。
+                // 行为与 moonward://startgame 对齐：记日志 + 弹窗，然后用完即退。
+                ILogger<StartGameStartupHandler> logger = AppConfig.GetLogger<StartGameStartupHandler>();
+                if (ex is GameRunningException)
+                {
+                    // 可预期：重复启动同一个游戏，不是故障，不留堆栈
+                    logger.LogInformation("Start game by command line: {message}", ex.Message);
+                }
+                else
+                {
+                    logger.LogError(ex, "Start game by command line ({biz})", biz);
+                }
+                User32.MessageBox(HWND.NULL, GameLaunchStartupCoordinator.GetLaunchErrorMessage(ex), "Moonward");
+            }
         }
         return StartupOutcome.Exit;
     }

@@ -5,10 +5,8 @@ using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
 using Starward.Features.PlayTime;
 using Starward.Features.Startup;
-using Starward.Language;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using System.Web;
 using Vanara.PInvoke;
@@ -171,27 +169,22 @@ internal class UrlProtocolService
         catch (Exception ex)
         {
             // 已识别的协议分支发生异常：记录日志、弹窗提示，并返回 true 阻止继续正常启动
-            log.LogError(ex, "Handle url protocol");
-            User32.MessageBox(HWND.NULL, GetProtocolErrorMessage(ex), "Moonward");
+            if (ex is GameRunningException)
+            {
+                // 重复双击快捷方式即可触发，不是故障：记一行，不留堆栈
+                log.LogInformation("Handle url protocol: {message}", ex.Message);
+            }
+            else
+            {
+                log.LogError(ex, "Handle url protocol");
+            }
+            User32.MessageBox(HWND.NULL, GameLaunchStartupCoordinator.GetLaunchErrorMessage(ex), "Moonward");
             return true;
         }
         return false;
     }
 
 
-    /// <summary>
-    /// 将 URL 协议处理中的异常映射为用户可见文案。异常类与日志仍保留服务端/实现原文，不本地化。
-    /// </summary>
-    private static string GetProtocolErrorMessage(Exception ex) => ex switch
-    {
-        FileNotFoundException => Lang.UrlProtocol_GameExeNotFound,
-        ArgumentOutOfRangeException => Lang.UrlProtocol_InvalidGameBiz,
-        ArgumentException when ex.Message.StartsWith("Cannot parse the game_biz", StringComparison.Ordinal)
-            => Lang.UrlProtocol_InvalidGameBiz,
-        _ when ex.Message.StartsWith("Game is running:", StringComparison.Ordinal)
-            => Lang.LauncherPage_GameIsRunning,
-        _ => $"{Lang.UrlProtocol_UnhandledError}\n{ex.Message}",
-    };
 
 
 
