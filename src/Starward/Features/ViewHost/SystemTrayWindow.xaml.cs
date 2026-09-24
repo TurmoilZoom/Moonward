@@ -77,6 +77,15 @@ public sealed partial class SystemTrayWindow : WindowEx
         flag &= ~(nint)User32.WindowStyles.WS_CAPTION;
         flag &= ~(nint)User32.WindowStyles.WS_BORDER;
         User32.SetWindowLong(WindowHandle, User32.WindowLongFlags.GWL_STYLE, flag);
+        // 上面的 IsAlwaysOnTop 实测没有落到窗口上（菜单弹出时 ex 里始终没有 WS_EX_TOPMOST），
+        // 而 Win11 的托盘溢出面板是 topmost 窗口，普通窗口在 z 序上永远压不过它 —— 图标收在
+        // 「隐藏的图标」里时右键，菜单会沉到面板下面。这里补一次真正的置顶，此后 Hide/Show 不会再丢。
+        User32.SetWindowPos(WindowHandle,
+                            HWND.HWND_TOPMOST,
+                            0, 0, 0, 0,
+                            User32.SetWindowPosFlags.SWP_NOMOVE
+                            | User32.SetWindowPosFlags.SWP_NOSIZE
+                            | User32.SetWindowPosFlags.SWP_NOACTIVATE);
         var p = DwmApi.DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
         DwmApi.DwmSetWindowAttribute(WindowHandle, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_WINDOW_CORNER_PREFERENCE, (nint)(&p), sizeof(DwmApi.DWM_WINDOW_CORNER_PREFERENCE));
 
