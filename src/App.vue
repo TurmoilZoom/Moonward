@@ -357,10 +357,49 @@ const sectionNav = [
   { id: 'install', zh: '安装', en: 'Install' },
 ]
 const activeSection = ref('')
+const navSectionsRef = ref(null)
+const navAtStart = ref(true)
+const navAtEnd = ref(true)
+let navResizeObserver = null
+
+/** 锚点条能否横向滚动：决定两端的渐隐遮罩 */
+function measureNavScroll() {
+  const el = navSectionsRef.value
+  if (!el) return
+  const max = el.scrollWidth - el.clientWidth
+  navAtStart.value = max <= 2 || el.scrollLeft <= 2
+  navAtEnd.value = max <= 2 || el.scrollLeft >= max - 2
+}
+
+/** 锚点条被挤到能滚动时，把当前区块的锚点带回视野中间 */
+function revealActiveNav() {
+  const el = navSectionsRef.value
+  if (!el || el.scrollWidth - el.clientWidth <= 2) return
+  const link = el.querySelector('.nav-link.is-current')
+  if (!link) return
+  const box = el.getBoundingClientRect()
+  const item = link.getBoundingClientRect()
+  const delta = item.left + item.width / 2 - (box.left + box.width / 2)
+  if (Math.abs(delta) < 4) return
+  el.scrollTo({
+    left: el.scrollLeft + delta,
+    behavior: reducedMotion.value ? 'auto' : 'smooth',
+  })
+}
+
+// 中英文标题宽度不同，切语言后重新量一次滑动状态
+watch(locale, () => {
+  requestAnimationFrame(() => {
+    measureNavScroll()
+    revealActiveNav()
+  })
+})
 
 const activeStep = ref('config')
 const activeCheckInStep = ref('enable')
 const showBackTop = ref(false)
+/** 顶栏底边的阅读进度（0~1），内容长时给一点位置感 */
+const scrollProgress = ref(0)
 const flowFoldRef = ref(null)
 const checkinFoldRef = ref(null)
 let releaseAbort = null
@@ -394,7 +433,15 @@ function updateActiveSection() {
       current = item.id
     }
   }
+  if (activeSection.value === current) return
   activeSection.value = current
+  requestAnimationFrame(revealActiveNav)
+}
+
+function updateScrollProgress() {
+  const doc = document.documentElement
+  const max = doc.scrollHeight - window.innerHeight
+  scrollProgress.value = max > 8 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
 }
 
 function onWindowScroll() {
@@ -403,6 +450,7 @@ function onWindowScroll() {
   requestAnimationFrame(() => {
     showBackTop.value = window.scrollY > 360
     updateActiveSection()
+    updateScrollProgress()
     scrollTicking = false
   })
 }
@@ -434,6 +482,11 @@ onMounted(() => {
   window.addEventListener('scroll', onWindowScroll, { passive: true })
   window.addEventListener('hashchange', syncFoldFromHash)
   window.addEventListener('hashchange', onRouteChange)
+  if (navSectionsRef.value && 'ResizeObserver' in window) {
+    navResizeObserver = new ResizeObserver(measureNavScroll)
+    navResizeObserver.observe(navSectionsRef.value)
+  }
+  measureNavScroll()
   onWindowScroll()
   syncFoldFromHash()
   syncDocumentTitle()
@@ -445,6 +498,7 @@ onUnmounted(() => {
   window.removeEventListener('scroll', onWindowScroll)
   window.removeEventListener('hashchange', syncFoldFromHash)
   window.removeEventListener('hashchange', onRouteChange)
+  navResizeObserver?.disconnect()
   stopSystemWatch?.()
   releaseAbort?.abort()
 })
@@ -458,74 +512,103 @@ onUnmounted(() => {
           <img :src="asset('logo.png')" alt="" width="28" height="28" />
           <span>Moonward</span>
         </a>
-        <nav class="nav">
-          <template v-if="!isDocs">
+        <nav class="nav" :aria-label="locale === 'zh' ? '主导航' : 'Main'">
+          <div
+            ref="navSectionsRef"
+            class="nav-sections"
+            :class="{ 'fade-start': !navAtStart, 'fade-end': !navAtEnd }"
+            @scroll.passive="measureNavScroll"
+          >
+            <template v-if="!isDocs">
+              <a
+                v-for="item in sectionNav"
+                :key="item.id"
+                class="nav-link nav-section"
+                :class="{ 'is-current': activeSection === item.id }"
+                :href="`#${item.id}`"
+                :aria-current="activeSection === item.id ? 'true' : undefined"
+              >{{ locale === 'zh' ? item.zh : item.en }}</a>
+            </template>
+            <a v-else class="nav-link nav-home" href="#">{{ locale === 'zh' ? '首页' : 'Home' }}</a>
             <a
-              v-for="item in sectionNav"
-              :key="item.id"
-              class="nav-link nav-section"
-              :class="{ 'is-current': activeSection === item.id }"
-              :href="`#${item.id}`"
-              :aria-current="activeSection === item.id ? 'true' : undefined"
-            >{{ locale === 'zh' ? item.zh : item.en }}</a>
-          </template>
-          <a v-else class="nav-link nav-home" href="#">{{ locale === 'zh' ? '首页' : 'Home' }}</a>
-          <a
-            class="nav-link"
-            :class="{ 'is-current': isDocs }"
-            href="#/docs"
-            :aria-current="isDocs ? 'true' : undefined"
-          >
-            <span class="nav-wide">{{ locale === 'zh' ? '相关文档' : 'Docs' }}</span>
-            <span class="nav-narrow">{{ locale === 'zh' ? '文档' : 'Docs' }}</span>
-          </a>
-          <a :href="links.github" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <button
-            type="button"
-            class="theme-btn"
-            :class="{
-              'is-dark': resolvedTheme === 'dark',
-              armed: themeArmed,
-            }"
-            :aria-busy="themeBusy ? 'true' : undefined"
-            :aria-label="
-              locale === 'zh'
-                ? resolvedTheme === 'dark'
-                  ? '切换为浅色'
-                  : '切换为深色'
-                : resolvedTheme === 'dark'
-                  ? 'Switch to light theme'
-                  : 'Switch to dark theme'
-            "
-            @click="toggleTheme"
-          >
-            <span class="theme-sky" aria-hidden="true">
-              <svg class="celestial sun" viewBox="0 0 24 24" focusable="false">
-                <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.75" />
+              class="nav-link"
+              :class="{ 'is-current': isDocs }"
+              href="#/docs"
+              :aria-current="isDocs ? 'true' : undefined"
+            >
+              <span class="nav-wide">{{ locale === 'zh' ? '相关文档' : 'Docs' }}</span>
+              <span class="nav-narrow">{{ locale === 'zh' ? '文档' : 'Docs' }}</span>
+            </a>
+          </div>
+          <span class="nav-divider" aria-hidden="true" />
+          <div class="nav-tools">
+            <a
+              class="icon-btn"
+              :href="links.github"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              title="GitHub"
+            >
+              <svg class="gh-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.75"
-                  stroke-linecap="round"
-                  d="M12 3v1.5M12 19.5V21M4.93 4.93l1.06 1.06M18.01 18.01l1.06 1.06M3 12h1.5M19.5 12H21M4.93 19.07l1.06-1.06M18.01 5.99l1.06-1.06"
+                  fill="currentColor"
+                  d="M12 .5C5.73.5.9 5.33.9 11.6c0 4.9 3.17 9.06 7.57 10.53.55.1.75-.24.75-.53v-1.86c-3.08.67-3.73-1.49-3.73-1.49-.5-1.28-1.23-1.62-1.23-1.62-1-.69.08-.67.08-.67 1.11.08 1.7 1.14 1.7 1.14.99 1.7 2.59 1.21 3.22.93.1-.72.39-1.21.7-1.49-2.46-.28-5.05-1.23-5.05-5.48 0-1.21.43-2.2 1.14-2.98-.11-.28-.49-1.41.11-2.94 0 0 .93-.3 3.05 1.14a10.5 10.5 0 0 1 5.56 0c2.12-1.44 3.05-1.14 3.05-1.14.6 1.53.22 2.66.11 2.94.71.78 1.14 1.77 1.14 2.98 0 4.26-2.6 5.2-5.07 5.47.4.35.76 1.03.76 2.08v3.08c0 .3.2.64.76.53a11.11 11.11 0 0 0 7.56-10.53C23.1 5.33 18.27.5 12 .5Z"
                 />
               </svg>
-              <svg class="celestial moon" viewBox="0 0 24 24" focusable="false">
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.75"
-                  stroke-linejoin="round"
-                  d="M17.5 14.2A7.2 7.2 0 0 1 9.8 6.5 7 7 0 1 0 17.5 14.2z"
-                />
-              </svg>
-            </span>
-          </button>
-          <button type="button" class="lang" @click="toggleLocale">
-            {{ locale === 'zh' ? 'EN' : '中文' }}
-          </button>
+            </a>
+            <button
+              type="button"
+              class="theme-btn icon-btn"
+              :class="{
+                'is-dark': resolvedTheme === 'dark',
+                armed: themeArmed,
+              }"
+              :aria-busy="themeBusy ? 'true' : undefined"
+              :aria-label="
+                locale === 'zh'
+                  ? resolvedTheme === 'dark'
+                    ? '切换为浅色'
+                    : '切换为深色'
+                  : resolvedTheme === 'dark'
+                    ? 'Switch to light theme'
+                    : 'Switch to dark theme'
+              "
+              @click="toggleTheme"
+            >
+              <span class="theme-sky" aria-hidden="true">
+                <svg class="celestial sun" viewBox="0 0 24 24" focusable="false">
+                  <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.75" />
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    d="M12 3v1.5M12 19.5V21M4.93 4.93l1.06 1.06M18.01 18.01l1.06 1.06M3 12h1.5M19.5 12H21M4.93 19.07l1.06-1.06M18.01 5.99l1.06-1.06"
+                  />
+                </svg>
+                <svg class="celestial moon" viewBox="0 0 24 24" focusable="false">
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linejoin="round"
+                    d="M17.5 14.2A7.2 7.2 0 0 1 9.8 6.5 7 7 0 1 0 17.5 14.2z"
+                  />
+                </svg>
+              </span>
+            </button>
+            <button type="button" class="lang" @click="toggleLocale">
+              {{ locale === 'zh' ? 'EN' : '中文' }}
+            </button>
+          </div>
         </nav>
       </div>
+      <span
+        class="top-progress"
+        aria-hidden="true"
+        :style="{ transform: `scaleX(${scrollProgress})` }"
+      />
     </header>
 
     <!-- 首页整段（下面到 </main> 为止）与文档页二选一，缩进保持原样 -->
@@ -1183,6 +1266,7 @@ onUnmounted(() => {
 .brand {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 0.5rem;
   color: var(--ink);
   text-decoration: none;
@@ -1198,13 +1282,75 @@ onUnmounted(() => {
   border: 1px solid var(--line);
 }
 
+/* 顶栏分两组：左边页内锚点，右边工具按钮，中间一条发丝线分隔。
+   锚点多了或英文标题较宽时横向滑动，不把顶栏挤成两行 */
 .nav {
   display: flex;
   align-items: center;
-  gap: 0.15rem 1.05rem;
-  flex-wrap: wrap;
+  gap: 0.8rem;
+  flex-wrap: nowrap;
   justify-content: flex-end;
+  min-width: 0;
   font-family: var(--font-sans);
+}
+
+.nav-sections {
+  display: flex;
+  align-items: center;
+  gap: 1.05rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* 给底部指示条留出位置，再用负外边距拉回不影响垂直居中 */
+  padding-bottom: 0.35rem;
+  margin-bottom: -0.35rem;
+}
+
+.nav-sections::-webkit-scrollbar {
+  display: none;
+}
+
+/* 滑动到不了头的一侧做渐隐，提示后面还有锚点 */
+.nav-sections.fade-start {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 1.2rem);
+  mask-image: linear-gradient(90deg, transparent 0, #000 1.2rem);
+}
+
+.nav-sections.fade-end {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 1.2rem), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 1.2rem), transparent 100%);
+}
+
+.nav-sections.fade-start.fade-end {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 1.2rem,
+    #000 calc(100% - 1.2rem),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 1.2rem,
+    #000 calc(100% - 1.2rem),
+    transparent 100%
+  );
+}
+
+.nav-divider {
+  width: 1px;
+  height: 1.1rem;
+  background: var(--line);
+  flex-shrink: 0;
+}
+
+.nav-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
 }
 
 .nav a {
@@ -1215,21 +1361,20 @@ onUnmounted(() => {
 
 .nav a:hover {
   color: var(--ink);
-  text-decoration: underline;
 }
 
-/* 页内导航：滚动到对应区块时高亮，底部一条强调色指示条 */
+/* 导航：只用一种指示语言 —— 底部强调色细条。
+   悬停时展开半条，当前区块铺满；不再叠一条白色下划线
+   （下划线原本来自 .nav a:hover，权重比 .nav-link:hover 高，压不住）*/
 .nav-link {
   position: relative;
+  flex-shrink: 0;
+  white-space: nowrap;
   transition: color 0.15s ease;
 }
 
 .nav-link.is-current {
   color: var(--ink);
-}
-
-.nav-link:hover {
-  text-decoration: none;
 }
 
 .nav-link::after {
@@ -1259,22 +1404,29 @@ onUnmounted(() => {
 }
 
 .lang,
-.theme-btn {
+.nav .icon-btn {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   padding: 0.22rem 0.5rem;
   border: 1px solid var(--line-strong);
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--muted);
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.theme-btn {
+.nav .icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 1.85rem;
   height: 1.85rem;
   padding: 0;
+}
+
+.gh-mark {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
 }
 
 .theme-sky {
@@ -1313,15 +1465,34 @@ onUnmounted(() => {
 }
 
 .lang:hover,
-.theme-btn:hover {
+.nav .icon-btn:hover {
   color: var(--ink);
   border-color: var(--ink-2);
+  background: var(--surface-hover);
 }
 
-.theme-btn:focus-visible,
+.nav .icon-btn:focus-visible,
 .lang:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* 顶栏底边的阅读进度细线 */
+.top-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 35%, transparent),
+    var(--accent)
+  );
+  pointer-events: none;
+  will-change: transform;
 }
 
 /* —— Hero + parallax —— */
@@ -3007,14 +3178,14 @@ onUnmounted(() => {
   }
 }
 
-/* 窄屏顶栏：页内锚点会挤成两行，收起只留品牌 + 文档 + GitHub + 主题 + 语言 */
+/* 窄屏顶栏：收起页内锚点，只留品牌 + 文档 + GitHub + 主题 + 语言 */
 .nav-narrow {
   display: none;
 }
 
 @media (max-width: 480px) {
   .nav {
-    gap: 0.15rem 0.75rem;
+    gap: 0.75rem;
   }
 
   .nav-section,
