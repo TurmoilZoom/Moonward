@@ -236,8 +236,8 @@ onUnmounted(() => {
     <p class="section-lead">
       {{
         locale === 'zh'
-          ? '启动配置、BetterGI 参数、抽卡记录、每日签到。点选切换，点图放大。'
-          : 'Launch profile, BetterGI args, gacha history, daily check-in. Pick a tab; click the shot to enlarge.'
+          ? '启动、云游戏、签到、抽卡、月报、数据同步的实际界面。点选切换，点图放大。'
+          : 'Launching, cloud time, check-in, gacha, reports, and data sync as they look in the app. Pick a tab; click the shot to enlarge.'
       }}
     </p>
 
@@ -530,8 +530,13 @@ onUnmounted(() => {
 
 .screen-tab[data-accent='teal'] { --card-accent: var(--teal); }
 .screen-tab[data-accent='amber'] { --card-accent: var(--amber); }
-.screen-tab[data-accent='violet'] { --card-accent: var(--violet); }
+.screen-tab[data-accent='blue'] { --card-accent: var(--blue); }
 .screen-tab[data-accent='green'] { --card-accent: var(--green); }
+.screen-tab[data-accent='violet'] { --card-accent: var(--violet); }
+.screen-tab[data-accent='rose'] { --card-accent: var(--rose); }
+.screen-tab[data-accent='cyan'] { --card-accent: var(--cyan); }
+.screen-tab[data-accent='indigo'] { --card-accent: var(--indigo); }
+.screen-tab[data-accent='slate'] { --card-accent: var(--slate); }
 
 .screen-tab-thumb {
   display: block;

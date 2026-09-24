@@ -59,6 +59,16 @@ export const featureCards = [
     },
   },
   {
+    id: 'cloud',
+    icon: '◷',
+    accent: 'cyan',
+    name: { zh: '云游戏时长', en: 'Cloud gaming time' },
+    detail: {
+      zh: '国服的云·原神、云·绝区零可在首页看畅玩卡和剩余时长。打开自动获取，软件运行时每天替你领一次免费时长。',
+      en: 'Cloud Genshin and Cloud Zenless (CN) show pass status and time left on the home page. Turn auto-claim on and the daily free time is collected while the app runs.',
+    },
+  },
+  {
     id: 'checkin',
     icon: '✓',
     accent: 'green',
@@ -74,8 +84,28 @@ export const featureCards = [
     accent: 'violet',
     name: { zh: '抽卡记录', en: 'Gacha history' },
     detail: {
-      zh: '卡池卡片可拖动排序。出货次数、连 UP / 连歪、不歪概率都在同一张卡上，还能导出分享图。',
-      en: 'Drag pool cards to reorder them. Pull counts, streaks, and rates sit on one card. Export a share image when you want.',
+      zh: '出货次数、连 UP / 连歪、不歪概率都在同一张卡上。列表与紧凑网格随时切换，卡片可拖动排序，也能导出分享图。',
+      en: 'Pull counts, streaks, and rates sit on one card. Switch between list and compact grid, drag cards to reorder, and export a share image.',
+    },
+  },
+  {
+    id: 'report',
+    icon: '▤',
+    accent: 'blue',
+    name: { zh: '战绩自动更新', en: 'Auto-refresh records' },
+    detail: {
+      zh: '深渊、式舆防卫战、月报可设每隔几天、每周或每月几号更新。软件启动时自动补上到期的，免得忘了刷新就缺一期。',
+      en: 'Abyss, Shiyu Defense, and monthly reports refresh every few days, weekly, or on a chosen day. Moonward runs what is due at startup, so forgetting no longer costs you a period.',
+    },
+  },
+  {
+    id: 'sync',
+    icon: '⇄',
+    accent: 'amber',
+    name: { zh: '局域网同步', en: 'LAN sync' },
+    detail: {
+      zh: '换电脑时，一台开共享、另一台输验证码，抽卡、战绩、游戏时长就并过来了。只补缺，不动已有记录。',
+      en: 'Moving to another PC: share from one, type the code on the other, and gacha, records, and play time come across. Only missing rows are added.',
     },
   },
   {
@@ -123,14 +153,14 @@ export const screens = [
     icon: '⚙',
     accent: 'teal',
     name: { zh: '启动配置', en: 'Launch profile' },
-    tag: { zh: '参数 · URL · 账号', en: 'Args · URL · account' },
+    tag: { zh: '参数 · 账号 · 链接', en: 'Args · account · link' },
     caption: {
-      zh: '启动参数、启动链接、绑定账号都在同一个窗口。可存多套，链接复制给脚本用。',
-      en: 'Launch options, the moonward:// link, and the bound account in one window. Save several; copy the link for scripts.',
+      zh: '命令行参数、自定义启动程序、登录账号存成一套，下方就是这套的 moonward:// 链接。同一游戏可存多套。',
+      en: 'Command-line args, a custom launcher, and the signed-in account make one profile; its moonward:// link sits at the bottom. Save several per game.',
     },
     alt: {
-      zh: 'Moonward 启动参数配置对话框：配置文件、命令行参数、URL 指令预览与绑定账号。',
-      en: 'Moonward launch-profile dialog: saved profile, command-line args, URL preview, and bound account.',
+      zh: 'Moonward 启动参数配置对话框：配置文件下拉、登录账号、命令行参数、自定义启动程序与 moonward:// 链接。',
+      en: 'Moonward launch-profile dialog: profile picker, signed-in account, command-line args, custom launcher, and the moonward:// link.',
     },
   },
   {
@@ -152,21 +182,21 @@ export const screens = [
     },
   },
   {
-    id: 'gacha',
-    src: 'screens/gacha.webp',
+    id: 'cloud',
+    src: 'screens/cloud.webp',
     width: 1184,
     height: 668,
-    icon: '◈',
-    accent: 'violet',
-    name: { zh: '抽卡记录', en: 'Gacha history' },
-    tag: { zh: '卡池 · 连 UP · 概率', en: 'Pools · streaks · rates' },
+    icon: '◷',
+    accent: 'cyan',
+    name: { zh: '云游戏时长', en: 'Cloud gaming time' },
+    tag: { zh: '免费时长 · 自动领取', en: 'Free time · auto claim' },
     caption: {
-      zh: '卡池卡片可拖动排序。连 UP / 连歪、不歪概率和出货次数排在一张卡上。',
-      en: 'Drag pool cards to reorder. Streaks, rates, and pull counts sit on one card.',
+      zh: '首页就能看畅玩卡和剩余时长。打开「自动获取免费时长」，软件运行时每天替你领一次。',
+      en: 'Pass status and time left, right on the home page. Turn on auto-claim and the daily free time is collected while the app runs.',
     },
     alt: {
-      zh: 'Moonward 抽卡记录页面：多张卡池统计卡片，含连 UP、概率与角色列表，其中一张正在拖拽。',
-      en: 'Moonward gacha history: pool stat cards with streaks, rates, and character lists; one card is being dragged.',
+      zh: 'Moonward 首页的云游戏面板：畅玩卡状态、免费时长、邦邦点时长与「自动获取免费时长」开关。',
+      en: 'Moonward home-page cloud-gaming panel: pass status, free time, Bangboo-point time, and the auto-claim switch.',
     },
   },
   {
@@ -185,6 +215,60 @@ export const screens = [
     alt: {
       zh: 'Moonward 签到面板：本月奖励月历、今日已签到状态与自动签到开关。',
       en: 'Moonward check-in panel: monthly reward calendar, today claimed, and the auto check-in switch.',
+    },
+  },
+  {
+    id: 'gacha',
+    src: 'screens/gacha.webp',
+    width: 1184,
+    height: 668,
+    icon: '◈',
+    accent: 'violet',
+    name: { zh: '抽卡记录', en: 'Gacha history' },
+    tag: { zh: '卡池 · 紧凑视图 · 概率', en: 'Pools · compact view' },
+    caption: {
+      zh: '一屏看完全部卡池：出货次数、连 UP / 连歪、保底进度。列表与紧凑网格随时切换。',
+      en: 'Every pool on one screen: pull counts, streaks, and pity progress. Switch between list and compact grid at any time.',
+    },
+    alt: {
+      zh: 'Moonward 抽卡记录页面：四个卡池的统计卡片，以紧凑网格列出历史出货与抽数。',
+      en: 'Moonward gacha history: four pool stat cards showing past pulls as a compact icon grid with pull counts.',
+    },
+  },
+  {
+    id: 'report',
+    src: 'screens/report.webp',
+    width: 1184,
+    height: 668,
+    icon: '▤',
+    accent: 'blue',
+    name: { zh: '月报与战绩', en: 'Reports & records' },
+    tag: { zh: '月报 · 自动更新', en: 'Report · auto refresh' },
+    caption: {
+      zh: '月报、式舆防卫战这类数据可各设一个更新频率，比如每月 2 号归档上月，软件启动时自动补上。',
+      en: 'Monthly reports and mode records each get their own schedule — archive last month on the 2nd, say — and Moonward catches up at startup.',
+    },
+    alt: {
+      zh: 'Moonward 绳网月报页面：月份列表、非林收入构成与每日数据，右上浮层设置更新频率与上次更新时间。',
+      en: 'Moonward Inter-Knot report page: month list, income breakdown, and daily data, with a flyout setting the refresh schedule.',
+    },
+  },
+  {
+    id: 'data',
+    src: 'screens/data.webp',
+    width: 1184,
+    height: 668,
+    icon: '⇄',
+    accent: 'amber',
+    name: { zh: '数据与同步', en: 'Data & sync' },
+    tag: { zh: '备份 · 局域网同步', en: 'Backup · LAN sync' },
+    caption: {
+      zh: '数据文件夹与数据库备份都在这一页。局域网同步输个验证码就能把另一台的记录并过来，账号信息不参与同步。',
+      en: 'Data folder and database backups live on this page. LAN sync pulls another machine’s records over with a code; account logins are left out.',
+    },
+    alt: {
+      zh: 'Moonward 应用设置的数据管理页：文件路径、备份数据库、删除个人设置与局域网同步。',
+      en: 'Moonward data-management settings: file paths, database backup, reset options, and LAN sync.',
     },
   },
 ]
