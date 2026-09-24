@@ -370,15 +370,16 @@ internal class AutoSignInService
 
 
     /// <summary>
-    /// 遍历所有支持签到的角色：先 GET info，未签再 POST。聚合 Early &gt; Incomplete &gt; Blocked &gt; Completed。
+    /// 遍历所有支持签到、且已开启自动签到的角色：先 GET info，未签再 POST。聚合 Early &gt; Incomplete &gt; Blocked &gt; Completed。
     /// </summary>
     private async Task<AutoSignInRoundOutcome> RunBatchCoreAsync(CancellationToken cancellationToken)
     {
         List<GameRecordRole> roles;
         try
         {
+            // 关了开关的游戏在此就滤掉：否则日志里的角色数会把它们算进去，与实际签到条数对不上
             roles = _gameRecordService.GetAllGameRoles()
-                .Where(r => GameFeatureConfig.FromGameBiz(r.GameBiz).SupportSignIn)
+                .Where(r => GameFeatureConfig.FromGameBiz(r.GameBiz).SupportSignIn && IsEnabled(r.GameBiz))
                 .ToList();
         }
         catch (Exception ex)
@@ -414,6 +415,7 @@ internal class AutoSignInService
         foreach (GameRecordRole role in roles)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            // 取列表时已按开关滤过；这里再判一次是为了批量途中（错峰等待可达数十秒）用户关掉开关时立即生效
             if (!IsEnabled(role.GameBiz))
             {
                 continue;

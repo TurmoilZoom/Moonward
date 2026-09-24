@@ -336,7 +336,7 @@ internal partial class GameLauncherService
         {
             if (await GetGameProcessAsync(gameId) is Process existingProcess)
             {
-                throw new Exception($"Game is running: {existingProcess.ProcessName}.exe ({existingProcess.Id}).");
+                throw new GameRunningException(existingProcess.ProcessName, existingProcess.Id);
             }
             // 「无」：不依赖启动参数配置；否则 profile 非空用其数据，null 用 config1（legacy 键）。
             bool enableThirdPartyTool;

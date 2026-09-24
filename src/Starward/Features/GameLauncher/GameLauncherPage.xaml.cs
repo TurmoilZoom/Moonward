@@ -669,6 +669,11 @@ public sealed partial class GameLauncherPage : PageBase
         {
             CheckGameVersion();
         }
+        catch (GameRunningException ex)
+        {
+            // 可预期：按钮状态没来得及刷新时又点了一次，不留堆栈
+            _logger.LogInformation("Start game: {message}", ex.Message);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Start game");
