@@ -266,7 +266,8 @@ public sealed partial class DailyNoteButton : UserControl
     /// <remarks>x:Bind 函数绑定返回 bool 再隐式转 Visibility 会生成无法编译的代码，只能直接返回 Visibility。</remarks>
     public Visibility GenshinTransformerReadyVisibility(Transformer? transformer)
     {
-        return transformer?.RecoveryTime?.Reached is true ? Visibility.Visible : Visibility.Collapsed;
+        // 未解锁时接口仍返回 reached=true 的空冷却时间，须先判 Obtained，否则低等级账号会只剩一行没有图标和名称的「可使用」
+        return transformer is { Obtained: true, RecoveryTime.Reached: true } ? Visibility.Visible : Visibility.Collapsed;
     }
 
 
@@ -277,7 +278,7 @@ public sealed partial class DailyNoteButton : UserControl
     /// <returns>冷却中时为 <see cref="Visibility.Visible"/>。</returns>
     public Visibility GenshinTransformerCoolingDownVisibility(Transformer? transformer)
     {
-        return transformer?.RecoveryTime is { Reached: false } ? Visibility.Visible : Visibility.Collapsed;
+        return transformer is { Obtained: true, RecoveryTime.Reached: false } ? Visibility.Visible : Visibility.Collapsed;
     }
 
 
