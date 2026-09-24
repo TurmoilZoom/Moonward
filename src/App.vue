@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import {
   checkInFlow,
   featureCards,
@@ -33,12 +33,16 @@ import {
   storeChannel,
 } from './utils/releases'
 
+/** 文档页（含 13 篇正文的目录数据与 Markdown 渲染）单独成块，按需加载。 */
+const DocsView = defineAsyncComponent(() => import('./components/DocsView.vue'))
+
 const locale = ref(localStorage.getItem('moonward-locale') || 'zh')
 const t = computed(() => (keyObj) => keyObj[locale.value] ?? keyObj.zh)
 
 watch(locale, (v) => {
   localStorage.setItem('moonward-locale', v)
   document.documentElement.lang = v === 'zh' ? 'zh-CN' : 'en'
+  syncDocumentTitle()
 })
 
 function toggleLocale() {
@@ -307,6 +311,43 @@ const moonLayerStyle = computed(() => {
   }
 })
 
+/* —— 站内路由 —— */
+/**
+ * 首页用 hash 做页内锚点（#install、#screens/<id>），文档页因此走
+ * `#/docs`、`#/docs/<slug>`、`#/docs/<slug>/<标题锚点>` 这种带前导斜杠的
+ * 形式，与页内锚点互不干扰，也不需要 GitHub Pages 做 SPA 回退。
+ */
+function parseRoute() {
+  const raw = (window.location.hash || '').replace(/^#/, '')
+  if (!/^\/docs(\/|$)/.test(raw)) return { name: 'home', slug: '', anchor: '' }
+  const dec = (v) => {
+    try {
+      return decodeURIComponent(v)
+    } catch {
+      return v
+    }
+  }
+  const parts = raw.split('/').slice(2)
+  return { name: 'docs', slug: dec(parts[0] || ''), anchor: dec(parts.slice(1).join('/')) }
+}
+
+const route = ref(parseRoute())
+const isDocs = computed(() => route.value.name === 'docs')
+
+/** 首页标题归位；文档页的标题由 DocsView 按当前篇目写。 */
+function syncDocumentTitle() {
+  if (!isDocs.value) document.title = 'Moonward'
+}
+
+function onRouteChange() {
+  const next = parseRoute()
+  const movedPage = next.name !== route.value.name || next.slug !== route.value.slug
+  route.value = next
+  syncDocumentTitle()
+  // 换页直接跳顶，别让 scroll-behavior: smooth 把整篇文章滚一遍
+  if (movedPage && !next.anchor) window.scrollTo({ top: 0, behavior: 'instant' })
+}
+
 /** 顶栏页内导航：滚动时高亮当前区块（id 对应页面各 section） */
 const sectionNav = [
   { id: 'features', zh: '功能', en: 'Features' },
@@ -391,8 +432,10 @@ onMounted(() => {
   loadRelease(releaseAbort.signal)
   window.addEventListener('scroll', onWindowScroll, { passive: true })
   window.addEventListener('hashchange', syncFoldFromHash)
+  window.addEventListener('hashchange', onRouteChange)
   onWindowScroll()
   syncFoldFromHash()
+  syncDocumentTitle()
 })
 
 onUnmounted(() => {
@@ -400,6 +443,7 @@ onUnmounted(() => {
   if (raf) cancelAnimationFrame(raf)
   window.removeEventListener('scroll', onWindowScroll)
   window.removeEventListener('hashchange', syncFoldFromHash)
+  window.removeEventListener('hashchange', onRouteChange)
   stopSystemWatch?.()
   releaseAbort?.abort()
 })
@@ -414,14 +458,26 @@ onUnmounted(() => {
           <span>Moonward</span>
         </a>
         <nav class="nav">
+          <template v-if="!isDocs">
+            <a
+              v-for="item in sectionNav"
+              :key="item.id"
+              class="nav-link nav-section"
+              :class="{ 'is-current': activeSection === item.id }"
+              :href="`#${item.id}`"
+              :aria-current="activeSection === item.id ? 'true' : undefined"
+            >{{ locale === 'zh' ? item.zh : item.en }}</a>
+          </template>
+          <a v-else class="nav-link nav-home" href="#">{{ locale === 'zh' ? '首页' : 'Home' }}</a>
           <a
-            v-for="item in sectionNav"
-            :key="item.id"
-            class="nav-link nav-section"
-            :class="{ 'is-current': activeSection === item.id }"
-            :href="`#${item.id}`"
-            :aria-current="activeSection === item.id ? 'true' : undefined"
-          >{{ locale === 'zh' ? item.zh : item.en }}</a>
+            class="nav-link"
+            :class="{ 'is-current': isDocs }"
+            href="#/docs"
+            :aria-current="isDocs ? 'true' : undefined"
+          >
+            <span class="nav-wide">{{ locale === 'zh' ? '相关文档' : 'Docs' }}</span>
+            <span class="nav-narrow">{{ locale === 'zh' ? '文档' : 'Docs' }}</span>
+          </a>
           <a :href="links.github" target="_blank" rel="noopener noreferrer">GitHub</a>
           <button
             type="button"
@@ -471,6 +527,8 @@ onUnmounted(() => {
       </div>
     </header>
 
+    <!-- 首页整段（下面到 </main> 为止）与文档页二选一，缩进保持原样 -->
+    <template v-if="!isDocs">
     <!-- Parallax hero -->
     <section
       ref="heroRef"
@@ -1021,6 +1079,9 @@ onUnmounted(() => {
                   : `Open this release on ${activeChannelMeta.label.en}`
               }}
             </a>
+            <a class="text-link" href="#/docs">
+              {{ locale === 'zh' ? '相关文档' : 'Documentation' }}
+            </a>
             <a class="text-link" :href="links.issues" target="_blank" rel="noopener noreferrer">
               Issues
             </a>
@@ -1031,6 +1092,15 @@ onUnmounted(() => {
         </div>
       </section>
     </main>
+    </template>
+
+    <DocsView
+      v-else
+      :locale="locale"
+      :slug="route.slug"
+      :anchor="route.anchor"
+      :reduced-motion="reducedMotion"
+    />
 
     <footer class="foot">
       <div class="wrap foot-inner">
@@ -1042,6 +1112,8 @@ onUnmounted(() => {
           }}
         </p>
         <p class="meta mono">
+          <a href="#/docs">{{ locale === 'zh' ? '相关文档' : 'Docs' }}</a>
+          ·
           <a :href="links.license" target="_blank" rel="noopener noreferrer">MIT</a>
           ·
           <a :href="links.github" target="_blank" rel="noopener noreferrer">TurmoilZoom/Moonward</a>
@@ -2741,10 +2813,27 @@ onUnmounted(() => {
   }
 }
 
-/* 窄屏顶栏：页内锚点会挤成两行，收起只留品牌 + GitHub + 主题 + 语言 */
+/* 窄屏顶栏：页内锚点会挤成两行，收起只留品牌 + 文档 + GitHub + 主题 + 语言 */
+.nav-narrow {
+  display: none;
+}
+
 @media (max-width: 480px) {
-  .nav-section {
+  .nav {
+    gap: 0.15rem 0.75rem;
+  }
+
+  .nav-section,
+  .nav-home {
     display: none;
+  }
+
+  .nav-wide {
+    display: none;
+  }
+
+  .nav-narrow {
+    display: inline;
   }
 }
 </style>
