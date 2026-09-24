@@ -173,12 +173,12 @@ export const screens = [
     name: { zh: 'BetterGI 参数', en: 'BetterGI args' },
     tag: { zh: '常用命令行 · 一键勾选', en: 'Preset args · one tick' },
     caption: {
-      zh: '勾选 BetterGI 的常用项，就会自动拼成命令行。把 BetterGI 设成启动程序即可联动。',
-      en: 'Tick the BetterGI presets and the command line is built for you. Set BetterGI as the custom launcher to hook it up.',
+      zh: '勾选 BetterGI 的常用项，下方就把命令行拼好了。把 BetterGI 设成自定义启动程序即可联动。',
+      en: 'Tick the BetterGI presets and the command line is assembled below. Set BetterGI as the custom launcher to hook it up.',
     },
     alt: {
-      zh: 'Moonward「常用命令行参数」对话框中的 BetterGI 分组：启动、一条龙、调度器配置组等勾选项，下方为组合结果。',
-      en: 'Moonward common command-line args dialog showing a BetterGI group: start, one-dragon, and scheduler-group checkboxes with a combined-result field below.',
+      zh: 'Moonward「常用命令行参数」对话框中的 BetterGI 分组：启动、一条龙、调度器配置组、任务进度等勾选项，下方组合结果已填入 start。',
+      en: 'Moonward common command-line args dialog, BetterGI group: start, one-dragon, scheduler groups, and task progress, with the combined result reading “start”.',
     },
   },
   {
@@ -225,14 +225,32 @@ export const screens = [
     icon: '◈',
     accent: 'violet',
     name: { zh: '抽卡记录', en: 'Gacha history' },
-    tag: { zh: '卡池 · 紧凑视图 · 概率', en: 'Pools · compact view' },
+    tag: { zh: '卡池 · 拖动排序', en: 'Pools · drag to reorder' },
     caption: {
-      zh: '一屏看完全部卡池：出货次数、连 UP / 连歪、保底进度。列表与紧凑网格随时切换。',
-      en: 'Every pool on one screen: pull counts, streaks, and pity progress. Switch between list and compact grid at any time.',
+      zh: '卡池卡片可拖动排序，想先看哪个就把它拖到前面。连 UP / 连歪、不歪概率和出货次数排在同一张卡上。',
+      en: 'Drag pool cards to reorder — put the one you care about first. Streaks, rates, and pull counts all sit on one card.',
     },
     alt: {
-      zh: 'Moonward 抽卡记录页面：四个卡池的统计卡片，以紧凑网格列出历史出货与抽数。',
-      en: 'Moonward gacha history: four pool stat cards showing past pulls as a compact icon grid with pull counts.',
+      zh: 'Moonward 抽卡记录页面：多张卡池统计卡片，含连 UP、概率与角色列表，其中一张正在拖拽。',
+      en: 'Moonward gacha history: pool stat cards with streaks, rates, and character lists; one card is being dragged.',
+    },
+  },
+  {
+    id: 'gacha-compact',
+    src: 'screens/gacha-compact.webp',
+    width: 1184,
+    height: 668,
+    icon: '⊞',
+    accent: 'rose',
+    name: { zh: '紧凑视图', en: 'Compact view' },
+    tag: { zh: '图标网格 · 一屏看完', en: 'Icon grid · one screen' },
+    caption: {
+      zh: '记录区换成图标网格，一屏就能看完每个卡池的出货。标题栏一键在列表与紧凑之间切换。',
+      en: 'The record list turns into an icon grid, so a pool’s whole history fits on one screen. Toggle list or compact from the title bar.',
+    },
+    alt: {
+      zh: 'Moonward 抽卡记录的紧凑视图：四个卡池以图标网格列出历史出货，图标下标注抽数，标题栏可切换视图。',
+      en: 'Moonward gacha history in compact view: four pools as icon grids with pull counts under each icon, and the view toggle in the title bar.',
     },
   },
   {

@@ -12,6 +12,7 @@ import {
 import Screens from './components/Screens.vue'
 import { asset } from './utils/asset'
 import { renderReleaseMarkdown } from './utils/markdown'
+import { vReveal } from './utils/reveal'
 import {
   applyTheme,
   readThemePref,
@@ -540,7 +541,10 @@ onUnmounted(() => {
       <div class="hero-layers" aria-hidden="true">
         <div class="layer layer-sky" :style="layerStyle(0.08)" />
         <div class="layer layer-stars stars-far" :style="layerStyle(0.18)" />
-        <div class="layer layer-shoot"><span class="shoot" /></div>
+        <div class="layer layer-shoot">
+          <span class="shoot shoot-a" />
+          <span class="shoot shoot-b" />
+        </div>
         <div class="layer layer-halo" :style="layerStyle(0.28)" />
         <div class="layer layer-moon" :style="moonLayerStyle">
           <span class="moon-disc" />
@@ -551,8 +555,8 @@ onUnmounted(() => {
           <span class="twinkle t2" />
           <span class="twinkle t3" />
         </div>
-        <div class="layer layer-cloud cloud-a" :style="layerStyle(0.7)" />
-        <div class="layer layer-cloud cloud-b" :style="layerStyle(1.05)" />
+        <div class="layer layer-cloud cloud-a" :style="layerStyle(0.7)"><span class="cloud-body" /></div>
+        <div class="layer layer-cloud cloud-b" :style="layerStyle(1.05)"><span class="cloud-body" /></div>
       </div>
 
       <div class="wrap hero-content" :style="layerStyle(0.08)">
@@ -593,7 +597,7 @@ onUnmounted(() => {
 
     <main class="wrap main">
       <!-- Feature cards -->
-      <section id="features" class="block" aria-labelledby="features-heading">
+      <section id="features" v-reveal class="block" aria-labelledby="features-heading">
         <h2 id="features-heading">{{ locale === 'zh' ? '功能一览' : 'Features' }}</h2>
         <p class="section-lead">
           {{
@@ -604,8 +608,9 @@ onUnmounted(() => {
         </p>
         <div class="cards">
           <article
-            v-for="card in featureCards"
+            v-for="(card, i) in featureCards"
             :key="card.id"
+            v-reveal="i % 3"
             class="card"
             :data-accent="card.accent"
           >
@@ -621,7 +626,7 @@ onUnmounted(() => {
       <Screens :locale="locale" />
 
       <!-- Advanced: launch + check-in folds -->
-      <section id="advanced" class="block advanced-block" aria-labelledby="advanced-heading">
+      <section id="advanced" v-reveal class="block advanced-block" aria-labelledby="advanced-heading">
         <h2 id="advanced-heading">{{ locale === 'zh' ? '进阶' : 'Advanced' }}</h2>
         <p class="section-lead">
           {{
@@ -945,7 +950,7 @@ onUnmounted(() => {
       </section>
 
       <!-- Install -->
-      <section id="install" class="block install-block" aria-labelledby="install-heading">
+      <section id="install" v-reveal class="block install-block" aria-labelledby="install-heading">
         <div class="install-head">
           <div>
             <h2 id="install-heading">{{ locale === 'zh' ? '下载与安装' : 'Download & install' }}</h2>
@@ -1014,8 +1019,9 @@ onUnmounted(() => {
           </div>
           <div class="dl-grid">
             <article
-              v-for="col in archColumns"
+              v-for="(col, i) in archColumns"
               :key="col.id"
+              v-reveal="i"
               class="dl-card"
               :class="{ preferred: col.id === preferredArch }"
             >
@@ -1222,11 +1228,11 @@ onUnmounted(() => {
   color: var(--ink);
 }
 
-.nav-link.is-current:hover {
+.nav-link:hover {
   text-decoration: none;
 }
 
-.nav-link.is-current::after {
+.nav-link::after {
   content: '';
   position: absolute;
   left: 0;
@@ -1235,6 +1241,21 @@ onUnmounted(() => {
   height: 2px;
   border-radius: 2px;
   background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-link.is-current::after {
+  transform: scaleX(1);
+}
+
+.nav-link:hover::after {
+  transform: scaleX(0.55);
+}
+
+.nav-link.is-current:hover::after {
+  transform: scaleX(1);
 }
 
 .lang,
@@ -1396,8 +1417,6 @@ onUnmounted(() => {
 
 .shoot {
   position: absolute;
-  top: 14%;
-  left: 68%;
   width: 8rem;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--star-color));
@@ -1407,10 +1426,29 @@ onUnmounted(() => {
   animation: shoot 9s ease-in infinite;
 }
 
+.shoot-a {
+  top: 14%;
+  left: 68%;
+}
+
+/* 第二颗错开位置与周期，免得看出是同一段循环 */
+.shoot-b {
+  top: 30%;
+  left: 44%;
+  width: 6rem;
+  animation-duration: 14s;
+  animation-delay: -5.5s;
+}
+
 @keyframes shoot {
   0%, 90% { opacity: 0; transform: translate(0, 0) rotate(18deg) scaleX(0.2); }
   91% { opacity: 0.9; }
   100% { opacity: 0; transform: translate(-15rem, 5rem) rotate(18deg) scaleX(1); }
+}
+
+@keyframes halo-breathe {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.95; }
 }
 
 /* 月晕：环绕月亮的两道柔和同心光圈 */
@@ -1421,6 +1459,7 @@ onUnmounted(() => {
   right: 0.5%;
   border-radius: 50%;
   opacity: 0.85;
+  animation: halo-breathe 11s ease-in-out infinite;
   background: radial-gradient(
     circle,
     transparent 39%,
@@ -1471,9 +1510,31 @@ onUnmounted(() => {
 /* 前景云雾：飘动幅度最大（parallax 深度最深），模糊柔和 */
 .layer-cloud {
   border-radius: 50%;
+}
+
+/* 内层单独存在，是为了让缓慢横移与外层的 parallax transform 互不覆盖 */
+.cloud-body {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   filter: blur(9px);
   opacity: 0.55;
   background: radial-gradient(ellipse 60% 100% at 50% 50%, var(--cloud-tint), transparent 72%);
+  animation: cloud-drift 38s ease-in-out infinite alternate;
+}
+
+.cloud-b .cloud-body {
+  animation-duration: 52s;
+  animation-delay: -16s;
+}
+
+@keyframes cloud-drift {
+  from {
+    transform: translate3d(-1.4rem, 0.2rem, 0);
+  }
+  to {
+    transform: translate3d(1.8rem, -0.5rem, 0);
+  }
 }
 
 .cloud-a {
@@ -1494,6 +1555,28 @@ onUnmounted(() => {
   position: relative;
   z-index: 2;
   will-change: transform;
+}
+
+/* 首屏依次亮起；月亮、云层的 parallax 写在 inline style 上，这里只动子元素 */
+.hero-content > * {
+  animation: hero-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-content > *:nth-child(1) { animation-delay: 0.05s; }
+.hero-content > *:nth-child(2) { animation-delay: 0.14s; }
+.hero-content > *:nth-child(3) { animation-delay: 0.23s; }
+.hero-content > *:nth-child(4) { animation-delay: 0.32s; }
+.hero-content > *:nth-child(5) { animation-delay: 0.41s; }
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .kicker {
@@ -1535,6 +1618,7 @@ onUnmounted(() => {
 }
 
 .games li {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease;
   font-family: var(--font-sans);
   font-size: 0.8rem;
   padding: 0.22rem 0.65rem;
@@ -1543,6 +1627,11 @@ onUnmounted(() => {
   background: color-mix(in srgb, var(--bg-card) 80%, transparent);
   color: var(--ink);
   backdrop-filter: blur(4px);
+}
+
+.games li:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
 }
 
 .actions {
@@ -1554,6 +1643,8 @@ onUnmounted(() => {
 }
 
 .btn {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1565,12 +1656,51 @@ onUnmounted(() => {
   font-family: var(--font-sans);
   font-size: 0.9rem;
   font-weight: 600;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* hover 时一道柔光从左扫到右；用 transform 走位，不碰布局 */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 45%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in srgb, #fff 26%, transparent),
+    transparent
+  );
+  transform: translate3d(0, 0, 0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn:hover::after {
+  opacity: 1;
+  animation: btn-sheen 0.75s ease-out;
+}
+
+@keyframes btn-sheen {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(380%, 0, 0);
+  }
 }
 
 .btn:hover {
   color: var(--on-accent);
   background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 .btn.large {
@@ -1660,6 +1790,12 @@ onUnmounted(() => {
   background: color-mix(in srgb, var(--card-accent, var(--accent)) 12%, var(--bg));
   color: var(--card-accent, var(--accent));
   flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s ease;
+}
+
+.card:hover .card-icon {
+  transform: scale(1.12) rotate(-4deg);
+  background: color-mix(in srgb, var(--card-accent, var(--accent)) 20%, var(--bg));
 }
 
 .card h3 {
@@ -1754,6 +1890,22 @@ onUnmounted(() => {
   font-family: var(--font-sans);
   font-size: 0.8rem;
   color: var(--muted);
+}
+
+/* 展开时正文轻轻落下；display 从 none 变回来时动画自然重播 */
+.flow-fold[open] > .fold-body {
+  animation: fold-in 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fold-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .fold-body {
@@ -1864,6 +2016,13 @@ onUnmounted(() => {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
   background: var(--surface-hover);
+  animation: node-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes node-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.035); }
+  100% { transform: scale(1); }
 }
 
 .pipe-node.shortcut.on,
@@ -1927,6 +2086,8 @@ onUnmounted(() => {
 }
 
 .pipe-v {
+  position: relative;
+  overflow: hidden;
   width: 2px;
   height: 1.15rem;
   background: var(--line-strong);
@@ -1937,6 +2098,39 @@ onUnmounted(() => {
   height: 1.35rem;
   background:
     linear-gradient(var(--line-strong), var(--line-strong)) center / 2px 100% no-repeat;
+}
+
+/* 顺着连接线往下走的一小段亮光，示意「配置流向游戏」 */
+.pipe-v::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 55%;
+  border-radius: inherit;
+  background: linear-gradient(transparent, var(--accent), transparent);
+  animation: pipe-flow 2.2s ease-in-out infinite;
+}
+
+.pipe-v.merge::after {
+  animation-delay: 0.5s;
+}
+
+@keyframes pipe-flow {
+  0% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.9;
+  }
+  75% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(220%);
+    opacity: 0;
+  }
 }
 
 .pipe-hint {

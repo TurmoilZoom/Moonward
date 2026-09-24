@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { screens } from '../data/content'
 import { asset } from '../utils/asset'
+import { vReveal } from '../utils/reveal'
 
 const props = defineProps({
   locale: { type: String, required: true },
@@ -228,6 +229,7 @@ onUnmounted(() => {
   <section
     id="screens"
     ref="sectionRef"
+    v-reveal
     class="block screens-block"
     aria-labelledby="screens-heading"
     @keydown="onSectionKeydown"
@@ -253,6 +255,7 @@ onUnmounted(() => {
           v-for="(s, i) in screens"
           :key="s.id"
           :ref="(el) => setTabRef(el, i)"
+          v-reveal="i"
           type="button"
           class="screen-tab"
           :data-accent="s.accent"
@@ -552,6 +555,15 @@ onUnmounted(() => {
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.screen-tab[aria-selected='true'] .screen-tab-thumb img {
+  transform: scale(1.03);
+}
+
+.screen-tab:hover .screen-tab-thumb img {
+  transform: scale(1.06);
 }
 
 .screen-tab[aria-selected='true'] .screen-tab-thumb {
@@ -632,12 +644,16 @@ onUnmounted(() => {
   height: 100%;
   object-fit: contain;
   opacity: 0;
+  transform: scale(1.015);
   pointer-events: none;
-  transition: opacity 0.28s ease;
+  transition:
+    opacity 0.32s ease,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .screen-shot.is-on {
   opacity: 1;
+  transform: none;
 }
 
 .screen-zoom {
@@ -790,6 +806,31 @@ onUnmounted(() => {
   backdrop-filter: blur(12px);
 }
 
+/* 灯箱开场：底幕先上来，图再从略小放到位 */
+.screen-lightbox[open] {
+  animation: lb-fade 0.22s ease;
+}
+
+.screen-lightbox[open] .screen-lb-figure {
+  animation: lb-pop 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes lb-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lb-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.972);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .screen-lb-figure {
   position: absolute;
   inset: 3.4rem 4.2rem 4.6rem;
@@ -915,6 +956,15 @@ onUnmounted(() => {
     grid-template-columns: 4.8rem minmax(0, 1fr);
   }
 
+  /*
+   * 窄屏下页签是一条横向滚动条：滚出去的页签不在视口里，进场动画永远不会触发，
+   * 位移还会把滚动区撑高、切掉页签顶边。这里直接判定到位，整块的进场动画不受影响。
+   */
+  .screen-list .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
   .screen-lb-figure {
     inset: 3.2rem 0.85rem 5.2rem;
   }
@@ -950,6 +1000,11 @@ onUnmounted(() => {
 
 @media (prefers-reduced-motion: reduce) {
   .screen-shot {
+    transform: none;
+    transition: none;
+  }
+
+  .screen-tab-thumb img {
     transition: none;
   }
 }
