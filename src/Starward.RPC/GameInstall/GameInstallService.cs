@@ -603,6 +603,43 @@ internal class GameInstallService
             await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, true, token), token);
             file.IsFinished = true;
         });
+        DeleteSophonChunkRemovedFiles(context);
+    }
+
+
+
+    /// <summary>
+    /// 删除 Chunk 模式下新版本已移除的旧文件。必须在全部文件写完后调用，
+    /// 因为更新途中还要从这些旧文件里复用块；单个文件删不掉只记日志，不影响更新结果。
+    /// </summary>
+    /// <param name="context"></param>
+    private void DeleteSophonChunkRemovedFiles(GameInstallContext context)
+    {
+        if (context.SophonChunkDeleteFiles is not { Count: > 0 } deleteFiles)
+        {
+            return;
+        }
+        string installPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(context.InstallPath)) + Path.DirectorySeparatorChar;
+        int count = 0;
+        foreach (string file in deleteFiles)
+        {
+            string path = Path.GetFullPath(Path.Combine(installPath, file));
+            // 清单里的路径都应在安装目录内，仍做一次防护，避免误删目录外的文件
+            if (!path.StartsWith(installPath, StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
+            {
+                continue;
+            }
+            try
+            {
+                File.Delete(path);
+                count++;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogWarning(ex, "GameInstallTask ({GameBiz}): Failed to delete file removed in new version: {path}", context.GameId.GameBiz, path);
+            }
+        }
+        _logger.LogInformation("GameInstallTask ({GameBiz}): Delete files removed in new version, deleted {count} of {total}", context.GameId.GameBiz, count, deleteFiles.Count);
     }
 
 
@@ -713,6 +750,8 @@ internal class GameInstallService
         if (context.DownloadMode is GameInstallDownloadMode.Chunk)
         {
             await ExecuteInstallTaskDownloadModeChunkAsync(context, cancellationToken);
+            // 本地版本落后时修复等同于更新，同样要清掉新版本已移除的文件；版本一致时列表为空
+            DeleteSophonChunkRemovedFiles(context);
         }
         else if (context.DownloadMode is GameInstallDownloadMode.SingleFile)
         {
@@ -950,7 +989,8 @@ internal class GameInstallService
             ("package", context.GamePackage?.Main.Major?.Version),
             ("files", context.TaskFiles?.Count ?? 0),
             ("files_done", context.TaskFiles?.Count(x => x.IsFinished) ?? 0),
-            ("write_bytes", context.TaskFiles?.Sum(x => x.Size) ?? 0));
+            ("write_bytes", context.TaskFiles?.Sum(x => x.Size) ?? 0),
+            ("delete_files", context.SophonChunkDeleteFiles?.Count ?? 0));
     }
 
 

@@ -87,7 +87,16 @@ internal class GameInstallFile
     }
 
 
-    public static GameInstallFile FromSophonChunkFile(SophonChunkFile file, SophonChunkFile? localFile, string installPath, string urlPrefix)
+    /// <summary>
+    /// 由 Chunk 清单中的文件生成任务文件，并标记可从本地旧版本复用的块。
+    /// </summary>
+    /// <param name="file">新版本清单中的文件</param>
+    /// <param name="localFile">旧版本清单中的同路径文件，没有时为 <see langword="null"/></param>
+    /// <param name="installPath">游戏安装目录</param>
+    /// <param name="urlPrefix">块的下载地址前缀</param>
+    /// <param name="removedFileChunks">新版本已移除的旧文件中的块，按解压后 MD5 索引；同路径找不到时再从这里找</param>
+    /// <returns></returns>
+    public static GameInstallFile FromSophonChunkFile(SophonChunkFile file, SophonChunkFile? localFile, string installPath, string urlPrefix, IReadOnlyDictionary<string, (SophonChunkFile File, SophonChunk Chunk)>? removedFileChunks = null)
     {
         GameInstallFile result = new GameInstallFile
         {
@@ -121,16 +130,35 @@ internal class GameInstallFile
             };
             if (localFile is not null && localChunkDict.TryGetValue(item.UncompressedMd5, out SophonChunk? localChunk) && item.UncompressedSize == localChunk.UncompressedSize)
             {
-                chunk.OriginalFileName = localFile.File;
-                chunk.OriginalFileFullPath = Path.GetFullPath(Path.Combine(installPath, localFile.File));
-                chunk.OriginalFileSize = localFile.Size;
-                chunk.OriginalFileMD5 = localChunk.UncompressedMd5;
-                chunk.OriginalFileOffset = localChunk.Offset;
+                SetOriginalFile(chunk, localFile, localChunk, installPath);
+            }
+            else if (removedFileChunks is not null && removedFileChunks.TryGetValue(item.UncompressedMd5, out var removed) && item.UncompressedSize == removed.Chunk.UncompressedSize)
+            {
+                // 崩坏3 的 asb 等资源内容一变就换文件名，同路径找不到，但块多半还在被移除的旧文件里。
+                // 只从新版本已移除的文件复用：它们要等全部文件写完才删除，不会在更新途中被替换
+                SetOriginalFile(chunk, removed.File, removed.Chunk, installPath);
             }
             chunks.Add(chunk);
         }
         result.Chunks = chunks;
         return result;
+    }
+
+
+    /// <summary>
+    /// 记录块在本地旧文件中的位置，下载时从旧文件切出这一段而不是联网下载。
+    /// </summary>
+    /// <param name="chunk">任务文件中的块</param>
+    /// <param name="originalFile">包含该块的旧版本文件</param>
+    /// <param name="originalChunk">该块在旧版本文件中的记录</param>
+    /// <param name="installPath">游戏安装目录</param>
+    private static void SetOriginalFile(GameInstallFileChunk chunk, SophonChunkFile originalFile, SophonChunk originalChunk, string installPath)
+    {
+        chunk.OriginalFileName = originalFile.File;
+        chunk.OriginalFileFullPath = Path.GetFullPath(Path.Combine(installPath, originalFile.File));
+        chunk.OriginalFileSize = originalFile.Size;
+        chunk.OriginalFileMD5 = originalChunk.UncompressedMd5;
+        chunk.OriginalFileOffset = originalChunk.Offset;
     }
 
 

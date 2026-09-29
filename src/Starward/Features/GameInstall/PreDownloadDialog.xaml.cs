@@ -532,8 +532,9 @@ public sealed partial class PreDownloadDialog : ContentDialog
 
 
     /// <summary>
-    /// 按 RPC 预下载任务的规则统计 Chunk 模式要下载的大小：同路径旧文件中解压后 MD5 与大小都相同的块直接复用，
-    /// 其余块按 Id 去重后累加（对应 GameInstallHelper.GetPredownloadFiles）。
+    /// 按 RPC 预下载任务的规则统计 Chunk 模式要下载的大小：块优先在旧版本同路径文件中找，其次在新版本已移除的旧文件中找，
+    /// 解压后 MD5 与大小都相同就直接复用，其余块按 Id 去重后累加
+    /// （对应 RPC GamePackageService.PrepareSophonChunkFilesWithLocalVersionAsync 与 GameInstallHelper.GetPredownloadFiles）。
     /// </summary>
     /// <param name="build">预下载版本的清单</param>
     /// <param name="localBuild">本地版本的清单；为 <see langword="null"/> 时无法增量，按整包统计</param>
@@ -546,39 +547,47 @@ public sealed partial class PreDownloadDialog : ContentDialog
         {
             return (manifests.Sum(x => x.Stats.CompressedSize), manifests.Sum(x => x.Stats.UncompressedSize));
         }
-        long size = 0, unzipSize = 0;
-        HashSet<string> chunkIds = new();
+        List<SophonChunkFile> files = new();
+        // 与 RPC 一致：路径不区分大小写
+        Dictionary<string, SophonChunkFile> localFiles = new(StringComparer.OrdinalIgnoreCase);
         foreach (GameSophonChunkManifest manifest in manifests)
         {
-            List<SophonChunkFile> files = await GetSophonChunkFilesAsync(manifest, cancellationToken);
-            Dictionary<string, SophonChunkFile> localFiles = new();
+            files.AddRange((await GetSophonChunkFilesAsync(manifest, cancellationToken)).Where(x => !x.IsFolder));
             if (localBuild.Manifests.FirstOrDefault(x => x.MatchingField == manifest.MatchingField) is GameSophonChunkManifest localManifest)
             {
                 foreach (SophonChunkFile item in await GetSophonChunkFilesAsync(localManifest, cancellationToken))
                 {
-                    localFiles.TryAdd(item.File, item);
+                    if (!item.IsFolder)
+                    {
+                        localFiles.TryAdd(item.File, item);
+                    }
                 }
             }
-            foreach (SophonChunkFile file in files)
+        }
+        HashSet<string> newFiles = files.Select(x => x.File).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        HashSet<(string, long)> removedChunks = localFiles.Values
+            .Where(x => !newFiles.Contains(x.File))
+            .SelectMany(x => x.Chunks)
+            .Select(x => (x.UncompressedMd5, x.UncompressedSize))
+            .ToHashSet();
+        long size = 0, unzipSize = 0;
+        HashSet<string> chunkIds = new();
+        foreach (SophonChunkFile file in files)
+        {
+            HashSet<(string, long)>? localChunks = localFiles.TryGetValue(file.File, out SophonChunkFile? localFile)
+                ? localFile.Chunks.Select(x => (x.UncompressedMd5, x.UncompressedSize)).ToHashSet()
+                : null;
+            foreach (SophonChunk chunk in file.Chunks)
             {
-                if (file.IsFolder)
+                (string, long) key = (chunk.UncompressedMd5, chunk.UncompressedSize);
+                if (localChunks?.Contains(key) is true || removedChunks.Contains(key))
                 {
                     continue;
                 }
-                HashSet<(string, long)>? localChunks = localFiles.TryGetValue(file.File, out SophonChunkFile? localFile)
-                    ? localFile.Chunks.Select(x => (x.UncompressedMd5, x.UncompressedSize)).ToHashSet()
-                    : null;
-                foreach (SophonChunk chunk in file.Chunks)
+                if (chunkIds.Add(chunk.Id))
                 {
-                    if (localChunks?.Contains((chunk.UncompressedMd5, chunk.UncompressedSize)) is true)
-                    {
-                        continue;
-                    }
-                    if (chunkIds.Add(chunk.Id))
-                    {
-                        size += chunk.CompressedSize;
-                        unzipSize += chunk.UncompressedSize;
-                    }
+                    size += chunk.CompressedSize;
+                    unzipSize += chunk.UncompressedSize;
                 }
             }
         }

@@ -127,6 +127,11 @@ public class GameInstallContext
 
     internal List<SophonChunkFile>? LocalVersionSophonChunkFiles { get; set; }
 
+    /// <summary>
+    /// Chunk 模式下旧版本有、新版本没有的文件（相对安装目录）。更新途中还要从中复用块，全部文件写完后才删除
+    /// </summary>
+    internal List<string>? SophonChunkDeleteFiles { get; set; }
+
     internal List<SophonPatchFile>? SophonPatchFiles { get; set; }
 
     internal List<SophonPatchDeleteFile>? SophonPatchDeleteFiles { get; set; }
