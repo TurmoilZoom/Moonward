@@ -87,6 +87,11 @@ public sealed partial class PreDownloadDialog : ContentDialog
 
     private GameSophonChunkBuild? _gameSophonChunkBuild;
 
+    /// <summary>
+    /// 本地版本在预下载分支上的 Chunk 清单，用于统计增量；为 null 时只能整包下载
+    /// </summary>
+    private GameSophonChunkBuild? _localVersionSophonChunkBuild;
+
     private GameSophonPatchBuild? _gameSophonPatchBuild;
 
     private AudioLanguage _audioLanguage;
@@ -146,10 +151,27 @@ public sealed partial class PreDownloadDialog : ContentDialog
                 }
                 if (_gameSophonPatchBuild is null)
                 {
+                    // 没有 ldiff 补丁时（崩坏3 的预下载一直如此）走 Chunk 模式，与 RPC 一样用本地版本的清单做块级去重
                     _gameSophonChunkBuild = await _hoYoPlayService.GetGameSophonChunkBuildAsync(gameBranch, gameBranch.PreDownload);
+                    if (_gameSophonChunkBuild is not null)
+                    {
+                        _localVersionSophonChunkBuild = await _hoYoPlayService.GetGameSophonChunkBuildAsync(gameBranch, gameBranch.PreDownload, _localGameVersion);
+                        if (_localVersionSophonChunkBuild is null)
+                        {
+                            // 本地版本过旧，无法增量，只能下载完整资源
+                            TextBlock_NoPatches.Visibility = Visibility.Visible;
+                        }
+                    }
+                }
+                if (_gameSophonPatchBuild is null && _gameSophonChunkBuild is null)
+                {
+                    // Chunk 模式的预下载任务不会回退压缩包，这里也不回退，避免显示一个实际无法开始的预下载
+                    _logger.LogWarning("Sophon build of ({GameBiz}) predownload is unavailable.", CurrentGameId.GameBiz);
+                    TextBlock_PredownloadUnavailable.Visibility = Visibility.Visible;
+                    return;
                 }
             }
-            if (_gameSophonPatchBuild is null && _gameSophonChunkBuild is null)
+            else
             {
                 GamePackage? package = await _hoYoPlayService.GetGamePackageAsync(CurrentGameId);
                 if (package?.PreDownload.Major is null)
@@ -266,12 +288,10 @@ public sealed partial class PreDownloadDialog : ContentDialog
             }
             else if (_gameSophonChunkBuild is not null)
             {
-                List<GameSophonChunkManifest> manifests = GetAvailableGameSophonChunkManifests(_gameSophonChunkBuild, _audioLanguage, _ignoreMatchingFields);
-                foreach (GameSophonChunkManifest manifest in manifests)
-                {
-                    size += manifest.Stats.CompressedSize;
-                    unzipSize += manifest.Stats.UncompressedSize;
-                }
+                GameSophonChunkBuild build = _gameSophonChunkBuild;
+                GameSophonChunkBuild? localBuild = _localVersionSophonChunkBuild;
+                // 清单可能有数十万个块，解析和比对放到后台线程
+                (size, unzipSize) = await Task.Run(() => ComputeSophonChunkDownloadSizeAsync(build, localBuild));
             }
             else if (_gameSophonPatchBuild is not null)
             {
@@ -330,6 +350,8 @@ public sealed partial class PreDownloadDialog : ContentDialog
         catch (Exception ex)
         {
             _logger.LogError(ex, "Compute package size.");
+            // 统计增量需要下载清单文件，失败时给出原因，而不是停在「...」
+            ErrorMessage = GetMiHoYoRequestErrorMessage(ex);
         }
     }
 
@@ -507,6 +529,76 @@ public sealed partial class PreDownloadDialog : ContentDialog
         }
         return manifests;
     }
+
+
+    /// <summary>
+    /// 按 RPC 预下载任务的规则统计 Chunk 模式要下载的大小：同路径旧文件中解压后 MD5 与大小都相同的块直接复用，
+    /// 其余块按 Id 去重后累加（对应 GameInstallHelper.GetPredownloadFiles）。
+    /// </summary>
+    /// <param name="build">预下载版本的清单</param>
+    /// <param name="localBuild">本地版本的清单；为 <see langword="null"/> 时无法增量，按整包统计</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>下载大小（压缩后）与解压后大小，单位字节</returns>
+    private async Task<(long Size, long UnzipSize)> ComputeSophonChunkDownloadSizeAsync(GameSophonChunkBuild build, GameSophonChunkBuild? localBuild, CancellationToken cancellationToken = default)
+    {
+        List<GameSophonChunkManifest> manifests = GetAvailableGameSophonChunkManifests(build, _audioLanguage, _ignoreMatchingFields);
+        if (localBuild is null)
+        {
+            return (manifests.Sum(x => x.Stats.CompressedSize), manifests.Sum(x => x.Stats.UncompressedSize));
+        }
+        long size = 0, unzipSize = 0;
+        HashSet<string> chunkIds = new();
+        foreach (GameSophonChunkManifest manifest in manifests)
+        {
+            List<SophonChunkFile> files = await GetSophonChunkFilesAsync(manifest, cancellationToken);
+            Dictionary<string, SophonChunkFile> localFiles = new();
+            if (localBuild.Manifests.FirstOrDefault(x => x.MatchingField == manifest.MatchingField) is GameSophonChunkManifest localManifest)
+            {
+                foreach (SophonChunkFile item in await GetSophonChunkFilesAsync(localManifest, cancellationToken))
+                {
+                    localFiles.TryAdd(item.File, item);
+                }
+            }
+            foreach (SophonChunkFile file in files)
+            {
+                if (file.IsFolder)
+                {
+                    continue;
+                }
+                HashSet<(string, long)>? localChunks = localFiles.TryGetValue(file.File, out SophonChunkFile? localFile)
+                    ? localFile.Chunks.Select(x => (x.UncompressedMd5, x.UncompressedSize)).ToHashSet()
+                    : null;
+                foreach (SophonChunk chunk in file.Chunks)
+                {
+                    if (localChunks?.Contains((chunk.UncompressedMd5, chunk.UncompressedSize)) is true)
+                    {
+                        continue;
+                    }
+                    if (chunkIds.Add(chunk.Id))
+                    {
+                        size += chunk.CompressedSize;
+                        unzipSize += chunk.UncompressedSize;
+                    }
+                }
+            }
+        }
+        return (size, unzipSize);
+    }
+
+
+
+    /// <summary>
+    /// 下载并解析 Chunk 模式的文件清单。
+    /// </summary>
+    /// <param name="manifest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task<List<SophonChunkFile>> GetSophonChunkFilesAsync(GameSophonChunkManifest manifest, CancellationToken cancellationToken = default)
+    {
+        byte[] bytes = await EnsureSophonManifestFileAsync(manifest.ManifestDownload, manifest.Manifest, cancellationToken);
+        return SophonChunkManifest.Parser.ParseFrom(bytes).Chuncks.ToList();
+    }
+
 
 
     private async Task<SophonPatchManifest> GetSophonPatchManifestAsync(GameSophonPatchManifest manifest, CancellationToken cancellationToken = default)

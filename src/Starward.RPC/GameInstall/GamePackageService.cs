@@ -276,6 +276,12 @@ internal partial class GamePackageService
                     context.LocalVersionSophonChunkBuild = await GetGameSophonChunkBuildAsync(branch, branch.PreDownload, localVersion.ToString(), cancellationToken);
                 }
             }
+            if (context.GameSophonPatchBuild is null && context.GameSophonChunkBuild is null)
+            {
+                // Chunk 模式不会取压缩包；两种清单都没有时继续执行会得到 0 个文件，预下载会被误记为已完成
+                _logger.LogWarning("Sophon build of ({GameBiz}) {Operation} is unavailable.", gameId.GameBiz, context.Operation);
+                throw new InvalidOperationException($"Sophon build of ({gameId.GameBiz}) {context.Operation} is unavailable.");
+            }
         }
         else
         {
@@ -946,17 +952,50 @@ internal partial class GamePackageService
 
 
 
+    /// <summary>
+    /// 获取 Chunk 模式文件清单。
+    /// </summary>
+    /// <param name="gameBranch">游戏分支</param>
+    /// <param name="gameBranchPackage">正式或预下载分支</param>
+    /// <param name="tag">版本号，为空时取该分支的当前版本</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>文件清单；该分支没有这个版本或清单为空时返回 <see langword="null"/></returns>
     private async Task<GameSophonChunkBuild?> GetGameSophonChunkBuildAsync(GameBranch gameBranch, GameBranchPackage gameBranchPackage, string tag = "", CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _hoyoplayClient.GetGameSophonChunkBuildAsync(gameBranch, gameBranchPackage, tag, cancellationToken);
+            GameSophonChunkBuild build = await _hoyoplayClient.GetGameSophonChunkBuildAsync(gameBranch, gameBranchPackage, tag, cancellationToken);
+            if (IsEmptySophonChunkBuild(build) && string.IsNullOrWhiteSpace(tag) && !string.IsNullOrWhiteSpace(gameBranchPackage.Tag))
+            {
+                // 预下载窗口内新版本只能不带 tag 取到（带 tag 返回 -202，见上游 #1484/#1563/#1898 日志）；
+                // 窗口结束后 predownload 分支不带 tag 反而返回 retcode 0 的空清单，此时按分支自身版本号再取一次
+                _logger.LogWarning("Sophon chunk build of ({GameBiz}) branch {Branch} without tag is empty, retry with tag {Tag}.", gameBranch.GameId.GameBiz, gameBranchPackage.Branch, gameBranchPackage.Tag);
+                build = await _hoyoplayClient.GetGameSophonChunkBuildAsync(gameBranch, gameBranchPackage, gameBranchPackage.Tag, cancellationToken);
+            }
+            if (IsEmptySophonChunkBuild(build))
+            {
+                _logger.LogWarning("Sophon chunk build of ({GameBiz}) branch {Branch} tag {Tag} is empty.", gameBranch.GameId.GameBiz, gameBranchPackage.Branch, tag);
+                return null;
+            }
+            return build;
         }
-        catch (miHoYoApiException)
+        catch (miHoYoApiException ex)
         {
-            // not found (-202)
+            // not found (-202)：该分支没有这个版本的清单，例如本地版本过旧
+            _logger.LogWarning("Sophon chunk build of ({GameBiz}) branch {Branch} tag {Tag} is unavailable: {Message}", gameBranch.GameId.GameBiz, gameBranchPackage.Branch, tag, ex.Message);
             return null;
         }
+    }
+
+
+    /// <summary>
+    /// 清单是否为空（接口返回 retcode 0 但没有 build_id 或文件清单）。
+    /// </summary>
+    /// <param name="build"></param>
+    /// <returns></returns>
+    private static bool IsEmptySophonChunkBuild(GameSophonChunkBuild? build)
+    {
+        return build is null || string.IsNullOrWhiteSpace(build.BuildId) || build.Manifests is not { Count: > 0 };
     }
 
 
