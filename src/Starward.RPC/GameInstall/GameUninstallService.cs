@@ -85,6 +85,7 @@ internal class GameUninstallService
                 ("files", fileCount),
                 ("screenshots", screenshotCount),
                 ("cache_dirs", cacheDirCount),
+                ("keep_shared_log_folders", request.KeepSharedLogFolders),
                 ("game_config", gameConfigLoaded),
                 ("error_type", error?.GetType().Name),
                 ("error", error?.Message));
@@ -170,7 +171,7 @@ internal class GameUninstallService
     /// <summary>
     /// 清理游戏在安装目录外生成的日志与崩溃文件目录（路径须含厂商名，防止误删）
     /// </summary>
-    /// <param name="request">卸载请求</param>
+    /// <param name="request">卸载请求；<see cref="UninstallGameRequest.KeepSharedLogFolders"/> 为 true 时不清理</param>
     /// <param name="gameConfig">游戏配置，为 null 时不清理</param>
     /// <returns>删除的目录数</returns>
     private int ClearCacheDir(UninstallGameRequest request, GameConfig? gameConfig)
@@ -179,45 +180,58 @@ internal class GameUninstallService
         {
             return 0;
         }
-        int count = 0;
-        if (!string.IsNullOrWhiteSpace(gameConfig.GameLogGenDir))
+        if (request.KeepSharedLogFolders)
         {
-            string path = Environment.ExpandEnvironmentVariables(gameConfig.GameLogGenDir);
-            if (Path.IsPathFullyQualified(path))
-            {
-                if (path.Contains("miHoYo", StringComparison.OrdinalIgnoreCase)
-                    || path.Contains("Cognosphere", StringComparison.OrdinalIgnoreCase)
-                    || path.Contains("HoYoverse", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (Directory.Exists(path))
-                    {
-                        Directory.Delete(path, true);
-                        count++;
-                        _logger.LogInformation("Deleted folder {path}", path);
-                    }
-                }
-            }
+            // 国服与 B 服共用这些目录，另一个区服还装着时删掉会连带清掉它的日志
+            _logger.LogInformation("Keep log folders of ({gameBiz}) because another server of the same game is still installed.", request.GameBiz);
+            return 0;
         }
-        if (!string.IsNullOrWhiteSpace(gameConfig.GameCrashFileGenDir))
+        int count = 0;
+        if (TryDeleteGameFolder(gameConfig.GameLogGenDir))
         {
-            string path = Environment.ExpandEnvironmentVariables(gameConfig.GameCrashFileGenDir);
-            if (Path.IsPathFullyQualified(path))
-            {
-                // 防止原神把 %UserProfile%/AppData/Local/Temp 删了
-                if (path.Contains("miHoYo", StringComparison.OrdinalIgnoreCase)
-                    || path.Contains("Cognosphere", StringComparison.OrdinalIgnoreCase)
-                    || path.Contains("HoYoverse", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (Directory.Exists(path))
-                    {
-                        Directory.Delete(path, true);
-                        count++;
-                        _logger.LogInformation("Deleted folder {path}", path);
-                    }
-                }
-            }
+            count++;
+        }
+        // 厂商名检查同时防止原神把 %UserProfile%/AppData/Local/Temp 删了
+        if (TryDeleteGameFolder(gameConfig.GameCrashFileGenDir))
+        {
+            count++;
         }
         return count;
+    }
+
+
+    /// <summary>
+    /// 删除游戏配置中的一个安装目录外的目录。游戏目录此时已经删完，这里失败（例如另一个区服正开着日志文件）
+    /// 只记录警告，不让整个卸载报错。
+    /// </summary>
+    /// <param name="configuredPath">配置里的路径，可含环境变量</param>
+    /// <returns>是否删除了目录</returns>
+    private bool TryDeleteGameFolder(string? configuredPath)
+    {
+        if (string.IsNullOrWhiteSpace(configuredPath))
+        {
+            return false;
+        }
+        string path = Environment.ExpandEnvironmentVariables(configuredPath);
+        if (!Path.IsPathFullyQualified(path)
+            || !(path.Contains("miHoYo", StringComparison.OrdinalIgnoreCase)
+                || path.Contains("Cognosphere", StringComparison.OrdinalIgnoreCase)
+                || path.Contains("HoYoverse", StringComparison.OrdinalIgnoreCase))
+            || !Directory.Exists(path))
+        {
+            return false;
+        }
+        try
+        {
+            Directory.Delete(path, true);
+            _logger.LogInformation("Deleted folder {path}", path);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _logger.LogWarning(ex, "Failed to delete folder {path}", path);
+            return false;
+        }
     }
 
 

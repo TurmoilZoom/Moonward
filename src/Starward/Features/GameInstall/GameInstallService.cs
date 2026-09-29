@@ -379,6 +379,11 @@ internal class GameInstallService
                 GameId: {gameId} {gameBiz}
                 InstallPath: {installPath}
                 """, gameId.Id, gameId.GameBiz, installPath);
+            string? sharedServer = GetInstalledServerSharingLogFolders(gameId.GameBiz, installPath);
+            if (sharedServer is not null)
+            {
+                _logger.LogInformation("Keep shared log folders of {gameBiz} because {otherBiz} is still installed.", gameId.GameBiz, sharedServer);
+            }
             var request = new UninstallGameRequest
             {
                 GameBiz = gameId.GameBiz,
@@ -387,6 +392,7 @@ internal class GameInstallService
                 UserDataFolder = AppConfig.UserDataFolder,
                 ScreenshotFolder = AppConfig.ScreenshotFolder,
                 GameExeName = GameLauncherService.GetGameExeName(gameId.GameBiz),
+                KeepSharedLogFolders = sharedServer is not null,
             };
             var response = await _gameInstallerClient.UninstallGameAsync(request);
             if (response.Success)
@@ -402,6 +408,39 @@ internal class GameInstallService
         {
             return false;
         }
+    }
+
+
+
+    /// <summary>
+    /// 查找与本区服共用日志目录、且仍安装着的其他区服。
+    /// Unity 游戏的注册表键与 LocalLow 数据目录都由同一组公司名/产品名生成（国服与 B 服同为「miHoYo\原神」等），
+    /// 所以注册表键相同即日志目录相同。
+    /// </summary>
+    /// <param name="gameBiz">要卸载的区服</param>
+    /// <param name="installPath">要卸载的安装目录，与它相同的路径不算另一个区服</param>
+    /// <returns>仍安装着的其他区服；没有时返回 <see langword="null"/></returns>
+    private static string? GetInstalledServerSharingLogFolders(GameBiz gameBiz, string installPath)
+    {
+        if (!gameBiz.IsKnown())
+        {
+            return null;
+        }
+        string registryKey = gameBiz.GetGameRegistryKey();
+        string ownPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(installPath));
+        foreach (GameBiz biz in GameBiz.AllGameBizs)
+        {
+            if (biz == gameBiz || biz.GetGameRegistryKey() != registryKey)
+            {
+                continue;
+            }
+            string? path = GameLauncherService.GetGameInstallPath(biz);
+            if (path is not null && !string.Equals(Path.TrimEndingDirectorySeparator(path), ownPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return biz;
+            }
+        }
+        return null;
     }
 
 

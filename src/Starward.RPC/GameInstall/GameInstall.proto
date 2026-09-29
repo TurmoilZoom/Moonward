@@ -78,6 +78,8 @@ message UninstallGameRequest {
     string user_data_folder = 4;
     google.protobuf.StringValue screenshot_folder = 5;
     google.protobuf.StringValue game_exe_name = 6;
+    // 同一游戏的其他区服仍安装着且共用日志目录（如国服与 B 服），为 true 时不删除安装目录外的日志与崩溃目录
+    bool keep_shared_log_folders = 7;
 }
 
 message UninstallGameResponse {
