@@ -7,6 +7,7 @@
                xmlns:lang="using:Starward.Language"
                xmlns:local="using:Starward.Features.GameInstall"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
                xmlns:sh="using:Starward.Helpers"
                x:DefaultBindMode="OneWay"
                Background="{ThemeResource CustomAcrylicBrush}"
@@ -42,11 +43,16 @@
                   Background="{ThemeResource DateTimePickerFlyoutButtonBackgroundPointerOver}"
                   CornerRadius="8">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
+                <!--  磁盘类型（SSD / HDD / 可移动 / 网络）：负右边距抵消路径的左边距，与路径间距 8；识别不了时隐藏且不占位  -->
+                <sc:DiskTypeBadge Margin="12,0,-4,0" FolderPath="{x:Bind InstallationPath}" />
+
                 <TextBlock x:Name="TextBlock_InstallationPath"
+                           Grid.Column="1"
                            Margin="12,4,12,4"
                            VerticalAlignment="Center"
                            FontSize="14"
@@ -58,7 +64,7 @@
                            TextTrimming="CharacterEllipsis"
                            TextWrapping="Wrap" />
                 <!--  Change Path  -->
-                <Button Grid.Column="1"
+                <Button Grid.Column="2"
                         Padding="12,0,12,0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Stretch"

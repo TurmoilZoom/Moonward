@@ -4145,4 +4145,16 @@ You are welcome to submit exported data to:</value>
   <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
     <value>คุณยังสามารถซิงค์จากอุปกรณ์อื่นในเครือข่ายภายหลังได้ที่ {0} → {1}</value>
   </data>
+  <data name="DiskTypeBadge_SSD" xml:space="preserve">
+    <value>SSD</value>
+  </data>
+  <data name="DiskTypeBadge_HDD" xml:space="preserve">
+    <value>ฮาร์ดดิสก์</value>
+  </data>
+  <data name="DiskTypeBadge_Removable" xml:space="preserve">
+    <value>ถอดได้</value>
+  </data>
+  <data name="DiskTypeBadge_Network" xml:space="preserve">
+    <value>เครือข่าย</value>
+  </data>
 </root>

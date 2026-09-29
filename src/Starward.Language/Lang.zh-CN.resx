@@ -4239,4 +4239,16 @@
   <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
     <value>之后也可以在「{0} → {1}」中从局域网内其他设备同步。</value>
   </data>
+  <data name="DiskTypeBadge_SSD" xml:space="preserve">
+    <value>固态硬盘</value>
+  </data>
+  <data name="DiskTypeBadge_HDD" xml:space="preserve">
+    <value>机械硬盘</value>
+  </data>
+  <data name="DiskTypeBadge_Removable" xml:space="preserve">
+    <value>可移动</value>
+  </data>
+  <data name="DiskTypeBadge_Network" xml:space="preserve">
+    <value>网络</value>
+  </data>
 </root>

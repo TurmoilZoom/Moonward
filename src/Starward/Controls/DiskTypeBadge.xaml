@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Controls.DiskTypeBadge"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             IsHitTestVisible="False"
+             Visibility="Collapsed"
+             mc:Ignorable="d">
+
+    <!--  纯展示：不参与命中测试，放在按钮内容里也不会截走点击  -->
+    <!--  文字已本地化（中文、泰文、带下行字母的词），用默认行高而非 Tight，高度只设下限  -->
+    <Border MinHeight="20"
+            Padding="6,0,6,0"
+            VerticalAlignment="Center"
+            Background="{ThemeResource ControlStrongFillColorDisabledBrush}"
+            CornerRadius="4">
+        <TextBlock x:Name="TextBlock_DiskType"
+                   VerticalAlignment="Center"
+                   FontSize="11"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   IsTextScaleFactorEnabled="False" />
+    </Border>
+
+</UserControl>

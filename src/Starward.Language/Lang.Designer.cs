@@ -2744,6 +2744,42 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 SSD 的本地化字符串。
+        /// </summary>
+        public static string DiskTypeBadge_SSD {
+            get {
+                return ResourceManager.GetString("DiskTypeBadge_SSD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 HDD 的本地化字符串。
+        /// </summary>
+        public static string DiskTypeBadge_HDD {
+            get {
+                return ResourceManager.GetString("DiskTypeBadge_HDD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Removable 的本地化字符串。
+        /// </summary>
+        public static string DiskTypeBadge_Removable {
+            get {
+                return ResourceManager.GetString("DiskTypeBadge_Removable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Network 的本地化字符串。
+        /// </summary>
+        public static string DiskTypeBadge_Network {
+            get {
+                return ResourceManager.GetString("DiskTypeBadge_Network", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Downloaded: 的本地化字符串。
         /// </summary>
         public static string DownloadGameDialog_Downloaded {

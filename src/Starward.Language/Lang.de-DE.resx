@@ -4149,4 +4149,16 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
     <value>Sie können später auch unter „{0} → {1}“ von einem anderen Gerät im Netzwerk synchronisieren.</value>
   </data>
+  <data name="DiskTypeBadge_SSD" xml:space="preserve">
+    <value>SSD</value>
+  </data>
+  <data name="DiskTypeBadge_HDD" xml:space="preserve">
+    <value>Festplatte</value>
+  </data>
+  <data name="DiskTypeBadge_Removable" xml:space="preserve">
+    <value>Entfernbar</value>
+  </data>
+  <data name="DiskTypeBadge_Network" xml:space="preserve">
+    <value>Netzwerk</value>
+  </data>
 </root>

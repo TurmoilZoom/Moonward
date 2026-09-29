@@ -239,10 +239,14 @@
                             CornerRadius="0">
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Margin="16,0,16,1"
+                            <!--  磁盘类型（SSD / HDD / 可移动 / 网络）：负右边距抵消路径的左边距，与路径间距 8；识别不了时隐藏且不占位  -->
+                            <sc:DiskTypeBadge Margin="16,0,-8,0" FolderPath="{x:Bind InstallPath}" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="16,0,16,1"
                                        VerticalAlignment="Center"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        IsTextTrimmedChanged="TextBlock_IsTextTrimmedChanged"
@@ -250,7 +254,7 @@
                                        Text="{x:Bind InstallPath}"
                                        TextTrimming="CharacterEllipsis"
                                        TextWrapping="Wrap" />
-                            <FontIcon Grid.Column="1"
+                            <FontIcon Grid.Column="2"
                                       Margin="16,0,16,0"
                                       FontSize="14"
                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"

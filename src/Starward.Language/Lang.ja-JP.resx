@@ -4150,4 +4150,16 @@
   <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
     <value>あとから「{0} → {1}」で LAN 内の他のデバイスから同期することもできます。</value>
   </data>
+  <data name="DiskTypeBadge_SSD" xml:space="preserve">
+    <value>SSD</value>
+  </data>
+  <data name="DiskTypeBadge_HDD" xml:space="preserve">
+    <value>HDD</value>
+  </data>
+  <data name="DiskTypeBadge_Removable" xml:space="preserve">
+    <value>リムーバブル</value>
+  </data>
+  <data name="DiskTypeBadge_Network" xml:space="preserve">
+    <value>ネットワーク</value>
+  </data>
 </root>

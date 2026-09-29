@@ -4151,4 +4151,16 @@
   <data name="WelcomeView_ImportLaterHint" xml:space="preserve">
     <value>之後也可以在「{0} → {1}」中從區域網路內其他裝置同步。</value>
   </data>
+  <data name="DiskTypeBadge_SSD" xml:space="preserve">
+    <value>固態硬碟</value>
+  </data>
+  <data name="DiskTypeBadge_HDD" xml:space="preserve">
+    <value>傳統硬碟</value>
+  </data>
+  <data name="DiskTypeBadge_Removable" xml:space="preserve">
+    <value>卸除式</value>
+  </data>
+  <data name="DiskTypeBadge_Network" xml:space="preserve">
+    <value>網路</value>
+  </data>
 </root>
