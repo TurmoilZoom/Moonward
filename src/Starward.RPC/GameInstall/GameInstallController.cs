@@ -72,9 +72,15 @@ internal class GameInstallController : GameInstaller.GameInstallerBase
             GameId gameId = new GameId { GameBiz = request.GameBiz, Id = request.GameId };
             if (_gameInstallService.TryGetTask(gameId, out GameInstallContext? task))
             {
+                Telemetry.Track("uninstall_start", request.GameBiz, ("has_task", true), ("task_op", task.Operation), ("task_state", task.State));
+                GameInstallService.TrackCancel(gameId, task, GameInstallState.Stop, "uninstall");
                 // 停止正在进行的安装任务
                 task.Cancel(GameInstallState.Stop);
                 await Task.Delay(3000);
+            }
+            else
+            {
+                Telemetry.Track("uninstall_start", request.GameBiz, ("has_task", false));
             }
             await _gameUninstallService.UninstallGameAsync(request, context.CancellationToken);
             return new UninstallGameResponse { Success = true };

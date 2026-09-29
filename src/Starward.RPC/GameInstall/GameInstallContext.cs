@@ -1,5 +1,6 @@
 using Starward.Core;
 using Starward.Core.HoYoPlay;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -164,6 +165,27 @@ public class GameInstallContext
 
 
     internal GameInstallState CancelState { get; private set; } = GameInstallState.Queueing;
+
+
+    /// <summary>
+    /// 埋点流水号：同一上下文跨暂停 / 继续保持不变，换操作或重建任务才会变
+    /// </summary>
+    internal string TransactionId { get; } = Guid.NewGuid().ToString("N")[..12];
+
+    /// <summary>
+    /// 本轮运行开始的时间戳（<see cref="Stopwatch"/>），埋点算耗时
+    /// </summary>
+    internal long RunStartTimestamp;
+
+    /// <summary>
+    /// 本轮运行开始时的累计网络字节数，埋点算本轮流量
+    /// </summary>
+    internal long RunStartNetworkBytes;
+
+    /// <summary>
+    /// 本轮运行最后进入的阶段，埋点记录任务停在哪一步
+    /// </summary>
+    internal GameInstallState RunStage;
 
 
     internal void Cancel(GameInstallState state)

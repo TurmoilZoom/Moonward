@@ -9,6 +9,7 @@ using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.HoYoPlay;
 using Starward.Helpers;
+using Starward.RPC;
 using Starward.RPC.GameInstall;
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,7 @@ public sealed partial class PreDownloadDialog : ContentDialog
             this.Hide();
             return;
         }
+        Telemetry.Track("predownload_dialog_show", CurrentGameId.GameBiz);
         _ = GetGamePackageAsync();
     }
 
@@ -365,9 +367,11 @@ public sealed partial class PreDownloadDialog : ContentDialog
     {
         try
         {
+            Telemetry.Track("predownload_dialog_click", CurrentGameId.GameBiz, ("button", "start"), ("audio", _audioLanguage));
             GameInstallContext? task = await _gameInstallService.StartPredownloadAsync(CurrentGameId, _installationPath, _audioLanguage);
             if (task is not null && task.State is not GameInstallState.Stop and not GameInstallState.Error)
             {
+                _predownloadStarted = true;
                 WeakReferenceMessenger.Default.Send(new GameInstallTaskStartedMessage(task));
                 Close();
             }
@@ -382,9 +386,22 @@ public sealed partial class PreDownloadDialog : ContentDialog
 
 
 
+    /// <summary>
+    /// 预下载已发起；之后的关闭是程序自动关，不计入用户点击
+    /// </summary>
+    private bool _predownloadStarted;
+
+
+    /// <summary>
+    /// 关闭对话框
+    /// </summary>
     [RelayCommand]
     private void Close()
     {
+        if (!_predownloadStarted)
+        {
+            Telemetry.Track("predownload_dialog_click", CurrentGameId?.GameBiz.ToString(), ("button", "close"));
+        }
         this.Hide();
     }
 

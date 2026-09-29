@@ -64,6 +64,7 @@ public static partial class AppConfig
                                                   .Enrich.FromLogContext()
                                                   .CreateLogger();
             Log.Information($"Welcome to Moonward v{AppVersion}\r\nSystem: {Environment.OSVersion}\r\nCommand Line: {Environment.CommandLine}");
+            Starward.RPC.Telemetry.Initialize(logFolder, "app", AppVersion);
 
             var sc = new ServiceCollection();
             sc.AddMemoryCache();

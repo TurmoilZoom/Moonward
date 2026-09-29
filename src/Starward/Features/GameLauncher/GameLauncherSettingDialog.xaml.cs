@@ -16,10 +16,12 @@ using Starward.Features.GameSelector;
 using Starward.Features.HoYoPlay;
 using Starward.Features.UrlProtocol;
 using Starward.Helpers;
+using Starward.RPC;
 using Starward.RPC.GameInstall;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -342,6 +344,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         {
             return;
         }
+        Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "repair"));
         if (_hasAudioPackages.Value && Button_StartRepairing.Visibility is Visibility.Collapsed)
         {
             Segmented_SelectLanguage.Visibility = Visibility.Visible;
@@ -377,6 +380,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
                     _ => AudioLanguage.None,
                 };
             }
+            Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "repair_start"), ("audio", audio));
             GameInstallContext? task = await _gameInstallService.StartRepairAsync(CurrentGameId, InstallPath, audio);
             if (task is not null && task.State is not GameInstallState.Stop and not GameInstallState.Error)
             {
@@ -402,6 +406,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     {
         try
         {
+            Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "uninstall"));
             if (Directory.Exists(InstallPath))
             {
                 string installPath = Path.GetFullPath(InstallPath);
@@ -409,6 +414,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
                 {
                     // 不能删除驱动器根目录
                     UninstallError = Lang.GameLauncherSettingDialog_CannotDeleteTheDriveRootDirectory;
+                    TrackUninstallBlocked("drive_root");
                     return;
                 }
                 if (Directory.Exists(AppConfig.UserDataFolder))
@@ -418,6 +424,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
                     {
                         // Starward 数据文件夹位于游戏文件夹内，删除游戏时会一并删除。请在设置页面修改数据文件夹位置后重试。
                         UninstallError = Lang.GameLauncherSettingDialog_UninstallGameUserDataFolderWarning;
+                        TrackUninstallBlocked("data_folder_inside");
                         return;
                     }
                 }
@@ -426,12 +433,15 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
                 {
                     // Starward 程序位于游戏文件夹内，删除游戏时会一并被删除。请将程序移出游戏文件夹后重试。
                     UninstallError = Lang.GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning;
+                    TrackUninstallBlocked("program_inside");
                     return;
                 }
                 Grid_UninstallWarning.Visibility = Visibility.Visible;
+                Telemetry.Track("uninstall_confirm_show", CurrentGameBiz, ("task_state", _gameInstallService.GetGameInstallTask(CurrentGameId)?.State));
             }
             else
             {
+                TrackUninstallBlocked("path_missing");
                 _ = InitializeBasicInfoAsync();
             }
         }
@@ -446,18 +456,23 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     [RelayCommand]
     private async Task UninstallGameAsync()
     {
+        long start = Stopwatch.GetTimestamp();
         try
         {
+            Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "uninstall_confirm"), ("task_state", _gameInstallService.GetGameInstallTask(CurrentGameId)?.State));
             UninstallError = null;
             if (await _gameLauncherService.GetGameProcessAsync(CurrentGameId) is not null)
             {
                 UninstallError = Lang.LauncherPage_GameIsRunning;
+                TrackUninstallBlocked("game_running");
                 await InitializeBasicInfoAsync();
                 return;
             }
             if (Directory.Exists(InstallPath))
             {
-                if (await _gameInstallService.StartUninstallAsync(CurrentGameId, InstallPath))
+                bool success = await _gameInstallService.StartUninstallAsync(CurrentGameId, InstallPath);
+                Telemetry.Track("uninstall_result", CurrentGameBiz, ("result", success ? "success" : "rpc_unavailable"), ("duration_ms", Stopwatch.GetElapsedTime(start)));
+                if (success)
                 {
                     _logger.LogInformation("""
                         Uninstall game finished:
@@ -472,14 +487,27 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
             }
             else
             {
+                TrackUninstallBlocked("path_missing");
                 await InitializeBasicInfoAsync();
             }
         }
         catch (Exception ex)
         {
+            Telemetry.Track("uninstall_result", CurrentGameBiz, ("result", "error"), ("duration_ms", Stopwatch.GetElapsedTime(start)), ("error", ex.Message));
             UninstallError = ex.Message;
             _logger.LogError(ex, "Uninstall game failed {GameBiz}", CurrentGameBiz);
         }
+    }
+
+
+
+    /// <summary>
+    /// 记录卸载被前置检查拦下的原因
+    /// </summary>
+    /// <param name="reason">drive_root / data_folder_inside / program_inside / path_missing / game_running</param>
+    private void TrackUninstallBlocked(string reason)
+    {
+        Telemetry.Track("uninstall_blocked", CurrentGameBiz, ("reason", reason));
     }
 
 

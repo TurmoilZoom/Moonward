@@ -39,6 +39,7 @@ public static class RpcRunner
                                           .ReadFrom.Configuration(builder.Configuration)
                                           .CreateLogger();
         Log.Information($"Welcome to Moonward RPC v{AppConfig.AppVersion}\r\nSystem: {Environment.OSVersion}\r\nCommand Line: {Environment.CommandLine}");
+        Telemetry.Initialize(logFolder, "rpc", AppConfig.AppVersion);
 
         if (args.Length < 2 || args[1] is not AppConfig.StartupMagic)
         {

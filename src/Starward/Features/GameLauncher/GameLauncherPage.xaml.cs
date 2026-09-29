@@ -24,6 +24,7 @@ using Starward.Features.Setting;
 using Starward.Features.ViewHost;
 using Starward.Frameworks;
 using Starward.Helpers;
+using Starward.RPC;
 using Starward.RPC.GameInstall;
 using System;
 using System.Collections.Generic;
@@ -171,6 +172,15 @@ public sealed partial class GameLauncherPage : PageBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(InstalledLocateGameEnabled))]
     public partial GameState GameState { get; set; }
+
+    /// <summary>
+    /// 按钮状态变化时记录埋点（只在值真正改变时触发，进度定时器反复赋同值不会刷屏）
+    /// </summary>
+    /// <param name="value">新的按钮状态</param>
+    partial void OnGameStateChanged(GameState value)
+    {
+        Telemetry.Track("launcher_button_state", CurrentGameBiz, ("state", value));
+    }
 
 
 
@@ -699,6 +709,7 @@ public sealed partial class GameLauncherPage : PageBase
         {
             if (_gameInstallTask is null)
             {
+                TrackDownloadClick("install");
                 await new InstallGameDialog { CurrentGameId = CurrentGameId, XamlRoot = this.XamlRoot, }.ShowAsync();
             }
             else
@@ -718,6 +729,7 @@ public sealed partial class GameLauncherPage : PageBase
     {
         try
         {
+            TrackDownloadClick("resume_download");
             if (!Directory.Exists(GameInstallPath))
             {
                 CheckGameVersion();
@@ -759,17 +771,20 @@ public sealed partial class GameLauncherPage : PageBase
         {
             if (_gameInstallTask is null)
             {
+                TrackDownloadClick("predownload");
                 await new PreDownloadDialog { CurrentGameId = this.CurrentGameId, XamlRoot = this.XamlRoot }.ShowAsync();
             }
             else if (_gameInstallTask.Operation is GameInstallOperation.Predownload)
             {
                 if (_gameInstallTask.State is GameInstallState.Stop or GameInstallState.Paused or GameInstallState.Error or GameInstallState.Queueing)
                 {
+                    TrackDownloadClick("predownload_continue");
                     await _gameInstallService.ContinueTaskAsync(_gameInstallTask);
                     _dispatchTimer.Start();
                 }
                 else if (_gameInstallTask.State is GameInstallState.Waiting or GameInstallState.Downloading or GameInstallState.Decompressing or GameInstallState.Merging or GameInstallState.Verifying)
                 {
+                    TrackDownloadClick("predownload_pause");
                     await _gameInstallService.PauseTaskAsync(_gameInstallTask);
                     _dispatchTimer.Start();
                 }
@@ -809,6 +824,7 @@ public sealed partial class GameLauncherPage : PageBase
         {
             if (localGameVersion is not null && latestGameVersion > localGameVersion)
             {
+                TrackDownloadClick("update");
                 AudioLanguage audio = await _gamePackageService.GetAudioLanguageAsync(CurrentGameId, GameInstallPath);
                 GameInstallContext? task = await _gameInstallService.StartUpdateAsync(CurrentGameId, GameInstallPath!, audio);
                 if (task is not null)
@@ -843,6 +859,17 @@ public sealed partial class GameLauncherPage : PageBase
 
 
 
+    /// <summary>
+    /// 记录首页下载相关按钮的点击，附带点击瞬间的任务操作与状态
+    /// </summary>
+    /// <param name="button">按钮：install / resume_download / update / continue / pause / predownload / predownload_continue / predownload_pause</param>
+    private void TrackDownloadClick(string button)
+    {
+        Telemetry.Track("download_click", CurrentGameBiz, ("button", button), ("task_op", _gameInstallTask?.Operation), ("task_state", _gameInstallTask?.State));
+    }
+
+
+
     private async Task ChangeGameInstallTaskStateAsync()
     {
         try
@@ -855,11 +882,13 @@ public sealed partial class GameLauncherPage : PageBase
             {
                 if (_gameInstallTask.State is GameInstallState.Stop or GameInstallState.Paused or GameInstallState.Error or GameInstallState.Queueing)
                 {
+                    TrackDownloadClick("continue");
                     await _gameInstallService.ContinueTaskAsync(_gameInstallTask);
                     _dispatchTimer.Start();
                 }
                 else if (_gameInstallTask.State is GameInstallState.Waiting or GameInstallState.Downloading or GameInstallState.Decompressing or GameInstallState.Merging or GameInstallState.Verifying)
                 {
+                    TrackDownloadClick("pause");
                     await _gameInstallService.PauseTaskAsync(_gameInstallTask);
                     _dispatchTimer.Start();
                 }

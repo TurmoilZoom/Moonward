@@ -72,6 +72,7 @@ internal class GameInstallService
             _logger.LogInformation("Parent process {name} ({pid}) exited, stop all game install tasks.", e.ProcessName, e.Id);
             foreach (var item in _tasks)
             {
+                TrackCancel(item.Key, item.Value, GameInstallState.Stop, "parent_exit");
                 item.Value.Cancel(GameInstallState.Stop);
             }
         }
@@ -104,6 +105,7 @@ internal class GameInstallService
             {
                 // 操作不一样，则取消上次任务
                 _logger.LogInformation("The new task operation is different from the previous task, cancel the previous task, GameBiz: {game_biz}, Operation: {operation}", context.GameId.GameBiz, context.Operation);
+                TrackCancel(context.GameId, context, GameInstallState.Stop, "replace");
                 context.Cancel(GameInstallState.Stop);
                 _tasks.TryRemove(context.GameId, out _);
                 context = request.ToTask();
@@ -132,10 +134,15 @@ internal class GameInstallService
             // 第一次开始时，如果有其他任务在执行，排队
             _logger.LogInformation("Queueing GameInstallTask, GameBiz: {game_biz}, Operation: {operation}", context.GameId.GameBiz, context.Operation);
             context.State = GameInstallState.Queueing;
+            Telemetry.Track("task_queued", context.GameId.GameBiz,
+                ("op", context.Operation),
+                ("txn", context.TransactionId),
+                ("running_biz", CurrentTask.GameId.GameBiz.ToString()));
             return GameInstallContextDTO.FromTask(context);
         }
         if (CurrentTask != null && CurrentTask != context)
         {
+            TrackCancel(CurrentTask.GameId, CurrentTask, GameInstallState.Queueing, "preempt");
             CurrentTask.Cancel(GameInstallState.Queueing);
             TaskStateChanged?.Invoke(this, CurrentTask);
         }
@@ -149,6 +156,7 @@ internal class GameInstallService
         {
             return GameInstallContextDTO.FromTask(context);
         }
+        TrackStart(context);
         context.State = GameInstallState.Waiting;
         context.ErrorMessage = null;
         _ = PrepareGameInstallTaskAsync(context, context.CancellationToken);
@@ -166,10 +174,12 @@ internal class GameInstallService
     {
         if (_tasks.TryGetValue(request.GetGameId(), out GameInstallContext? context))
         {
+            TrackCancel(context.GameId, context, GameInstallState.Paused, "pause");
             context.Cancel(GameInstallState.Paused);
         }
         else
         {
+            TrackCancel(request.GetGameId(), null, GameInstallState.Paused, "pause");
             context = request.ToTask();
             context.State = GameInstallState.Stop;
         }
@@ -186,11 +196,13 @@ internal class GameInstallService
     {
         if (_tasks.TryRemove(request.GetGameId(), out GameInstallContext? context))
         {
+            TrackCancel(context.GameId, context, GameInstallState.Stop, "stop");
             context.Cancel(GameInstallState.Stop);
             context.State = GameInstallState.Stop;
         }
         else
         {
+            TrackCancel(request.GetGameId(), null, GameInstallState.Stop, "stop");
             context = request.ToTask();
             context.State = GameInstallState.Stop;
         }
@@ -208,6 +220,7 @@ internal class GameInstallService
     /// <returns></returns>
     public async Task PrepareGameInstallTaskAsync(GameInstallContext context, CancellationToken cancellationToken = default)
     {
+        Exception? error = null;
         try
         {
             _logger.LogInformation("""
@@ -220,6 +233,8 @@ internal class GameInstallService
                 """, context.Operation, context.GameId.Id, context.GameId.GameBiz, context.InstallPath, context.AudioLanguage, context.HardLinkPath);
             Directory.CreateDirectory(context.InstallPath);
             GamePackageService gamePackageService = _serviceProvider.GetRequiredService<GamePackageService>();
+            long prepareStart = Stopwatch.GetTimestamp();
+            bool reused = context.TaskFiles is not null;
             if (context.AudioLanguage is not AudioLanguage.None)
             {
                 await gamePackageService.SetAudioLanguageAsync(context.GameId, context.InstallPath, context.AudioLanguage, cancellationToken);
@@ -228,6 +243,7 @@ internal class GameInstallService
             {
                 await gamePackageService.PrepareGamePackageAsync(context, cancellationToken);
             }
+            TrackPrepared(context, reused, Stopwatch.GetElapsedTime(prepareStart));
 
             foreach (string item in Directory.GetFiles(context.InstallPath, "*", SearchOption.AllDirectories))
             {
@@ -270,6 +286,7 @@ internal class GameInstallService
             _logger.LogError(ex, "PrepareGameInstallTaskAsync");
             context.State = GameInstallState.Error;
             context.ErrorMessage = ex.InnerException.Message;
+            error = ex.InnerException;
         }
         catch (OperationCanceledException)
         {
@@ -281,7 +298,9 @@ internal class GameInstallService
             _logger.LogError(ex, "PrepareGameInstallTaskAsync");
             context.State = GameInstallState.Error;
             context.ErrorMessage = ex.Message;
+            error = ex;
         }
+        TrackEnd(context, error);
         ChangeToAnotherTask(context);
     }
 
@@ -358,7 +377,7 @@ internal class GameInstallService
         context.Progress_WriteFinishBytes = 0;
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode chunk", context.GameId.GameBiz);
-        context.State = GameInstallState.Downloading;
+        EnterStage(context, GameInstallState.Downloading);
         await Parallel.ForEachAsync(context.TaskFiles ?? [], cancellationToken, async (GameInstallFile file, CancellationToken token) =>
         {
             await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, false, token), token);
@@ -380,14 +399,14 @@ internal class GameInstallService
         context.Progress_DownloadFinishBytes = 0;
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode package", context.GameId.GameBiz);
-        context.State = GameInstallState.Downloading;
+        EnterStage(context, GameInstallState.Downloading);
         await Parallel.ForEachAsync(packages, cancellationToken, async (GameInstallCompressedPackage package, CancellationToken token) =>
         {
             await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadToFileAsync(context, package.FullPath, package.Url, package.Size, package.MD5, token), token);
         });
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start decompressing in mode package", context.GameId.GameBiz);
-        context.State = GameInstallState.Decompressing;
+        EnterStage(context, GameInstallState.Decompressing);
         context.Progress_Percent = 0;
         double totalSize = packages.Sum(x => x.Size);
         foreach (GameInstallFile item in context.TaskFiles ?? [])
@@ -476,7 +495,7 @@ internal class GameInstallService
 
         context.Progress_DownloadTotalBytes = files.Sum(x => x.Size);
         context.Progress_DownloadFinishBytes = 0;
-        context.State = GameInstallState.Downloading;
+        EnterStage(context, GameInstallState.Downloading);
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode patch", context.GameId.GameBiz);
         await Parallel.ForEachAsync(files, cancellationToken, async (PredownloadFile item, CancellationToken token) =>
@@ -485,7 +504,7 @@ internal class GameInstallService
         });
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start merging in mode patch, file count: {count}", context.GameId.GameBiz, context.TaskFiles?.Count);
-        context.State = GameInstallState.Merging;
+        EnterStage(context, GameInstallState.Merging);
         context.Progress_Percent = 0;
         double totalCount = context.TaskFiles?.Count ?? 1;
         double increase = 1 / totalCount;
@@ -547,7 +566,7 @@ internal class GameInstallService
         context.Progress_WriteFinishBytes = 0;
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode chunk", context.GameId.GameBiz);
-        context.State = GameInstallState.Downloading;
+        EnterStage(context, GameInstallState.Downloading);
         await Parallel.ForEachAsync(context.TaskFiles ?? [], cancellationToken, async (GameInstallFile file, CancellationToken token) =>
         {
             await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, true, token), token);
@@ -569,7 +588,7 @@ internal class GameInstallService
 
         context.Progress_DownloadTotalBytes = files.Sum(x => x.Size);
         context.Progress_DownloadFinishBytes = 0;
-        context.State = GameInstallState.Downloading;
+        EnterStage(context, GameInstallState.Downloading);
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode package", context.GameId.GameBiz);
         await Parallel.ForEachAsync(files, cancellationToken, async (PredownloadFile item, CancellationToken token) =>
@@ -578,7 +597,7 @@ internal class GameInstallService
         });
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start decompressing in mode package", context.GameId.GameBiz);
-        context.State = GameInstallState.Decompressing;
+        EnterStage(context, GameInstallState.Decompressing);
         context.Progress_Percent = 0;
         double totalSize = files.Sum(x => x.Size);
         foreach (GameInstallFile item in context.TaskFiles ?? [])
@@ -617,7 +636,7 @@ internal class GameInstallService
 
         context.Progress_DownloadTotalBytes = files.Sum(x => x.Size);
         context.Progress_DownloadFinishBytes = 0;
-        context.State = GameInstallState.Downloading;
+        EnterStage(context, GameInstallState.Downloading);
 
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode predownload", context.GameId.GameBiz);
         await Parallel.ForEachAsync(files, cancellationToken, async (PredownloadFile item, CancellationToken token) =>
@@ -670,7 +689,7 @@ internal class GameInstallService
             context.Progress_DownloadFinishBytes = 0;
 
             _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode single file", context.GameId.GameBiz);
-            context.State = GameInstallState.Downloading;
+            EnterStage(context, GameInstallState.Downloading);
             await Parallel.ForEachAsync(context.TaskFiles!, cancellationToken, async (GameInstallFile file, CancellationToken token) =>
             {
                 await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadToFileAsync(context, file, token), token);
@@ -848,6 +867,138 @@ internal class GameInstallService
         await File.WriteAllTextAsync(path, sb.ToString());
         _logger.LogInformation("GameInstallTask ({GameBiz}): Set config.ini, path: {path}", context.GameId.GameBiz, path);
     }
+
+
+
+
+    #region Telemetry
+
+
+
+    /// <summary>
+    /// 记录一轮运行开始（新任务或继续），并重置本轮计时与流量基线
+    /// </summary>
+    /// <param name="context">即将开始的任务</param>
+    private static void TrackStart(GameInstallContext context)
+    {
+        context.RunStartTimestamp = Stopwatch.GetTimestamp();
+        context.RunStartNetworkBytes = Interlocked.Read(ref context.networkDownloadBytes);
+        context.RunStage = GameInstallState.Waiting;
+        Telemetry.Track("task_start", context.GameId.GameBiz,
+            ("op", context.Operation),
+            ("txn", context.TransactionId),
+            ("start_status", context.TaskFiles is null ? "new" : "continue"),
+            ("prev_state", context.State),
+            ("audio", context.AudioLanguage),
+            ("hard_link", !string.IsNullOrWhiteSpace(context.HardLinkPath)));
+    }
+
+
+
+    /// <summary>
+    /// 记录准备阶段的结果：版本、build、下载方式与文件数
+    /// </summary>
+    /// <param name="context">已准备好的任务</param>
+    /// <param name="reused">true 表示沿用上一轮的文件清单，本轮没有重新拉取 build</param>
+    /// <param name="elapsed">准备耗时</param>
+    private static void TrackPrepared(GameInstallContext context, bool reused, TimeSpan elapsed)
+    {
+        Telemetry.Track("task_prepared", context.GameId.GameBiz,
+            ("op", context.Operation),
+            ("txn", context.TransactionId),
+            ("reused", reused),
+            ("duration_ms", elapsed),
+            ("mode", context.DownloadMode),
+            ("latest", context.LatestGameVersion),
+            ("local", context.LocalGameVersion),
+            ("predownload", context.PredownloadVersion),
+            ("build", context.GameSophonChunkBuild?.BuildId),
+            ("build_tag", context.GameSophonChunkBuild?.Tag),
+            ("local_build_tag", context.LocalVersionSophonChunkBuild?.Tag),
+            ("patch_build", context.GameSophonPatchBuild?.BuildId),
+            ("package", context.GamePackage?.Main.Major?.Version),
+            ("files", context.TaskFiles?.Count ?? 0),
+            ("files_done", context.TaskFiles?.Count(x => x.IsFinished) ?? 0),
+            ("write_bytes", context.TaskFiles?.Sum(x => x.Size) ?? 0));
+    }
+
+
+
+    /// <summary>
+    /// 进入下载 / 解压 / 合并阶段，并记录该阶段开始时的总量与已完成文件数
+    /// </summary>
+    /// <param name="context">当前任务</param>
+    /// <param name="stage">进入的阶段</param>
+    private static void EnterStage(GameInstallContext context, GameInstallState stage)
+    {
+        context.State = stage;
+        context.RunStage = stage;
+        Telemetry.Track("task_stage", context.GameId.GameBiz,
+            ("op", context.Operation),
+            ("txn", context.TransactionId),
+            ("stage", stage),
+            ("mode", context.DownloadMode),
+            ("download_total", context.Progress_DownloadTotalBytes),
+            ("write_total", context.Progress_WriteTotalBytes),
+            ("files", context.TaskFiles?.Count ?? 0),
+            ("files_done", context.TaskFiles?.Count(x => x.IsFinished) ?? 0));
+    }
+
+
+
+    /// <summary>
+    /// 记录一轮运行结束。结果取最终状态（Finish / Paused / Stop / Queueing / Error），并带本轮耗时、流量与进度
+    /// </summary>
+    /// <param name="context">刚结束的任务</param>
+    /// <param name="error">出错时的异常，取消或成功为 null</param>
+    private static void TrackEnd(GameInstallContext context, Exception? error)
+    {
+        TimeSpan elapsed = context.RunStartTimestamp > 0 ? Stopwatch.GetElapsedTime(context.RunStartTimestamp) : TimeSpan.Zero;
+        long network = Interlocked.Read(ref context.networkDownloadBytes) - context.RunStartNetworkBytes;
+        Telemetry.Track("task_end", context.GameId.GameBiz,
+            ("op", context.Operation),
+            ("txn", context.TransactionId),
+            ("result", context.State),
+            ("stage", context.RunStage),
+            ("duration_ms", elapsed),
+            ("network_bytes", network),
+            ("avg_speed", elapsed.TotalSeconds > 0 ? (long)(network / elapsed.TotalSeconds) : 0L),
+            ("download_finish", context.Progress_DownloadFinishBytes),
+            ("download_total", context.Progress_DownloadTotalBytes),
+            ("write_finish", context.Progress_WriteFinishBytes),
+            ("write_total", context.Progress_WriteTotalBytes),
+            ("files", context.TaskFiles?.Count ?? 0),
+            ("files_done", context.TaskFiles?.Count(x => x.IsFinished) ?? 0),
+            ("error_type", error?.GetType().Name),
+            ("error", error?.Message));
+    }
+
+
+
+    /// <summary>
+    /// 记录一次取消请求（暂停、停止、卸载、被抢占等）
+    /// </summary>
+    /// <param name="gameId">请求针对的游戏</param>
+    /// <param name="context">找到的任务，没找到为 null</param>
+    /// <param name="cancelState">取消后期望进入的状态</param>
+    /// <param name="source">取消来源：pause / stop / uninstall / replace / preempt / parent_exit</param>
+    internal static void TrackCancel(GameId gameId, GameInstallContext? context, GameInstallState cancelState, string source)
+    {
+        // running=false 时任务本就没在跑，Cancel 只会改 CancelState、不会改变任务状态
+        bool running = context?.State is GameInstallState.Waiting or GameInstallState.Downloading or GameInstallState.Decompressing or GameInstallState.Merging or GameInstallState.Verifying;
+        Telemetry.Track("task_cancel", gameId.GameBiz,
+            ("source", source),
+            ("cancel_state", cancelState),
+            ("found", context is not null),
+            ("op", context?.Operation),
+            ("txn", context?.TransactionId),
+            ("prev_state", context?.State),
+            ("running", running));
+    }
+
+
+
+    #endregion
 
 
 

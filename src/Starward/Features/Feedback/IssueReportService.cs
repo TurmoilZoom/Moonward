@@ -104,7 +104,7 @@ internal class IssueReportService
 
 
     /// <summary>
-    /// 打开当天日志所在文件夹，并尽量选中当前日志文件。
+    /// 打开当天日志所在文件夹，并尽量选中当前日志文件与当天的操作记录（<c>Events_yyyyMMdd.log</c>），方便一起拖进 Issue。
     /// </summary>
     private static async Task OpenLogFolderAsync()
     {
@@ -113,9 +113,14 @@ internal class IssueReportService
             string? folder = Path.GetDirectoryName(AppConfig.LogFile);
             if (!string.IsNullOrWhiteSpace(folder))
             {
-                var item = await StorageFile.GetFileFromPathAsync(AppConfig.LogFile);
                 var options = new FolderLauncherOptions();
-                options.ItemsToSelect.Add(item);
+                options.ItemsToSelect.Add(await StorageFile.GetFileFromPathAsync(AppConfig.LogFile));
+                // 操作记录按天滚动，文件名取今天；主日志的文件名在进程启动时就定了，常驻跨天后两者日期可能不同
+                string eventsFile = Path.Combine(folder, $"Events_{DateTime.Now:yyyyMMdd}.log");
+                if (File.Exists(eventsFile))
+                {
+                    options.ItemsToSelect.Add(await StorageFile.GetFileFromPathAsync(eventsFile));
+                }
                 await Launcher.LaunchFolderPathAsync(folder, options);
                 return;
             }

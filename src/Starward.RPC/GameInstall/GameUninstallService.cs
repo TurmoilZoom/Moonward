@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -31,43 +32,75 @@ internal class GameUninstallService
 
     public async Task UninstallGameAsync(UninstallGameRequest request, CancellationToken cancellationToken = default)
     {
-        string installPath = request.InstallPath;
-        if (!Directory.Exists(installPath))
-        {
-            _logger.LogWarning("Game folder does not exist: {installPath}", installPath);
-        }
-        if (Path.GetPathRoot(installPath) == installPath)
-        {
-            _logger.LogError("Game folder is the root of drive.");
-            throw new InvalidOperationException("Game folder is the root of drive.");
-        }
-        _logger.LogInformation("Start to uninstall game ({gameBiz}): {installPath}", request.GameBiz, installPath);
-        GameId gameId = new GameId { GameBiz = request.GameBiz, Id = request.GameId };
-        GameConfig? gameConfig = null;
+        long start = Stopwatch.GetTimestamp();
+        int fileCount = 0, screenshotCount = 0, cacheDirCount = 0;
+        bool gameConfigLoaded = false;
+        Exception? error = null;
         try
         {
-            gameConfig = await _hoYoPlayClient.GetGameConfigAsync(LauncherId.FromGameId(gameId)!, "en-us", gameId, cancellationToken);
+            string installPath = request.InstallPath;
+            if (!Directory.Exists(installPath))
+            {
+                _logger.LogWarning("Game folder does not exist: {installPath}", installPath);
+            }
+            if (Path.GetPathRoot(installPath) == installPath)
+            {
+                _logger.LogError("Game folder is the root of drive.");
+                throw new InvalidOperationException("Game folder is the root of drive.");
+            }
+            _logger.LogInformation("Start to uninstall game ({gameBiz}): {installPath}", request.GameBiz, installPath);
+            GameId gameId = new GameId { GameBiz = request.GameBiz, Id = request.GameId };
+            GameConfig? gameConfig = null;
+            try
+            {
+                gameConfig = await _hoYoPlayClient.GetGameConfigAsync(LauncherId.FromGameId(gameId)!, "en-us", gameId, cancellationToken);
+                gameConfigLoaded = gameConfig is not null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get game config.");
+            }
+            string[] files = Directory.GetFiles(installPath, "*", SearchOption.AllDirectories);
+            fileCount = files.Length;
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+            }
+            screenshotCount = BackupScreenshot(request, gameConfig);
+            _logger.LogInformation("Deleting folder {installPath} ({count} files).", installPath, files.Length);
+            Directory.Delete(installPath, true);
+            cacheDirCount = ClearCacheDir(request, gameConfig);
+            _logger.LogInformation("Finished uninstall game ({gameBiz}): {installPath}", request.GameBiz, installPath);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get game config.");
+            error = ex;
+            throw;
         }
-        string[] files = Directory.GetFiles(installPath, "*", SearchOption.AllDirectories);
-        foreach (string file in files)
+        finally
         {
-            File.SetAttributes(file, FileAttributes.Normal);
+            Telemetry.Track("uninstall_end", request.GameBiz,
+                ("result", error is null ? "success" : "error"),
+                ("duration_ms", Stopwatch.GetElapsedTime(start)),
+                ("files", fileCount),
+                ("screenshots", screenshotCount),
+                ("cache_dirs", cacheDirCount),
+                ("game_config", gameConfigLoaded),
+                ("error_type", error?.GetType().Name),
+                ("error", error?.Message));
         }
-        BackupScreenshot(request, gameConfig);
-        _logger.LogInformation("Deleting folder {installPath} ({count} files).", installPath, files.Length);
-        Directory.Delete(installPath, true);
-        ClearCacheDir(request, gameConfig);
-        _logger.LogInformation("Finished uninstall game ({gameBiz}): {installPath}", request.GameBiz, installPath);
     }
 
 
 
 
-    private void BackupScreenshot(UninstallGameRequest request, GameConfig? gameConfig)
+    /// <summary>
+    /// 删除前把游戏截图备份到截图目录（同盘 NTFS 优先硬链接）
+    /// </summary>
+    /// <param name="request">卸载请求</param>
+    /// <param name="gameConfig">游戏配置，取截图目录；为 null 时在安装目录里找 Screenshot*</param>
+    /// <returns>本次新备份的截图数</returns>
+    private int BackupScreenshot(UninstallGameRequest request, GameConfig? gameConfig)
     {
         string userDataFolder = request.UserDataFolder;
         string sourceScreenshotFolder;
@@ -127,17 +160,26 @@ internal class GameUninstallService
                 }
             }
             _logger.LogInformation("Backed up {count} screenshots.", count);
+            return count;
         }
+        return 0;
     }
 
 
 
-    private void ClearCacheDir(UninstallGameRequest request, GameConfig? gameConfig)
+    /// <summary>
+    /// 清理游戏在安装目录外生成的日志与崩溃文件目录（路径须含厂商名，防止误删）
+    /// </summary>
+    /// <param name="request">卸载请求</param>
+    /// <param name="gameConfig">游戏配置，为 null 时不清理</param>
+    /// <returns>删除的目录数</returns>
+    private int ClearCacheDir(UninstallGameRequest request, GameConfig? gameConfig)
     {
         if (gameConfig is null)
         {
-            return;
+            return 0;
         }
+        int count = 0;
         if (!string.IsNullOrWhiteSpace(gameConfig.GameLogGenDir))
         {
             string path = Environment.ExpandEnvironmentVariables(gameConfig.GameLogGenDir);
@@ -150,6 +192,7 @@ internal class GameUninstallService
                     if (Directory.Exists(path))
                     {
                         Directory.Delete(path, true);
+                        count++;
                         _logger.LogInformation("Deleted folder {path}", path);
                     }
                 }
@@ -168,11 +211,13 @@ internal class GameUninstallService
                     if (Directory.Exists(path))
                     {
                         Directory.Delete(path, true);
+                        count++;
                         _logger.LogInformation("Deleted folder {path}", path);
                     }
                 }
             }
         }
+        return count;
     }
 
 

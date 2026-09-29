@@ -56,8 +56,13 @@ body:
   - type: upload
     id: log_file
     attributes:
-      label: 日志文件 / Log file
-      description: 请上传当天的日志文件（.log / .txt）。可在设置 → 文件管理 → 打开日志文件夹中找到。
+      label: 日志文件 / Log files
+      description: |
+        请把问题发生当天的**两个文件一起上传**（可一次选多个）：
+        - `Moonward_yyMMdd.log`：运行日志，例如 `Moonward_260929.log`
+        - `Events_yyyyMMdd.log`：操作记录，例如 `Events_20260929.log`，记录下载、暂停、继续、卸载等操作及任务结果，用来还原操作过程；不含账号或 Cookie，报错原文里可能带有文件路径。当天没有这个文件就不用传。
+
+        位置：设置 → 数据管理 → 日志文件夹（点右侧按钮打开）。从应用内「反馈问题」进入时，文件夹会自动打开并选中当天的文件。
     validations:
       required: false
 

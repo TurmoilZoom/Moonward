@@ -11,6 +11,7 @@ using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
 using Starward.Features.HoYoPlay;
 using Starward.Helpers;
+using Starward.RPC;
 using Starward.RPC.GameInstall;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,7 @@ public sealed partial class InstallGameDialog : ContentDialog
             this.Hide();
             return;
         }
+        Telemetry.Track("install_dialog_show", CurrentGameId.GameBiz);
         SetDefaultInstallationPath();
         _ = GetGamePackageAsync();
     }
@@ -421,9 +423,19 @@ public sealed partial class InstallGameDialog : ContentDialog
     {
         try
         {
+            Telemetry.Track("install_dialog_click", CurrentGameId.GameBiz,
+                ("button", "install"),
+                ("mode", _gameSophonChunkBuild is not null ? "chunk" : _gamePackage is not null ? "package" : null),
+                ("audio", _audioLanguage),
+                ("disk_type", DriveHelper.GetDiskMediaType(InstallationPath)),
+                ("drive_format", DriveHelper.GetDriveFormat(InstallationPath)),
+                ("required_bytes", UnzipSpaceBytes),
+                ("available_bytes", AvailableSpaceBytes),
+                ("subfolder", AutomaticallyCreateSubfolderForInstall));
             GameInstallContext? task = await _gameInstallService.StartInstallAsync(CurrentGameId, InstallationPath, _audioLanguage);
             if (task is not null && task.State is not GameInstallState.Stop and not GameInstallState.Error)
             {
+                _installStarted = true;
                 GameLauncherService.ChangeGameInstallPath(CurrentGameId, InstallationPath);
                 WeakReferenceMessenger.Default.Send(new GameInstallTaskStartedMessage(task));
                 if (_selectPath is not null && InstallationPath.EndsWith(CurrentGameId.GameBiz))
@@ -443,9 +455,22 @@ public sealed partial class InstallGameDialog : ContentDialog
 
 
 
+    /// <summary>
+    /// 安装已发起；之后的关闭是程序自动关，不计入用户点击
+    /// </summary>
+    private bool _installStarted;
+
+
+    /// <summary>
+    /// 关闭对话框
+    /// </summary>
     [RelayCommand]
     private void Close()
     {
+        if (!_installStarted)
+        {
+            Telemetry.Track("install_dialog_click", CurrentGameId?.GameBiz.ToString(), ("button", "close"));
+        }
         this.Hide();
     }
 

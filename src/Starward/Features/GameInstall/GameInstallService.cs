@@ -257,13 +257,23 @@ internal class GameInstallService
                 AudioLanguage: {audioLanguage}
                 HardLinkPath: {hardLinkPath}
                 """, operation, gameId.Id, gameId.GameBiz, installPath, audioLanguage, request.HardLinkPath);
-            var dto = await _gameInstallerClient.StartOrContinueTaskAsync(request, deadline: DateTime.UtcNow.AddSeconds(3));
+            GameInstallContextDTO dto;
+            try
+            {
+                dto = await _gameInstallerClient.StartOrContinueTaskAsync(request, deadline: DateTime.UtcNow.AddSeconds(3));
+            }
+            catch (Exception ex)
+            {
+                TrackRpcFailed("start", gameId, operation, ex);
+                throw;
+            }
             StartUpdateTaskProgress();
             return AddOrUpdateTask(dto);
         }
         else
         {
             _logger.LogInformation("RPC server is not running, can't start game install task ({GameBiz}, {Operation}).", gameId.GameBiz, operation);
+            TrackRpcFailed("start", gameId, operation);
             return null;
         }
     }
@@ -277,12 +287,22 @@ internal class GameInstallService
             var request = GameInstallRequest.FromTask(task);
             await _rpcService.EnsureRpcServerRunningAsync();
             _logger.LogInformation("Pause game install task: {gameId} {gameBiz}", task.GameId.Id, task.GameId.GameBiz);
-            var dto = await _gameInstallerClient.PauseTaskAsync(request, deadline: DateTime.UtcNow.AddSeconds(3));
+            GameInstallContextDTO dto;
+            try
+            {
+                dto = await _gameInstallerClient.PauseTaskAsync(request, deadline: DateTime.UtcNow.AddSeconds(3));
+            }
+            catch (Exception ex)
+            {
+                TrackRpcFailed("pause", task.GameId, task.Operation, ex);
+                throw;
+            }
             task = AddOrUpdateTask(dto);
             StartUpdateTaskProgress();
         }
         else
         {
+            TrackRpcFailed("pause", task.GameId, task.Operation);
             task.State = GameInstallState.Stop;
             task.ErrorMessage = Lang.RPCServiceExitedUnexpectedly;
         }
@@ -297,9 +317,22 @@ internal class GameInstallService
         if (await _rpcService.EnsureRpcServerRunningAsync())
         {
             _logger.LogInformation("Continue game install task: {gameId} {gameBiz}", task.GameId.Id, task.GameId.GameBiz);
-            var dto = await _gameInstallerClient.StartOrContinueTaskAsync(request, deadline: DateTime.UtcNow.AddSeconds(3));
+            GameInstallContextDTO dto;
+            try
+            {
+                dto = await _gameInstallerClient.StartOrContinueTaskAsync(request, deadline: DateTime.UtcNow.AddSeconds(3));
+            }
+            catch (Exception ex)
+            {
+                TrackRpcFailed("continue", task.GameId, task.Operation, ex);
+                throw;
+            }
             task = AddOrUpdateTask(dto);
             StartUpdateTaskProgress();
+        }
+        else
+        {
+            TrackRpcFailed("continue", task.GameId, task.Operation);
         }
         return task;
     }
@@ -313,12 +346,22 @@ internal class GameInstallService
             var request = GameInstallRequest.FromTask(task);
             await _rpcService.EnsureRpcServerRunningAsync();
             _logger.LogInformation("Stop game install task: {gameId} {gameBiz}", task.GameId.Id, task.GameId.GameBiz);
-            var dto = await _gameInstallerClient.StopTaskAsync(request, deadline: DateTime.UtcNow.AddSeconds(3));
+            GameInstallContextDTO dto;
+            try
+            {
+                dto = await _gameInstallerClient.StopTaskAsync(request, deadline: DateTime.UtcNow.AddSeconds(3));
+            }
+            catch (Exception ex)
+            {
+                TrackRpcFailed("stop", task.GameId, task.Operation, ex);
+                throw;
+            }
             task = AddOrUpdateTask(dto);
             StartUpdateTaskProgress();
         }
         else
         {
+            TrackRpcFailed("stop", task.GameId, task.Operation);
             task.State = GameInstallState.Stop;
             task.ErrorMessage = Lang.RPCServiceExitedUnexpectedly;
         }
@@ -359,6 +402,25 @@ internal class GameInstallService
         {
             return false;
         }
+    }
+
+
+
+    /// <summary>
+    /// 记录调用 RPC 失败（服务没起来或调用抛异常）；调用成功时由 RPC 进程自己记录任务事件
+    /// </summary>
+    /// <param name="call">调用：start / pause / continue / stop</param>
+    /// <param name="gameId">任务对应的游戏</param>
+    /// <param name="operation">任务操作</param>
+    /// <param name="error">调用异常；为 null 表示 RPC 服务不可用</param>
+    private static void TrackRpcFailed(string call, GameId gameId, GameInstallOperation operation, Exception? error = null)
+    {
+        Telemetry.Track("install_rpc_failed", gameId.GameBiz,
+            ("call", call),
+            ("op", operation),
+            ("reason", error is null ? "rpc_unavailable" : "error"),
+            ("error_type", error?.GetType().Name),
+            ("error", error?.Message));
     }
 
 
