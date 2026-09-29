@@ -1535,15 +1535,6 @@
   <data name="SwitchClientPage_FileVerificationFailedPleaseTryToRepairGameResources" xml:space="preserve">
     <value>Проверка файлов не удалась. Пожалуйста, попробуйте восстановить игровые ресурсы.</value>
   </data>
-  <data name="GameResourcePage_LatestVersion" xml:space="preserve">
-    <value>Последняя Версия</value>
-  </data>
-  <data name="GameResourcePage_FullPackages" xml:space="preserve">
-    <value>Полный Пакет</value>
-  </data>
-  <data name="GameResourcePage_DiffPackages" xml:space="preserve">
-    <value>Различные Пакеты</value>
-  </data>
   <data name="SwitchClientPage_TheTowFoldersExistAtTheSameTime" xml:space="preserve">
     <value>Папки YuanShen_Data и GenshinImpact_Data не могут существовать одновременно.</value>
   </data>
@@ -1816,9 +1807,6 @@
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>Переместить игру</value>
   </data>
-  <data name="GameLauncherSettingDialog_Size" xml:space="preserve">
-    <value>Размер</value>
-  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Базовая Информация</value>
   </data>
@@ -1827,9 +1815,6 @@
   </data>
   <data name="GameLauncherSettingDialog_CustomBackground" xml:space="preserve">
     <value>Пользовательский фон</value>
-  </data>
-  <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
-    <value>Игровые пакеты</value>
   </data>
   <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
     <value>Быстрый запуск</value>
@@ -4182,5 +4167,59 @@ ChatGPT может допускать ошибки. Проверьте важн�
   </data>
   <data name="DiskTypeBadge_Network" xml:space="preserve">
     <value>Сеть</value>
+  </data>
+  <data name="GameLauncherSettingDialog_VersionInfo" xml:space="preserve">
+    <value>Информация о версии</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalVersion" xml:space="preserve">
+    <value>Локальная версия</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LatestVersion" xml:space="preserve">
+    <value>Последняя версия</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpToDate" xml:space="preserve">
+    <value>Актуальна</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpdateAvailable" xml:space="preserve">
+    <value>Доступно обновление</value>
+  </data>
+  <data name="GameLauncherSettingDialog_IncrementalPatch" xml:space="preserve">
+    <value>Инкрементальный патч</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ChunkCompare" xml:space="preserve">
+    <value>Сравнение по блокам</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PatchFromVersions" xml:space="preserve">
+    <value>Доступно при обновлении с {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NoPatch" xml:space="preserve">
+    <value>Нет, при обновлении загружаются изменённые блоки</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadFinished" xml:space="preserve">
+    <value>Завершена</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadNotFinished" xml:space="preserve">
+    <value>Не завершена</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeCheck" xml:space="preserve">
+    <value>Исполняемый файл игры</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMatches" xml:space="preserve">
+    <value>Совпадает с {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMismatch" xml:space="preserve">
+    <value>Не совпадает с локальной версией, определён как {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeUnknown" xml:space="preserve">
+    <value>Нет в официальных записях</value>
+  </data>
+  <data name="GameLauncherSettingDialog_FullResources" xml:space="preserve">
+    <value>Полные ресурсы</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ResourceSizeWithAudio" xml:space="preserve">
+    <value>{0} (включая голосовые пакеты {1})</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
+    <value>Занято на диске</value>
   </data>
 </root>

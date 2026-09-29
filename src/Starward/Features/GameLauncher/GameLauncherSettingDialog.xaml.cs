@@ -25,6 +25,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -79,15 +80,12 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         WeakReferenceMessenger.Default.Register<AccentColorChangedMessage>(this, OnAccentColorChanged);
         CheckCanRepairGame();
         await InitializeBasicInfoAsync();
-        await InitializeGamePackagesAsync();
     }
 
 
     private void GameLauncherSettingDialog_Unloaded(object sender, RoutedEventArgs e)
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
-        LatestPackageGroups = null!;
-        PreInstallPackageGroups = null!;
     }
 
 
@@ -177,6 +175,8 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
                 UninstallAndRepairEnabled = false;
             }
             await InitializeAudioLanguageAsync();
+            // 版本信息要联网，不阻塞卸载、定位等等待基本信息刷新完的操作
+            _ = InitializeVersionInfoAsync();
         }
         catch (Exception ex)
         {
@@ -193,8 +193,19 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
             return null;
         }
         var size = new DirectoryInfo(path).EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length);
-        var gb = (double)size / (1 << 30);
-        return $"{gb:F2}GB";
+        return FormatSize(size);
+    }
+
+
+
+    /// <summary>
+    /// 字节数格式化为 GB（按 1024 进位，与目录大小的显示一致）
+    /// </summary>
+    /// <param name="bytes">字节数</param>
+    /// <returns></returns>
+    private static string FormatSize(long bytes)
+    {
+        return $"{(double)bytes / (1 << 30):F2}GB";
     }
 
 
@@ -555,261 +566,309 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
 
-    #region 游戏包体
+    #region 版本信息
 
 
 
     /// <summary>
-    /// 最新版本
+    /// 每次刷新版本信息时递增，异步结果回来时与之比对，丢弃被新一轮刷新取代的旧结果
     /// </summary>
-    public string LatestVersion { get; set => SetProperty(ref field, value); }
+    private int _versionInfoToken;
+
+    /// <summary>本地版本（config.ini 的 game_version）；未定位游戏时为 <see langword="null"/></summary>
+    private string? _localVersionText;
+
+    /// <summary>最新版本</summary>
+    private string? _latestVersionText;
+
+    /// <summary>最新版本旁的更新状态标签</summary>
+    private string? _updateStatus;
+
+    /// <summary>预下载版本</summary>
+    private string? _predownloadVersionText;
+
+    /// <summary>预下载版本旁的完成状态标签</summary>
+    private string? _predownloadStatus;
+
+    /// <summary>可用增量补丁的起点版本</summary>
+    private string? _patchText;
+
+    /// <summary>主程序 MD5 与官方各版本记录的比对结果</summary>
+    private string? _exeCheckText;
+
+    /// <summary>主程序与本地版本不符或不在官方记录中</summary>
+    private bool _exeCheckWarning;
+
+    /// <summary>最新版本完整资源的解压后大小（含已装语音包）</summary>
+    private string? _fullResourceText;
 
     /// <summary>
-    /// 最新版本包体
+    /// 版本信息的各行，只含取到数据的项；一项都没有时为 <see langword="null"/>，整块隐藏
     /// </summary>
-    public List<PackageGroup> LatestPackageGroups { get; set => SetProperty(ref field, value); }
+    public List<GameVersionInfoRow>? VersionInfoRows { get; set => SetProperty(ref field, value); }
+
+
 
     /// <summary>
-    /// 预下载版本
+    /// 刷新版本信息。各项独立获取，某项取不到时只隐藏对应的行。
     /// </summary>
-    public string PreInstallVersion { get; set => SetProperty(ref field, value); }
-
-    /// <summary>
-    /// 预下载版本包体
-    /// </summary>
-    public List<PackageGroup> PreInstallPackageGroups { get; set => SetProperty(ref field, value); }
-
-
-
-
-    private async Task InitializeGamePackagesAsync()
+    /// <returns></returns>
+    private async Task InitializeVersionInfoAsync()
     {
+        int token = ++_versionInfoToken;
+        string? installPath = InstallPath;
+        _localVersionText = null;
+        _latestVersionText = null;
+        _updateStatus = null;
+        _predownloadVersionText = null;
+        _predownloadStatus = null;
+        _patchText = null;
+        _exeCheckText = null;
+        _exeCheckWarning = false;
+        _fullResourceText = null;
+
+        Version? localVersion = null;
+        GameBranch? branch = null;
         try
         {
-            GamePackage? gamePackage = await _hoyoPlayService.GetGamePackageAsync(CurrentGameId);
-            if (gamePackage?.Main.Major is null)
+            if (installPath is not null)
             {
-                // 已在启动器中展示、但尚未发布安装包的游戏（如星布谷地、崩坏：因缘精灵）不在 getGamePackages 的返回中，没有包体可展示
-                _logger.LogInformation("Game package is not available, gameBiz: {gameBiz}", CurrentGameBiz);
-                Pivot_GamePackages.Visibility = Visibility.Collapsed;
-                TextBlock_NoGamePackage.Visibility = Visibility.Visible;
+                localVersion = await _gameLauncherService.GetLocalGameVersionAsync(CurrentGameId, installPath);
+                if (token != _versionInfoToken)
+                {
+                    return;
+                }
+                // 已定位但没有 config.ini（例如下载到一半）时显示占位，与「未定位游戏」区分
+                _localVersionText = localVersion?.ToString() ?? "-";
+            }
+            GameConfig? config = await _hoyoPlayService.GetGameConfigAsync(CurrentGameId);
+            if (config?.DefaultDownloadMode is DownloadMode.DOWNLOAD_MODE_CHUNK or DownloadMode.DOWNLOAD_MODE_LDIFF)
+            {
+                branch = await _hoyoPlayService.GetGameBranchAsync(CurrentGameId);
+            }
+            if (token != _versionInfoToken)
+            {
                 return;
             }
-            LatestVersion = gamePackage.Main.Major.Version;
-            var list = GetGameResourcePackageGroups(gamePackage.Main);
-            var sdk = await _hoyoPlayService.GetGameChannelSDKAsync(CurrentGameId);
-            if (sdk is not null)
-            {
-                list.Add(new PackageGroup
-                {
-                    Name = "Channel SDK",
-                    Items = [new PackageItem
-                    {
-                        FileName = Path.GetFileName(sdk.ChannelSDKPackage.Url),
-                        Url = sdk.ChannelSDKPackage.Url,
-                        Md5 = sdk.ChannelSDKPackage.MD5,
-                        PackageSize = sdk.ChannelSDKPackage.Size,
-                        DecompressSize = sdk.ChannelSDKPackage.DecompressedSize,
-                    }],
-                });
-            }
-            // todo plugin
-            LatestPackageGroups = list;
-            if (!string.IsNullOrWhiteSpace(gamePackage.PreDownload?.Major?.Version))
-            {
-                PreInstallVersion = gamePackage.PreDownload.Major.Version;
-                PreInstallPackageGroups = GetGameResourcePackageGroups(gamePackage.PreDownload);
-            }
+            await InitializeLatestVersionAsync(token, installPath, localVersion, branch);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Get game resource failed, gameBiz: {gameBiz}", CurrentGameBiz);
+            _logger.LogWarning(ex, "Initialize version info ({biz})", CurrentGameBiz);
+        }
+        if (token != _versionInfoToken)
+        {
+            return;
+        }
+        // 对话框高度随行数变化，行分两批出现以减少跳动：先显示版本，主程序校验与完整资源并行取完后再补上
+        RefreshVersionInfoRows();
+        await Task.WhenAll(InitializeExeCheckAsync(token, installPath, localVersion), InitializeFullResourceSizeAsync(token, installPath, branch));
+        if (token == _versionInfoToken)
+        {
+            RefreshVersionInfoRows();
         }
     }
 
 
 
-    private List<PackageGroup> GetGameResourcePackageGroups(GamePackageVersion gameResource)
+    /// <summary>
+    /// 最新版本、更新方式、预下载与增量补丁。
+    /// </summary>
+    /// <param name="token">本轮刷新的标记</param>
+    /// <param name="installPath">游戏安装目录，未定位时为 <see langword="null"/></param>
+    /// <param name="localVersion">本地版本</param>
+    /// <param name="branch">Chunk 模式的游戏分支，压缩包模式或未发布安装包时为 <see langword="null"/></param>
+    /// <returns></returns>
+    private async Task InitializeLatestVersionAsync(int token, string? installPath, Version? localVersion, GameBranch? branch)
     {
-        var list = new List<PackageGroup>();
-        var fullPackageGroup = new PackageGroup
+        (Version? latestVersion, Version? predownloadVersion) = await _gameLauncherService.GetLatestGameVersionAsync(CurrentGameId);
+        if (token != _versionInfoToken)
         {
-            Name = Lang.GameResourcePage_FullPackages,
-            Items = new List<PackageItem>()
-        };
-        foreach (var item in gameResource.Major?.GamePackages ?? [])
-        {
-            fullPackageGroup.Items.Add(new PackageItem
-            {
-                FileName = Path.GetFileName(item.Url),
-                Url = item.Url,
-                Md5 = item.MD5,
-                PackageSize = item.Size,
-                DecompressSize = item.DecompressedSize,
-            });
+            return;
         }
-        foreach (var item in gameResource.Major?.AudioPackages ?? [])
+        _latestVersionText = latestVersion?.ToString();
+        if (latestVersion is not null && localVersion is not null)
         {
-            fullPackageGroup.Items.Add(new PackageItem
+            string status;
+            if (localVersion >= latestVersion)
             {
-                FileName = Path.GetFileName(item.Url),
-                Url = item.Url,
-                Md5 = item.MD5,
-                PackageSize = item.Size,
-                DecompressSize = item.DecompressedSize,
-            });
-        }
-        list.Add(fullPackageGroup);
-
-        foreach (var patch in gameResource.Patches ?? [])
-        {
-            var diffPackageGroup = new PackageGroup
-            {
-                Name = $"{Lang.GameResourcePage_DiffPackages}  {patch.Version}",
-                Items = new List<PackageItem>()
-            };
-            foreach (var item in patch.GamePackages ?? [])
-            {
-                diffPackageGroup.Items.Add(new PackageItem
-                {
-                    FileName = Path.GetFileName(item.Url),
-                    Url = item.Url,
-                    Md5 = item.MD5,
-                    PackageSize = item.Size,
-                    DecompressSize = item.DecompressedSize,
-                });
+                status = Lang.GameLauncherSettingDialog_UpToDate;
             }
-            foreach (var item in patch.AudioPackages ?? [])
+            else if (branch is null)
             {
-                diffPackageGroup.Items.Add(new PackageItem
-                {
-                    FileName = Path.GetFileName(item.Url),
-                    Url = item.Url,
-                    Md5 = item.MD5,
-                    PackageSize = item.Size,
-                    DecompressSize = item.DecompressedSize,
-                });
-            }
-            list.Add(diffPackageGroup);
-        }
-        return list;
-    }
-
-
-
-    private async void Button_CopyUrl_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        try
-        {
-            if (sender is Button button)
-            {
-                if (button.DataContext is PackageGroup group)
-                {
-                    if (group.Items is not null)
-                    {
-                        var sb = new StringBuilder();
-                        foreach (var item in group.Items)
-                        {
-                            if (!string.IsNullOrEmpty(item.Url))
-                            {
-                                sb.AppendLine(item.Url);
-                            }
-                        }
-                        string url = sb.ToString().TrimEnd();
-                        if (!string.IsNullOrWhiteSpace(url))
-                        {
-                            ClipboardHelper.SetText(url);
-                            await CopySuccessAsync(button);
-                        }
-                    }
-                }
-                if (button.DataContext is PackageItem package)
-                {
-                    if (!string.IsNullOrEmpty(package.Url))
-                    {
-                        ClipboardHelper.SetText(package.Url);
-                        await CopySuccessAsync(button);
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Copy url failed");
-        }
-    }
-
-
-
-    private async Task CopySuccessAsync(Button button)
-    {
-        try
-        {
-            button.IsEnabled = false;
-            if (button.Content is FontIcon icon)
-            {
-                // Accpet
-                icon.Glyph = "\uF78C";
-                await Task.Delay(1000);
-            }
-        }
-        finally
-        {
-            button.IsEnabled = true;
-            if (button.Content is FontIcon icon)
-            {
-                // Link
-                icon.Glyph = "\uE71B";
-            }
-        }
-    }
-
-
-
-
-    public class PackageGroup
-    {
-        public string Name { get; set; }
-
-        public List<PackageItem> Items { get; set; }
-    }
-
-
-
-    public class PackageItem
-    {
-        public string FileName { get; set; }
-
-        public string Url { get; set; }
-
-        public string Md5 { get; set; }
-
-        public long PackageSize { get; set; }
-
-        public long DecompressSize { get; set; }
-
-        public string PackageSizeString => GetSizeString(PackageSize);
-
-        public string DecompressSizeString => GetSizeString(DecompressSize);
-
-        private string GetSizeString(long size)
-        {
-            const double KB = 1 << 10;
-            const double MB = 1 << 20;
-            const double GB = 1 << 30;
-            if (size >= GB)
-            {
-                return $"{size / GB:F2} GB";
-            }
-            else if (size >= MB)
-            {
-                return $"{size / MB:F2} MB";
+                status = Lang.GameLauncherSettingDialog_UpdateAvailable;
             }
             else
             {
-                return $"{size / KB:F2} KB";
+                // 与更新任务的判断一致：本地版本在 diff_tags 里才有 ldiff 补丁，否则按块比对下载
+                bool canPatch = branch.Main.DiffTags.Any(x => x == localVersion.ToString());
+                status = $"{Lang.GameLauncherSettingDialog_UpdateAvailable} · {(canPatch ? Lang.GameLauncherSettingDialog_IncrementalPatch : Lang.GameLauncherSettingDialog_ChunkCompare)}";
+            }
+            _updateStatus = status;
+        }
+        if (branch is not null)
+        {
+            _patchText = branch.Main.DiffTags is { Count: > 0 } tags
+                ? string.Format(Lang.GameLauncherSettingDialog_PatchFromVersions, string.Join(", ", tags))
+                : Lang.GameLauncherSettingDialog_NoPatch;
+        }
+        if (predownloadVersion is not null && (localVersion is null || predownloadVersion > localVersion))
+        {
+            _predownloadVersionText = predownloadVersion.ToString();
+            if (installPath is not null && localVersion is not null)
+            {
+                bool finished = await _gamePackageService.CheckPreDownloadFinishedAsync(CurrentGameId, installPath);
+                if (token != _versionInfoToken)
+                {
+                    return;
+                }
+                _predownloadStatus = finished ? Lang.GameLauncherSettingDialog_PredownloadFinished : Lang.GameLauncherSettingDialog_PredownloadNotFinished;
             }
         }
+    }
+
+
+
+    /// <summary>
+    /// 用官方记录的各版本主程序 MD5 校验本地主程序，能发现 config.ini 版本号与实际文件不符（例如手动覆盖过文件）。
+    /// 官方没有该游戏的记录（如崩坏3）或主程序不存在时不显示。
+    /// </summary>
+    /// <param name="token">本轮刷新的标记</param>
+    /// <param name="installPath">游戏安装目录</param>
+    /// <param name="localVersion">本地版本</param>
+    /// <returns></returns>
+    private async Task InitializeExeCheckAsync(int token, string? installPath, Version? localVersion)
+    {
+        try
+        {
+            if (installPath is null)
+            {
+                return;
+            }
+            string exe = Path.Join(installPath, await _gameLauncherService.GetGameExeNameAsync(CurrentGameId));
+            if (!File.Exists(exe))
+            {
+                return;
+            }
+            GameScanInfo? scanInfo = await _hoyoPlayService.GetGameScanInfoAsync(CurrentGameId);
+            if (scanInfo?.GameExeList is not { Count: > 0 } exeList)
+            {
+                return;
+            }
+            string md5 = await Task.Run(async () =>
+            {
+                using FileStream fs = File.OpenRead(exe);
+                return Convert.ToHexStringLower(await MD5.HashDataAsync(fs));
+            });
+            if (token != _versionInfoToken)
+            {
+                return;
+            }
+            GameScanInfoExe? matched = exeList.FirstOrDefault(x => string.Equals(x.MD5, md5, StringComparison.OrdinalIgnoreCase));
+            if (matched is null)
+            {
+                _exeCheckText = Lang.GameLauncherSettingDialog_ExeUnknown;
+                _exeCheckWarning = true;
+            }
+            else if (localVersion is null || (Version.TryParse(matched.Version, out Version? exeVersion) && exeVersion == localVersion))
+            {
+                _exeCheckText = string.Format(Lang.GameLauncherSettingDialog_ExeMatches, matched.Version);
+                _exeCheckWarning = false;
+            }
+            else
+            {
+                _exeCheckText = string.Format(Lang.GameLauncherSettingDialog_ExeMismatch, matched.Version);
+                _exeCheckWarning = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Check game exe ({biz})", CurrentGameBiz);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 最新版本完整资源的解压后大小：全部非语音分类，加上本地已装的语音包。
+    /// </summary>
+    /// <param name="token">本轮刷新的标记</param>
+    /// <param name="installPath">游戏安装目录，未定位时只统计非语音分类</param>
+    /// <param name="branch">Chunk 模式的游戏分支</param>
+    /// <returns></returns>
+    private async Task InitializeFullResourceSizeAsync(int token, string? installPath, GameBranch? branch)
+    {
+        try
+        {
+            if (branch is null)
+            {
+                return;
+            }
+            GameSophonChunkBuild? build = await _hoyoPlayService.GetGameSophonChunkBuildAsync(branch, branch.Main);
+            if (build is null)
+            {
+                return;
+            }
+            long gameSize = 0;
+            foreach (GameSophonChunkManifest manifest in build.Manifests)
+            {
+                if (manifest.MatchingField.Length is 5 or 10 && manifest.MatchingField.Contains('-'))
+                {
+                    // 跳过语音包 zh-cn or mini-zh-cn，与安装时的分类选取一致
+                    continue;
+                }
+                gameSize += manifest.Stats.UncompressedSize;
+            }
+            long audioSize = 0;
+            if (installPath is not null)
+            {
+                AudioLanguage audioLanguage = await _gamePackageService.GetAudioLanguageAsync(CurrentGameId, installPath);
+                foreach (AudioLanguage lang in (AudioLanguage[])[AudioLanguage.Chinese, AudioLanguage.English, AudioLanguage.Japanese, AudioLanguage.Korean])
+                {
+                    if (audioLanguage.HasFlag(lang) && build.Manifests.FirstOrDefault(x => x.MatchingField == lang.ToDescription()) is GameSophonChunkManifest audioManifest)
+                    {
+                        audioSize += audioManifest.Stats.UncompressedSize;
+                    }
+                }
+            }
+            if (token != _versionInfoToken)
+            {
+                return;
+            }
+            _fullResourceText = audioSize > 0
+                ? string.Format(Lang.GameLauncherSettingDialog_ResourceSizeWithAudio, FormatSize(gameSize + audioSize), FormatSize(audioSize))
+                : FormatSize(gameSize);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get full resource size ({biz})", CurrentGameBiz);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 按当前取到的数据重建版本信息的各行。数据分两批异步到达，每到一批重建一次；
+    /// 只有前面有行时才画分隔线，这样隐藏的项不会留下多余的线。
+    /// </summary>
+    private void RefreshVersionInfoRows()
+    {
+        var rows = new List<GameVersionInfoRow>();
+        void Add(string label, string? value, string? badge = null, bool isWarning = false)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                rows.Add(new GameVersionInfoRow { Label = label, Value = value, Badge = badge, IsWarning = isWarning, ShowDivider = rows.Count > 0 });
+            }
+        }
+        Add(Lang.GameLauncherSettingDialog_LocalVersion, _localVersionText);
+        Add(Lang.GameLauncherSettingDialog_LatestVersion, _latestVersionText, _updateStatus);
+        Add(Lang.LauncherPage_PreInstall, _predownloadVersionText, _predownloadStatus);
+        Add(Lang.GameLauncherSettingDialog_IncrementalPatch, _patchText);
+        Add(Lang.GameLauncherSettingDialog_ExeCheck, _exeCheckText, isWarning: _exeCheckWarning);
+        Add(Lang.GameLauncherSettingDialog_FullResources, _fullResourceText);
+        Add(Lang.GameLauncherSettingDialog_LocalSize, GameSize);
+        VersionInfoRows = rows.Count > 0 ? rows : null;
     }
 
 
@@ -828,5 +887,44 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         }
     }
 
+
+}
+
+
+
+/// <summary>
+/// 游戏设置对话框版本信息中的一行。XAML 类型信息会为它生成无参构造与属性 setter，所以不能用 required / init。
+/// </summary>
+public sealed class GameVersionInfoRow
+{
+
+    /// <summary>
+    /// 左侧标签
+    /// </summary>
+    public string Label { get; set; } = "";
+
+    /// <summary>
+    /// 右侧取值
+    /// </summary>
+    public string Value { get; set; } = "";
+
+    /// <summary>
+    /// 取值左边的状态标签，没有时为 <see langword="null"/>
+    /// </summary>
+    public string? Badge { get; set; }
+
+    /// <summary>
+    /// 取值是否用警示色
+    /// </summary>
+    public bool IsWarning { get; set; }
+
+    /// <summary>
+    /// 是否在行顶画分隔线（首行不画）
+    /// </summary>
+    public bool ShowDivider { get; set; }
+
+    public bool IsNormal => !IsWarning;
+
+    public bool HasBadge => !string.IsNullOrEmpty(Badge);
 
 }

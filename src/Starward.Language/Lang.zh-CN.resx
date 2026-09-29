@@ -1593,15 +1593,6 @@
   <data name="SwitchClientPage_FileVerificationFailedPleaseTryToRepairGameResources" xml:space="preserve">
     <value>文件校验失败，请尝试修复游戏资源。</value>
   </data>
-  <data name="GameResourcePage_LatestVersion" xml:space="preserve">
-    <value>最新版本</value>
-  </data>
-  <data name="GameResourcePage_FullPackages" xml:space="preserve">
-    <value>完整包</value>
-  </data>
-  <data name="GameResourcePage_DiffPackages" xml:space="preserve">
-    <value>增量包</value>
-  </data>
   <data name="SwitchClientPage_TheTowFoldersExistAtTheSameTime" xml:space="preserve">
     <value>文件夹 YuanShen_Data 和 GenshinImpact_Data 不能同时存在。</value>
   </data>
@@ -1873,9 +1864,6 @@
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>重新定位游戏</value>
   </data>
-  <data name="GameLauncherSettingDialog_Size" xml:space="preserve">
-    <value>大小</value>
-  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>基本信息</value>
   </data>
@@ -1884,9 +1872,6 @@
   </data>
   <data name="GameLauncherSettingDialog_CustomBackground" xml:space="preserve">
     <value>自定义背景</value>
-  </data>
-  <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
-    <value>游戏包体</value>
   </data>
   <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
     <value>快速启动</value>
@@ -4250,5 +4235,59 @@
   </data>
   <data name="DiskTypeBadge_Network" xml:space="preserve">
     <value>网络</value>
+  </data>
+  <data name="GameLauncherSettingDialog_VersionInfo" xml:space="preserve">
+    <value>版本信息</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalVersion" xml:space="preserve">
+    <value>本地版本</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LatestVersion" xml:space="preserve">
+    <value>最新版本</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpToDate" xml:space="preserve">
+    <value>已是最新</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpdateAvailable" xml:space="preserve">
+    <value>可更新</value>
+  </data>
+  <data name="GameLauncherSettingDialog_IncrementalPatch" xml:space="preserve">
+    <value>增量补丁</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ChunkCompare" xml:space="preserve">
+    <value>按块比对</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PatchFromVersions" xml:space="preserve">
+    <value>支持从 {0} 更新</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NoPatch" xml:space="preserve">
+    <value>无，更新时按块比对下载</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadFinished" xml:space="preserve">
+    <value>已完成</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadNotFinished" xml:space="preserve">
+    <value>未完成</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeCheck" xml:space="preserve">
+    <value>主程序校验</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMatches" xml:space="preserve">
+    <value>与 {0} 一致</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMismatch" xml:space="preserve">
+    <value>与本地版本不符，实际为 {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeUnknown" xml:space="preserve">
+    <value>不在官方记录中</value>
+  </data>
+  <data name="GameLauncherSettingDialog_FullResources" xml:space="preserve">
+    <value>完整资源</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ResourceSizeWithAudio" xml:space="preserve">
+    <value>{0}（含语音包 {1}）</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
+    <value>本地占用</value>
   </data>
 </root>

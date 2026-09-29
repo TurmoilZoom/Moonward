@@ -1535,15 +1535,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="SwitchClientPage_FileVerificationFailedPleaseTryToRepairGameResources" xml:space="preserve">
     <value>Verificación de archivos fallida, intenta reparar los recursos del juego.</value>
   </data>
-  <data name="GameResourcePage_LatestVersion" xml:space="preserve">
-    <value>Última versión</value>
-  </data>
-  <data name="GameResourcePage_FullPackages" xml:space="preserve">
-    <value>Paquetes completos</value>
-  </data>
-  <data name="GameResourcePage_DiffPackages" xml:space="preserve">
-    <value>Paquetes diferenciales</value>
-  </data>
   <data name="SwitchClientPage_TheTowFoldersExistAtTheSameTime" xml:space="preserve">
     <value>Las carpetas YuanShen_Data y GenshinImpact_Data no pueden existir al mismo tiempo.</value>
   </data>
@@ -1815,9 +1806,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>Reubicar juego</value>
   </data>
-  <data name="GameLauncherSettingDialog_Size" xml:space="preserve">
-    <value>Tamaño</value>
-  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Información básica</value>
   </data>
@@ -1826,9 +1814,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   </data>
   <data name="GameLauncherSettingDialog_CustomBackground" xml:space="preserve">
     <value>Fondo personalizado</value>
-  </data>
-  <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
-    <value>Paquetes del juego</value>
   </data>
   <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
     <value>Inicio rápido</value>
@@ -4162,5 +4147,59 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="DiskTypeBadge_Network" xml:space="preserve">
     <value>Red</value>
+  </data>
+  <data name="GameLauncherSettingDialog_VersionInfo" xml:space="preserve">
+    <value>Información de la versión</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalVersion" xml:space="preserve">
+    <value>Versión local</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LatestVersion" xml:space="preserve">
+    <value>Última versión</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpToDate" xml:space="preserve">
+    <value>Actualizado</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpdateAvailable" xml:space="preserve">
+    <value>Actualización disponible</value>
+  </data>
+  <data name="GameLauncherSettingDialog_IncrementalPatch" xml:space="preserve">
+    <value>Parche incremental</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ChunkCompare" xml:space="preserve">
+    <value>Comparación por fragmentos</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PatchFromVersions" xml:space="preserve">
+    <value>Disponible al actualizar desde {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NoPatch" xml:space="preserve">
+    <value>Ninguno, las actualizaciones descargan los fragmentos modificados</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadFinished" xml:space="preserve">
+    <value>Completada</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadNotFinished" xml:space="preserve">
+    <value>Sin completar</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeCheck" xml:space="preserve">
+    <value>Ejecutable del juego</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMatches" xml:space="preserve">
+    <value>Coincide con {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMismatch" xml:space="preserve">
+    <value>No coincide con la versión local; se identifica como {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeUnknown" xml:space="preserve">
+    <value>No figura en los registros oficiales</value>
+  </data>
+  <data name="GameLauncherSettingDialog_FullResources" xml:space="preserve">
+    <value>Recursos completos</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ResourceSizeWithAudio" xml:space="preserve">
+    <value>{0} (incluye {1} de paquetes de voz)</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
+    <value>Espacio en disco</value>
   </data>
 </root>

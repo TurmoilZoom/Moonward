@@ -1535,15 +1535,6 @@
   <data name="SwitchClientPage_FileVerificationFailedPleaseTryToRepairGameResources" xml:space="preserve">
     <value>리소스 확인 실패. 게임리소스 복구를 진행하세요.</value>
   </data>
-  <data name="GameResourcePage_LatestVersion" xml:space="preserve">
-    <value>최신버전</value>
-  </data>
-  <data name="GameResourcePage_FullPackages" xml:space="preserve">
-    <value>전체 패키지</value>
-  </data>
-  <data name="GameResourcePage_DiffPackages" xml:space="preserve">
-    <value>분할 패키지</value>
-  </data>
   <data name="SwitchClientPage_TheTowFoldersExistAtTheSameTime" xml:space="preserve">
     <value>YuanShen_Data 폴더와 GenshinImpact_Data 폴더는 동시에 존재할 수 없습니다.</value>
   </data>
@@ -1815,9 +1806,6 @@
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>게임 경로 변경</value>
   </data>
-  <data name="GameLauncherSettingDialog_Size" xml:space="preserve">
-    <value>크기</value>
-  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>기본 정보</value>
   </data>
@@ -1826,9 +1814,6 @@
   </data>
   <data name="GameLauncherSettingDialog_CustomBackground" xml:space="preserve">
     <value>사용자 지정 배경</value>
-  </data>
-  <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
-    <value>게임 패키지</value>
   </data>
   <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
     <value>빠른 실행</value>
@@ -4162,5 +4147,59 @@
   </data>
   <data name="DiskTypeBadge_Network" xml:space="preserve">
     <value>네트워크</value>
+  </data>
+  <data name="GameLauncherSettingDialog_VersionInfo" xml:space="preserve">
+    <value>버전 정보</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalVersion" xml:space="preserve">
+    <value>로컬 버전</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LatestVersion" xml:space="preserve">
+    <value>최신 버전</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpToDate" xml:space="preserve">
+    <value>최신 상태</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpdateAvailable" xml:space="preserve">
+    <value>업데이트 가능</value>
+  </data>
+  <data name="GameLauncherSettingDialog_IncrementalPatch" xml:space="preserve">
+    <value>증분 패치</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ChunkCompare" xml:space="preserve">
+    <value>청크 비교</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PatchFromVersions" xml:space="preserve">
+    <value>{0}에서 업데이트 가능</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NoPatch" xml:space="preserve">
+    <value>없음, 업데이트 시 변경된 청크를 다운로드</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadFinished" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadNotFinished" xml:space="preserve">
+    <value>미완료</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeCheck" xml:space="preserve">
+    <value>실행 파일 검증</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMatches" xml:space="preserve">
+    <value>{0}와(과) 일치</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMismatch" xml:space="preserve">
+    <value>로컬 버전과 일치하지 않음, 실제 {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeUnknown" xml:space="preserve">
+    <value>공식 기록에 없음</value>
+  </data>
+  <data name="GameLauncherSettingDialog_FullResources" xml:space="preserve">
+    <value>전체 리소스</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ResourceSizeWithAudio" xml:space="preserve">
+    <value>{0} (음성 팩 {1} 포함)</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
+    <value>디스크 사용량</value>
   </data>
 </root>

@@ -294,6 +294,30 @@ public class HoYoPlayService
 
 
 
+    /// <summary>
+    /// 获取游戏各版本主程序的 MD5。
+    /// </summary>
+    /// <param name="gameId">游戏</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>各版本主程序 MD5；接口没有该游戏的条目时（如崩坏3）返回 <see langword="null"/></returns>
+    public async Task<GameScanInfo?> GetGameScanInfoAsync(GameId gameId, CancellationToken cancellationToken = default)
+    {
+        string key = $"{nameof(GameScanInfo)}_{gameId.Id}";
+        if (!_memoryCache.TryGetValue(key, out GameScanInfo? info))
+        {
+            string lang = CultureInfo.CurrentUICulture.Name;
+            info = await _client.GetGameScanInfosAsync(LauncherId.FromGameId(gameId)!, lang, gameId, cancellationToken);
+            // 各版本的 MD5 发布后不会变，缓存久一点；没有条目时不缓存，下次再查
+            if (info is not null)
+            {
+                _memoryCache.Set(key, info, TimeSpan.FromMinutes(10));
+            }
+        }
+        return info;
+    }
+
+
+
 
     /// <summary>
     /// 获取 Chunk 模式文件清单，取法与 RPC 安装任务一致，保证对话框统计的就是实际要下载的清单。

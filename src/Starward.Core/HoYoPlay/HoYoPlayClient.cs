@@ -461,12 +461,12 @@ public class HoYoPlayClient
     /// <param name="language"></param>
     /// <param name="gameId"></param>
     /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public async Task<GameConfig?> GetGameScanInfosAsync(string launcherId, string language, GameId gameId, CancellationToken cancellationToken = default)
+    /// <returns>该游戏的扫描信息；接口没有该游戏的条目时（如崩坏3）返回 <see langword="null"/></returns>
+    public async Task<GameScanInfo?> GetGameScanInfosAsync(string launcherId, string language, GameId gameId, CancellationToken cancellationToken = default)
     {
         string url = BuildUrl("getGameScanInfo", launcherId, language) + $"&game_ids[]={gameId.Id}";
-        var list = await CommonGetAsync<List<GameConfig>>(url, "game_scan_info", cancellationToken);
-        return list.FirstOrDefault(x => x.GameId == gameId);
+        var list = await CommonGetAsync<List<GameScanInfo>>(url, "game_scan_info", cancellationToken);
+        return list.FirstOrDefault(x => x.GameId == gameId.Id);
     }
 
 

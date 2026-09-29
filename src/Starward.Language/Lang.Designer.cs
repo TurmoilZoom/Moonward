@@ -4500,6 +4500,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Chunk comparison 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ChunkCompare {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ChunkCompare", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Command Line Argument 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_CommandLineArgument {
@@ -4508,6 +4517,69 @@ namespace Starward.Language {
             }
         }
 
+        /// <summary>
+        ///   查找类似 Game Executable 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ExeCheck {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ExeCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Matches {0} 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ExeMatches {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ExeMatches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Doesn't match the local version, identified as {0} 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ExeMismatch {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ExeMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not found in official records 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ExeUnknown {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ExeUnknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Full Resources 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_FullResources {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_FullResources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Incremental patch 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_IncrementalPatch {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_IncrementalPatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Latest Version 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_LatestVersion {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_LatestVersion", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   查找类似 Launch Profile 的本地化字符串。
         /// </summary>
@@ -4518,6 +4590,24 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Disk Usage 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_LocalSize {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_LocalSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Local Version 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_LocalVersion {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_LocalVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 New Profile 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_NewProfile {
@@ -4527,6 +4617,42 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 None, updates download the changed chunks 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_NoPatch {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_NoPatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Available when updating from {0} 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_PatchFromVersions {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_PatchFromVersions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Finished 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_PredownloadFinished {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_PredownloadFinished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not finished 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_PredownloadNotFinished {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_PredownloadNotFinished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Profile Name 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_ProfileName {
@@ -4535,6 +4661,33 @@ namespace Starward.Language {
             }
         }
 
+        /// <summary>
+        ///   查找类似 {0} (including {1} of voice packs) 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_ResourceSizeWithAudio {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_ResourceSizeWithAudio", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Up to date 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_UpToDate {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_UpToDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Update available 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_UpdateAvailable {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_UpdateAvailable", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   查找类似 URL Preview Command 的本地化字符串。
         /// </summary>
@@ -4644,14 +4797,14 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Game Packages 的本地化字符串。
+        ///   查找类似 Version Info 的本地化字符串。
         /// </summary>
-        public static string GameLauncherSettingDialog_GamePackages {
+        public static string GameLauncherSettingDialog_VersionInfo {
             get {
-                return ResourceManager.GetString("GameLauncherSettingDialog_GamePackages", resourceCulture);
+                return ResourceManager.GetString("GameLauncherSettingDialog_VersionInfo", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   查找类似 Quick Launch 的本地化字符串。
         /// </summary>
@@ -4932,15 +5085,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Size 的本地化字符串。
-        /// </summary>
-        public static string GameLauncherSettingDialog_Size {
-            get {
-                return ResourceManager.GetString("GameLauncherSettingDialog_Size", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Start Repairing 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_StartRepairing {
@@ -5200,33 +5344,6 @@ namespace Starward.Language {
         public static string GameRecordPage_AnomalyArbitration {
             get {
                 return ResourceManager.GetString("GameRecordPage_AnomalyArbitration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Diff Packages 的本地化字符串。
-        /// </summary>
-        public static string GameResourcePage_DiffPackages {
-            get {
-                return ResourceManager.GetString("GameResourcePage_DiffPackages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Full Packages 的本地化字符串。
-        /// </summary>
-        public static string GameResourcePage_FullPackages {
-            get {
-                return ResourceManager.GetString("GameResourcePage_FullPackages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Latest Version 的本地化字符串。
-        /// </summary>
-        public static string GameResourcePage_LatestVersion {
-            get {
-                return ResourceManager.GetString("GameResourcePage_LatestVersion", resourceCulture);
             }
         }
         

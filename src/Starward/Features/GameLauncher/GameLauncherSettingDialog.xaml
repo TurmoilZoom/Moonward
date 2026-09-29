@@ -21,87 +21,11 @@
         <Thickness x:Key="ContentDialogPadding">0</Thickness>
         <StaticResource x:Key="ContentDialogSmokeFill" ResourceKey="ControlFillColorTransparentBrush" />
         <StaticResource x:Key="ContentDialogTopOverlay" ResourceKey="ControlFillColorTransparentBrush" />
-        <!--  游戏包体 DataTemplate  -->
-        <DataTemplate x:Key="PackageGroupsDataTemplate">
-            <Expander HorizontalAlignment="Stretch"
-                      HorizontalContentAlignment="Stretch"
-                      Background="#40000000">
-                <Expander.Header>
-                    <Grid>
-                        <TextBlock VerticalAlignment="Center"
-                                   FontSize="16"
-                                   Text="{Binding Name}" />
-                        <Button HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                Click="Button_CopyUrl_Click"
-                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
-                            <Button.Content>
-                                <FontIcon FontSize="20"
-                                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                          Glyph="&#xE71B;" />
-                            </Button.Content>
-                        </Button>
-                    </Grid>
-                </Expander.Header>
-                <ItemsControl HorizontalAlignment="Stretch" ItemsSource="{Binding Items}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Spacing="16" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid RowSpacing="2">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <TextBlock FontSize="14" Text="{Binding FileName}" />
-                                <StackPanel Grid.Row="1"
-                                            Orientation="Horizontal"
-                                            Spacing="8">
-                                    <FontIcon FontSize="12"
-                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                              Glyph="&#xF012;" />
-                                    <TextBlock Width="80"
-                                               FontSize="12"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               Text="{Binding PackageSizeString}" />
-                                    <FontIcon FontSize="12"
-                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                              Glyph="&#xE95E;" />
-                                    <TextBlock FontSize="12"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               Text="MD5" />
-                                    <TextBlock FontSize="12"
-                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                               IsTextSelectionEnabled="True"
-                                               Text="{Binding Md5}" />
-                                </StackPanel>
-                                <Button Grid.RowSpan="2"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        Click="Button_CopyUrl_Click"
-                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                        Visibility="{Binding Url, Converter={StaticResource ObjectToVisibilityConverter}}">
-                                    <Button.Content>
-                                        <FontIcon FontSize="20"
-                                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
-                                                  Glyph="&#xE71B;" />
-                                    </Button.Content>
-                                </Button>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Expander>
-        </DataTemplate>
     </ContentDialog.Resources>
 
 
-    <Grid Width="600"
-          Height="480"
-          Padding="24,24,24,0">
+    <!--  高度随内容；版本信息最多 7 行，不需要内部滚动  -->
+    <Grid Width="600" Padding="24,24,24,24">
 
         <!--  游戏设置内容（已移除左侧导航栏，直接展示右侧内容）  -->
         <Grid Margin="0,16,0,0" RowSpacing="12">
@@ -309,89 +233,75 @@
 
             </StackPanel>
 
-            <!--  游戏包体  -->
-            <Pivot x:Name="Pivot_GamePackages"
-                   Grid.Row="1"
-                   Margin="0,16,0,0">
-
-                <!--  大小 -->
-                <Pivot.RightHeader>
-                    <TextBlock Margin="0,0,8,0"
-                               VerticalAlignment="Top"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Visibility="{x:Bind GameSize, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <Run Text="{x:Bind lang:Lang.GameLauncherSettingDialog_Size}" />
-                        <Run Text="" />
-                        <Run Text="{x:Bind GameSize}" />
-                    </TextBlock>
-                </Pivot.RightHeader>
-
-                <Pivot.Resources>
-                    <Thickness x:Key="PivotItemMargin">0,8,0,0</Thickness>
-                    <Thickness x:Key="PivotHeaderItemMargin">0,0,24,0</Thickness>
-                    <Style BasedOn="{StaticResource DefaultPivotHeaderItemStyle}" TargetType="PivotHeaderItem">
-                        <Setter Property="Height" Value="28" />
-                        <Setter Property="FontSize" Value="16" />
-                        <Setter Property="VerticalContentAlignment" Value="Top" />
-                    </Style>
-                </Pivot.Resources>
-
-                <!--  正式版  -->
-                <PivotItem Margin="0,-8,0,0">
-                    <PivotItem.Header>
-                        <TextBlock>
-                            <Run Text="{x:Bind lang:Lang.GameResourcePage_LatestVersion}" />
-                            <Run Text="" />
-                            <Run Text="{x:Bind LatestVersion}" />
-                        </TextBlock>
-                    </PivotItem.Header>
-                    <ScrollViewer>
-                        <ItemsControl Margin="0,0,8,0"
-                                      ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
-                                      ItemsSource="{x:Bind LatestPackageGroups}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Spacing="8" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </PivotItem>
-
-                <!--  预下载  -->
-                <PivotItem Margin="0,-8,0,0">
-                    <PivotItem.Header>
-                        <TextBlock>
-                            <Run Text="{x:Bind lang:Lang.LauncherPage_PreInstall}" />
-                            <Run Text="" />
-                            <Run Text="{x:Bind PreInstallVersion}" />
-                        </TextBlock>
-                    </PivotItem.Header>
-                    <ScrollViewer>
-                        <ItemsControl Margin="0,0,8,0"
-                                      ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
-                                      ItemsSource="{x:Bind PreInstallPackageGroups}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Spacing="8" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </PivotItem>
-
-            </Pivot>
-
-            <!--  尚未发布安装包的游戏没有包体信息  -->
-            <TextBlock x:Name="TextBlock_NoGamePackage"
-                       Grid.Row="1"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.GameLauncherSettingDialog_NoGamePackage}"
-                       TextAlignment="Center"
-                       TextWrapping="Wrap"
-                       Visibility="Collapsed" />
+            <!--  版本信息：与上方路径栏同底色的圆角卡片，一行一项，标签在左、值靠右；行由代码按取到的数据生成，隐藏的项不留分隔线  -->
+            <Grid Grid.Row="1"
+                  Margin="0,16,0,0"
+                  RowSpacing="8"
+                  Visibility="{x:Bind VersionInfoRows, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_VersionInfo}" />
+                <Border Grid.Row="1"
+                        Padding="0,2,0,2"
+                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                        CornerRadius="8">
+                    <ItemsControl ItemsSource="{x:Bind VersionInfoRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="local:GameVersionInfoRow">
+                                <Grid MinHeight="36"
+                                      Padding="16,0,16,0"
+                                      ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <!--  分隔线：画在内边距以内，首行不画  -->
+                                    <Border Grid.ColumnSpan="2"
+                                            Height="1"
+                                            VerticalAlignment="Top"
+                                            Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                            Visibility="{x:Bind ShowDivider}" />
+                                    <TextBlock VerticalAlignment="Center"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind Label}" />
+                                    <StackPanel Grid.Column="1"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal"
+                                                Spacing="8">
+                                        <!--  状态标签，样式与路径栏的磁盘类型标签一致  -->
+                                        <Border MinHeight="20"
+                                                Padding="6,0,6,0"
+                                                VerticalAlignment="Center"
+                                                Background="{ThemeResource ControlStrongFillColorDisabledBrush}"
+                                                CornerRadius="4"
+                                                Visibility="{x:Bind HasBadge}">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       FontSize="11"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       IsTextScaleFactorEnabled="False"
+                                                       Text="{x:Bind Badge}" />
+                                        </Border>
+                                        <TextBlock VerticalAlignment="Center"
+                                                   IsTextSelectionEnabled="True"
+                                                   Text="{x:Bind Value}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Visibility="{x:Bind IsNormal}" />
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                   IsTextSelectionEnabled="True"
+                                                   Text="{x:Bind Value}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Visibility="{x:Bind IsWarning}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+            </Grid>
         </Grid>
 
 

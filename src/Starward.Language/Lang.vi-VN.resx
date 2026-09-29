@@ -1535,15 +1535,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="SwitchClientPage_FileVerificationFailedPleaseTryToRepairGameResources" xml:space="preserve">
     <value>Xác minh tập tin không thành công, vui lòng thử sửa chữa tài nguyên trò chơi.</value>
   </data>
-  <data name="GameResourcePage_LatestVersion" xml:space="preserve">
-    <value>Phiên bản mới nhất</value>
-  </data>
-  <data name="GameResourcePage_FullPackages" xml:space="preserve">
-    <value>Gói đầy đủ</value>
-  </data>
-  <data name="GameResourcePage_DiffPackages" xml:space="preserve">
-    <value>Gói khác</value>
-  </data>
   <data name="SwitchClientPage_TheTowFoldersExistAtTheSameTime" xml:space="preserve">
     <value>Thư mục YuanShen_Data và GenshinImpact_Data cùng tồn tại.</value>
   </data>
@@ -1815,9 +1806,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>Tìm Trò Chơi</value>
   </data>
-  <data name="GameLauncherSettingDialog_Size" xml:space="preserve">
-    <value>Kích thước</value>
-  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Thông tin cơ bản</value>
   </data>
@@ -1826,9 +1814,6 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="GameLauncherSettingDialog_CustomBackground" xml:space="preserve">
     <value>Tùy chỉnh ảnh nền</value>
-  </data>
-  <data name="GameLauncherSettingDialog_GamePackages" xml:space="preserve">
-    <value>Gói Trò chơi</value>
   </data>
   <data name="StartGameMenu_QuickLaunch" xml:space="preserve">
     <value>Khởi chạy nhanh</value>
@@ -4162,5 +4147,59 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="DiskTypeBadge_Network" xml:space="preserve">
     <value>Mạng</value>
+  </data>
+  <data name="GameLauncherSettingDialog_VersionInfo" xml:space="preserve">
+    <value>Thông tin phiên bản</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalVersion" xml:space="preserve">
+    <value>Phiên bản cục bộ</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LatestVersion" xml:space="preserve">
+    <value>Phiên bản mới nhất</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpToDate" xml:space="preserve">
+    <value>Đã là bản mới nhất</value>
+  </data>
+  <data name="GameLauncherSettingDialog_UpdateAvailable" xml:space="preserve">
+    <value>Có bản cập nhật</value>
+  </data>
+  <data name="GameLauncherSettingDialog_IncrementalPatch" xml:space="preserve">
+    <value>Bản vá tăng dần</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ChunkCompare" xml:space="preserve">
+    <value>So sánh theo khối</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PatchFromVersions" xml:space="preserve">
+    <value>Hỗ trợ cập nhật từ {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_NoPatch" xml:space="preserve">
+    <value>Không có, khi cập nhật sẽ tải các khối đã thay đổi</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadFinished" xml:space="preserve">
+    <value>Đã hoàn tất</value>
+  </data>
+  <data name="GameLauncherSettingDialog_PredownloadNotFinished" xml:space="preserve">
+    <value>Chưa hoàn tất</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeCheck" xml:space="preserve">
+    <value>Tệp thực thi trò chơi</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMatches" xml:space="preserve">
+    <value>Khớp với {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeMismatch" xml:space="preserve">
+    <value>Không khớp với phiên bản cục bộ, nhận diện là {0}</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ExeUnknown" xml:space="preserve">
+    <value>Không có trong dữ liệu chính thức</value>
+  </data>
+  <data name="GameLauncherSettingDialog_FullResources" xml:space="preserve">
+    <value>Tài nguyên đầy đủ</value>
+  </data>
+  <data name="GameLauncherSettingDialog_ResourceSizeWithAudio" xml:space="preserve">
+    <value>{0} (gồm {1} gói lồng tiếng)</value>
+  </data>
+  <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
+    <value>Dung lượng sử dụng</value>
   </data>
 </root>
