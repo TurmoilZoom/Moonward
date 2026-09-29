@@ -688,8 +688,13 @@ public sealed partial class GameLauncherPage : PageBase
         }
         catch (GameRunningException ex)
         {
-            // 可预期：按钮状态没来得及刷新时又点了一次，不留堆栈
+            // 可预期：按钮状态没来得及刷新时又点了一次，或同名 exe 的另一个区服还开着，不留堆栈
             _logger.LogInformation("Start game: {message}", ex.Message);
+            if (!await CheckGameRunningAsync())
+            {
+                // 运行中的是另一个区服，本页按钮不会切到「运行中」，不提示的话点了没有任何反应
+                InAppToast.MainWindow?.Warning(null, Lang.LauncherPage_GameIsRunning);
+            }
         }
         catch (Exception ex)
         {

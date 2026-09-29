@@ -8,12 +8,14 @@ using Starward.Features.HoYoPlay;
 using Starward.Features.PlayTime;
 using Starward.Helpers;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Vanara.PInvoke;
 
 namespace Starward.Features.GameLauncher;
 
@@ -277,15 +279,123 @@ internal partial class GameLauncherService
 
 
     /// <summary>
-    /// 获取游戏进程
+    /// 获取本区服的游戏进程。
+    /// 国服与 B 服等区服的 exe 同名，只按进程名会把另一个区服的进程算到本区服头上，
+    /// 所以能确认进程位于同名 exe 的其他区服安装目录时将其排除；
+    /// 取不到进程路径或路径不在任何已知安装目录时仍算作本区服，与只按进程名查找时一致。
     /// </summary>
-    /// <param name="gameId"></param>
-    /// <returns></returns>
+    /// <param name="gameId">游戏</param>
+    /// <returns>本区服正在运行的游戏进程；没有时返回 <see langword="null"/></returns>
     public async Task<Process?> GetGameProcessAsync(GameId gameId)
     {
+        string exeName = await GetGameExeNameAsync(gameId);
+        Process[] processes = GetGameProcessesByExeName(exeName);
+        if (processes.Length == 0)
+        {
+            return null;
+        }
+        List<string> otherFolders = new();
+        foreach (GameBiz biz in GameBiz.AllGameBizs)
+        {
+            if (biz != gameId.GameBiz
+                && string.Equals(GetGameExeName(biz), exeName, StringComparison.OrdinalIgnoreCase)
+                && GetConfiguredInstallFolder(biz) is string folder)
+            {
+                otherFolders.Add(folder);
+            }
+        }
+        if (otherFolders.Count == 0)
+        {
+            return processes[0];
+        }
+        string? ownFolder = GetConfiguredInstallFolder(gameId.GameBiz);
+        foreach (Process process in processes)
+        {
+            if (TryGetProcessImagePath(process) is not string imagePath)
+            {
+                return process;
+            }
+            // 取最长的匹配目录，一个区服装在另一个区服目录的子目录里时也能归到正确的区服
+            string? owner = otherFolders.Append(ownFolder)
+                .Where(x => x is not null && imagePath.StartsWith(x, StringComparison.OrdinalIgnoreCase))
+                .MaxBy(x => x!.Length);
+            if (owner is null || owner == ownFolder)
+            {
+                return process;
+            }
+        }
+        return null;
+    }
+
+
+    /// <summary>
+    /// 获取同名 exe 的游戏进程，不区分区服。国服与 B 服是同一个程序、共用注册表键，
+    /// 启动前据此拦截，避免另一个区服还开着时再启动一个。
+    /// </summary>
+    /// <param name="gameId">游戏</param>
+    /// <returns>同名 exe 正在运行的任意一个进程；没有时返回 <see langword="null"/></returns>
+    public async Task<Process?> GetGameProcessOfAnyServerAsync(GameId gameId)
+    {
+        return GetGameProcessesByExeName(await GetGameExeNameAsync(gameId)).FirstOrDefault();
+    }
+
+
+    /// <summary>
+    /// 按 exe 名获取当前会话中未挂起的进程。
+    /// </summary>
+    /// <param name="exeName">exe 文件名，带不带 .exe 扩展名均可</param>
+    /// <returns>匹配的进程，可能为空数组</returns>
+    private static Process[] GetGameProcessesByExeName(string exeName)
+    {
         int currentSessionId = Process.GetCurrentProcess().SessionId;
-        var name = (await GetGameExeNameAsync(gameId)).Replace(".exe", "");
-        return Process.GetProcessesByName(name).Where(x => x.SessionId == currentSessionId && !IsProcessPending(x)).FirstOrDefault();
+        return Process.GetProcessesByName(Path.GetFileNameWithoutExtension(exeName))
+            .Where(x => x.SessionId == currentSessionId && !IsProcessPending(x))
+            .ToArray();
+    }
+
+
+    /// <summary>
+    /// 读取设置里保存的安装目录，规范化为以目录分隔符结尾的完整路径，便于做前缀比较。
+    /// 不检查目录是否存在，也不像 <see cref="GetGameInstallPath(GameBiz)"/> 那样清理失效路径。
+    /// </summary>
+    /// <param name="gameBiz">区服</param>
+    /// <returns>安装目录；未设置或路径无效时返回 <see langword="null"/></returns>
+    private static string? GetConfiguredInstallFolder(GameBiz gameBiz)
+    {
+        string? path = AppConfig.GetGameInstallPath(gameBiz);
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+        try
+        {
+            return Path.TrimEndingDirectorySeparator(GetFullPathIfRelativePath(path)) + Path.DirectorySeparatorChar;
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
+        }
+    }
+
+
+    /// <summary>
+    /// 获取进程的 exe 完整路径。
+    /// </summary>
+    /// <param name="process">进程</param>
+    /// <returns>exe 完整路径；无权访问或进程已退出时返回 <see langword="null"/></returns>
+    private static string? TryGetProcessImagePath(Process process)
+    {
+        try
+        {
+            // 游戏以管理员权限运行，Process.MainModule 要读进程内存会被拒绝；查询受限信息的权限就足够取路径
+            using Kernel32.SafeHPROCESS handle = Kernel32.OpenProcess((uint)Kernel32.ProcessAccess.PROCESS_QUERY_LIMITED_INFORMATION, false, (uint)process.Id);
+            if (!handle.IsInvalid && Kernel32.QueryFullProcessImageName(handle, Kernel32.PROCESS_NAME.PROCESS_NAME_WIN32, out string? path) && !string.IsNullOrWhiteSpace(path))
+            {
+                return Path.GetFullPath(path);
+            }
+        }
+        catch { }
+        return null;
     }
 
 
@@ -334,7 +444,7 @@ internal partial class GameLauncherService
         const int ERROR_CANCELLED = 0x000004C7;
         try
         {
-            if (await GetGameProcessAsync(gameId) is Process existingProcess)
+            if (await GetGameProcessOfAnyServerAsync(gameId) is Process existingProcess)
             {
                 throw new GameRunningException(existingProcess.ProcessName, existingProcess.Id);
             }
