@@ -26,6 +26,12 @@ internal partial class GameInstallHelper
 
     private const int MD5_BUFFER_SIZE = 1 << 19;
 
+    /// <summary>
+    /// 单块下载超过这么久没收到新数据就放弃，交给文件级重试。官方启动器由 getParamsConfig 下发 request_timeout_wait_time=30。
+    /// HttpClient.Timeout 只管到收到响应头为止，服务器发到一半停住又不断开时，读数据会一直等下去
+    /// </summary>
+    private static readonly TimeSpan ChunkStallTimeout = TimeSpan.FromSeconds(30);
+
 
     private readonly ILogger<GameInstallHelper> _logger;
 
@@ -569,14 +575,18 @@ internal partial class GameInstallHelper
     /// <param name="cancellationToken"></param>
     /// <returns>从 <see cref="ChunkDownloadScheduler.BufferPool"/> 租用的缓冲区，前 <see cref="GameInstallFileChunk.CompressedSize"/> 字节为块数据，用完须归还</returns>
     /// <exception cref="IOException">数据长度或 MD5 不符</exception>
+    /// <exception cref="TimeoutException">超过 <see cref="ChunkStallTimeout"/> 没有收到新数据</exception>
     private async Task<byte[]> DownloadChunkAsync(GameInstallContext task, HttpClient httpClient, GameInstallFileChunk chunk, ChunkDownloadScheduler scheduler, ChunkProgress progress, CancellationToken cancellationToken)
     {
         await scheduler.WaitDownloadSlotAsync(cancellationToken);
+        // 排队等下载名额的时间不算，从发出请求开始计时，每收到一段数据重新计时
+        using CancellationTokenSource stallCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        stallCts.CancelAfter(ChunkStallTimeout);
         try
         {
-            using HttpResponseMessage response = await httpClient.GetAsync(chunk.Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            using HttpResponseMessage response = await httpClient.GetAsync(chunk.Url, HttpCompletionOption.ResponseHeadersRead, stallCts.Token);
             response.EnsureSuccessStatusCode();
-            using Stream hs = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using Stream hs = await response.Content.ReadAsStreamAsync(stallCts.Token);
             int size = checked((int)chunk.CompressedSize);
             byte[] buffer = scheduler.BufferPool.Rent(size);
             try
@@ -585,11 +595,13 @@ internal partial class GameInstallHelper
                 while (total < size)
                 {
                     // 每次最多读 BUFFER_SIZE：限速时令牌上限最小就是 BUFFER_SIZE，一次申请更多会抛异常
-                    int read = await hs.ReadAsync(buffer.AsMemory(total, Math.Min(BUFFER_SIZE, size - total)), cancellationToken);
+                    int read = await hs.ReadAsync(buffer.AsMemory(total, Math.Min(BUFFER_SIZE, size - total)), stallCts.Token);
                     if (read == 0)
                     {
                         break;
                     }
+                    // 限速排队不算停滞：排队期间暂停计时，拿到令牌后重新计时
+                    stallCts.CancelAfter(Timeout.InfiniteTimeSpan);
                     // RateLimiter 的等待队列已设置为 int.MaxValue，理论上不会出现获取令牌失败的情况
                     RateLimitLease lease = await _rateLimiter.AcquireAsync(read, cancellationToken);
                     while (!lease.IsAcquired)
@@ -597,6 +609,7 @@ internal partial class GameInstallHelper
                         await Task.Delay(1, cancellationToken);
                         lease = await _rateLimiter.AcquireAsync(read, cancellationToken);
                     }
+                    stallCts.CancelAfter(ChunkStallTimeout);
                     total += read;
                     progress.AddDownload(read);
                     Interlocked.Add(ref task.networkDownloadBytes, read);
@@ -613,6 +626,11 @@ internal partial class GameInstallHelper
                 scheduler.BufferPool.Return(buffer);
                 throw;
             }
+        }
+        catch (OperationCanceledException) when (stallCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            // 必须转成 TimeoutException：取消异常不会被文件级重试接手，还会被当成用户暂停
+            throw new TimeoutException($"No data received for {ChunkStallTimeout.TotalSeconds} seconds, chunk: {chunk.Id}.");
         }
         finally
         {
