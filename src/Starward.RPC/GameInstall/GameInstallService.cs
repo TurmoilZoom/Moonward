@@ -159,7 +159,7 @@ internal class GameInstallService
         TrackStart(context);
         context.State = GameInstallState.Waiting;
         context.ErrorMessage = null;
-        _ = PrepareGameInstallTaskAsync(context, context.CancellationToken);
+        context.RunTask = PrepareGameInstallTaskAsync(context, context.CancellationToken);
         return GameInstallContextDTO.FromTask(context);
     }
 
@@ -194,19 +194,50 @@ internal class GameInstallService
     /// <returns></returns>
     public GameInstallContextDTO StopTask(GameInstallRequest request)
     {
-        if (_tasks.TryRemove(request.GetGameId(), out GameInstallContext? context))
+        GameId gameId = request.GetGameId();
+        TrackCancel(gameId, _tasks.GetValueOrDefault(gameId), GameInstallState.Stop, "stop");
+        GameInstallContext context = StopTask(gameId) ?? request.ToTask();
+        context.State = GameInstallState.Stop;
+        return GameInstallContextDTO.FromTask(context);
+    }
+
+
+
+    /// <summary>
+    /// 从任务表移除任务并置为 Stop，之后不会再被继续或排队调度。不记录埋点，由调用方按来源记录。
+    /// 正在运行的协程只是收到取消信号，需要确认退出时用 <see cref="WaitTaskExitAsync"/>
+    /// </summary>
+    /// <param name="gameId">游戏</param>
+    /// <returns>被移除的任务；没有任务时为 null</returns>
+    internal GameInstallContext? StopTask(GameId gameId)
+    {
+        if (_tasks.TryRemove(gameId, out GameInstallContext? context))
         {
-            TrackCancel(context.GameId, context, GameInstallState.Stop, "stop");
+            // 已暂停的任务 CTS 早已取消，Cancel 只改 CancelState，所以状态要在这里直接置 Stop
             context.Cancel(GameInstallState.Stop);
             context.State = GameInstallState.Stop;
         }
-        else
+        return context;
+    }
+
+
+
+    /// <summary>
+    /// 等待任务最近一轮运行的协程退出；任务没在运行（已暂停、出错、排队）时立即返回
+    /// </summary>
+    /// <param name="context">已取消的任务</param>
+    /// <param name="timeout">最长等待时间</param>
+    /// <param name="cancellationToken">取消等待</param>
+    /// <returns>协程已退出为 true，超时或等待被取消为 false</returns>
+    internal static async Task<bool> WaitTaskExitAsync(GameInstallContext context, TimeSpan timeout, CancellationToken cancellationToken = default)
+    {
+        if (context.RunTask is not { IsCompleted: false } runTask)
         {
-            TrackCancel(request.GetGameId(), null, GameInstallState.Stop, "stop");
-            context = request.ToTask();
-            context.State = GameInstallState.Stop;
+            return true;
         }
-        return GameInstallContextDTO.FromTask(context);
+        // 用 WhenAny 而不是 WaitAsync：协程自身的异常已在内部记录，这里只关心它是否结束
+        await Task.WhenAny(runTask, Task.Delay(timeout, cancellationToken));
+        return runTask.IsCompleted;
     }
 
 

@@ -496,6 +496,13 @@ public sealed partial class GameLauncherPage : PageBase
 
     private void OnGameInstallPathChanged(object _, GameInstallPathChangedMessage message)
     {
+        if (_gameInstallTask?.State is GameInstallState.Stop or GameInstallState.Finish)
+        {
+            // 卸载前任务已被停止，但出错的任务计时器早已停下，不会自己清掉；
+            // 留着的话点安装会走「继续旧任务」，跳过安装对话框直接往旧路径下载
+            _dispatchTimer.Stop();
+            _gameInstallTask = null;
+        }
         CheckGameVersion();
     }
 

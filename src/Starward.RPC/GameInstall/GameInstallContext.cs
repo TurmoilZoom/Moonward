@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Starward.RPC.GameInstall;
 
@@ -165,6 +166,12 @@ public class GameInstallContext
 
 
     internal GameInstallState CancelState { get; private set; } = GameInstallState.Queueing;
+
+
+    /// <summary>
+    /// 最近一轮运行的协程，从未运行过为 null。取消只是发信号，要等它结束才算任务真正退出
+    /// </summary>
+    internal Task? RunTask { get; set; }
 
 
     /// <summary>

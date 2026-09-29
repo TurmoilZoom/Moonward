@@ -470,6 +470,11 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
             }
             if (Directory.Exists(InstallPath))
             {
+                if (_gameInstallService.GetGameInstallTask(CurrentGameId) is GameInstallContext task)
+                {
+                    // 先停止并移除安装任务（含已暂停的），否则首页仍显示暂停进度，点继续会在已删除的目录上复用旧的文件清单
+                    await _gameInstallService.StopTaskAsync(task);
+                }
                 bool success = await _gameInstallService.StartUninstallAsync(CurrentGameId, InstallPath);
                 Telemetry.Track("uninstall_result", CurrentGameBiz, ("result", success ? "success" : "rpc_unavailable"), ("duration_ms", Stopwatch.GetElapsedTime(start)));
                 if (success)

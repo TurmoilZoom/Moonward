@@ -74,9 +74,13 @@ internal class GameInstallController : GameInstaller.GameInstallerBase
             {
                 Telemetry.Track("uninstall_start", request.GameBiz, ("has_task", true), ("task_op", task.Operation), ("task_state", task.State));
                 GameInstallService.TrackCancel(gameId, task, GameInstallState.Stop, "uninstall");
-                // 停止正在进行的安装任务
-                task.Cancel(GameInstallState.Stop);
-                await Task.Delay(3000);
+                // 停止并移除任务：只 Cancel 的话已暂停的任务仍留在任务表里，继续时会复用已被删除文件的完成标记
+                _gameInstallService.StopTask(gameId);
+                // 等正在运行的协程真正退出再删目录，否则可能还有文件在写
+                if (!await GameInstallService.WaitTaskExitAsync(task, TimeSpan.FromSeconds(30), context.CancellationToken))
+                {
+                    _logger.LogWarning("Game install task ({gameBiz}) did not exit in time before uninstall.", request.GameBiz);
+                }
             }
             else
             {
