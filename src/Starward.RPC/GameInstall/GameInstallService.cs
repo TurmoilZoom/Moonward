@@ -407,11 +407,12 @@ internal class GameInstallService
         context.Progress_WriteTotalBytes = writeBytes;
         context.Progress_WriteFinishBytes = 0;
 
-        _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode chunk", context.GameId.GameBiz);
+        _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode chunk, max concurrent chunk downloads: {count}", context.GameId.GameBiz, ChunkDownloadScheduler.MaxConcurrentDownloads);
         EnterStage(context, GameInstallState.Downloading);
+        using ChunkDownloadScheduler scheduler = new();
         await Parallel.ForEachAsync(context.TaskFiles ?? [], cancellationToken, async (GameInstallFile file, CancellationToken token) =>
         {
-            await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, false, token), token);
+            await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, scheduler, false, token), token);
             file.IsFinished = true;
         });
     }
@@ -596,11 +597,12 @@ internal class GameInstallService
         context.Progress_WriteTotalBytes = writeBytes;
         context.Progress_WriteFinishBytes = 0;
 
-        _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode chunk", context.GameId.GameBiz);
+        _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode chunk, max concurrent chunk downloads: {count}", context.GameId.GameBiz, ChunkDownloadScheduler.MaxConcurrentDownloads);
         EnterStage(context, GameInstallState.Downloading);
+        using ChunkDownloadScheduler scheduler = new();
         await Parallel.ForEachAsync(context.TaskFiles ?? [], cancellationToken, async (GameInstallFile file, CancellationToken token) =>
         {
-            await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, true, token), token);
+            await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, scheduler, true, token), token);
             file.IsFinished = true;
         });
         DeleteSophonChunkRemovedFiles(context);
