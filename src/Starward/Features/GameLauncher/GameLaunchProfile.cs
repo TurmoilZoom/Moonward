@@ -188,6 +188,15 @@ public sealed class GameLaunchProfile : ObservableObject
 
 
     /// <summary>
+    /// 是否使用 CMD 启动游戏，与自定义启动程序互斥。
+    /// <c>null</c> 表示旧版数据未按配置文件保存过，沿用旧全局开关 <see cref="AppConfig.StartGameWithCMD"/>；
+    /// config1 存于 legacy 键，其余配置写入 JSON。
+    /// </summary>
+    [JsonPropertyName("start_with_cmd")]
+    public bool? StartWithCmd { get; set; }
+
+
+    /// <summary>
     /// 启动时用于自动登录的游戏角色 UID（与米游社工具箱 <c>GameRecordRole.Uid</c> 一致）。
     /// <c>null</c> 或 <c>≤0</c> 表示不指定；config1 存于 legacy 键，其余配置写入 JSON。
     /// </summary>

@@ -4075,7 +4075,7 @@
     <value>本配置不附加</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>对所有配置文件生效，与自定义启动程序互斥</value>
+    <value>仅对当前配置文件生效，与自定义启动程序互斥</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>关闭</value>

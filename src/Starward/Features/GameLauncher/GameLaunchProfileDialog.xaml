@@ -26,7 +26,7 @@
 
     <!--
       外框宽 600（与游戏设置对话框一致），Padding 24 后内容区宽 552。
-      自上而下：标题行（标题 + 关闭）→ 配置文件栏（选哪个）→ 表单（按配置文件保存；分隔线下为全局 CMD）→ 底栏（URL 指令 + 保存）。
+      自上而下：标题行（标题 + 关闭）→ 配置文件栏（选哪个）→ 表单（按配置文件保存；分隔线下为 CMD 启动）→ 底栏（URL 指令 + 保存）。
       对齐按「看得见的内容」：链接按钮、复制按钮用负边距抵掉自身内边距，让文字 / 图标贴齐内容区边缘。
       表单行用 *：ContentDialog 给内容的是有限高度，放得下时随内容高，窗口放不下时才滚动。
     -->
@@ -339,7 +339,7 @@
                     </Grid>
                 </StackPanel>
 
-                <!--  全局设置（分隔线下，即时生效、不进配置文件）：使用 CMD 启动游戏，与自定义启动程序互斥  -->
+                <!--  分隔线下：使用 CMD 启动游戏（按配置文件保存），与自定义启动程序互斥  -->
                 <Grid Padding="0,16,0,0"
                       BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
                       BorderThickness="0,1,0,0"
@@ -365,7 +365,7 @@
                                   Margin="0,0,-12,0"
                                   VerticalAlignment="Center"
                                   IsEnabled="{x:Bind IsCmdToggleEnabled, Mode=OneWay}"
-                                  IsOn="{x:Bind StartGameWithCMD, Mode=TwoWay}"
+                                  IsOn="{x:Bind EditingStartWithCmd, Mode=TwoWay}"
                                   OffContent="{x:Null}"
                                   OnContent="{x:Null}" />
                 </Grid>

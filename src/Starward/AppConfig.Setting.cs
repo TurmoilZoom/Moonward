@@ -509,7 +509,9 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 使用 CMD 启动游戏 <see href="https://github.com/Scighost/Starward/issues/1634"/>
+    /// 旧版全局「使用 CMD 启动游戏」开关 <see href="https://github.com/Scighost/Starward/issues/1634"/>。
+    /// 现已改为按配置文件保存（<see cref="GameLaunchProfile.StartWithCmd"/>），界面不再写入；
+    /// 仅作为未按配置文件保存过的旧数据的回退值。
     /// </summary>
     public static bool StartGameWithCMD
     {
@@ -1040,6 +1042,26 @@ public static partial class AppConfig
     public static void SetDefaultLaunchProfileSkipAutoDx12(GameBiz biz, bool value)
     {
         SetValue(value, $"launch_profile_skip_auto_dx12_{biz}");
+    }
+
+
+    /// <summary>
+    /// 获取 config1 是否使用 CMD 启动游戏。
+    /// </summary>
+    /// <returns>未保存过时为 <c>null</c>，由调用方回退到旧全局开关 <see cref="StartGameWithCMD"/>。</returns>
+    public static bool? GetDefaultLaunchProfileStartWithCmd(GameBiz biz)
+    {
+        string? value = GetValue<string>(default, $"launch_profile_start_with_cmd_{biz}");
+        return bool.TryParse(value, out bool result) ? result : null;
+    }
+
+
+    /// <summary>
+    /// 设置 config1 是否使用 CMD 启动游戏。
+    /// </summary>
+    public static void SetDefaultLaunchProfileStartWithCmd(GameBiz biz, bool value)
+    {
+        SetValue(value, $"launch_profile_start_with_cmd_{biz}");
     }
 
     /// <summary>

@@ -3987,7 +3987,7 @@ You are welcome to submit exported data to:</value>
     <value>Không thêm cho hồ sơ này</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>Áp dụng cho mọi hồ sơ và không dùng cùng chương trình khởi chạy tùy chỉnh.</value>
+    <value>Chỉ áp dụng cho hồ sơ này và không dùng cùng chương trình khởi chạy tùy chỉnh.</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>Đóng</value>

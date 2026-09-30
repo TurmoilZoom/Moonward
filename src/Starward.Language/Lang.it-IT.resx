@@ -3987,7 +3987,7 @@ You are welcome to submit exported data to:</value>
     <value>Non aggiungere per questo profilo</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>Si applica a tutti i profili e non può essere usato con un eseguibile di avvio personalizzato.</value>
+    <value>Si applica solo a questo profilo e non può essere usato con un eseguibile di avvio personalizzato.</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>Chiudi</value>
