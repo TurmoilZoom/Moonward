@@ -107,7 +107,7 @@ git diff "$prev..$target" --stat
 产出两段文本：
 
 1. **一句话概述**（简体中文，进 tag subject）  
-2. **完整 Markdown 正文**（直接从 `### 新功能` 等分类起；**无**首部大标题/日期；**无 emoji**）
+2. **完整 Markdown 正文**（直接从 `### 新功能` 等分类起；**无**首部大标题/日期；**末尾不附**提交数 / 对比链接；**无 emoji**）
 
 正文结构与文风严格遵循 release-notes（新功能 / 问题修复 / 体验与性能 / 重要变更 / 文档与其他；无内容的组省略；面向普通用户）。
 
@@ -128,7 +128,7 @@ git diff "$prev..$target" --stat
 
 - 第一行 = subject  
 - 空一行  
-- 其余 = release-notes 全文（直接分类列表，**不要** `## 版本（日期）` 或导语；**不要**只写三五条开发者向 bullet 而把完整 notes 留在对话里）
+- 其余 = release-notes 全文（直接分类列表，**不要** `## 版本（日期）` 或导语；最后一个分类列表即结尾，**不要**加 `---`、提交数、Compare 链接；**不要**只写三五条开发者向 bullet 而把完整 notes 留在对话里）
 
 ```powershell
 $tag = "<tagname>"
@@ -221,6 +221,7 @@ gh release edit <tag> --notes-file <path>
 - 把 `git log` 原样当发布说明  
 - tag 注释只写三五行要点，完整 notes 只出现在对话里（CI 读不到）  
 - 在 notes 正文首部写 `## 版本（日期）` 或「与上一版相比…」导语（直接分类即可）  
+- 在 notes 正文末尾附「共涉及约 N 个提交」「完整对比」/ GitHub Compare 链接等范围总结  
 - 不遵循 release-notes 的分组与「无 emoji / 面向用户」文风  
 - 在说明里引用 issue / PR（写 `#N` 或加 issue 链接）  
 - 在汇报里写「已发布」但 origin push 实际失败  

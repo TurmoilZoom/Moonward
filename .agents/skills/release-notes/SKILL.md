@@ -25,7 +25,7 @@ description: >
 | 正式版 | tag 名**不含** `-` → 从**上一个正式版**累计，覆盖中间所有 beta 的改动 |
 | 语言 | 简体中文 |
 | 受众 | 普通用户（少术语，讲「能做什么 / 修了什么」） |
-| 格式 | 纯文本 Markdown 分类小节与列表；**无**首部大标题/日期；**不使用任何 emoji / 图标** |
+| 格式 | 纯文本 Markdown 分类小节与列表；**无**首部大标题/日期；**末尾不附**提交数量 / 对比链接等范围总结；**不使用任何 emoji / 图标** |
 
 用户可额外指定：对比区间（如 `A..B`）、输出路径、语言。
 
@@ -61,7 +61,7 @@ git describe --tags --abbrev=0 --match "[0-9]*" "$new^"
 - `$new` 已是 tag 时用 `$new^` 避免取到它自己；发版前 `$new` 为目标提交，直接用 `$new`（尚未打 tag）。
 - 例：`2026.9.6` 的上一版是 `2026.9.5`（覆盖 `-beta1`、`-beta2` 的全部改动），不是 `2026.9.6-beta2`。
 - 用户明确指定了旧 ref 时以用户为准。
-5. **仓库只有一个 tag / 无上一 tag** → 旧 = 首次提交（`git rev-list --max-parents=0 HEAD`）；可在正文末脚注一句「首个正式版本 / 无可对比的上一 tag」，**不要**因此加首部大标题。
+5. **仓库只有一个 tag / 无上一 tag** → 旧 = 首次提交（`git rev-list --max-parents=0 HEAD`）；正文照常分类，**不要**因此加首部大标题或末尾脚注。
 6. **没有任何 tag 且非发版场景** → 停止并告知用户先打 tag，或请其指定两个 commit/分支再总结。
 
 确认两个 ref 都存在：
@@ -82,9 +82,6 @@ git log <old>..<new> --pretty=format:"%h|%s|%an"
 
 # 文件级统计（辅助判断影响面，不写进用户正文细表）
 git diff <old>..<new> --stat
-
-# 远程（compare 链接的仓库地址）
-git remote get-url origin
 ```
 
 若 commit 很多（例如 >80），优先按 Conventional Commits 前缀与路径聚类，再抽样读关键提交的 body（`git show -s --format=%B <hash>`），不要把上百条标题丢给用户。
@@ -145,24 +142,13 @@ git remote get-url origin
 ### 文档 / 其他
 
 - …（可省略）
-
----
-
-共涉及约 N 个提交。  
-**完整对比**：[GitHub Compare](<url>)
 ```
 
-Compare 链接（origin 为 GitHub 时）：
-
-1. 将 `git@github.com:owner/repo.git` 或 `https://github.com/owner/repo.git` 规范为 `https://github.com/owner/repo`
-2. 拼：`https://github.com/owner/repo/compare/<旧 tag>...<新 tag>`（三个点）
-3. 新 tag 尚未创建时：compare 可用 `<旧 tag>...<新 commit 短哈希>`，或推送 tag 后再写最终链接。
-
-非 GitHub 远程则省略链接，或给用户可用的 web 地址（若可判断）。
+正文到最后一个分类的列表即结束：**不加** `---` 分隔线、「共涉及约 N 个提交」、「完整对比」/ GitHub Compare 链接等范围总结。
 
 ### 5. 汇报
 
-简短说明：
+简短说明（对比区间与提交数量只在对话里说，不写进正文）：
 
 - 对比区间：`<旧>..<新>`
 - 提交数量（约）
@@ -244,4 +230,5 @@ git for-each-ref "refs/tags/$version" --format="%(contents:body)"
 - 不要在标题或正文中使用 emoji / 图标
 - 不要引用 issue / PR：不写 `#N`、不加 issue 链接（含提交标题里带的和上游合入的编号）
 - **不要**在正文首部生成 `## 版本号（日期）` 或「与上一版相比…」导语；直接分类总结
+- **不要**在正文末尾附范围总结：`---` 分隔线、「共涉及约 N 个提交」、「完整对比」/ GitHub Compare 链接
 - 不要把完整用户向 notes 只打印在对话里却不写进 tag（tag-release 场景）
