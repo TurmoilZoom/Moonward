@@ -6,7 +6,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.Win32;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
@@ -950,7 +949,7 @@ public sealed partial class GameSelector : UserControl
 
 
     /// <summary>
-    /// 从注册表自动搜索已安装的游戏
+    /// 从注册表自动搜索已安装的游戏，找到的追加到待选游戏，没找到的不会从待选游戏中移除
     /// </summary>
     [RelayCommand]
     public void AutoSearchInstalledGames()
@@ -958,7 +957,7 @@ public sealed partial class GameSelector : UserControl
         try
         {
             List<GameInfo> gameInfos = GetCachedGameInfos();
-            var sb = new StringBuilder();
+            List<string> selectedBizs = AppConfig.SelectedGameBizs?.Split(',', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList() ?? [];
             foreach (GameInfo item in gameInfos)
             {
                 GameBiz gameBiz = item.GameBiz;
@@ -971,33 +970,24 @@ public sealed partial class GameSelector : UserControl
                 {
                     if (Directory.Exists(path) || AppConfig.GetGameInstallPathRemovable(gameBiz))
                     {
-                        sb.Append(gameBiz);
-                        sb.Append(',');
+                        if (!selectedBizs.Contains(gameBiz))
+                        {
+                            selectedBizs.Add(gameBiz);
+                        }
                         continue;
                     }
                 }
-                string key = "";
-                if (gameBiz.Server is "cn")
+                path = GameLauncherService.FindGameInstallPathFromRegistry(gameBiz);
+                if (path is not null)
                 {
-                    key = $@"HKEY_CURRENT_USER\Software\miHoYo\HYP\1_1\{gameBiz}";
-                }
-                else if (gameBiz.Server is "global")
-                {
-                    key = $@"HKEY_CURRENT_USER\Software\Cognosphere\HYP\1_0\{gameBiz}";
-                }
-                if (!string.IsNullOrWhiteSpace(key))
-                {
-                    path = Registry.GetValue(key, "GameInstallPath", null) as string;
-                    if (Directory.Exists(path))
+                    AppConfig.SetGameInstallPath(gameBiz, path);
+                    if (!selectedBizs.Contains(gameBiz))
                     {
-                        AppConfig.SetGameInstallPath(gameBiz, path);
-                        sb.Append(gameBiz);
-                        sb.Append(',');
-                        continue;
+                        selectedBizs.Add(gameBiz);
                     }
                 }
             }
-            AppConfig.SelectedGameBizs = sb.ToString().TrimEnd(',');
+            AppConfig.SelectedGameBizs = string.Join(',', selectedBizs);
             InitializeGameSelector();
             if (!IsPinned)
             {

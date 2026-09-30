@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
@@ -123,6 +124,30 @@ internal partial class GameLauncherService
             ChangeGameInstallPath(gameId, null);
             return null;
         }
+    }
+
+
+
+    /// <summary>
+    /// 从官方启动器（HoYoPlay）写入的注册表查找游戏安装目录
+    /// </summary>
+    /// <param name="gameBiz"></param>
+    /// <returns>存在的安装目录，未找到时为 <see langword="null"/></returns>
+    public static string? FindGameInstallPathFromRegistry(GameBiz gameBiz)
+    {
+        // HoYoPlay 只管国服和国际服，B 服等其他区服没有对应的注册表项
+        string? key = gameBiz.Server switch
+        {
+            "cn" => $@"HKEY_CURRENT_USER\Software\miHoYo\HYP\1_1\{gameBiz}",
+            "global" => $@"HKEY_CURRENT_USER\Software\Cognosphere\HYP\1_0\{gameBiz}",
+            _ => null,
+        };
+        if (key is null)
+        {
+            return null;
+        }
+        string? path = Registry.GetValue(key, "GameInstallPath", null) as string;
+        return Directory.Exists(path) ? path : null;
     }
 
 
