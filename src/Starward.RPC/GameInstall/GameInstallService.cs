@@ -880,19 +880,7 @@ internal class GameInstallService
     private async Task SetGameConfigIniAsync(GameInstallContext context, params IEnumerable<(string Key, string? Value)> keyValuePairs)
     {
         string path = Path.Join(context.InstallPath, "config.ini");
-        using MemoryStream ms = new MemoryStream();
-        if (File.Exists(path))
-        {
-            using StreamWriter sw = new StreamWriter(ms, leaveOpen: true);
-            foreach (string line in await File.ReadAllLinesAsync(path))
-            {
-                if (!line.Contains("[General]", StringComparison.OrdinalIgnoreCase))
-                {
-                    sw.WriteLine(line);
-                }
-            }
-        }
-        IConfigurationRoot config = new ConfigurationBuilder().AddIniStream(ms).Build();
+        IConfigurationRoot config = await ReadGameConfigIniAsync(path);
         if (context.Operation is GameInstallOperation.Predownload)
         {
             config["game_version"] = context.LocalGameVersion;
@@ -930,6 +918,57 @@ internal class GameInstallService
         {
             config[key] = value;
         }
+        await WriteGameConfigIniAsync(context, path, config);
+    }
+
+
+
+    /// <summary>
+    /// 读取 config.ini 已有的键（包括官方启动器写的 uapc 等），不存在时返回空配置。节头去掉，键直接放在根上
+    /// </summary>
+    /// <param name="path">config.ini 路径</param>
+    /// <returns></returns>
+    private static async Task<IConfigurationRoot> ReadGameConfigIniAsync(string path)
+    {
+        // 先按键去重（后出现的覆盖前面的），重复的键会让 IniStream 解析时抛异常
+        Dictionary<string, string> values = new(StringComparer.OrdinalIgnoreCase);
+        if (File.Exists(path))
+        {
+            foreach (string line in await File.ReadAllLinesAsync(path))
+            {
+                string text = line.Trim();
+                int index = text.IndexOf('=');
+                if (text.StartsWith('[') || index <= 0)
+                {
+                    continue;
+                }
+                values[text[..index].Trim()] = text[(index + 1)..].Trim();
+            }
+        }
+        using MemoryStream ms = new MemoryStream();
+        using (StreamWriter sw = new StreamWriter(ms, leaveOpen: true))
+        {
+            foreach ((string key, string value) in values)
+            {
+                sw.WriteLine($"{key}={value}");
+            }
+        }
+        // 写完流停在末尾，不回到开头 IniStream 什么也读不到：原来的写法因此每次都把已有的键全丢了
+        ms.Position = 0;
+        return new ConfigurationBuilder().AddIniStream(ms).Build();
+    }
+
+
+
+    /// <summary>
+    /// 把配置写回 config.ini，全部键放在 [General] 节下
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="path">config.ini 路径</param>
+    /// <param name="config">要写入的配置</param>
+    /// <returns></returns>
+    private async Task WriteGameConfigIniAsync(GameInstallContext context, string path, IConfigurationRoot config)
+    {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("[General]");
         foreach (KeyValuePair<string, string?> item in config.AsEnumerable())
