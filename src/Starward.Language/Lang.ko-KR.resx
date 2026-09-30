@@ -3987,7 +3987,7 @@
     <value>이 프로필에서는 추가 안 함</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>모든 프로필에 적용되며 사용자 지정 시작 프로그램과 함께 사용할 수 없습니다.</value>
+    <value>이 프로필에만 적용되며 사용자 지정 시작 프로그램과 함께 사용할 수 없습니다.</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>닫기</value>

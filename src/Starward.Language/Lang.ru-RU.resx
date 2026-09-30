@@ -4007,7 +4007,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Не добавлять для этого профиля</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>Действует для всех профилей и не сочетается с пользовательской программой запуска.</value>
+    <value>Действует только для этого профиля и не сочетается с пользовательской программой запуска.</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>Закрыть</value>

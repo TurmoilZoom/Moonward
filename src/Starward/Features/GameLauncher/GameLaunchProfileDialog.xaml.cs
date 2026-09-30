@@ -306,25 +306,21 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 使用 CMD 启动游戏（全局设置）。与自定义启动程序互斥：开启时清空并持久化当前配置文件的自定义启动程序，
-    /// 并禁用「选择」按钮；当已设置自定义启动程序时该开关不可操作。
+    /// 工作副本：使用 CMD 启动游戏。与自定义启动程序互斥：开启时禁用「选择」按钮；
+    /// 已设置自定义启动程序时该开关不可操作。
     /// </summary>
-    public bool StartGameWithCMD
+    public bool EditingStartWithCmd
     {
         get;
         set
         {
             if (SetProperty(ref field, value))
             {
-                AppConfig.StartGameWithCMD = value;
+                UpdateIsDirty();
                 OnPropertyChanged(nameof(IsThirdPartyToolEnabled));
-                if (value)
-                {
-                    ClearThirdPartyToolForCmd();
-                }
             }
         }
-    } = AppConfig.StartGameWithCMD;
+    }
 
 
     /// <summary>是否可操作「使用 CMD 启动游戏」开关（未设置自定义启动程序时可用）。</summary>
@@ -332,7 +328,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>是否可操作自定义启动程序「选择」按钮（未开启 CMD 启动时可用）。</summary>
-    public bool IsThirdPartyToolEnabled => !StartGameWithCMD;
+    public bool IsThirdPartyToolEnabled => !EditingStartWithCmd;
 
 
     /// <summary>
@@ -406,7 +402,22 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             || (EditingArgument ?? "") != (p.Argument ?? "")
             || (EditingThirdPartyToolPath ?? "") != (p.ThirdPartyToolPath ?? "")
             || EditingLoginUid != savedUid
-            || EditingSkipAutoDx12 != p.SkipAutoDx12;
+            || EditingSkipAutoDx12 != p.SkipAutoDx12
+            || EditingStartWithCmd != GetSavedStartWithCmd(p);
+    }
+
+
+    /// <summary>
+    /// 配置文件已保存的 CMD 启动状态。
+    /// 已设自定义启动程序时视为关闭：两者互斥，启动时也是自定义程序优先；
+    /// 否则旧数据（旧版全局开关开启时设过自定义程序）会显示为「开启且不可操作」，同时「选择」按钮被禁用。
+    /// </summary>
+    /// <param name="profile">配置文件。</param>
+    /// <returns>是否使用 CMD 启动。</returns>
+    private static bool GetSavedStartWithCmd(GameLaunchProfile profile)
+    {
+        // 旧版为全局开关，未按配置文件保存过时沿用旧值
+        return (profile.StartWithCmd ?? AppConfig.StartGameWithCMD) && string.IsNullOrEmpty(profile.ThirdPartyToolPath);
     }
 
 
@@ -426,6 +437,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
             LoginUid = AppConfig.GetDefaultLaunchLoginUid(CurrentGameBiz),
             SkipAutoDx12 = AppConfig.GetDefaultLaunchProfileSkipAutoDx12(CurrentGameBiz),
+            StartWithCmd = AppConfig.GetDefaultLaunchProfileStartWithCmd(CurrentGameBiz),
         };
         Profiles.Add(config1);
         foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz))
@@ -515,6 +527,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         // uid 未变化时 setter 不会同步下拉框（如新建配置文件、首次打开时都是 0），会留空而不是显示「不指定」
         SyncSelectedLoginAccountOption();
         EditingSkipAutoDx12 = profile.SkipAutoDx12;
+        EditingStartWithCmd = GetSavedStartWithCmd(profile);
         IsRenamingProfile = false;
         IsDirty = false;
         AppConfig.SetSelectedLaunchProfileId(CurrentGameBiz, profile.Id);
@@ -649,6 +662,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             AppConfig.SetDefaultLaunchProfileName(CurrentGameBiz, name);
             AppConfig.SetDefaultLaunchLoginUid(CurrentGameBiz, loginUid > 0 ? loginUid : null);
             AppConfig.SetDefaultLaunchProfileSkipAutoDx12(CurrentGameBiz, EditingSkipAutoDx12);
+            AppConfig.SetDefaultLaunchProfileStartWithCmd(CurrentGameBiz, EditingStartWithCmd);
             p.Argument = EditingArgument;
             p.EnableThirdPartyTool = enableTool;
             p.ThirdPartyToolPath = savedPath;
@@ -662,6 +676,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             p.EnableThirdPartyTool = !string.IsNullOrWhiteSpace(EditingThirdPartyToolPath);
             p.SkipAutoDx12 = EditingSkipAutoDx12;
         }
+        p.StartWithCmd = EditingStartWithCmd;
         p.LoginUid = loginUid > 0 ? loginUid : null;
         p.Name = name;
         EditingName = name;
@@ -703,6 +718,8 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         {
             Id = id,
             Name = ProfileNameFromId(id, null),
+            // 显式写入，新配置文件不继承旧版全局 CMD 开关
+            StartWithCmd = false,
         };
         Profiles.Add(profile);
         PersistExtraProfiles();
@@ -783,30 +800,6 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     private void DeleteThirdPartyToolPath()
     {
         EditingThirdPartyToolPath = null;
-    }
-
-
-    /// <summary>
-    /// 开启 CMD 启动时，清空并持久化当前配置文件的自定义启动程序（两者互斥，避免重新打开时残留）。
-    /// </summary>
-    private void ClearThirdPartyToolForCmd()
-    {
-        EditingThirdPartyToolPath = null;
-        if (SelectedProfile is GameLaunchProfile p && (p.EnableThirdPartyTool || !string.IsNullOrEmpty(p.ThirdPartyToolPath)))
-        {
-            p.EnableThirdPartyTool = false;
-            p.ThirdPartyToolPath = null;
-            if (p.IsDefault)
-            {
-                GameLauncherService.SetThirdPartyToolPath(CurrentGameId, null);
-                AppConfig.SetEnableThirdPartyTool(CurrentGameBiz, false);
-            }
-            else
-            {
-                PersistExtraProfiles();
-            }
-            UpdateIsDirty();
-        }
     }
 
 

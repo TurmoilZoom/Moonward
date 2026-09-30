@@ -4076,7 +4076,7 @@ Repository:</value>
     <value>Don't append for this profile</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>Applies to all profiles and can't be used with a custom startup executable.</value>
+    <value>Applies to this profile only and can't be used with a custom startup executable.</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>Close</value>

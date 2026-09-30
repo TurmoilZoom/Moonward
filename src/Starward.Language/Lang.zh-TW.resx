@@ -3987,7 +3987,7 @@
     <value>此設定檔不附加</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>對所有設定檔生效，與自訂啟動程式互斥</value>
+    <value>僅對此設定檔生效，與自訂啟動程式互斥</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>關閉</value>

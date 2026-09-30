@@ -3986,7 +3986,7 @@
     <value>このプロファイルでは付けない</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>すべてのプロファイルに適用され、カスタム起動プログラムとは併用できません</value>
+    <value>このプロファイルにのみ適用され、カスタム起動プログラムとは併用できません</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>閉じる</value>

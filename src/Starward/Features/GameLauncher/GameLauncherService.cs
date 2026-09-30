@@ -437,7 +437,7 @@ internal partial class GameLauncherService
     /// </summary>
     /// <returns></returns>
     /// <param name="profile">额外配置文件（config2…）；null 且 <paramref name="useNoneLaunchMethod"/> 为 false 时使用 config1 的 legacy 键。</param>
-    /// <param name="useNoneLaunchMethod">「无」：不使用启动参数配置（无命令行参数、无自定义启动程序），仍应用 DX12 等全局开关。</param>
+    /// <param name="useNoneLaunchMethod">「无」：不使用启动参数配置（无命令行参数、无自定义启动程序、不用 CMD 启动），仍应用 DX12 等全局开关。</param>
     /// <param name="loginUid">URL 或调用方显式指定的游戏角色 UID；优先于配置文件中的 <see cref="GameLaunchProfile.LoginUid"/>。自定义程序启动时不用于换票。</param>
     public async Task<Process?> StartGameAsync(GameId gameId, string? installPath = null, GameLaunchProfile? profile = null, bool useNoneLaunchMethod = false, long? loginUid = null)
     {
@@ -552,7 +552,8 @@ internal partial class GameLauncherService
             {
                 GameSettingService.SetGenshinEnableHDR(gameId.GameBiz, AppConfig.EnableGenshinHDR);
             }
-            if (!thirdPartyTool && AppConfig.StartGameWithCMD)
+            bool startWithCmd = !thirdPartyTool && ResolveStartWithCmd(gameId.GameBiz, profile, useNoneLaunchMethod);
+            if (startWithCmd)
             {
                 arg = $"""/c start "" /d "{Path.GetDirectoryName(exe)}" "{exe}" {arg}""";
                 exe = "cmd.exe";
@@ -569,7 +570,7 @@ internal partial class GameLauncherService
             Process? process = Process.Start(info);
             if (process != null)
             {
-                if (thirdPartyTool || AppConfig.StartGameWithCMD)
+                if (thirdPartyTool || startWithCmd)
                 {
                     return await _playTimeRecorderService.StartProcessToLogAsync(gameId);
                 }
@@ -605,9 +606,28 @@ internal partial class GameLauncherService
     }
 
 
-    /// <summary>StartGameWithCMD 会把参数再包一层引号，故票据值以空白或引号为界。</summary>
+    /// <summary>CMD 启动会把参数再包一层引号，故票据值以空白或引号为界。</summary>
     [GeneratedRegex("""login_auth_ticket=[^\s"]+""")]
     private static partial Regex LoginAuthTicketRegex();
+
+
+    /// <summary>
+    /// 解析本次启动是否使用 CMD 启动游戏（按配置文件保存）。
+    /// </summary>
+    /// <param name="biz">游戏区服。</param>
+    /// <param name="profile">额外配置文件；null 表示 config1（legacy 键）。</param>
+    /// <param name="useNoneLaunchMethod">「无」启动方式：不使用任何配置文件，也不使用 CMD。</param>
+    /// <returns>是否使用 CMD 启动。</returns>
+    internal static bool ResolveStartWithCmd(GameBiz biz, GameLaunchProfile? profile, bool useNoneLaunchMethod)
+    {
+        if (useNoneLaunchMethod)
+        {
+            return false;
+        }
+        bool? value = profile is null ? AppConfig.GetDefaultLaunchProfileStartWithCmd(biz) : profile.StartWithCmd;
+        // 旧版为全局开关，配置文件从未保存过该项时沿用旧值，升级后行为不变
+        return value ?? AppConfig.StartGameWithCMD;
+    }
 
 
     /// <summary>

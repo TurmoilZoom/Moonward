@@ -3981,7 +3981,7 @@ You are welcome to submit exported data to:</value>
     <value>ไม่แนบสำหรับโปรไฟล์นี้</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>มีผลกับทุกโปรไฟล์ และใช้ร่วมกับตัวเรียกใช้งานที่กำหนดเองไม่ได้</value>
+    <value>มีผลกับโปรไฟล์นี้เท่านั้น และใช้ร่วมกับตัวเรียกใช้งานที่กำหนดเองไม่ได้</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>ปิด</value>

@@ -4887,7 +4887,7 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Applies to all profiles and can't be used with a custom startup executable. 的本地化字符串。
+        ///   查找类似 Applies to this profile only and can't be used with a custom startup executable. 的本地化字符串。
         /// </summary>
         public static string GameLaunchProfileDialog_CmdLaunchScopeHint {
             get {

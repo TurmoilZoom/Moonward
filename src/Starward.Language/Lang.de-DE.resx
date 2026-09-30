@@ -3985,7 +3985,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
     <value>Für dieses Profil nicht anhängen</value>
   </data>
   <data name="GameLaunchProfileDialog_CmdLaunchScopeHint" xml:space="preserve">
-    <value>Gilt für alle Profile und lässt sich nicht mit einem benutzerdefinierten Startprogramm kombinieren.</value>
+    <value>Gilt nur für dieses Profil und lässt sich nicht mit einem benutzerdefinierten Startprogramm kombinieren.</value>
   </data>
   <data name="Common_Close" xml:space="preserve">
     <value>Schließen</value>
