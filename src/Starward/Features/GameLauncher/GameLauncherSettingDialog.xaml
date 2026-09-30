@@ -203,9 +203,10 @@
 
             </StackPanel>
 
-            <!--  版本信息：与上方路径栏同底色的圆角卡片，一行一项，标签在左、值靠右；行由代码按取到的数据生成，隐藏的项不留分隔线  -->
+            <!--  版本信息：与上方路径栏同底色的圆角卡片，一行一项，标签在左、值靠右；行由代码按取到的数据生成，隐藏的项不留分隔线。
+                  与路径栏的间距 = 外层 RowSpacing 12 + 这里的 4  -->
             <Grid Grid.Row="1"
-                  Margin="0,16,0,0"
+                  Margin="0,4,0,0"
                   RowSpacing="8"
                   Visibility="{x:Bind VersionInfoRows, Converter={StaticResource ObjectToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -265,6 +266,14 @@
                                                    Text="{x:Bind Value}"
                                                    TextTrimming="CharacterEllipsis"
                                                    Visibility="{x:Bind IsWarning}" />
+                                        <!--  行内开关（千星沙箱自动更新）：模板在旋钮右侧固定留 12、上下各留 10，负边距抵掉，与其他行的取值右缘对齐且不撑高行  -->
+                                        <ToggleSwitch MinWidth="0"
+                                                      Margin="0,-4,-12,-4"
+                                                      VerticalAlignment="Center"
+                                                      IsOn="{x:Bind IsToggleOn, Mode=TwoWay}"
+                                                      OffContent=""
+                                                      OnContent=""
+                                                      Visibility="{x:Bind HasToggle}" />
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>

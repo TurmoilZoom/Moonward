@@ -4225,6 +4225,9 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>Miliastra Sandbox</value>
   </data>
+  <data name="GameLauncherSettingDialog_AutoUpdateSandbox" xml:space="preserve">
+    <value>Автоматически обновлять Miliastra Sandbox</value>
+  </data>
   <data name="RepairGameDialog_Title" xml:space="preserve">
     <value>Выберите, что восстановить</value>
   </data>

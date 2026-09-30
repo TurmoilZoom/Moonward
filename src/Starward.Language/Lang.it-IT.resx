@@ -4205,6 +4205,9 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>Miliastra Sandbox</value>
   </data>
+  <data name="GameLauncherSettingDialog_AutoUpdateSandbox" xml:space="preserve">
+    <value>Aggiorna automaticamente Miliastra Sandbox</value>
+  </data>
   <data name="RepairGameDialog_Title" xml:space="preserve">
     <value>Seleziona cosa riparare</value>
   </data>

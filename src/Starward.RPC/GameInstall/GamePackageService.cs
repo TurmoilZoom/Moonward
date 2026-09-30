@@ -116,7 +116,7 @@ internal partial class GamePackageService
                 _logger.LogWarning("GameConfig of ({GameBiz}) is null.", context.GameId.GameBiz);
                 throw new ArgumentNullException($"GameConfig of ({context.GameId.GameBiz}) is null.");
             }
-            if (context.Operation is GameInstallOperation.RepairWPFPackage)
+            if (context.Operation is GameInstallOperation.RepairWPFPackage or GameInstallOperation.UpdateWPFPackage)
             {
                 await PrepareForRepairWPFPackageAsync(context, cancellationToken);
                 return;
@@ -191,7 +191,7 @@ internal partial class GamePackageService
 
 
     /// <summary>
-    /// 准备只修复 WPF 包（千星沙箱）：只需要游戏配置和 WPF 包信息，不取游戏资源清单。
+    /// 准备只修复或更新 WPF 包（千星沙箱）：只需要游戏配置和 WPF 包信息，不取游戏资源清单。
     /// </summary>
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
