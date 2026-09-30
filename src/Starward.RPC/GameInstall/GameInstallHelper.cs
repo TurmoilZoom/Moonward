@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SharpSevenZip;
 using SharpSevenZip.Exceptions;
 using Snap.HPatch;
+using Starward.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -301,7 +302,9 @@ internal partial class GameInstallHelper
         Directory.CreateDirectory(Path.GetDirectoryName(file.FullPath)!);
         if (Kernel32.CreateHardLink(temp, file.HardLinkTarget!))
         {
+            List<string> shared = alreadyLinked ? [] : GetSharedInstallFiles(task, file);
             File.Move(temp, file.FullPath, true);
+            RelinkSharedInstallFiles(task, file.FullPath, shared);
             if (!alreadyLinked)
             {
                 Interlocked.Increment(ref task._rewrittenFileCount);
@@ -335,6 +338,174 @@ internal partial class GameInstallHelper
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception)
         {
             return false;
+        }
+    }
+
+
+
+    /// <summary>
+    /// 修复时，列出与本区服这个文件共用同一份数据、需要一并修好的其他区服文件。
+    /// 硬链接的区服在磁盘上用的是同一份数据，本区服的文件坏了，对方的也坏了；修复用新文件替换本区服的路径后，对方仍指向旧数据，
+    /// 所以要在替换前记下这些路径，替换后由 <see cref="RelinkSharedInstallFiles"/> 链接到修好的文件。
+    /// 只收录同一游戏、config.ini 版本与修复目标版本相同、并且文件在对方目录中的位置与本区服一致的路径（原神国服与国际服的数据目录名不同也能对上）：
+    /// 版本不同时两边这个文件该有的内容可能不同，不能动。
+    /// </summary>
+    /// <param name="task">修复任务，其他操作一律返回空</param>
+    /// <param name="file">本区服即将被替换的文件</param>
+    /// <returns>其他区服中要重新链接的完整路径</returns>
+    private List<string> GetSharedInstallFiles(GameInstallContext task, GameInstallFile file)
+    {
+        List<string> result = [];
+        if (task.Operation is not GameInstallOperation.Repair || string.IsNullOrWhiteSpace(file.File) || !File.Exists(file.FullPath))
+        {
+            return result;
+        }
+        try
+        {
+            if (!Kernel32.GetVolumePathName(file.FullPath, out string? volume) || string.IsNullOrWhiteSpace(volume))
+            {
+                return result;
+            }
+            string installPrefix = Path.TrimEndingDirectorySeparator(Path.GetFullPath(task.InstallPath)) + Path.DirectorySeparatorChar;
+            foreach (string name in Kernel32.EnumHardLinks(file.FullPath))
+            {
+                // 返回的是不带盘符的卷内路径，如 \Games\hk4e_bilibili\...
+                string path = Path.GetFullPath(Path.Join(volume, name.TrimStart(Path.DirectorySeparatorChar)));
+                if (path.StartsWith(installPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                if (GetSharedInstallRoot(path, file.File) is string root && IsSharedInstallRepairable(task, root))
+                {
+                    result.Add(path);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // 只影响其他区服，不能让本区服的修复失败
+            _logger.LogWarning(ex, "Failed to enumerate hard links of {file}", file.FullPath);
+        }
+        return result;
+    }
+
+
+
+    /// <summary>
+    /// 由其他区服中的硬链接路径推出它的游戏目录：路径末尾须是本区服这个文件的相对路径。
+    /// 原神国服（含 B 服）的数据目录是 YuanShen_Data，国际服是 GenshinImpact_Data，硬链接安装时按对方的目录名对应，两种都要试。
+    /// </summary>
+    /// <param name="path">其他区服中的硬链接完整路径</param>
+    /// <param name="relativePath">本区服这个文件相对于游戏目录的路径</param>
+    /// <returns>对方的游戏目录；对不上时为 <see langword="null"/>，说明不是按游戏目录结构链接的，不去动它</returns>
+    private static string? GetSharedInstallRoot(string path, string relativePath)
+    {
+        const string YuanShen_Data = nameof(YuanShen_Data);
+        const string GenshinImpact_Data = nameof(GenshinImpact_Data);
+        string relative = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar);
+        List<string> candidates = [relative];
+        if (relative.StartsWith(YuanShen_Data + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        {
+            candidates.Add(GenshinImpact_Data + relative[YuanShen_Data.Length..]);
+        }
+        else if (relative.StartsWith(GenshinImpact_Data + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        {
+            candidates.Add(YuanShen_Data + relative[GenshinImpact_Data.Length..]);
+        }
+        foreach (string candidate in candidates)
+        {
+            string suffix = Path.DirectorySeparatorChar + candidate;
+            if (path.Length > suffix.Length && path.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+            {
+                return path[..^suffix.Length];
+            }
+        }
+        return null;
+    }
+
+
+
+    /// <summary>
+    /// 其他区服的游戏目录能否一并修复：config.ini 记录的是同一游戏，版本与本次修复的目标版本相同。结果按目录缓存在任务上。
+    /// </summary>
+    /// <param name="task">修复任务</param>
+    /// <param name="root">其他区服的游戏目录</param>
+    /// <returns></returns>
+    private bool IsSharedInstallRepairable(GameInstallContext task, string root)
+    {
+        return task.SharedInstallRoots.GetOrAdd(root, folder =>
+        {
+            string? version = null, biz = null;
+            try
+            {
+                string config = Path.Join(folder, "config.ini");
+                if (File.Exists(config))
+                {
+                    // 与读取本地版本一致，重复的键以最后一个为准
+                    foreach (string line in File.ReadLines(config))
+                    {
+                        if (line.StartsWith("game_version=", StringComparison.OrdinalIgnoreCase))
+                        {
+                            version = line["game_version=".Length..].Trim();
+                        }
+                        else if (line.StartsWith("game_biz=", StringComparison.OrdinalIgnoreCase))
+                        {
+                            biz = line["game_biz=".Length..].Trim();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogWarning(ex, "Failed to read config.ini of hard-linked install {root}", folder);
+            }
+            bool repairable = Version.TryParse(version, out Version? local)
+                && Version.TryParse(task.LatestGameVersion, out Version? latest)
+                && local == latest
+                && !string.IsNullOrWhiteSpace(biz)
+                && new GameBiz(biz).Game == task.GameId.GameBiz.Game;
+            _logger.LogInformation("GameInstallTask ({GameBiz}): Hard-linked install {root} ({biz}, {version}) shares files, repair together: {repairable}", task.GameId.GameBiz, folder, biz, version, repairable);
+            return repairable;
+        });
+    }
+
+
+
+    /// <summary>
+    /// 把 <see cref="GetSharedInstallFiles"/> 记下的其他区服文件重新链接到本区服修好的文件，两边恢复共用同一份数据。
+    /// 对方游戏正在运行等原因替换失败时只记日志，不影响本区服的修复。
+    /// </summary>
+    /// <param name="task">修复任务</param>
+    /// <param name="source">本区服修好并通过校验的文件</param>
+    /// <param name="paths">其他区服中要重新链接的完整路径</param>
+    private void RelinkSharedInstallFiles(GameInstallContext task, string source, List<string> paths)
+    {
+        foreach (string path in paths)
+        {
+            string temp = path + ".link";
+            try
+            {
+                if (File.Exists(temp))
+                {
+                    File.Delete(temp);
+                }
+                if (!Kernel32.CreateHardLink(temp, source))
+                {
+                    _logger.LogWarning("Failed to create hard link {temp} to repaired file {source}, error: {error}", temp, source, Marshal.GetLastPInvokeError());
+                    continue;
+                }
+                File.Move(temp, path, true);
+                Interlocked.Increment(ref task._sharedInstallRelinkedFileCount);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogWarning(ex, "Failed to relink {path} to repaired file {source}", path, source);
+                try
+                {
+                    File.Delete(temp);
+                }
+                catch { }
+            }
         }
     }
 
@@ -489,7 +660,9 @@ internal partial class GameInstallHelper
 
         if (await CheckFileMD5Async(task, path_tmp, file.Size, file.MD5, cancellationToken))
         {
+            List<string> shared = GetSharedInstallFiles(task, file);
             File.Move(path_tmp, file.FullPath, true);
+            RelinkSharedInstallFiles(task, file.FullPath, shared);
         }
         else
         {
@@ -785,7 +958,7 @@ internal partial class GameInstallHelper
         }
         else
         {
-            await DownloadToFileAsync(task, file.FullPath, file.Url, file.Size, file.MD5, cancellationToken);
+            await DownloadToFileAsync(task, file.FullPath, file.Url, file.Size, file.MD5, file, cancellationToken);
         }
     }
 
@@ -816,7 +989,25 @@ internal partial class GameInstallHelper
     /// <param name="md5"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task DownloadToFileAsync(GameInstallContext task, string path, string url, long size, string md5, CancellationToken cancellationToken = default)
+    public Task DownloadToFileAsync(GameInstallContext task, string path, string url, long size, string md5, CancellationToken cancellationToken = default)
+    {
+        return DownloadToFileAsync(task, path, url, size, md5, null, cancellationToken);
+    }
+
+
+
+    /// <summary>
+    /// 下载到文件
+    /// </summary>
+    /// <param name="task"></param>
+    /// <param name="path"></param>
+    /// <param name="url"></param>
+    /// <param name="size"></param>
+    /// <param name="md5"></param>
+    /// <param name="file">下载的是游戏文件时传入，修复时用来一并重新链接共用这个文件的其他区服，见 <see cref="GetSharedInstallFiles"/></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task DownloadToFileAsync(GameInstallContext task, string path, string url, long size, string md5, GameInstallFile? file, CancellationToken cancellationToken)
     {
         if (await CheckFileMD5InDownloadProgressAsync(task, path, size, md5, cancellationToken))
         {
@@ -874,7 +1065,9 @@ internal partial class GameInstallHelper
 
         if (await CheckFileMD5Async(task, path_tmp, size, md5, cancellationToken))
         {
+            List<string> shared = file is null ? [] : GetSharedInstallFiles(task, file);
             File.Move(path_tmp, path, true);
+            RelinkSharedInstallFiles(task, path, shared);
         }
         else
         {

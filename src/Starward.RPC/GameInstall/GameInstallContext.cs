@@ -1,6 +1,7 @@
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -100,6 +101,16 @@ public class GameInstallContext
     /// </summary>
     public long RewrittenFileCount { get => _rewrittenFileCount; set => _rewrittenFileCount = value; }
     internal long _rewrittenFileCount;
+
+    /// <summary>
+    /// 修复时一并重新链接到修好文件的其他硬链接区服文件数，只用于日志与埋点
+    /// </summary>
+    internal long _sharedInstallRelinkedFileCount;
+
+    /// <summary>
+    /// 修复时判断过的其他硬链接区服目录，值为能否一并修复。同一目录的 config.ini 只读一次
+    /// </summary>
+    internal ConcurrentDictionary<string, bool> SharedInstallRoots { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// 用户关闭了「自动更新千星沙箱」：更新或修复游戏资源时不顺带更新千星沙箱。只在 RPC 进程内使用，随请求传入

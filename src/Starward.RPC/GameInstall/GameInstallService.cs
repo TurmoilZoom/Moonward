@@ -787,6 +787,11 @@ internal class GameInstallService
                 file.IsFinished = true;
             });
         }
+        long relinked = Interlocked.Read(ref context._sharedInstallRelinkedFileCount);
+        if (relinked > 0)
+        {
+            _logger.LogInformation("GameInstallTask ({GameBiz}): Relinked {count} files of other hard-linked installs to repaired files", context.GameId.GameBiz, relinked);
+        }
 
         // todo celar useless audio
         // 与官方启动器一致：修复游戏资源不校验千星沙箱的文件内容，只在版本落后时更新；沙箱损坏走单独的千星沙箱修复
@@ -1262,6 +1267,7 @@ internal class GameInstallService
             ("write_total", context.Progress_WriteTotalBytes),
             ("files", context.TaskFiles?.Count ?? 0),
             ("files_done", context.TaskFiles?.Count(x => x.IsFinished) ?? 0),
+            ("shared_relinked", Interlocked.Read(ref context._sharedInstallRelinkedFileCount)),
             ("error_type", error?.GetType().Name),
             ("error", error?.Message));
     }
