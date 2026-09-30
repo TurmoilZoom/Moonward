@@ -184,6 +184,14 @@ public class GameInstallContext
     /// </summary>
     internal string TransactionId { get; } = Guid.NewGuid().ToString("N")[..12];
 
+
+    private static long s_queueSequence;
+
+    /// <summary>
+    /// 创建顺序，排队的任务按它先进先出。一并更新硬链接的区服时要靠它保证本体先更新
+    /// </summary>
+    internal long QueueSequence { get; } = Interlocked.Increment(ref s_queueSequence);
+
     /// <summary>
     /// 本轮运行开始的时间戳（<see cref="Stopwatch"/>），埋点算耗时
     /// </summary>
