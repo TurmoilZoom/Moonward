@@ -87,6 +87,13 @@ public class GameInfoDisplay
     [JsonPropertyName("thumbnail")]
     public GameImage? Thumbnail { get; set; }
 
+
+    /// <summary>
+    /// 千星沙箱（WPF 包）的图标，只有原神有，其余游戏的 url 为空
+    /// </summary>
+    [JsonPropertyName("wpf_icon")]
+    public GameImage? WpfIcon { get; set; }
+
 }
 
 

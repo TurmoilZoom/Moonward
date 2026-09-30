@@ -333,12 +333,14 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
                 return;
             }
             Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "repair"));
+            bool hasWPFPackage = await HasWPFPackageAsync();
             _repairGameDialog = new RepairGameDialog
             {
                 CurrentGameId = CurrentGameId,
                 InstallPath = InstallPath,
                 CurrentGameBizIcon = CurrentGameBizIcon,
-                HasWPFPackage = await HasWPFPackageAsync(),
+                HasWPFPackage = hasWPFPackage,
+                WPFIconUrl = hasWPFPackage ? await GetWPFIconUrlAsync() : null,
             };
             this.Hide();
         }
@@ -364,6 +366,25 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         {
             _logger.LogWarning(ex, "Get WPF package ({biz})", CurrentGameBiz);
             return false;
+        }
+    }
+
+
+
+    /// <summary>
+    /// 千星沙箱的官方图标，取不到时为 <see langword="null"/>，修复对话框改用拼图图标
+    /// </summary>
+    /// <returns></returns>
+    private async Task<string?> GetWPFIconUrlAsync()
+    {
+        try
+        {
+            return (await _hoyoPlayService.GetGameInfoAsync(CurrentGameId))?.Display?.WpfIcon?.Url;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get WPF icon ({biz})", CurrentGameBiz);
+            return null;
         }
     }
 

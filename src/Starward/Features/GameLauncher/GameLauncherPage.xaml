@@ -633,12 +633,19 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition MinWidth="52" />
                     </Grid.ColumnDefinitions>
+                    <!--  官方图标（getGames 的 wpf_icon），取不到时用拼图图标  -->
+                    <sc:CachedImage Width="24"
+                                    Height="24"
+                                    VerticalAlignment="Center"
+                                    Source="{x:Bind WPFPackageIconUrl, Mode=OneWay}"
+                                    Visibility="{x:Bind WPFPackageIconUrl, Mode=OneWay, Converter={StaticResource ObjectToVisibilityConverter}}" />
                     <TextBlock Margin="0,2,0,0"
                                VerticalAlignment="Center"
                                cu:Effects.Shadow="{StaticResource TextShadow}"
                                FontFamily="{ThemeResource SegoeFluentIcons}"
                                FontSize="22"
-                               Text="&#xEA86;" />
+                               Text="&#xEA86;"
+                               Visibility="{x:Bind HasNoWPFPackageIcon, Mode=OneWay}" />
                     <TextBlock Grid.Column="1"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"

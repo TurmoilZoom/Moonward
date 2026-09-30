@@ -13,12 +13,46 @@
                Style="{ThemeResource DefaultContentDialogStyle}"
                mc:Ignorable="d">
 
+    <ContentDialog.Resources>
+        <Thickness x:Key="ContentDialogPadding">0</Thickness>
+        <!--  模板里空的 Title 行仍带 0,0,0,12 的下边距，不清零的话顶部会比左右多空 12（同启动参数配置对话框）  -->
+        <Thickness x:Key="ContentDialogTitleMargin">0</Thickness>
+    </ContentDialog.Resources>
+
 
     <!--  与官方启动器的「请选择修复对象」一致：每个修复对象一行，各自一个修复按钮；卡片样式同游戏设置的版本信息  -->
-    <StackPanel Width="420" Spacing="12">
-        <TextBlock FontSize="20"
-                   Text="{x:Bind lang:Lang.RepairGameDialog_Title}"
-                   TextWrapping="Wrap" />
+    <StackPanel Width="468"
+                Padding="24"
+                Spacing="12">
+
+        <!--  标题行（同启动参数配置对话框）：负边距把整行上移 16、右伸 16，关闭按钮贴到距边框 8 的右上角，标题仍与下方内容左缘对齐  -->
+        <Grid Height="32"
+              Margin="0,-16,-16,0"
+              ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="20"
+                       Text="{x:Bind lang:Lang.RepairGameDialog_Title}"
+                       TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="1"
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    BorderThickness="0"
+                    Command="{x:Bind CloseCommand}"
+                    CornerRadius="8"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                <FontIcon FontSize="16"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE711;"
+                          IsTextScaleFactorEnabled="False" />
+            </Button>
+        </Grid>
+
         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                    Text="{x:Bind lang:Lang.RepairGameDialog_Description}"
                    TextWrapping="Wrap" />
@@ -67,12 +101,19 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <FontIcon Width="24"
-                                  Height="24"
-                                  VerticalAlignment="Center"
-                                  FontSize="18"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                  Glyph="&#xEA86;" />
+                        <!--  官方图标（getGames 的 wpf_icon），取不到时用拼图图标  -->
+                        <Grid Width="24"
+                              Height="24"
+                              VerticalAlignment="Center">
+                            <sc:CachedImage Width="24"
+                                            Height="24"
+                                            Source="{x:Bind WPFIconUrl}"
+                                            Visibility="{x:Bind HasWPFIcon}" />
+                            <FontIcon FontSize="18"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xEA86;"
+                                      Visibility="{x:Bind HasNoWPFIcon}" />
+                        </Grid>
                         <TextBlock Grid.Column="1"
                                    VerticalAlignment="Center"
                                    Text="{x:Bind lang:Lang.GameLauncherSettingDialog_MiliastraSandbox}" />
@@ -85,12 +126,6 @@
                 </StackPanel>
             </StackPanel>
         </Border>
-
-        <Button MinWidth="100"
-                Margin="0,16,0,0"
-                HorizontalAlignment="Right"
-                Command="{x:Bind CancelCommand}"
-                Content="{x:Bind lang:Lang.Common_Cancel}" />
     </StackPanel>
 
 </ContentDialog>

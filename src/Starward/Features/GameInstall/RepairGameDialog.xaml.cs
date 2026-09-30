@@ -54,6 +54,15 @@ public sealed partial class RepairGameDialog : ContentDialog
     /// </summary>
     public bool HasWPFPackage { get; set; }
 
+    /// <summary>
+    /// 千星沙箱的官方图标（getGames 的 wpf_icon），取不到时为 <see langword="null"/>，显示拼图图标
+    /// </summary>
+    public string? WPFIconUrl { get; set; }
+
+    public bool HasWPFIcon => !string.IsNullOrWhiteSpace(WPFIconUrl);
+
+    public bool HasNoWPFIcon => !HasWPFIcon;
+
 
 
     /// <summary>
@@ -123,7 +132,7 @@ public sealed partial class RepairGameDialog : ContentDialog
 
 
     [RelayCommand]
-    private void Cancel()
+    private void Close()
     {
         this.Hide();
     }

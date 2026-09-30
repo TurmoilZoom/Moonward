@@ -1076,6 +1076,15 @@ public sealed partial class GameLauncherPage : PageBase
     /// </summary>
     public string? WPFPackageRepairTooltip { get; set => SetProperty(ref field, value); }
 
+    /// <summary>
+    /// 千星沙箱的官方图标，取不到时为 <see langword="null"/>，改用拼图图标
+    /// </summary>
+    public string? WPFPackageIconUrl { get; set { if (SetProperty(ref field, value)) OnPropertyChanged(nameof(HasNoWPFPackageIcon)); } }
+
+    public bool HasNoWPFPackageIcon => string.IsNullOrWhiteSpace(WPFPackageIconUrl);
+
+    private bool _wpfPackageIconRequested;
+
 
 
     /// <summary>
@@ -1103,6 +1112,31 @@ public sealed partial class GameLauncherPage : PageBase
         };
         WPFPackageRepairText = progress is double value ? $"{value:P1}" : stage;
         WPFPackageRepairTooltip = $"{Lang.GameLauncherSettingDialog_MiliastraSandbox} · {stage}";
+        if (!_wpfPackageIconRequested)
+        {
+            _wpfPackageIconRequested = true;
+            _ = LoadWPFPackageIconAsync();
+        }
+    }
+
+
+
+    /// <summary>
+    /// 读取千星沙箱的官方图标（getGames 的 wpf_icon），只在第一次显示修复进度时读取
+    /// </summary>
+    /// <returns></returns>
+    private async Task LoadWPFPackageIconAsync()
+    {
+        try
+        {
+            string? url = (await _hoYoPlayService.GetGameInfoAsync(CurrentGameId))?.Display?.WpfIcon?.Url;
+            // 没有图标时 url 是空字符串，统一成 null，图片与拼图图标才不会同时显示
+            WPFPackageIconUrl = string.IsNullOrWhiteSpace(url) ? null : url;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get WPF icon ({biz})", CurrentGameBiz);
+        }
     }
 
 
