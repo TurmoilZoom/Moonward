@@ -1806,7 +1806,7 @@
     <value>ย้ายเกม</value>
   </data>
   <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
-    <value>ไม่พบการติดตั้งเกมนี้ในตัวเรียกใช้งานอย่างเป็นทางการ กรุณาค้นหาเกมด้วยตนเอง</value>
+    <value>ไม่พบตำแหน่งที่ติดตั้งเกมนี้ กรุณาค้นหาเกมด้วยตนเอง</value>
   </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>ข้อมูลพื้นฐาน</value>

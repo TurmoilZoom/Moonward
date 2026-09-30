@@ -1865,7 +1865,7 @@
     <value>重新定位游戏</value>
   </data>
   <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
-    <value>未在官方启动器中找到该游戏的安装记录，请手动定位游戏。</value>
+    <value>未找到该游戏的安装位置，请手动定位游戏。</value>
   </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>基本信息</value>

@@ -263,7 +263,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
     /// <summary>
-    /// 从官方启动器的注册表自动查找当前游戏的安装目录，只查当前游戏
+    /// 自动查找当前游戏的安装目录（见 <see cref="GameLauncherService.FindGameInstallPath"/>），只查当前游戏
     /// </summary>
     /// <returns></returns>
     [RelayCommand]
@@ -271,7 +271,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     {
         try
         {
-            string? folder = GameLauncherService.FindGameInstallPathFromRegistry(CurrentGameBiz);
+            string? folder = GameLauncherService.FindGameInstallPath(CurrentGameBiz);
             if (folder is null)
             {
                 TextBlock_NetworkDriveWarning.Visibility = Visibility.Collapsed;

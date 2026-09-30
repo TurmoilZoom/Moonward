@@ -129,11 +129,85 @@ internal partial class GameLauncherService
 
 
     /// <summary>
+    /// 自动查找游戏安装目录，依次查找：上次清除的安装路径、安装父目录下以区服命名的子文件夹、官方启动器注册表。
+    /// 前两处针对本软件安装（含硬链接）的游戏，要求目录中有游戏 exe。
+    /// </summary>
+    /// <param name="gameBiz"></param>
+    /// <returns>找到的安装目录，未找到时为 <see langword="null"/></returns>
+    public static string? FindGameInstallPath(GameBiz gameBiz)
+    {
+        List<string> candidates = new();
+        string? lastPath = AppConfig.GetLastGameInstallPath(gameBiz);
+        if (!string.IsNullOrWhiteSpace(lastPath))
+        {
+            candidates.Add(lastPath);
+        }
+        // 安装对话框默认勾选「自动创建子文件夹」，游戏装在安装父目录下以区服命名的子文件夹
+        string? defaultFolder = AppConfig.DefaultGameInstallationPath;
+        if (!string.IsNullOrWhiteSpace(defaultFolder))
+        {
+            candidates.Add(Path.Join(defaultFolder, gameBiz.ToString()));
+        }
+        candidates.Add(Path.Join(GetFallbackGameInstallationFolder(), gameBiz.ToString()));
+        foreach (string candidate in candidates)
+        {
+            try
+            {
+                string folder = GetFullPathIfRelativePath(candidate);
+                if (IsGameInstallFolder(gameBiz, folder))
+                {
+                    return folder;
+                }
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                // 路径无效，跳过
+            }
+        }
+        return FindGameInstallPathFromRegistry(gameBiz);
+    }
+
+
+
+    /// <summary>
+    /// 目录中是否有该游戏的 exe；exe 名要联网获取的游戏（未适配的 GameBiz）退而检查 config.ini
+    /// </summary>
+    /// <param name="gameBiz"></param>
+    /// <param name="folder">完整路径</param>
+    /// <returns></returns>
+    private static bool IsGameInstallFolder(GameBiz gameBiz, string folder)
+    {
+        return File.Exists(Path.Join(folder, GetGameExeName(gameBiz) ?? "config.ini"));
+    }
+
+
+
+    /// <summary>
+    /// 没有设置默认安装目录时，安装对话框使用的安装父目录：软件在可移动存储上时放在软件旁，否则放在 Program Files 下
+    /// </summary>
+    /// <returns></returns>
+    public static string GetFallbackGameInstallationFolder()
+    {
+        if (AppConfig.IsAppInRemovableStorage)
+        {
+            if (AppConfig.IsPortable && Directory.GetParent(AppContext.BaseDirectory) is { } portableRoot)
+            {
+                // 便携版：游戏装在 Velopack 根目录（current 的上一级）旁，更新替换 current 时不受影响。
+                return Path.Combine(portableRoot.FullName, "Games");
+            }
+            return Path.Combine(Path.GetDirectoryName(AppConfig.MoonwardExecutePath)!, "Games");
+        }
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Starward/Games");
+    }
+
+
+
+    /// <summary>
     /// 从官方启动器（HoYoPlay）写入的注册表查找游戏安装目录
     /// </summary>
     /// <param name="gameBiz"></param>
     /// <returns>存在的安装目录，未找到时为 <see langword="null"/></returns>
-    public static string? FindGameInstallPathFromRegistry(GameBiz gameBiz)
+    private static string? FindGameInstallPathFromRegistry(GameBiz gameBiz)
     {
         // HoYoPlay 只管国服和国际服，B 服等其他区服没有对应的注册表项
         string? key = gameBiz.Server switch
@@ -757,6 +831,12 @@ internal partial class GameLauncherService
         }
         else
         {
+            // 清除前记下原路径：软件内安装（含硬链接）的游戏不在官方启动器注册表里，自动查找要靠它找回
+            string? previousPath = AppConfig.GetGameInstallPath(gameBiz);
+            if (!string.IsNullOrWhiteSpace(previousPath))
+            {
+                AppConfig.SetLastGameInstallPath(gameBiz, previousPath);
+            }
             path = null;
             AppConfig.SetGameInstallPath(gameBiz, null);
             AppConfig.SetGameInstallPathRemovable(gameBiz, false);

@@ -83,32 +83,8 @@ public sealed partial class InstallGameDialog : ContentDialog
                 SetInstallationPath(Path.GetFullPath(Path.Combine(defaultFolder, CurrentGameId.GameBiz)));
                 return;
             }
-            string baseFolder = "";
-            if (AppConfig.IsAppInRemovableStorage)
-            {
-                if (AppConfig.IsPortable && Directory.GetParent(AppContext.BaseDirectory) is { } portableRoot)
-                {
-                    // 便携版：游戏装在 Velopack 根目录（current 的上一级）旁，更新替换 current 时不受影响。
-                    baseFolder = Path.Combine(portableRoot.FullName, "Games");
-                }
-                else
-                {
-                    baseFolder = Path.Combine(Path.GetDirectoryName(AppConfig.MoonwardExecutePath)!, "Games");
-                }
-            }
-            else
-            {
-                string? defaultPath = AppConfig.DefaultGameInstallationPath;
-                if (Directory.Exists(defaultPath))
-                {
-                    baseFolder = defaultPath;
-                }
-                else
-                {
-                    baseFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Starward/Games");
-                }
-            }
-            string target = Path.Combine(baseFolder, CurrentGameId.GameBiz);
+            // 自动查找也会检查这个目录，路径规则统一放在 GameLauncherService
+            string target = Path.Combine(GameLauncherService.GetFallbackGameInstallationFolder(), CurrentGameId.GameBiz);
             if (Path.IsPathFullyQualified(target))
             {
                 SetInstallationPath(Path.GetFullPath(target));

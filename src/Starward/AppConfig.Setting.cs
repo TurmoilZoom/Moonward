@@ -893,6 +893,26 @@ public static partial class AppConfig
         SetValue(value, $"install_path_removable_{biz}");
     }
 
+    /// <summary>
+    /// 获取指定游戏上一次被清除的安装路径，供自动查找找回。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <returns>清除前保存的路径（可移动存储上为相对路径）或 null。</returns>
+    public static string? GetLastGameInstallPath(GameBiz biz)
+    {
+        return GetValue<string>(default, $"last_install_path_{biz}");
+    }
+
+    /// <summary>
+    /// 设置指定游戏上一次被清除的安装路径。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">清除前保存的路径。</param>
+    public static void SetLastGameInstallPath(GameBiz biz, string? value)
+    {
+        SetValue(value, $"last_install_path_{biz}");
+    }
+
 
     public static bool GetEnableThirdPartyTool(GameBiz biz)
     {

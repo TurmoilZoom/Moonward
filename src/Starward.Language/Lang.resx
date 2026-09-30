@@ -1865,7 +1865,7 @@ Do you accept the risk and continue to use it?</value>
     <value>Relocate Game</value>
   </data>
   <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
-    <value>No installation of this game was found in the official launcher. Please locate the game manually.</value>
+    <value>Could not find where this game is installed. Please locate the game manually.</value>
   </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Basic Information</value>

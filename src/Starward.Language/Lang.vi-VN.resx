@@ -1807,7 +1807,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
     <value>Tìm Trò Chơi</value>
   </data>
   <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
-    <value>Không tìm thấy bản cài đặt của trò chơi này trong trình khởi chạy chính thức. Vui lòng tìm trò chơi thủ công.</value>
+    <value>Không tìm thấy vị trí cài đặt của trò chơi này. Vui lòng tìm trò chơi thủ công.</value>
   </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Thông tin cơ bản</value>

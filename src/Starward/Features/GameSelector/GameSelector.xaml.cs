@@ -949,7 +949,7 @@ public sealed partial class GameSelector : UserControl
 
 
     /// <summary>
-    /// 从注册表自动搜索已安装的游戏，找到的追加到待选游戏，没找到的不会从待选游戏中移除
+    /// 自动搜索已安装的游戏（见 <see cref="GameLauncherService.FindGameInstallPath"/>），找到的追加到待选游戏，没找到的不会从待选游戏中移除
     /// </summary>
     [RelayCommand]
     public void AutoSearchInstalledGames()
@@ -977,10 +977,10 @@ public sealed partial class GameSelector : UserControl
                         continue;
                     }
                 }
-                path = GameLauncherService.FindGameInstallPathFromRegistry(gameBiz);
+                path = GameLauncherService.FindGameInstallPath(gameBiz);
                 if (path is not null)
                 {
-                    AppConfig.SetGameInstallPath(gameBiz, path);
+                    GameLauncherService.ChangeGameInstallPath(gameBiz, path);
                     if (!selectedBizs.Contains(gameBiz))
                     {
                         selectedBizs.Add(gameBiz);
