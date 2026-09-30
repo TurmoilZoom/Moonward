@@ -263,7 +263,9 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
     /// <summary>
-    /// 自动查找当前游戏的安装目录（见 <see cref="GameLauncherService.FindGameInstallPath"/>），只查当前游戏
+    /// 自动查找当前游戏的安装目录，只保存当前游戏。
+    /// 第一轮见 <see cref="GameLauncherService.FindGameInstallPath"/>；
+    /// 第二轮以同一游戏其他区服的安装目录为锚点反查硬链接，见 <see cref="GameLauncherService.FindHardLinkedGameInstallPaths"/>
     /// </summary>
     /// <returns></returns>
     [RelayCommand]
@@ -271,7 +273,18 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     {
         try
         {
-            string? folder = GameLauncherService.FindGameInstallPath(CurrentGameBiz);
+            GameBiz gameBiz = CurrentGameBiz;
+            string? folder = GameLauncherService.FindGameInstallPath(gameBiz);
+            if (folder is null)
+            {
+                Dictionary<GameBiz, string> anchors = GameLauncherService.GetHardLinkAnchors(gameBiz);
+                if (anchors.Count > 0)
+                {
+                    // 第二轮要遍历游戏文件，放到后台线程
+                    var linkedPaths = await Task.Run(() => GameLauncherService.FindHardLinkedGameInstallPaths([gameBiz], anchors));
+                    folder = linkedPaths.Count > 0 ? linkedPaths[0].Path : null;
+                }
+            }
             if (folder is null)
             {
                 TextBlock_NetworkDriveWarning.Visibility = Visibility.Collapsed;

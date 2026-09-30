@@ -949,15 +949,19 @@ public sealed partial class GameSelector : UserControl
 
 
     /// <summary>
-    /// 自动搜索已安装的游戏（见 <see cref="GameLauncherService.FindGameInstallPath"/>），找到的追加到待选游戏，没找到的不会从待选游戏中移除
+    /// 自动搜索已安装的游戏，找到的追加到待选游戏，没找到的不会从待选游戏中移除。
+    /// 第一轮见 <see cref="GameLauncherService.FindGameInstallPath"/>；
+    /// 第二轮以第一轮找到的目录为锚点反查硬链接，见 <see cref="GameLauncherService.FindHardLinkedGameInstallPaths"/>
     /// </summary>
     [RelayCommand]
-    public void AutoSearchInstalledGames()
+    public async Task AutoSearchInstalledGamesAsync()
     {
         try
         {
             List<GameInfo> gameInfos = GetCachedGameInfos();
             List<string> selectedBizs = AppConfig.SelectedGameBizs?.Split(',', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList() ?? [];
+            List<GameBiz> allBizs = new();
+            Dictionary<GameBiz, string> foundPaths = new();
             foreach (GameInfo item in gameInfos)
             {
                 GameBiz gameBiz = item.GameBiz;
@@ -965,15 +969,13 @@ public sealed partial class GameSelector : UserControl
                 {
                     gameBiz = $"{gameBiz.Game}_bilibili";
                 }
+                allBizs.Add(gameBiz);
                 string? path = GameLauncherService.GetGameInstallPath(gameBiz);
                 if (!string.IsNullOrWhiteSpace(path))
                 {
                     if (Directory.Exists(path) || AppConfig.GetGameInstallPathRemovable(gameBiz))
                     {
-                        if (!selectedBizs.Contains(gameBiz))
-                        {
-                            selectedBizs.Add(gameBiz);
-                        }
+                        foundPaths[gameBiz] = path;
                         continue;
                     }
                 }
@@ -981,10 +983,22 @@ public sealed partial class GameSelector : UserControl
                 if (path is not null)
                 {
                     GameLauncherService.ChangeGameInstallPath(gameBiz, path);
-                    if (!selectedBizs.Contains(gameBiz))
-                    {
-                        selectedBizs.Add(gameBiz);
-                    }
+                    foundPaths[gameBiz] = path;
+                }
+            }
+            // 第二轮要遍历游戏文件，放到后台线程；它不读写设置，保存仍回到界面线程
+            List<GameBiz> notFoundBizs = allBizs.Where(x => !foundPaths.ContainsKey(x)).ToList();
+            var linkedPaths = await Task.Run(() => GameLauncherService.FindHardLinkedGameInstallPaths(notFoundBizs, foundPaths));
+            foreach ((GameBiz gameBiz, string path) in linkedPaths)
+            {
+                GameLauncherService.ChangeGameInstallPath(gameBiz, path);
+                foundPaths[gameBiz] = path;
+            }
+            foreach (GameBiz gameBiz in allBizs)
+            {
+                if (foundPaths.ContainsKey(gameBiz) && !selectedBizs.Contains(gameBiz))
+                {
+                    selectedBizs.Add(gameBiz);
                 }
             }
             AppConfig.SelectedGameBizs = string.Join(',', selectedBizs);
@@ -998,6 +1012,7 @@ public sealed partial class GameSelector : UserControl
         {
             Debug.WriteLine(ex);
         }
+    }
     }
 
 
