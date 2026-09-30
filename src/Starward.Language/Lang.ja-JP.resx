@@ -1805,6 +1805,9 @@
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>ゲームを再配置</value>
   </data>
+  <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
+    <value>公式のランチャーにこのゲームのインストール記録が見つかりませんでした。手動でゲームの場所を指定してください。</value>
+  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>基本情報</value>
   </data>

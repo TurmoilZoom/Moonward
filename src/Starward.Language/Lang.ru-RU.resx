@@ -1807,6 +1807,9 @@
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>Переместить игру</value>
   </data>
+  <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
+    <value>Установка этой игры не найдена в официальном лаунчере. Укажите папку игры вручную.</value>
+  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Базовая Информация</value>
   </data>

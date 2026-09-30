@@ -1805,6 +1805,9 @@
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>重新定位遊戲</value>
   </data>
+  <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
+    <value>喺官方啟動器搵唔到呢個遊戲嘅安裝記錄，請手動定位遊戲。</value>
+  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>基本資料</value>
   </data>

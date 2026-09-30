@@ -1806,6 +1806,9 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>Reubicar juego</value>
   </data>
+  <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
+    <value>No se encontró ninguna instalación de este juego en el lanzador oficial. Por favor, ubique el juego manualmente.</value>
+  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Información básica</value>
   </data>

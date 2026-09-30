@@ -248,30 +248,69 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     {
         try
         {
-            string? previousInstallPath = InstallPath;
             string? folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot);
             if (!string.IsNullOrWhiteSpace(folder))
             {
-                if (DriveHelper.GetDriveType(folder) is DriveType.Network && !new Uri(folder).IsUnc)
-                {
-                    TextBlock_NetworkDriveWarning.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    TextBlock_NetworkDriveWarning.Visibility = Visibility.Collapsed;
-                    GameLauncherService.ChangeGameInstallPath(CurrentGameId, folder);
-                    await InitializeBasicInfoAsync();
-                    WeakReferenceMessenger.Default.Send(new GameInstallPathChangedMessage());
-                    if (previousInstallPath != folder)
-                    {
-                        await TryStopGameInstallTaskAsync();
-                    }
-                }
+                await ApplyGameInstallPathAsync(folder);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Locate game failed {GameBiz}", CurrentGameBiz);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 从官方启动器的注册表自动查找当前游戏的安装目录，只查当前游戏
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task AutoSearchGameAsync()
+    {
+        try
+        {
+            string? folder = GameLauncherService.FindGameInstallPathFromRegistry(CurrentGameBiz);
+            if (folder is null)
+            {
+                TextBlock_NetworkDriveWarning.Visibility = Visibility.Collapsed;
+                TextBlock_AutoSearchNotFound.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                await ApplyGameInstallPathAsync(folder);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Auto search game failed {GameBiz}", CurrentGameBiz);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 保存新的游戏安装目录并刷新；映射的网络驱动器不保存，只显示警告
+    /// </summary>
+    /// <param name="folder">定位或自动查找到的目录</param>
+    /// <returns></returns>
+    private async Task ApplyGameInstallPathAsync(string folder)
+    {
+        TextBlock_AutoSearchNotFound.Visibility = Visibility.Collapsed;
+        if (DriveHelper.GetDriveType(folder) is DriveType.Network && !new Uri(folder).IsUnc)
+        {
+            TextBlock_NetworkDriveWarning.Visibility = Visibility.Visible;
+            return;
+        }
+        TextBlock_NetworkDriveWarning.Visibility = Visibility.Collapsed;
+        string? previousInstallPath = InstallPath;
+        GameLauncherService.ChangeGameInstallPath(CurrentGameId, folder);
+        await InitializeBasicInfoAsync();
+        WeakReferenceMessenger.Default.Send(new GameInstallPathChangedMessage());
+        if (previousInstallPath != folder)
+        {
+            await TryStopGameInstallTaskAsync();
         }
     }
 

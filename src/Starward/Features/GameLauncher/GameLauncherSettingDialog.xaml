@@ -59,10 +59,24 @@
                                VerticalAlignment="Center"
                                FontSize="16"
                                Text="{x:Bind CurrentGameBizIcon.GameName}" />
-                    <!--  右侧操作：定位 / 重新定位 / 修复 / 卸载  -->
+                    <!--  右侧操作：自动查找 / 定位 / 重新定位 / 修复 / 卸载  -->
                     <StackPanel Grid.Column="2"
                                 Orientation="Horizontal"
                                 Spacing="12">
+                        <!--  自动查找：只查当前游戏  -->
+                        <Button Height="36"
+                                Command="{x:Bind AutoSearchGameCommand}"
+                                CornerRadius="8"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                Visibility="{x:Bind InstallPath, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Width="20"
+                                          Height="20"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE721;" />
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.GameBizSelector_AutoSearch}" />
+                            </StackPanel>
+                        </Button>
                         <!--  定位游戏  -->
                         <Button Height="36"
                                 Command="{x:Bind LocateGameCommand}"
@@ -116,6 +130,14 @@
                            FontSize="12"
                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
                            Text="{x:Bind lang:Lang.InstallGameDialog_MappedNetworkDrivesAreNotSupportedPleaseUseANetworkSharePathStartingWithDoubleBackslashes}"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed" />
+
+                <!--  自动查找未找到  -->
+                <TextBlock x:Name="TextBlock_AutoSearchNotFound"
+                           FontSize="12"
+                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                           Text="{x:Bind lang:Lang.GameLauncherSettingDialog_AutoSearchNotFound}"
                            TextWrapping="Wrap"
                            Visibility="Collapsed" />
 

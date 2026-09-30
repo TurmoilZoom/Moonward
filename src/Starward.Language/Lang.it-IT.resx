@@ -1806,6 +1806,9 @@ Accetti il rischio e desideri continuare?</value>
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>Rilocalizza gioco</value>
   </data>
+  <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
+    <value>Nessuna installazione di questo gioco trovata nel launcher ufficiale. Si prega di trovare il gioco manualmente.</value>
+  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Informazioni base</value>
   </data>

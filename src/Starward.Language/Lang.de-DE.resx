@@ -1804,6 +1804,9 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="GameLauncherSettingDialog_RelocateGame" xml:space="preserve">
     <value>Spiel verschieben</value>
   </data>
+  <data name="GameLauncherSettingDialog_AutoSearchNotFound" xml:space="preserve">
+    <value>Im offiziellen Launcher wurde keine Installation dieses Spiels gefunden. Bitte suchen Sie das Spiel manuell.</value>
+  </data>
   <data name="GameLauncherSettingDialog_BasicInformation" xml:space="preserve">
     <value>Basisinformationen</value>
   </data>

@@ -5184,6 +5184,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 No installation of this game was found in the official launcher. Please locate the game manually. 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_AutoSearchNotFound {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_AutoSearchNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 See more information about command line argument. 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_SeeMoreInformationAboutCommandLineArgument {
