@@ -4291,4 +4291,25 @@ Repository:</value>
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>Disk Usage</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>Also update hard-linked servers?</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>The following servers share game files with this one through hard links and also have a new version. Checked servers will be updated one by one: the source is always updated first, then the servers created from it through hard links.</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>Don't ask again, always update them together</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>You can change this later in Settings - {0}.</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>Update hard-linked servers together</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>When updating a game, also update the other servers that share its files through hard links, without asking. The source is always updated first, then the servers created from it through hard links. When turned off, you will be asked every time.</value>
+  </data>
 </root>

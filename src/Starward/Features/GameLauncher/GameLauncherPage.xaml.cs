@@ -837,12 +837,35 @@ public sealed partial class GameLauncherPage : PageBase
             if (localGameVersion is not null && latestGameVersion > localGameVersion)
             {
                 TrackDownloadClick("update");
+                List<OtherServerUpdate> linkedServers = await GetHardLinkedServersToUpdateAsync();
+                if (linkedServers.Count > 0)
+                {
+                    if (AppConfig.UpdateHardLinkedGamesTogether)
+                    {
+                        // 已设置直接一并更新：正在运行的区服更新必然失败，跳过
+                        linkedServers = linkedServers.Where(x => !x.IsGameRunning).ToList();
+                        Telemetry.Track("update_linked_auto", CurrentGameBiz, ("servers", linkedServers.Select(x => x.GameId.GameBiz.Value).ToList()));
+                    }
+                    else
+                    {
+                        var dialog = new UpdateOtherServersDialog { CurrentGameBiz = CurrentGameBiz, Servers = linkedServers, XamlRoot = this.XamlRoot };
+                        await dialog.ShowAsync();
+                        if (!dialog.Confirmed)
+                        {
+                            return;
+                        }
+                        linkedServers = dialog.SelectedServers;
+                    }
+                }
+                // RPC 同一时间只执行一个任务，其余按提交顺序排队：本体先于当前区服提交，通过硬链接产生的区服排在当前区服之后
+                await StartLinkedServerUpdatesAsync(linkedServers.Where(x => x.IsHardLinkSource));
                 AudioLanguage audio = await _gamePackageService.GetAudioLanguageAsync(CurrentGameId, GameInstallPath);
                 GameInstallContext? task = await _gameInstallService.StartUpdateAsync(CurrentGameId, GameInstallPath!, audio);
                 if (task is not null)
                 {
                     _gameInstallTask = task;
                     _dispatchTimer.Start();
+                    await StartLinkedServerUpdatesAsync(linkedServers.Where(x => !x.IsHardLinkSource));
                 }
             }
             else
@@ -853,6 +876,47 @@ public sealed partial class GameLauncherPage : PageBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Update game {GameBiz}", CurrentGameBiz);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 查找与当前区服硬链接、也可以一并更新的其他区服。查找失败不影响更新当前区服，按没有处理。
+    /// </summary>
+    /// <returns>可一并更新的区服，本体在前</returns>
+    private async Task<List<OtherServerUpdate>> GetHardLinkedServersToUpdateAsync()
+    {
+        try
+        {
+            return await _gameInstallService.GetHardLinkedServersToUpdateAsync(CurrentGameId, GameInstallPath!);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get hard linked servers to update {GameBiz}", CurrentGameBiz);
+            return [];
+        }
+    }
+
+
+
+    /// <summary>
+    /// 为要一并更新的区服提交更新任务。单个区服提交失败只记日志，不影响其余区服。
+    /// </summary>
+    /// <param name="servers">要一并更新的区服</param>
+    private async Task StartLinkedServerUpdatesAsync(IEnumerable<OtherServerUpdate> servers)
+    {
+        foreach (OtherServerUpdate server in servers)
+        {
+            try
+            {
+                AudioLanguage audio = await _gamePackageService.GetAudioLanguageAsync(server.GameId, server.InstallPath);
+                await _gameInstallService.StartUpdateAsync(server.GameId, server.InstallPath, audio);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Update hard linked server {GameBiz} together with {CurrentGameBiz}", server.GameId.GameBiz, CurrentGameBiz);
+            }
         }
     }
 

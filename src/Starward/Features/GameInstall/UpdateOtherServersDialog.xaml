@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog x:Class="Starward.Features.GameInstall.UpdateOtherServersDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:lang="using:Starward.Language"
+               xmlns:local="using:Starward.Features.GameInstall"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               x:DefaultBindMode="OneWay"
+               Background="{ThemeResource CustomAcrylicBrush}"
+               BorderThickness="0"
+               Loaded="ContentDialog_Loaded"
+               Style="{ThemeResource DefaultContentDialogStyle}"
+               mc:Ignorable="d">
+
+
+    <StackPanel Width="420" Spacing="12">
+        <TextBlock FontSize="20"
+                   Text="{x:Bind lang:Lang.UpdateOtherServersDialog_Title}"
+                   TextWrapping="Wrap" />
+        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="{x:Bind lang:Lang.UpdateOtherServersDialog_Description}"
+                   TextWrapping="Wrap" />
+
+        <!--  区服勾选项在代码里按候选列表生成  -->
+        <StackPanel Name="StackPanel_Servers"
+                    Margin="0,4,0,0"
+                    Spacing="8" />
+
+        <!--  下次不再询问，对应「设置 - 游戏下载」里的同名选项  -->
+        <StackPanel Margin="0,8,0,0" Spacing="2">
+            <CheckBox Name="CheckBox_DoNotAskAgain" Content="{x:Bind lang:Lang.UpdateOtherServersDialog_DoNotAskAgain}" />
+            <TextBlock Name="TextBlock_SettingHint"
+                       Margin="28,0,0,0"
+                       FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <StackPanel Margin="0,16,0,0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal"
+                    Spacing="12">
+            <Button MinWidth="100"
+                    Command="{x:Bind UpdateCommand}"
+                    Content="{x:Bind lang:Lang.LauncherPage_UpdateGame}"
+                    Style="{ThemeResource AccentButtonStyle}" />
+            <Button MinWidth="100"
+                    Command="{x:Bind CancelCommand}"
+                    Content="{x:Bind lang:Lang.Common_Cancel}" />
+        </StackPanel>
+    </StackPanel>
+
+</ContentDialog>

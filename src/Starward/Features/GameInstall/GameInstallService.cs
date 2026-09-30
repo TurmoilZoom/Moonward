@@ -229,6 +229,123 @@ internal class GameInstallService
 
 
 
+    /// <summary>
+    /// 查找与当前区服通过硬链接共用文件、也有新版本的其他区服，用于更新当前区服时一并更新。
+    /// 只在开启硬链接且游戏支持硬链接时查找，只列出与当前区服实际共用文件（文件 ID 相同）的区服。
+    /// 共用文件的区服（含当前区服）中安装目录创建得最早的视为本体，其余是后来通过硬链接产生的；
+    /// 本体不是当前区服时排在最前，要先于当前区服更新。
+    /// 已有安装任务（预下载、排队中的更新等）、游戏文件不完整、取不到最新版本的区服不列出。
+    /// </summary>
+    /// <param name="gameId">正在更新的区服</param>
+    /// <param name="installPath">正在更新的区服的安装目录</param>
+    /// <returns>可一并更新的区服，本体在前，其余按 <see cref="GameBiz.AllGameBizs"/> 的顺序排列</returns>
+    public async Task<List<OtherServerUpdate>> GetHardLinkedServersToUpdateAsync(GameId gameId, string installPath)
+    {
+        if (!AppConfig.EnableHardLink || !GameFeatureConfig.FromGameId(gameId).SupportHardLink)
+        {
+            return [];
+        }
+        string currentFolder = Path.TrimEndingDirectorySeparator(Path.GetFullPath(installPath));
+        List<(GameId GameId, string InstallPath)> installed = new();
+        foreach (GameBiz biz in GameBiz.AllGameBizs)
+        {
+            if (biz == gameId.GameBiz || biz.Game != gameId.GameBiz.Game || GameId.FromGameBiz(biz) is not GameId otherId)
+            {
+                continue;
+            }
+            if (biz == GameBiz.bh3_global && AppConfig.LastGameIdOfBH3Global is string bh3GlobalId && !string.IsNullOrWhiteSpace(bh3GlobalId))
+            {
+                // 崩坏3国际服同一 GameBiz 下有多个区服，与主界面一样取上次选择的那个，任务才能和它的页面对上
+                otherId.Id = bh3GlobalId;
+            }
+            string? path = GameLauncherService.GetGameInstallPath(otherId, out bool storageRemoved);
+            if (path is null || storageRemoved)
+            {
+                continue;
+            }
+            path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
+            // 硬链接只能在同一个卷上；两个区服指向同一个目录时也只更新当前这一个，否则同一目录会被连续更新两次
+            if (!string.Equals(Path.GetPathRoot(path), Path.GetPathRoot(currentFolder), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(path, currentFolder, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+            installed.Add((otherId, path));
+        }
+        if (installed.Count == 0)
+        {
+            return [];
+        }
+
+        // 要打开文件读文件 ID，放到后台线程
+        List<(GameId GameId, string InstallPath)> linked = await Task.Run(() =>
+        {
+            Dictionary<string, long> fileIds = HardLinkDetector.GetLinkedFileIds(currentFolder);
+            return installed.Where(x => HardLinkDetector.ContainsAnyFile(x.InstallPath, fileIds)).ToList();
+        });
+        if (linked.Count == 0)
+        {
+            return [];
+        }
+        // 通过硬链接产生的目录一定晚于本体创建；同一卷内移动目录不会改变创建时间
+        string sourceFolder = linked.Select(x => x.InstallPath).Append(currentFolder).MinBy(Directory.GetCreationTimeUtc)!;
+        _logger.LogInformation("Hard linked servers of {GameBiz}: {Servers}, source folder: {Source}", gameId.GameBiz, linked.Select(x => x.GameId.GameBiz.ToString()), sourceFolder);
+
+        List<(GameId GameId, string InstallPath, Version LocalVersion)> candidates = new();
+        foreach ((GameId otherId, string path) in linked)
+        {
+            if (GetGameInstallTask(otherId) is { State: not GameInstallState.Stop and not GameInstallState.Finish })
+            {
+                continue;
+            }
+            if (!await _gameLauncherService.IsGameExeExistsAsync(otherId, path)
+                || await _gameLauncherService.GetLocalGameVersionAsync(otherId.GameBiz, path) is not Version localVersion)
+            {
+                continue;
+            }
+            candidates.Add((otherId, path, localVersion));
+        }
+
+        Task<OtherServerUpdate?>[] checks = candidates.Select(async item =>
+        {
+            try
+            {
+                (Version? latestVersion, _) = await _gameLauncherService.GetLatestGameVersionAsync(item.GameId);
+                if (latestVersion is null || latestVersion <= item.LocalVersion)
+                {
+                    return null;
+                }
+                bool running = await _gameLauncherService.GetGameProcessAsync(item.GameId) is not null;
+                bool isSource = string.Equals(item.InstallPath, sourceFolder, StringComparison.OrdinalIgnoreCase);
+                return new OtherServerUpdate(item.GameId, item.InstallPath, item.LocalVersion, latestVersion, running, isSource);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Check update of hard linked server ({GameBiz})", item.GameId.GameBiz);
+                return null;
+            }
+        }).ToArray();
+        // 其他区服的接口可能很慢（例如在国内访问国际服），不能因此拖住当前区服的更新，超时未返回的区服不列出
+        Task allChecks = Task.WhenAll(checks);
+        if (await Task.WhenAny(allChecks, Task.Delay(OtherServerCheckTimeout)) != allChecks)
+        {
+            _logger.LogWarning("Check update of hard linked servers timed out, skip {Count} of {Total}.", checks.Count(x => !x.IsCompleted), checks.Length);
+        }
+        return checks.Where(x => x.IsCompletedSuccessfully)
+            .Select(x => x.Result)
+            .OfType<OtherServerUpdate>()
+            .OrderByDescending(x => x.IsHardLinkSource)
+            .ToList();
+    }
+
+
+    /// <summary>
+    /// 更新时查找其他区服最新版本的最长等待时间。
+    /// </summary>
+    private static readonly TimeSpan OtherServerCheckTimeout = TimeSpan.FromSeconds(5);
+
+
+
     public async Task<GameInstallContext?> StartRepairAsync(GameId gameId, string installPath, AudioLanguage audioLanguage)
     {
         return await StartOrContinueTaskAsync(GameInstallOperation.Repair, gameId, installPath, audioLanguage);

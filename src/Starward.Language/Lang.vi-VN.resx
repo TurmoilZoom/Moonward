@@ -4202,4 +4202,25 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>Dung lượng sử dụng</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>Cập nhật cả các máy chủ liên kết cứng?</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>Các máy chủ sau dùng chung tệp trò chơi với máy chủ này qua liên kết cứng và cũng có phiên bản mới. Các máy chủ được chọn sẽ lần lượt được cập nhật: luôn cập nhật bản gốc trước, sau đó đến các máy chủ được tạo từ nó qua liên kết cứng.</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>Bản gốc</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>Không hỏi lại, luôn cập nhật cùng nhau</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>Có thể thay đổi sau trong Cài đặt - {0}.</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>Cập nhật cùng lúc các máy chủ liên kết cứng</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>Khi cập nhật trò chơi, tự động cập nhật cùng các máy chủ khác dùng chung tệp với nó qua liên kết cứng mà không hỏi. Luôn cập nhật bản gốc trước, sau đó đến các máy chủ được tạo từ nó qua liên kết cứng. Nếu tắt, sẽ hỏi mỗi lần.</value>
+  </data>
 </root>

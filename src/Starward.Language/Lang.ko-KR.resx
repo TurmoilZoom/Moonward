@@ -4202,4 +4202,25 @@
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>디스크 사용량</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>하드링크된 서버도 함께 업데이트하시겠습니까?</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>다음 서버는 현재 서버와 하드링크로 게임 파일을 공유하며 새 버전이 있습니다. 선택한 서버는 순서대로 업데이트됩니다. 항상 원본을 먼저 업데이트한 뒤 하드링크로 만들어진 서버를 업데이트합니다.</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>원본</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>다음부터 묻지 않고 항상 함께 업데이트</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>'설정 - {0}'에서 변경할 수 있습니다.</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>하드링크된 서버 함께 업데이트</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>게임을 업데이트할 때 하드링크로 파일을 공유하는 다른 서버도 묻지 않고 함께 업데이트합니다. 항상 원본을 먼저 업데이트한 뒤 하드링크로 만들어진 서버를 업데이트합니다. 끄면 매번 묻습니다.</value>
+  </data>
 </root>

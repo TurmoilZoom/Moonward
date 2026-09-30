@@ -4196,4 +4196,25 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>พื้นที่ที่ใช้</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>อัปเดตเซิร์ฟเวอร์ที่ฮาร์ดลิงก์ไว้ด้วยหรือไม่?</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>เซิร์ฟเวอร์ต่อไปนี้ใช้ไฟล์เกมร่วมกับเซิร์ฟเวอร์นี้ผ่านฮาร์ดลิงก์ และมีเวอร์ชันใหม่เช่นกัน เซิร์ฟเวอร์ที่เลือกจะได้รับการอัปเดตตามลำดับ โดยจะอัปเดตต้นฉบับก่อนเสมอ แล้วจึงอัปเดตเซิร์ฟเวอร์ที่สร้างจากต้นฉบับผ่านฮาร์ดลิงก์</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>ต้นฉบับ</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>ไม่ต้องถามอีก อัปเดตพร้อมกันเสมอ</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>สามารถเปลี่ยนได้ภายหลังใน ตั้งค่า - {0}</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>อัปเดตเซิร์ฟเวอร์ที่ฮาร์ดลิงก์ไว้พร้อมกัน</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>เมื่ออัปเดตเกม จะอัปเดตเซิร์ฟเวอร์อื่นที่ใช้ไฟล์ร่วมกันผ่านฮาร์ดลิงก์ไปพร้อมกันโดยไม่ถาม โดยจะอัปเดตต้นฉบับก่อนเสมอ แล้วจึงอัปเดตเซิร์ฟเวอร์ที่สร้างจากต้นฉบับผ่านฮาร์ดลิงก์ หากปิดไว้จะถามทุกครั้ง</value>
+  </data>
 </root>

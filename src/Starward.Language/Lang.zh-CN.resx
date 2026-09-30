@@ -4290,4 +4290,25 @@
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>本地占用</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>同时更新硬链接的区服？</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>以下区服与当前区服通过硬链接共用游戏文件，也有新版本。勾选的区服会依次更新：总是先更新本体，再更新通过硬链接产生的区服。</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>本体</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>下次不再询问，总是一并更新</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>可在「设置 - {0}」中修改。</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>更新时一并更新硬链接的区服</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>更新游戏时，直接一并更新与它通过硬链接共用文件的其他区服，不再询问。总是先更新本体，再更新通过硬链接产生的区服。关闭时每次都会询问。</value>
+  </data>
 </root>

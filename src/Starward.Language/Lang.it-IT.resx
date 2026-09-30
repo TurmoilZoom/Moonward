@@ -4202,4 +4202,25 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>Spazio occupato</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>Aggiornare anche i server con collegamento fisico?</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>I seguenti server condividono i file di gioco con questo tramite collegamenti fisici e hanno anch'essi una nuova versione. I server selezionati verranno aggiornati uno dopo l'altro: sempre prima l'originale, poi i server creati da esso tramite collegamenti fisici.</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>Originale</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>Non chiedere più, aggiornali sempre insieme</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>Puoi modificarlo in seguito in Impostazioni - {0}.</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>Aggiorna insieme i server con collegamento fisico</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>Durante l'aggiornamento di un gioco, aggiorna senza chiedere anche gli altri server che ne condividono i file tramite collegamenti fisici. Viene sempre aggiornato prima l'originale, poi i server creati da esso tramite collegamenti fisici. Se disattivato, verrà chiesto ogni volta.</value>
+  </data>
 </root>

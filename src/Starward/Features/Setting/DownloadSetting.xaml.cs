@@ -144,6 +144,22 @@ public sealed partial class DownloadSetting : PageBase
 
 
 
+    /// <summary>
+    /// 更新游戏时直接一并更新与它硬链接的其他区服，不再询问
+    /// </summary>
+    public bool UpdateHardLinkedGamesTogether
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                AppConfig.UpdateHardLinkedGamesTogether = value;
+            }
+        }
+    } = AppConfig.UpdateHardLinkedGamesTogether;
+
+
+
     #endregion
 
 

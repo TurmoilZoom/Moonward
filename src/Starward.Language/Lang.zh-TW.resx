@@ -4202,4 +4202,25 @@
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>本機佔用</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>同時更新硬連結的伺服器？</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>以下伺服器與目前伺服器透過硬連結共用遊戲檔案，也有新版本。勾選的伺服器會依序更新：一律先更新本體，再更新透過硬連結產生的伺服器。</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>本體</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>下次不再詢問，一律一併更新</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>可在「設定 - {0}」中修改。</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>更新時一併更新硬連結的伺服器</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>更新遊戲時，直接一併更新與它透過硬連結共用檔案的其他伺服器，不再詢問。一律先更新本體，再更新透過硬連結產生的伺服器。關閉時每次都會詢問。</value>
+  </data>
 </root>

@@ -3249,6 +3249,24 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Update hard-linked servers together 的本地化字符串。
+        /// </summary>
+        public static string DownloadSettingPage_UpdateHardLinkedGamesTogether {
+            get {
+                return ResourceManager.GetString("DownloadSettingPage_UpdateHardLinkedGamesTogether", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 When updating a game, also update the other servers that share its files through hard links, without asking. The source is always updated first, then the servers created from it through hard links. When turned off, you will be asked every time. 的本地化字符串。
+        /// </summary>
+        public static string DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription {
+            get {
+                return ResourceManager.GetString("DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 DX12 Effect Details 的本地化字符串。
         /// </summary>
         public static string DX12IntroDialog_DX12EffectDetails {
@@ -10443,6 +10461,51 @@ namespace Starward.Language {
         public static string UpdateContentWindow_RecentlyUpdatedContent {
             get {
                 return ResourceManager.GetString("UpdateContentWindow_RecentlyUpdatedContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The following servers share game files with this one through hard links and also have a new version. Checked servers will be updated one by one: the source is always updated first, then the servers created from it through hard links. 的本地化字符串。
+        /// </summary>
+        public static string UpdateOtherServersDialog_Description {
+            get {
+                return ResourceManager.GetString("UpdateOtherServersDialog_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Don't ask again, always update them together 的本地化字符串。
+        /// </summary>
+        public static string UpdateOtherServersDialog_DoNotAskAgain {
+            get {
+                return ResourceManager.GetString("UpdateOtherServersDialog_DoNotAskAgain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 You can change this later in Settings - {0}. 的本地化字符串。
+        /// </summary>
+        public static string UpdateOtherServersDialog_SettingHint {
+            get {
+                return ResourceManager.GetString("UpdateOtherServersDialog_SettingHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Source 的本地化字符串。
+        /// </summary>
+        public static string UpdateOtherServersDialog_Source {
+            get {
+                return ResourceManager.GetString("UpdateOtherServersDialog_Source", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Also update hard-linked servers? 的本地化字符串。
+        /// </summary>
+        public static string UpdateOtherServersDialog_Title {
+            get {
+                return ResourceManager.GetString("UpdateOtherServersDialog_Title", resourceCulture);
             }
         }
         

@@ -363,6 +363,15 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 更新游戏时直接一并更新与它硬链接的其他区服，不再询问
+    /// </summary>
+    public static bool UpdateHardLinkedGamesTogether
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 原神HDR
     /// </summary>
     public static bool EnableGenshinHDR

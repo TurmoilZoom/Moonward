@@ -4201,4 +4201,25 @@
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>使用容量</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>ハードリンクされたサーバーも更新しますか？</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>以下のサーバーはハードリンクでこのサーバーとゲームファイルを共有しており、新しいバージョンがあります。チェックしたサーバーは順番に更新されます。常に本体を先に更新し、その後ハードリンクで作成されたサーバーを更新します。</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>本体</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>次回から確認せず、常に一緒に更新する</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>「設定 - {0}」で変更できます。</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>ハードリンクされたサーバーも一緒に更新する</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>ゲームを更新するとき、ハードリンクでファイルを共有している他のサーバーも確認せずに一緒に更新します。常に本体を先に更新し、その後ハードリンクで作成されたサーバーを更新します。オフの場合は毎回確認します。</value>
+  </data>
 </root>

@@ -4222,4 +4222,25 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>Занято на диске</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>Обновить и серверы с жёсткими ссылками?</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>Следующие серверы используют общие с этим сервером файлы игры через жёсткие ссылки, и для них тоже доступна новая версия. Отмеченные серверы будут обновлены по очереди: сначала всегда источник, затем серверы, созданные из него с помощью жёстких ссылок.</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>Источник</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>Больше не спрашивать, всегда обновлять вместе</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>Это можно изменить позже в разделе «Настройки - {0}».</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>Обновлять серверы с жёсткими ссылками вместе</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>При обновлении игры без запроса обновляются и другие серверы, использующие её файлы через жёсткие ссылки. Сначала всегда обновляется источник, затем серверы, созданные из него с помощью жёстких ссылок. Если отключено, запрос будет появляться каждый раз.</value>
+  </data>
 </root>

@@ -4200,4 +4200,25 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>Speicherbelegung</value>
   </data>
+  <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
+    <value>Per Hardlink verknüpfte Server ebenfalls aktualisieren?</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Description" xml:space="preserve">
+    <value>Die folgenden Server teilen sich per Hardlink Spieldateien mit diesem Server und haben ebenfalls eine neue Version. Ausgewählte Server werden nacheinander aktualisiert: zuerst immer die Quelle, danach die per Hardlink daraus erstellten Server.</value>
+  </data>
+  <data name="UpdateOtherServersDialog_Source" xml:space="preserve">
+    <value>Quelle</value>
+  </data>
+  <data name="UpdateOtherServersDialog_DoNotAskAgain" xml:space="preserve">
+    <value>Nicht mehr fragen, immer gemeinsam aktualisieren</value>
+  </data>
+  <data name="UpdateOtherServersDialog_SettingHint" xml:space="preserve">
+    <value>Sie können dies später unter Einstellungen - {0} ändern.</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogether" xml:space="preserve">
+    <value>Per Hardlink verknüpfte Server gemeinsam aktualisieren</value>
+  </data>
+  <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
+    <value>Beim Aktualisieren eines Spiels werden die anderen Server, die sich per Hardlink Dateien mit ihm teilen, ohne Nachfrage mit aktualisiert. Zuerst wird immer die Quelle aktualisiert, danach die per Hardlink daraus erstellten Server. Wenn deaktiviert, wird jedes Mal nachgefragt.</value>
+  </data>
 </root>
