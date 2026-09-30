@@ -4250,4 +4250,16 @@ You are welcome to submit exported data to:</value>
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>เมื่ออัปเดตเกม จะอัปเดตเซิร์ฟเวอร์อื่นที่ใช้ไฟล์ร่วมกันผ่านฮาร์ดลิงก์ไปพร้อมกันโดยไม่ถาม โดยจะอัปเดตต้นฉบับก่อนเสมอ แล้วจึงอัปเดตเซิร์ฟเวอร์ที่สร้างจากต้นฉบับผ่านฮาร์ดลิงก์ หากปิดไว้จะถามทุกครั้ง</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>เก็บเซิร์ฟเวอร์อื่นไว้</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>เซิร์ฟเวอร์บางตัวที่เก็บไว้ใช้ไฟล์เกมร่วมกับเซิร์ฟเวอร์นี้ผ่านฮาร์ดลิงก์ การถอนการติดตั้งเฉพาะเซิร์ฟเวอร์นี้จึงแทบไม่ได้พื้นที่คืน</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>โฟลเดอร์เดียวกัน</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>โฟลเดอร์ติดตั้งเป็นโฟลเดอร์เดียวกับเซิร์ฟเวอร์นี้ (หรืออยู่ภายใน) จึงจะถูกลบไปด้วยแม้จะเก็บเซิร์ฟเวอร์อื่นไว้</value>
+  </data>
 </root>

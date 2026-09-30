@@ -346,14 +346,14 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
     /// <summary>
-    /// 用户点了修复游戏时要接着打开的修复对话框，由 <see cref="OpenAsync"/> 在游戏设置关闭后打开
+    /// 用户点了修复游戏或卸载游戏时要接着打开的对话框，由 <see cref="OpenAsync"/> 在游戏设置关闭后打开
     /// </summary>
-    private RepairGameDialog? _repairGameDialog;
+    private ContentDialog? _nextDialog;
 
 
 
     /// <summary>
-    /// 打开游戏设置。用户点了修复游戏时，等游戏设置完全关闭后再打开修复对话框：ContentDialog 同一时间只能打开一个
+    /// 打开游戏设置。用户点了修复游戏或卸载游戏时，等游戏设置完全关闭后再打开对应的对话框：ContentDialog 同一时间只能打开一个
     /// </summary>
     /// <param name="gameId">游戏</param>
     /// <param name="xamlRoot">对话框所在窗口</param>
@@ -362,10 +362,10 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     {
         var dialog = new GameLauncherSettingDialog { CurrentGameId = gameId, XamlRoot = xamlRoot };
         await dialog.ShowAsync();
-        if (dialog._repairGameDialog is RepairGameDialog repairGameDialog)
+        if (dialog._nextDialog is ContentDialog nextDialog)
         {
-            repairGameDialog.XamlRoot = xamlRoot;
-            await repairGameDialog.ShowAsync();
+            nextDialog.XamlRoot = xamlRoot;
+            await nextDialog.ShowAsync();
         }
     }
 
@@ -386,7 +386,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
             }
             Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "repair"));
             bool hasWPFPackage = await HasWPFPackageAsync();
-            _repairGameDialog = new RepairGameDialog
+            _nextDialog = new RepairGameDialog
             {
                 CurrentGameId = CurrentGameId,
                 InstallPath = InstallPath,
@@ -443,122 +443,34 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
 
-    public string? UninstallError { get; set => SetProperty(ref field, value); }
-
-
-
+    /// <summary>
+    /// 卸载游戏：关闭游戏设置，改为打开单独的卸载对话框，可一并卸载同一游戏的其他区服
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
-    private void ShowUninstallGameWarning()
+    private async Task UninstallGameAsync()
     {
         try
         {
             Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "uninstall"));
-            if (Directory.Exists(InstallPath))
+            if (!Directory.Exists(InstallPath))
             {
-                string installPath = Path.GetFullPath(InstallPath);
-                if (Path.GetPathRoot(InstallPath) == InstallPath)
-                {
-                    // 不能删除驱动器根目录
-                    UninstallError = Lang.GameLauncherSettingDialog_CannotDeleteTheDriveRootDirectory;
-                    TrackUninstallBlocked("drive_root");
-                    return;
-                }
-                if (Directory.Exists(AppConfig.UserDataFolder))
-                {
-                    string userDataFolder = Path.GetFullPath(AppConfig.UserDataFolder);
-                    if (userDataFolder.StartsWith(installPath))
-                    {
-                        // Starward 数据文件夹位于游戏文件夹内，删除游戏时会一并删除。请在设置页面修改数据文件夹位置后重试。
-                        UninstallError = Lang.GameLauncherSettingDialog_UninstallGameUserDataFolderWarning;
-                        TrackUninstallBlocked("data_folder_inside");
-                        return;
-                    }
-                }
-                string baseFolder = AppContext.BaseDirectory.TrimEnd('/', '\\');
-                if (baseFolder.StartsWith(installPath))
-                {
-                    // Starward 程序位于游戏文件夹内，删除游戏时会一并被删除。请将程序移出游戏文件夹后重试。
-                    UninstallError = Lang.GameLauncherSettingDialog_UninstallGameStarwardProgramFolderWarning;
-                    TrackUninstallBlocked("program_inside");
-                    return;
-                }
-                Grid_UninstallWarning.Visibility = Visibility.Visible;
-                Telemetry.Track("uninstall_confirm_show", CurrentGameBiz, ("task_state", _gameInstallService.GetGameInstallTask(CurrentGameId)?.State));
-            }
-            else
-            {
-                TrackUninstallBlocked("path_missing");
-                _ = InitializeBasicInfoAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Show uninstall game warning {GameBiz}", CurrentGameBiz);
-        }
-    }
-
-
-
-    [RelayCommand]
-    private async Task UninstallGameAsync()
-    {
-        long start = Stopwatch.GetTimestamp();
-        try
-        {
-            Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "uninstall_confirm"), ("task_state", _gameInstallService.GetGameInstallTask(CurrentGameId)?.State));
-            UninstallError = null;
-            if (await _gameLauncherService.GetGameProcessAsync(CurrentGameId) is not null)
-            {
-                UninstallError = Lang.LauncherPage_GameIsRunning;
-                TrackUninstallBlocked("game_running");
+                Telemetry.Track("uninstall_blocked", CurrentGameBiz, ("reason", "path_missing"));
                 await InitializeBasicInfoAsync();
                 return;
             }
-            if (Directory.Exists(InstallPath))
+            _nextDialog = new UninstallGameDialog
             {
-                if (_gameInstallService.GetGameInstallTask(CurrentGameId) is GameInstallContext task)
-                {
-                    // 先停止并移除安装任务（含已暂停的），否则首页仍显示暂停进度，点继续会在已删除的目录上复用旧的文件清单
-                    await _gameInstallService.StopTaskAsync(task);
-                }
-                bool success = await _gameInstallService.StartUninstallAsync(CurrentGameId, InstallPath);
-                Telemetry.Track("uninstall_result", CurrentGameBiz, ("result", success ? "success" : "rpc_unavailable"), ("duration_ms", Stopwatch.GetElapsedTime(start)));
-                if (success)
-                {
-                    _logger.LogInformation("""
-                        Uninstall game finished:
-                        GameId: {gameId} {gameBiz}
-                        InstallPath: {installPath}
-                        """, CurrentGameId.Id, CurrentGameId.GameBiz, InstallPath);
-                    Grid_UninstallWarning.Visibility = Visibility.Collapsed;
-                    WeakReferenceMessenger.Default.Send(new GameInstallPathChangedMessage());
-                    CheckCanRepairGame();
-                    await InitializeBasicInfoAsync();
-                }
-            }
-            else
-            {
-                TrackUninstallBlocked("path_missing");
-                await InitializeBasicInfoAsync();
-            }
+                CurrentGameId = CurrentGameId,
+                InstallPath = InstallPath,
+                CurrentGameBizIcon = CurrentGameBizIcon,
+            };
+            this.Hide();
         }
         catch (Exception ex)
         {
-            Telemetry.Track("uninstall_result", CurrentGameBiz, ("result", "error"), ("duration_ms", Stopwatch.GetElapsedTime(start)), ("error", ex.Message));
-            UninstallError = ex.Message;
-            _logger.LogError(ex, "Uninstall game failed {GameBiz}", CurrentGameBiz);
+            _logger.LogError(ex, "Uninstall game {GameBiz}", CurrentGameBiz);
         }
-    }
-
-
-
-    /// <summary>
-    /// 记录卸载被前置检查拦下的原因
-    /// </summary>
-    /// <param name="reason">drive_root / data_folder_inside / program_inside / path_missing / game_running</param>
-    private void TrackUninstallBlocked(string reason)
-    {
-        Telemetry.Track("uninstall_blocked", CurrentGameBiz, ("reason", reason));
     }
 
 

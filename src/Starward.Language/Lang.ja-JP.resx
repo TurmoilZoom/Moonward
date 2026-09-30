@@ -4255,4 +4255,16 @@
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>ゲームを更新するとき、ハードリンクでファイルを共有している他のサーバーも確認せずに一緒に更新します。常に本体を先に更新し、その後ハードリンクで作成されたサーバーを更新します。オフの場合は毎回確認します。</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>他のサーバーを残す</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>残すサーバーの中に、このサーバーとハードリンクでゲームファイルを共有しているものがあるため、このサーバーだけをアンインストールしても空き容量はほとんど増えません。</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>同じフォルダー</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>インストールフォルダーがこのサーバーと同じ（またはその中）にあるため、他のサーバーを残しても一緒に削除されます。</value>
+  </data>
 </root>

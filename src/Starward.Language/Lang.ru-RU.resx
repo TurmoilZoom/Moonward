@@ -4276,4 +4276,16 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>При обновлении игры без запроса обновляются и другие серверы, использующие её файлы через жёсткие ссылки. Сначала всегда обновляется источник, затем серверы, созданные из него с помощью жёстких ссылок. Если отключено, запрос будет появляться каждый раз.</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>Оставить другие серверы</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>Некоторые из сохраняемых серверов используют общие с этим сервером файлы игры через жёсткие ссылки, поэтому удаление только этого сервера почти не освободит места.</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>Та же папка</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>Его папка установки совпадает с папкой этого сервера (или находится внутри неё), поэтому она будет удалена, даже если другие серверы сохраняются.</value>
+  </data>
 </root>

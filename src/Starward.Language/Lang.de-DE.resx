@@ -4254,4 +4254,16 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>Beim Aktualisieren eines Spiels werden die anderen Server, die sich per Hardlink Dateien mit ihm teilen, ohne Nachfrage mit aktualisiert. Zuerst wird immer die Quelle aktualisiert, danach die per Hardlink daraus erstellten Server. Wenn deaktiviert, wird jedes Mal nachgefragt.</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>Andere Server behalten</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>Einige der behaltenen Server teilen sich per Hardlink Spieldateien mit diesem Server. Wird nur dieser Server deinstalliert, wird kaum Speicherplatz frei.</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>Gleicher Ordner</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>Der Installationsordner ist derselbe wie der dieses Servers (oder liegt darin) und wird daher auch gelöscht, wenn andere Server behalten werden.</value>
+  </data>
 </root>

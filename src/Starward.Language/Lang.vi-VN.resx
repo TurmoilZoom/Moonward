@@ -4256,4 +4256,16 @@ You are welcome to submit exported data to:</value>
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>Khi cập nhật trò chơi, tự động cập nhật cùng các máy chủ khác dùng chung tệp với nó qua liên kết cứng mà không hỏi. Luôn cập nhật bản gốc trước, sau đó đến các máy chủ được tạo từ nó qua liên kết cứng. Nếu tắt, sẽ hỏi mỗi lần.</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>Giữ lại các máy chủ khác</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>Một số máy chủ được giữ lại dùng chung tệp trò chơi với máy chủ này qua liên kết cứng, nên chỉ gỡ cài đặt máy chủ này sẽ giải phóng rất ít dung lượng.</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>Cùng thư mục</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>Thư mục cài đặt trùng với (hoặc nằm trong) thư mục của máy chủ này, nên vẫn sẽ bị xóa cùng dù giữ lại các máy chủ khác.</value>
+  </data>
 </root>

@@ -4345,4 +4345,16 @@ Repository:</value>
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>When updating a game, also update the other servers that share its files through hard links, without asking. The source is always updated first, then the servers created from it through hard links. When turned off, you will be asked every time.</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>Keep other servers</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>Some of the kept servers share game files with this server through hard links, so uninstalling only this server frees very little space.</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>Same folder</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>Its install folder is the same as (or inside) this server's folder, so it will be deleted too even if other servers are kept.</value>
+  </data>
 </root>

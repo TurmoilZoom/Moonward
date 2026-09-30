@@ -342,49 +342,22 @@ internal class GameInstallService
             return [];
         }
         string currentFolder = Path.TrimEndingDirectorySeparator(Path.GetFullPath(installPath));
-        List<(GameId GameId, string InstallPath)> installed = new();
-        foreach (GameBiz biz in GameBiz.AllGameBizs)
-        {
-            if (biz == gameId.GameBiz || biz.Game != gameId.GameBiz.Game || GameId.FromGameBiz(biz) is not GameId otherId)
-            {
-                continue;
-            }
-            if (biz == GameBiz.bh3_global && AppConfig.LastGameIdOfBH3Global is string bh3GlobalId && !string.IsNullOrWhiteSpace(bh3GlobalId))
-            {
-                // 崩坏3国际服同一 GameBiz 下有多个区服，与主界面一样取上次选择的那个，任务才能和它的页面对上
-                otherId.Id = bh3GlobalId;
-            }
-            string? path = GameLauncherService.GetGameInstallPath(otherId, out bool storageRemoved);
-            if (path is null || storageRemoved)
-            {
-                continue;
-            }
-            path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
-            // 硬链接只能在同一个卷上；两个区服指向同一个目录时也只更新当前这一个，否则同一目录会被连续更新两次
-            if (!string.Equals(Path.GetPathRoot(path), Path.GetPathRoot(currentFolder), StringComparison.OrdinalIgnoreCase)
-                || string.Equals(path, currentFolder, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-            installed.Add((otherId, path));
-        }
+        // 两个区服指向同一个目录时也只更新当前这一个，否则同一目录会被连续更新两次
+        List<(GameId GameId, string InstallPath)> installed = GetOtherInstalledServers(gameId)
+            .Where(x => !string.Equals(x.InstallPath, currentFolder, StringComparison.OrdinalIgnoreCase))
+            .ToList();
         if (installed.Count == 0)
         {
             return [];
         }
 
         // 要打开文件读文件 ID，放到后台线程
-        List<(GameId GameId, string InstallPath)> linked = await Task.Run(() =>
-        {
-            Dictionary<string, long> fileIds = HardLinkDetector.GetLinkedFileIds(currentFolder);
-            return installed.Where(x => HardLinkDetector.ContainsAnyFile(x.InstallPath, fileIds)).ToList();
-        });
+        List<(GameId GameId, string InstallPath)> linked = await Task.Run(() => GetHardLinkedServers(currentFolder, installed));
         if (linked.Count == 0)
         {
             return [];
         }
-        // 通过硬链接产生的目录一定晚于本体创建；同一卷内移动目录不会改变创建时间
-        string sourceFolder = linked.Select(x => x.InstallPath).Append(currentFolder).MinBy(Directory.GetCreationTimeUtc)!;
+        string sourceFolder = GetHardLinkSourceFolder(linked.Select(x => x.InstallPath).Append(currentFolder));
         _logger.LogInformation("Hard linked servers of {GameBiz}: {Servers}, source folder: {Source}", gameId.GameBiz, linked.Select(x => x.GameId.GameBiz.ToString()), sourceFolder);
 
         List<(GameId GameId, string InstallPath, Version LocalVersion)> candidates = new();
@@ -439,6 +412,73 @@ internal class GameInstallService
     /// 更新时查找其他区服最新版本的最长等待时间。
     /// </summary>
     private static readonly TimeSpan OtherServerCheckTimeout = TimeSpan.FromSeconds(5);
+
+
+
+    /// <summary>
+    /// 同一游戏已安装的其他区服。可移动存储设备已移除的区服访问不到，不列出。
+    /// </summary>
+    /// <param name="gameId">当前区服</param>
+    /// <returns>其他区服与去掉末尾分隔符的完整安装目录，按 <see cref="GameBiz.AllGameBizs"/> 的顺序排列；可能与当前区服的目录相同</returns>
+    public static List<(GameId GameId, string InstallPath)> GetOtherInstalledServers(GameId gameId)
+    {
+        List<(GameId GameId, string InstallPath)> installed = new();
+        foreach (GameBiz biz in GameBiz.AllGameBizs)
+        {
+            if (biz == gameId.GameBiz || biz.Game != gameId.GameBiz.Game || GameId.FromGameBiz(biz) is not GameId otherId)
+            {
+                continue;
+            }
+            if (biz == GameBiz.bh3_global && AppConfig.LastGameIdOfBH3Global is string bh3GlobalId && !string.IsNullOrWhiteSpace(bh3GlobalId))
+            {
+                // 崩坏3国际服同一 GameBiz 下有多个区服，与主界面一样取上次选择的那个，任务才能和它的页面对上
+                otherId.Id = bh3GlobalId;
+            }
+            string? path = GameLauncherService.GetGameInstallPath(otherId, out bool storageRemoved);
+            if (path is null || storageRemoved)
+            {
+                continue;
+            }
+            installed.Add((otherId, Path.TrimEndingDirectorySeparator(Path.GetFullPath(path))));
+        }
+        return installed;
+    }
+
+
+
+    /// <summary>
+    /// 从其他区服中找出与当前目录通过硬链接共用文件（文件 ID 相同）的区服。要打开文件，调用方应放到后台线程。
+    /// </summary>
+    /// <param name="currentFolder">当前区服的安装目录</param>
+    /// <param name="servers">其他区服与安装目录</param>
+    /// <returns>共用文件的区服，保持传入的顺序</returns>
+    public static List<(GameId GameId, string InstallPath)> GetHardLinkedServers(string currentFolder, IEnumerable<(GameId GameId, string InstallPath)> servers)
+    {
+        // 硬链接只能在同一个卷上，同一目录则是同一批文件，都不用比较
+        List<(GameId GameId, string InstallPath)> candidates = servers
+            .Where(x => string.Equals(Path.GetPathRoot(x.InstallPath), Path.GetPathRoot(currentFolder), StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(x.InstallPath, currentFolder, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (candidates.Count == 0)
+        {
+            return [];
+        }
+        Dictionary<string, long> fileIds = HardLinkDetector.GetLinkedFileIds(currentFolder);
+        return candidates.Where(x => HardLinkDetector.ContainsAnyFile(x.InstallPath, fileIds)).ToList();
+    }
+
+
+
+    /// <summary>
+    /// 在共用文件的一组区服目录中推断本体。硬链接的各个名字地位相同，文件系统里没有来源记录，
+    /// 只能靠目录创建时间：通过硬链接产生的目录一定晚于本体创建，同一卷内移动目录也不会改变创建时间。
+    /// </summary>
+    /// <param name="folders">共用文件的区服安装目录，至少一个</param>
+    /// <returns>创建得最早的目录</returns>
+    public static string GetHardLinkSourceFolder(IEnumerable<string> folders)
+    {
+        return folders.MinBy(Directory.GetCreationTimeUtc)!;
+    }
 
 
 

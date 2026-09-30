@@ -4256,4 +4256,16 @@
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>게임을 업데이트할 때 하드링크로 파일을 공유하는 다른 서버도 묻지 않고 함께 업데이트합니다. 항상 원본을 먼저 업데이트한 뒤 하드링크로 만들어진 서버를 업데이트합니다. 끄면 매번 묻습니다.</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>다른 서버 유지</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>유지하는 서버 중 현재 서버와 하드링크로 게임 파일을 공유하는 서버가 있어, 현재 서버만 삭제해도 확보되는 공간은 거의 없습니다.</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>같은 폴더</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>설치 폴더가 현재 서버와 같거나 그 안에 있어, 다른 서버를 유지해도 함께 삭제됩니다.</value>
+  </data>
 </root>

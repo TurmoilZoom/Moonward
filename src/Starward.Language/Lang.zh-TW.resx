@@ -4256,4 +4256,16 @@
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>更新遊戲時，直接一併更新與它透過硬連結共用檔案的其他伺服器，不再詢問。一律先更新本體，再更新透過硬連結產生的伺服器。關閉時每次都會詢問。</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>保留其他伺服器</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>保留的伺服器中有與目前伺服器透過硬連結共用遊戲檔案的，只解除安裝目前伺服器能釋放的空間很少。</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>同一資料夾</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>安裝資料夾與目前伺服器相同或位於其中，即使保留其他伺服器也會一併刪除。</value>
+  </data>
 </root>

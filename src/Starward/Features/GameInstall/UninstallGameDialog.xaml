@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog x:Class="Starward.Features.GameInstall.UninstallGameDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:lang="using:Starward.Language"
+               xmlns:local="using:Starward.Features.GameInstall"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
+               x:DefaultBindMode="OneWay"
+               Background="{ThemeResource CustomAcrylicBrush}"
+               BorderThickness="0"
+               Closing="ContentDialog_Closing"
+               Loaded="ContentDialog_Loaded"
+               Style="{ThemeResource DefaultContentDialogStyle}"
+               mc:Ignorable="d">
+
+    <ContentDialog.Resources>
+        <Thickness x:Key="ContentDialogPadding">0</Thickness>
+        <!--  模板里空的 Title 行仍带 0,0,0,12 的下边距，不清零的话顶部会比左右多空 12（同修复游戏对话框）  -->
+        <Thickness x:Key="ContentDialogTitleMargin">0</Thickness>
+    </ContentDialog.Resources>
+
+
+    <!--  外观同修复游戏对话框：每个要卸载的区服一行，卡片样式同游戏设置的版本信息  -->
+    <StackPanel Width="520"
+                Padding="24"
+                Spacing="12">
+
+        <!--  标题行（同修复游戏对话框）：负边距把整行上移 16、右伸 16，关闭按钮贴到距边框 8 的右上角  -->
+        <Grid Height="32"
+              Margin="0,-16,-16,0"
+              ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="20"
+                       Text="{x:Bind lang:Lang.LauncherPage_UninstallGame}"
+                       TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="1"
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    BorderThickness="0"
+                    Command="{x:Bind CloseCommand}"
+                    CornerRadius="8"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                <FontIcon FontSize="16"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE711;"
+                          IsTextScaleFactorEnabled="False" />
+            </Button>
+        </Grid>
+
+        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="{x:Bind lang:Lang.GameLauncherSettingDialog_UninstallGameWarning}"
+                   TextWrapping="Wrap" />
+
+        <Border Margin="0,4,0,0"
+                Padding="0,2,0,2"
+                Background="{ThemeResource ControlFillColorDefaultBrush}"
+                CornerRadius="8">
+            <ItemsControl IsTabStop="False" ItemsSource="{x:Bind Servers}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="local:UninstallServerItem">
+                        <StackPanel Opacity="{x:Bind RowOpacity}">
+                            <Border Height="1"
+                                    Margin="16,0,16,0"
+                                    Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                    Visibility="{x:Bind ShowDivider}" />
+                            <Grid MinHeight="60"
+                                  Padding="16,10,16,10"
+                                  ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <!--  游戏图标 + 右下角区服图标（同游戏设置顶部）  -->
+                                <Grid Width="32"
+                                      Height="32"
+                                      VerticalAlignment="Center"
+                                      CornerRadius="6">
+                                    <sc:CachedImage Width="32"
+                                                    Height="32"
+                                                    Source="{x:Bind Icon.GameIcon, FallbackValue={x:Null}}" />
+                                    <sc:CachedImage Width="16"
+                                                    Height="16"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Bottom"
+                                                    Source="{x:Bind Icon.ServerIcon, FallbackValue={x:Null}}" />
+                                </Grid>
+                                <StackPanel Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock FontWeight="SemiBold" Text="{x:Bind Icon.ServerName}" />
+                                        <!--  共用文件的区服中，本体与通过硬链接产生的区服分开标注（本体标签同更新时一并更新的对话框）  -->
+                                        <Border Padding="6,0,6,1"
+                                                VerticalAlignment="Center"
+                                                Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                CornerRadius="4"
+                                                Visibility="{x:Bind IsHardLinkSource}">
+                                            <TextBlock FontSize="12"
+                                                       Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                                       Text="{x:Bind lang:Lang.UpdateOtherServersDialog_Source}" />
+                                        </Border>
+                                        <Border Padding="6,0,6,1"
+                                                VerticalAlignment="Center"
+                                                Background="{ThemeResource SubtleFillColorTertiaryBrush}"
+                                                CornerRadius="4"
+                                                Visibility="{x:Bind IsHardLinkCopy}">
+                                            <TextBlock FontSize="12"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       Text="{x:Bind lang:Lang.LauncherPage_HardLink}" />
+                                        </Border>
+                                        <!--  与当前区服同一目录：勾选保留其他区服也会被删掉，不变淡  -->
+                                        <Border Padding="6,0,6,1"
+                                                VerticalAlignment="Center"
+                                                sc:InstantTooltip.Placement="Top"
+                                                sc:InstantTooltip.Text="{x:Bind lang:Lang.UninstallGameDialog_SameFolderDescription}"
+                                                Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                CornerRadius="4"
+                                                Visibility="{x:Bind InCurrentFolder}">
+                                            <TextBlock FontSize="12"
+                                                       Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                       Text="{x:Bind lang:Lang.UninstallGameDialog_SameFolder}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock FontSize="12"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind InstallPath}"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTipService.ToolTip="{x:Bind InstallPath}"
+                                               Visibility="{x:Bind IsNotBlocked}" />
+                                    <TextBlock FontSize="12"
+                                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                               Text="{x:Bind BlockReason}"
+                                               TextWrapping="Wrap"
+                                               Visibility="{x:Bind IsBlocked}" />
+                                </StackPanel>
+                                <!--  卸载进度：进行中 / 完成 / 失败  -->
+                                <Grid Grid.Column="2"
+                                      Width="20"
+                                      Height="20"
+                                      VerticalAlignment="Center">
+                                    <ProgressRing Width="20"
+                                                  Height="20"
+                                                  IsActive="{x:Bind IsRunning}" />
+                                    <FontIcon FontSize="16"
+                                              Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                              Glyph="&#xE73E;"
+                                              Visibility="{x:Bind IsDone}" />
+                                    <FontIcon FontSize="16"
+                                              Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                              Glyph="&#xE783;"
+                                              Visibility="{x:Bind IsFailed}" />
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
+        <TextBlock FontSize="12"
+                   Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                   Text="{x:Bind ErrorMessage}"
+                   TextWrapping="Wrap"
+                   Visibility="{x:Bind ErrorMessage, Converter={StaticResource ObjectToVisibilityConverter}}" />
+
+        <!--  底部一行：左边保留其他区服（默认不勾选，即同一游戏已安装的区服全部卸载），右边确认卸载。
+              提示只占左列、放在勾选框下方，勾选时勾选框和按钮都不移动  -->
+        <Grid Margin="0,4,0,0" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="2" Visibility="{x:Bind HasOtherServers}">
+                <CheckBox Content="{x:Bind lang:Lang.UninstallGameDialog_KeepOtherServers}"
+                          IsChecked="{x:Bind KeepOtherServers, Mode=TwoWay}"
+                          IsEnabled="{x:Bind IsIdle}" />
+                <TextBlock Margin="28,0,0,0"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.UninstallGameDialog_HardLinkHint}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind ShowHardLinkHint}" />
+            </StackPanel>
+            <!--  与勾选框同高（32），顶端对齐即与勾选框同一行  -->
+            <Button Grid.Column="1"
+                    MinWidth="100"
+                    VerticalAlignment="Top"
+                    Command="{x:Bind UninstallCommand}">
+                <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind lang:Lang.GameLauncherSettingDialog_ConfirmUninstall}" />
+            </Button>
+        </Grid>
+    </StackPanel>
+
+</ContentDialog>

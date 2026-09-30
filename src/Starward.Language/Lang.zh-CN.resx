@@ -4344,4 +4344,16 @@
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>更新游戏时，直接一并更新与它通过硬链接共用文件的其他区服，不再询问。总是先更新本体，再更新通过硬链接产生的区服。关闭时每次都会询问。</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>保留其他区服</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>保留的区服中有与当前区服通过硬链接共用游戏文件的，只卸载当前区服能释放的空间很少。</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>同一文件夹</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>安装文件夹与当前区服相同或位于其中，即使保留其他区服也会一并删除。</value>
+  </data>
 </root>

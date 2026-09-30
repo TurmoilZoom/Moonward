@@ -4256,4 +4256,16 @@ You are welcome to submit exported data to:</value>
   <data name="DownloadSettingPage_UpdateHardLinkedGamesTogetherDescription" xml:space="preserve">
     <value>Al actualizar un juego, también se actualizan sin preguntar los demás servidores que comparten sus archivos mediante enlaces físicos. Siempre se actualiza primero el original y después los servidores creados a partir de él mediante enlaces físicos. Si se desactiva, se preguntará cada vez.</value>
   </data>
+  <data name="UninstallGameDialog_KeepOtherServers" xml:space="preserve">
+    <value>Conservar los demás servidores</value>
+  </data>
+  <data name="UninstallGameDialog_HardLinkHint" xml:space="preserve">
+    <value>Algunos de los servidores conservados comparten archivos del juego con este mediante enlaces físicos, por lo que desinstalar solo este servidor libera muy poco espacio.</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolder" xml:space="preserve">
+    <value>Misma carpeta</value>
+  </data>
+  <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
+    <value>Su carpeta de instalación es la misma que la de este servidor (o está dentro de ella), por lo que también se eliminará aunque se conserven los demás servidores.</value>
+  </data>
 </root>

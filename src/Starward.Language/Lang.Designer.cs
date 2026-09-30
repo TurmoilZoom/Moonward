@@ -10546,6 +10546,42 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Some of the kept servers share game files with this server through hard links, so uninstalling only this server frees very little space. 的本地化字符串。
+        /// </summary>
+        public static string UninstallGameDialog_HardLinkHint {
+            get {
+                return ResourceManager.GetString("UninstallGameDialog_HardLinkHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Keep other servers 的本地化字符串。
+        /// </summary>
+        public static string UninstallGameDialog_KeepOtherServers {
+            get {
+                return ResourceManager.GetString("UninstallGameDialog_KeepOtherServers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Same folder 的本地化字符串。
+        /// </summary>
+        public static string UninstallGameDialog_SameFolder {
+            get {
+                return ResourceManager.GetString("UninstallGameDialog_SameFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Its install folder is the same as (or inside) this server's folder, so it will be deleted too even if other servers are kept. 的本地化字符串。
+        /// </summary>
+        public static string UninstallGameDialog_SameFolderDescription {
+            get {
+                return ResourceManager.GetString("UninstallGameDialog_SameFolderDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Click to Refresh 的本地化字符串。
         /// </summary>
         public static string UpdateContentWindow_ClickToRefresh {
