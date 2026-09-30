@@ -373,7 +373,7 @@ internal class GameInstallService
     {
         if (context.DownloadMode is GameInstallDownloadMode.Chunk)
         {
-            await ExecuteInstallTaskDownloadModeChunkAsync(context, cancellationToken);
+            await ExecuteInstallTaskDownloadModeChunkAsync(context, cancellationToken: cancellationToken);
         }
         else if (context.DownloadMode is GameInstallDownloadMode.CompressedPackage)
         {
@@ -391,8 +391,9 @@ internal class GameInstallService
     /// 安装游戏，下载模式为 Chunk
     /// </summary>
     /// <param name="context"></param>
+    /// <param name="maxDegreeOfParallelism">同时处理（校验、写入）的文件数，-1 为 CPU 核数</param>
     /// <returns></returns>
-    private async Task ExecuteInstallTaskDownloadModeChunkAsync(GameInstallContext context, CancellationToken cancellationToken = default)
+    private async Task ExecuteInstallTaskDownloadModeChunkAsync(GameInstallContext context, int maxDegreeOfParallelism = -1, CancellationToken cancellationToken = default)
     {
         long downloadBytes = 0, writeBytes = 0;
         foreach (GameInstallFile item in context.TaskFiles ?? [])
@@ -411,7 +412,8 @@ internal class GameInstallService
         _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode chunk, max concurrent chunk downloads: {count}", context.GameId.GameBiz, ChunkDownloadScheduler.MaxConcurrentDownloads);
         EnterStage(context, GameInstallState.Downloading);
         using ChunkDownloadScheduler scheduler = new();
-        await Parallel.ForEachAsync(context.TaskFiles ?? [], cancellationToken, async (GameInstallFile file, CancellationToken token) =>
+        ParallelOptions options = new() { MaxDegreeOfParallelism = maxDegreeOfParallelism, CancellationToken = cancellationToken };
+        await Parallel.ForEachAsync(context.TaskFiles ?? [], options, async (GameInstallFile file, CancellationToken token) =>
         {
             await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, scheduler, false, token), token);
             file.IsFinished = true;
@@ -752,7 +754,7 @@ internal class GameInstallService
 
         if (context.DownloadMode is GameInstallDownloadMode.Chunk)
         {
-            await ExecuteInstallTaskDownloadModeChunkAsync(context, cancellationToken);
+            await ExecuteInstallTaskDownloadModeChunkAsync(context, GetRepairParallelism(context, chunkMode: true), cancellationToken);
             // 本地版本落后时修复等同于更新，同样要清掉新版本已移除的文件；版本一致时列表为空
             DeleteSophonChunkRemovedFiles(context);
         }
@@ -763,7 +765,8 @@ internal class GameInstallService
 
             _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading in mode single file", context.GameId.GameBiz);
             EnterStage(context, GameInstallState.Downloading);
-            await Parallel.ForEachAsync(context.TaskFiles!, cancellationToken, async (GameInstallFile file, CancellationToken token) =>
+            ParallelOptions options = new() { MaxDegreeOfParallelism = GetRepairParallelism(context, chunkMode: false), CancellationToken = cancellationToken };
+            await Parallel.ForEachAsync(context.TaskFiles!, options, async (GameInstallFile file, CancellationToken token) =>
             {
                 await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadToFileAsync(context, file, token), token);
                 file.IsFinished = true;
@@ -774,6 +777,40 @@ internal class GameInstallService
         await DownloadWPFPackageAsync(context, cancellationToken);
         await DownloadGameChannelSDKAsync(context, cancellationToken);
         await SetGameConfigIniAsync(context);
+    }
+
+
+
+    /// <summary>
+    /// 官方启动器 chunk 模式的校验线程数（sophon getParamsConfig 的 chunk_max_validation_threads，2026-09 实测 SSD 与机械硬盘都是 6）
+    /// </summary>
+    private const int OfficialChunkVerifyThreads = 6;
+
+    /// <summary>
+    /// 官方启动器整包 / 单文件模式的校验线程数（getParamsConfig 的 max_validation_threads，2026-09 实测机械硬盘与未识别的磁盘为 1，SSD 为 2）
+    /// </summary>
+    private const int OfficialFileVerifyThreads = 1;
+
+
+    /// <summary>
+    /// 修复时同时校验的文件数：游戏在固态硬盘上沿用原方案（CPU 核数），否则按官方启动器的线程数，
+    /// 避免机械硬盘、可移动存储和网络位置被多路并发读取拖慢。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="chunkMode">是否为 chunk 模式；千星沙箱和单文件模式按整包 / 单文件的线程数</param>
+    /// <returns></returns>
+    private int GetRepairParallelism(GameInstallContext context, bool chunkMode)
+    {
+        bool ssd = DriveHelper.IsSolidStateDrive(context.InstallPath);
+        int threads = ssd ? Environment.ProcessorCount : chunkMode ? OfficialChunkVerifyThreads : OfficialFileVerifyThreads;
+        _logger.LogInformation("GameInstallTask ({GameBiz}): Repair verify threads: {threads}, solid state drive: {ssd}, chunk mode: {chunk}", context.GameId.GameBiz, threads, ssd, chunkMode);
+        Telemetry.Track("task_verify_threads", context.GameId.GameBiz,
+            ("op", context.Operation),
+            ("txn", context.TransactionId),
+            ("ssd", ssd),
+            ("chunk", chunkMode),
+            ("threads", threads));
+        return threads;
     }
 
 
