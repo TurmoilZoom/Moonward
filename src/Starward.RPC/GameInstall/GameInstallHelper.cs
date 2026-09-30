@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -290,6 +291,8 @@ internal partial class GameInstallHelper
         {
             return false;
         }
+        // 本地原本就是这个硬链接时文件没有变化，修复结束才能判断本地文件是否本来就完整
+        bool alreadyLinked = IsSameFile(file.FullPath, file.HardLinkTarget!);
         string temp = file.FullPath + ".link";
         if (File.Exists(temp))
         {
@@ -299,9 +302,37 @@ internal partial class GameInstallHelper
         if (Kernel32.CreateHardLink(temp, file.HardLinkTarget!))
         {
             File.Move(temp, file.FullPath, true);
+            if (!alreadyLinked)
+            {
+                Interlocked.Increment(ref task._rewrittenFileCount);
+            }
             return true;
         }
         else
+        {
+            return false;
+        }
+    }
+
+
+
+    /// <summary>
+    /// 两个路径是否指向同一个文件（同一卷上的同一文件 ID，即互为硬链接）。任一文件不存在或打不开时为 <see langword="false"/>
+    /// </summary>
+    /// <param name="path1">文件路径</param>
+    /// <param name="path2">文件路径</param>
+    /// <returns></returns>
+    private static bool IsSameFile(string path1, string path2)
+    {
+        try
+        {
+            using var handle1 = File.OpenHandle(path1, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using var handle2 = File.OpenHandle(path2, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            var id1 = Kernel32.GetFileInformationByHandleEx<Kernel32.FILE_ID_INFO>(handle1, Kernel32.FILE_INFO_BY_HANDLE_CLASS.FileIdInfo);
+            var id2 = Kernel32.GetFileInformationByHandleEx<Kernel32.FILE_ID_INFO>(handle2, Kernel32.FILE_INFO_BY_HANDLE_CLASS.FileIdInfo);
+            return MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref id1, 1)).SequenceEqual(MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref id2, 1)));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception)
         {
             return false;
         }
@@ -333,6 +364,7 @@ internal partial class GameInstallHelper
             }
             return;
         }
+        Interlocked.Increment(ref task._rewrittenFileCount);
 
         Directory.CreateDirectory(Path.GetDirectoryName(file.FullPath)!);
         string path_tmp = file.FullPath + "_tmp";
@@ -790,6 +822,7 @@ internal partial class GameInstallHelper
         {
             return;
         }
+        Interlocked.Increment(ref task._rewrittenFileCount);
 
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         string path_tmp = path + "_tmp";
@@ -1240,6 +1273,7 @@ internal partial class GameInstallHelper
             }
         }
 
+        Interlocked.Increment(ref task._rewrittenFileCount);
         long size = task.GameChannelSDK.ChannelSDKPackage.Size;
         string url = task.GameChannelSDK.ChannelSDKPackage.Url;
         string md5 = task.GameChannelSDK.ChannelSDKPackage.MD5;
@@ -1356,6 +1390,7 @@ internal partial class GameInstallHelper
     public async Task ExtractWPFPackageAsync(GameInstallContext context, string path, CancellationToken cancellationToken = default)
     {
         context.Progress_Percent = 0;
+        Interlocked.Increment(ref context._rewrittenFileCount);
         await Task.Run(() =>
         {
             using var archive = new SharpSevenZipExtractor(path);

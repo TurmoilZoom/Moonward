@@ -4689,6 +4689,24 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Local files are intact. Enjoy your game! 的本地化字符串。
+        /// </summary>
+        public static string RepairGameDialog_ResourcesIntact {
+            get {
+                return ResourceManager.GetString("RepairGameDialog_ResourcesIntact", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Game resources repaired 的本地化字符串。
+        /// </summary>
+        public static string RepairGameDialog_GameRepairFinished {
+            get {
+                return ResourceManager.GetString("RepairGameDialog_GameRepairFinished", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 New Profile 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_NewProfile {

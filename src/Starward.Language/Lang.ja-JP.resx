@@ -4222,6 +4222,12 @@
   <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
     <value>星々の箱庭を修復できませんでした</value>
   </data>
+  <data name="RepairGameDialog_ResourcesIntact" xml:space="preserve">
+    <value>ローカルのリソースに問題はありません。ゲームをお楽しみください</value>
+  </data>
+  <data name="RepairGameDialog_GameRepairFinished" xml:space="preserve">
+    <value>ゲームリソースの修復が完了しました</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>ハードリンクされたサーバーも更新しますか？</value>
   </data>

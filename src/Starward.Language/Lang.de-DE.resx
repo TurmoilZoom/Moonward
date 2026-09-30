@@ -4221,6 +4221,12 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
     <value>Miliastra Sandbox konnte nicht repariert werden</value>
   </data>
+  <data name="RepairGameDialog_ResourcesIntact" xml:space="preserve">
+    <value>Die lokalen Dateien sind vollständig. Viel Spaß beim Spielen!</value>
+  </data>
+  <data name="RepairGameDialog_GameRepairFinished" xml:space="preserve">
+    <value>Spielressourcen wurden repariert</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>Per Hardlink verknüpfte Server ebenfalls aktualisieren?</value>
   </data>

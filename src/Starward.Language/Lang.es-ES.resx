@@ -4223,6 +4223,12 @@ You are welcome to submit exported data to:</value>
   <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
     <value>No se pudo reparar Miliastra Sandbox</value>
   </data>
+  <data name="RepairGameDialog_ResourcesIntact" xml:space="preserve">
+    <value>Los archivos locales están completos. ¡Disfruta del juego!</value>
+  </data>
+  <data name="RepairGameDialog_GameRepairFinished" xml:space="preserve">
+    <value>Se repararon los recursos del juego</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>¿Actualizar también los servidores con enlace físico?</value>
   </data>

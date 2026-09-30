@@ -4311,6 +4311,12 @@
   <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
     <value>千星沙箱修复失败</value>
   </data>
+  <data name="RepairGameDialog_ResourcesIntact" xml:space="preserve">
+    <value>本地资源完整，祝您游戏愉快</value>
+  </data>
+  <data name="RepairGameDialog_GameRepairFinished" xml:space="preserve">
+    <value>游戏资源修复完成</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>同时更新硬链接的区服？</value>
   </data>

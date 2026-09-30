@@ -4312,6 +4312,12 @@ Repository:</value>
   <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
     <value>Couldn't repair Miliastra Sandbox</value>
   </data>
+  <data name="RepairGameDialog_ResourcesIntact" xml:space="preserve">
+    <value>Local files are intact. Enjoy your game!</value>
+  </data>
+  <data name="RepairGameDialog_GameRepairFinished" xml:space="preserve">
+    <value>Game resources repaired</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>Also update hard-linked servers?</value>
   </data>

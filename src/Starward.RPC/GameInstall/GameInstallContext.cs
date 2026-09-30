@@ -95,6 +95,12 @@ public class GameInstallContext
     /// </summary>
     public long RemainTimeSeconds { get; set; }
 
+    /// <summary>
+    /// 校验不通过、被重新下载或重建的文件数，重试时可能重复计数。修复结束时为 0 表示本地文件本来就完整
+    /// </summary>
+    public long RewrittenFileCount { get => _rewrittenFileCount; set => _rewrittenFileCount = value; }
+    internal long _rewrittenFileCount;
+
 
 
     internal string? LocalGameVersion { get; set; }
@@ -277,6 +283,7 @@ public partial class GameInstallContextDTO
         task.StorageReadSpeed = StorageReadSpeed;
         task.StorageWriteSpeed = StorageWriteSpeed;
         task.RemainTimeSeconds = RemainTimeSeconds;
+        task.RewrittenFileCount = RewrittenFileCount;
         task.DownloadMode = (GameInstallDownloadMode)DownloadMode;
         return task;
     }
@@ -305,6 +312,7 @@ public partial class GameInstallContextDTO
         StorageReadSpeed = task.StorageReadSpeed,
         StorageWriteSpeed = task.StorageWriteSpeed,
         RemainTimeSeconds = task.RemainTimeSeconds,
+        RewrittenFileCount = task.RewrittenFileCount,
         DownloadMode = (int)task.DownloadMode,
     };
 

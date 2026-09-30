@@ -86,6 +86,7 @@ internal class GameInstallService
                         task.StorageReadSpeed = item.StorageReadSpeed;
                         task.StorageWriteSpeed = item.StorageWriteSpeed;
                         task.RemainTimeSeconds = item.RemainTimeSeconds;
+                        task.RewrittenFileCount = item.RewrittenFileCount;
                         task.DownloadMode = (GameInstallDownloadMode)item.DownloadMode;
                     }
                     else
@@ -111,6 +112,7 @@ internal class GameInstallService
                             StorageReadSpeed = item.StorageReadSpeed,
                             StorageWriteSpeed = item.StorageWriteSpeed,
                             RemainTimeSeconds = item.RemainTimeSeconds,
+                            RewrittenFileCount = item.RewrittenFileCount,
                             DownloadMode = (GameInstallDownloadMode)item.DownloadMode,
                         };
                     }
@@ -207,11 +209,30 @@ internal class GameInstallService
             _tasks.TryRemove(gameId, out _);
         }
         // 已结束的任务 RPC 还会再推送一次，那时任务已不在表里，previousState 为 null，不会重复提示
-        if (task.Operation is GameInstallOperation.RepairWPFPackage && previousState is not null && previousState != task.State)
+        if (previousState is not null && previousState != task.State)
         {
-            OnWPFPackageRepairStateChanged(task);
+            if (task.Operation is GameInstallOperation.Repair && task.State is GameInstallState.Finish)
+            {
+                ShowRepairFinishedToast(task, Lang.RepairGameDialog_GameRepairFinished);
+            }
+            else if (task.Operation is GameInstallOperation.RepairWPFPackage)
+            {
+                OnWPFPackageRepairStateChanged(task);
+            }
         }
         return task;
+    }
+
+
+
+    /// <summary>
+    /// 修复完成的提示：没有文件需要重新下载或重建时提示本地资源完整，与真正修复了文件区分开（与官方启动器一致）
+    /// </summary>
+    /// <param name="task">已完成的修复任务</param>
+    /// <param name="repairedMessage">修复了文件时的提示</param>
+    private static void ShowRepairFinishedToast(GameInstallContext task, string repairedMessage)
+    {
+        InAppToast.MainWindow?.Success(task.RewrittenFileCount == 0 ? Lang.RepairGameDialog_ResourcesIntact : repairedMessage);
     }
 
 
@@ -225,7 +246,7 @@ internal class GameInstallService
     {
         if (task.State is GameInstallState.Finish)
         {
-            InAppToast.MainWindow?.Success(Lang.RepairGameDialog_SandboxRepairFinished);
+            ShowRepairFinishedToast(task, Lang.RepairGameDialog_SandboxRepairFinished);
         }
         else if (task.State is GameInstallState.Error)
         {

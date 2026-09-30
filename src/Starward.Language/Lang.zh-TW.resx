@@ -4223,6 +4223,12 @@
   <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
     <value>千星沙箱修復失敗</value>
   </data>
+  <data name="RepairGameDialog_ResourcesIntact" xml:space="preserve">
+    <value>本地資源完整，祝您遊戲愉快</value>
+  </data>
+  <data name="RepairGameDialog_GameRepairFinished" xml:space="preserve">
+    <value>遊戲資源修復完成</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>同時更新硬連結的伺服器？</value>
   </data>

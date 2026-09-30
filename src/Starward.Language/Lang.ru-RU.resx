@@ -4243,6 +4243,12 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
     <value>Не удалось восстановить: Miliastra Sandbox</value>
   </data>
+  <data name="RepairGameDialog_ResourcesIntact" xml:space="preserve">
+    <value>Локальные файлы в порядке. Приятной игры!</value>
+  </data>
+  <data name="RepairGameDialog_GameRepairFinished" xml:space="preserve">
+    <value>Восстановление ресурсов игры завершено</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>Обновить и серверы с жёсткими ссылками?</value>
   </data>
