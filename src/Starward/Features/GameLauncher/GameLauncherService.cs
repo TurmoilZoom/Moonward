@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.HoYoPlay;
+using Starward.Features.GameInstall;
 using Starward.Features.GameRecord;
 using Starward.Features.GameSetting;
 using Starward.Features.HoYoPlay;
@@ -129,8 +130,9 @@ internal partial class GameLauncherService
 
 
     /// <summary>
-    /// 自动查找游戏安装目录，依次查找：上次清除的安装路径、安装父目录下以区服命名的子文件夹、官方启动器注册表。
+    /// 第一轮自动查找游戏安装目录，依次查找：上次清除的安装路径、安装父目录下以区服命名的子文件夹、官方启动器注册表。
     /// 前两处针对本软件安装（含硬链接）的游戏，要求目录中有游戏 exe。
+    /// 第一轮没找到的，再用 <see cref="FindHardLinkedGameInstallPaths"/> 从其他区服反查硬链接。
     /// </summary>
     /// <param name="gameBiz"></param>
     /// <returns>找到的安装目录，未找到时为 <see langword="null"/></returns>
@@ -166,6 +168,156 @@ internal partial class GameLauncherService
         }
         return FindGameInstallPathFromRegistry(gameBiz);
     }
+
+
+
+    /// <summary>
+    /// 第二轮自动查找：以已找到的同一游戏其他区服的安装目录为锚点，反查硬链接找到本区服通过硬链接安装的目录。
+    /// 只读文件系统、不读写设置，可以放在后台线程。
+    /// </summary>
+    /// <param name="gameBizs">第一轮没找到的区服</param>
+    /// <param name="foundPaths">已找到的区服与安装目录；本轮找到的也会作为后面区服的锚点，但不会改动传入的字典</param>
+    /// <returns>本轮找到的区服与安装目录</returns>
+    public static List<(GameBiz GameBiz, string Path)> FindHardLinkedGameInstallPaths(IEnumerable<GameBiz> gameBizs, IReadOnlyDictionary<GameBiz, string> foundPaths)
+    {
+        List<(GameBiz, string)> result = new();
+        Dictionary<GameBiz, string> anchors = new(foundPaths);
+        // 同一锚点会被同一游戏的多个区服用到，缓存它的外部硬链接，避免重复遍历游戏目录
+        Dictionary<string, List<string>> linkPathCache = new(StringComparer.OrdinalIgnoreCase);
+        foreach (GameBiz gameBiz in gameBizs)
+        {
+            if (!GameFeatureConfig.FromGameBiz(gameBiz).SupportHardLink)
+            {
+                continue;
+            }
+            foreach (GameBiz sibling in GetHardLinkSiblings(gameBiz))
+            {
+                if (anchors.TryGetValue(sibling, out string? anchor) && FindHardLinkedGameInstallPath(gameBiz, anchor, linkPathCache) is string path)
+                {
+                    anchors[gameBiz] = path;
+                    result.Add((gameBiz, path));
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+
+
+    /// <summary>
+    /// 只查一个区服时第二轮用的锚点：同一游戏其他区服保存的安装目录，没有时按第一轮的方式查找。只用来反查，不会保存其他区服的路径
+    /// </summary>
+    /// <param name="gameBiz">要找的区服</param>
+    /// <returns>其他区服与安装目录；不支持硬链接的游戏为空</returns>
+    public static Dictionary<GameBiz, string> GetHardLinkAnchors(GameBiz gameBiz)
+    {
+        Dictionary<GameBiz, string> anchors = new();
+        if (!GameFeatureConfig.FromGameBiz(gameBiz).SupportHardLink)
+        {
+            return anchors;
+        }
+        foreach (GameBiz sibling in GetHardLinkSiblings(gameBiz))
+        {
+            if ((GetGameInstallPath(sibling) ?? FindGameInstallPath(sibling)) is string path)
+            {
+                anchors[sibling] = path;
+            }
+        }
+        return anchors;
+    }
+
+
+
+    /// <summary>
+    /// 可能与本区服硬链接的同一游戏其他区服，与安装时选取硬链接源的范围一致
+    /// </summary>
+    /// <param name="gameBiz"></param>
+    /// <returns></returns>
+    private static IEnumerable<GameBiz> GetHardLinkSiblings(GameBiz gameBiz)
+    {
+        foreach (string server in new[] { "cn", "bilibili", "global" })
+        {
+            GameBiz sibling = $"{gameBiz.Game}_{server}";
+            if (sibling != gameBiz)
+            {
+                yield return sibling;
+            }
+        }
+    }
+
+
+
+    /// <summary>
+    /// 从锚点目录在目录之外的硬链接中，找本区服的游戏目录
+    /// </summary>
+    /// <param name="gameBiz">要找的区服</param>
+    /// <param name="anchorFolder">其他区服的安装目录</param>
+    /// <param name="linkPathCache">锚点目录到其外部硬链接路径的缓存</param>
+    /// <returns>找到的安装目录，未找到时为 <see langword="null"/></returns>
+    private static string? FindHardLinkedGameInstallPath(GameBiz gameBiz, string anchorFolder, Dictionary<string, List<string>> linkPathCache)
+    {
+        if (!linkPathCache.TryGetValue(anchorFolder, out List<string>? linkPaths))
+        {
+            try
+            {
+                // 可移动存储拔出时保存的路径可能不存在
+                linkPaths = Directory.Exists(anchorFolder) ? HardLinkDetector.GetOutsideLinkPaths(anchorFolder) : new List<string>();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                linkPaths = new List<string>();
+            }
+            linkPathCache[anchorFolder] = linkPaths;
+        }
+        // 同一目标目录下有多个链接文件，向上查过的目录不再重复查
+        HashSet<string> visited = new(StringComparer.OrdinalIgnoreCase);
+        foreach (string linkPath in linkPaths)
+        {
+            string? folder = Path.GetDirectoryName(linkPath);
+            // 资源文件离游戏目录不会超过这么多层，也避免一路查到盘符根目录
+            for (int i = 0; i < 10 && !string.IsNullOrEmpty(folder) && visited.Add(folder); i++)
+            {
+                // 同一游戏各区服的 exe 可能同名（星铁、绝区零全部同名，原神国服与 B 服同名），以 config.ini 的 game_biz 为准
+                if (IsGameInstallFolder(gameBiz, folder) && IsConfigGameBiz(gameBiz, folder))
+                {
+                    return folder;
+                }
+                folder = Path.GetDirectoryName(folder);
+            }
+        }
+        return null;
+    }
+
+
+
+    /// <summary>
+    /// 目录中 config.ini 记录的 game_biz 是否为该区服。本软件安装游戏时会写入 game_biz
+    /// </summary>
+    /// <param name="gameBiz"></param>
+    /// <param name="folder">游戏目录</param>
+    /// <returns></returns>
+    private static bool IsConfigGameBiz(GameBiz gameBiz, string folder)
+    {
+        try
+        {
+            string config = Path.Join(folder, "config.ini");
+            if (!File.Exists(config))
+            {
+                return false;
+            }
+            Match match = GameBizRegex().Match(File.ReadAllText(config));
+            return match.Success && match.Groups[1].Value == gameBiz.ToString();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
+
+    [GeneratedRegex(@"^game_biz=(\S+)", RegexOptions.Multiline)]
+    private static partial Regex GameBizRegex();
 
 
 
