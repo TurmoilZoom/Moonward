@@ -593,6 +593,12 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     /// <summary>可用增量补丁的起点版本</summary>
     private string? _patchText;
 
+    /// <summary>千星沙箱（WPF 包）的本地版本，有更新时带上最新版本</summary>
+    private string? _wpfVersionText;
+
+    /// <summary>千星沙箱版本旁的更新状态标签</summary>
+    private string? _wpfStatus;
+
     /// <summary>主程序 MD5 与官方各版本记录的比对结果</summary>
     private string? _exeCheckText;
 
@@ -623,6 +629,8 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         _predownloadVersionText = null;
         _predownloadStatus = null;
         _patchText = null;
+        _wpfVersionText = null;
+        _wpfStatus = null;
         _exeCheckText = null;
         _exeCheckWarning = false;
         _fullResourceText = null;
@@ -660,9 +668,9 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         {
             return;
         }
-        // 对话框高度随行数变化，行分两批出现以减少跳动：先显示版本，主程序校验与完整资源并行取完后再补上
+        // 对话框高度随行数变化，行分两批出现以减少跳动：先显示版本，千星沙箱、主程序校验与完整资源并行取完后再补上
         RefreshVersionInfoRows();
-        await Task.WhenAll(InitializeExeCheckAsync(token, installPath, localVersion), InitializeFullResourceSizeAsync(token, installPath, branch));
+        await Task.WhenAll(InitializeWPFVersionAsync(token, installPath, localVersion), InitializeExeCheckAsync(token, installPath, localVersion), InitializeFullResourceSizeAsync(token, installPath, branch));
         if (token == _versionInfoToken)
         {
             RefreshVersionInfoRows();
@@ -724,6 +732,55 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
                 }
                 _predownloadStatus = finished ? Lang.GameLauncherSettingDialog_PredownloadFinished : Lang.GameLauncherSettingDialog_PredownloadNotFinished;
             }
+        }
+    }
+
+
+
+    /// <summary>
+    /// 千星沙箱（WPF 包，目前只有原神有）的本地版本与是否最新。游戏没有 WPF 包、未定位或未装完时不显示。
+    /// 判断「最新」与安装任务一致：本地记录的版本与官方当前版本字符串相同，否则下次安装、更新或修复时会重新下载。
+    /// </summary>
+    /// <param name="token">本轮刷新的标记</param>
+    /// <param name="installPath">游戏安装目录</param>
+    /// <param name="localVersion">本地游戏版本，为 <see langword="null"/> 时游戏还没装完</param>
+    /// <returns></returns>
+    private async Task InitializeWPFVersionAsync(int token, string? installPath, Version? localVersion)
+    {
+        try
+        {
+            if (installPath is null || localVersion is null)
+            {
+                return;
+            }
+            WPFPackage? package = await _hoyoPlayService.GetWPFPackageAsync(CurrentGameId);
+            if (package is null || string.IsNullOrWhiteSpace(package.Version))
+            {
+                return;
+            }
+            string? localWpfVersion = await GameLauncherService.GetLocalWPFVersionAsync(installPath);
+            if (token != _versionInfoToken)
+            {
+                return;
+            }
+            if (localWpfVersion is null)
+            {
+                _wpfVersionText = Lang.WelcomeView_NotInstalled;
+            }
+            else if (localWpfVersion == package.Version)
+            {
+                _wpfVersionText = localWpfVersion;
+                _wpfStatus = Lang.GameLauncherSettingDialog_UpToDate;
+            }
+            else
+            {
+                _wpfVersionText = $"{localWpfVersion} → {package.Version}";
+                _wpfStatus = Lang.GameLauncherSettingDialog_UpdateAvailable;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get WPF package version ({biz})", CurrentGameBiz);
         }
     }
 
@@ -865,6 +922,7 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         Add(Lang.GameLauncherSettingDialog_LatestVersion, _latestVersionText, _updateStatus);
         Add(Lang.LauncherPage_PreInstall, _predownloadVersionText, _predownloadStatus);
         Add(Lang.GameLauncherSettingDialog_IncrementalPatch, _patchText);
+        Add(Lang.GameLauncherSettingDialog_MiliastraSandbox, _wpfVersionText, _wpfStatus);
         Add(Lang.GameLauncherSettingDialog_ExeCheck, _exeCheckText, isWarning: _exeCheckWarning);
         Add(Lang.GameLauncherSettingDialog_FullResources, _fullResourceText);
         Add(Lang.GameLauncherSettingDialog_LocalSize, GameSize);

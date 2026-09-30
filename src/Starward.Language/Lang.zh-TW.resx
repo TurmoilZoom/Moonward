@@ -4202,6 +4202,9 @@
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>本機佔用</value>
   </data>
+  <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
+    <value>千星沙箱</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>同時更新硬連結的伺服器？</value>
   </data>

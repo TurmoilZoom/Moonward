@@ -4202,6 +4202,9 @@
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>디스크 사용량</value>
   </data>
+  <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
+    <value>별바다 정원</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>하드링크된 서버도 함께 업데이트하시겠습니까?</value>
   </data>

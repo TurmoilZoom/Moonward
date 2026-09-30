@@ -4196,6 +4196,9 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>พื้นที่ที่ใช้</value>
   </data>
+  <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
+    <value>Miliastra Sandbox</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>อัปเดตเซิร์ฟเวอร์ที่ฮาร์ดลิงก์ไว้ด้วยหรือไม่?</value>
   </data>

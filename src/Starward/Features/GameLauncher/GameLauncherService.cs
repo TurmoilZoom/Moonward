@@ -179,6 +179,33 @@ internal partial class GameLauncherService
 
 
     /// <summary>
+    /// 本地 WPF 包（原神的千星沙箱）版本，即安装时写进 config.ini 的 wpf_version。
+    /// </summary>
+    /// <param name="installPath">游戏安装目录</param>
+    /// <returns>本地版本；没有 config.ini 或没有记录（未安装）时返回 <see langword="null"/></returns>
+    public static async Task<string?> GetLocalWPFVersionAsync(string installPath)
+    {
+        string config = Path.Join(installPath, "config.ini");
+        if (!File.Exists(config))
+        {
+            return null;
+        }
+        MatchCollection matches = WPFVersionRegex().Matches(await File.ReadAllTextAsync(config));
+        if (matches.Count == 0)
+        {
+            return null;
+        }
+        string version = matches[^1].Groups[1].Value.Trim();
+        return string.IsNullOrEmpty(version) ? null : version;
+    }
+
+
+    [GeneratedRegex(@"wpf_version=(.+)")]
+    private static partial Regex WPFVersionRegex();
+
+
+
+    /// <summary>
     /// 最新游戏版本
     /// </summary>
     /// <param name="gameBiz"></param>

@@ -4290,6 +4290,9 @@
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>本地占用</value>
   </data>
+  <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
+    <value>千星沙箱</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>同时更新硬链接的区服？</value>
   </data>

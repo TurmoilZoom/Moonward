@@ -4624,7 +4624,16 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GameLauncherSettingDialog_LocalVersion", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Miliastra Sandbox 的本地化字符串。
+        /// </summary>
+        public static string GameLauncherSettingDialog_MiliastraSandbox {
+            get {
+                return ResourceManager.GetString("GameLauncherSettingDialog_MiliastraSandbox", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 New Profile 的本地化字符串。
         /// </summary>

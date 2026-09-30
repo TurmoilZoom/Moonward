@@ -320,6 +320,29 @@ public class HoYoPlayService
 
 
     /// <summary>
+    /// 获取游戏附带的 WPF 包（原神的千星沙箱）。
+    /// </summary>
+    /// <param name="gameId">游戏</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>WPF 包；该游戏没有时（目前除原神外都没有）返回 <see langword="null"/></returns>
+    public async Task<WPFPackage?> GetWPFPackageAsync(GameId gameId, CancellationToken cancellationToken = default)
+    {
+        string launcherId = LauncherId.FromGameId(gameId)!;
+        string key = $"{nameof(WPFPackageInfo)}_{launcherId}";
+        // 按启动器缓存整张列表：大多数游戏没有 WPF 包，按游戏缓存的话查不到的游戏每次都要重新请求
+        if (!_memoryCache.TryGetValue(key, out List<WPFPackageInfo>? list))
+        {
+            string lang = CultureInfo.CurrentUICulture.Name;
+            list = await _client.GetWPFPackagesAsync(launcherId, lang, cancellationToken);
+            _memoryCache.Set(key, list, TimeSpan.FromMinutes(1));
+        }
+        return list?.FirstOrDefault(x => x.GameId == gameId)?.WPFPackage;
+    }
+
+
+
+
+    /// <summary>
     /// 获取 Chunk 模式文件清单，取法与 RPC 安装任务一致，保证对话框统计的就是实际要下载的清单。
     /// </summary>
     /// <param name="gameBranch">游戏分支</param>

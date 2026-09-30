@@ -4200,6 +4200,9 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>Speicherbelegung</value>
   </data>
+  <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
+    <value>Miliastra Sandbox</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>Per Hardlink verknüpfte Server ebenfalls aktualisieren?</value>
   </data>

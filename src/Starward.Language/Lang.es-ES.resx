@@ -4202,6 +4202,9 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>Espacio en disco</value>
   </data>
+  <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
+    <value>Miliastra Sandbox</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>¿Actualizar también los servidores con enlace físico?</value>
   </data>

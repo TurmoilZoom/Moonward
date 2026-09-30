@@ -4201,6 +4201,9 @@
   <data name="GameLauncherSettingDialog_LocalSize" xml:space="preserve">
     <value>使用容量</value>
   </data>
+  <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
+    <value>星々の箱庭</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>ハードリンクされたサーバーも更新しますか？</value>
   </data>
