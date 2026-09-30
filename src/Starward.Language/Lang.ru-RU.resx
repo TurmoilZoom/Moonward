@@ -4225,6 +4225,24 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>Miliastra Sandbox</value>
   </data>
+  <data name="RepairGameDialog_Title" xml:space="preserve">
+    <value>Выберите, что восстановить</value>
+  </data>
+  <data name="RepairGameDialog_GameResources" xml:space="preserve">
+    <value>Ресурсы игры</value>
+  </data>
+  <data name="RepairGameDialog_Repair" xml:space="preserve">
+    <value>Восстановить</value>
+  </data>
+  <data name="RepairGameDialog_Description" xml:space="preserve">
+    <value>Восстановление проверяет локальные файлы и заново загружает отсутствующие или повреждённые. Читаются все файлы, поэтому это может занять некоторое время.</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFinished" xml:space="preserve">
+    <value>Восстановление завершено: Miliastra Sandbox</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
+    <value>Не удалось восстановить: Miliastra Sandbox</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>Обновить и серверы с жёсткими ссылками?</value>
   </data>

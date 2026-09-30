@@ -4204,6 +4204,24 @@
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>星々の箱庭</value>
   </data>
+  <data name="RepairGameDialog_Title" xml:space="preserve">
+    <value>修復する対象を選択</value>
+  </data>
+  <data name="RepairGameDialog_GameResources" xml:space="preserve">
+    <value>ゲームリソース</value>
+  </data>
+  <data name="RepairGameDialog_Repair" xml:space="preserve">
+    <value>修復</value>
+  </data>
+  <data name="RepairGameDialog_Description" xml:space="preserve">
+    <value>修復ではローカルファイルを検証し、欠落または破損しているファイルを再ダウンロードします。すべてのファイルを読み込むため、時間がかかる場合があります。</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFinished" xml:space="preserve">
+    <value>星々の箱庭の修復が完了しました</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
+    <value>星々の箱庭を修復できませんでした</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>ハードリンクされたサーバーも更新しますか？</value>
   </data>

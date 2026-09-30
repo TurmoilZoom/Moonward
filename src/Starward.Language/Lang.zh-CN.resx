@@ -4293,6 +4293,24 @@
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>千星沙箱</value>
   </data>
+  <data name="RepairGameDialog_Title" xml:space="preserve">
+    <value>请选择修复对象</value>
+  </data>
+  <data name="RepairGameDialog_GameResources" xml:space="preserve">
+    <value>游戏资源</value>
+  </data>
+  <data name="RepairGameDialog_Repair" xml:space="preserve">
+    <value>修复</value>
+  </data>
+  <data name="RepairGameDialog_Description" xml:space="preserve">
+    <value>修复会校验本地文件，重新下载缺失或损坏的文件。需要读取全部文件，可能要花一些时间。</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFinished" xml:space="preserve">
+    <value>千星沙箱修复完成</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
+    <value>千星沙箱修复失败</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>同时更新硬链接的区服？</value>
   </data>

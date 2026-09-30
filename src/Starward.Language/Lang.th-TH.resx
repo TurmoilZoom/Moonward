@@ -4199,6 +4199,24 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>Miliastra Sandbox</value>
   </data>
+  <data name="RepairGameDialog_Title" xml:space="preserve">
+    <value>เลือกสิ่งที่ต้องการซ่อมแซม</value>
+  </data>
+  <data name="RepairGameDialog_GameResources" xml:space="preserve">
+    <value>ทรัพยากรเกม</value>
+  </data>
+  <data name="RepairGameDialog_Repair" xml:space="preserve">
+    <value>ซ่อมแซม</value>
+  </data>
+  <data name="RepairGameDialog_Description" xml:space="preserve">
+    <value>การซ่อมแซมจะตรวจสอบไฟล์ในเครื่องและดาวน์โหลดไฟล์ที่หายไปหรือเสียหายใหม่ ต้องอ่านไฟล์ทั้งหมดจึงอาจใช้เวลาสักครู่</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFinished" xml:space="preserve">
+    <value>ซ่อมแซม Miliastra Sandbox เสร็จสิ้น</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
+    <value>ซ่อมแซม Miliastra Sandbox ไม่สำเร็จ</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>อัปเดตเซิร์ฟเวอร์ที่ฮาร์ดลิงก์ไว้ด้วยหรือไม่?</value>
   </data>

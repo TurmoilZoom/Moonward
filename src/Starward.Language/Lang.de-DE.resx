@@ -4203,6 +4203,24 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>Miliastra Sandbox</value>
   </data>
+  <data name="RepairGameDialog_Title" xml:space="preserve">
+    <value>Zu reparierende Inhalte auswählen</value>
+  </data>
+  <data name="RepairGameDialog_GameResources" xml:space="preserve">
+    <value>Spielressourcen</value>
+  </data>
+  <data name="RepairGameDialog_Repair" xml:space="preserve">
+    <value>Reparieren</value>
+  </data>
+  <data name="RepairGameDialog_Description" xml:space="preserve">
+    <value>Die Reparatur prüft die lokalen Dateien und lädt fehlende oder beschädigte Dateien erneut herunter. Da alle Dateien gelesen werden, kann dies eine Weile dauern.</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFinished" xml:space="preserve">
+    <value>Miliastra Sandbox wurde repariert</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
+    <value>Miliastra Sandbox konnte nicht repariert werden</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>Per Hardlink verknüpfte Server ebenfalls aktualisieren?</value>
   </data>

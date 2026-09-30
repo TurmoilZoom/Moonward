@@ -1276,24 +1276,57 @@ internal partial class GameInstallHelper
 
 
 
+    /// <summary>
+    /// 下载 WPF 包（原神的千星沙箱）并解压到游戏目录，本地记录的版本与官方一致时跳过。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async Task DownloadWPFPackageAsync(GameInstallContext context, CancellationToken cancellationToken = default)
     {
         if (context.WPFPackage is null)
         {
             return;
         }
-        string config = Path.Combine(context.InstallPath, "config.ini");
-        if (File.Exists(config))
+        if (await GetLocalWPFVersionAsync(context.InstallPath, cancellationToken) == context.WPFPackage.Version)
         {
-            string content = await File.ReadAllTextAsync(config, cancellationToken);
-            string wpfVersion = Regex.Match(content, @"wpf_version=(.+)").Groups[1].Value.Trim();
-            if (wpfVersion == context.WPFPackage.Version)
-            {
-                return;
-            }
+            return;
         }
+        string path = await DownloadWPFPackageFileAsync(context, cancellationToken);
+        await ExtractWPFPackageAsync(context, path, cancellationToken);
+    }
 
-        long size = context.WPFPackage.Size;
+
+
+    /// <summary>
+    /// 本地 WPF 包版本，即 config.ini 的 wpf_version。
+    /// </summary>
+    /// <param name="installPath">游戏安装目录</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>本地版本；没有 config.ini 或没有记录时返回 <see langword="null"/></returns>
+    public static async Task<string?> GetLocalWPFVersionAsync(string installPath, CancellationToken cancellationToken = default)
+    {
+        string config = Path.Combine(installPath, "config.ini");
+        if (!File.Exists(config))
+        {
+            return null;
+        }
+        string content = await File.ReadAllTextAsync(config, cancellationToken);
+        string version = Regex.Match(content, @"wpf_version=(.+)").Groups[1].Value.Trim();
+        return string.IsNullOrEmpty(version) ? null : version;
+    }
+
+
+
+    /// <summary>
+    /// 下载 WPF 包的压缩包到游戏目录，并更新下载进度。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>压缩包的本地路径</returns>
+    public async Task<string> DownloadWPFPackageFileAsync(GameInstallContext context, CancellationToken cancellationToken = default)
+    {
+        long size = context.WPFPackage!.Size;
         string url = context.WPFPackage.Url;
         string md5 = context.WPFPackage.MD5;
         context.Progress_DownloadTotalBytes = size;
@@ -1308,10 +1341,88 @@ internal partial class GameInstallHelper
         }
         string path = Path.Combine(context.InstallPath, name);
         await DownloadToFileAsync(context, path, url, size, md5, cancellationToken);
-        using var archive = new SharpSevenZipExtractor(path);
-        archive.ExtractArchive(context.InstallPath);
-        archive.Dispose();
+        return path;
+    }
+
+
+
+    /// <summary>
+    /// 把 WPF 包整包解压覆盖到游戏目录（与官方启动器一样全部重写），解压完删除压缩包。解压进度写入 <see cref="GameInstallContext.Progress_Percent"/>。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="path">压缩包的本地路径</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task ExtractWPFPackageAsync(GameInstallContext context, string path, CancellationToken cancellationToken = default)
+    {
+        context.Progress_Percent = 0;
+        await Task.Run(() =>
+        {
+            using var archive = new SharpSevenZipExtractor(path);
+            archive.Extracting += (_, e) => context.Progress_Percent = e.FinishPercent;
+            archive.ExtractArchive(context.InstallPath);
+        }, cancellationToken);
+        context.Progress_Percent = 1;
         File.Delete(path);
+    }
+
+
+
+    /// <summary>
+    /// 按 WPF 包自带的文件清单（beyond_pkg_version，与 pkg_version 同格式）逐个核对文件大小和 MD5，校验进度写入 <see cref="GameInstallContext.Progress_Percent"/>。
+    /// 修复总是重新下载整包，所以发现第一个缺失或损坏的文件就停止，不再读剩下的文件。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="maxDegreeOfParallelism">同时校验的文件数</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>全部文件完好时为 true；清单不存在、为空，或有文件缺失、损坏时为 false</returns>
+    public async Task<bool> VerifyWPFPackageAsync(GameInstallContext context, int maxDegreeOfParallelism, CancellationToken cancellationToken = default)
+    {
+        string name = string.IsNullOrWhiteSpace(context.GameConfig?.WpfPackageVersionDir) ? "beyond_pkg_version" : context.GameConfig.WpfPackageVersionDir;
+        string listPath = Path.Join(context.InstallPath, name);
+        if (!File.Exists(listPath))
+        {
+            _logger.LogInformation("GameInstallTask ({GameBiz}): WPFPackage file list not found: {path}", context.GameId.GameBiz, listPath);
+            return false;
+        }
+        List<PkgVersionItem> items;
+        using (FileStream fs = File.OpenRead(listPath))
+        {
+            items = await DeserilizerLinesAsync<PkgVersionItem>(fs, cancellationToken);
+        }
+        if (items.Count == 0)
+        {
+            return false;
+        }
+        double totalBytes = Math.Max(1, items.Sum(x => x.FileSize));
+        long verifiedBytes = 0;
+        string? brokenFile = null;
+        context.Progress_Percent = 0;
+        using CancellationTokenSource stopCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        try
+        {
+            ParallelOptions options = new() { MaxDegreeOfParallelism = maxDegreeOfParallelism, CancellationToken = stopCts.Token };
+            await Parallel.ForEachAsync(items, options, async (PkgVersionItem item, CancellationToken token) =>
+            {
+                if (!await CheckFileMD5Async(context, Path.Join(context.InstallPath, item.RemoteName), item.FileSize, item.MD5, token))
+                {
+                    Interlocked.CompareExchange(ref brokenFile, item.RemoteName, null);
+                    stopCts.Cancel();
+                    return;
+                }
+                context.Progress_Percent = Interlocked.Add(ref verifiedBytes, item.FileSize) / totalBytes;
+            });
+        }
+        catch (OperationCanceledException) when (brokenFile is not null && !cancellationToken.IsCancellationRequested)
+        {
+            // 找到损坏文件后主动停止的其余校验
+        }
+        if (brokenFile is not null)
+        {
+            _logger.LogInformation("GameInstallTask ({GameBiz}): WPFPackage file missing or damaged: {file}", context.GameId.GameBiz, brokenFile);
+            return false;
+        }
+        return true;
     }
 
 

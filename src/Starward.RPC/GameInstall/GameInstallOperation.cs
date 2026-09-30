@@ -19,4 +19,10 @@ public enum GameInstallOperation
 
 
     Uninstall = 5,
+
+
+    /// <summary>
+    /// 只修复 WPF 包（原神的千星沙箱），不动游戏资源
+    /// </summary>
+    RepairWPFPackage = 6,
 }

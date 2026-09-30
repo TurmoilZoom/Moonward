@@ -4635,6 +4635,60 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Select what to repair 的本地化字符串。
+        /// </summary>
+        public static string RepairGameDialog_Title {
+            get {
+                return ResourceManager.GetString("RepairGameDialog_Title", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Game resources 的本地化字符串。
+        /// </summary>
+        public static string RepairGameDialog_GameResources {
+            get {
+                return ResourceManager.GetString("RepairGameDialog_GameResources", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Repair 的本地化字符串。
+        /// </summary>
+        public static string RepairGameDialog_Repair {
+            get {
+                return ResourceManager.GetString("RepairGameDialog_Repair", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Repair checks your local files and downloads any that are missing or damaged again. Every file has to be read, so this may take a while. 的本地化字符串。
+        /// </summary>
+        public static string RepairGameDialog_Description {
+            get {
+                return ResourceManager.GetString("RepairGameDialog_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Miliastra Sandbox repaired 的本地化字符串。
+        /// </summary>
+        public static string RepairGameDialog_SandboxRepairFinished {
+            get {
+                return ResourceManager.GetString("RepairGameDialog_SandboxRepairFinished", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Couldn't repair Miliastra Sandbox 的本地化字符串。
+        /// </summary>
+        public static string RepairGameDialog_SandboxRepairFailed {
+            get {
+                return ResourceManager.GetString("RepairGameDialog_SandboxRepairFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 New Profile 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_NewProfile {

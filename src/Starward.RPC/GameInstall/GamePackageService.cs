@@ -116,6 +116,11 @@ internal partial class GamePackageService
                 _logger.LogWarning("GameConfig of ({GameBiz}) is null.", context.GameId.GameBiz);
                 throw new ArgumentNullException($"GameConfig of ({context.GameId.GameBiz}) is null.");
             }
+            if (context.Operation is GameInstallOperation.RepairWPFPackage)
+            {
+                await PrepareForRepairWPFPackageAsync(context, cancellationToken);
+                return;
+            }
             if (context.Operation is GameInstallOperation.Predownload or GameInstallOperation.Update)
             {
                 await PrepareForPredownloadOrUpdateAsync(context, cancellationToken);
@@ -182,6 +187,27 @@ internal partial class GamePackageService
             _logger.LogError(ex, "Prepare game package ({GameBiz})", context.GameId.GameBiz);
             throw;
         }
+    }
+
+
+    /// <summary>
+    /// 准备只修复 WPF 包（千星沙箱）：只需要游戏配置和 WPF 包信息，不取游戏资源清单。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException">该游戏没有 WPF 包</exception>
+    private async Task PrepareForRepairWPFPackageAsync(GameInstallContext context, CancellationToken cancellationToken = default)
+    {
+        context.WPFPackage = (await _hoyoplayClient.GetWPFPackageAsync(LauncherId.FromGameId(context.GameId)!, "en-us", context.GameId, cancellationToken))?.WPFPackage;
+        if (context.WPFPackage is null)
+        {
+            _logger.LogWarning("WPFPackage of ({GameBiz}) is null.", context.GameId.GameBiz);
+            throw new NotSupportedException($"WPFPackage of ({context.GameId.GameBiz}) is null.");
+        }
+        // 空列表表示准备完成，继续任务时不再重复准备
+        context.TaskFiles = [];
+        _logger.LogInformation("Prepare WPFPackage ({GameBiz}) finished: {WPFVersion}", context.GameId.GameBiz, context.WPFPackage.Version);
     }
 
 

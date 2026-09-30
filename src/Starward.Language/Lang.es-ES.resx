@@ -4205,6 +4205,24 @@ You are welcome to submit exported data to:</value>
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>Miliastra Sandbox</value>
   </data>
+  <data name="RepairGameDialog_Title" xml:space="preserve">
+    <value>Selecciona qué reparar</value>
+  </data>
+  <data name="RepairGameDialog_GameResources" xml:space="preserve">
+    <value>Recursos del juego</value>
+  </data>
+  <data name="RepairGameDialog_Repair" xml:space="preserve">
+    <value>Reparar</value>
+  </data>
+  <data name="RepairGameDialog_Description" xml:space="preserve">
+    <value>La reparación comprueba los archivos locales y vuelve a descargar los que falten o estén dañados. Como hay que leer todos los archivos, puede tardar un rato.</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFinished" xml:space="preserve">
+    <value>Se reparó Miliastra Sandbox</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
+    <value>No se pudo reparar Miliastra Sandbox</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>¿Actualizar también los servidores con enlace físico?</value>
   </data>

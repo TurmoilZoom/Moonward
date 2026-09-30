@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Starward.Core;
@@ -190,8 +191,10 @@ internal class GameInstallService
     private GameInstallContext AddOrUpdateTask(GameInstallContextDTO dto)
     {
         GameId gameId = dto.GetGameId();
+        GameInstallState? previousState = null;
         if (_tasks.TryGetValue(gameId, out GameInstallContext? task))
         {
+            previousState = task.State;
             dto.UpdateTask(task);
         }
         else
@@ -203,7 +206,67 @@ internal class GameInstallService
         {
             _tasks.TryRemove(gameId, out _);
         }
+        // 已结束的任务 RPC 还会再推送一次，那时任务已不在表里，previousState 为 null，不会重复提示
+        if (task.Operation is GameInstallOperation.RepairWPFPackage && previousState is not null && previousState != task.State)
+        {
+            OnWPFPackageRepairStateChanged(task);
+        }
         return task;
+    }
+
+
+
+    /// <summary>
+    /// 千星沙箱在后台修复，不占用开始游戏按钮，结果用应用内提示告知（与官方启动器一致）。
+    /// 出错的任务直接停掉，否则会一直占着这个游戏的任务，影响预下载等操作；提示里的重试会重新开始修复。
+    /// </summary>
+    /// <param name="task">千星沙箱修复任务，在读取进度的后台线程上调用</param>
+    private void OnWPFPackageRepairStateChanged(GameInstallContext task)
+    {
+        if (task.State is GameInstallState.Finish)
+        {
+            InAppToast.MainWindow?.Success(Lang.RepairGameDialog_SandboxRepairFinished);
+        }
+        else if (task.State is GameInstallState.Error)
+        {
+            GameId gameId = task.GameId;
+            string installPath = task.InstallPath;
+            InAppToast.MainWindow?.ShowWithButton(Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error, Lang.RepairGameDialog_SandboxRepairFailed, task.ErrorMessage, Lang.DownloadGamePage_Retry, async () =>
+            {
+                try
+                {
+                    GameInstallContext? retry = await StartRepairWPFPackageAsync(gameId, installPath);
+                    if (retry is not null)
+                    {
+                        WeakReferenceMessenger.Default.Send(new GameInstallTaskStartedMessage(retry));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Retry repair WPF package ({GameBiz})", gameId.GameBiz);
+                }
+            }, duration: 10000);
+            _ = StopFailedWPFPackageRepairAsync(task);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 停掉出错的千星沙箱修复任务，失败只记日志
+    /// </summary>
+    /// <param name="task">出错的任务</param>
+    /// <returns></returns>
+    private async Task StopFailedWPFPackageRepairAsync(GameInstallContext task)
+    {
+        try
+        {
+            await StopTaskAsync(task);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Stop failed WPF package repair task ({GameBiz})", task.GameId.GameBiz);
+        }
     }
 
 
@@ -349,6 +412,19 @@ internal class GameInstallService
     public async Task<GameInstallContext?> StartRepairAsync(GameId gameId, string installPath, AudioLanguage audioLanguage)
     {
         return await StartOrContinueTaskAsync(GameInstallOperation.Repair, gameId, installPath, audioLanguage);
+    }
+
+
+
+    /// <summary>
+    /// 只修复千星沙箱（WPF 包），不校验游戏资源。
+    /// </summary>
+    /// <param name="gameId">游戏</param>
+    /// <param name="installPath">游戏安装目录</param>
+    /// <returns>RPC 服务没运行时为 <see langword="null"/></returns>
+    public async Task<GameInstallContext?> StartRepairWPFPackageAsync(GameId gameId, string installPath)
+    {
+        return await StartOrContinueTaskAsync(GameInstallOperation.RepairWPFPackage, gameId, installPath, AudioLanguage.None);
     }
 
 

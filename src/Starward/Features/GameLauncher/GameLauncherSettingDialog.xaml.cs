@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI.Controls;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -128,12 +127,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
 
-    private bool? _hasAudioPackages;
-
-
-    public bool CanRepairGame { get; set => SetProperty(ref field, value); } = true;
-
-
     public GameBizIcon CurrentGameBizIcon { get; set => SetProperty(ref field, value); }
 
     /// <summary>
@@ -174,7 +167,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
             {
                 UninstallAndRepairEnabled = false;
             }
-            await InitializeAudioLanguageAsync();
             // 版本信息要联网，不阻塞卸载、定位等等待基本信息刷新完的操作
             _ = InitializeVersionInfoAsync();
         }
@@ -206,49 +198,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     private static string FormatSize(long bytes)
     {
         return $"{(double)bytes / (1 << 30):F2}GB";
-    }
-
-
-
-    private async Task InitializeAudioLanguageAsync()
-    {
-        try
-        {
-            GameConfig? config = await _hoyoPlayService.GetGameConfigAsync(CurrentGameId);
-            if (config is not null)
-            {
-                if (!string.IsNullOrWhiteSpace(config.AudioPackageScanDir))
-                {
-                    _hasAudioPackages = true;
-                    Segmented_SelectLanguage.SelectedItems.Clear();
-                    AudioLanguage audioLanguage = await _gamePackageService.GetAudioLanguageAsync(CurrentGameId, InstallPath);
-                    if (audioLanguage.HasFlag(AudioLanguage.Chinese))
-                    {
-                        Segmented_SelectLanguage.SelectedItems.Add(SegmentedItem_Chinese);
-                    }
-                    if (audioLanguage.HasFlag(AudioLanguage.English))
-                    {
-                        Segmented_SelectLanguage.SelectedItems.Add(SegmentedItem_English);
-                    }
-                    if (audioLanguage.HasFlag(AudioLanguage.Japanese))
-                    {
-                        Segmented_SelectLanguage.SelectedItems.Add(SegmentedItem_Japanese);
-                    }
-                    if (audioLanguage.HasFlag(AudioLanguage.Korean))
-                    {
-                        Segmented_SelectLanguage.SelectedItems.Add(SegmentedItem_Korean);
-                    }
-                }
-                else
-                {
-                    _hasAudioPackages = false;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "InitializeAudioLanguageAsync ({biz})", CurrentGameBiz);
-        }
     }
 
 
@@ -345,33 +294,37 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
 
 
     /// <summary>
-    /// 修复游戏
+    /// 用户点了修复游戏时要接着打开的修复对话框，由 <see cref="OpenAsync"/> 在游戏设置关闭后打开
     /// </summary>
+    private RepairGameDialog? _repairGameDialog;
+
+
+
+    /// <summary>
+    /// 打开游戏设置。用户点了修复游戏时，等游戏设置完全关闭后再打开修复对话框：ContentDialog 同一时间只能打开一个
+    /// </summary>
+    /// <param name="gameId">游戏</param>
+    /// <param name="xamlRoot">对话框所在窗口</param>
     /// <returns></returns>
-    [RelayCommand]
-    private async Task RepairGameAsync()
+    public static async Task OpenAsync(GameId gameId, XamlRoot xamlRoot)
     {
-        if (_hasAudioPackages is null)
+        var dialog = new GameLauncherSettingDialog { CurrentGameId = gameId, XamlRoot = xamlRoot };
+        await dialog.ShowAsync();
+        if (dialog._repairGameDialog is RepairGameDialog repairGameDialog)
         {
-            return;
-        }
-        Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "repair"));
-        if (_hasAudioPackages.Value && Button_StartRepairing.Visibility is Visibility.Collapsed)
-        {
-            Segmented_SelectLanguage.Visibility = Visibility.Visible;
-            Button_StartRepairing.Visibility = Visibility.Visible;
-            Button_RepairGame.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-            await RepairGameInternalAsync();
+            repairGameDialog.XamlRoot = xamlRoot;
+            await repairGameDialog.ShowAsync();
         }
     }
 
 
 
+    /// <summary>
+    /// 修复游戏：关闭游戏设置，改为打开单独的修复对话框选择修复对象（与官方启动器一致）
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
-    private async Task RepairGameInternalAsync()
+    private async Task RepairGameAsync()
     {
         try
         {
@@ -379,29 +332,38 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
             {
                 return;
             }
-            AudioLanguage audio = AudioLanguage.None;
-            foreach (SegmentedItem item in Segmented_SelectLanguage.SelectedItems.Cast<SegmentedItem>())
+            Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "repair"));
+            _repairGameDialog = new RepairGameDialog
             {
-                audio |= item.Tag switch
-                {
-                    "zh-cn" => AudioLanguage.Chinese,
-                    "en-us" => AudioLanguage.English,
-                    "ja-jp" => AudioLanguage.Japanese,
-                    "ko-kr" => AudioLanguage.Korean,
-                    _ => AudioLanguage.None,
-                };
-            }
-            Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "repair_start"), ("audio", audio));
-            GameInstallContext? task = await _gameInstallService.StartRepairAsync(CurrentGameId, InstallPath, audio);
-            if (task is not null && task.State is not GameInstallState.Stop and not GameInstallState.Error)
-            {
-                WeakReferenceMessenger.Default.Send(new GameInstallTaskStartedMessage(task));
-                Close();
-            }
+                CurrentGameId = CurrentGameId,
+                InstallPath = InstallPath,
+                CurrentGameBizIcon = CurrentGameBizIcon,
+                HasWPFPackage = await HasWPFPackageAsync(),
+            };
+            this.Hide();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Repair game internal {GameBiz}", CurrentGameBiz);
+            _logger.LogError(ex, "Repair game {GameBiz}", CurrentGameBiz);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 游戏是否带千星沙箱（WPF 包，目前只有原神）。取不到时按没有处理，修复对话框只列出游戏资源
+    /// </summary>
+    /// <returns></returns>
+    private async Task<bool> HasWPFPackageAsync()
+    {
+        try
+        {
+            return await _hoyoPlayService.GetWPFPackageAsync(CurrentGameId) is not null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get WPF package ({biz})", CurrentGameBiz);
+            return false;
         }
     }
 
@@ -524,16 +486,6 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     private void TrackUninstallBlocked(string reason)
     {
         Telemetry.Track("uninstall_blocked", CurrentGameBiz, ("reason", reason));
-    }
-
-
-
-    private void Segmented_SelectLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (sender is Segmented segmented)
-        {
-            CanRepairGame = segmented.SelectedItems.Count > 0;
-        }
     }
 
 

@@ -527,7 +527,7 @@ public sealed partial class StartGameMenu : UserControl
         RequestClose?.Invoke();
         try
         {
-            await new GameLauncherSettingDialog { CurrentGameId = CurrentGameId, XamlRoot = xamlRoot }.ShowAsync();
+            await GameLauncherSettingDialog.OpenAsync(CurrentGameId, xamlRoot);
         }
         catch (Exception ex)
         {

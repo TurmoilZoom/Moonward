@@ -619,6 +619,34 @@
                                     Margin="12,0,0,0"
                                     CurrentGameBiz="{x:Bind CurrentGameBiz}"
                                     Visibility="{x:Bind EnablePlayTime, Mode=OneWay}" />
+
+                <!--  千星沙箱修复进度：与官方启动器一样在后台修复，不占用开始游戏按钮，进度贴在按钮旁  -->
+                <Grid Height="44"
+                      Margin="12,0,0,0"
+                      Padding="4,0,4,0"
+                      Background="Transparent"
+                      ColumnSpacing="8"
+                      Visibility="{x:Bind IsWPFPackageRepairing, Mode=OneWay}"
+                      sc:InstantTooltip.Placement="Top"
+                      sc:InstantTooltip.Text="{x:Bind WPFPackageRepairTooltip, Mode=OneWay}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition MinWidth="52" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Margin="0,2,0,0"
+                               VerticalAlignment="Center"
+                               cu:Effects.Shadow="{StaticResource TextShadow}"
+                               FontFamily="{ThemeResource SegoeFluentIcons}"
+                               FontSize="22"
+                               Text="&#xEA86;" />
+                    <TextBlock Grid.Column="1"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               cu:Effects.Shadow="{StaticResource TextShadow}"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Text="{x:Bind WPFPackageRepairText, Mode=OneWay}" />
+                </Grid>
             </StackPanel>
 
             <!--  启动游戏  -->

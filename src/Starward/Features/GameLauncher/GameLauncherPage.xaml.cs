@@ -1017,11 +1017,25 @@ public sealed partial class GameLauncherPage : PageBase
     {
         if (_gameInstallTask is null)
         {
+            IsWPFPackageRepairing = false;
             _dispatchTimer.Stop();
             return;
         }
         try
         {
+            if (_gameInstallTask.Operation is GameInstallOperation.RepairWPFPackage)
+            {
+                UpdateWPFPackageRepairProgress(_gameInstallTask);
+                if (_gameInstallTask.State is GameInstallState.Stop or GameInstallState.Finish or GameInstallState.Error)
+                {
+                    // 结果提示与出错后停止任务都由 GameInstallService 负责，这里只收起进度
+                    _dispatchTimer.Stop();
+                    _gameInstallTask = null;
+                }
+                return;
+            }
+            // 同一游戏的千星沙箱修复被其他任务取代时，任务对象会原地变成新的操作
+            IsWPFPackageRepairing = false;
             if (_gameInstallTask.Operation is GameInstallOperation.Predownload)
             {
                 Button_Predownload.UpdateGameInstallTaskState(_gameInstallTask);
@@ -1043,6 +1057,52 @@ public sealed partial class GameLauncherPage : PageBase
             }
         }
         catch { }
+    }
+
+
+
+    /// <summary>
+    /// 千星沙箱是否正在后台修复，是则在开始游戏按钮旁显示进度
+    /// </summary>
+    public bool IsWPFPackageRepairing { get; set => SetProperty(ref field, value); }
+
+    /// <summary>
+    /// 千星沙箱修复进度：百分比，或等待中、排队中等状态
+    /// </summary>
+    public string? WPFPackageRepairText { get; set => SetProperty(ref field, value); }
+
+    /// <summary>
+    /// 千星沙箱修复进度的悬停提示：千星沙箱 · 当前阶段
+    /// </summary>
+    public string? WPFPackageRepairTooltip { get; set => SetProperty(ref field, value); }
+
+
+
+    /// <summary>
+    /// 刷新开始游戏按钮旁的千星沙箱修复进度。
+    /// 与官方启动器一致，千星沙箱在后台修复，开始游戏按钮保持原状态，修复期间也能启动游戏。
+    /// </summary>
+    /// <param name="task">千星沙箱修复任务</param>
+    private void UpdateWPFPackageRepairProgress(GameInstallContext task)
+    {
+        IsWPFPackageRepairing = task.State is not GameInstallState.Stop and not GameInstallState.Finish and not GameInstallState.Error;
+        string stage = task.State switch
+        {
+            GameInstallState.Verifying => Lang.DownloadGamePage_Verifying,
+            GameInstallState.Downloading => Lang.DownloadGamePage_Downloading,
+            GameInstallState.Decompressing => Lang.DownloadGamePage_Decompressing,
+            GameInstallState.Queueing => Lang.StartGameButton_InQueue,
+            GameInstallState.Paused => Lang.DownloadGamePage_Paused,
+            _ => Lang.StartGameButton_Waiting,
+        };
+        double? progress = task.State switch
+        {
+            GameInstallState.Verifying or GameInstallState.Decompressing => task.Progress_Percent,
+            GameInstallState.Downloading => task.Progress_DownloadTotalBytes > 0 ? (double)task.Progress_DownloadFinishBytes / task.Progress_DownloadTotalBytes : 0,
+            _ => null,
+        };
+        WPFPackageRepairText = progress is double value ? $"{value:P1}" : stage;
+        WPFPackageRepairTooltip = $"{Lang.GameLauncherSettingDialog_MiliastraSandbox} · {stage}";
     }
 
 
@@ -1123,7 +1183,7 @@ public sealed partial class GameLauncherPage : PageBase
     [RelayCommand]
     private async Task OpenGameLauncherSettingDialogAsync()
     {
-        await new GameLauncherSettingDialog { CurrentGameId = this.CurrentGameId, XamlRoot = this.XamlRoot }.ShowAsync();
+        await GameLauncherSettingDialog.OpenAsync(CurrentGameId, this.XamlRoot);
     }
 
 

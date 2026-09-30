@@ -302,6 +302,11 @@ internal class GameInstallService
                 // 修复
                 await ExecuteRepairTaskAsync(context, cancellationToken);
             }
+            else if (context.Operation is GameInstallOperation.RepairWPFPackage)
+            {
+                // 只修复千星沙箱
+                await ExecuteRepairWPFPackageTaskAsync(context, cancellationToken);
+            }
             else
             {
                 _logger.LogWarning("GameInstallTask ({GameBiz}): Unsupported Operation: {operation}", context.GameId.GameBiz, context.Operation);
@@ -774,9 +779,57 @@ internal class GameInstallService
         }
 
         // todo celar useless audio
+        // 与官方启动器一致：修复游戏资源不校验千星沙箱的文件内容，只在版本落后时更新；沙箱损坏走单独的千星沙箱修复
         await DownloadWPFPackageAsync(context, cancellationToken);
         await DownloadGameChannelSDKAsync(context, cancellationToken);
         await SetGameConfigIniAsync(context);
+    }
+
+
+
+    /// <summary>
+    /// 只修复 WPF 包（原神的千星沙箱）。完成后只更新 config.ini 的 wpf_version，游戏版本等记录保持不变。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task ExecuteRepairWPFPackageTaskAsync(GameInstallContext context, CancellationToken cancellationToken = default)
+    {
+        await RepairWPFPackageAsync(context, cancellationToken);
+        await UpdateGameConfigIniAsync(context, ("wpf_version", context.WPFPackage?.Version));
+    }
+
+
+
+    /// <summary>
+    /// 校验并修复 WPF 包（原神的千星沙箱），做法与官方启动器一致：本地记录的版本与官方相同时，按包内的文件清单逐个核对大小和 MD5；
+    /// 版本不同、清单缺失，或有文件缺失、损坏时，重新下载整个压缩包并解压覆盖。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    private async Task RepairWPFPackageAsync(GameInstallContext context, CancellationToken cancellationToken = default)
+    {
+        if (context.WPFPackage is null)
+        {
+            return;
+        }
+        string? localVersion = await GameInstallHelper.GetLocalWPFVersionAsync(context.InstallPath, cancellationToken);
+        if (localVersion == context.WPFPackage.Version)
+        {
+            _logger.LogInformation("GameInstallTask ({GameBiz}): Start verifying WPFPackage {version}", context.GameId.GameBiz, localVersion);
+            EnterStage(context, GameInstallState.Verifying);
+            if (await _gameInstallHelper.VerifyWPFPackageAsync(context, GetRepairParallelism(context, chunkMode: false), cancellationToken))
+            {
+                _logger.LogInformation("GameInstallTask ({GameBiz}): WPFPackage is intact", context.GameId.GameBiz);
+                return;
+            }
+        }
+        _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading WPFPackage, local version: {local}, latest version: {latest}", context.GameId.GameBiz, localVersion, context.WPFPackage.Version);
+        EnterStage(context, GameInstallState.Downloading);
+        string path = await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadWPFPackageFileAsync(context, token), cancellationToken);
+        EnterStage(context, GameInstallState.Decompressing);
+        await _gameInstallHelper.ExtractWPFPackageAsync(context, path, cancellationToken);
     }
 
 
@@ -850,7 +903,8 @@ internal class GameInstallService
     /// <param name="context"></param>
     private void ClearDeprecatedFiles(GameInstallContext context)
     {
-        if (context.Operation is not GameInstallOperation.Predownload)
+        // 只修复千星沙箱时没取预下载版本，照常清理会把预下载的 chunk 缓存当成残留删掉
+        if (context.Operation is not GameInstallOperation.Predownload and not GameInstallOperation.RepairWPFPackage)
         {
             int count = 0;
             foreach (GameInstallFile item in context.TaskFiles ?? [])
@@ -954,6 +1008,28 @@ internal class GameInstallService
         foreach ((string key, string? value) in keyValuePairs)
         {
             config[key] = value;
+        }
+        await WriteGameConfigIniAsync(context, path, config);
+    }
+
+
+
+    /// <summary>
+    /// 只改 config.ini 里指定的键，其余记录（游戏版本、渠道等）保持原样
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="keyValuePairs">要修改的键值，值为 null 的跳过</param>
+    /// <returns></returns>
+    private async Task UpdateGameConfigIniAsync(GameInstallContext context, params IEnumerable<(string Key, string? Value)> keyValuePairs)
+    {
+        string path = Path.Join(context.InstallPath, "config.ini");
+        IConfigurationRoot config = await ReadGameConfigIniAsync(path);
+        foreach ((string key, string? value) in keyValuePairs)
+        {
+            if (value is not null)
+            {
+                config[key] = value;
+            }
         }
         await WriteGameConfigIniAsync(context, path, config);
     }

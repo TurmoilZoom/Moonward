@@ -4294,6 +4294,24 @@ Repository:</value>
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>Miliastra Sandbox</value>
   </data>
+  <data name="RepairGameDialog_Title" xml:space="preserve">
+    <value>Select what to repair</value>
+  </data>
+  <data name="RepairGameDialog_GameResources" xml:space="preserve">
+    <value>Game resources</value>
+  </data>
+  <data name="RepairGameDialog_Repair" xml:space="preserve">
+    <value>Repair</value>
+  </data>
+  <data name="RepairGameDialog_Description" xml:space="preserve">
+    <value>Repair checks your local files and downloads any that are missing or damaged again. Every file has to be read, so this may take a while.</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFinished" xml:space="preserve">
+    <value>Miliastra Sandbox repaired</value>
+  </data>
+  <data name="RepairGameDialog_SandboxRepairFailed" xml:space="preserve">
+    <value>Couldn't repair Miliastra Sandbox</value>
+  </data>
   <data name="UpdateOtherServersDialog_Title" xml:space="preserve">
     <value>Also update hard-linked servers?</value>
   </data>
