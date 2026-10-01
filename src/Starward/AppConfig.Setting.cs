@@ -1297,24 +1297,6 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 自动更新千星沙箱（WPF 包），默认开启，与官方启动器每个游戏的「自动为我更新」一致。
-    /// 关闭时既不在后台自动更新，更新或修复游戏资源时也不顺带更新
-    /// </summary>
-    public static bool GetAutoUpdateWPFPackage(GameBiz biz)
-    {
-        return GetValue(true, $"auto_update_wpf_package_{biz}");
-    }
-
-    /// <summary>
-    /// 自动更新千星沙箱（WPF 包）
-    /// </summary>
-    public static void SetAutoUpdateWPFPackage(GameBiz biz, bool value)
-    {
-        SetValue(value, $"auto_update_wpf_package_{biz}");
-    }
-
-
-    /// <summary>
     /// 获取指定游戏的背景视频音量（0-100）。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>

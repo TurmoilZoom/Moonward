@@ -4635,15 +4635,6 @@ namespace Starward.Language {
         }
 
         /// <summary>
-        ///   查找类似 Update Miliastra Sandbox automatically 的本地化字符串。
-        /// </summary>
-        public static string GameLauncherSettingDialog_AutoUpdateSandbox {
-            get {
-                return ResourceManager.GetString("GameLauncherSettingDialog_AutoUpdateSandbox", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   查找类似 Select what to repair 的本地化字符串。
         /// </summary>
         public static string RepairGameDialog_Title {

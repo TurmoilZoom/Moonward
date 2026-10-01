@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
-using Starward.Features.HoYoPlay;
 using Starward.Features.RPC;
 using Starward.Helpers;
 using Starward.RPC;
@@ -30,17 +29,14 @@ internal class GameInstallService
 
     private readonly GameLauncherService _gameLauncherService;
 
-    private readonly HoYoPlayService _hoYoPlayService;
-
     private readonly SemaphoreSlim _getProgressSemaphore = new(1);
 
 
-    public GameInstallService(ILogger<GameInstallService> logger, RpcService rpcService, GameLauncherService gameLauncherService, HoYoPlayService hoYoPlayService)
+    public GameInstallService(ILogger<GameInstallService> logger, RpcService rpcService, GameLauncherService gameLauncherService)
     {
         _logger = logger;
         _rpcService = rpcService;
         _gameLauncherService = gameLauncherService;
-        _hoYoPlayService = hoYoPlayService;
         _gameInstallerClient = RpcService.CreateRpcClient<GameInstaller.GameInstallerClient>();
     }
 
@@ -219,9 +215,9 @@ internal class GameInstallService
             {
                 ShowRepairFinishedToast(task, Lang.RepairGameDialog_GameRepairFinished);
             }
-            else if (task.Operation is GameInstallOperation.RepairWPFPackage or GameInstallOperation.UpdateWPFPackage)
+            else if (task.Operation is GameInstallOperation.RepairWPFPackage)
             {
-                OnWPFPackageTaskStateChanged(task);
+                OnWPFPackageRepairStateChanged(task);
             }
         }
         return task;
@@ -242,21 +238,12 @@ internal class GameInstallService
 
 
     /// <summary>
-    /// 千星沙箱在后台修复或更新，不占用开始游戏按钮。修复的结果用应用内提示告知（与官方启动器一致），提示里的重试会重新修复；
-    /// 自动更新成功失败都不提示，失败了下次打开游戏页再试。
-    /// 出错的任务直接停掉，否则会一直占着这个游戏的任务，影响预下载等操作。
+    /// 千星沙箱在后台修复，不占用开始游戏按钮，结果用应用内提示告知（与官方启动器一致）。
+    /// 出错的任务直接停掉，否则会一直占着这个游戏的任务，影响预下载等操作；提示里的重试会重新开始修复。
     /// </summary>
-    /// <param name="task">千星沙箱修复或更新任务，在读取进度的后台线程上调用</param>
-    private void OnWPFPackageTaskStateChanged(GameInstallContext task)
+    /// <param name="task">千星沙箱修复任务，在读取进度的后台线程上调用</param>
+    private void OnWPFPackageRepairStateChanged(GameInstallContext task)
     {
-        if (task.State is GameInstallState.Error)
-        {
-            _ = StopFailedWPFPackageTaskAsync(task);
-        }
-        if (task.Operation is GameInstallOperation.UpdateWPFPackage)
-        {
-            return;
-        }
         if (task.State is GameInstallState.Finish)
         {
             ShowRepairFinishedToast(task, Lang.RepairGameDialog_SandboxRepairFinished);
@@ -280,17 +267,18 @@ internal class GameInstallService
                     _logger.LogError(ex, "Retry repair WPF package ({GameBiz})", gameId.GameBiz);
                 }
             }, duration: 10000);
+            _ = StopFailedWPFPackageRepairAsync(task);
         }
     }
 
 
 
     /// <summary>
-    /// 停掉出错的千星沙箱修复或更新任务，失败只记日志
+    /// 停掉出错的千星沙箱修复任务，失败只记日志
     /// </summary>
     /// <param name="task">出错的任务</param>
     /// <returns></returns>
-    private async Task StopFailedWPFPackageTaskAsync(GameInstallContext task)
+    private async Task StopFailedWPFPackageRepairAsync(GameInstallContext task)
     {
         try
         {
@@ -298,7 +286,7 @@ internal class GameInstallService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Stop failed {Operation} task ({GameBiz})", task.Operation, task.GameId.GameBiz);
+            _logger.LogWarning(ex, "Stop failed WPF package repair task ({GameBiz})", task.GameId.GameBiz);
         }
     }
 
@@ -502,60 +490,6 @@ internal class GameInstallService
 
 
 
-    /// <summary>
-    /// 在后台把千星沙箱（WPF 包）更新到官方最新版本，本地已是最新时 RPC 什么也不做。
-    /// </summary>
-    /// <param name="gameId">游戏</param>
-    /// <param name="installPath">游戏安装目录</param>
-    /// <returns>RPC 服务没运行时为 <see langword="null"/></returns>
-    public async Task<GameInstallContext?> StartUpdateWPFPackageAsync(GameId gameId, string installPath)
-    {
-        return await StartOrContinueTaskAsync(GameInstallOperation.UpdateWPFPackage, gameId, installPath, AudioLanguage.None);
-    }
-
-
-
-    /// <summary>
-    /// 开启了自动更新千星沙箱、且官方有新版本时，在后台开始更新（与官方启动器的「自动为我更新」一致）。
-    /// 这个游戏已有其他任务、游戏本体有更新（更新游戏时会一并更新千星沙箱）或游戏正在运行（文件可能被占用）时不更新。
-    /// 本地没有千星沙箱版本记录时同样会下载安装。
-    /// </summary>
-    /// <param name="gameId">游戏</param>
-    /// <param name="installPath">游戏安装目录</param>
-    /// <returns>开始了更新时为该任务，否则为 <see langword="null"/></returns>
-    public async Task<GameInstallContext?> TryStartWPFPackageAutoUpdateAsync(GameId gameId, string installPath)
-    {
-        if (!AppConfig.GetAutoUpdateWPFPackage(gameId.GameBiz) || GetGameInstallTask(gameId) is not null)
-        {
-            return null;
-        }
-        if (await _hoYoPlayService.GetWPFPackageAsync(gameId) is not WPFPackage package || string.IsNullOrWhiteSpace(package.Version))
-        {
-            return null;
-        }
-        string? localWpfVersion = await GameLauncherService.GetLocalWPFVersionAsync(installPath);
-        if (localWpfVersion == package.Version)
-        {
-            return null;
-        }
-        Version? localVersion = await _gameLauncherService.GetLocalGameVersionAsync(gameId, installPath);
-        (Version? latestVersion, _) = await _gameLauncherService.GetLatestGameVersionAsync(gameId);
-        if (localVersion is null || latestVersion > localVersion)
-        {
-            return null;
-        }
-        // 上面的检查要联网，期间可能已经开始了别的任务或启动了游戏
-        if (GetGameInstallTask(gameId) is not null || await _gameLauncherService.GetGameProcessAsync(gameId) is not null)
-        {
-            return null;
-        }
-        _logger.LogInformation("Auto update WPF package ({GameBiz}): {Local} -> {Latest}", gameId.GameBiz, localWpfVersion, package.Version);
-        Telemetry.Track("wpf_auto_update", gameId.GameBiz, ("local", localWpfVersion), ("latest", package.Version));
-        return await StartUpdateWPFPackageAsync(gameId, installPath);
-    }
-
-
-
     private async Task<GameInstallContext?> StartOrContinueTaskAsync(GameInstallOperation operation, GameId gameId, string installPath, AudioLanguage audioLanguage)
     {
         var request = new GameInstallRequest
@@ -566,7 +500,6 @@ internal class GameInstallService
             Operation = (int)operation,
             AudioLanguage = (int)audioLanguage,
             HardLinkPath = await GetHardLinkPathAsync(gameId, installPath),
-            SkipWpfPackageUpdate = !AppConfig.GetAutoUpdateWPFPackage(gameId.GameBiz),
         };
         if (await _rpcService.EnsureRpcServerRunningAsync())
         {
@@ -635,7 +568,6 @@ internal class GameInstallService
     public async Task<GameInstallContext> ContinueTaskAsync(GameInstallContext task)
     {
         var request = GameInstallRequest.FromTask(task);
-        request.SkipWpfPackageUpdate = !AppConfig.GetAutoUpdateWPFPackage(task.GameId.GameBiz);
         if (await _rpcService.EnsureRpcServerRunningAsync())
         {
             _logger.LogInformation("Continue game install task: {gameId} {gameBiz}", task.GameId.Id, task.GameId.GameBiz);

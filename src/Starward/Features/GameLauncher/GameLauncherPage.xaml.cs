@@ -385,37 +385,10 @@ public sealed partial class GameLauncherPage : PageBase
                 IsPredownloadFinished = await _gamePackageService.CheckPreDownloadFinishedAsync(CurrentGameId);
             }
             _ = CheckDX12ConfigAsync();
-            _ = StartWPFPackageAutoUpdateAsync();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Check game version");
-        }
-    }
-
-
-
-    /// <summary>
-    /// 游戏已是最新时，按「自动更新千星沙箱」在后台更新千星沙箱，进度显示在开始游戏按钮旁
-    /// </summary>
-    /// <returns></returns>
-    private async Task StartWPFPackageAutoUpdateAsync()
-    {
-        try
-        {
-            if (GameInstallPath is not string installPath || _gameInstallTask is not null)
-            {
-                return;
-            }
-            if (await _gameInstallService.TryStartWPFPackageAutoUpdateAsync(CurrentGameId, installPath) is GameInstallContext task)
-            {
-                _gameInstallTask = task;
-                _dispatchTimer.Start();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Auto update WPF package ({biz})", CurrentGameBiz);
         }
     }
 
@@ -1050,9 +1023,8 @@ public sealed partial class GameLauncherPage : PageBase
         }
         try
         {
-            if (_gameInstallTask.Operation is GameInstallOperation.RepairWPFPackage or GameInstallOperation.UpdateWPFPackage)
+            if (_gameInstallTask.Operation is GameInstallOperation.RepairWPFPackage)
             {
-                // 千星沙箱的修复和自动更新都在后台进行，进度显示在开始游戏按钮旁
                 UpdateWPFPackageRepairProgress(_gameInstallTask);
                 if (_gameInstallTask.State is GameInstallState.Stop or GameInstallState.Finish or GameInstallState.Error)
                 {

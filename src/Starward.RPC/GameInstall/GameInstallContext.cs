@@ -112,11 +112,6 @@ public class GameInstallContext
     /// </summary>
     internal ConcurrentDictionary<string, bool> SharedInstallRoots { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>
-    /// 用户关闭了「自动更新千星沙箱」：更新或修复游戏资源时不顺带更新千星沙箱。只在 RPC 进程内使用，随请求传入
-    /// </summary>
-    public bool SkipWPFPackageUpdate { get; set; }
-
 
 
     internal string? LocalGameVersion { get; set; }
@@ -347,8 +342,7 @@ public partial class GameInstallRequest
         GameId = GetGameId(),
         HardLinkPath = HardLinkPath,
         InstallPath = InstallPath,
-        Operation = (GameInstallOperation)Operation,
-        SkipWPFPackageUpdate = SkipWpfPackageUpdate,
+        Operation = (GameInstallOperation)Operation
     };
 
 

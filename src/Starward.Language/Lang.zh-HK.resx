@@ -4207,9 +4207,6 @@
   <data name="GameLauncherSettingDialog_MiliastraSandbox" xml:space="preserve">
     <value>千星沙箱</value>
   </data>
-  <data name="GameLauncherSettingDialog_AutoUpdateSandbox" xml:space="preserve">
-    <value>自動更新千星沙箱</value>
-  </data>
   <data name="RepairGameDialog_Title" xml:space="preserve">
     <value>請選擇修復對象</value>
   </data>

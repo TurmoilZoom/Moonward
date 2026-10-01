@@ -860,64 +860,10 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         Add(Lang.LauncherPage_PreInstall, _predownloadVersionText, _predownloadStatus);
         Add(Lang.GameLauncherSettingDialog_IncrementalPatch, _patchText);
         Add(Lang.GameLauncherSettingDialog_MiliastraSandbox, _wpfVersionText, _wpfStatus);
-        if (!string.IsNullOrWhiteSpace(_wpfVersionText))
-        {
-            // 紧跟千星沙箱版本，对应官方启动器千星沙箱弹窗里的「自动为我更新」
-            rows.Add(new GameVersionInfoRow
-            {
-                Label = Lang.GameLauncherSettingDialog_AutoUpdateSandbox,
-                HasToggle = true,
-                IsToggleOn = AppConfig.GetAutoUpdateWPFPackage(CurrentGameBiz),
-                ShowDivider = rows.Count > 0,
-                ToggleChanged = OnWPFPackageAutoUpdateToggled,
-            });
-        }
         Add(Lang.GameLauncherSettingDialog_ExeCheck, _exeCheckText, isWarning: _exeCheckWarning);
         Add(Lang.GameLauncherSettingDialog_FullResources, _fullResourceText);
         Add(Lang.GameLauncherSettingDialog_LocalSize, GameSize);
         VersionInfoRows = rows.Count > 0 ? rows : null;
-    }
-
-
-
-    /// <summary>
-    /// 切换千星沙箱自动更新；打开时如果官方有新版本，立即在后台开始更新
-    /// </summary>
-    /// <param name="isOn">是否自动更新</param>
-    private void OnWPFPackageAutoUpdateToggled(bool isOn)
-    {
-        AppConfig.SetAutoUpdateWPFPackage(CurrentGameBiz, isOn);
-        Telemetry.Track("game_setting_click", CurrentGameBiz, ("button", "wpf_auto_update"), ("on", isOn));
-        if (isOn)
-        {
-            _ = StartWPFPackageAutoUpdateAsync();
-        }
-    }
-
-
-
-    /// <summary>
-    /// 满足自动更新条件时在后台更新千星沙箱，并通知首页显示进度
-    /// </summary>
-    /// <returns></returns>
-    private async Task StartWPFPackageAutoUpdateAsync()
-    {
-        try
-        {
-            if (InstallPath is null)
-            {
-                return;
-            }
-            if (await _gameInstallService.TryStartWPFPackageAutoUpdateAsync(CurrentGameId, InstallPath) is GameInstallContext task)
-            {
-                WeakReferenceMessenger.Default.Send(new GameInstallTaskStartedMessage(task));
-                CheckCanRepairGame();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Auto update WPF package ({biz})", CurrentGameBiz);
-        }
     }
 
 
@@ -972,33 +918,7 @@ public sealed class GameVersionInfoRow
     /// </summary>
     public bool ShowDivider { get; set; }
 
-    /// <summary>
-    /// 右侧是开关而不是取值
-    /// </summary>
-    public bool HasToggle { get; set; }
-
-    /// <summary>
-    /// 开关状态，用户拨动时通过 <see cref="ToggleChanged"/> 通知
-    /// </summary>
-    public bool IsToggleOn
-    {
-        get;
-        set
-        {
-            if (field != value)
-            {
-                field = value;
-                ToggleChanged?.Invoke(value);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 开关被拨动后的回调。用 internal：公开的委托属性会被 XAML 类型信息收录
-    /// </summary>
-    internal Action<bool>? ToggleChanged { get; set; }
-
-    public bool IsNormal => !IsWarning && !HasToggle;
+    public bool IsNormal => !IsWarning;
 
     public bool HasBadge => !string.IsNullOrEmpty(Badge);
 

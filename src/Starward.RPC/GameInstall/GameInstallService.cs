@@ -111,11 +111,6 @@ internal class GameInstallService
                 context = request.ToTask();
                 _tasks.TryAdd(context.GameId, context);
             }
-            else
-            {
-                // 暂停期间可能改了开关，继续时按最新的
-                context.SkipWPFPackageUpdate = request.SkipWpfPackageUpdate;
-            }
         }
         else
         {
@@ -311,11 +306,6 @@ internal class GameInstallService
             {
                 // 只修复千星沙箱
                 await ExecuteRepairWPFPackageTaskAsync(context, cancellationToken);
-            }
-            else if (context.Operation is GameInstallOperation.UpdateWPFPackage)
-            {
-                // 自动更新千星沙箱
-                await ExecuteUpdateWPFPackageTaskAsync(context, cancellationToken);
             }
             else
             {
@@ -840,46 +830,7 @@ internal class GameInstallService
                 return;
             }
         }
-        await DownloadAndExtractWPFPackageAsync(context, localVersion, cancellationToken);
-    }
-
-
-
-    /// <summary>
-    /// 只把 WPF 包（原神的千星沙箱）更新到官方最新版本：本地记录的版本已是最新时什么也不做，否则整包下载并解压覆盖。
-    /// 完成后只更新 config.ini 的 wpf_version。
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    private async Task ExecuteUpdateWPFPackageTaskAsync(GameInstallContext context, CancellationToken cancellationToken = default)
-    {
-        if (context.WPFPackage is null)
-        {
-            return;
-        }
-        string? localVersion = await GameInstallHelper.GetLocalWPFVersionAsync(context.InstallPath, cancellationToken);
-        if (localVersion == context.WPFPackage.Version)
-        {
-            _logger.LogInformation("GameInstallTask ({GameBiz}): WPFPackage is already up to date: {version}", context.GameId.GameBiz, localVersion);
-            return;
-        }
-        await DownloadAndExtractWPFPackageAsync(context, localVersion, cancellationToken);
-        await UpdateGameConfigIniAsync(context, ("wpf_version", context.WPFPackage.Version));
-    }
-
-
-
-    /// <summary>
-    /// 下载整个 WPF 包并解压覆盖到游戏目录，与官方启动器一样不按文件增量更新。
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="localVersion">本地记录的版本，只用于日志</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    private async Task DownloadAndExtractWPFPackageAsync(GameInstallContext context, string? localVersion, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading WPFPackage, local version: {local}, latest version: {latest}", context.GameId.GameBiz, localVersion, context.WPFPackage!.Version);
+        _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading WPFPackage, local version: {local}, latest version: {latest}", context.GameId.GameBiz, localVersion, context.WPFPackage.Version);
         EnterStage(context, GameInstallState.Downloading);
         string path = await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadWPFPackageFileAsync(context, token), cancellationToken);
         EnterStage(context, GameInstallState.Decompressing);
@@ -939,11 +890,6 @@ internal class GameInstallService
 
     private async Task DownloadWPFPackageAsync(GameInstallContext context, CancellationToken cancellationToken = default)
     {
-        if (SkipsWPFPackageUpdate(context))
-        {
-            _logger.LogInformation("GameInstallTask ({GameBiz}): Skip updating WPFPackage because auto update is off", context.GameId.GameBiz);
-            return;
-        }
         if (context.WPFPackage is not null)
         {
             _logger.LogInformation("GameInstallTask ({GameBiz}): Start downloading WPFPackage", context.GameId.GameBiz);
@@ -957,25 +903,13 @@ internal class GameInstallService
 
 
     /// <summary>
-    /// 用户关闭了「自动更新千星沙箱」时，更新和修复游戏资源都不顺带更新千星沙箱；安装时照常安装，单独修复千星沙箱不受影响
-    /// </summary>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    private static bool SkipsWPFPackageUpdate(GameInstallContext context)
-    {
-        return context.SkipWPFPackageUpdate && context.Operation is GameInstallOperation.Update or GameInstallOperation.Repair;
-    }
-
-
-
-    /// <summary>
     /// 清理文件
     /// </summary>
     /// <param name="context"></param>
     private void ClearDeprecatedFiles(GameInstallContext context)
     {
-        // 只修复或更新千星沙箱时没取预下载版本，照常清理会把预下载的 chunk 缓存当成残留删掉
-        if (context.Operation is not GameInstallOperation.Predownload and not GameInstallOperation.RepairWPFPackage and not GameInstallOperation.UpdateWPFPackage)
+        // 只修复千星沙箱时没取预下载版本，照常清理会把预下载的 chunk 缓存当成残留删掉
+        if (context.Operation is not GameInstallOperation.Predownload and not GameInstallOperation.RepairWPFPackage)
         {
             int count = 0;
             foreach (GameInstallFile item in context.TaskFiles ?? [])
@@ -1071,8 +1005,7 @@ internal class GameInstallService
         }
         config["sdk_version"] = context.GameChannelSDK?.Version ?? "";
         config["game_biz"] = context.GameId.GameBiz;
-        // 没有更新千星沙箱时保留原来的版本记录，否则会与实际文件对不上
-        if (context.WPFPackage is not null && !SkipsWPFPackageUpdate(context))
+        if (context.WPFPackage is not null)
         {
             config["wpf_version"] = context.WPFPackage.Version;
         }

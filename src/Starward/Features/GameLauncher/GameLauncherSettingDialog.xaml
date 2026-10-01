@@ -262,14 +262,6 @@
                                                    Text="{x:Bind Value}"
                                                    TextTrimming="CharacterEllipsis"
                                                    Visibility="{x:Bind IsWarning}" />
-                                        <!--  行内开关（千星沙箱自动更新）：模板在旋钮右侧固定留 12、上下各留 10，负边距抵掉，与其他行的取值右缘对齐且不撑高行  -->
-                                        <ToggleSwitch MinWidth="0"
-                                                      Margin="0,-4,-12,-4"
-                                                      VerticalAlignment="Center"
-                                                      IsOn="{x:Bind IsToggleOn, Mode=TwoWay}"
-                                                      OffContent=""
-                                                      OnContent=""
-                                                      Visibility="{x:Bind HasToggle}" />
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
