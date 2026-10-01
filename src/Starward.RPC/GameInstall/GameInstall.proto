@@ -57,6 +57,8 @@ message GameInstallContextDTO {
     int64 storage_write_speed = 20;
     int64 remain_time_seconds = 21;
     int64 rewritten_file_count = 22;
+    // 发起任务时请求的操作。硬链接时 RPC 会把安装、更新改成修复（operation 随之变化），这里保持不变
+    int32 requested_operation = 23;
 }
 
 message GameInstallRequest {

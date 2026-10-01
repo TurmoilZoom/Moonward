@@ -24,6 +24,12 @@ public class GameInstallContext
 
     public GameInstallOperation Operation { get; set; }
 
+    /// <summary>
+    /// 发起任务时请求的操作。硬链接时 RPC 会把安装、更新改成修复（直接链接到另一个区服已是最新的文件），
+    /// <see cref="Operation"/> 随之变成修复，这里保持用户点的操作，界面据此决定提示
+    /// </summary>
+    public GameInstallOperation RequestedOperation { get; set; }
+
     public AudioLanguage AudioLanguage { get; init; }
 
     /// <summary>
@@ -280,6 +286,7 @@ public partial class GameInstallContextDTO
             InstallPath = InstallPath,
         };
         task.Operation = (GameInstallOperation)Operation;
+        task.RequestedOperation = (GameInstallOperation)RequestedOperation;
         task.Timestamp = Timestamp;
         task.State = (GameInstallState)State;
         task.Progress_DownloadTotalBytes = ProgressDownloadTotalBytes;
@@ -309,6 +316,7 @@ public partial class GameInstallContextDTO
         HardLinkPath = task.HardLinkPath,
         InstallPath = task.InstallPath,
         Operation = (int)task.Operation,
+        RequestedOperation = (int)task.RequestedOperation,
         Timestamp = task.Timestamp,
         State = (int)task.State,
         ProgressDownloadTotalBytes = task.Progress_DownloadTotalBytes,
@@ -342,7 +350,8 @@ public partial class GameInstallRequest
         GameId = GetGameId(),
         HardLinkPath = HardLinkPath,
         InstallPath = InstallPath,
-        Operation = (GameInstallOperation)Operation
+        Operation = (GameInstallOperation)Operation,
+        RequestedOperation = (GameInstallOperation)Operation,
     };
 
 

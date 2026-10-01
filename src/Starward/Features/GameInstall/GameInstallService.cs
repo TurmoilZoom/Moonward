@@ -96,6 +96,7 @@ internal class GameInstallService
                             GameId = gameId,
                             InstallPath = item.InstallPath,
                             Operation = (GameInstallOperation)item.Operation,
+                            RequestedOperation = (GameInstallOperation)item.RequestedOperation,
                             AudioLanguage = (AudioLanguage)item.AudioLanguage,
                             HardLinkPath = item.HardLinkPath,
                             Timestamp = item.Timestamp,
@@ -211,7 +212,8 @@ internal class GameInstallService
         // 已结束的任务 RPC 还会再推送一次，那时任务已不在表里，previousState 为 null，不会重复提示
         if (previousState is not null && previousState != task.State)
         {
-            if (task.Operation is GameInstallOperation.Repair && task.State is GameInstallState.Finish)
+            // 按用户点的操作判断：硬链接时 RPC 会把安装、更新改成修复，那仍是安装或更新，不弹修复完成
+            if (task.RequestedOperation is GameInstallOperation.Repair && task.State is GameInstallState.Finish)
             {
                 ShowRepairFinishedToast(task, Lang.RepairGameDialog_GameRepairFinished);
             }
