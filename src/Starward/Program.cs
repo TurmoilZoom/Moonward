@@ -32,6 +32,8 @@ public static class Program
 
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Normal;
+        // 计划任务拉起时 I/O 与内存优先级也被调低，只改优先级类收不回来，且会继承给游戏
+        Helpers.ProcessPriorityHelper.RestoreNormalMemoryAndIoPriority();
 
         global::WinRT.ComWrappersSupport.InitializeComWrappers();
         global::Microsoft.UI.Xaml.Application.Start((p) =>
