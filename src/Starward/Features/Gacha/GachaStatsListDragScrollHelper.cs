@@ -24,6 +24,7 @@ namespace Starward.Features.Gacha;
 /// 会被 ScrollViewer 直接丢掉（返回 <c>false</c>）。因此甩动与跟手共用同一套虚拟偏移，
 /// 由 <see cref="CompositionTarget.Rendering"/> 按帧积分。
 /// </para>
+/// <para>拖拽或甩动中一旦滚动滚轮，立即结束自管滚动、交给 ScrollViewer 原生滚轮动画，避免两边争抢偏移。</para>
 /// </summary>
 internal static class GachaStatsListDragScrollHelper
 {
@@ -71,6 +72,7 @@ internal static class GachaStatsListDragScrollHelper
         private readonly FrameworkElement _content;
         private readonly Visual _contentVisual;
         private readonly Action? _onDragEnd;
+        private readonly PointerEventHandler _wheelHandler;
         private bool _disposed;
 
         // 拖拽状态
@@ -111,6 +113,9 @@ internal static class GachaStatsListDragScrollHelper
             _scrollViewer.PointerReleased += OnPointerReleased;
             _scrollViewer.PointerCaptureLost += OnPointerCaptureLost;
             _scrollViewer.PointerCanceled += OnPointerCaptureLost;
+            // ScrollViewer 在自身 OnPointerWheelChanged 里处理滚轮并置 Handled，须 handledEventsToo 才收得到。
+            _wheelHandler = OnPointerWheelChanged;
+            _scrollViewer.AddHandler(UIElement.PointerWheelChangedEvent, _wheelHandler, handledEventsToo: true);
         }
 
 
@@ -207,6 +212,31 @@ internal static class GachaStatsListDragScrollHelper
             }
             // 捕获丢失与正常松手走同一条路径：有速度就甩，没有则回弹/停住。
             TryFlingOrRestore();
+        }
+
+
+        /// <summary>
+        /// 拖拽或甩动中收到滚轮：结束自管滚动，由 ScrollViewer 原生滚轮动画接管。
+        /// </summary>
+        /// <remarks>
+        /// 到这里时 ScrollViewer 已启动滚轮动画，且无动画的 <c>ChangeView</c> 取消不了它；若继续跟手 / 逐帧积分，
+        /// 每次都会把内容拉回自管位置，与滚轮动画来回拉扯，记录之间出现残影。
+        /// 拖拽中指针被本容器捕获，滚轮直接路由到 ScrollViewer，无法先于它吞掉，所以拖拽也让位给滚轮（不甩动）。
+        /// </remarks>
+        /// <param name="sender">事件源（ScrollViewer）。</param>
+        /// <param name="e">滚轮路由事件参数（通常已被 ScrollViewer 置为 Handled）。</param>
+        private void OnPointerWheelChanged(object sender, PointerRoutedEventArgs e)
+        {
+            if (_isDragging)
+            {
+                _velocity = 0;
+                TryFlingOrRestore();
+            }
+            else if (_flinging)
+            {
+                StopFling();
+                RestoreTooltip();
+            }
         }
 
         #endregion
@@ -467,6 +497,7 @@ internal static class GachaStatsListDragScrollHelper
             _scrollViewer.PointerReleased -= OnPointerReleased;
             _scrollViewer.PointerCaptureLost -= OnPointerCaptureLost;
             _scrollViewer.PointerCanceled -= OnPointerCaptureLost;
+            _scrollViewer.RemoveHandler(UIElement.PointerWheelChangedEvent, _wheelHandler);
 
             if (_isDragging)
             {
