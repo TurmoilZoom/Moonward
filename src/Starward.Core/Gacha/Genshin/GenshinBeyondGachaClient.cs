@@ -1,6 +1,8 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Starward.Core.Gacha.Genshin;
@@ -400,11 +402,75 @@ public class GenshinBeyondGachaClient
 
 
 
-    public async Task<List<GenshinBeyondGachaInfo>> GetGenshinBeyondGachaInfoAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// 千星奇域物品信息数据源，按顺序尝试；图标地址跟随实际返回数据的源。
+    /// <list type="number">
+    /// <item>Cloudflare Pages（TurmoilZoom/Moonward-Assets）：主源。</item>
+    /// <item>GitHub Pages（同一仓库，内容相同）：主源不可用时兜底。</item>
+    /// <item>上游：自 2026-07 起未更新且部分图标为空，以上都不可用时才使用。</item>
+    /// </list>
+    /// </summary>
+    private static readonly string[] BeyondGachaInfoUrls =
+    [
+        "https://moonward-assets.pages.dev/genshin/beyond/GenshinBeyondGachaInfo.json",
+        "https://turmoilzoom.github.io/Moonward-Assets/genshin/beyond/GenshinBeyondGachaInfo.json",
+        "https://starward-static.scighost.com/game-assets/genshin/GenshinBeyondGachaInfo.json",
+    ];
+
+    /// <summary>
+    /// 单个数据源的超时，超时后换下一个源。
+    /// </summary>
+    private static readonly TimeSpan BeyondGachaInfoSourceTimeout = TimeSpan.FromSeconds(15);
+
+
+    /// <summary>
+    /// 按 <see cref="BeyondGachaInfoUrls"/> 的顺序获取千星奇域物品信息，并对上次成功的数据源发送条件请求。
+    /// </summary>
+    /// <param name="lastSourceUrl">上次成功的数据源地址。</param>
+    /// <param name="lastETag">上次该数据源返回的 ETag；只对 <paramref name="lastSourceUrl"/> 发送 If-None-Match。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>获取结果；数据源返回 304 时 <see cref="GenshinBeyondGachaInfoFetchResult.NotModified"/> 为 true。</returns>
+    /// <exception cref="HttpRequestException">所有数据源都失败时抛出，InnerException 为最后一个数据源的错误。</exception>
+    public async Task<GenshinBeyondGachaInfoFetchResult> GetGenshinBeyondGachaInfoAsync(string? lastSourceUrl = null, string? lastETag = null, CancellationToken cancellationToken = default)
     {
-        const string url = "https://starward-static.scighost.com/game-assets/genshin/GenshinBeyondGachaInfo.json";
-        var result = await _httpClient.GetFromJsonAsync(url, typeof(List<GenshinBeyondGachaInfo>), GachaLogJsonContext.Default, cancellationToken) as List<GenshinBeyondGachaInfo>;
-        return result ?? [];
+        Exception? lastException = null;
+        // 每次都从主源开始，即使上次回落到了兜底源：主源恢复后数据与图标都会切回主源
+        foreach (string url in BeyondGachaInfoUrls)
+        {
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(BeyondGachaInfoSourceTimeout);
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                if (url == lastSourceUrl && EntityTagHeaderValue.TryParse(lastETag, out var etag))
+                {
+                    request.Headers.IfNoneMatch.Add(etag);
+                }
+                using var response = await _httpClient.SendAsync(request, timeoutCts.Token);
+                string? responseETag = response.Headers.ETag?.ToString();
+                if (response.StatusCode is HttpStatusCode.NotModified)
+                {
+                    return new GenshinBeyondGachaInfoFetchResult { SourceUrl = url, ETag = responseETag ?? lastETag, NotModified = true };
+                }
+                response.EnsureSuccessStatusCode();
+                var items = await response.Content.ReadFromJsonAsync(typeof(List<GenshinBeyondGachaInfo>), GachaLogJsonContext.Default, timeoutCts.Token) as List<GenshinBeyondGachaInfo> ?? [];
+                // 镜像的 Icon 是相对 JSON 所在目录的路径，上游则是绝对地址
+                var baseUri = new Uri(url);
+                foreach (var item in items)
+                {
+                    if (!string.IsNullOrWhiteSpace(item.Icon) && !Uri.TryCreate(item.Icon, UriKind.Absolute, out _))
+                    {
+                        item.Icon = new Uri(baseUri, item.Icon).ToString();
+                    }
+                }
+                return new GenshinBeyondGachaInfoFetchResult { SourceUrl = url, ETag = responseETag, Items = items };
+            }
+            catch (Exception ex) when ((ex is HttpRequestException or JsonException or OperationCanceledException) && !cancellationToken.IsCancellationRequested)
+            {
+                lastException = ex;
+            }
+        }
+        throw new HttpRequestException("All genshin beyond gacha info sources failed.", lastException);
     }
 
 

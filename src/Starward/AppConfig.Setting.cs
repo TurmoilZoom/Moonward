@@ -125,6 +125,33 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 千星奇域物品信息上次成功获取的数据源地址；下次检查轮到该源时，配合 <see cref="GenshinBeyondGachaInfoETag"/> 发送条件请求。
+    /// </summary>
+    public static string? GenshinBeyondGachaInfoSource
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// <see cref="GenshinBeyondGachaInfoSource"/> 返回的 ETag。
+    /// </summary>
+    public static string? GenshinBeyondGachaInfoETag
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 上次检查千星奇域物品信息更新的时间（含 304 未修改），用于限制每天最多检查一次。
+    /// </summary>
+    public static DateTimeOffset GenshinBeyondGachaInfoLastCheckTime
+    {
+        get => GetValue<DateTimeOffset>();
+        set => SetValue(value);
+    }
+
     public static string? AccentColor
     {
         get => GetValue<string>();

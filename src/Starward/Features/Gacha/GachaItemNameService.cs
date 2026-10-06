@@ -79,7 +79,7 @@ internal class GachaItemNameService
         {
             AppConfig.LastGachaNameLanguage = lang;
         }
-        // 千星奇域物品信息表为空（首次启动）时全量下载；失败则下次启动或打开页面时重试。
+        // 千星奇域物品信息：表为空时全量下载，否则每天最多检查一次更新；失败则打开页面或下次启动时重试。
         try
         {
             await _beyond.EnsureGachaInfoAsync();

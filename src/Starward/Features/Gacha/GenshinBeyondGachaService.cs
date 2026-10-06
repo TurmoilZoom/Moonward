@@ -401,33 +401,108 @@ internal class GenshinBeyondGachaService
 
 
 
-    public async Task UpdateGachaInfoAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// 两次检查物品信息更新的最小间隔；有 ETag 时多为 304，开销很小。
+    /// </summary>
+    private static readonly TimeSpan GachaInfoCheckInterval = TimeSpan.FromDays(1);
+
+    /// <summary>
+    /// 串行化物品信息更新：软件启动与打开页面可能同时触发。
+    /// </summary>
+    private readonly SemaphoreSlim _gachaInfoLock = new(1, 1);
+
+
+
+    /// <summary>
+    /// 立即联网检查千星奇域物品信息（图标）：对上次成功的数据源发送条件请求，未修改时不写库。
+    /// 更新记录时发现本地未收录的新物品（<see cref="HasUnknownItems"/>）会调用。
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>本地物品信息是否有变化。</returns>
+    /// <exception cref="System.Net.Http.HttpRequestException">所有数据源都不可用时抛出。</exception>
+    public async Task<bool> UpdateGachaInfoAsync(CancellationToken cancellationToken = default)
     {
-        var data = await _client.GetGenshinBeyondGachaInfoAsync(cancellationToken);
-        using var dapper = DatabaseService.CreateConnection();
-        using var t = dapper.BeginTransaction();
-        const string insertSql = """INSERT OR REPLACE INTO GenshinBeyondGachaInfo (Id, Name, Rank, Icon) VALUES (@Id, @Name, @Rank, @Icon);""";
-        dapper.Execute(insertSql, data, t);
-        t.Commit();
+        await _gachaInfoLock.WaitAsync(cancellationToken);
+        try
+        {
+            return await UpdateGachaInfoCoreAsync(cancellationToken);
+        }
+        finally
+        {
+            _gachaInfoLock.Release();
+        }
     }
 
 
 
     /// <summary>
-    /// 确保本地已有千星奇域物品信息（图标）：表为空时才全量下载 <see cref="UpdateGachaInfoAsync"/>。
-    /// 软件首次启动由 <see cref="GachaItemNameService"/> 调用完成全量更新（失败则打开页面/下次启动时重试）；
-    /// 此后版本更新带来的新物品由更新记录时的 <see cref="HasUnknownItems"/> 检测按需增量补全。
+    /// 确保本地千星奇域物品信息（图标）可用且较新：表为空时立即下载，否则距上次检查满 <see cref="GachaInfoCheckInterval"/> 才联网检查。
+    /// 由软件启动（<see cref="GachaItemNameService"/>）、打开千星奇域页面与 UIGF 导入调用；失败则下次调用时重试。
     /// </summary>
-    public async Task EnsureGachaInfoAsync(CancellationToken cancellationToken = default)
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>本地物品信息是否有变化。</returns>
+    /// <exception cref="System.Net.Http.HttpRequestException">需要联网但所有数据源都不可用时抛出。</exception>
+    public async Task<bool> EnsureGachaInfoAsync(CancellationToken cancellationToken = default)
     {
-        using (var dapper = DatabaseService.CreateConnection())
+        await _gachaInfoLock.WaitAsync(cancellationToken);
+        try
         {
-            if (dapper.QueryFirstOrDefault<int>("SELECT COUNT(*) FROM GenshinBeyondGachaInfo;") > 0)
+            // 在锁内判断：并发的第二次调用会看到第一次刚写入的检查时间而直接返回
+            if (HasGachaInfo() && DateTimeOffset.Now - AppConfig.GenshinBeyondGachaInfoLastCheckTime < GachaInfoCheckInterval)
             {
-                return;
+                return false;
             }
+            return await UpdateGachaInfoCoreAsync(cancellationToken);
         }
-        await UpdateGachaInfoAsync(cancellationToken);
+        finally
+        {
+            _gachaInfoLock.Release();
+        }
+    }
+
+
+
+    /// <summary>
+    /// 联网获取物品信息并写库；调用方须持有 <see cref="_gachaInfoLock"/>。
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>本地物品信息是否有变化。</returns>
+    /// <exception cref="System.Net.Http.HttpRequestException">所有数据源都不可用时抛出。</exception>
+    private async Task<bool> UpdateGachaInfoCoreAsync(CancellationToken cancellationToken)
+    {
+        // 本地表为空时不发条件请求，确保拿到完整数据
+        string? etag = HasGachaInfo() ? AppConfig.GenshinBeyondGachaInfoETag : null;
+        var result = await _client.GetGenshinBeyondGachaInfoAsync(AppConfig.GenshinBeyondGachaInfoSource, etag, cancellationToken);
+        AppConfig.GenshinBeyondGachaInfoLastCheckTime = DateTimeOffset.Now;
+        if (result.NotModified)
+        {
+            _logger.LogInformation("Beyond gacha info not modified, source {Source}", result.SourceUrl);
+            return false;
+        }
+        if (result.Items.Count > 0)
+        {
+            using var dapper = DatabaseService.CreateConnection();
+            using var t = dapper.BeginTransaction();
+            const string insertSql = """INSERT OR REPLACE INTO GenshinBeyondGachaInfo (Id, Name, Rank, Icon) VALUES (@Id, @Name, @Rank, @Icon);""";
+            dapper.Execute(insertSql, result.Items, t);
+            t.Commit();
+        }
+        AppConfig.GenshinBeyondGachaInfoSource = result.SourceUrl;
+        AppConfig.GenshinBeyondGachaInfoETag = result.ETag;
+        _logger.LogInformation("Beyond gacha info updated, source {Source}, {Count} items", result.SourceUrl, result.Items.Count);
+        return result.Items.Count > 0;
+    }
+
+
+
+    /// <summary>
+    /// 本地物品信息表（GenshinBeyondGachaInfo）是否已有数据。
+    /// </summary>
+    /// <returns>有数据为 true。</returns>
+    private static bool HasGachaInfo()
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.QueryFirstOrDefault<int>("SELECT COUNT(*) FROM GenshinBeyondGachaInfo;") > 0;
     }
 
 

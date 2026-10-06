@@ -202,14 +202,16 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
 
 
     /// <summary>
-    /// 兜底：首次启动时 <see cref="GachaItemNameService"/> 已全量下载物品信息（图标），
-    /// 此处仅在表仍为空（如启动时无网络）时重试下载；新物品由更新记录时按需增量补全。
+    /// 确保物品信息（图标）可用且较新（表为空或距上次检查满一天时联网）；有变化则重新加载统计，让新图标立即显示。
     /// </summary>
     private async Task EnsureGachaInfoAsync()
     {
         try
         {
-            await _gachaLogService.EnsureGachaInfoAsync();
+            if (await _gachaLogService.EnsureGachaInfoAsync())
+            {
+                UpdateGachaTypeStats(SelectUid);
+            }
         }
         catch (Exception ex)
         {
