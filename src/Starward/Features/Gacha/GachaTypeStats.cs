@@ -40,12 +40,33 @@ public class GachaTypeStats
     ///   102  - 独家重映 (ExclusiveRescreening，与 2 共用非UP判定)
     ///   103  - 音擎回响 (WEngineReverberation，与 3 共用非UP判定)
     ///
+    /// 【千星奇域颂愿 (hk4eugc)】
+    ///   1000 - 常驻颂愿 (StandardOde，最高统计到 4★，见 <see cref="TopRarity"/>)
+    ///   2000 - 活动颂愿 (EventOde，各期活动 op_gacha_type 合并)
+    ///
     /// 注意：
     /// - ZZZ 的统计中，“5星”相关字段实际对应数据库 RankType==4（S级），“4星”对应 RankType==3（A级），Count_3 对应 RankType==2（B级）。
     /// - 原神 301 与 400 在统计时会被合并为同一个 GachaTypeStats（见 GenshinGachaService.GetGachaLogItemsByQueryType）。
     /// - 新手池（原神100、星铁2）在抽满固定次数（20/50）后，UI 不再显示当前 pity 进度。
     /// </summary>
     public int GachaType { get; set; }
+
+    /// <summary>
+    /// 统计卡片「最高稀有度」一栏实际对应的星级，默认 5。
+    /// 千星奇域常驻颂愿只统计到 4★：此时 *_5 系列字段与 <see cref="List_5"/> 装的是 4★，*_4 系列与 <see cref="List_4"/> 装的是 3★，
+    /// 卡片与分享图据此换文案和稀有度配色。
+    /// </summary>
+    public int TopRarity { get; set; } = 5;
+
+    /// <summary>
+    /// 最高稀有度一栏的星级文案，如「5★」。
+    /// </summary>
+    public string TopRarityText => $"{TopRarity}★";
+
+    /// <summary>
+    /// 次一级稀有度（4★ 列表一栏）的星级文案，如「4★」。
+    /// </summary>
+    public string SecondRarityText => $"{TopRarity - 1}★";
 
     /// <summary>
     /// 卡池类型的本地化显示名称（如“角色活动祈愿”、“群星跃迁”、“独家频段”等）。

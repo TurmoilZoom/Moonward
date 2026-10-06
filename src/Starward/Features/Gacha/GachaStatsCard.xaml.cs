@@ -1,6 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System.Linq;
+using Windows.UI;
 
 
 namespace Starward.Features.Gacha;
@@ -64,7 +66,41 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
 
     /// <summary><see cref="WarpTypeStats"/> 的依赖属性标识，供 XAML 绑定与样式使用。</summary>
     public static readonly DependencyProperty WarpTypeStatsProperty =
-        DependencyProperty.Register("WarpTypeStats", typeof(GachaTypeStats), typeof(GachaStatsCard), new PropertyMetadata(null));
+        DependencyProperty.Register("WarpTypeStats", typeof(GachaTypeStats), typeof(GachaStatsCard), new PropertyMetadata(null, OnWarpTypeStatsChanged));
+
+
+    /// <summary>
+    /// 卡池数据变化时按其最高稀有度重设本卡配色。
+    /// </summary>
+    /// <param name="d">卡片。</param>
+    /// <param name="e">变更参数（未使用，以当前 <see cref="WarpTypeStats"/> 为准）。</param>
+    private static void OnWarpTypeStatsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        ((GachaStatsCard)d).ApplyRarityTier();
+    }
+
+
+    /// <summary>
+    /// 把「最高 / 次一级稀有度」画刷改成 <see cref="GachaTypeStats.TopRarity"/> 对应星级的颜色（取自 RarityNForegroundBrush），紧凑方块底板取同色 25% 透明度。
+    /// </summary>
+    /// <remarks>
+    /// 直接改画刷 Color：这些画刷定义在本卡 Resources 中、每个实例各一份，卡内元素与记录模板引用的都是同一实例，改色即生效且不影响其他卡片。
+    /// </remarks>
+    private void ApplyRarityTier()
+    {
+        int top = WarpTypeStats?.TopRarity ?? 5;
+        if (!Resources.TryGetValue($"Rarity{top}ForegroundBrush", out object topSource)
+            || !Resources.TryGetValue($"Rarity{top - 1}ForegroundBrush", out object secondSource))
+        {
+            return;
+        }
+        Color topColor = ((SolidColorBrush)topSource).Color;
+        Color secondColor = ((SolidColorBrush)secondSource).Color;
+        ((SolidColorBrush)Resources["TopRarityForegroundBrush"]).Color = topColor;
+        ((SolidColorBrush)Resources["SecondRarityForegroundBrush"]).Color = secondColor;
+        ((SolidColorBrush)Resources["TopRarityTileBackgroundBrush"]).Color = Color.FromArgb(0x40, topColor.R, topColor.G, topColor.B);
+        ((SolidColorBrush)Resources["SecondRarityTileBackgroundBrush"]).Color = Color.FromArgb(0x40, secondColor.R, secondColor.G, secondColor.B);
+    }
 
 
     /// <summary>

@@ -6,9 +6,6 @@ using Microsoft.Graphics.Canvas.Text;
 using Microsoft.UI;
 using Starward.Codec.ICC;
 using Starward.Core;
-using Starward.Core.Gacha.Genshin;
-using Starward.Core.Gacha.StarRail;
-using Starward.Core.Gacha.ZZZ;
 using Starward.Features.Background;
 using Starward.Features.Codec;
 using Starward.Helpers;
@@ -95,6 +92,13 @@ internal static class GachaShareImageRenderer
     // 紧凑方块底板取 Rarity5 的 25% 透明度，与页面 #40FFA500 同一观感
     private static readonly Color CompactTileBackground = Color.FromArgb(0x40, 0xFF, 0xB4, 0x2E);
     private static readonly Color CompactBadgeText = Color.FromArgb(0xFF, 0x1F, 0x1F, 0x1F);
+    // 千星奇域常驻颂愿最高只到 4★：对应页面 #C864E0，同样略提亮
+    private static readonly Color Rarity4 = Color.FromArgb(0xFF, 0xD0, 0x7A, 0xE8);
+    private static readonly Color Rarity4Hi = Color.FromArgb(0xFF, 0xE2, 0xA6, 0xF2);
+    private static readonly Color Rarity4TileBackground = Color.FromArgb(0x40, 0xD0, 0x7A, 0xE8);
+    // 须在上面各颜色之后声明：静态字段按书写顺序初始化
+    private static readonly RarityPalette Rarity5Palette = new(Rarity5, Rarity5Hi, CompactTileBackground);
+    private static readonly RarityPalette Rarity4Palette = new(Rarity4, Rarity4Hi, Rarity4TileBackground);
 
     // 预暗化只压高光，避免浅壁纸把亚克力洗白，同时保留更多原图颜色
     private static readonly Color BgPreDarkenOverlay = Color.FromArgb(0x28, 0x00, 0x00, 0x00);
@@ -151,7 +155,6 @@ internal static class GachaShareImageRenderer
         }
 
         bool isZzz = gameBiz.Game == GameBiz.nap;
-        string rarityLabel = isZzz ? "S" : "5★";
 
         var device = CanvasDevice.GetSharedDevice();
         var iconLoads = new Dictionary<string, Task<CanvasBitmap?>>(StringComparer.Ordinal);
@@ -200,6 +203,7 @@ internal static class GachaShareImageRenderer
                 for (int i = 0; i < stats.Count; i++)
                 {
                     GachaTypeStats stat = stats[i];
+                    string rarityLabel = isZzz ? "S" : stat.TopRarityText;
                     DrawCard(ds, device, stat, cardLeft, cardTop, contentHeight, rarityLabel, accentColor, viewMode,
                              titleFormat, bodyFormat, smallFormat, capsuleFormat, upFormat,
                              tilePityFormat, tileBadgeFormat, tileNameFormat, iconBitmaps, bgLayer);
@@ -327,6 +331,7 @@ internal static class GachaShareImageRenderer
         DrawCardShadow(ds, device, left, top, CardWidth, height, CardCornerRadius);
         DrawAcrylicCardBackground(ds, device, bgLayer, left, top, CardWidth, height, CardCornerRadius, accentColor);
 
+        RarityPalette palette = stats.TopRarity == 4 ? Rarity4Palette : Rarity5Palette;
         float x = left + CardPaddingH;
         float y = top + CardPaddingV;
         float innerWidth = CardWidth - CardPaddingH * 2;
@@ -374,21 +379,21 @@ internal static class GachaShareImageRenderer
 
         if (stats.HasUpItem)
         {
-            DrawText(ds, Lang.GachaStatsCard_NoUpProbability, x, y, bodyFormat, Rarity5);
-            DrawText(ds, stats.FiftyFiftyNoUpText, rightX - MeasureTextWidth(ds, stats.FiftyFiftyNoUpText, bodyFormat), y, bodyFormat, Rarity5);
+            DrawText(ds, Lang.GachaStatsCard_NoUpProbability, x, y, bodyFormat, palette.Main);
+            DrawText(ds, stats.FiftyFiftyNoUpText, rightX - MeasureTextWidth(ds, stats.FiftyFiftyNoUpText, bodyFormat), y, bodyFormat, palette.Main);
         }
         else
         {
             string statsLeft = $"{rarityLabel}{Lang.GachaStatsCard_Stats}";
             string statsRight = $"{stats.Count_5} [{stats.Ratio_5:P2}]";
-            DrawText(ds, statsLeft, x, y, bodyFormat, Rarity5);
-            DrawText(ds, statsRight, rightX - MeasureTextWidth(ds, statsRight, bodyFormat), y, bodyFormat, Rarity5);
+            DrawText(ds, statsLeft, x, y, bodyFormat, palette.Main);
+            DrawText(ds, statsRight, rightX - MeasureTextWidth(ds, statsRight, bodyFormat), y, bodyFormat, palette.Main);
         }
         y += 20f + RowSpacing;
 
         if (stats.ShowPityProgress)
         {
-            y = DrawPityProgress(ds, device, stats, x, y, innerWidth, rightX, smallFormat);
+            y = DrawPityProgress(ds, device, stats, x, y, innerWidth, rightX, smallFormat, palette);
         }
 
         y += ListSectionSpacing;
@@ -397,7 +402,7 @@ internal static class GachaShareImageRenderer
         {
             if (viewMode == GachaRecordViewMode.Compact)
             {
-                DrawCompactGrid(ds, device, stats.List_5, x, y, innerWidth, tilePityFormat, tileBadgeFormat, tileNameFormat, iconBitmaps);
+                DrawCompactGrid(ds, device, stats.List_5, x, y, innerWidth, tilePityFormat, tileBadgeFormat, tileNameFormat, iconBitmaps, palette);
                 return;
             }
 
@@ -405,7 +410,7 @@ internal static class GachaShareImageRenderer
             float nameWidth = innerWidth - IconColumnWidth - 48f;
             foreach (GachaLogItemEx item in stats.List_5)
             {
-                DrawListItem(ds, device, item, x, y, nameX, nameWidth, rightX, bodyFormat, upFormat, iconBitmaps);
+                DrawListItem(ds, device, item, x, y, nameX, nameWidth, rightX, bodyFormat, upFormat, iconBitmaps, palette);
                 y += ItemRowHeight;
             }
         }
@@ -426,6 +431,7 @@ internal static class GachaShareImageRenderer
     /// <param name="badgeFormat">UP 角标字体。</param>
     /// <param name="nameFormat">图标缺失时的名称回退字体（可换行）。</param>
     /// <param name="iconBitmaps">已预加载的图标位图。</param>
+    /// <param name="palette">本卡最高稀有度配色（底板与 UP 角标）。</param>
     private static void DrawCompactGrid(
         CanvasDrawingSession ds,
         CanvasDevice device,
@@ -436,14 +442,15 @@ internal static class GachaShareImageRenderer
         CanvasTextFormat pityFormat,
         CanvasTextFormat badgeFormat,
         CanvasTextFormat nameFormat,
-        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps)
+        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps,
+        RarityPalette palette)
     {
         float columnSpacing = Math.Max(0f, (innerWidth - CompactColumns * CompactIconSize) / (CompactColumns - 1));
         for (int i = 0; i < items.Count; i++)
         {
             float tileLeft = left + (i % CompactColumns) * (CompactIconSize + columnSpacing);
             float tileTop = top + (i / CompactColumns) * (CompactTileHeight + CompactRowSpacing);
-            DrawCompactTile(ds, device, items[i], tileLeft, tileTop, pityFormat, badgeFormat, nameFormat, iconBitmaps);
+            DrawCompactTile(ds, device, items[i], tileLeft, tileTop, pityFormat, badgeFormat, nameFormat, iconBitmaps, palette);
         }
     }
 
@@ -460,6 +467,7 @@ internal static class GachaShareImageRenderer
     /// <param name="badgeFormat">UP 角标字体。</param>
     /// <param name="nameFormat">名称回退字体。</param>
     /// <param name="iconBitmaps">已预加载的图标位图。</param>
+    /// <param name="palette">本卡最高稀有度配色（底板与 UP 角标）。</param>
     private static void DrawCompactTile(
         CanvasDrawingSession ds,
         CanvasDevice device,
@@ -469,11 +477,12 @@ internal static class GachaShareImageRenderer
         CanvasTextFormat pityFormat,
         CanvasTextFormat badgeFormat,
         CanvasTextFormat nameFormat,
-        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps)
+        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps,
+        RarityPalette palette)
     {
         using var plate = CanvasGeometry.CreateRoundedRectangle(
             device, left, top, CompactIconSize, CompactIconSize, CompactTileCornerRadius, CompactTileCornerRadius);
-        ds.FillGeometry(plate, CompactTileBackground);
+        ds.FillGeometry(plate, palette.TileBackground);
 
         using (ds.CreateLayer(1f, plate))
         {
@@ -500,7 +509,7 @@ internal static class GachaShareImageRenderer
                     CompactBadgeHeight + CompactBadgeCornerRadius,
                     CompactBadgeCornerRadius,
                     CompactBadgeCornerRadius);
-                ds.FillGeometry(badge, Rarity5);
+                ds.FillGeometry(badge, palette.Main);
                 DrawTextInkCentered(ds, "UP", badgeLeft, top, CompactBadgeWidth, CompactBadgeHeight, badgeFormat, CompactBadgeText);
             }
         }
@@ -694,6 +703,7 @@ internal static class GachaShareImageRenderer
     /// <param name="innerWidth">内容区宽度，进度条拉满该宽度。</param>
     /// <param name="rightX">内容区右缘，用于右对齐保底文案。</param>
     /// <param name="labelFormat">12pt 标签字体。</param>
+    /// <param name="palette">本卡最高稀有度配色（保底文案与进度条）。</param>
     /// <returns>本块底部 Y（已含底边距），供后续 5★/S 列表接着排。</returns>
     private static float DrawPityProgress(
         CanvasDrawingSession ds,
@@ -703,7 +713,8 @@ internal static class GachaShareImageRenderer
         float y,
         float innerWidth,
         float rightX,
-        CanvasTextFormat labelFormat)
+        CanvasTextFormat labelFormat,
+        RarityPalette palette)
     {
         y += PityProgressMarginTop;
 
@@ -711,7 +722,7 @@ internal static class GachaShareImageRenderer
         if (stats.HasUpItem)
         {
             string guaranteeText = stats.PityGuaranteeText;
-            DrawText(ds, guaranteeText, rightX - MeasureTextWidth(ds, guaranteeText, labelFormat), y, labelFormat, Rarity5);
+            DrawText(ds, guaranteeText, rightX - MeasureTextWidth(ds, guaranteeText, labelFormat), y, labelFormat, palette.Main);
         }
         y += PityProgressLabelHeight + PityProgressRowSpacing;
 
@@ -732,8 +743,8 @@ internal static class GachaShareImageRenderer
                         device, x, y, fillWidth, PityProgressBarHeight, PityProgressCornerRadius, PityProgressCornerRadius);
                     var fillStops = new[]
                     {
-                        new CanvasGradientStop { Position = 0f, Color = Rarity5Hi },
-                        new CanvasGradientStop { Position = 1f, Color = Rarity5 },
+                        new CanvasGradientStop { Position = 0f, Color = palette.Highlight },
+                        new CanvasGradientStop { Position = 1f, Color = palette.Main },
                     };
                     using var fillBrush = new CanvasLinearGradientBrush(ds, fillStops)
                     {
@@ -766,7 +777,8 @@ internal static class GachaShareImageRenderer
         float rightX,
         CanvasTextFormat bodyFormat,
         CanvasTextFormat upFormat,
-        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps)
+        IReadOnlyDictionary<string, CanvasBitmap?> iconBitmaps,
+        RarityPalette palette)
     {
         float barTop = rowTop + 2f;
         DrawPityBar(ds, device, item, nameX - 4f, barTop, nameWidth + 8f, 24f);
@@ -792,7 +804,7 @@ internal static class GachaShareImageRenderer
         {
             const string upText = "up!";
             float upWidth = MeasureTextWidth(ds, upText, upFormat);
-            DrawText(ds, upText, rightX - upWidth - 28f, rowTop + 6f, upFormat, Rarity5);
+            DrawText(ds, upText, rightX - upWidth - 28f, rowTop + 6f, upFormat, palette.Main);
         }
 
         DrawText(ds, pityText, rightX - MeasureTextWidth(ds, pityText, bodyFormat), rowTop + 4f, bodyFormat, TertiaryText);
@@ -812,22 +824,11 @@ internal static class GachaShareImageRenderer
         float height)
     {
         int pity = item.Pity;
-        int point = 74;
-        double guarantee = 90;
-        if (item.GachaType is GenshinGachaType.WeaponEventWish or StarRailGachaType.LightConeEventWarp or StarRailGachaType.LightConeCollaborationWarp)
-        {
-            point = 63;
-            guarantee = 80;
-        }
-        else if (item.GachaType is ZZZGachaType.WEngineChannel or ZZZGachaType.WEngineReverberation or ZZZGachaType.BangbooChannel)
-        {
-            point = 65;
-            guarantee = 80;
-        }
+        var (point, guarantee) = GachaPityProgressBackgroundBrushConverter.GetPityThresholds(item.GachaType);
 
         Color baseColor = pity < point ? PityGreen : PityRed;
         Color fillColor = Color.FromArgb((byte)(PityBarFillOpacity * 255f), baseColor.R, baseColor.G, baseColor.B);
-        float offset = Math.Clamp((float)(pity / guarantee), 0f, 1f);
+        float offset = Math.Clamp(pity / (float)guarantee, 0f, 1f);
         if (offset <= 0f)
         {
             return;
@@ -1158,5 +1159,14 @@ internal static class GachaShareImageRenderer
 
         return null;
     }
+
+
+    /// <summary>
+    /// 卡片最高稀有度一栏的配色。
+    /// </summary>
+    /// <param name="Main">统计行、UP 标记、进度条末端。</param>
+    /// <param name="Highlight">进度条起始高光。</param>
+    /// <param name="TileBackground">紧凑方块底板。</param>
+    private readonly record struct RarityPalette(Color Main, Color Highlight, Color TileBackground);
 
 }

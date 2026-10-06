@@ -1,8 +1,5 @@
 using Dapper;
 using Microsoft.Extensions.Logging;
-using Microsoft.UI;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Media;
 using Starward.Core;
 using Starward.Core.Gacha;
 using Starward.Core.Gacha.Genshin;
@@ -13,8 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.UI;
 
 namespace Starward.Features.Gacha;
 
@@ -217,91 +212,73 @@ internal class GenshinBeyondGachaService
 
 
 
-    public GenshinBeyondGachaTypeStats? GetGachaTypeStatsType1000(long uid)
+    /// <summary>
+    /// 卡池筛选可选的卡池分组：常驻颂愿、活动颂愿。
+    /// </summary>
+    public IReadOnlyCollection<IGachaType> QueryGachaTypes { get; } =
+    [
+        new GenshinBeyondGachaType(GenshinBeyondGachaType.StandardOde),
+        new GenshinBeyondGachaType(GenshinBeyondGachaType.EventOde),
+    ];
+
+
+
+    /// <summary>
+    /// 统计指定 UID 的常驻 / 活动颂愿，转成普通抽卡页同款 <see cref="GachaTypeStats"/>，让统计卡片、拖拽排序与分享图直接复用。
+    /// </summary>
+    /// <param name="uid">玩家 UID。</param>
+    /// <returns>有记录的卡池统计（常驻在前）；按物品汇总的出货次数，无记录时为 null。</returns>
+    public (List<GachaTypeStats> TypeStats, List<GachaLogItemEx>? ItemStats) GetGachaTypeStats(long uid)
     {
         using var dapper = DatabaseService.CreateConnection();
-        var list = dapper.Query<GenshinBeyondGachaItemEx>("""
-            SELECT item.*, info.Icon FROM GenshinBeyondGachaItem item LEFT JOIN GenshinBeyondGachaInfo info
-            ON item.ItemId = info.Id WHERE Uid = @uid AND OpGachaType = 1000 ORDER BY item.Id;
+        // 活动颂愿各期 op_gacha_type 不同，统一并到 2000（与 UIGF 导出一致）
+        var all = dapper.Query<GachaLogItemEx>($"""
+            SELECT item.Uid, item.Id, item.ItemId, item.ItemName AS Name, item.ItemType, item.RankType, item.Time,
+                   CASE WHEN item.OpGachaType = 1000 THEN 1000 ELSE 2000 END AS GachaType, info.Icon
+            FROM {GachaTableName} item LEFT JOIN GenshinBeyondGachaInfo info ON item.ItemId = info.Id
+            WHERE item.Uid = @uid ORDER BY item.Id;
             """, new { uid }).ToList();
-        if (list.Count == 0)
+        var statsList = new List<GachaTypeStats>();
+        if (all.Count == 0)
         {
-            return null;
+            return (statsList, null);
         }
 
-        int index = 0;
-        int pity = 0;
-        foreach (var item in list)
+        // 常驻颂愿最高只出 4★，保底与列表都按 4★ / 3★ 计
+        if (BuildGachaTypeStats(all.Where(x => x.GachaType == GenshinBeyondGachaType.StandardOde).ToList(), GenshinBeyondGachaType.StandardOde, 4) is GachaTypeStats standard)
         {
-            item.Index = ++index;
-            item.Pity = ++pity;
-            if (item.RankType == 4)
-            {
-                pity = 0;
-            }
+            statsList.Add(standard);
+        }
+        if (BuildGachaTypeStats(all.Where(x => x.GachaType == GenshinBeyondGachaType.EventOde).ToList(), GenshinBeyondGachaType.EventOde, 5) is GachaTypeStats eventOde)
+        {
+            statsList.Add(eventOde);
         }
 
-        var stats = new GenshinBeyondGachaTypeStats
-        {
-            GachaType = 1000,
-            GachaTypeText = CoreLang.GachaType_StandardOde,
-            Count = list.Count,
-            Count_5 = list.Count(x => x.RankType == 5),
-            Count_4 = list.Count(x => x.RankType == 4),
-            Count_3 = list.Count(x => x.RankType == 3),
-            Count_2 = list.Count(x => x.RankType == 2),
-            StartTime = list.First().Time,
-            EndTime = list.Last().Time,
-        };
-        stats.Ratio_5 = (double)stats.Count_5 / stats.Count;
-        stats.Ratio_4 = (double)stats.Count_4 / stats.Count;
-        stats.Ratio_3 = (double)stats.Count_3 / stats.Count;
-        stats.Ratio_2 = (double)stats.Count_2 / stats.Count;
-        stats.List_5 = list.Where(x => x.RankType == 5).Reverse().ToList();
-        stats.List_4 = list.Where(x => x.RankType == 4).Reverse().ToList();
-        stats.List_3 = list.Where(x => x.RankType == 3).Reverse().ToList();
-
-        stats.Pity_4 = list.Last().Pity;
-        if (list.Last().RankType == 4)
-        {
-            stats.Pity_4 = 0;
-        }
-        // 无 4 星样本时不计算平均，避免 NaN；展示侧用 Average_4_Text 显示「—」
-        if (stats.Count_4 > 0)
-        {
-            stats.Average_4 = (double)(stats.Count - stats.Pity_4) / stats.Count_4;
-        }
-        stats.Pity_3 = list.Count - 1 - list.FindLastIndex(x => x.RankType == 3);
-        int pity_3 = 0;
-        foreach (var item in list)
-        {
-            pity_3++;
-            if (item.RankType == 3)
-            {
-                item.Pity = pity_3;
-                pity_3 = 0;
-            }
-        }
-
-        // 常驻颂愿最高展示稀有度为 4★，硬保底 70
-        stats.Pity_Current = stats.Pity_4;
-        stats.Pity_Max = 70;
-
-        return stats;
+        var itemStats = all.GroupBy(x => x.ItemId)
+                           .Select(x => { var item = x.First(); item.ItemCount = x.Count(); return item; })
+                           .OrderByDescending(x => x.RankType)
+                           .ThenByDescending(x => x.ItemCount)
+                           .ThenByDescending(x => x.Time)
+                           .ToList();
+        return (statsList, itemStats);
     }
 
 
-    public GenshinBeyondGachaTypeStats? GetGachaTypeStatsType2000(long uid)
+
+    /// <summary>
+    /// 计算单个颂愿分组的统计，并回写每条记录的序号与抽数。
+    /// </summary>
+    /// <param name="list">该分组的记录（按 Id 升序）。</param>
+    /// <param name="gachaType">分组：<see cref="GenshinBeyondGachaType.StandardOde"/> 或 <see cref="GenshinBeyondGachaType.EventOde"/>。</param>
+    /// <param name="topRarity">该分组统计的最高星级（常驻 4，活动 5），保底均为 70 抽。</param>
+    /// <returns>统计；无记录时为 null。</returns>
+    private static GachaTypeStats? BuildGachaTypeStats(List<GachaLogItemEx> list, int gachaType, int topRarity)
     {
-        using var dapper = DatabaseService.CreateConnection();
-        var list = dapper.Query<GenshinBeyondGachaItemEx>("""
-            SELECT item.*, info.Icon FROM GenshinBeyondGachaItem item LEFT JOIN GenshinBeyondGachaInfo info
-            ON item.ItemId = info.Id WHERE Uid = @uid AND OpGachaType != 1000 ORDER BY item.Id;
-            """, new { uid }).ToList();
         if (list.Count == 0)
         {
             return null;
         }
+        int secondRarity = topRarity - 1;
 
         int index = 0;
         int pity = 0;
@@ -309,79 +286,63 @@ internal class GenshinBeyondGachaService
         {
             item.Index = ++index;
             item.Pity = ++pity;
-            if (item.RankType == 5)
+            if (item.RankType == topRarity)
             {
                 pity = 0;
             }
         }
 
-        var stats = new GenshinBeyondGachaTypeStats
+        var stats = new GachaTypeStats
         {
-            GachaType = 2000,
-            GachaTypeText = CoreLang.GachaType_EventOde,
+            GachaType = gachaType,
+            GachaTypeText = new GenshinBeyondGachaType(gachaType).ToLocalization(),
+            TopRarity = topRarity,
+            Pity_5_Max = 70,
             Count = list.Count,
-            Count_5 = list.Count(x => x.RankType == 5),
-            Count_4 = list.Count(x => x.RankType == 4),
-            Count_3 = list.Count(x => x.RankType == 3),
-            Count_2 = list.Count(x => x.RankType == 2),
-            StartTime = list.First().Time,
-            EndTime = list.Last().Time,
+            Count_5 = list.Count(x => x.RankType == topRarity),
+            Count_4 = list.Count(x => x.RankType == secondRarity),
+            Count_3 = list.Count(x => x.RankType == secondRarity - 1),
+            StartTime = list[0].Time,
+            EndTime = list[^1].Time,
         };
         stats.Ratio_5 = (double)stats.Count_5 / stats.Count;
         stats.Ratio_4 = (double)stats.Count_4 / stats.Count;
         stats.Ratio_3 = (double)stats.Count_3 / stats.Count;
-        stats.Ratio_2 = (double)stats.Count_2 / stats.Count;
-        stats.List_5 = list.Where(x => x.RankType == 5).Reverse().ToList();
-        stats.List_4 = list.Where(x => x.RankType == 4).Reverse().ToList();
-        stats.List_3 = list.Where(x => x.RankType == 3).Reverse().ToList();
+        stats.List_5 = list.Where(x => x.RankType == topRarity).Reverse().ToList();
+        stats.List_4 = list.Where(x => x.RankType == secondRarity).Reverse().ToList();
 
-        stats.Pity_5 = list.Last().Pity;
-        if (list.Last().RankType == 5)
-        {
-            stats.Pity_5 = 0;
-        }
-        // 无 5 星样本时不计算平均，避免 NaN；展示侧用 Average_5_Text 显示「—」
+        // 须在下面回写次一级抽数之前取：最后一条若是次一级，它的 Pity 会被改掉
+        stats.Pity_5 = list[^1].RankType == topRarity ? 0 : list[^1].Pity;
+        // 无最高星级样本时不计算平均，避免 NaN；展示侧用 Average_5_Text 显示「—」
         if (stats.Count_5 > 0)
         {
             stats.Average_5 = (double)(stats.Count - stats.Pity_5) / stats.Count_5;
         }
-        stats.Pity_4 = list.Count - 1 - list.FindLastIndex(x => x.RankType == 4);
-        int pity_4 = 0;
+        stats.Pity_4 = list.Count - 1 - list.FindLastIndex(x => x.RankType == secondRarity);
+        int pitySecond = 0;
         foreach (var item in list)
         {
-            pity_4++;
-            if (item.RankType == 4)
+            pitySecond++;
+            if (item.RankType == secondRarity)
             {
-                item.Pity = pity_4;
-                pity_4 = 0;
+                item.Pity = pitySecond;
+                pitySecond = 0;
             }
         }
-
-        // 活动颂愿最高展示稀有度为 5★，硬保底 70
-        stats.Pity_Current = stats.Pity_5;
-        stats.Pity_Max = 70;
-
         return stats;
     }
 
 
-    public List<GenshinBeyondGachaItemEx>? GetGachaItemStats(long uid)
+
+    /// <summary>
+    /// 指定 UID 全部记录的抽取时间，供按时间段删除对话框统计条数。
+    /// </summary>
+    /// <param name="uid">玩家 UID。</param>
+    /// <returns>抽取时间列表。</returns>
+    public List<DateTime> GetGachaLogTimes(long uid)
     {
         using var dapper = DatabaseService.CreateConnection();
-        var list = dapper.Query<GenshinBeyondGachaItemEx>("""
-            SELECT item.*, info.Icon FROM GenshinBeyondGachaItem item LEFT JOIN GenshinBeyondGachaInfo info
-            ON item.ItemId = info.Id WHERE Uid = @uid ORDER BY item.Id;
-            """, new { uid }).ToList();
-        if (list.Count == 0)
-        {
-            return null;
-        }
-        return list.GroupBy(x => x.ItemId)
-                   .Select(x => { var item = x.First(); item.Count = x.Count(); return item; })
-                   .OrderByDescending(x => x.RankType)
-                   .ThenByDescending(x => x.Count)
-                   .ThenByDescending(x => x.Time)
-                   .ToList();
+        return dapper.Query<DateTime>($"SELECT Time FROM {GachaTableName} WHERE Uid = @uid;", new { uid }).ToList();
     }
 
 
@@ -521,132 +482,4 @@ internal class GenshinBeyondGachaService
     }
 
 
-}
-
-
-public partial class GenshinBeyondGachaItemEx : GenshinBeyondGachaItem
-{
-    /// <summary>
-    /// 相同保底卡池中的顺序
-    /// </summary>
-    public int Index { get; set; }
-
-    public int Pity { get; set; }
-
-    public string Icon { get; set; }
-
-    public int Count { get; set; }
-
-}
-
-
-
-public class GenshinBeyondGachaTypeStats
-{
-
-    public int GachaType { get; set; }
-
-    public string GachaTypeText { get; set; }
-
-    public int Count { get; set; }
-
-    public int Pity_5 { get; set; }
-
-    public int Pity_4 { get; set; }
-
-    public int Pity_3 { get; set; }
-
-    /// <summary>
-    /// 当前最高展示稀有度垫数（常驻颂愿为 4★，活动颂愿为 5★）。
-    /// </summary>
-    public int Pity_Current { get; set; }
-
-    /// <summary>
-    /// 当前最高展示稀有度硬保底抽数。常驻 4★ 与活动 5★ 均为 70。
-    /// </summary>
-    public int Pity_Max { get; set; } = 70;
-
-    /// <summary>
-    /// 当前最高稀有度垫数及硬保底上限的本地化展示文本。
-    /// </summary>
-    public string PityProgressText => string.Format(Lang.GachaStatsCard_CurrentPity, Pity_Current, Pity_Max);
-
-    public DateTime StartTime { get; set; }
-
-    public DateTime EndTime { get; set; }
-
-    public int Count_5 { get; set; }
-
-    public int Count_4 { get; set; }
-
-    public int Count_3 { get; set; }
-
-    public int Count_2 { get; set; }
-
-    public double Ratio_5 { get; set; }
-
-    public double Ratio_4 { get; set; }
-
-    public double Ratio_3 { get; set; }
-
-    public double Ratio_2 { get; set; }
-
-    public double Average_5 { get; set; }
-
-    public double Average_4 { get; set; }
-
-    /// <summary>
-    /// 5 星平均抽数展示文本：有样本时形如「62.50」，无样本时为「—」。
-    /// </summary>
-    public string Average_5_Text => Count_5 == 0 ? "—" : $"{Average_5:F2}";
-
-    /// <summary>
-    /// 4 星平均抽数展示文本：有样本时形如「8.50」，无样本时为「—」。
-    /// </summary>
-    public string Average_4_Text => Count_4 == 0 ? "—" : $"{Average_4:F2}";
-
-    public List<GenshinBeyondGachaItemEx> List_5 { get; set; }
-
-    public List<GenshinBeyondGachaItemEx> List_4 { get; set; }
-
-    public List<GenshinBeyondGachaItemEx> List_3 { get; set; }
-
-}
-
-
-public partial class GenshinBeyondGachaPityProgressBackgroundBrushConverter : IValueConverter
-{
-    private static Color Red = Color.FromArgb(0xFF, 0xC8, 0x3C, 0x23);
-    private static Color Green = Color.FromArgb(0xFF, 0x00, 0xE0, 0x79);
-
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is GenshinBeyondGachaItemEx item)
-        {
-            int pity = item.Pity;
-            var brush = new LinearGradientBrush { StartPoint = new Point(0, 0), EndPoint = new Point(1, 0), Opacity = 0.4 };
-            int point = 64;
-            double guarantee = 70;
-            double offset = pity / guarantee;
-            if (pity < point)
-            {
-                brush.GradientStops.Add(new GradientStop { Color = Green, Offset = 0 });
-                brush.GradientStops.Add(new GradientStop { Color = Green, Offset = offset });
-                brush.GradientStops.Add(new GradientStop { Color = Colors.Transparent, Offset = offset });
-            }
-            else
-            {
-                brush.GradientStops.Add(new GradientStop { Color = Red, Offset = 0 });
-                brush.GradientStops.Add(new GradientStop { Color = Red, Offset = offset });
-                brush.GradientStops.Add(new GradientStop { Color = Colors.Transparent, Offset = offset });
-            }
-            return brush;
-        }
-        return null!;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
 }

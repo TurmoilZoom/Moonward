@@ -4,6 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:helpers="using:Starward.Helpers"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.Gacha"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -12,20 +13,10 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
+    <!--  布局与交互对齐 GachaLogPage：统计卡片复用 GachaStatsCard（横向排列、可拖拽换位、列表 / 紧凑视图），工具栏与设置弹层结构一致；
+          千星奇域没有的入口（米游社 / HoYoLAB 同步、云游戏、Excel 与 UIGF v3 导出、物品名称回写）不放。  -->
+
     <Page.Resources>
-        <SolidColorBrush x:Key="Rarity5ForegroundBrush">#FFA500</SolidColorBrush>
-        <SolidColorBrush x:Key="Rarity4ForegroundBrush">#C864E0</SolidColorBrush>
-        <SolidColorBrush x:Key="Rarity3ForegroundBrush">#5EAAED</SolidColorBrush>
-        <SolidColorBrush x:Key="Rarity2ForegroundBrush">#3BA272</SolidColorBrush>
-
-        <Style BasedOn="{StaticResource BodyTextBlockStyle}" TargetType="TextBlock">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="TextWrapping" Value="NoWrap" />
-            <Setter Property="TextTrimming" Value="None" />
-            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
-        </Style>
-
-        <local:GenshinBeyondGachaPityProgressBackgroundBrushConverter x:Key="GenshinBeyondGachaPityProgressBackgroundBrushConverter" />
         <local:RarityToGIBgConverter x:Key="RarityToGIBgConverter" />
     </Page.Resources>
 
@@ -36,12 +27,132 @@
         </Grid.RowDefinitions>
 
 
-        <TextBlock Margin="24,0,0,0"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Center"
-                   FontSize="20"
-                   FontWeight="Bold"
-                   Text="{x:Bind lang:Lang.GenshinBeyondGachaPage_MiliastraWonderlandOde}" />
+        <StackPanel Margin="24,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="6">
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Text="{x:Bind lang:Lang.GenshinBeyondGachaPage_MiliastraWonderlandOde}" />
+            <!--  卡池筛选器（下拉按钮）：勾选=显示，含全选/清除/反选）。  -->
+            <DropDownButton x:Name="DropDownButton_GachaBannerFilter"
+                            Height="34"
+                            VerticalAlignment="Center"
+                            helpers:FluentAnimations.PressScale="0.94"
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}">
+                <FontIcon x:Name="FontIcon_GachaBannerFilter"
+                          FontSize="16"
+                          Glyph="&#xE71C;" />
+                <DropDownButton.Flyout>
+                    <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
+                        <StackPanel MinWidth="220" Spacing="8">
+                            <!--  卡池筛选 + 右上角拖拽说明  -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}" />
+                                <Border Grid.Column="1"
+                                        Padding="4"
+                                        VerticalAlignment="Center"
+                                        Background="Transparent"
+                                        helpers:PointerCursor.CursorShape="Hand"
+                                        sc:InstantTooltip.Placement="Top"
+                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilterDragHint}"
+                                        sc:InstantTooltip.Trigger="Click">
+                                    <FontIcon FontSize="14"
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              Glyph="&#xE9CE;" />
+                                </Border>
+                            </Grid>
+                            <!--  全选 / 清除 / 反选  -->
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <HyperlinkButton Padding="0"
+                                                 helpers:FluentAnimations.PressScale="0.92"
+                                                 Click="GachaBannerSelectAll_Click"
+                                                 Content="{x:Bind lang:Lang.Common_SelectAll}" />
+                                <HyperlinkButton Padding="0"
+                                                 helpers:FluentAnimations.PressScale="0.92"
+                                                 Click="GachaBannerClear_Click"
+                                                 Content="{x:Bind lang:Lang.Common_Clear}" />
+                                <HyperlinkButton Padding="0"
+                                                 helpers:FluentAnimations.PressScale="0.92"
+                                                 Click="GachaBannerInvert_Click"
+                                                 Content="{x:Bind lang:Lang.Common_InvertSelection}" />
+                            </StackPanel>
+                            <!--  分割线  -->
+                            <MenuFlyoutSeparator />
+                            <!--  卡池列表  -->
+                            <ScrollViewer MaxHeight="420"
+                                          HorizontalScrollMode="Disabled"
+                                          VerticalScrollBarVisibility="Auto">
+                                <ItemsControl HorizontalAlignment="Stretch" ItemsSource="{x:Bind GachaBanners}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="local:GachaBanner">
+                                            <Grid Height="36" Margin="0,1">
+                                                <!--  选中高亮框：选中时显示细微填充圆角框  -->
+                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                        CornerRadius="4"
+                                                        Visibility="{x:Bind IsSelected, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                <!--  不用 MinWidth + 字符串 Content：默认模板 TextWrapping=Wrap，会按 MinWidth 在行内换行，再被 Height=36 裁成「内部截断」。  -->
+                                                <CheckBox MinWidth="0"
+                                                          Margin="4,0,0,0"
+                                                          Padding="8,0,10,0"
+                                                          HorizontalAlignment="Stretch"
+                                                          VerticalAlignment="Center"
+                                                          VerticalContentAlignment="Center"
+                                                          helpers:FluentAnimations.HoverTranslateX="6"
+                                                          Click="GachaBannerCheckBox_Click"
+                                                          IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
+                                                    <TextBlock VerticalAlignment="Center"
+                                                               Text="{x:Bind ToLocalization()}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               TextWrapping="NoWrap" />
+                                                </CheckBox>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+            <!--  记录视图：列表 / 紧凑图标网格。与抽卡记录页共用同一全局设置。  -->
+            <cwc:Segmented x:Name="Segmented_RecordViewMode"
+                           VerticalAlignment="Center"
+                           SelectionChanged="Segmented_RecordViewMode_SelectionChanged">
+                <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_ListView}"
+                                   sc:InstantTooltip.Placement="Top"
+                                   sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ListView}">
+                    <cwc:SegmentedItem.Icon>
+                        <FontIcon Glyph="&#xE8FD;" />
+                    </cwc:SegmentedItem.Icon>
+                </cwc:SegmentedItem>
+                <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CompactView}"
+                                   sc:InstantTooltip.Placement="Top"
+                                   sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_CompactView}">
+                    <cwc:SegmentedItem.Icon>
+                        <FontIcon Glyph="&#xF0E2;" />
+                    </cwc:SegmentedItem.Icon>
+                </cwc:SegmentedItem>
+            </cwc:Segmented>
+            <Button Height="34"
+                    VerticalAlignment="Center"
+                    helpers:FluentAnimations.PressScale="0.94"
+                    Command="{x:Bind ShareGachaImageCommand}"
+                    sc:InstantTooltip.Placement="Top"
+                    sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
+                <FontIcon FontSize="16" Glyph="&#xE72D;" />
+            </Button>
+        </StackPanel>
 
 
         <StackPanel HorizontalAlignment="Right"
@@ -83,8 +194,20 @@
                     <TextBlock Text="{x:Bind lang:Lang.Common_Setting}" />
                 </StackPanel>
                 <Button.Flyout>
-                    <Flyout>
-                        <StackPanel MinWidth="200" Spacing="8">
+                    <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
+                        <!--  显式 Presenter：关掉横向滚动；英文长说明在无 MaxWidth 的 StackPanel 里会按单行测宽，底部易出横条  -->
+                        <Flyout.FlyoutPresenterStyle>
+                            <Style BasedOn="{StaticResource DefaultFlyoutPresenterStyle}" TargetType="FlyoutPresenter">
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
+                                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+                                <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled" />
+                                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+                            </Style>
+                        </Flyout.FlyoutPresenterStyle>
+                        <StackPanel MinWidth="240"
+                                    MaxWidth="320"
+                                    Spacing="8">
                             <!--  其他设置  -->
                             <TextBlock FontSize="16" Text="{x:Bind lang:Lang.GachaLogPage_OtherSettings}" />
 
@@ -103,7 +226,8 @@
                             <!--  总是出现 Authkey Timeout  -->
                             <TextBlock Margin="0,8,0,0"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind lang:Lang.GachaLogPage_AuthkeyTimeoutAlwaysOccurs}" />
+                                       Text="{x:Bind lang:Lang.GachaLogPage_AuthkeyTimeoutAlwaysOccurs}"
+                                       TextWrapping="Wrap" />
                             <TextBlock Margin="0,-4,0,0"
                                        FontSize="12"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -120,31 +244,49 @@
                             <!--  分割线  -->
                             <MenuFlyoutSeparator />
 
-                            <!--  导入（左）/ 导出（右）同一行；千星奇域仅 UIGF v4.2（hk4e_ugc）  -->
+                            <!--  导入（左）/ 导出（右）同一行，无图标  -->
                             <Grid ColumnSpacing="8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition />
                                     <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
+                                <!--  导入  -->
                                 <Button HorizontalAlignment="Stretch"
                                         Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Import}">
                                     <Button.Flyout>
                                         <Flyout>
                                             <StackPanel MinWidth="200" Spacing="8">
-                                                <HyperlinkButton Padding="0"
-                                                                 HorizontalAlignment="Left"
-                                                                 Content="UIGF-Org"
-                                                                 FontSize="12"
-                                                                 NavigateUri="https://uigf.org" />
-                                                <!--  千星奇域仅 UIGF v4.2（hk4e_ugc）  -->
+                                                <!--  顶栏：UIGF-Org 链接 + 问号说明支持的导入格式/版本  -->
+                                                <Grid>
+                                                    <HyperlinkButton Padding="0"
+                                                                     HorizontalAlignment="Left"
+                                                                     VerticalAlignment="Center"
+                                                                     Content="UIGF-Org"
+                                                                     FontSize="12"
+                                                                     NavigateUri="https://uigf.org" />
+                                                    <Border Padding="4"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            Background="Transparent"
+                                                            helpers:PointerCursor.CursorShape="Hand"
+                                                            sc:InstantTooltip.Placement="Top"
+                                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_UIGFImportVersionsTip}"
+                                                            sc:InstantTooltip.Trigger="Click">
+                                                        <FontIcon FontSize="14"
+                                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                  Glyph="&#xE9CE;" />
+                                                    </Border>
+                                                </Grid>
+                                                <!--  统一 UIGF 导入：选文件后自动识别（千星奇域数据在 v4.2 的 hk4e_ugc）  -->
                                                 <Button HorizontalAlignment="Stretch"
                                                         Command="{x:Bind OpenUIGF4WindowCommand}"
                                                         CommandParameter="import"
-                                                        Content="UIGF v4.2" />
+                                                        Content="UIGF" />
                                             </StackPanel>
                                         </Flyout>
                                     </Button.Flyout>
                                 </Button>
+                                <!--  导出：千星奇域只有 UIGF v4.2（hk4e_ugc）  -->
                                 <Button Grid.Column="1"
                                         HorizontalAlignment="Stretch"
                                         Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Export}">
@@ -166,6 +308,25 @@
                                 </Button>
                             </Grid>
 
+                            <!--  删除记录  -->
+                            <Button HorizontalAlignment="Stretch">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontSize="14"
+                                              Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                              Glyph="&#xE74D;" />
+                                    <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind lang:Lang.GachaLogPage_DeleteRecords}" />
+                                </StackPanel>
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Command="{x:Bind DeleteUidCommand}"
+                                                        FontSize="14"
+                                                        Text="{x:Bind lang:Lang.GachaLogPage_DeleteAll}" />
+                                        <MenuFlyoutItem Command="{x:Bind DeleteUidByTimeCommand}"
+                                                        FontSize="14"
+                                                        Text="{x:Bind lang:Lang.GachaLogPage_SpecificTimePeriod}" />
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
                         </StackPanel>
                     </Flyout>
                 </Button.Flyout>
@@ -182,7 +343,6 @@
                           Glyph="&#xE8A0;" />
             </Button>
         </StackPanel>
-
 
         <StackPanel Name="StackPanel_Emoji"
                     Grid.RowSpan="2"
@@ -212,403 +372,17 @@
 
 
             <ScrollViewer x:Name="ScrollViewer_GachaStats"
-                          Grid.Row="1"
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                          ScrollViewer.HorizontalScrollMode="Disabled">
+                          HorizontalScrollBarVisibility="Auto"
+                          HorizontalScrollMode="Auto"
+                          VerticalScrollBarVisibility="Disabled"
+                          VerticalScrollMode="Disabled">
                 <Grid x:Name="Grid_GachaStats"
                       Margin="20,0,20,16"
-                      ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-
-                    <!--  常驻颂愿  -->
-                    <Grid Padding="12,8,12,8"
-                          Background="{ThemeResource CustomOverlayAcrylicBrush}"
-                          CornerRadius="8"
-                          RowSpacing="4"
-                          Shadow="{ThemeResource ThemeShadow}"
-                          Translation="0,0,16"
-                          Visibility="{x:Bind GachaStatsType1000, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-
-                        <Grid Grid.Row="0" ColumnSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock FontSize="16"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind GachaStatsType1000.GachaTypeText}"
-                                       TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="1"
-                                       FontSize="16"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind GachaStatsType1000.Count}" />
-                        </Grid>
-
-
-                        <TextBlock Grid.Row="1"
-                                   FontSize="12"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   TextTrimming="CharacterEllipsis">
-                            <Run Text="{x:Bind GachaStatsType1000.StartTime.ToString('yyyy/MM/dd HH:mm:ss', x:Null)}" />
-                            <Run Text="-" />
-                            <Run Text="{x:Bind GachaStatsType1000.EndTime.ToString('yyyy/MM/dd HH:mm:ss', x:Null)}" />
-                        </TextBlock>
-
-                        <MenuFlyoutSeparator Grid.Row="2" />
-
-                        <!--  4★ 平均  -->
-                        <TextBlock Grid.Row="3" Foreground="{ThemeResource Rarity4ForegroundBrush}">
-                            <Run Text="4★" />
-                            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Average}" />
-                        </TextBlock>
-                        <TextBlock Grid.Row="3"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{ThemeResource Rarity4ForegroundBrush}">
-                            <Run Text="{x:Bind GachaStatsType1000.Average_4_Text}" />
-                        </TextBlock>
-
-                        <!--  4★ 统计  -->
-                        <TextBlock Grid.Row="4" Foreground="{ThemeResource Rarity4ForegroundBrush}">
-                            <Run Text="4★" />
-                            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-                        </TextBlock>
-                        <TextBlock Grid.Row="4"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{ThemeResource Rarity4ForegroundBrush}"
-                                   HorizontalTextAlignment="Left">
-                            <Run Text="{x:Bind GachaStatsType1000.Count_4}" />
-                            <Run Text="[" /><Run Text="{x:Bind GachaStatsType1000.Ratio_4.ToString('P2', x:Null)}" /><Run Text="]" />
-                        </TextBlock>
-
-                        <!--  当前最高稀有度垫数（常驻颂愿为 4★）。  -->
-                        <Grid Grid.Row="5"
-                              Margin="0,2,0,4"
-                              RowSpacing="3">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <TextBlock FontSize="12"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind GachaStatsType1000.PityProgressText}" />
-                            <ProgressBar Grid.Row="1"
-                                         Height="6"
-                                         HorizontalAlignment="Stretch"
-                                         Background="{ThemeResource ControlFillColorSecondaryBrush}"
-                                         CornerRadius="3"
-                                         Foreground="{ThemeResource Rarity4ForegroundBrush}"
-                                         Maximum="{x:Bind GachaStatsType1000.Pity_Max}"
-                                         Value="{x:Bind GachaStatsType1000.Pity_Current}" />
-                        </Grid>
-
-                        <Grid Grid.Row="6"
-                              RowSpacing="8">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="36" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <cwc:Segmented x:Name="Segmented_GachaItemList1000"
-                                           HorizontalAlignment="Stretch"
-                                           VerticalAlignment="Center"
-                                           SelectedIndex="0">
-                                <cwc:SegmentedItem>
-                                    <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="4★" />
-                                </cwc:SegmentedItem>
-                                <cwc:SegmentedItem>
-                                    <TextBlock Foreground="{ThemeResource Rarity3ForegroundBrush}" Text="3★" />
-                                </cwc:SegmentedItem>
-                            </cwc:Segmented>
-
-                            <!--  行高固定、数量有限：用 ItemsControl 避免 ItemsRepeater 虚拟化在跨显示器 DPI 变化时 MeasureOverride 失败。  -->
-                            <ItemsControl x:Name="ItemsRepeater_List_4_1000"
-                                           Grid.Row="1"
-                                           ItemsSource="{x:Bind GachaStatsType1000.List_4}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
-                                            <Grid Name="Grid_Rarity5Item"
-                                                  Height="28"
-                                                  Background="Transparent"
-                                                  Tag="{x:Bind}"
-                                                  sc:InstantTooltip.Placement="Top"
-                                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="36" />
-                                                    <ColumnDefinition />
-                                                    <ColumnDefinition Width="24" />
-                                                </Grid.ColumnDefinitions>
-                                                <sc:CachedImage Grid.Column="0"
-                                                                Width="28"
-                                                                Height="28"
-                                                                HorizontalAlignment="Left"
-                                                                Source="{x:Bind Icon}" />
-                                                <Border x:Name="PityBar"
-                                                        Grid.Column="1"
-                                                        Height="24"
-                                                        VerticalAlignment="Center"
-                                                        Background="{x:Bind Converter={StaticResource GenshinBeyondGachaPityProgressBackgroundBrushConverter}}"
-                                                        local:GachaPityBarAnimation.AnimateOnLoad="True" />
-                                                <TextBlock Grid.Column="1"
-                                                           Margin="4,0,4,0"
-                                                           VerticalAlignment="Center"
-                                                           Text="{x:Bind ItemName}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="2"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center"
-                                                           IsTextScaleFactorEnabled="False"
-                                                           Text="{x:Bind Pity}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                            <ItemsControl x:Name="ItemsRepeater_List_3_1000"
-                                           Grid.Row="1"
-                                           ItemsSource="{x:Bind GachaStatsType1000.List_3}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
-                                            <Grid Name="Grid_Rarity4Item"
-                                                  Height="28"
-                                                  Background="Transparent"
-                                                  ColumnSpacing="8"
-                                                  Tag="{x:Bind}"
-                                                  sc:InstantTooltip.Placement="Top"
-                                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="28" />
-                                                    <ColumnDefinition />
-                                                    <ColumnDefinition Width="24" />
-                                                </Grid.ColumnDefinitions>
-                                                <sc:CachedImage Grid.Column="0"
-                                                                Width="28"
-                                                                Height="28"
-                                                                Source="{x:Bind Icon}" />
-                                                <TextBlock Grid.Column="1"
-                                                           Margin="4,0,4,0"
-                                                           VerticalAlignment="Center"
-                                                           Text="{x:Bind ItemName}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="2"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center"
-                                                           Text="{x:Bind Pity}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                        </Grid>
-
-
-                    </Grid>
-
-
-                    <!--  活动颂愿  -->
-                    <Grid Grid.Column="1"
-                          Padding="12,8,12,8"
-                          Background="{ThemeResource CustomOverlayAcrylicBrush}"
-                          CornerRadius="8"
-                          RowSpacing="4"
-                          Shadow="{ThemeResource ThemeShadow}"
-                          Translation="0,0,16"
-                          Visibility="{x:Bind GachaStatsType2000, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-
-                        <Grid Grid.Row="0" ColumnSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock FontSize="16"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind GachaStatsType2000.GachaTypeText}"
-                                       TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="1"
-                                       FontSize="16"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind GachaStatsType2000.Count}" />
-                        </Grid>
-
-
-                        <TextBlock Grid.Row="1"
-                                   FontSize="12"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   TextTrimming="CharacterEllipsis">
-                            <Run Text="{x:Bind GachaStatsType2000.StartTime.ToString('yyyy/MM/dd HH:mm:ss', x:Null)}" />
-                            <Run Text="-" />
-                            <Run Text="{x:Bind GachaStatsType2000.EndTime.ToString('yyyy/MM/dd HH:mm:ss', x:Null)}" />
-                        </TextBlock>
-
-                        <MenuFlyoutSeparator Grid.Row="2" />
-
-                        <!--  5★ 平均  -->
-                        <TextBlock Grid.Row="3" Foreground="{ThemeResource Rarity5ForegroundBrush}">
-                            <Run Text="5★" />
-                            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Average}" />
-                        </TextBlock>
-                        <TextBlock Grid.Row="3"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{ThemeResource Rarity5ForegroundBrush}">
-                            <Run Text="{x:Bind GachaStatsType2000.Average_5_Text}" />
-                        </TextBlock>
-
-                        <!--  5★ 统计  -->
-                        <TextBlock Grid.Row="4" Foreground="{ThemeResource Rarity5ForegroundBrush}">
-                            <Run Text="5★" />
-                            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-                        </TextBlock>
-                        <TextBlock Grid.Row="4"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
-                                   HorizontalTextAlignment="Left">
-                            <Run Text="{x:Bind GachaStatsType2000.Count_5}" />
-                            <Run Text="[" /><Run Text="{x:Bind GachaStatsType2000.Ratio_5.ToString('P2', x:Null)}" /><Run Text="]" />
-                        </TextBlock>
-
-                        <!--  当前最高稀有度垫数（活动颂愿为 5★）。  -->
-                        <Grid Grid.Row="5"
-                              Margin="0,2,0,4"
-                              RowSpacing="3">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <TextBlock FontSize="12"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind GachaStatsType2000.PityProgressText}" />
-                            <ProgressBar Grid.Row="1"
-                                         Height="6"
-                                         HorizontalAlignment="Stretch"
-                                         Background="{ThemeResource ControlFillColorSecondaryBrush}"
-                                         CornerRadius="3"
-                                         Foreground="{ThemeResource Rarity5ForegroundBrush}"
-                                         Maximum="{x:Bind GachaStatsType2000.Pity_Max}"
-                                         Value="{x:Bind GachaStatsType2000.Pity_Current}" />
-                        </Grid>
-
-                        <Grid Grid.Row="6"
-                              RowSpacing="8">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="36" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <cwc:Segmented x:Name="Segmented_GachaItemList2000"
-                                           HorizontalAlignment="Stretch"
-                                           VerticalAlignment="Center"
-                                           SelectedIndex="0">
-                                <cwc:SegmentedItem>
-                                    <TextBlock Foreground="{ThemeResource Rarity5ForegroundBrush}" Text="5★" />
-                                </cwc:SegmentedItem>
-                                <cwc:SegmentedItem>
-                                    <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="4★" />
-                                </cwc:SegmentedItem>
-                            </cwc:Segmented>
-
-                            <ItemsControl x:Name="ItemsRepeater_List_5_2000"
-                                           Grid.Row="1"
-                                           ItemsSource="{x:Bind GachaStatsType2000.List_5}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
-                                            <Grid Name="Grid_Rarity5Item"
-                                                  Height="28"
-                                                  Background="Transparent"
-                                                  Tag="{x:Bind}"
-                                                  sc:InstantTooltip.Placement="Top"
-                                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="36" />
-                                                    <ColumnDefinition />
-                                                    <ColumnDefinition Width="24" />
-                                                </Grid.ColumnDefinitions>
-                                                <sc:CachedImage Grid.Column="0"
-                                                                Width="28"
-                                                                Height="28"
-                                                                HorizontalAlignment="Left"
-                                                                Source="{x:Bind Icon}" />
-                                                <Border x:Name="PityBar"
-                                                        Grid.Column="1"
-                                                        Height="24"
-                                                        VerticalAlignment="Center"
-                                                        Background="{x:Bind Converter={StaticResource GenshinBeyondGachaPityProgressBackgroundBrushConverter}}"
-                                                        local:GachaPityBarAnimation.AnimateOnLoad="True" />
-                                                <TextBlock Grid.Column="1"
-                                                           Margin="4,0,4,0"
-                                                           VerticalAlignment="Center"
-                                                           Text="{x:Bind ItemName}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="2"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center"
-                                                           IsTextScaleFactorEnabled="False"
-                                                           Text="{x:Bind Pity}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                            <ItemsControl x:Name="ItemsRepeater_List_4_2000"
-                                           Grid.Row="1"
-                                           ItemsSource="{x:Bind GachaStatsType2000.List_4}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
-                                            <Grid Name="Grid_Rarity4Item"
-                                                  Height="28"
-                                                  Background="Transparent"
-                                                  ColumnSpacing="8"
-                                                  Tag="{x:Bind}"
-                                                  sc:InstantTooltip.Placement="Top"
-                                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="28" />
-                                                    <ColumnDefinition />
-                                                    <ColumnDefinition Width="24" />
-                                                </Grid.ColumnDefinitions>
-                                                <sc:CachedImage Grid.Column="0"
-                                                                Width="28"
-                                                                Height="28"
-                                                                Source="{x:Bind Icon}" />
-                                                <TextBlock Grid.Column="1"
-                                                           Margin="4,0,4,0"
-                                                           VerticalAlignment="Center"
-                                                           Text="{x:Bind ItemName}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="2"
-                                                           HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center"
-                                                           Text="{x:Bind Pity}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                        </Grid>
-
-
-                    </Grid>
-
-
+                      Background="Transparent">
+                    <StackPanel x:Name="StackPanel_GachaStats"
+                                Orientation="Horizontal"
+                                Spacing="12" />
                 </Grid>
-
             </ScrollViewer>
 
 
@@ -619,7 +393,7 @@
                               ItemsSource="{x:Bind GachaItemStats}"
                               SelectionMode="None">
                         <GridView.ItemTemplate>
-                            <DataTemplate x:DataType="local:GenshinBeyondGachaItemEx">
+                            <DataTemplate x:DataType="local:GachaLogItemEx">
                                 <Grid Width="80"
                                       Height="97"
                                       Margin="4,2,4,2">
@@ -633,7 +407,7 @@
                                                VerticalAlignment="Bottom"
                                                FontSize="12"
                                                Foreground="#84603D">
-                                        <Run Text="{x:Bind Count}" />
+                                        <Run Text="{x:Bind ItemCount}" />
                                         <Run Text="{x:Bind lang:Lang.SpiralAbyssPage_Times}" />
                                     </TextBlock>
                                 </Grid>
@@ -643,11 +417,10 @@
                 </Grid>
             </SplitView.Pane>
 
+
         </SplitView>
 
 
-
     </Grid>
-
 
 </sf:PageBase>

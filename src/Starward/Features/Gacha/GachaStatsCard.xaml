@@ -17,6 +17,9 @@
         <SolidColorBrush x:Key="Rarity4ForegroundBrush">#C864E0</SolidColorBrush>
         <SolidColorBrush x:Key="Rarity3ForegroundBrush">#5EAAED</SolidColorBrush>
         <SolidColorBrush x:Key="Rarity2ForegroundBrush">#3BA272</SolidColorBrush>
+        <!--  最高 / 次一级稀有度画刷：默认即 5★ / 4★。千星奇域常驻颂愿（WarpTypeStats.TopRarity = 4）由 ApplyRarityTier 改成 4★ / 3★ 配色；资源随卡片实例创建，改色只影响本卡。  -->
+        <SolidColorBrush x:Key="TopRarityForegroundBrush">#FFA500</SolidColorBrush>
+        <SolidColorBrush x:Key="SecondRarityForegroundBrush">#C864E0</SolidColorBrush>
 
         <Style BasedOn="{StaticResource BodyTextBlockStyle}" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -28,8 +31,8 @@
         <local:GachaPityProgressBackgroundBrushConverter x:Key="GachaPityProgressBackgroundBrushConverter" />
 
         <!--  紧凑视图（图标网格）资源：卡片入树前按 RecordViewMode 替换两个记录 ItemsControl 的 ItemsPanel / ItemTemplate，列表视图沿用下方内联模板。  -->
-        <SolidColorBrush x:Key="Rarity5TileBackgroundBrush">#40FFA500</SolidColorBrush>
-        <SolidColorBrush x:Key="Rarity4TileBackgroundBrush">#40C864E0</SolidColorBrush>
+        <SolidColorBrush x:Key="TopRarityTileBackgroundBrush">#40FFA500</SolidColorBrush>
+        <SolidColorBrush x:Key="SecondRarityTileBackgroundBrush">#40C864E0</SolidColorBrush>
 
         <!--  每行 5 个：5×44 + 4×4 = 236 ≤ 238（卡宽 262 − 左右 Padding 24），留 2px 吸收 DPI 取整；方块再加宽或间距再加大都会掉成每行 4 个。  -->
         <ItemsPanelTemplate x:Key="GachaRecordTilePanelTemplate">
@@ -52,7 +55,7 @@
                     <RowDefinition Height="44" />
                     <RowDefinition Height="16" />
                 </Grid.RowDefinitions>
-                <Border Background="{StaticResource Rarity5TileBackgroundBrush}"
+                <Border Background="{StaticResource TopRarityTileBackgroundBrush}"
                         CornerRadius="6"
                         IsHitTestVisible="False" />
                 <sc:CachedImage Width="44"
@@ -79,7 +82,7 @@
                         Height="13"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
-                        Background="{StaticResource Rarity5ForegroundBrush}"
+                        Background="{StaticResource TopRarityForegroundBrush}"
                         CornerRadius="0,6,0,4"
                         IsHitTestVisible="False"
                         Visibility="{x:Bind IsUp, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -93,7 +96,7 @@
                                TextLineBounds="Tight" />
                 </Border>
                 <!--  同名悬停描边：复用列表视图的 IsPointerIn 联动  -->
-                <Border BorderBrush="{StaticResource Rarity5ForegroundBrush}"
+                <Border BorderBrush="{StaticResource TopRarityForegroundBrush}"
                         BorderThickness="2"
                         CornerRadius="6"
                         IsHitTestVisible="False"
@@ -131,7 +134,7 @@
                     <RowDefinition Height="44" />
                     <RowDefinition Height="16" />
                 </Grid.RowDefinitions>
-                <Border Background="{StaticResource Rarity4TileBackgroundBrush}"
+                <Border Background="{StaticResource SecondRarityTileBackgroundBrush}"
                         CornerRadius="6"
                         IsHitTestVisible="False" />
                 <sc:CachedImage Width="44"
@@ -153,7 +156,7 @@
                            TextTrimming="CharacterEllipsis"
                            TextWrapping="Wrap"
                            Visibility="{x:Bind Icon, Converter={StaticResource ObjectToVisibilityReversedConverter}}" />
-                <Border BorderBrush="{StaticResource Rarity4ForegroundBrush}"
+                <Border BorderBrush="{StaticResource SecondRarityForegroundBrush}"
                         BorderThickness="2"
                         CornerRadius="6"
                         IsHitTestVisible="False"
@@ -246,7 +249,7 @@
 
         <!--  5★ 平均  -->
         <TextBlock Grid.Row="3" Foreground="{ThemeResource Rarity2ForegroundBrush}">
-            <Run Text="5★" />
+            <Run Text="{x:Bind WarpTypeStats.TopRarityText}" />
             <Run Text="{x:Bind lang:Lang.GachaStatsCard_Average}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Desc_Text}" />
         </TextBlock>
         <TextBlock Grid.Row="3"
@@ -257,15 +260,15 @@
 
         <!--  5★ 统计（非 UP 卡池显示）；UP 卡池此行改为显示「不歪概率」，二者互斥同占第 4 行  -->
         <TextBlock Grid.Row="4"
-                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                   Foreground="{ThemeResource TopRarityForegroundBrush}"
                    Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityReversedConverter}}">
-            <Run Text="5★" />
+            <Run Text="{x:Bind WarpTypeStats.TopRarityText}" />
             <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
         </TextBlock>
         <TextBlock Grid.Row="4"
                    HorizontalAlignment="Right"
                    HorizontalTextAlignment="Left"
-                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                   Foreground="{ThemeResource TopRarityForegroundBrush}"
                    Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityReversedConverter}}">
             <Run Text="{x:Bind WarpTypeStats.Count_5}" />
             <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_5.ToString('P2', x:Null)}" /><Run Text="]" />
@@ -273,14 +276,14 @@
 
         <!--  不歪概率（仅 UP 卡池显示）：小保底抽到当期 UP 的概率，形如 54.55% (6/11)  -->
         <TextBlock Grid.Row="4"
-                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                   Foreground="{ThemeResource TopRarityForegroundBrush}"
                    Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}">
             <Run Text="{x:Bind lang:Lang.GachaStatsCard_NoUpProbability}" />
         </TextBlock>
         <TextBlock Grid.Row="4"
                    HorizontalAlignment="Right"
                    HorizontalTextAlignment="Left"
-                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                   Foreground="{ThemeResource TopRarityForegroundBrush}"
                    Text="{x:Bind WarpTypeStats.FiftyFiftyNoUpText}"
                    Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
 
@@ -299,7 +302,7 @@
                            Text="{x:Bind WarpTypeStats.PityProgressText}" />
                 <TextBlock HorizontalAlignment="Right"
                            FontSize="12"
-                           Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                           Foreground="{ThemeResource TopRarityForegroundBrush}"
                            Text="{x:Bind WarpTypeStats.PityGuaranteeText}"
                            Visibility="{x:Bind WarpTypeStats.HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
@@ -308,7 +311,7 @@
                          HorizontalAlignment="Stretch"
                          Background="{ThemeResource ControlFillColorSecondaryBrush}"
                          CornerRadius="3"
-                         Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                         Foreground="{ThemeResource TopRarityForegroundBrush}"
                          Maximum="{x:Bind WarpTypeStats.Pity_5_Max}"
                          Value="{x:Bind WarpTypeStats.Pity_5}" />
         </Grid>
@@ -332,10 +335,10 @@
                            VerticalAlignment="Center"
                            SelectedIndex="0">
                 <cwc:SegmentedItem>
-                    <TextBlock Foreground="{ThemeResource Rarity5ForegroundBrush}" Text="5★" />
+                    <TextBlock Foreground="{ThemeResource TopRarityForegroundBrush}" Text="{x:Bind WarpTypeStats.TopRarityText}" />
                 </cwc:SegmentedItem>
                 <cwc:SegmentedItem>
-                    <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}" Text="4★" />
+                    <TextBlock Foreground="{ThemeResource SecondRarityForegroundBrush}" Text="{x:Bind WarpTypeStats.SecondRarityText}" />
                 </cwc:SegmentedItem>
             </cwc:Segmented>
 
@@ -391,14 +394,14 @@
                                            Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
                                 <TextBlock Grid.Column="1"
                                            VerticalAlignment="Center"
-                                           Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                                           Foreground="{ThemeResource TopRarityForegroundBrush}"
                                            Text="{x:Bind Name}"
                                            TextTrimming="CharacterEllipsis"
                                            Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
                                 <TextBlock Grid.Column="3"
                                            HorizontalAlignment="Right"
                                            VerticalAlignment="Center"
-                                           Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                                           Foreground="{ThemeResource TopRarityForegroundBrush}"
                                            IsTextScaleFactorEnabled="False"
                                            Text="{x:Bind Pity}"
                                            Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
@@ -407,7 +410,7 @@
                                            VerticalAlignment="Center"
                                            FontSize="12"
                                            FontStyle="Italic"
-                                           Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                                           Foreground="{ThemeResource TopRarityForegroundBrush}"
                                            IsTextScaleFactorEnabled="False"
                                            Opacity="{x:Bind UpTextOpacity}"
                                            Text="up!"
@@ -450,14 +453,14 @@
                                            Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
                                 <TextBlock Grid.Column="1"
                                            VerticalAlignment="Center"
-                                           Foreground="{ThemeResource Rarity4ForegroundBrush}"
+                                           Foreground="{ThemeResource SecondRarityForegroundBrush}"
                                            Text="{x:Bind Name}"
                                            TextTrimming="CharacterEllipsis"
                                            Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
                                 <TextBlock Grid.Column="2"
                                            HorizontalAlignment="Right"
                                            VerticalAlignment="Center"
-                                           Foreground="{ThemeResource Rarity4ForegroundBrush}"
+                                           Foreground="{ThemeResource SecondRarityForegroundBrush}"
                                            Text="{x:Bind Pity}"
                                            Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
                             </Grid>
