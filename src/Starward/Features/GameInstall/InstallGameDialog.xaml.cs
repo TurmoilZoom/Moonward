@@ -59,6 +59,7 @@ public sealed partial class InstallGameDialog : ContentDialog
             return;
         }
         Telemetry.Track("install_dialog_show", CurrentGameId.GameBiz);
+        _useHardLink = AppConfig.GetGameInstallHardLink(CurrentGameId.GameBiz) ?? true;
         SetDefaultInstallationPath();
         _ = GetGamePackageAsync();
     }
@@ -483,7 +484,7 @@ public sealed partial class InstallGameDialog : ContentDialog
             InstallationPath = path;
             AvailableSpaceBytes = DriveHelper.GetDriveAvailableSpace(path);
             CheckCanStartInstallation();
-            _ = RefreshHardLinkAsync(path);
+            _hardLinkRefreshTask = RefreshHardLinkAsync(path);
         }
         catch (Exception ex)
         {
@@ -522,6 +523,7 @@ public sealed partial class InstallGameDialog : ContentDialog
     {
         try
         {
+            await _hardLinkRefreshTask;
             Telemetry.Track("install_dialog_click", CurrentGameId.GameBiz,
                 ("button", "install"),
                 ("mode", _gameSophonChunkBuild is not null ? "chunk" : _gamePackage is not null ? "package" : null),
@@ -538,6 +540,8 @@ public sealed partial class InstallGameDialog : ContentDialog
             if (task is not null && task.State is not GameInstallState.Stop and not GameInstallState.Error)
             {
                 _installStarted = true;
+                // 按区服记下这次的选择，继续下载和之后的更新沿用；不能硬链接时不算选择，清掉旧记录
+                AppConfig.SetGameInstallHardLink(CurrentGameId.GameBiz, HardLinkAvailable ? HardLinkChecked : null);
                 GameLauncherService.ChangeGameInstallPath(CurrentGameId, InstallationPath);
                 WeakReferenceMessenger.Default.Send(new GameInstallTaskStartedMessage(task));
                 if (_selectPath is not null && InstallationPath.EndsWith(CurrentGameId.GameBiz))
@@ -579,9 +583,9 @@ public sealed partial class InstallGameDialog : ContentDialog
 
 
     /// <summary>
-    /// 用户对本次安装是否硬链接的选择，默认跟随设置里的硬链接开关；路径换到不能链接再换回来时保留
+    /// 用户对本次安装是否硬链接的选择，默认沿用该区服上次的选择，没有时勾选；路径换到不能链接再换回来时保留
     /// </summary>
-    private bool _useHardLink = AppConfig.EnableHardLink;
+    private bool _useHardLink = true;
 
 
     /// <summary>
@@ -636,6 +640,12 @@ public sealed partial class InstallGameDialog : ContentDialog
 
 
     /// <summary>
+    /// 最近一次硬链接查找，开始安装前要等它完成，否则刚换完路径就点安装会按「不可用」处理
+    /// </summary>
+    private Task _hardLinkRefreshTask = Task.CompletedTask;
+
+
+    /// <summary>
     /// 按当前安装路径刷新硬链接选项：同一 NTFS 磁盘上有同一游戏的其他区服时可勾选，否则置灰并写明原因
     /// </summary>
     /// <param name="installPath">当前安装路径</param>
@@ -672,22 +682,30 @@ public sealed partial class InstallGameDialog : ContentDialog
         {
             return;
         }
-        HardLinkAvailable = target is not null;
-        if (target is { } t)
+        // 开始安装前会等这里完成，出错也不能抛出去，否则安装按钮跟着失败
+        try
         {
-            HardLinkText = string.Format(Lang.InstallGameDialog_HardLinkWithServer, t.GameBiz.ToGameServerName());
-            HardLinkTooltip = $"{Lang.InstallGameDialog_HardLinkDesc}\n\n{Lang.InstallGameDialog_LinkTarget}{t.InstallPath}";
-            HardLinkReason = null;
+            HardLinkAvailable = target is not null;
+            if (target is { } t)
+            {
+                HardLinkText = string.Format(Lang.InstallGameDialog_HardLinkWithServer, t.GameBiz.ToGameServerName());
+                HardLinkTooltip = $"{Lang.InstallGameDialog_HardLinkDesc}\n\n{Lang.InstallGameDialog_LinkTarget}{t.InstallPath}";
+                HardLinkReason = null;
+            }
+            else
+            {
+                HardLinkText = Lang.InstallGameDialog_HardLinkWithOtherServers;
+                HardLinkTooltip = Lang.InstallGameDialog_HardLinkDesc;
+                HardLinkReason = reason;
+            }
+            // 复选框文字显式用了次要色，不会随禁用变灰，这里手动换成禁用色
+            TextBlock_HardLink.Foreground = App.Current.Resources[target is null ? "TextFillColorDisabledBrush" : "TextFillColorSecondaryBrush"] as Brush;
+            StackPanel_HardLink.Visibility = Visibility.Visible;
         }
-        else
+        catch (Exception ex)
         {
-            HardLinkText = Lang.InstallGameDialog_HardLinkWithOtherServers;
-            HardLinkTooltip = Lang.InstallGameDialog_HardLinkDesc;
-            HardLinkReason = reason;
+            _logger.LogWarning(ex, "Refresh hard link option.");
         }
-        // 复选框文字显式用了次要色，不会随禁用变灰，这里手动换成禁用色
-        TextBlock_HardLink.Foreground = App.Current.Resources[target is null ? "TextFillColorDisabledBrush" : "TextFillColorSecondaryBrush"] as Brush;
-        StackPanel_HardLink.Visibility = Visibility.Visible;
     }
 
 

@@ -75,14 +75,10 @@
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        Text="{x:Bind lang:Lang.InstallGameDialog_HardLinkDescription}"
                        TextWrapping="Wrap" />
-            <ToggleSwitch IsOn="{x:Bind EnableHardLink, Mode=TwoWay}"
-                          OffContent="{x:Bind lang:Lang.Common_Disabled}"
-                          OnContent="{x:Bind lang:Lang.Common_Enabled}" />
-            <!--  更新时一并更新硬链接的区服，只在开启硬链接时有意义  -->
+            <!--  更新时一并更新硬链接的区服：只看区服之间是否实际共用文件  -->
             <CheckBox Margin="0,8,0,0"
                       Content="{x:Bind lang:Lang.DownloadSettingPage_UpdateHardLinkedGamesTogether}"
-                      IsChecked="{x:Bind UpdateHardLinkedGamesTogether, Mode=TwoWay}"
-                      IsEnabled="{x:Bind EnableHardLink}" />
+                      IsChecked="{x:Bind UpdateHardLinkedGamesTogether, Mode=TwoWay}" />
             <TextBlock Margin="28,0,0,0"
                        FontSize="12"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"

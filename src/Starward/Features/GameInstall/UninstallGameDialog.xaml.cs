@@ -308,6 +308,7 @@ public sealed partial class UninstallGameDialog : ContentDialog
             // 立即清除：可移动存储设备上的目录删掉后，读取路径时会被当成设备已移除而不会自动清除；
             // 其他区服卸载时也据此判断共用的日志目录是否还有人在用
             GameLauncherService.ChangeGameInstallPath(item.GameId, null);
+            AppConfig.SetGameInstallHardLink(item.GameId.GameBiz, null);
             Telemetry.Track("uninstall_result", item.GameId.GameBiz, ("result", "success"), ("duration_ms", Stopwatch.GetElapsedTime(start)));
             _logger.LogInformation("Uninstalled {GameBiz}: {InstallPath}", item.GameId.GameBiz, item.InstallPath);
             item.IsDone = true;

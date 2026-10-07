@@ -107,7 +107,8 @@ public static class GameScenarioPackage
             {
                 return GameScenarioPackageType.Unknown;
             }
-            using JsonDocument doc = JsonDocument.Parse(File.ReadAllBytes(file));
+            // 按文本读：带 BOM 时 ReadAllText 会去掉，按字节解析会因 BOM 失败
+            using JsonDocument doc = JsonDocument.Parse(File.ReadAllText(file));
             if (doc.RootElement.ValueKind is JsonValueKind.Object
                 && doc.RootElement.TryGetProperty("packageType", out JsonElement value)
                 && value.ValueKind is JsonValueKind.String)

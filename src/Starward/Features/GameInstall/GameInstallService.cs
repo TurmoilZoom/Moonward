@@ -302,7 +302,7 @@ internal class GameInstallService
     /// <param name="installPath">安装目录</param>
     /// <param name="audioLanguage">语音语言</param>
     /// <param name="packageType">完整或基础资源，不区分资源场景的游戏为 <see cref="GameScenarioPackageType.Unknown"/></param>
-    /// <param name="enableHardLink">本次安装是否硬链接到其他区服，<see langword="null"/> 时跟随设置</param>
+    /// <param name="enableHardLink">本次安装是否硬链接到其他区服，<see langword="null"/> 时按该区服记录的选择（见 <see cref="ShouldUseHardLinkAsync"/>）</param>
     /// <returns></returns>
     public async Task<GameInstallContext?> StartInstallAsync(GameId gameId, string installPath, AudioLanguage audioLanguage, GameScenarioPackageType packageType = GameScenarioPackageType.Unknown, bool? enableHardLink = null)
     {
@@ -327,7 +327,7 @@ internal class GameInstallService
 
     /// <summary>
     /// 查找与当前区服通过硬链接共用文件、也有新版本的其他区服，用于更新当前区服时一并更新。
-    /// 只在开启硬链接且游戏支持硬链接时查找，只列出与当前区服实际共用文件（文件 ID 相同）的区服。
+    /// 只在游戏支持硬链接时查找，只列出与当前区服实际共用文件（文件 ID 相同）的区服。
     /// 共用文件的区服（含当前区服）中安装目录创建得最早的视为本体，其余是后来通过硬链接产生的；
     /// 本体不是当前区服时排在最前，要先于当前区服更新。
     /// 已有安装任务（预下载、排队中的更新等）、游戏文件不完整、取不到最新版本的区服不列出。
@@ -337,7 +337,7 @@ internal class GameInstallService
     /// <returns>可一并更新的区服，本体在前，其余按 <see cref="GameBiz.AllGameBizs"/> 的顺序排列</returns>
     public async Task<List<OtherServerUpdate>> GetHardLinkedServersToUpdateAsync(GameId gameId, string installPath)
     {
-        if (!AppConfig.EnableHardLink || !GameFeatureConfig.FromGameId(gameId).SupportHardLink)
+        if (!GameFeatureConfig.FromGameId(gameId).SupportHardLink)
         {
             return [];
         }
@@ -737,11 +737,11 @@ internal class GameInstallService
     /// </summary>
     /// <param name="gameId"></param>
     /// <param name="installPath">本区服安装目录</param>
-    /// <param name="enableHardLink">是否硬链接，<see langword="null"/> 时跟随设置</param>
+    /// <param name="enableHardLink">是否硬链接，<see langword="null"/> 时按该区服记录的选择</param>
     /// <returns>不硬链接或没有可链接的区服时为 <see langword="null"/></returns>
     private async Task<string?> GetHardLinkPathAsync(GameId gameId, string installPath, bool? enableHardLink = null)
     {
-        if (!(enableHardLink ?? AppConfig.EnableHardLink))
+        if (!(enableHardLink ?? await ShouldUseHardLinkAsync(gameId, installPath)))
         {
             return null;
         }
@@ -751,8 +751,39 @@ internal class GameInstallService
 
 
     /// <summary>
+    /// 没有指定时决定任务是否硬链接：有记录（安装对话框里的选择）按记录；
+    /// 没有记录（更早版本或官方启动器安装的）时看安装目录是否已与其他区服共用文件，已共用的继续共用
+    /// </summary>
+    /// <param name="gameId"></param>
+    /// <param name="installPath">本区服安装目录</param>
+    /// <returns>是否硬链接</returns>
+    private static async Task<bool> ShouldUseHardLinkAsync(GameId gameId, string installPath)
+    {
+        if (AppConfig.GetGameInstallHardLink(gameId.GameBiz) is bool value)
+        {
+            return value;
+        }
+        if (!GameFeatureConfig.FromGameId(gameId).SupportHardLink || !Directory.Exists(installPath))
+        {
+            return false;
+        }
+        string currentFolder = Path.TrimEndingDirectorySeparator(Path.GetFullPath(installPath));
+        List<(GameId GameId, string InstallPath)> installed = GetOtherInstalledServers(gameId)
+            .Where(x => !string.Equals(x.InstallPath, currentFolder, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (installed.Count == 0)
+        {
+            return false;
+        }
+        // 要打开文件读文件 ID，放到后台线程；只抽查少量文件，开销很小
+        return (await Task.Run(() => GetHardLinkedServers(currentFolder, installed))).Count > 0;
+    }
+
+
+
+    /// <summary>
     /// 查找可与该安装目录硬链接的其他区服：同一游戏、同一 NTFS 磁盘上正在安装 / 更新 / 修复或已安装的区服，
-    /// 正在进行的任务优先，其余取版本最新的。不看设置里的硬链接开关
+    /// 正在进行的任务优先，其余取版本最新的。不管是否要硬链接，只负责找目标
     /// </summary>
     /// <param name="gameId"></param>
     /// <param name="installPath">本区服安装目录，可以尚不存在</param>

@@ -381,15 +381,6 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 启用硬链接
-    /// </summary>
-    public static bool EnableHardLink
-    {
-        get => GetValue(true);
-        set => SetValue(value);
-    }
-
-    /// <summary>
     /// 更新游戏时直接一并更新与它硬链接的其他区服，不再询问
     /// </summary>
     public static bool UpdateHardLinkedGamesTogether
@@ -918,6 +909,27 @@ public static partial class AppConfig
     public static void SetGameInstallPathRemovable(GameBiz biz, bool value)
     {
         SetValue(value, $"install_path_removable_{biz}");
+    }
+
+
+    /// <summary>
+    /// 安装该区服时在安装对话框里是否选择了硬链接，之后的继续下载、更新、预下载、修复都沿用
+    /// </summary>
+    /// <param name="biz"></param>
+    /// <returns>没有记录（更早版本或官方启动器安装的、安装时不能硬链接）时为 <see langword="null"/></returns>
+    public static bool? GetGameInstallHardLink(GameBiz biz)
+    {
+        return bool.TryParse(GetValue<string>(null, $"install_hard_link_{biz}"), out bool value) ? value : null;
+    }
+
+    /// <summary>
+    /// 记录安装该区服时是否选择了硬链接，<see langword="null"/> 清除记录
+    /// </summary>
+    /// <param name="biz"></param>
+    /// <param name="value"></param>
+    public static void SetGameInstallHardLink(GameBiz biz, bool? value)
+    {
+        SetValue(value?.ToString(), $"install_hard_link_{biz}");
     }
 
     /// <summary>
