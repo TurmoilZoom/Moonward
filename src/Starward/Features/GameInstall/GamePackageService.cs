@@ -172,6 +172,11 @@ internal partial class GamePackageService
             return false;
         }
         List<string> ignoreMatchingFields = PreDownloadDialog.GetIgnoreMatchingFields(installPath, gameConfig);
+        if (GameScenarioPackage.GetLocalPackageType(installPath, gameConfig) is GameScenarioPackageType.Base)
+        {
+            // 基础资源不预下载本地没有的完整资源分类；游戏内另行下载过的分类会让本地多出补丁，下面按「不少于」判断不受影响
+            ignoreMatchingFields.AddRange(GameScenarioPackage.GetFullOnlyMatchingFields(pre));
+        }
         List<GameSophonPatchManifest> manifests = PreDownloadDialog.GetAvaliableGameSophonPatchManifests(build, lang, ignoreMatchingFields);
         long expectedBytes = 0;
         int expectedChunks = 0;

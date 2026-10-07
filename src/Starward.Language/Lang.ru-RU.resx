@@ -2046,6 +2046,36 @@
   <data name="InstallGameDialog_AutomaticallyCreateASubfolder" xml:space="preserve">
     <value>Автоматически создать подпапку</value>
   </data>
+  <data name="InstallGameDialog_FullResources" xml:space="preserve">
+    <value>Полные ресурсы</value>
+  </data>
+  <data name="InstallGameDialog_BaseResources" xml:space="preserve">
+    <value>Базовые ресурсы</value>
+  </data>
+  <data name="InstallGameDialog_Recommended" xml:space="preserve">
+    <value>Рекомендуется</value>
+  </data>
+  <data name="InstallGameDialog_VoiceResources" xml:space="preserve">
+    <value>Озвучка</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithServer" xml:space="preserve">
+    <value>Общие файлы с установленным клиентом: {0} (жёсткая ссылка)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkRequiresSameDrive" xml:space="preserve">
+    <value>Установленный клиент ({0}) находится на {1}. Установите на тот же диск NTFS, чтобы использовать общие файлы через жёсткие ссылки и сэкономить место.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithOtherServers" xml:space="preserve">
+    <value>Общие файлы с другими установленными серверами (жёсткая ссылка)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotSupported" xml:space="preserve">
+    <value>Эта игра не поддерживает жёсткие ссылки.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNoOtherServer" xml:space="preserve">
+    <value>Другие серверы {0} не установлены, общих файлов нет.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotNtfs" xml:space="preserve">
+    <value>Установленный клиент ({0}) находится на {1}. Этот диск не в формате NTFS, жёсткие ссылки недоступны.</value>
+  </data>
   <data name="GameLauncherSettingDialog_UninstallGameWarning" xml:space="preserve">
     <value>Все файлы в следующей папке будут удалены. Пожалуйста, подтвердите путь перед удалением.</value>
   </data>

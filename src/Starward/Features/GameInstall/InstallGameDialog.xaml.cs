@@ -113,12 +113,9 @@ public sealed partial class InstallGameDialog : ContentDialog
             if (!string.IsNullOrWhiteSpace(config.AudioPackageScanDir))
             {
                 _needAudioPackage = true;
-                Segmented_SelectLanguage.Visibility = Visibility.Visible;
+                Border_Resources.Visibility = Visibility.Visible;
+                StackPanel_SelectLanguage.Visibility = Visibility.Visible;
                 SetDefaultAudioPackage();
-            }
-            if (GameFeatureConfig.FromGameId(CurrentGameId).SupportHardLink)
-            {
-                StackPanel_HardLink.Visibility = Visibility.Visible;
             }
             if (config.DefaultDownloadMode is DownloadMode.DOWNLOAD_MODE_CHUNK)
             {
@@ -126,6 +123,11 @@ public sealed partial class InstallGameDialog : ContentDialog
                 if (branch is not null)
                 {
                     _gameSophonChunkBuild = await _hoYoPlayService.GetGameSophonChunkBuildAsync(branch, branch.Main);
+                    // 基础资源只在 Chunk 模式提供（官方同样如此），压缩包没有按分类拆分
+                    if (_gameSophonChunkBuild is not null && GameScenarioPackage.IsSupported(config, branch.Main))
+                    {
+                        InitializeScenarioPackage(config, branch.Main);
+                    }
                 }
             }
             if (_gameSophonChunkBuild is null)
@@ -159,6 +161,47 @@ public sealed partial class InstallGameDialog : ContentDialog
 
 
 
+    /// <summary>
+    /// 显示完整资源 / 基础资源选项，默认选完整资源（与官方一致）
+    /// </summary>
+    /// <param name="config">游戏配置，提供两个选项的说明与是否标「推荐」</param>
+    /// <param name="package">要安装的分支，提供各分类属于哪个资源场景</param>
+    private void InitializeScenarioPackage(GameConfig config, GameBranchPackage package)
+    {
+        _scenarioPackageSupported = true;
+        _scenarioPackageInfo = config.ScenarioPackageInfo;
+        _fullOnlyMatchingFields = GameScenarioPackage.GetFullOnlyMatchingFields(package);
+        Border_Resources.Visibility = Visibility.Visible;
+        StackPanel_ScenarioPackage.Visibility = Visibility.Visible;
+        Border_FullPackageRecommend.Visibility = config.EnableFullPackageRecommend ? Visibility.Visible : Visibility.Collapsed;
+        RadioButton_FullPackage.IsChecked = true;
+    }
+
+
+
+    /// <summary>
+    /// 切换完整资源 / 基础资源
+    /// </summary>
+    private void RadioButton_ScenarioPackage_Checked(object sender, RoutedEventArgs e)
+    {
+        string? description = SelectedPackageType is GameScenarioPackageType.Base
+            ? _scenarioPackageInfo?.BasePackageDescription
+            : _scenarioPackageInfo?.FullPackageDescription;
+        ScenarioPackageDescription = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+        ComputePackageSize();
+    }
+
+
+
+    /// <summary>
+    /// 当前选择的资源场景；不区分资源场景的游戏为 <see cref="GameScenarioPackageType.Unknown"/>
+    /// </summary>
+    private GameScenarioPackageType SelectedPackageType => !_scenarioPackageSupported
+        ? GameScenarioPackageType.Unknown
+        : RadioButton_BasePackage.IsChecked is true ? GameScenarioPackageType.Base : GameScenarioPackageType.Full;
+
+
+
     private void SetDefaultAudioPackage()
     {
         if (_needAudioPackage)
@@ -189,6 +232,21 @@ public sealed partial class InstallGameDialog : ContentDialog
 
 
     /// <summary>
+    /// 是否提供完整资源 / 基础资源选项
+    /// </summary>
+    private bool _scenarioPackageSupported;
+
+
+    private GameScenarioPackageInfo? _scenarioPackageInfo;
+
+
+    /// <summary>
+    /// 只属于完整资源的分类，选基础资源时不下载
+    /// </summary>
+    private HashSet<string> _fullOnlyMatchingFields = [];
+
+
+    /// <summary>
     /// 包体信息是否已拉取完成，用于区分「仍在加载」和「确实没有安装包」
     /// </summary>
     private bool _gamePackageLoaded;
@@ -208,6 +266,46 @@ public sealed partial class InstallGameDialog : ContentDialog
     public partial long UnzipSpaceBytes { get; set; }
 
     public string UnzipSpaceText => UnzipSpaceBytes == 0 ? "..." : $"{UnzipSpaceBytes / GB:F2} GB";
+
+
+    /// <summary>
+    /// 需要下载的大小（压缩后）
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DownloadSizeText))]
+    public partial long DownloadSizeBytes { get; set; }
+
+    public string DownloadSizeText => DownloadSizeBytes == 0 ? "..." : $"{DownloadSizeBytes / GB:F2} GB";
+
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FullPackageSizeText))]
+    public partial long FullPackageSizeBytes { get; set; }
+
+    public string FullPackageSizeText => FullPackageSizeBytes == 0 ? "..." : $"{FullPackageSizeBytes / GB:F2} GB";
+
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BasePackageSizeText))]
+    public partial long BasePackageSizeBytes { get; set; }
+
+    public string BasePackageSizeText => BasePackageSizeBytes == 0 ? "..." : $"{BasePackageSizeBytes / GB:F2} GB";
+
+
+    /// <summary>
+    /// 所选语音的下载大小，没选语言时为 0
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AudioPackageSizeText))]
+    public partial long AudioPackageSizeBytes { get; set; }
+
+    public string AudioPackageSizeText => AudioPackageSizeBytes == 0 ? "" : $"{AudioPackageSizeBytes / GB:F2} GB";
+
+
+    /// <summary>
+    /// 所选资源场景的说明，没有时隐藏
+    /// </summary>
+    public string? ScenarioPackageDescription { get; set => SetProperty(ref field, value); }
 
 
     [ObservableProperty]
@@ -237,25 +335,33 @@ public sealed partial class InstallGameDialog : ContentDialog
 
 
 
+    /// <summary>
+    /// 按所选资源场景与语音统计下载大小、解压所需空间，以及两个资源选项各自的大小
+    /// </summary>
     private void ComputePackageSize()
     {
         try
         {
-            long size = 0;
+            long downloadSize = 0, unzipSize = 0, audioSize = 0;
             List<string?> langs = Segmented_SelectLanguage.SelectedItems.Cast<SegmentedItem>().Select(x => x.Tag as string).ToList();
             if (_gamePackage is not null)
             {
-                size += _gamePackage.Main.Major!.GamePackages.Sum(x => x.DecompressedSize);
+                // 压缩包的 decompressed_size 是官方给的所需空间估算（约为压缩包的 2.2 倍）
+                downloadSize += _gamePackage.Main.Major!.GamePackages.Sum(x => x.Size);
+                unzipSize += _gamePackage.Main.Major.GamePackages.Sum(x => x.DecompressedSize);
                 foreach (string? lang in langs)
                 {
                     if (_gamePackage.Main.Major.AudioPackages.FirstOrDefault(x => x.Language == lang) is GamePackageFile gamePackageFile)
                     {
-                        size += gamePackageFile.DecompressedSize;
+                        audioSize += gamePackageFile.Size;
+                        unzipSize += gamePackageFile.DecompressedSize;
                     }
                 }
             }
             else if (_gameSophonChunkBuild is not null)
             {
+                bool isBase = SelectedPackageType is GameScenarioPackageType.Base;
+                long fullSize = 0, baseSize = 0;
                 foreach (GameSophonChunkManifest manifest in _gameSophonChunkBuild.Manifests)
                 {
                     if (manifest.MatchingField.Length is 5 or 10 && manifest.MatchingField.Contains('-'))
@@ -263,17 +369,33 @@ public sealed partial class InstallGameDialog : ContentDialog
                         // 跳过语音包 zh-cn or mini-zh-cn
                         continue;
                     }
-                    size += manifest.Stats.UncompressedSize;
+                    bool fullOnly = _fullOnlyMatchingFields.Contains(manifest.MatchingField);
+                    fullSize += manifest.Stats.CompressedSize;
+                    if (!fullOnly)
+                    {
+                        baseSize += manifest.Stats.CompressedSize;
+                    }
+                    if (!(isBase && fullOnly))
+                    {
+                        downloadSize += manifest.Stats.CompressedSize;
+                        unzipSize += manifest.Stats.UncompressedSize;
+                    }
                 }
                 foreach (string? lang in langs)
                 {
                     if (_gameSophonChunkBuild.Manifests.FirstOrDefault(x => x.MatchingField == lang) is GameSophonChunkManifest audioManifest)
                     {
-                        size += audioManifest.Stats.UncompressedSize;
+                        audioSize += audioManifest.Stats.CompressedSize;
+                        unzipSize += audioManifest.Stats.UncompressedSize;
                     }
                 }
+                FullPackageSizeBytes = fullSize;
+                BasePackageSizeBytes = baseSize;
             }
-            UnzipSpaceBytes = size;
+            downloadSize += audioSize;
+            AudioPackageSizeBytes = audioSize;
+            DownloadSizeBytes = downloadSize;
+            UnzipSpaceBytes = unzipSize;
             if (AvailableSpaceBytes > 0 && UnzipSpaceBytes > AvailableSpaceBytes)
             {
                 TextBlock_AvailableSpace.Foreground = App.Current.Resources["SystemFillColorCautionBrush"] as Brush;
@@ -361,6 +483,7 @@ public sealed partial class InstallGameDialog : ContentDialog
             InstallationPath = path;
             AvailableSpaceBytes = DriveHelper.GetDriveAvailableSpace(path);
             CheckCanStartInstallation();
+            _ = RefreshHardLinkAsync(path);
         }
         catch (Exception ex)
         {
@@ -403,12 +526,15 @@ public sealed partial class InstallGameDialog : ContentDialog
                 ("button", "install"),
                 ("mode", _gameSophonChunkBuild is not null ? "chunk" : _gamePackage is not null ? "package" : null),
                 ("audio", _audioLanguage),
+                ("package_type", SelectedPackageType),
                 ("disk_type", DriveHelper.GetDiskMediaType(InstallationPath)),
                 ("drive_format", DriveHelper.GetDriveFormat(InstallationPath)),
                 ("required_bytes", UnzipSpaceBytes),
                 ("available_bytes", AvailableSpaceBytes),
-                ("subfolder", AutomaticallyCreateSubfolderForInstall));
-            GameInstallContext? task = await _gameInstallService.StartInstallAsync(CurrentGameId, InstallationPath, _audioLanguage);
+                ("subfolder", AutomaticallyCreateSubfolderForInstall),
+                ("hard_link", HardLinkChecked));
+            // 按对话框显示的为准：不可用时传 false，不让后台重新查找时又链接上
+            GameInstallContext? task = await _gameInstallService.StartInstallAsync(CurrentGameId, InstallationPath, _audioLanguage, SelectedPackageType, HardLinkChecked);
             if (task is not null && task.State is not GameInstallState.Stop and not GameInstallState.Error)
             {
                 _installStarted = true;
@@ -448,6 +574,153 @@ public sealed partial class InstallGameDialog : ContentDialog
             Telemetry.Track("install_dialog_click", CurrentGameId?.GameBiz.ToString(), ("button", "close"));
         }
         this.Hide();
+    }
+
+
+
+    /// <summary>
+    /// 用户对本次安装是否硬链接的选择，默认跟随设置里的硬链接开关；路径换到不能链接再换回来时保留
+    /// </summary>
+    private bool _useHardLink = AppConfig.EnableHardLink;
+
+
+    /// <summary>
+    /// 硬链接复选框：不可用时恒为未勾选，即本次安装不会硬链接
+    /// </summary>
+    public bool HardLinkChecked
+    {
+        get => HardLinkAvailable && _useHardLink;
+        set
+        {
+            if (HardLinkAvailable && _useHardLink != value)
+            {
+                _useHardLink = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 当前路径能否硬链接到其他区服
+    /// </summary>
+    public bool HardLinkAvailable
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(HardLinkChecked));
+            }
+        }
+    }
+
+
+    public string? HardLinkText { get; set => SetProperty(ref field, value); }
+
+
+    public string? HardLinkTooltip { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>
+    /// 不能硬链接的原因，能硬链接时为 <see langword="null"/>
+    /// </summary>
+    public string? HardLinkReason { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>
+    /// 路径连续变化时只采用最后一次查找的结果
+    /// </summary>
+    private int _hardLinkRefreshVersion;
+
+
+    /// <summary>
+    /// 按当前安装路径刷新硬链接选项：同一 NTFS 磁盘上有同一游戏的其他区服时可勾选，否则置灰并写明原因
+    /// </summary>
+    /// <param name="installPath">当前安装路径</param>
+    private async Task RefreshHardLinkAsync(string installPath)
+    {
+        if (CurrentGameId is null)
+        {
+            return;
+        }
+        int version = ++_hardLinkRefreshVersion;
+        bool supported = GameFeatureConfig.FromGameId(CurrentGameId).SupportHardLink;
+        (GameBiz GameBiz, string InstallPath)? target = null;
+        string? reason = null;
+        try
+        {
+            if (!supported)
+            {
+                reason = Lang.InstallGameDialog_HardLinkNotSupported;
+            }
+            else if (Path.IsPathFullyQualified(installPath))
+            {
+                target = await _gameInstallService.FindHardLinkTargetAsync(CurrentGameId, installPath);
+                if (target is null)
+                {
+                    reason = GetHardLinkUnavailableReason();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Find hard link target.");
+        }
+        if (version != _hardLinkRefreshVersion)
+        {
+            return;
+        }
+        HardLinkAvailable = target is not null;
+        if (target is { } t)
+        {
+            HardLinkText = string.Format(Lang.InstallGameDialog_HardLinkWithServer, t.GameBiz.ToGameServerName());
+            HardLinkTooltip = $"{Lang.InstallGameDialog_HardLinkDesc}\n\n{Lang.InstallGameDialog_LinkTarget}{t.InstallPath}";
+            HardLinkReason = null;
+        }
+        else
+        {
+            HardLinkText = Lang.InstallGameDialog_HardLinkWithOtherServers;
+            HardLinkTooltip = Lang.InstallGameDialog_HardLinkDesc;
+            HardLinkReason = reason;
+        }
+        // 复选框文字显式用了次要色，不会随禁用变灰，这里手动换成禁用色
+        TextBlock_HardLink.Foreground = App.Current.Resources[target is null ? "TextFillColorDisabledBrush" : "TextFillColorSecondaryBrush"] as Brush;
+        StackPanel_HardLink.Visibility = Visibility.Visible;
+    }
+
+
+    /// <summary>
+    /// 支持硬链接但当前路径找不到可链接区服时的原因：没装其他区服、装在别的磁盘、所在磁盘不是 NTFS
+    /// </summary>
+    /// <returns>原因文案；找不到合适的说明时为 <see langword="null"/></returns>
+    private string? GetHardLinkUnavailableReason()
+    {
+        string game = CurrentGameId.GameBiz.Game;
+        List<(GameBiz GameBiz, string InstallPath)> others = new();
+        foreach (string server in new[] { "cn", "bilibili", "global", })
+        {
+            string biz = $"{game}_{server}";
+            if (CurrentGameId.GameBiz != biz && GameLauncherService.GetGameInstallPath(biz) is { } path)
+            {
+                others.Add((biz, path));
+            }
+        }
+        if (others.Count == 0)
+        {
+            return string.Format(Lang.InstallGameDialog_HardLinkNoOtherServer, CurrentGameId.GameBiz.ToGameName());
+        }
+        // 有装在 NTFS 磁盘上的区服却没找到可链接目标，说明它在别的磁盘，提示换盘
+        foreach ((GameBiz biz, string path) in others)
+        {
+            if (DriveHelper.GetDriveFormat(path) is "NTFS")
+            {
+                return string.Format(Lang.InstallGameDialog_HardLinkRequiresSameDrive, biz.ToGameServerName(), Path.GetPathRoot(path));
+            }
+        }
+        (GameBiz first, string firstPath) = others[0];
+        return string.Format(Lang.InstallGameDialog_HardLinkNotNtfs, first.ToGameServerName(), Path.GetPathRoot(firstPath));
     }
 
 

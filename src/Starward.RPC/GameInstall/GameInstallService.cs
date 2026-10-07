@@ -260,8 +260,9 @@ internal class GameInstallService
                 GameId: {gameId} {gameBiz}
                 InstallPath: {installPath}
                 AudioLanguage: {audioLanguage}
+                PackageType: {packageType}
                 HardLinkPath: {hardLinkPath}
-                """, context.Operation, context.GameId.Id, context.GameId.GameBiz, context.InstallPath, context.AudioLanguage, context.HardLinkPath);
+                """, context.Operation, context.GameId.Id, context.GameId.GameBiz, context.InstallPath, context.AudioLanguage, context.PackageType, context.HardLinkPath);
             Directory.CreateDirectory(context.InstallPath);
             GamePackageService gamePackageService = _serviceProvider.GetRequiredService<GamePackageService>();
             long prepareStart = Stopwatch.GetTimestamp();
@@ -269,6 +270,11 @@ internal class GameInstallService
             if (context.AudioLanguage is not AudioLanguage.None)
             {
                 await gamePackageService.SetAudioLanguageAsync(context.GameId, context.InstallPath, context.AudioLanguage, cancellationToken);
+            }
+            if (context.PackageType is not GameScenarioPackageType.Unknown)
+            {
+                // 先写入再准备文件：准备时按游戏目录里的记录决定跳过哪些分类，暂停后继续、硬链接改成修复时也能读到
+                await gamePackageService.SetScenarioPackageTypeAsync(context.GameId, context.InstallPath, context.PackageType, cancellationToken);
             }
             if (context.TaskFiles is null)
             {

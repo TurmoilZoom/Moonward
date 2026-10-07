@@ -2045,6 +2045,36 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="InstallGameDialog_AutomaticallyCreateASubfolder" xml:space="preserve">
     <value>Tự động tạo một thư mục con</value>
   </data>
+  <data name="InstallGameDialog_FullResources" xml:space="preserve">
+    <value>Tài nguyên đầy đủ</value>
+  </data>
+  <data name="InstallGameDialog_BaseResources" xml:space="preserve">
+    <value>Tài nguyên cơ bản</value>
+  </data>
+  <data name="InstallGameDialog_Recommended" xml:space="preserve">
+    <value>Đề xuất</value>
+  </data>
+  <data name="InstallGameDialog_VoiceResources" xml:space="preserve">
+    <value>Lồng tiếng</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithServer" xml:space="preserve">
+    <value>Dùng chung tệp với {0} đã cài đặt (hard link)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkRequiresSameDrive" xml:space="preserve">
+    <value>{0} đã cài đặt nằm ở {1}. Cài đặt vào cùng ổ NTFS để dùng chung tệp qua hard link và tiết kiệm dung lượng.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithOtherServers" xml:space="preserve">
+    <value>Dùng chung tệp với máy chủ khác đã cài đặt (hard link)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotSupported" xml:space="preserve">
+    <value>Trò chơi này không hỗ trợ hard link.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNoOtherServer" xml:space="preserve">
+    <value>Chưa cài đặt máy chủ khác của {0} nên không có tệp để dùng chung.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotNtfs" xml:space="preserve">
+    <value>{0} đã cài đặt nằm ở {1}, ổ này không phải NTFS nên không thể dùng hard link.</value>
+  </data>
   <data name="GameLauncherSettingDialog_UninstallGameWarning" xml:space="preserve">
     <value>Tất cả các tập tin trong thư mục sau sẽ bị xóa. Vui lòng xác nhận đường dẫn trước khi gỡ cài đặt.</value>
   </data>

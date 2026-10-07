@@ -2044,6 +2044,36 @@
   <data name="InstallGameDialog_AutomaticallyCreateASubfolder" xml:space="preserve">
     <value>自動建立子資料夾</value>
   </data>
+  <data name="InstallGameDialog_FullResources" xml:space="preserve">
+    <value>完整資源</value>
+  </data>
+  <data name="InstallGameDialog_BaseResources" xml:space="preserve">
+    <value>基礎資源</value>
+  </data>
+  <data name="InstallGameDialog_Recommended" xml:space="preserve">
+    <value>推薦</value>
+  </data>
+  <data name="InstallGameDialog_VoiceResources" xml:space="preserve">
+    <value>語音資源</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithServer" xml:space="preserve">
+    <value>與已安裝的{0}共用檔案（硬連結）</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkRequiresSameDrive" xml:space="preserve">
+    <value>已安裝的{0}位於 {1}，安裝到同一 NTFS 磁碟即可透過硬連結共用檔案，節省儲存空間。</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithOtherServers" xml:space="preserve">
+    <value>與已安裝的其他區服共用檔案（硬連結）</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotSupported" xml:space="preserve">
+    <value>此遊戲不支援硬連結。</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNoOtherServer" xml:space="preserve">
+    <value>未安裝{0}的其他區服，沒有可共用的檔案。</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotNtfs" xml:space="preserve">
+    <value>已安裝的{0}位於 {1}，該磁碟不是 NTFS 格式，無法使用硬連結。</value>
+  </data>
   <data name="GameLauncherSettingDialog_UninstallGameWarning" xml:space="preserve">
     <value>以下資料夾入面嘅所有 file 會被 delete，請係 delete 之前確認路徑啱唔啱。</value>
   </data>

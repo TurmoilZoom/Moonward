@@ -2045,6 +2045,36 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="InstallGameDialog_AutomaticallyCreateASubfolder" xml:space="preserve">
     <value>Crear automáticamente una subcarpeta</value>
   </data>
+  <data name="InstallGameDialog_FullResources" xml:space="preserve">
+    <value>Recursos completos</value>
+  </data>
+  <data name="InstallGameDialog_BaseResources" xml:space="preserve">
+    <value>Recursos básicos</value>
+  </data>
+  <data name="InstallGameDialog_Recommended" xml:space="preserve">
+    <value>Recomendado</value>
+  </data>
+  <data name="InstallGameDialog_VoiceResources" xml:space="preserve">
+    <value>Voces</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithServer" xml:space="preserve">
+    <value>Compartir archivos con el {0} instalado (enlace duro)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkRequiresSameDrive" xml:space="preserve">
+    <value>El {0} instalado está en {1}. Instálalo en la misma unidad NTFS para compartir archivos mediante enlaces duros y ahorrar espacio.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithOtherServers" xml:space="preserve">
+    <value>Compartir archivos con otros servidores instalados (enlace duro)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotSupported" xml:space="preserve">
+    <value>Este juego no admite enlaces duros.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNoOtherServer" xml:space="preserve">
+    <value>No hay otro servidor de {0} instalado, por lo que no hay archivos para compartir.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotNtfs" xml:space="preserve">
+    <value>El {0} instalado está en {1}, que no es una unidad NTFS, por lo que no se pueden usar enlaces duros.</value>
+  </data>
   <data name="GameLauncherSettingDialog_UninstallGameWarning" xml:space="preserve">
     <value>Todos los archivos de la siguiente carpeta se eliminarán. Confirma la ruta antes de desinstalar.</value>
   </data>

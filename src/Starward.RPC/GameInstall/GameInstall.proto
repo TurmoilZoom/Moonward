@@ -59,6 +59,8 @@ message GameInstallContextDTO {
     int64 rewritten_file_count = 22;
     // 发起任务时请求的操作。硬链接时 RPC 会把安装、更新改成修复（operation 随之变化），这里保持不变
     int32 requested_operation = 23;
+    // 安装时选择的资源场景（GameScenarioPackageType：0 未指定、1 完整资源、2 基础资源）
+    int32 package_type = 24;
 }
 
 message GameInstallRequest {
@@ -68,6 +70,8 @@ message GameInstallRequest {
     int32 operation = 4;
     int32 audio_language = 5;
     google.protobuf.StringValue hard_link_path = 6;
+    // 安装时选择的资源场景（GameScenarioPackageType）；其他操作为 0，RPC 按游戏目录里的记录处理
+    int32 package_type = 7;
 }
 
 message RateLimiterMessage {

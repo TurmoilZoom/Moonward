@@ -472,6 +472,13 @@ public class HoYoPlayClient
 
 
     /// <summary>
+    /// 同时请求完整资源（1）与基础资源（2）两个场景的分类；不带时只返回完整资源的分类，缺少只属于基础资源的分类
+    /// </summary>
+    private const string GameBranchScenariosFilter = "&scenarios_filter[]=1&scenarios_filter[]=2";
+
+
+
+    /// <summary>
     /// Chunk 下载模式的正式和预下载分支
     /// </summary>
     /// <param name="launcherId"></param>
@@ -480,7 +487,7 @@ public class HoYoPlayClient
     /// <returns></returns>
     public async Task<List<GameBranch>> GetGameBranchAsync(string launcherId, string language, CancellationToken cancellationToken = default)
     {
-        string url = BuildUrl("getGameBranches", launcherId, language);
+        string url = BuildUrl("getGameBranches", launcherId, language) + GameBranchScenariosFilter;
         return await CommonGetAsync<List<GameBranch>>(url, "game_branches", cancellationToken);
     }
 
@@ -496,7 +503,7 @@ public class HoYoPlayClient
     /// <returns></returns>
     public async Task<List<GameBranch>> GetGameBranchAsync(string launcherId, string language, IEnumerable<GameId> gameIds, CancellationToken cancellationToken = default)
     {
-        string url = BuildUrl("getGameBranches", launcherId, language);
+        string url = BuildUrl("getGameBranches", launcherId, language) + GameBranchScenariosFilter;
         foreach (var gameId in gameIds)
         {
             url += $"&game_ids[]={gameId.Id}";
@@ -517,7 +524,7 @@ public class HoYoPlayClient
     /// <exception cref="miHoYoApiException"></exception>
     public async Task<GameBranch?> GetGameBranchAsync(string launcherId, string language, GameId gameId, CancellationToken cancellationToken = default)
     {
-        string url = BuildUrl("getGameBranches", launcherId, language) + $"&game_ids[]={gameId.Id}";
+        string url = BuildUrl("getGameBranches", launcherId, language) + GameBranchScenariosFilter + $"&game_ids[]={gameId.Id}";
         var list = await CommonGetAsync<List<GameBranch>>(url, "game_branches", cancellationToken);
         return list.FirstOrDefault(x => x.GameId == gameId);
     }

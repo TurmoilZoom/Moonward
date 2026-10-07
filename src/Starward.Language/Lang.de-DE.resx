@@ -2043,6 +2043,36 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="InstallGameDialog_AutomaticallyCreateASubfolder" xml:space="preserve">
     <value>Automatisch einen Unterordner erstellen</value>
   </data>
+  <data name="InstallGameDialog_FullResources" xml:space="preserve">
+    <value>Vollständige Ressourcen</value>
+  </data>
+  <data name="InstallGameDialog_BaseResources" xml:space="preserve">
+    <value>Basisressourcen</value>
+  </data>
+  <data name="InstallGameDialog_Recommended" xml:space="preserve">
+    <value>Empfohlen</value>
+  </data>
+  <data name="InstallGameDialog_VoiceResources" xml:space="preserve">
+    <value>Sprachausgabe</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithServer" xml:space="preserve">
+    <value>Dateien mit dem installierten {0} teilen (Hardlink)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkRequiresSameDrive" xml:space="preserve">
+    <value>Der installierte {0} befindet sich auf {1}. Installiere auf demselben NTFS-Laufwerk, um Dateien per Hardlink zu teilen und Speicherplatz zu sparen.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithOtherServers" xml:space="preserve">
+    <value>Dateien mit anderen installierten Servern teilen (Hardlink)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotSupported" xml:space="preserve">
+    <value>Dieses Spiel unterstützt keine Hardlinks.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNoOtherServer" xml:space="preserve">
+    <value>Es ist kein anderer Server von {0} installiert, daher gibt es keine Dateien zum Teilen.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotNtfs" xml:space="preserve">
+    <value>Der installierte {0} befindet sich auf {1}. Dieses Laufwerk ist nicht NTFS-formatiert, daher können keine Hardlinks verwendet werden.</value>
+  </data>
   <data name="GameLauncherSettingDialog_UninstallGameWarning" xml:space="preserve">
     <value>Alle Dateien im folgenden Ordner werden gelöscht. Bitte bestätigen Sie den Pfad vor der Deinstallation.</value>
   </data>

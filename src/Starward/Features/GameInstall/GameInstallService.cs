@@ -98,6 +98,7 @@ internal class GameInstallService
                             Operation = (GameInstallOperation)item.Operation,
                             RequestedOperation = (GameInstallOperation)item.RequestedOperation,
                             AudioLanguage = (AudioLanguage)item.AudioLanguage,
+                            PackageType = (GameScenarioPackageType)item.PackageType,
                             HardLinkPath = item.HardLinkPath,
                             Timestamp = item.Timestamp,
                             State = (GameInstallState)item.State,
@@ -294,9 +295,18 @@ internal class GameInstallService
 
 
 
-    public async Task<GameInstallContext?> StartInstallAsync(GameId gameId, string installPath, AudioLanguage audioLanguage)
+    /// <summary>
+    /// 开始安装游戏
+    /// </summary>
+    /// <param name="gameId"></param>
+    /// <param name="installPath">安装目录</param>
+    /// <param name="audioLanguage">语音语言</param>
+    /// <param name="packageType">完整或基础资源，不区分资源场景的游戏为 <see cref="GameScenarioPackageType.Unknown"/></param>
+    /// <param name="enableHardLink">本次安装是否硬链接到其他区服，<see langword="null"/> 时跟随设置</param>
+    /// <returns></returns>
+    public async Task<GameInstallContext?> StartInstallAsync(GameId gameId, string installPath, AudioLanguage audioLanguage, GameScenarioPackageType packageType = GameScenarioPackageType.Unknown, bool? enableHardLink = null)
     {
-        return await StartOrContinueTaskAsync(GameInstallOperation.Install, gameId, installPath, audioLanguage);
+        return await StartOrContinueTaskAsync(GameInstallOperation.Install, gameId, installPath, audioLanguage, packageType, enableHardLink);
     }
 
 
@@ -492,7 +502,7 @@ internal class GameInstallService
 
 
 
-    private async Task<GameInstallContext?> StartOrContinueTaskAsync(GameInstallOperation operation, GameId gameId, string installPath, AudioLanguage audioLanguage)
+    private async Task<GameInstallContext?> StartOrContinueTaskAsync(GameInstallOperation operation, GameId gameId, string installPath, AudioLanguage audioLanguage, GameScenarioPackageType packageType = GameScenarioPackageType.Unknown, bool? enableHardLink = null)
     {
         var request = new GameInstallRequest
         {
@@ -501,7 +511,8 @@ internal class GameInstallService
             InstallPath = installPath,
             Operation = (int)operation,
             AudioLanguage = (int)audioLanguage,
-            HardLinkPath = await GetHardLinkPathAsync(gameId, installPath),
+            HardLinkPath = await GetHardLinkPathAsync(gameId, installPath, enableHardLink),
+            PackageType = (int)packageType,
         };
         if (await _rpcService.EnsureRpcServerRunningAsync())
         {
@@ -511,8 +522,9 @@ internal class GameInstallService
                 GameId: {gameId} {gameBiz}
                 InstallPath: {installPath}
                 AudioLanguage: {audioLanguage}
+                PackageType: {packageType}
                 HardLinkPath: {hardLinkPath}
-                """, operation, gameId.Id, gameId.GameBiz, installPath, audioLanguage, request.HardLinkPath);
+                """, operation, gameId.Id, gameId.GameBiz, installPath, audioLanguage, packageType, request.HardLinkPath);
             GameInstallContextDTO dto;
             try
             {
@@ -720,17 +732,38 @@ internal class GameInstallService
 
 
 
-    private async Task<string?> GetHardLinkPathAsync(GameId gameId, string installPath)
+    /// <summary>
+    /// 任务要硬链接的其他区服目录
+    /// </summary>
+    /// <param name="gameId"></param>
+    /// <param name="installPath">本区服安装目录</param>
+    /// <param name="enableHardLink">是否硬链接，<see langword="null"/> 时跟随设置</param>
+    /// <returns>不硬链接或没有可链接的区服时为 <see langword="null"/></returns>
+    private async Task<string?> GetHardLinkPathAsync(GameId gameId, string installPath, bool? enableHardLink = null)
     {
-        if (!AppConfig.EnableHardLink)
+        if (!(enableHardLink ?? AppConfig.EnableHardLink))
         {
             return null;
         }
+        return (await FindHardLinkTargetAsync(gameId, installPath))?.InstallPath;
+    }
+
+
+
+    /// <summary>
+    /// 查找可与该安装目录硬链接的其他区服：同一游戏、同一 NTFS 磁盘上正在安装 / 更新 / 修复或已安装的区服，
+    /// 正在进行的任务优先，其余取版本最新的。不看设置里的硬链接开关
+    /// </summary>
+    /// <param name="gameId"></param>
+    /// <param name="installPath">本区服安装目录，可以尚不存在</param>
+    /// <returns>游戏不支持硬链接或没有可链接的区服时为 <see langword="null"/></returns>
+    public async Task<(GameBiz GameBiz, string InstallPath)?> FindHardLinkTargetAsync(GameId gameId, string installPath)
+    {
         if (GameFeatureConfig.FromGameId(gameId).SupportHardLink)
         {
             string game = gameId.GameBiz.Game;
             Version? lastVersion = null;
-            string? lastPath = null;
+            (GameBiz GameBiz, string InstallPath)? last = null;
             foreach (string server in new[] { "cn", "bilibili", "global", })
             {
                 string biz = $"{game}_{server}";
@@ -742,7 +775,7 @@ internal class GameInstallService
                         {
                             if (!string.IsNullOrWhiteSpace(task.InstallPath) && Path.GetPathRoot(task.InstallPath) == Path.GetPathRoot(installPath) && DriveHelper.GetDriveFormat(installPath) is "NTFS")
                             {
-                                return task.InstallPath;
+                                return (biz, task.InstallPath);
                             }
                         }
                     }
@@ -750,21 +783,16 @@ internal class GameInstallService
                     if (!string.IsNullOrWhiteSpace(path) && Path.GetPathRoot(path) == Path.GetPathRoot(installPath) && DriveHelper.GetDriveFormat(path) is "NTFS")
                     {
                         Version? version = await _gameLauncherService.GetLocalGameVersionAsync(biz, path);
-                        if (lastPath is null)
+                        if (last is null || version > lastVersion)
                         {
                             lastVersion = version;
-                            lastPath = path;
-                        }
-                        else if (version > lastVersion)
-                        {
-                            lastVersion = version;
-                            lastPath = path;
+                            last = (biz, path);
                         }
                     }
 
                 }
             }
-            return lastPath;
+            return last;
         }
         return null;
     }

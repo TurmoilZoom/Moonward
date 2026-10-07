@@ -100,6 +100,40 @@ internal partial class GamePackageService
 
 
     /// <summary>
+    /// 把安装时选择的资源场景（完整或基础资源）写入游戏目录，游戏和官方启动器都读这个文件
+    /// </summary>
+    /// <param name="gameId"></param>
+    /// <param name="installPath">游戏安装目录</param>
+    /// <param name="type">资源场景</param>
+    /// <param name="cancellationToken"></param>
+    public async Task SetScenarioPackageTypeAsync(GameId gameId, string installPath, GameScenarioPackageType type, CancellationToken cancellationToken = default)
+    {
+        GameConfig? config = await GetGameConfigAsync(gameId, cancellationToken);
+        await GameScenarioPackage.SetLocalPackageTypeAsync(installPath, config, type, cancellationToken);
+    }
+
+
+
+    /// <summary>
+    /// 安装的是基础资源时，记下只属于完整资源的分类，准备文件时据此跳过
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="package">要安装的分支（更新、修复为当前版本，预下载为预下载分支）</param>
+    private void SetBaseExcludedMatchingFields(GameInstallContext context, GameBranchPackage? package)
+    {
+        GameScenarioPackageType type = context.PackageType is not GameScenarioPackageType.Unknown
+            ? context.PackageType
+            : GameScenarioPackage.GetLocalPackageType(context.InstallPath, context.GameConfig);
+        context.BaseExcludedMatchingFields = type is GameScenarioPackageType.Base ? GameScenarioPackage.GetFullOnlyMatchingFields(package) : [];
+        if (type is not GameScenarioPackageType.Unknown)
+        {
+            _logger.LogInformation("Scenario package of ({GameBiz}): {Type}, {Count} full-only categories.", context.GameId.GameBiz, type, context.BaseExcludedMatchingFields.Count);
+        }
+    }
+
+
+
+    /// <summary>
     /// 准备游戏包
     /// </summary>
     /// <param name="context"></param>
@@ -227,6 +261,7 @@ internal partial class GamePackageService
             {
                 context.LatestGameVersion = branch.Main.Tag;
                 context.PredownloadVersion = branch.PreDownload?.Tag;
+                SetBaseExcludedMatchingFields(context, branch.Main);
                 context.GameSophonChunkBuild = await GetGameSophonChunkBuildAsync(branch, branch.Main, "", cancellationToken);
                 Version? localVersion = await GetLocalGameVersionAsync(context.InstallPath);
                 if (localVersion is not null)
@@ -272,6 +307,7 @@ internal partial class GamePackageService
                 throw new ArgumentNullException($"GameBranch of ({gameId.GameBiz}) is null.");
             }
             context.LatestGameVersion = branch.Main.Tag;
+            SetBaseExcludedMatchingFields(context, context.Operation is GameInstallOperation.Update || branch.PreDownload is null ? branch.Main : branch.PreDownload);
             if (context.Operation is GameInstallOperation.Update || branch.PreDownload is null)
             {
                 // 更新
@@ -366,6 +402,12 @@ internal partial class GamePackageService
                     bool compression = manifest.DiffDownload.Compression is not 0;
                     bool isGameOrAudio = manifest.MatchingField is "game" or "zh-cn" or "en-us" or "ja-jp" or "ko-kr";
                     SophonPatchManifest patchManifest = await GetSophonPatchManifestAsync(manifest, cancellationToken);
+                    if (context.BaseExcludedMatchingFields.Contains(manifest.MatchingField)
+                        && !ScenarioPackageFiles.AnyFileExists(context.InstallPath, patchManifest, localVersion))
+                    {
+                        // 基础资源：本地没有的完整资源分类不更新，否则一次更新就补成完整资源
+                        continue;
+                    }
                     patches.AddRange(patchManifest.Patches);
                     if (patchManifest.DeleteTags.FirstOrDefault(x => x.Tag == localVersion) is SophonPatchDeleteTag deleteTag)
                     {
@@ -487,6 +529,8 @@ internal partial class GamePackageService
                 context.DownloadMode = GameInstallDownloadMode.Chunk;
                 List<SophonChunkFile> chunks = new();
                 List<string> ignoreMatchingFields = GetIgnoreMatchingFields(context);
+                // 基础资源：不下载只属于完整资源的分类
+                ignoreMatchingFields.AddRange(context.BaseExcludedMatchingFields);
                 List<GameSophonChunkManifest> manifests = GetAvailableGameSophonChunkManifests(context.GameSophonChunkBuild, context.AudioLanguage, ignoreMatchingFields);
                 foreach (GameSophonChunkManifest manifest in manifests)
                 {
@@ -682,15 +726,32 @@ internal partial class GamePackageService
         List<(GameSophonChunkManifest Manifest, List<SophonChunkFile> Files)> newManifests = new();
         List<SophonChunkFile> chunks = new();
         List<SophonChunkFile> localChunks = new();
+        int skippedCategories = 0;
         foreach (GameSophonChunkManifest manifest in manifests)
         {
             List<SophonChunkFile> items = await GetSophonChunkFilesAsync(manifest, cancellationToken);
-            newManifests.Add((manifest, items));
-            chunks.AddRange(items);
+            List<SophonChunkFile>? localItems = null;
             if (context.LocalVersionSophonChunkBuild?.Manifests.FirstOrDefault(x => x.MatchingField == manifest.MatchingField) is GameSophonChunkManifest localManifest)
             {
-                localChunks.AddRange(await GetSophonChunkFilesAsync(localManifest, cancellationToken));
+                localItems = await GetSophonChunkFilesAsync(localManifest, cancellationToken);
             }
+            if (context.BaseExcludedMatchingFields.Contains(manifest.MatchingField)
+                && !ScenarioPackageFiles.AnyFileExists(context.InstallPath, items, localItems))
+            {
+                // 基础资源：本地没有的完整资源分类不处理，否则更新、修复会补成完整资源；游戏内另行下载过的分类照常处理
+                skippedCategories++;
+                continue;
+            }
+            newManifests.Add((manifest, items));
+            chunks.AddRange(items);
+            if (localItems is not null)
+            {
+                localChunks.AddRange(localItems);
+            }
+        }
+        if (skippedCategories > 0)
+        {
+            _logger.LogInformation("Skip {Count} full-only categories not installed locally ({GameBiz}).", skippedCategories, context.GameId.GameBiz);
         }
 
         // Windows 路径不区分大小写：只改了大小写的文件仍是同一个文件，不能算作已移除，否则更新完会把新文件删掉

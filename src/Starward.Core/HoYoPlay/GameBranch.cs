@@ -26,6 +26,13 @@ public class GameBranch
     [JsonPropertyName("pre_download")]
     public GameBranchPackage? PreDownload { get; set; }
 
+
+    /// <summary>
+    /// 安装了基础资源时是否允许预下载
+    /// </summary>
+    [JsonPropertyName("enable_base_pkg_predownload")]
+    public bool EnableBasePackagePredownload { get; set; }
+
 }
 
 
@@ -78,5 +85,20 @@ public class GameBranchPackageCategory
 
     [JsonPropertyName("matching_field")]
     public string MatchingField { get; set; }
+
+
+    /// <summary>
+    /// CATEGORY_TYPE_RESOURCE 或 CATEGORY_TYPE_AUDIO
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+
+    /// <summary>
+    /// 该分类属于哪些安装场景：CATEGORY_SCENARIO_FULL（完整资源）、CATEGORY_SCENARIO_BASE（基础资源）。
+    /// 请求 getGameBranches 时须带 scenarios_filter 才会返回只属于基础资源的分类
+    /// </summary>
+    [JsonPropertyName("scenarios")]
+    public List<string>? Scenarios { get; set; }
 
 }

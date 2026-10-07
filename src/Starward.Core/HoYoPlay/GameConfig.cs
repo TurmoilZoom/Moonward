@@ -170,6 +170,59 @@ public class GameConfig
     [JsonPropertyName("enable_ldiff")]
     public bool EnableLdiff { get; set; }
 
+
+    /// <summary>
+    /// 安装时「完整资源 / 基础资源」两个选项的名称与说明，文案随请求语言本地化
+    /// </summary>
+    [JsonPropertyName("scenario_pkg_info")]
+    public GameScenarioPackageInfo? ScenarioPackageInfo { get; set; }
+
+
+    /// <summary>
+    /// 记录本地安装的是完整资源还是基础资源的文件（相对于游戏安装目录），内容如 {"packageType":"BASE"}
+    /// </summary>
+    [JsonPropertyName("local_scenario_config_path")]
+    public string? LocalScenarioConfigPath { get; set; }
+
+
+    /// <summary>
+    /// 完整资源选项是否标「推荐」
+    /// </summary>
+    [JsonPropertyName("enable_full_pkg_recommend")]
+    public bool EnableFullPackageRecommend { get; set; }
+
+
+    /// <summary>
+    /// 安装时是否可选基础资源（目前只有绝区零）
+    /// </summary>
+    [JsonPropertyName("enable_scenario_pkg")]
+    public bool EnableScenarioPackage { get; set; }
+
+}
+
+
+
+/// <summary>
+/// 完整资源与基础资源两个安装选项的文案
+/// </summary>
+public class GameScenarioPackageInfo
+{
+
+    [JsonPropertyName("full_pkg_name")]
+    public string? FullPackageName { get; set; }
+
+
+    [JsonPropertyName("full_pkg_desc")]
+    public string? FullPackageDescription { get; set; }
+
+
+    [JsonPropertyName("base_pkg_name")]
+    public string? BasePackageName { get; set; }
+
+
+    [JsonPropertyName("base_pkg_desc")]
+    public string? BasePackageDescription { get; set; }
+
 }
 
 

@@ -6915,6 +6915,96 @@ namespace Starward.Language {
                 return ResourceManager.GetString("InstallGameDialog_AutomaticallyCreateASubfolder", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Full resources 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_FullResources {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_FullResources", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Base resources 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_BaseResources {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_BaseResources", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Recommended 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_Recommended {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_Recommended", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Voice-over 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_VoiceResources {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_VoiceResources", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Share files with the installed {0} (hard link) 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_HardLinkWithServer {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_HardLinkWithServer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 The installed {0} is on {1}. Install on the same NTFS drive to share its files via hard links and save space. 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_HardLinkRequiresSameDrive {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_HardLinkRequiresSameDrive", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Share files with other installed servers (hard link) 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_HardLinkWithOtherServers {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_HardLinkWithOtherServers", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 This game does not support hard links. 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_HardLinkNotSupported {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_HardLinkNotSupported", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No other server of {0} is installed, so there are no files to share. 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_HardLinkNoOtherServer {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_HardLinkNoOtherServer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 The installed {0} is on {1}, which is not an NTFS drive, so hard links cannot be used. 的本地化字符串。
+        /// </summary>
+        public static string InstallGameDialog_HardLinkNotNtfs {
+            get {
+                return ResourceManager.GetString("InstallGameDialog_HardLinkNotNtfs", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Click to Restart 的本地化字符串。

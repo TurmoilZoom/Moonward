@@ -2045,6 +2045,36 @@ Accetti il rischio e desideri continuare?</value>
   <data name="InstallGameDialog_AutomaticallyCreateASubfolder" xml:space="preserve">
     <value>Crea automaticamente una sottocartella</value>
   </data>
+  <data name="InstallGameDialog_FullResources" xml:space="preserve">
+    <value>Risorse complete</value>
+  </data>
+  <data name="InstallGameDialog_BaseResources" xml:space="preserve">
+    <value>Risorse di base</value>
+  </data>
+  <data name="InstallGameDialog_Recommended" xml:space="preserve">
+    <value>Consigliato</value>
+  </data>
+  <data name="InstallGameDialog_VoiceResources" xml:space="preserve">
+    <value>Doppiaggio</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithServer" xml:space="preserve">
+    <value>Condividi i file con il {0} installato (hard link)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkRequiresSameDrive" xml:space="preserve">
+    <value>Il {0} installato si trova su {1}. Installa sulla stessa unità NTFS per condividere i file tramite hard link e risparmiare spazio.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithOtherServers" xml:space="preserve">
+    <value>Condividi i file con altri server installati (hard link)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotSupported" xml:space="preserve">
+    <value>Questo gioco non supporta gli hard link.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNoOtherServer" xml:space="preserve">
+    <value>Nessun altro server di {0} è installato, quindi non ci sono file da condividere.</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotNtfs" xml:space="preserve">
+    <value>Il {0} installato si trova su {1}, che non è un'unità NTFS, quindi non è possibile usare gli hard link.</value>
+  </data>
   <data name="GameLauncherSettingDialog_UninstallGameWarning" xml:space="preserve">
     <value>Tutti i file nella seguente cartella verranno eliminati. Conferma il percorso prima di disinstallare.</value>
   </data>

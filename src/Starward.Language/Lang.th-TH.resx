@@ -2044,6 +2044,36 @@
   <data name="InstallGameDialog_AutomaticallyCreateASubfolder" xml:space="preserve">
     <value>สร้างโฟลเดอร์ย่อยอัตโนมัติ</value>
   </data>
+  <data name="InstallGameDialog_FullResources" xml:space="preserve">
+    <value>ทรัพยากรทั้งหมด</value>
+  </data>
+  <data name="InstallGameDialog_BaseResources" xml:space="preserve">
+    <value>ทรัพยากรพื้นฐาน</value>
+  </data>
+  <data name="InstallGameDialog_Recommended" xml:space="preserve">
+    <value>แนะนำ</value>
+  </data>
+  <data name="InstallGameDialog_VoiceResources" xml:space="preserve">
+    <value>เสียงพากย์</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithServer" xml:space="preserve">
+    <value>ใช้ไฟล์ร่วมกับ {0} ที่ติดตั้งไว้ (ฮาร์ดลิงก์)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkRequiresSameDrive" xml:space="preserve">
+    <value>{0} ที่ติดตั้งไว้อยู่ใน {1} ติดตั้งลงไดรฟ์ NTFS เดียวกันเพื่อใช้ไฟล์ร่วมกันผ่านฮาร์ดลิงก์และประหยัดพื้นที่</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkWithOtherServers" xml:space="preserve">
+    <value>ใช้ไฟล์ร่วมกับเซิร์ฟเวอร์อื่นที่ติดตั้งไว้ (ฮาร์ดลิงก์)</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotSupported" xml:space="preserve">
+    <value>เกมนี้ไม่รองรับฮาร์ดลิงก์</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNoOtherServer" xml:space="preserve">
+    <value>ยังไม่ได้ติดตั้งเซิร์ฟเวอร์อื่นของ {0} จึงไม่มีไฟล์ให้ใช้ร่วมกัน</value>
+  </data>
+  <data name="InstallGameDialog_HardLinkNotNtfs" xml:space="preserve">
+    <value>{0} ที่ติดตั้งไว้อยู่ใน {1} ซึ่งไม่ใช่ไดรฟ์ NTFS จึงใช้ฮาร์ดลิงก์ไม่ได้</value>
+  </data>
   <data name="GameLauncherSettingDialog_UninstallGameWarning" xml:space="preserve">
     <value>ไฟล์ทั้งหมดในโฟลเดอร์ต่อไปนี้จะถูกลบ กรุณายืนยันเส้นทางก่อนถอนการติดตั้ง</value>
   </data>
