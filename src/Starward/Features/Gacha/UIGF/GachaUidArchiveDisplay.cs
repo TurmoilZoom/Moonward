@@ -75,10 +75,36 @@ public class GachaUidArchiveDisplay : ObservableObject
     public DateTime LastItemTimeOffest { get; set => SetProperty(ref field, value); }
 
 
-    public string? Result { get; set => SetProperty(ref field, value); }
+    public string? Result
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(HasResult));
+            }
+        }
+    }
 
 
-    public string? Error { get; set => SetProperty(ref field, value); }
+    public string? Error
+    {
+        get; set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(HasError));
+            }
+        }
+    }
+
+
+    /// <summary>导入列表据此显示成功图标与文字。</summary>
+    public bool HasResult => !string.IsNullOrEmpty(Result);
+
+
+    /// <summary>导入列表据此显示失败图标与文字。</summary>
+    public bool HasError => !string.IsNullOrEmpty(Error);
 
 
 }

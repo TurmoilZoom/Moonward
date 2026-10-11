@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Xaml.Interactivity;
 using Starward.Frameworks;
@@ -50,6 +52,22 @@ public sealed partial class UIGF4GachaWindow : WindowEx
     private InAppToast? WindowToast => Interaction.GetBehaviors(StackPanel_InAppToast).OfType<InAppToast>().FirstOrDefault();
 
 
+    /// <summary>
+    /// 窗口最小宽度（逻辑像素）。按导入页算：所有固定列 + 可伸缩列的 MinWidth + 8 个列间距
+    /// + 行内容左右偏移（左 60 = 列表留白 16 + 卡片内边距 16 + 勾选框 28，右 32）+ 窗口边框，约 956，留些余量取 980。
+    /// 调整 XAML 中的列宽资源后需同步核算。
+    /// </summary>
+    private const int MinWindowWidth = 980;
+
+
+    /// <summary>窗口最小高度（逻辑像素）：标题、工具栏、表头之外至少还能显示两三行记录。</summary>
+    private const int MinWindowHeight = 480;
+
+
+    /// <summary>上次设置最小尺寸时的缩放比例，用于在窗口移到不同缩放的显示器后重新换算。</summary>
+    private double _minimumSizeScale;
+
+
 
     /// <param name="exportVersion">导出时写入的 UIGF 子版本；列表也按该版本过滤（v4.2 才显示千星奇域）。</param>
     /// <param name="openImport">为 true 时打开后定位到导入 Pivot；导入自动识别 v3/SRGF/v4，不依赖 <paramref name="exportVersion"/>。</param>
@@ -57,6 +75,16 @@ public sealed partial class UIGF4GachaWindow : WindowEx
     {
         ExportVersion = exportVersion;
         _openImport = openImport;
+        GachaExportArchives.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasExportArchives));
+            OnPropertyChanged(nameof(IsExportListEmpty));
+        };
+        GachaImportArchives.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasImportArchives));
+            OnPropertyChanged(nameof(IsImportListEmpty));
+        };
         this.InitializeComponent();
         InitializeWindow();
     }
@@ -72,14 +100,42 @@ public sealed partial class UIGF4GachaWindow : WindowEx
         SystemBackdrop = new DesktopAcrylicBackdrop();
         AdaptTitleBarButtonColorToActuallTheme();
         SetIcon();
+        UpdateMinimumSize();
         // 导入页列数最多，按其内容宽度给定初始窗口大小并居中（此前未设置，会沿用 WinUI 默认尺寸）。
-        CenterInScreen(1120, 720);
+        CenterInScreen(1200, 720);
+    }
+
+
+
+    /// <summary>
+    /// 设置窗口最小尺寸，防止表格列被截断。
+    /// <see cref="OverlappedPresenter"/> 的最小尺寸与 AppWindow 其他尺寸一样按物理像素计，需乘当前缩放比例。
+    /// </summary>
+    private void UpdateMinimumSize()
+    {
+        double scale = UIScale;
+        if (scale == _minimumSizeScale || AppWindow.Presenter is not OverlappedPresenter presenter)
+        {
+            return;
+        }
+        _minimumSizeScale = scale;
+        presenter.PreferredMinimumWidth = (int)Math.Ceiling(MinWindowWidth * scale);
+        presenter.PreferredMinimumHeight = (int)Math.Ceiling(MinWindowHeight * scale);
+    }
+
+
+
+    /// <summary>窗口移到不同缩放比例的显示器时，按新比例重新换算最小尺寸。</summary>
+    private void XamlRoot_Changed(XamlRoot sender, XamlRootChangedEventArgs args)
+    {
+        UpdateMinimumSize();
     }
 
 
 
     private void RootGrid_Loaded(object sender, RoutedEventArgs e)
     {
+        RootGrid.XamlRoot.Changed += XamlRoot_Changed;
         try
         {
             if (_openImport && Pivot_ExportImport.Items.Count > 1)
@@ -92,6 +148,7 @@ public sealed partial class UIGF4GachaWindow : WindowEx
             {
                 GachaExportArchives.Add(item);
             }
+            SyncSelectAllCheckBox(ListView_Export, CheckBox_SelectAllExport);
         }
         catch (Exception ex)
         {
@@ -106,6 +163,10 @@ public sealed partial class UIGF4GachaWindow : WindowEx
 
     private void RootGrid_Unloaded(object sender, RoutedEventArgs e)
     {
+        if (RootGrid.XamlRoot is not null)
+        {
+            RootGrid.XamlRoot.Changed -= XamlRoot_Changed;
+        }
         GachaExportArchives.Clear();
         GachaImportArchives.Clear();
         Pivot_ExportImport.Items.Clear();
@@ -118,6 +179,14 @@ public sealed partial class UIGF4GachaWindow : WindowEx
 
 
     public ObservableCollection<GachaUidArchiveDisplay> GachaExportArchives { get; } = new();
+
+
+    /// <summary>有可导出的归档时才启用导出按钮与表头全选。</summary>
+    public bool HasExportArchives => GachaExportArchives.Count > 0;
+
+
+    /// <summary>导出列表为空时在列表区域居中显示空状态。</summary>
+    public bool IsExportListEmpty => GachaExportArchives.Count == 0;
 
 
     public string? ExportError { get; set => SetProperty(ref field, value); }
@@ -170,6 +239,17 @@ public sealed partial class UIGF4GachaWindow : WindowEx
     public ObservableCollection<GachaUidArchiveDisplay> GachaImportArchives { get; } = new();
 
 
+    /// <summary>已从文件读出归档时才启用导入按钮与表头全选。</summary>
+    public bool HasImportArchives => GachaImportArchives.Count > 0;
+
+
+    /// <summary>尚未选择文件（或文件解析失败）时在列表区域居中显示空状态。</summary>
+    public bool IsImportListEmpty => GachaImportArchives.Count == 0;
+
+
+    /// <summary>工具栏左侧显示的已选文件名；解析失败时清空。</summary>
+    public string? ImportFileName { get; set => SetProperty(ref field, value); }
+
 
     public string? ImportError { get; set => SetProperty(ref field, value); }
 
@@ -184,12 +264,15 @@ public sealed partial class UIGF4GachaWindow : WindowEx
             if (File.Exists(path))
             {
                 GachaImportArchives.Clear();
+                ImportFileName = null;
                 // 按 JSON 结构自动识别 UIGF v3.0 / SRGF / UIGF v4.0–v4.2，无需用户选手版本
                 var list = await _uigfGachaService.ImportFileAsync(path);
                 foreach (var item in list)
                 {
                     GachaImportArchives.Add(item);
                 }
+                ImportFileName = Path.GetFileName(path);
+                SyncSelectAllCheckBox(ListView_Import, CheckBox_SelectAllImport);
             }
         }
         catch (Exception ex)
@@ -199,14 +282,6 @@ public sealed partial class UIGF4GachaWindow : WindowEx
             _logger.LogError(ex, "Select uigf4 file");
             WindowToast?.Error(Lang.UIGF4GachaWindow_ImportFailed, message);
         }
-    }
-
-
-
-    /// <summary>全选导入列表中的所有账号（ListView 为多选模式，SelectAll 直接生效）。</summary>
-    private void Button_SelectAllImport_Click(object sender, RoutedEventArgs e)
-    {
-        ListView_Import.SelectAll();
     }
 
 
@@ -262,6 +337,106 @@ public sealed partial class UIGF4GachaWindow : WindowEx
         }
     }
 
+
+
+    #endregion
+
+
+
+
+    #region Column Layout
+
+
+    /// <summary>导出页「最后一次抽卡」列优先保留的宽度：窗口变窄时先缩到这里，再压缩游戏名列。</summary>
+    private const double ExportNameMinWidth = 160;
+
+
+    /// <summary>导入页「最后一次抽卡」列优先保留的宽度（导入页固定列更多，留得少一些）。</summary>
+    private const double ImportNameMinWidth = 120;
+
+
+    private GachaTableColumnLayout ExportColumnLayout => (GachaTableColumnLayout)RootGrid.Resources["ExportColumnLayout"];
+
+
+    private GachaTableColumnLayout ImportColumnLayout => (GachaTableColumnLayout)RootGrid.Resources["ImportColumnLayout"];
+
+
+    /// <summary>读取 XAML 中的列宽资源，保证计算用的固定列宽与界面一致。</summary>
+    private double ColumnResource(string key) => (double)RootGrid.Resources[key];
+
+
+    /// <summary>导出页表头尺寸变化（即窗口宽度变化）时重算游戏名列宽度。</summary>
+    private void Grid_ExportHeaderColumns_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        // 固定列：图标、Uid、数量、时间；共 6 列 5 个间距
+        double fixedWidth = ColumnResource("GachaColIcon") + ColumnResource("GachaColUid") + ColumnResource("GachaColCount")
+                            + ColumnResource("GachaColTime") + 5 * ColumnResource("GachaColumnSpacing");
+        ExportColumnLayout.Update(e.NewSize.Width - fixedWidth, ExportNameMinWidth, hasResultColumn: false);
+    }
+
+
+    /// <summary>导入页表头尺寸变化（即窗口宽度变化）时重算游戏名列与结果列宽度。</summary>
+    private void Grid_ImportHeaderColumns_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        // 固定列：图标、Uid、数量、时间、时区偏移、偏移后时间；共 9 列 8 个间距
+        double fixedWidth = ColumnResource("GachaColIcon") + ColumnResource("GachaColUid") + ColumnResource("GachaColCount")
+                            + 2 * ColumnResource("GachaColTime") + ColumnResource("GachaColOffset") + 8 * ColumnResource("GachaColumnSpacing");
+        ImportColumnLayout.Update(e.NewSize.Width - fixedWidth, ImportNameMinWidth, hasResultColumn: true);
+    }
+
+
+    #endregion
+
+
+
+
+    #region Select All
+
+
+    private void CheckBox_SelectAllExport_Click(object sender, RoutedEventArgs e) => ToggleSelectAll(ListView_Export, CheckBox_SelectAllExport);
+
+
+    private void CheckBox_SelectAllImport_Click(object sender, RoutedEventArgs e) => ToggleSelectAll(ListView_Import, CheckBox_SelectAllImport);
+
+
+    private void ListView_Export_SelectionChanged(object sender, SelectionChangedEventArgs e) => SyncSelectAllCheckBox(ListView_Export, CheckBox_SelectAllExport);
+
+
+    private void ListView_Import_SelectionChanged(object sender, SelectionChangedEventArgs e) => SyncSelectAllCheckBox(ListView_Import, CheckBox_SelectAllImport);
+
+
+    /// <summary>
+    /// 表头全选复选框点击：已全选则全部取消，否则全选。
+    /// 复选框自身的勾选状态随后由 <see cref="SyncSelectAllCheckBox"/> 按实际选中数覆盖。
+    /// </summary>
+    /// <param name="listView">多选列表。</param>
+    /// <param name="checkBox">该列表表头的全选复选框。</param>
+    private static void ToggleSelectAll(ListView listView, CheckBox checkBox)
+    {
+        int total = listView.Items.Count;
+        if (total > 0 && listView.SelectedItems.Count == total)
+        {
+            listView.DeselectRange(new ItemIndexRange(0, (uint)total));
+        }
+        else
+        {
+            listView.SelectAll();
+        }
+        SyncSelectAllCheckBox(listView, checkBox);
+    }
+
+
+    /// <summary>
+    /// 按列表选中数同步表头全选复选框：全选为勾选、部分选中为不确定、未选为空。
+    /// </summary>
+    /// <param name="listView">多选列表。</param>
+    /// <param name="checkBox">该列表表头的全选复选框。</param>
+    private static void SyncSelectAllCheckBox(ListView listView, CheckBox checkBox)
+    {
+        int selected = listView.SelectedItems.Count;
+        // IsThreeState 为 false 时用户点击不会进入不确定态，但代码仍可赋 null 显示「部分选中」
+        checkBox.IsChecked = selected == 0 ? false : selected == listView.Items.Count ? true : null;
+    }
 
 
     #endregion
