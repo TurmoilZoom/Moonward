@@ -9,6 +9,7 @@ using Starward.Features.HoYoPlay;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Starward.Features.PlayTime;
@@ -56,7 +57,7 @@ internal class PlayTimeRecordService
                 {
                     var now = DateTimeOffset.Now;
                     Log(biz, pid, PlayTimeState.Stop, now.ToUnixTimeMilliseconds(), $"{process.ProcessName} [{now}]");
-                    SavePlayTimeStats(biz, pid, process.StartTime, now.DateTime);
+                    SavePlayTimeStats(biz, pid, new DateTimeOffset(process.StartTime), now);
                     break;
                 }
                 else
@@ -93,7 +94,7 @@ internal class PlayTimeRecordService
         }
 
         var now = DateTimeOffset.Now;
-        if (now - time >= TimeSpan.FromSeconds(60))
+        if (now - time >= TimeSpan.FromSeconds(10))
         {
             // 补全从开始游戏到开始记录游戏时间之间的记录
             List<PlayTimeItem> list = new List<PlayTimeItem>();
@@ -115,6 +116,15 @@ internal class PlayTimeRecordService
                     break;
                 }
             }
+            // 末尾补一条当前时刻的：第一条正式心跳在约 30 秒后才写，不补的话两者间隔可能超过 60 秒，
+            // 统计时会被当成睡眠空档切断，少算这段时间
+            list.Add(new PlayTimeItem
+            {
+                TimeStamp = now.ToUnixTimeMilliseconds(),
+                GameBiz = biz,
+                Pid = process.Id,
+                State = PlayTimeState.Play,
+            });
             using var t = dapper.BeginTransaction();
             dapper.Execute("INSERT OR REPLACE INTO PlayTimeItem (TimeStamp, GameBiz, Pid, State, CursorPos, Message) VALUES (@TimeStamp, @GameBiz, @Pid, @State, @CursorPos, @Message);", list, t);
             t.Commit();
@@ -146,27 +156,40 @@ internal class PlayTimeRecordService
 
 
 
-    private void SavePlayTimeStats(GameBiz biz, int pid, DateTime startTime, DateTime endTime)
+    /// <summary>
+    /// 游戏正常退出后，把这次进程的心跳记录按间隔切成会话写入 PlayTimeStats，并删除这些心跳。
+    /// 电脑睡眠/休眠期间没有心跳，这段空档不计入游戏时长，与未正常退出时由心跳归档的结果一致。
+    /// </summary>
+    /// <param name="biz">游戏区服（已归一化）。</param>
+    /// <param name="pid">游戏进程 ID。</param>
+    /// <param name="startTime">游戏进程启动时间。</param>
+    /// <param name="endTime">检测到游戏退出的时间，与 Stop 心跳的时间戳一致。</param>
+    private void SavePlayTimeStats(GameBiz biz, int pid, DateTimeOffset startTime, DateTimeOffset endTime)
     {
         try
         {
+            long start = startTime.ToUnixTimeMilliseconds();
+            long end = endTime.ToUnixTimeMilliseconds();
             using var dapper = DatabaseService.CreateConnection();
-            var stats = new PlayTimeStats
+            List<PlayTimeItemStruct> items = dapper.Query<PlayTimeItemStruct>(
+                "SELECT * FROM PlayTimeItem WHERE GameBiz = @biz AND Pid = @pid AND TimeStamp >= @start AND TimeStamp <= @end ORDER BY TimeStamp;",
+                new { biz = biz.ToString(), pid, start, end }).ToList();
+            List<PlayTimeStats> stats = PlayTimeStatsService.GetPlayTimeStats(items).Where(x => x.EndTime > x.StartTime).ToList();
+            if (items.Count == 0)
             {
-                GameBiz = biz,
-                Pid = pid,
-                StartTime = new DateTimeOffset(startTime).ToUnixTimeMilliseconds(),
-                EndTime = new DateTimeOffset(endTime).ToUnixTimeMilliseconds(),
-            };
+                // 心跳一条都没写进去时只能按进程起止时间记，总比整次游戏丢掉好
+                stats = [new PlayTimeStats { GameBiz = biz, Pid = pid, StartTime = start, EndTime = end }];
+            }
             using var t = dapper.BeginTransaction();
-            dapper.Execute("INSERT OR REPLACE INTO PlayTimeStats (GameBiz, Pid, StartTime, EndTime, Interruption, Type) VALUES (@GameBiz, @Pid, @StartTime, @EndTime, @Interruption, @Type);", stats);
-            dapper.Execute("DELETE FROM PlayTimeItem WHERE GameBiz = @GameBiz AND Pid = @Pid AND TimeStamp >= @StartTime AND TimeStamp <= @EndTime;", stats);
+            dapper.Execute("INSERT OR REPLACE INTO PlayTimeStats (GameBiz, Pid, StartTime, EndTime, Interruption, Type) VALUES (@GameBiz, @Pid, @StartTime, @EndTime, @Interruption, @Type);", stats, t);
+            dapper.Execute("DELETE FROM PlayTimeItem WHERE GameBiz = @biz AND Pid = @pid AND TimeStamp >= @start AND TimeStamp <= @end;", new { biz = biz.ToString(), pid, start, end }, t);
             t.Commit();
-            _logger.LogInformation("Save play time stats: GameBiz {biz}, Pid {pid}, StartTime {startTime}, EndTime {endTime}, Interruption {interruption}", biz, pid, startTime, endTime, false);
+            _logger.LogInformation("Save play time stats: GameBiz {biz}, Pid {pid}, StartTime {startTime}, EndTime {endTime}, Sessions {count}, PlayTime {playTime}",
+                biz, pid, startTime, endTime, stats.Count, TimeSpan.FromMilliseconds(stats.Sum(x => x.EndTime - x.StartTime)));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Save play time stats: GameBiz {biz}, Pid {pid}, StartTime {startTime}, EndTime {endTime}, Interruption {interruption}", biz, pid, startTime, endTime, false);
+            _logger.LogError(ex, "Save play time stats: GameBiz {biz}, Pid {pid}, StartTime {startTime}, EndTime {endTime}", biz, pid, startTime, endTime);
         }
     }
 

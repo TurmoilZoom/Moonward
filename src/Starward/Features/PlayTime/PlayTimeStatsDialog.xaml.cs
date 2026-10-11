@@ -273,22 +273,27 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
             // 每日时长
             Dictionary<DateOnly, long> timePerDay = new Dictionary<DateOnly, long>();
 
-            foreach (var session in sessions)
+            // 启动次数、最长单次、上次启动按「一次启动」算，睡眠空档切出的多段不重复计数
+            List<(long Start, long End, long Span)> launches = GroupSessionsByLaunch(sessions);
+            foreach (var launch in launches)
             {
-                long span = session.EndTime - session.StartTime;
-                totalMs += span;
-                if (span > longestSpan)
+                if (launch.Span > longestSpan)
                 {
-                    longestSpan = span;
-                    longestStart = session.StartTime;
+                    longestSpan = launch.Span;
+                    longestStart = launch.Start;
                 }
 
                 // 游戏关闭后60s才会被认为是上一次启动
-                if (session.StartTime > lastStart && now - session.EndTime > 60_000)
+                if (launch.Start > lastStart && now - launch.End > 60_000)
                 {
-                    lastStart = session.StartTime;
-                    lastSpan = span;
+                    lastStart = launch.Start;
+                    lastSpan = launch.Span;
                 }
+            }
+
+            foreach (var session in sessions)
+            {
+                totalMs += session.EndTime - session.StartTime;
 
                 DateTimeOffset startTime = DateTimeOffset.FromUnixTimeMilliseconds(session.StartTime).ToLocalTime();
                 DateTimeOffset endTime = DateTimeOffset.FromUnixTimeMilliseconds(session.EndTime).ToLocalTime();
@@ -315,7 +320,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
             UpdateYearOptions();
 
             TotalTimeText = TimeSpanToString(TimeSpan.FromMilliseconds(totalMs));
-            StartUpCountText = totalMs > 0 ? string.Format(Lang.PlayTimeStatsDialog_Started0Times, sessions.Count) : "";
+            StartUpCountText = totalMs > 0 ? string.Format(Lang.PlayTimeStatsDialog_Started0Times, launches.Count) : "";
             // 键必须与 PlayTimeButton 读取的一致（B 服归一化到官服），否则按钮显示 0h 0m。
             DatabaseService.SetValue(PlayTimeStatsService.TotalPlayTimeKey(biz), TimeSpan.FromMilliseconds(totalMs));
 
@@ -444,6 +449,36 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
             PlayTimeHeatmap.Margin = new Thickness(0, 20, 0, 0);
         }
 
+    }
+
+
+
+    /// <summary>
+    /// 把同一游戏进程的相邻会话合并成一次启动。
+    /// 电脑睡眠等心跳空档会把一次游戏切成多段（前面各段 Interruption 为 true 且 Pid 相同）；
+    /// 正常结束（Interruption 为 false）之后的会话一定属于新的启动。
+    /// </summary>
+    /// <param name="sessions">按 StartTime 升序的会话。</param>
+    /// <returns>每次启动的首段开始时间、末段结束时间与各段时长之和，按开始时间升序。</returns>
+    private static List<(long Start, long End, long Span)> GroupSessionsByLaunch(List<PlayTimeStats> sessions)
+    {
+        var launches = new List<(long Start, long End, long Span)>();
+        PlayTimeStats? previous = null;
+        foreach (var session in sessions)
+        {
+            long span = session.EndTime - session.StartTime;
+            if (previous is not null && previous.Pid == session.Pid && previous.Interruption)
+            {
+                var last = launches[^1];
+                launches[^1] = (last.Start, session.EndTime, last.Span + span);
+            }
+            else
+            {
+                launches.Add((session.StartTime, session.EndTime, span));
+            }
+            previous = session;
+        }
+        return launches;
     }
 
 
