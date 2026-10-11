@@ -181,13 +181,31 @@ internal class PlayTimeRecordService
     /// 启动进程记录游戏时间，返回游戏进程
     /// </summary>
     /// <param name="gameId"></param>
+    /// <param name="launcherProcess">
+    /// 拉起游戏的自定义启动程序进程。不为 <see langword="null"/> 时先在它存活期间持续查找游戏进程，
+    /// 它退出后仍未找到再按固定时长（约 12 秒）查找。
+    /// </param>
     /// <returns></returns>
-    public async Task<Process?> StartProcessToLogAsync(GameId gameId)
+    public async Task<Process?> StartProcessToLogAsync(GameId gameId, Process? launcherProcess = null)
     {
         try
         {
             var biz = gameId.GameBiz;
             string name = await GetGameExeNameWithoutExtensionAsync(gameId);
+            if (launcherProcess is not null)
+            {
+                // 工具何时拉起游戏不确定（如胡桃工具箱要用户在工具里手动点启动），固定时长常常不够，工具还在就一直等
+                _logger.LogInformation("Wait for game process ({biz}) while launcher process ({launcherPid}) is running", biz, launcherProcess.Id);
+                while (IsProcessRunning(launcherProcess))
+                {
+                    await Task.Delay(2000).ConfigureAwait(false);
+                    if (TryStartProcessToLog(biz, Process.GetProcessesByName(name)) is Process process)
+                    {
+                        return process;
+                    }
+                }
+                _logger.LogInformation("Launcher process ({launcherPid}) exited before game process ({biz}) was found", launcherProcess.Id, biz);
+            }
             for (int i = 0; i < 15; i++)
             {
                 await Task.Delay(2000);
@@ -199,30 +217,11 @@ internal class PlayTimeRecordService
                         continue;
                     }
                     // 未找到游戏进程
+                    _logger.LogWarning("Game process ({biz}, {name}) not found, play time will not be recorded", biz, name);
                     return null;
                 }
-                foreach (var process in processes)
+                if (TryStartProcessToLog(biz, processes) is Process process)
                 {
-                    var instance = App.FindInstanceForKey($"playtime_{process.Id}");
-                    if (instance != null)
-                    {
-                        // 已经有进程在记录该游戏
-                        _logger.LogInformation("Game process ({biz}, {gamePid}) has been recorded by process ({playtimePid})", biz, process.Id, instance.ProcessId);
-                        continue;
-                    }
-                    if (process.SessionId != Process.GetCurrentProcess().SessionId)
-                    {
-                        // 游戏进程不在当前会话
-                        _logger.LogWarning("Game process ({biz}, {gamePid}) is not in the current session", biz, process.Id);
-                        continue;
-                    }
-                    _logger.LogInformation("Start to log playtime ({biz}, {pid})", biz, process.Id);
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = AppConfig.MoonwardExecutePath,
-                        Arguments = $"playtime --biz {biz} --pid {process.Id} {AppConfig.GetDataFolderArgument()}",
-                        CreateNoWindow = true,
-                    });
                     return process;
                 }
             }
@@ -232,6 +231,62 @@ internal class PlayTimeRecordService
             _logger.LogError(ex, "Start process to log play time");
         }
         return null;
+    }
+
+
+    /// <summary>
+    /// 从按进程名找到的候选进程中取当前会话的游戏进程，尚未被记录时启动子进程记录游戏时间。
+    /// </summary>
+    /// <param name="biz">游戏区服。</param>
+    /// <param name="processes">按游戏进程名找到的候选进程。</param>
+    /// <returns>当前会话的游戏进程（已被其他进程记录的也返回）；没有则返回 <see langword="null"/>。</returns>
+    private Process? TryStartProcessToLog(GameBiz biz, Process[] processes)
+    {
+        int sessionId = Process.GetCurrentProcess().SessionId;
+        foreach (var process in processes)
+        {
+            if (process.SessionId != sessionId)
+            {
+                // 游戏进程不在当前会话
+                _logger.LogWarning("Game process ({biz}, {gamePid}) is not in the current session", biz, process.Id);
+                continue;
+            }
+            var instance = App.FindInstanceForKey($"playtime_{process.Id}");
+            if (instance != null)
+            {
+                // 已经有进程在记录该游戏（如首页与快捷方式先后启动、各自在等），不重复记录；
+                // 但游戏确实已启动，照常返回，否则等待中的一方会一直等到启动程序退出
+                _logger.LogInformation("Game process ({biz}, {gamePid}) has been recorded by process ({playtimePid})", biz, process.Id, instance.ProcessId);
+                return process;
+            }
+            _logger.LogInformation("Start to log playtime ({biz}, {pid})", biz, process.Id);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AppConfig.MoonwardExecutePath,
+                Arguments = $"playtime --biz {biz} --pid {process.Id} {AppConfig.GetDataFolderArgument()}",
+                CreateNoWindow = true,
+            });
+            return process;
+        }
+        return null;
+    }
+
+
+    /// <summary>
+    /// 进程是否仍在运行。
+    /// </summary>
+    /// <param name="process">要检查的进程。</param>
+    /// <returns>仍在运行返回 <see langword="true"/>；已退出或无法查询（如句柄无权限）返回 <see langword="false"/>，调用方随即改按固定时长查找。</returns>
+    private static bool IsProcessRunning(Process process)
+    {
+        try
+        {
+            return !process.HasExited;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
 

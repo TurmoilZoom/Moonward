@@ -846,17 +846,16 @@ internal partial class GameLauncherService
                 WorkingDirectory = Path.GetDirectoryName(exe),
             };
             Process? process = Process.Start(info);
+            if (thirdPartyTool || startWithCmd)
+            {
+                // 自定义启动程序与 CMD 只是中转，游戏进程要另外按进程名找；自定义启动程序存活期间一直等它拉起游戏。
+                // ShellExecute 打开 .url 等非可执行文件时可能拿不到进程（返回 null），此时也要找，只是按固定时长。
+                return await _playTimeRecorderService.StartProcessToLogAsync(gameId, thirdPartyTool ? process : null);
+            }
             if (process != null)
             {
-                if (thirdPartyTool || startWithCmd)
-                {
-                    return await _playTimeRecorderService.StartProcessToLogAsync(gameId);
-                }
-                else
-                {
-                    await _playTimeRecorderService.StartProcessToLogAsync(gameId, process.Id);
-                    return process;
-                }
+                await _playTimeRecorderService.StartProcessToLogAsync(gameId, process.Id);
+                return process;
             }
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == ERROR_CANCELLED)
