@@ -21,6 +21,16 @@ public class GachaUidArchiveDisplay : ObservableObject
     public string GameIcon { get; set; }
 
     /// <summary>
+    /// 是否为千星奇域归档。其图标是透明底的道具图，列表据此在图标下垫深色圆角底块，与其他游戏的方形图标对齐。
+    /// </summary>
+    public bool IsGenshinBeyond => Game.Value == "hk4eugc";
+
+    /// <summary>
+    /// 图标悬停说明：游戏名；千星奇域显示「千星奇域颂愿」（hk4eugc 不是真实 GameBiz，<see cref="GameBiz.ToGameName"/> 取不到名称）。
+    /// </summary>
+    public string GameName => IsGenshinBeyond ? Lang.GenshinBeyondGachaPage_MiliastraWonderlandOde : Game.ToGameName();
+
+    /// <summary>
     /// UIGF 根字段名（协议标识，不翻译），用于列表区分同 UID 的原神与千星奇域归档。
     /// </summary>
     public string UigfGameKey => Game.Value switch

@@ -131,6 +131,13 @@ internal class UIGFGachaService
     }
 
 
+    /// <summary>
+    /// 千星奇域归档图标：颂愿货币「绮刻之楔」（与自助查询同图）。
+    /// 若沿用原神图标，同 UID 的原神与千星奇域两行几乎无法区分。
+    /// </summary>
+    private const string GenshinBeyondIcon = "ms-appx:///Assets/Image/UI_ItemIcon_232.png";
+
+
     /// <summary>枚举本地千星奇域（GenshinBeyondGachaItem）归档，内部 GameBiz 使用 hk4eugc。</summary>
     private List<GachaUidArchiveDisplay> GetLocalGachaArchivesForGenshinBeyond()
     {
@@ -144,7 +151,7 @@ internal class UIGFGachaService
             var display = new GachaUidArchiveDisplay
             {
                 Game = "hk4eugc",
-                GameIcon = "ms-appx:///Assets/Image/icon_ys.jpg",
+                GameIcon = GenshinBeyondIcon,
                 Uid = uid,
                 Count = count,
                 LastItemGachaType = LocalizeBeyondOpGachaType(lastItem.OpGachaType),
@@ -491,7 +498,7 @@ internal class UIGFGachaService
                 GachaUidArchiveDisplay archive = new()
                 {
                     Game = "hk4eugc",
-                    GameIcon = "ms-appx:///Assets/Image/icon_ys.jpg",
+                    GameIcon = GenshinBeyondIcon,
                     Uid = item.Uid,
                     hk4eUgcList = item.List,
                     Count = item.List.Count,
