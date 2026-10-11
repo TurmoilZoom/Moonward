@@ -3158,6 +3158,15 @@ You are welcome to submit exported data to:</value>
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>Di Chuyển Sang Bản Cài Đặt</value>
   </data>
+  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
+    <value>Trò chơi vẫn đang chạy. Nếu khởi động lại ngay để hoàn tất cập nhật, việc ghi lại thời gian chơi sẽ bị dừng và thời gian còn lại của lượt chơi này sẽ không được tính. Bạn nên khởi động lại sau khi đóng trò chơi.</value>
+  </data>
+  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
+    <value>Đang ghi lại thời gian chơi</value>
+  </data>
+  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
+    <value>Vẫn khởi động lại</value>
+  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>Nút Tới Hạn: Phòng Tuyến Thứ Tư</value>
   </data>

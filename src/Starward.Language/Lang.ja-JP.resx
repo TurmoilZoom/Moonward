@@ -3157,6 +3157,15 @@
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>セットアップ版に移行</value>
   </data>
+  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
+    <value>ゲームはまだ実行中です。今すぐ再起動して更新を完了すると、プレイ時間の記録が中断され、今回のプレイの残りの時間は記録されません。ゲームを終了してから再起動することをおすすめします。</value>
+  </data>
+  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
+    <value>プレイ時間を記録中</value>
+  </data>
+  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
+    <value>このまま再起動</value>
+  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>重大ノード：第四フロンティア</value>
   </data>

@@ -3156,6 +3156,15 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>Zu Setup migrieren</value>
   </data>
+  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
+    <value>Ein Spiel läuft noch. Wenn Sie jetzt neu starten, um das Update abzuschließen, wird die Aufzeichnung der Spielzeit beendet und die restliche Zeit dieser Sitzung nicht gezählt. Starten Sie am besten neu, nachdem Sie das Spiel beendet haben.</value>
+  </data>
+  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
+    <value>Spielzeit wird aufgezeichnet</value>
+  </data>
+  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
+    <value>Trotzdem neu starten</value>
+  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>Kritischer Knoten: Vierte Grenze</value>
   </data>

@@ -3152,6 +3152,15 @@ You are welcome to submit exported data to:</value>
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>ย้ายไปใช้เวอร์ชันติดตั้ง</value>
   </data>
+  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
+    <value>เกมยังทำงานอยู่ หากรีสตาร์ทตอนนี้เพื่อทำการอัปเดตให้เสร็จ การบันทึกเวลาเล่นจะหยุดลงและเวลาที่เหลือของการเล่นครั้งนี้จะไม่ถูกนับ แนะนำให้รีสตาร์ทหลังจากปิดเกมแล้ว</value>
+  </data>
+  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
+    <value>กำลังบันทึกเวลาเล่น</value>
+  </data>
+  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
+    <value>รีสตาร์ทต่อไป</value>
+  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>โหนดวิกฤต: แนวรบที่สี่</value>
   </data>
