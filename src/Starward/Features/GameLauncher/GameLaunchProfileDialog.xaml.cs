@@ -292,9 +292,30 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
                 OnPropertyChanged(nameof(ThirdPartyToolPathVisibility));
                 OnPropertyChanged(nameof(ThirdPartyToolHintVisibility));
                 OnPropertyChanged(nameof(IsCmdToggleEnabled));
+                IsThirdPartyToolMoonward = GameLauncherService.IsMoonwardExecutable(value);
             }
         }
     }
+
+
+    /// <summary>
+    /// 刚选的文件被拒绝，或已保存的路径（拦截前的旧配置）就是 Moonward 本体；为 true 时在路径下方显示警告。
+    /// </summary>
+    public bool IsThirdPartyToolMoonward
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(ThirdPartyToolMoonwardWarningVisibility));
+            }
+        }
+    }
+
+
+    /// <summary>「不能使用 Moonward 本身」警告的可见性。</summary>
+    public Visibility ThirdPartyToolMoonwardWarningVisibility => IsThirdPartyToolMoonward ? Visibility.Visible : Visibility.Collapsed;
 
 
     /// <summary>自定义启动程序路径条可见性（路径非空时显示）。</summary>
@@ -523,6 +544,8 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         EditingName = profile.Name;
         EditingArgument = profile.Argument;
         EditingThirdPartyToolPath = profile.ThirdPartyToolPath;
+        // 路径没变时 setter 不会重算，上一个配置文件里被拒绝的警告要在这里清掉
+        IsThirdPartyToolMoonward = GameLauncherService.IsMoonwardExecutable(profile.ThirdPartyToolPath);
         EditingLoginUid = NormalizeLoginUid(profile.LoginUid);
         // uid 未变化时 setter 不会同步下拉框（如新建配置文件、首次打开时都是 0），会留空而不是显示「不指定」
         SyncSelectedLoginAccountOption();
@@ -764,7 +787,16 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             var file = await FileDialogHelper.PickSingleFileAsync(this.XamlRoot);
             if (File.Exists(file))
             {
+                if (GameLauncherService.IsMoonwardExecutable(file))
+                {
+                    // 拉起的新实例只会把激活转回本实例，游戏起不来；参数带 startgame 时还会无限拉起自己
+                    _logger.LogWarning("Rejected Moonward itself as third party tool ({biz}): {path}", CurrentGameBiz, file);
+                    IsThirdPartyToolMoonward = true;
+                    return;
+                }
                 EditingThirdPartyToolPath = file;
+                // 重选了与当前相同的路径时 setter 不触发，警告要手动清掉
+                IsThirdPartyToolMoonward = false;
             }
         }
         catch (Exception ex)

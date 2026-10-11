@@ -5157,6 +5157,15 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Moonward itself can&apos;t be used as the custom startup executable. 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_ThirdPartyToolIsMoonward {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_ThirdPartyToolIsMoonward", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Launch Game using CMD 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_LaunchGameUsingCMD {

@@ -3860,6 +3860,9 @@
   <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
     <value>이 프로필로 실행할 때 -use-d3d12를 추가하지 않습니다. 전역 DX12 설정은 그대로입니다.</value>
   </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
+    <value>Moonward 자체는 사용자 지정 실행 프로그램으로 사용할 수 없습니다</value>
+  </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>플레이 시간 통계</value>
   </data>

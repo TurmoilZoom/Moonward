@@ -758,7 +758,13 @@ internal partial class GameLauncherService
             if (string.IsNullOrWhiteSpace(exe) && enableThirdPartyTool)
             {
                 exe = thirdPartyToolPath;
-                if (File.Exists(exe))
+                if (IsMoonwardExecutable(exe))
+                {
+                    // 对话框已拦住新选择，这里兜底旧配置：忽略并直接启动游戏，否则游戏起不来甚至无限拉起自己
+                    _logger.LogWarning("Third party tool is Moonward itself, ignored: {path}", exe);
+                    exe = null;
+                }
+                else if (File.Exists(exe))
                 {
                     thirdPartyTool = true;
                     verb = Path.GetExtension(exe) is ".exe" or ".bat" ? "runas" : "";
@@ -1079,6 +1085,44 @@ internal partial class GameLauncherService
             AppConfig.SetThirdPartyToolPath(gameId.GameBiz, null);
         }
         return path;
+    }
+
+
+    /// <summary>
+    /// 判断文件是否为 Moonward 本体：当前运行的 exe，或另一份 Moonward（便携版、Debug 构建等）。
+    /// 设为自定义启动程序时，新实例只会把激活转回已运行的实例，游戏不会启动；
+    /// 启动参数带 <c>startgame</c> 时还会按同一配置一层层拉起自己，直到资源耗尽。
+    /// </summary>
+    /// <param name="path">自定义启动程序路径，可为相对路径（可移动存储）。</param>
+    /// <returns>是 Moonward 本体时返回 <see langword="true"/>；路径为空、文件不存在或读取失败时返回 <see langword="false"/>。</returns>
+    public static bool IsMoonwardExecutable(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return false;
+        }
+        try
+        {
+            path = GetFullPathIfRelativePath(path);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+            string self = Path.GetFullPath(AppConfig.MoonwardExecutePath);
+            if (string.Equals(path, self, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(Path.GetFileName(path), Path.GetFileName(self), StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            // 改过文件名的副本按产品名识别
+            string? product = FileVersionInfo.GetVersionInfo(path).ProductName;
+            return !string.IsNullOrWhiteSpace(product)
+                && string.Equals(product, FileVersionInfo.GetVersionInfo(self).ProductName, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
 

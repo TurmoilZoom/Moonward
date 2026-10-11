@@ -3860,6 +3860,9 @@ You are welcome to submit exported data to:</value>
   <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
     <value>No se añadirá -use-d3d12 al iniciar este perfil. La opción global de DX12 no cambia.</value>
   </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
+    <value>No se puede usar el propio Moonward como ejecutable de inicio personalizado.</value>
+  </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>Estadísticas de tiempo de juego</value>
   </data>

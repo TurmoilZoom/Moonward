@@ -3919,6 +3919,9 @@ Repository:</value>
   <data name="GameLaunchProfileDialog_DismissDx12ArgumentTooltip" xml:space="preserve">
     <value>Don't append -use-d3d12 for this profile. The global DX12 option is unchanged.</value>
   </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
+    <value>Moonward itself can't be used as the custom startup executable.</value>
+  </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>Playtime Statistics</value>
   </data>

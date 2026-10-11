@@ -337,6 +337,12 @@
                                 CornerRadius="8"
                                 IsEnabled="{x:Bind IsThirdPartyToolEnabled, Mode=OneWay}" />
                     </Grid>
+                    <!--  选了 Moonward 本体时拒绝并提示；旧配置里已存的同样提示（启动时会被忽略）  -->
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                               Text="{x:Bind lang:Lang.GameLaunchProfileDialog_ThirdPartyToolIsMoonward}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind ThirdPartyToolMoonwardWarningVisibility, Mode=OneWay}" />
                 </StackPanel>
 
                 <!--  分隔线下：使用 CMD 启动游戏（按配置文件保存），与自定义启动程序互斥  -->
