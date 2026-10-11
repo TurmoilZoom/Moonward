@@ -444,8 +444,14 @@ internal class GenshinBeyondGachaService
         {
             using var dapper = DatabaseService.CreateConnection();
             using var t = dapper.BeginTransaction();
-            const string insertSql = """INSERT OR REPLACE INTO GenshinBeyondGachaInfo (Id, Name, Rank, Icon) VALUES (@Id, @Name, @Rank, @Icon);""";
-            dapper.Execute(insertSql, result.Items, t);
+            const string replaceSql = """INSERT OR REPLACE INTO GenshinBeyondGachaInfo (Id, Name, Rank, Icon) VALUES (@Id, @Name, @Rank, @Icon);""";
+            const string keepIconSql = """
+                INSERT INTO GenshinBeyondGachaInfo (Id, Name, Rank, Icon) VALUES (@Id, @Name, @Rank, @Icon)
+                ON CONFLICT (Id) DO UPDATE SET Name = excluded.Name, Rank = excluded.Rank,
+                    Icon = CASE WHEN IFNULL(GenshinBeyondGachaInfo.Icon, '') = '' THEN excluded.Icon ELSE GenshinBeyondGachaInfo.Icon END;
+                """;
+            // 上游未更新且部分图标为空：只补本地没有的图标，否则镜像暂时连不上时，镜像写入的图标会被清掉
+            dapper.Execute(result.IsUpstream ? keepIconSql : replaceSql, result.Items, t);
             t.Commit();
         }
         AppConfig.GenshinBeyondGachaInfoSource = result.SourceUrl;

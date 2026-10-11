@@ -407,15 +407,20 @@ public class GenshinBeyondGachaClient
     /// <list type="number">
     /// <item>Cloudflare Pages（TurmoilZoom/Moonward-Assets）：主源。</item>
     /// <item>GitHub Pages（同一仓库，内容相同）：主源不可用时兜底。</item>
-    /// <item>上游：自 2026-07 起未更新且部分图标为空，以上都不可用时才使用。</item>
+    /// <item>上游（<see cref="UpstreamBeyondGachaInfoUrl"/>）：以上都不可用时才使用。</item>
     /// </list>
     /// </summary>
     private static readonly string[] BeyondGachaInfoUrls =
     [
         "https://moonward-assets.pages.dev/genshin/beyond/GenshinBeyondGachaInfo.json",
         "https://turmoilzoom.github.io/Moonward-Assets/genshin/beyond/GenshinBeyondGachaInfo.json",
-        "https://starward-static.scighost.com/game-assets/genshin/GenshinBeyondGachaInfo.json",
+        UpstreamBeyondGachaInfoUrl,
     ];
+
+    /// <summary>
+    /// 上游数据源：自 2026-07 起未更新，且部分物品的图标地址为空。
+    /// </summary>
+    private const string UpstreamBeyondGachaInfoUrl = "https://starward-static.scighost.com/game-assets/genshin/GenshinBeyondGachaInfo.json";
 
     /// <summary>
     /// 单个数据源的超时，超时后换下一个源。
@@ -463,7 +468,7 @@ public class GenshinBeyondGachaClient
                         item.Icon = new Uri(baseUri, item.Icon).ToString();
                     }
                 }
-                return new GenshinBeyondGachaInfoFetchResult { SourceUrl = url, ETag = responseETag, Items = items };
+                return new GenshinBeyondGachaInfoFetchResult { SourceUrl = url, ETag = responseETag, Items = items, IsUpstream = url == UpstreamBeyondGachaInfoUrl };
             }
             catch (Exception ex) when ((ex is HttpRequestException or JsonException or OperationCanceledException) && !cancellationToken.IsCancellationRequested)
             {
