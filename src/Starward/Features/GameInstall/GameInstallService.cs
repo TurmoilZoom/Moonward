@@ -751,15 +751,15 @@ internal class GameInstallService
 
 
     /// <summary>
-    /// 没有指定时决定任务是否硬链接：有记录（安装对话框里的选择）按记录；
-    /// 没有记录（更早版本或官方启动器安装的）时看安装目录是否已与其他区服共用文件，已共用的继续共用
+    /// 没有指定时决定任务是否硬链接：有记录（安装对话框里的选择）且记录的就是当前安装目录时按记录；
+    /// 没有记录（更早版本或官方启动器安装的）或区服已换了目录时，看安装目录是否已与其他区服共用文件，已共用的继续共用
     /// </summary>
     /// <param name="gameId"></param>
     /// <param name="installPath">本区服安装目录</param>
     /// <returns>是否硬链接</returns>
     private static async Task<bool> ShouldUseHardLinkAsync(GameId gameId, string installPath)
     {
-        if (AppConfig.GetGameInstallHardLink(gameId.GameBiz) is bool value)
+        if (GetRecordedHardLinkChoice(gameId.GameBiz, installPath) is bool value)
         {
             return value;
         }
@@ -777,6 +777,47 @@ internal class GameInstallService
         }
         // 要打开文件读文件 ID，放到后台线程；只抽查少量文件，开销很小
         return (await Task.Run(() => GetHardLinkedServers(currentFolder, installed))).Count > 0;
+    }
+
+
+
+    /// <summary>
+    /// 记下安装对话框里对该区服硬链接的选择，并绑定本次的安装目录
+    /// </summary>
+    /// <param name="biz"></param>
+    /// <param name="installPath">本次安装目录</param>
+    /// <param name="value">是否硬链接；<see langword="null"/> 清除记录（不能硬链接时不算选择）</param>
+    public static void RecordHardLinkChoice(GameBiz biz, string installPath, bool? value)
+    {
+        // 与安装目录的存法一致：便携版与游戏在同一可移动存储上时存相对路径，换了盘符仍能对上
+        string path = GameLauncherService.GetRelativePathIfInRemovableStorage(Path.GetFullPath(installPath), out _);
+        AppConfig.SetGameInstallHardLink(biz, value, path);
+    }
+
+
+
+    /// <summary>
+    /// 该区服记录的硬链接选择。记录只对当时的安装目录有效：区服换了目录（重新定位、自动查找到别处）就当没有记录
+    /// </summary>
+    /// <param name="biz"></param>
+    /// <param name="installPath">本区服当前安装目录</param>
+    /// <returns>没有记录、没记目录或目录不一致时为 <see langword="null"/></returns>
+    private static bool? GetRecordedHardLinkChoice(GameBiz biz, string installPath)
+    {
+        if (AppConfig.GetGameInstallHardLink(biz) is not bool value || AppConfig.GetGameInstallHardLinkPath(biz) is not { Length: > 0 } recordedPath)
+        {
+            return null;
+        }
+        try
+        {
+            string recorded = Path.TrimEndingDirectorySeparator(GameLauncherService.GetFullPathIfRelativePath(recordedPath));
+            string current = Path.TrimEndingDirectorySeparator(Path.GetFullPath(installPath));
+            return string.Equals(recorded, current, StringComparison.OrdinalIgnoreCase) ? value : null;
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
+        }
     }
 
 

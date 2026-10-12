@@ -541,7 +541,7 @@ public sealed partial class InstallGameDialog : ContentDialog
             {
                 _installStarted = true;
                 // 按区服记下这次的选择，继续下载和之后的更新沿用；不能硬链接时不算选择，清掉旧记录
-                AppConfig.SetGameInstallHardLink(CurrentGameId.GameBiz, HardLinkAvailable ? HardLinkChecked : null);
+                GameInstallService.RecordHardLinkChoice(CurrentGameId.GameBiz, InstallationPath, HardLinkAvailable ? HardLinkChecked : null);
                 GameLauncherService.ChangeGameInstallPath(CurrentGameId, InstallationPath);
                 WeakReferenceMessenger.Default.Send(new GameInstallTaskStartedMessage(task));
                 if (_selectPath is not null && InstallationPath.EndsWith(CurrentGameId.GameBiz))

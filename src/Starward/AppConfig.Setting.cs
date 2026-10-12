@@ -913,7 +913,8 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 安装该区服时在安装对话框里是否选择了硬链接，之后的继续下载、更新、预下载、修复都沿用
+    /// 安装该区服时在安装对话框里是否选择了硬链接（上次的选择，不核对目录）。
+    /// 继续下载、更新、预下载、修复是否沿用，还要核对 <see cref="GetGameInstallHardLinkPath"/> 是否仍是当前安装目录
     /// </summary>
     /// <param name="biz"></param>
     /// <returns>没有记录（更早版本或官方启动器安装的、安装时不能硬链接）时为 <see langword="null"/></returns>
@@ -923,13 +924,25 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 记录安装该区服时是否选择了硬链接，<see langword="null"/> 清除记录
+    /// 做出 <see cref="GetGameInstallHardLink"/> 这次选择时的安装目录（与安装目录同样，便携版在可移动存储上时为相对路径）
+    /// </summary>
+    /// <param name="biz"></param>
+    /// <returns>没有记录时为 <see langword="null"/></returns>
+    public static string? GetGameInstallHardLinkPath(GameBiz biz)
+    {
+        return GetValue<string>(null, $"install_hard_link_path_{biz}");
+    }
+
+    /// <summary>
+    /// 记录安装该区服时是否选择了硬链接及当时的安装目录，<paramref name="value"/> 为 <see langword="null"/> 时一并清除
     /// </summary>
     /// <param name="biz"></param>
     /// <param name="value"></param>
-    public static void SetGameInstallHardLink(GameBiz biz, bool? value)
+    /// <param name="installPath">本次安装目录</param>
+    public static void SetGameInstallHardLink(GameBiz biz, bool? value, string? installPath)
     {
         SetValue(value?.ToString(), $"install_hard_link_{biz}");
+        SetValue(value is null ? null : installPath, $"install_hard_link_path_{biz}");
     }
 
     /// <summary>
