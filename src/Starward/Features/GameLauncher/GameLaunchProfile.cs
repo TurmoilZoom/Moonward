@@ -7,16 +7,16 @@ namespace Starward.Features.GameLauncher;
 
 /// <summary>
 /// 启动参数配置文件。每个游戏区服可以有多个配置文件，每个配置文件保存一套命令行参数与自定义启动程序设置。
-/// 内部名 <c>configN</c> 与显示名「配置文件 N」序号一一对应（N ≥ 1，无数量上限）。
-/// 第一个配置文件 Id 固定为 <see cref="DefaultId"/>（config1），其参数/工具数据存储在 legacy 设置键中；
-/// 其余配置文件序列化为 JSON 存储。
+/// 内部名 <c>configN</c> 与显示名「配置文件 N」序号一一对应（N ≥ 1，无数量上限）；新建时取最小的空缺编号。
+/// <see cref="DefaultId"/>（config1）的参数/工具数据存储在 legacy 设置键中，其余配置文件序列化为 JSON 存储。
+/// 每个配置文件（含 config1）都可删除，但至少保留一个；config1 删除后由 <c>launch_profile_default_deleted_{biz}</c> 标记。
 /// 「启动方式」另有 <see cref="NoneId"/>（无），不在本配置对话框中管理，表示不使用任何启动参数配置。
 /// </summary>
 public sealed class GameLaunchProfile : ObservableObject
 {
 
     /// <summary>
-    /// 第一个配置文件的内部名（config1 ↔ 配置文件1），数据存于 legacy 设置键。
+    /// 配置文件 1 的内部名（config1 ↔ 配置文件1），数据存于 legacy 设置键。可被删除，编号空出后新建时会重新用上。
     /// </summary>
     public const string DefaultId = "config1";
 

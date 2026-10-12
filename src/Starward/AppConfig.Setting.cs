@@ -1132,6 +1132,45 @@ public static partial class AppConfig
         SetValue(value, $"launch_profile_start_with_cmd_{biz}");
     }
 
+
+    /// <summary>
+    /// config1 是否已被删除。config1 的数据存在 legacy 键里，没有「不存在」这种状态，靠此标记表示；
+    /// 未设置过（旧数据）时为 <see langword="false"/>，即 config1 存在。
+    /// </summary>
+    /// <param name="biz">游戏区服。</param>
+    public static bool GetDefaultLaunchProfileDeleted(GameBiz biz)
+    {
+        return GetValue<bool>(false, $"launch_profile_default_deleted_{biz}");
+    }
+
+
+    /// <summary>
+    /// 设置 config1 是否已被删除。删除时应同时调用 <see cref="ResetDefaultLaunchProfile"/> 清空数据。
+    /// </summary>
+    /// <param name="biz">游戏区服。</param>
+    /// <param name="value">是否已删除。</param>
+    public static void SetDefaultLaunchProfileDeleted(GameBiz biz, bool value)
+    {
+        SetValue(value, $"launch_profile_default_deleted_{biz}");
+    }
+
+
+    /// <summary>
+    /// 把 config1 存在 legacy 键里的数据恢复为新建配置文件的初始值：删除 config1、以及编号空出来后重新新建 config1 时使用。
+    /// </summary>
+    /// <param name="biz">游戏区服。</param>
+    public static void ResetDefaultLaunchProfile(GameBiz biz)
+    {
+        SetStartArgument(biz, null);
+        SetThirdPartyToolPath(biz, null);
+        SetEnableThirdPartyTool(biz, false);
+        SetDefaultLaunchProfileName(biz, null);
+        SetDefaultLaunchLoginUid(biz, null);
+        SetDefaultLaunchProfileSkipAutoDx12(biz, false);
+        // 显式写 false：与新建的其他配置文件一致，不继承旧版全局 CMD 开关
+        SetDefaultLaunchProfileStartWithCmd(biz, false);
+    }
+
     /// <summary>
     /// 获取当前在启动参数编辑界面选中的配置文件内部名（configN）。
     /// </summary>
@@ -1187,6 +1226,7 @@ public static partial class AppConfig
 
     /// <summary>
     /// 解析启动方式：是否为「无」、以及对应的配置文件（config1 时 profile 为 null，由调用方读 legacy 键）。
+    /// 配置文件不存在（已删除，或 URL / 快捷方式里写的编号从未建过）时按「无」启动，与「选择启动方式」下拉框此时显示「无」一致。
     /// </summary>
     /// <param name="biz">游戏区服。</param>
     /// <param name="profileId">启动方式 / 配置内部名；null 或 none 表示「无」。</param>
@@ -1200,12 +1240,15 @@ public static partial class AppConfig
             useNoneLaunchMethod = true;
             return;
         }
-        useNoneLaunchMethod = false;
         if (GameLaunchProfile.IsDefaultId(profileId))
         {
+            // config1 删除后 legacy 键已清空，不能再按它启动（StartWithCmd 读不到还会回退旧全局开关）
+            useNoneLaunchMethod = GetDefaultLaunchProfileDeleted(biz);
             return;
         }
         profile = GetLaunchProfileById(biz, profileId);
+        // 以前找不到时 profile 为 null，会被当成 config1 启动；config1 也可删除后不能再这样回退
+        useNoneLaunchMethod = profile is null;
     }
 
 

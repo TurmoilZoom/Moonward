@@ -236,17 +236,21 @@ public sealed partial class StartGameMenu : UserControl
             Id = GameLaunchProfile.NoneId,
             Name = Lang.StartGameMenu_LaunchMethodNone,
         });
-        var config1 = new GameLaunchProfile
+        // 配置文件 1 可被删除（见 AppConfig.GetDefaultLaunchProfileDeleted），删了就不列出
+        if (!AppConfig.GetDefaultLaunchProfileDeleted(CurrentGameBiz))
         {
-            Id = GameLaunchProfile.DefaultId,
-            Name = ProfileNameFromId(GameLaunchProfile.DefaultId, AppConfig.GetDefaultLaunchProfileName(CurrentGameBiz)),
-            Argument = AppConfig.GetStartArgument(CurrentGameBiz),
-            EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
-            ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
-            LoginUid = AppConfig.GetDefaultLaunchLoginUid(CurrentGameBiz),
-        };
-        Profiles.Add(config1);
-        foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz))
+            Profiles.Add(new GameLaunchProfile
+            {
+                Id = GameLaunchProfile.DefaultId,
+                Name = ProfileNameFromId(GameLaunchProfile.DefaultId, AppConfig.GetDefaultLaunchProfileName(CurrentGameBiz)),
+                Argument = AppConfig.GetStartArgument(CurrentGameBiz),
+                EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
+                ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
+                LoginUid = AppConfig.GetDefaultLaunchLoginUid(CurrentGameBiz),
+            });
+        }
+        // 按编号排，与启动参数配置对话框一致
+        foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz).OrderBy(p => GameLaunchProfile.TryGetIndex(p.Id)))
         {
             if (GameLaunchProfile.IsKnownId(extra.Id) && !extra.IsDefault && !extra.IsNone)
             {

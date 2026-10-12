@@ -111,7 +111,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 所有启动配置文件，作为下拉框数据源。第一个固定为 config1（配置文件1）；不含「无」。
+    /// 所有启动配置文件，作为下拉框数据源，按编号排序（配置文件 1 被删除时不在其中）；不含「无」。
     /// </summary>
     public ObservableCollection<GameLaunchProfile> Profiles { get; } = new();
 
@@ -135,9 +135,9 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
 
     /// <summary>
-    /// 是否可以删除当前配置文件（默认配置文件不可删除）。
+    /// 是否可以删除当前配置文件：任何配置文件（含配置文件 1）都可删，但至少保留一个。
     /// </summary>
-    public bool CanDeleteProfile => SelectedProfile is { IsDefault: false };
+    public bool CanDeleteProfile => SelectedProfile is not null && Profiles.Count > 1;
 
 
     /// <summary>
@@ -541,34 +541,38 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
         LoadLoginAccountOptions();
 
         Profiles.Clear();
-        var config1 = new GameLaunchProfile
+        List<GameLaunchProfile> extras = AppConfig.GetExtraLaunchProfiles(CurrentGameBiz)
+            .Where(p => GameLaunchProfile.IsKnownId(p.Id) && !p.IsDefault && !p.IsNone)
+            .ToList();
+        if (extras.Count == 0 && AppConfig.GetDefaultLaunchProfileDeleted(CurrentGameBiz))
         {
-            Id = GameLaunchProfile.DefaultId,
-            Name = ProfileNameFromId(GameLaunchProfile.DefaultId, AppConfig.GetDefaultLaunchProfileName(CurrentGameBiz)),
-            Argument = AppConfig.GetStartArgument(CurrentGameBiz),
-            EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
-            ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
-            LoginUid = AppConfig.GetDefaultLaunchLoginUid(CurrentGameBiz),
-            SkipAutoDx12 = AppConfig.GetDefaultLaunchProfileSkipAutoDx12(CurrentGameBiz),
-            StartWithCmd = AppConfig.GetDefaultLaunchProfileStartWithCmd(CurrentGameBiz),
-        };
-        Profiles.Add(config1);
-        foreach (GameLaunchProfile extra in AppConfig.GetExtraLaunchProfiles(CurrentGameBiz))
+            // 删除时会保留最后一个，正常走不到；手改设置等导致一个都不剩时恢复一个空的配置文件 1，对话框总要有可编辑的配置
+            AppConfig.ResetDefaultLaunchProfile(CurrentGameBiz);
+            AppConfig.SetDefaultLaunchProfileDeleted(CurrentGameBiz, false);
+        }
+        if (!AppConfig.GetDefaultLaunchProfileDeleted(CurrentGameBiz))
         {
-            if (GameLaunchProfile.IsKnownId(extra.Id) && !extra.IsDefault && !extra.IsNone)
+            Profiles.Add(new GameLaunchProfile
             {
-                extra.Id = GameLaunchProfile.NormalizeId(extra.Id);
-                extra.Name = ProfileNameFromId(extra.Id, extra.Name);
-                Profiles.Add(extra);
-            }
+                Id = GameLaunchProfile.DefaultId,
+                Name = ProfileNameFromId(GameLaunchProfile.DefaultId, AppConfig.GetDefaultLaunchProfileName(CurrentGameBiz)),
+                Argument = AppConfig.GetStartArgument(CurrentGameBiz),
+                EnableThirdPartyTool = AppConfig.GetEnableThirdPartyTool(CurrentGameBiz),
+                ThirdPartyToolPath = GameLauncherService.GetThirdPartyToolPath(CurrentGameId),
+                LoginUid = AppConfig.GetDefaultLaunchLoginUid(CurrentGameBiz),
+                SkipAutoDx12 = AppConfig.GetDefaultLaunchProfileSkipAutoDx12(CurrentGameBiz),
+                StartWithCmd = AppConfig.GetDefaultLaunchProfileStartWithCmd(CurrentGameBiz),
+            });
+        }
+        // 按编号排：新建时补上的空缺编号排回原位置，而不是列表末尾
+        foreach (GameLaunchProfile extra in extras.OrderBy(p => GameLaunchProfile.TryGetIndex(p.Id)))
+        {
+            extra.Name = ProfileNameFromId(extra.Id, extra.Name);
+            Profiles.Add(extra);
         }
 
         string? selectedId = AppConfig.GetSelectedLaunchProfileId(CurrentGameBiz);
-        if (!GameLaunchProfile.IsKnownId(selectedId))
-        {
-            selectedId = GameLaunchProfile.DefaultId;
-        }
-        GameLaunchProfile target = Profiles.FirstOrDefault(p => string.Equals(p.Id, selectedId, StringComparison.OrdinalIgnoreCase)) ?? config1;
+        GameLaunchProfile target = Profiles.FirstOrDefault(p => string.Equals(p.Id, selectedId, StringComparison.OrdinalIgnoreCase)) ?? Profiles[0];
         SelectProfileCore(target);
     }
 
@@ -827,6 +831,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
     private void CreateNewProfileCore()
     {
+        // 取最小的空缺编号（删过的编号会被重新用上，含配置文件 1）
         string id = GameLaunchProfile.GetNextAvailableId(Profiles.Select(p => p.Id));
         // Name 序号必须与 configN 中的 N 一致（如 config3 → 配置文件3）
         var profile = new GameLaunchProfile
@@ -836,7 +841,15 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
             // 显式写入，新配置文件不继承旧版全局 CMD 开关
             StartWithCmd = false,
         };
-        Profiles.Add(profile);
+        if (profile.IsDefault)
+        {
+            // 配置文件 1 的数据仍存 legacy 键：删除时已清空，这里再重置一遍并取消删除标记
+            AppConfig.ResetDefaultLaunchProfile(CurrentGameBiz);
+            AppConfig.SetDefaultLaunchProfileDeleted(CurrentGameBiz, false);
+        }
+        // 按编号插入，补上的空缺编号排回原位置
+        int index = GameLaunchProfile.TryGetIndex(id) ?? int.MaxValue;
+        Profiles.Insert(Profiles.Count(p => (GameLaunchProfile.TryGetIndex(p.Id) ?? int.MaxValue) < index), profile);
         PersistExtraProfiles();
         SelectProfileCore(profile);
     }
@@ -855,12 +868,23 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     private void DeleteProfile_Confirm_Click(object sender, RoutedEventArgs e)
     {
         FlyoutBase.GetAttachedFlyout(Button_ProfileMore)?.Hide();
-        if (SelectedProfile is not GameLaunchProfile p || p.IsDefault)
+        if (SelectedProfile is not GameLaunchProfile p || Profiles.Count <= 1)
         {
             return;
         }
         Profiles.Remove(p);
+        if (p.IsDefault)
+        {
+            // 配置文件 1 的数据在 legacy 键里：清空并标记已删除，编号空出来后新建时会重新用上
+            AppConfig.ResetDefaultLaunchProfile(CurrentGameBiz);
+            AppConfig.SetDefaultLaunchProfileDeleted(CurrentGameBiz, true);
+        }
         PersistExtraProfiles();
+        if (string.Equals(AppConfig.GetActiveLaunchProfileId(CurrentGameBiz), p.Id, StringComparison.OrdinalIgnoreCase))
+        {
+            // 正在生效的配置被删：改回「无」。否则编号被新建的配置复用时，会悄悄变成按新配置启动
+            AppConfig.SetActiveLaunchProfileId(CurrentGameBiz, GameLaunchProfile.NoneId);
+        }
         SelectProfileCore(Profiles[0]);
     }
 
