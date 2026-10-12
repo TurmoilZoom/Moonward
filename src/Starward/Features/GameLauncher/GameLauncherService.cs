@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
@@ -741,7 +742,9 @@ internal partial class GameLauncherService
                 enableThirdPartyTool = profile?.EnableThirdPartyTool ?? AppConfig.GetEnableThirdPartyTool(gameId.GameBiz);
                 thirdPartyToolPath = profile is null
                     ? GetThirdPartyToolPath(gameId)
-                    : (string.IsNullOrWhiteSpace(profile.ThirdPartyToolPath) ? null : GetFullPathIfRelativePath(profile.ThirdPartyToolPath));
+                    : (string.IsNullOrWhiteSpace(profile.ThirdPartyToolPath) ? null
+                        : IsLaunchUrl(profile.ThirdPartyToolPath) ? profile.ThirdPartyToolPath.Trim()
+                        : GetFullPathIfRelativePath(profile.ThirdPartyToolPath));
                 startArgument = profile is null ? AppConfig.GetStartArgument(gameId.GameBiz) : profile.Argument;
             }
 
@@ -755,10 +758,33 @@ internal partial class GameLauncherService
                 }
             }
             bool thirdPartyTool = false;
+            bool thirdPartyUrl = false;
             if (string.IsNullOrWhiteSpace(exe) && enableThirdPartyTool)
             {
                 exe = thirdPartyToolPath;
-                if (IsMoonwardExecutable(exe))
+                if (IsLaunchUrl(exe))
+                {
+                    if (IsAllowedLaunchUrl(exe))
+                    {
+                        if (!IsLaunchUrlRegistered(exe))
+                        {
+                            // 协议没注册时打开链接不报错，而是弹系统「选择应用」并把它当启动程序返回，首页会一直等；
+                            // 也不能悄悄改为直接启动游戏（用户选的是经由该程序启动），交给调用方提示
+                            throw new ThirdPartyToolUrlNotRegisteredException(exe!);
+                        }
+                        // 链接交给系统按协议打开，是否提权由目标程序决定
+                        thirdPartyTool = true;
+                        thirdPartyUrl = true;
+                        verb = "";
+                    }
+                    else
+                    {
+                        // 对话框已拦住，这里兜底手改的配置：网页打开后等不到游戏，moonward:// 会拉起自己
+                        _logger.LogWarning("Third party tool url is not allowed, ignored: {url}", exe);
+                        exe = null;
+                    }
+                }
+                else if (IsMoonwardExecutable(exe))
                 {
                     // 对话框已拦住新选择，这里兜底旧配置：忽略并直接启动游戏，否则游戏起不来甚至无限拉起自己
                     _logger.LogWarning("Third party tool is Moonward itself, ignored: {path}", exe);
@@ -831,6 +857,11 @@ internal partial class GameLauncherService
             {
                 arg += " -use-d3d12";
             }
+            if (thirdPartyUrl)
+            {
+                // 按协议打开链接没有命令行，参数（含上面自动附加的）无处可传；对话框里也禁用了参数输入
+                arg = null;
+            }
 
             if (gameId.GameBiz.Game is GameBiz.hk4e)
             {
@@ -849,14 +880,26 @@ internal partial class GameLauncherService
                 Arguments = arg,
                 UseShellExecute = true,
                 Verb = verb,
-                WorkingDirectory = Path.GetDirectoryName(exe),
+                WorkingDirectory = thirdPartyUrl ? null : Path.GetDirectoryName(exe),
             };
-            Process? process = Process.Start(info);
+            Process? process;
+            try
+            {
+                process = Process.Start(info);
+            }
+            catch (Win32Exception ex) when (thirdPartyUrl && ex.NativeErrorCode != ERROR_CANCELLED)
+            {
+                // 协议还在注册表里而对应程序已删掉（卸载没清干净）时打开失败（实测 CO_E_APPNOTFOUND），与未注册同样提示；
+                // 取消了目标程序的 UAC 仍按原逻辑当作用户取消
+                throw new ThirdPartyToolUrlNotRegisteredException(exe, ex);
+            }
             if (thirdPartyTool || startWithCmd)
             {
                 // 自定义启动程序与 CMD 只是中转，游戏进程要另外按进程名找；自定义启动程序存活期间一直等它拉起游戏。
                 // ShellExecute 打开 .url 等非可执行文件时可能拿不到进程（返回 null），此时也要找，只是按固定时长。
-                return await _playTimeRecorderService.StartProcessToLogAsync(gameId, thirdPartyTool ? process : null);
+                // 链接常拿不到进程，或拿到的是转交给已运行实例后马上退出的新实例，按更长时长找。
+                return await _playTimeRecorderService.StartProcessToLogAsync(gameId, thirdPartyTool ? process : null,
+                    thirdPartyUrl ? LaunchUrlGameWaitTimeout : null);
             }
             if (process != null)
             {
@@ -1049,6 +1092,11 @@ internal partial class GameLauncherService
     public static string? GetThirdPartyToolPath(GameId gameId)
     {
         string? path = AppConfig.GetThirdPartyToolPath(gameId.GameBiz);
+        if (IsLaunchUrl(path))
+        {
+            // 链接不是文件，不能按路径补全或判存在，否则会被当成失效路径清掉
+            return path!.Trim();
+        }
         if (!string.IsNullOrWhiteSpace(path))
         {
             path = GetFullPathIfRelativePath(path);
@@ -1073,7 +1121,12 @@ internal partial class GameLauncherService
     /// <returns></returns>
     public static string? SetThirdPartyToolPath(GameId gameId, string? path)
     {
-        if (File.Exists(path))
+        if (IsLaunchUrl(path))
+        {
+            path = path!.Trim();
+            AppConfig.SetThirdPartyToolPath(gameId.GameBiz, path);
+        }
+        else if (File.Exists(path))
         {
             path = Path.GetFullPath(path);
             string relativePath = GetRelativePathIfInRemovableStorage(path, out bool removable);
@@ -1118,6 +1171,80 @@ internal partial class GameLauncherService
             string? product = FileVersionInfo.GetVersionInfo(path).ProductName;
             return !string.IsNullOrWhiteSpace(product)
                 && string.Equals(product, FileVersionInfo.GetVersionInfo(self).ProductName, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
+    /// <summary>
+    /// 不能作为自定义启动链接的协议：网页打开后不会拉起游戏（file 链接不算链接，见 <see cref="IsLaunchUrl"/>）；
+    /// Moonward 自己的协议（含上游 starward://）会转回本程序，<c>startgame</c> 时还会一层层拉起自己。
+    /// </summary>
+    private static readonly HashSet<string> DisallowedLaunchUrlSchemes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        Uri.UriSchemeHttp,
+        Uri.UriSchemeHttps,
+        "moonward",
+        "starward",
+    };
+
+
+    /// <summary>
+    /// 通过链接启动且拿不到中转进程时查找游戏进程的时长。链接的目标程序本该自动拉起游戏，
+    /// 但冷启动（如胡桃工具箱加载元数据）常超过启动程序的默认 12 秒。
+    /// </summary>
+    private static readonly TimeSpan LaunchUrlGameWaitTimeout = TimeSpan.FromSeconds(90);
+
+
+    /// <summary>
+    /// 自定义启动程序是否为链接（URL 协议）形式，如 <c>hutao://launch</c>。只看形式，不判断能否使用。
+    /// </summary>
+    /// <param name="value">自定义启动程序路径或链接。</param>
+    /// <returns>是带协议名的绝对 URI 且不是文件路径时返回 <see langword="true"/>；盘符路径（<c>C:\…</c>）的协议名只有一个字母，不算。</returns>
+    public static bool IsLaunchUrl(string? value)
+    {
+        return !string.IsNullOrWhiteSpace(value)
+            && Uri.TryCreate(value.Trim(), UriKind.Absolute, out Uri? uri)
+            && uri.Scheme.Length > 1
+            && !uri.IsFile;
+    }
+
+
+    /// <summary>
+    /// 链接能否作为自定义启动程序：须为 <see cref="IsLaunchUrl"/> 形式，且不是 <see cref="DisallowedLaunchUrlSchemes"/> 中的协议。
+    /// </summary>
+    /// <param name="value">用户输入或已保存的链接。</param>
+    /// <returns>可以使用时返回 <see langword="true"/>。</returns>
+    public static bool IsAllowedLaunchUrl(string? value)
+    {
+        return IsLaunchUrl(value)
+            && Uri.TryCreate(value!.Trim(), UriKind.Absolute, out Uri? uri)
+            && !DisallowedLaunchUrlSchemes.Contains(uri.Scheme);
+    }
+
+
+    /// <summary>
+    /// 系统里是否有程序注册了链接的协议。普通程序写注册表注册的（如胡桃安装版 <c>hutao:</c>）与打包应用声明的（如 <c>ms-settings:</c>）都能查到。
+    /// </summary>
+    /// <param name="value">链接。</param>
+    /// <returns>查到协议关联时返回 <see langword="true"/>；不是链接或查不到时返回 <see langword="false"/>。</returns>
+    public static bool IsLaunchUrlRegistered(string? value)
+    {
+        if (!IsLaunchUrl(value) || !Uri.TryCreate(value!.Trim(), UriKind.Absolute, out Uri? uri))
+        {
+            return false;
+        }
+        try
+        {
+            // 查 ProgID：实测（Win11 26200）普通程序注册的（hutao）与打包应用的（ms-settings）都能查到，未注册的返回 ERROR_NO_ASSOCIATION。
+            // 不能查 AppId（普通程序注册的协议没有，会误判为未注册），也不能查命令行 / 可执行文件（带 IS_PROTOCOL 时对所有协议都失败）
+            var sb = new StringBuilder(1024);
+            uint length = (uint)sb.Capacity;
+            return ShlwApi.AssocQueryString(ShlwApi.ASSOCF.ASSOCF_IS_PROTOCOL | ShlwApi.ASSOCF.ASSOCF_INIT_IGNOREUNKNOWN,
+                ShlwApi.ASSOCSTR.ASSOCSTR_PROGID, uri.Scheme, null, sb, ref length).Succeeded;
         }
         catch
         {

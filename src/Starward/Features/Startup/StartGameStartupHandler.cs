@@ -42,9 +42,9 @@ internal sealed class StartGameStartupHandler : IStartupHandler
                 // App_UnhandledException 只记日志不置 Handled，进程直接终止且用户看不到任何提示。
                 // 行为与 moonward://startgame 对齐：记日志 + 弹窗，然后用完即退。
                 ILogger<StartGameStartupHandler> logger = AppConfig.GetLogger<StartGameStartupHandler>();
-                if (ex is GameRunningException)
+                if (ex is GameRunningException or ThirdPartyToolUrlNotRegisteredException)
                 {
-                    // 可预期：重复启动同一个游戏，不是故障，不留堆栈
+                    // 可预期：重复启动同一个游戏、自定义启动链接的程序没装，不是故障，不留堆栈
                     logger.LogInformation("Start game by command line: {message}", ex.Message);
                 }
                 else

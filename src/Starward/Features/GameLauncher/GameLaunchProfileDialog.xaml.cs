@@ -158,7 +158,7 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     /// <summary>
     /// 当前配置文件对应的 URL 协议启动指令预览（含编辑中的登录 UID）。
     /// </summary>
-    public string ProfileStartGameUrl => UrlProtocolService.BuildStartGameUrl(CurrentGameBiz, SelectedProfile?.Id, EditingLoginUid > 0 ? EditingLoginUid : null);
+    public string ProfileStartGameUrl => UrlProtocolService.BuildStartGameUrl(CurrentGameBiz, SelectedProfile?.Id, EditingLoginUid > 0 && IsLoginAccountEnabled ? EditingLoginUid : null);
 
 
     /// <summary>
@@ -185,6 +185,16 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
 
     /// <summary>登录账号行可见性。</summary>
     public Visibility LoginAccountVisibility => ShowLoginAccount ? Visibility.Visible : Visibility.Collapsed;
+
+
+    /// <summary>
+    /// 登录账号是否可选：设了自定义启动程序（程序或链接）时启动的是工具而非游戏，登录票据不会附加，禁用。
+    /// </summary>
+    public bool IsLoginAccountEnabled => string.IsNullOrEmpty(EditingThirdPartyToolPath);
+
+
+    /// <summary>「使用自定义启动程序时不会自动登录」说明的可见性。</summary>
+    public Visibility LoginAccountIgnoredVisibility => IsLoginAccountEnabled ? Visibility.Collapsed : Visibility.Visible;
 
 
     /// <summary>
@@ -292,9 +302,91 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
                 OnPropertyChanged(nameof(ThirdPartyToolPathVisibility));
                 OnPropertyChanged(nameof(ThirdPartyToolHintVisibility));
                 OnPropertyChanged(nameof(IsCmdToggleEnabled));
+                OnPropertyChanged(nameof(IsArgumentEnabled));
+                OnPropertyChanged(nameof(ArgumentNotPassedToUrlVisibility));
+                OnPropertyChanged(nameof(Dx12ArgumentVisibility));
+                OnPropertyChanged(nameof(IsLoginAccountEnabled));
+                OnPropertyChanged(nameof(LoginAccountIgnoredVisibility));
+                OnPropertyChanged(nameof(ProfileStartGameUrl));
                 IsThirdPartyToolMoonward = GameLauncherService.IsMoonwardExecutable(value);
+                ThirdPartyToolUrlWarning = GetThirdPartyToolUrlProblem(value);
             }
         }
+    }
+
+
+    /// <summary>自定义启动程序是否为链接（URL 协议）。</summary>
+    public bool IsThirdPartyToolUrl => GameLauncherService.IsLaunchUrl(EditingThirdPartyToolPath);
+
+
+    /// <summary>命令行参数是否可编辑：自定义启动程序是链接时参数无处可传，禁用。</summary>
+    public bool IsArgumentEnabled => !IsThirdPartyToolUrl;
+
+
+    /// <summary>「通过链接启动时不传递命令行参数」说明的可见性。</summary>
+    public Visibility ArgumentNotPassedToUrlVisibility => IsThirdPartyToolUrl ? Visibility.Visible : Visibility.Collapsed;
+
+
+    /// <summary>
+    /// 链接输入框确认时的错误提示（协议不能用 / 没有程序注册该协议）；为 <see langword="null"/> 时不显示，改动输入后清除。
+    /// </summary>
+    public string? ThirdPartyToolUrlError
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(ThirdPartyToolUrlErrorVisibility));
+            }
+        }
+    }
+
+
+    /// <summary>链接输入框错误提示的可见性。</summary>
+    public Visibility ThirdPartyToolUrlErrorVisibility => string.IsNullOrEmpty(ThirdPartyToolUrlError) ? Visibility.Collapsed : Visibility.Visible;
+
+
+    /// <summary>
+    /// 已设置的链接用不了时在路径条下方显示的提示：对应程序后来被卸载，或是手改配置写入的不可用协议。启动时不会启动游戏或会被忽略。
+    /// </summary>
+    public string? ThirdPartyToolUrlWarning
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(ThirdPartyToolUrlWarningVisibility));
+            }
+        }
+    }
+
+
+    /// <summary>已设置链接用不了的提示的可见性。</summary>
+    public Visibility ThirdPartyToolUrlWarningVisibility => string.IsNullOrEmpty(ThirdPartyToolUrlWarning) ? Visibility.Collapsed : Visibility.Visible;
+
+
+    /// <summary>
+    /// 检查链接能否作为自定义启动程序。
+    /// </summary>
+    /// <param name="url">链接；不是链接时视为没有问题。</param>
+    /// <returns>不能用时返回提示文案，能用或不是链接时返回 <see langword="null"/>。</returns>
+    private static string? GetThirdPartyToolUrlProblem(string? url)
+    {
+        if (!GameLauncherService.IsLaunchUrl(url))
+        {
+            return null;
+        }
+        if (!GameLauncherService.IsAllowedLaunchUrl(url))
+        {
+            return Lang.GameLaunchProfileDialog_ThirdPartyToolUrlInvalid;
+        }
+        if (!GameLauncherService.IsLaunchUrlRegistered(url))
+        {
+            return Lang.GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered;
+        }
+        return null;
     }
 
 
@@ -395,8 +487,8 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     }
 
 
-    /// <summary>DX12 参数徽章可见性：全局已开启且本配置尚未关闭时显示。</summary>
-    public Visibility Dx12ArgumentVisibility => (ShowDx12Argument && !EditingSkipAutoDx12) ? Visibility.Visible : Visibility.Collapsed;
+    /// <summary>DX12 参数徽章可见性：全局已开启且本配置尚未关闭时显示；通过链接启动时不传参数，不显示。</summary>
+    public Visibility Dx12ArgumentVisibility => (ShowDx12Argument && !EditingSkipAutoDx12 && !IsThirdPartyToolUrl) ? Visibility.Visible : Visibility.Collapsed;
 
 
     /// <summary>
@@ -806,11 +898,95 @@ public sealed partial class GameLaunchProfileDialog : ContentDialog
     }
 
 
+    /// <summary>
+    /// 打开链接输入 Flyout：已设置的是链接时带入原值，否则留空。
+    /// </summary>
+    private void ShowThirdPartyToolUrlFlyout()
+    {
+        TextBox_ThirdPartyToolUrl.Text = IsThirdPartyToolUrl ? EditingThirdPartyToolPath : "";
+        ThirdPartyToolUrlError = null;
+        FlyoutBase.ShowAttachedFlyout(Button_ThirdPartyToolSelect);
+    }
+
+
+    private void MenuFlyoutItem_EnterThirdPartyToolUrl_Click(object sender, RoutedEventArgs e)
+    {
+        // 菜单此时正在关闭，同步弹出 Flyout 可能被关闭流程吞掉，排队到下一轮再弹
+        DispatcherQueue.TryEnqueue(ShowThirdPartyToolUrlFlyout);
+    }
+
+
+    private void Flyout_ThirdPartyToolUrl_Opened(object sender, object e)
+    {
+        TextBox_ThirdPartyToolUrl.Focus(FocusState.Programmatic);
+        TextBox_ThirdPartyToolUrl.SelectAll();
+    }
+
+
+    private void TextBox_ThirdPartyToolUrl_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ThirdPartyToolUrlError = null;
+    }
+
+
+    /// <summary>
+    /// 链接输入框按键：Enter 确认，Esc 关闭 Flyout。用 PreviewKeyDown 抢在 ContentDialog 之前处理，否则 Esc 会关掉整个对话框。
+    /// </summary>
+    private void TextBox_ThirdPartyToolUrl_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key is VirtualKey.Enter)
+        {
+            e.Handled = true;
+            ConfirmThirdPartyToolUrl();
+        }
+        else if (e.Key is VirtualKey.Escape)
+        {
+            e.Handled = true;
+            FlyoutBase.GetAttachedFlyout(Button_ThirdPartyToolSelect)?.Hide();
+        }
+    }
+
+
+    private void ThirdPartyToolUrl_Confirm_Click(object sender, RoutedEventArgs e)
+    {
+        ConfirmThirdPartyToolUrl();
+    }
+
+
+    private void ThirdPartyToolUrl_Cancel_Click(object sender, RoutedEventArgs e)
+    {
+        FlyoutBase.GetAttachedFlyout(Button_ThirdPartyToolSelect)?.Hide();
+    }
+
+
+    /// <summary>
+    /// 把输入的链接设为自定义启动程序（保存后生效）；不能用时留在 Flyout 里提示。
+    /// </summary>
+    private void ConfirmThirdPartyToolUrl()
+    {
+        string url = TextBox_ThirdPartyToolUrl.Text.Trim();
+        // 不是链接（如误填文件路径、拼错的协议头）也按不能用的协议提示
+        string? problem = GameLauncherService.IsLaunchUrl(url) ? GetThirdPartyToolUrlProblem(url) : Lang.GameLaunchProfileDialog_ThirdPartyToolUrlInvalid;
+        if (problem is not null)
+        {
+            ThirdPartyToolUrlError = problem;
+            return;
+        }
+        EditingThirdPartyToolPath = url;
+        FlyoutBase.GetAttachedFlyout(Button_ThirdPartyToolSelect)?.Hide();
+    }
+
+
     [RelayCommand]
     private async Task OpenThirdPartyToolFolderAsync()
     {
         try
         {
+            if (IsThirdPartyToolUrl)
+            {
+                ShowThirdPartyToolUrlFlyout();
+                return;
+            }
             string? path = EditingThirdPartyToolPath;
             if (File.Exists(path))
             {

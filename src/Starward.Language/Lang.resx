@@ -659,6 +659,9 @@ closing the program during decompression will cause game file corruption.</value
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>Game is Running</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>No app was found to open {0}, so the game wasn't started. Make sure the app is installed, or change the custom startup executable in Launch Argument Profiles.</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>Start</value>
   </data>
@@ -3930,6 +3933,27 @@ Repository:</value>
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>Moonward itself can't be used as the custom startup executable.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>Choose file</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>Enter link</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>Launch another program through its link (URL protocol), e.g. hutao://launch. Command line arguments are not passed; include them in the link if the program supports it.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>Enter a custom protocol link such as hutao://launch. http, https, file and Moonward links aren't supported.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>No app was found to open this link. Make sure the app is installed.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>Command line arguments aren't passed when launching through a link.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>The selected account isn't logged in automatically when a custom startup executable is used.</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>Playtime Statistics</value>

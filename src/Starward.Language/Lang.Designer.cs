@@ -5166,6 +5166,69 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Choose file 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_PickThirdPartyToolFile {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_PickThirdPartyToolFile", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Enter link 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_EnterThirdPartyToolUrl {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_EnterThirdPartyToolUrl", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Launch another program through its link (URL protocol), e.g. hutao://launch. Command line arguments are not passed; include them in the link if the program supports it. 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_ThirdPartyToolUrlDesc {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_ThirdPartyToolUrlDesc", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Enter a custom protocol link such as hutao://launch. http, https, file and Moonward links aren&apos;t supported. 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_ThirdPartyToolUrlInvalid {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_ThirdPartyToolUrlInvalid", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No app was found to open this link. Make sure the app is installed. 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Command line arguments aren&apos;t passed when launching through a link. 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_ArgumentNotPassedToUrl {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_ArgumentNotPassedToUrl", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 The selected account isn&apos;t logged in automatically when a custom startup executable is used. 的本地化字符串。
+        /// </summary>
+        public static string GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool {
+            get {
+                return ResourceManager.GetString("GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Launch Game using CMD 的本地化字符串。
         /// </summary>
         public static string GameLauncherSettingDialog_LaunchGameUsingCMD {
@@ -10353,6 +10416,15 @@ namespace Starward.Language {
         public static string GachaLogPage_ExportFailed {
             get {
                 return ResourceManager.GetString("GachaLogPage_ExportFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 No app was found to open {0}, so the game wasn&apos;t started. Make sure the app is installed, or change the custom startup executable in Launch Argument Profiles. 的本地化字符串。
+        /// </summary>
+        public static string LauncherPage_ThirdPartyToolUrlNotRegistered {
+            get {
+                return ResourceManager.GetString("LauncherPage_ThirdPartyToolUrlNotRegistered", resourceCulture);
             }
         }
 

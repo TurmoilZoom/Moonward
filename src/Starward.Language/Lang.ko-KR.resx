@@ -600,6 +600,9 @@
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>게임실행중</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>{0}을(를) 열 수 있는 프로그램을 찾지 못해 게임을 실행하지 않았습니다. 해당 프로그램이 설치되어 있는지 확인하거나 '실행 인수 프로필'에서 사용자 지정 실행 프로그램을 변경하세요.</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>시작</value>
   </data>
@@ -3871,6 +3874,27 @@
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>Moonward 자체는 사용자 지정 실행 프로그램으로 사용할 수 없습니다</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>파일 선택</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>링크 입력</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>링크(URL 프로토콜)로 다른 프로그램을 실행합니다(예: hutao://launch). 명령줄 인수는 전달되지 않으므로, 프로그램이 지원한다면 링크에 포함하세요.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>hutao://launch 같은 사용자 지정 프로토콜 링크를 입력하세요. http, https, file 및 Moonward 자체 링크는 지원하지 않습니다</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>이 링크를 열 수 있는 프로그램을 찾을 수 없습니다. 해당 프로그램이 설치되어 있는지 확인하세요</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>링크로 실행할 때는 명령줄 인수가 전달되지 않습니다</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>사용자 지정 실행 프로그램을 사용할 때는 선택한 계정으로 자동 로그인되지 않습니다</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>플레이 시간 통계</value>

@@ -600,6 +600,9 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>Juego ejecutándose</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>No se encontró ninguna aplicación que pueda abrir {0}, así que el juego no se ha iniciado. Comprueba que la aplicación esté instalada o cambia el ejecutable de inicio personalizado en «Perfiles de argumentos de inicio».</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>Comenzar</value>
   </data>
@@ -3871,6 +3874,27 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>No se puede usar el propio Moonward como ejecutable de inicio personalizado.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>Elegir archivo</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>Introducir enlace</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>Inicia otro programa mediante su enlace (protocolo URL), p. ej. hutao://launch. Los argumentos de línea de comandos no se pasan; inclúyelos en el enlace si el programa lo admite.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>Introduce un enlace de protocolo personalizado, como hutao://launch. No se admiten enlaces http, https, file ni de Moonward.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>No se encontró ninguna aplicación que pueda abrir este enlace. Comprueba que la aplicación esté instalada.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>Al iniciar mediante un enlace no se pasan argumentos de línea de comandos.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>Al usar un ejecutable de inicio personalizado no se inicia sesión automáticamente con la cuenta seleccionada.</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>Estadísticas de tiempo de juego</value>

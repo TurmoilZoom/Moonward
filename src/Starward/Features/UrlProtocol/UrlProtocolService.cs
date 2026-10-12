@@ -169,9 +169,9 @@ internal class UrlProtocolService
         catch (Exception ex)
         {
             // 已识别的协议分支发生异常：记录日志、弹窗提示，并返回 true 阻止继续正常启动
-            if (ex is GameRunningException)
+            if (ex is GameRunningException or ThirdPartyToolUrlNotRegisteredException)
             {
-                // 重复双击快捷方式即可触发，不是故障：记一行，不留堆栈
+                // 重复双击快捷方式、自定义启动链接的程序没装即可触发，不是故障：记一行，不留堆栈
                 log.LogInformation("Handle url protocol: {message}", ex.Message);
             }
             else

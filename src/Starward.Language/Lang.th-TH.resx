@@ -599,6 +599,9 @@
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>เกมกำลังรันอยู่</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>ไม่พบโปรแกรมที่เปิด {0} ได้ จึงไม่ได้เริ่มเกม โปรดตรวจสอบว่าติดตั้งโปรแกรมแล้ว หรือเปลี่ยนตัวเรียกใช้งานที่กำหนดเองใน "โปรไฟล์อาร์กิวเมนต์เริ่มเกม"</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>เริ่ม</value>
   </data>
@@ -3865,6 +3868,27 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>ไม่สามารถใช้ Moonward เองเป็นตัวเรียกใช้งานที่กำหนดเองได้</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>เลือกไฟล์</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>ป้อนลิงก์</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>เปิดโปรแกรมอื่นผ่านลิงก์ (โปรโตคอล URL) เช่น hutao://launch จะไม่ส่งอาร์กิวเมนต์บรรทัดคำสั่ง หากโปรแกรมรองรับให้ใส่ไว้ในลิงก์</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>โปรดป้อนลิงก์โปรโตคอลที่กำหนดเอง เช่น hutao://launch ไม่รองรับลิงก์ http, https, file และลิงก์ของ Moonward เอง</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>ไม่พบโปรแกรมที่เปิดลิงก์นี้ได้ โปรดตรวจสอบว่าติดตั้งโปรแกรมแล้ว</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>เมื่อเปิดผ่านลิงก์ จะไม่ส่งอาร์กิวเมนต์บรรทัดคำสั่ง</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>เมื่อใช้ตัวเรียกใช้งานที่กำหนดเอง จะไม่เข้าสู่ระบบบัญชีที่เลือกโดยอัตโนมัติ</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>สถิติเวลาเล่น</value>

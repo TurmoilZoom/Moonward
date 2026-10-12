@@ -600,6 +600,9 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>Trò chơi đang chạy</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>Không tìm thấy chương trình có thể mở {0}, nên trò chơi chưa được khởi động. Hãy kiểm tra chương trình đã được cài đặt chưa, hoặc đổi chương trình khởi động tùy chỉnh trong "Hồ sơ tham số khởi chạy".</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>Bắt đầu</value>
   </data>
@@ -3871,6 +3874,27 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>Không thể dùng chính Moonward làm chương trình khởi động tùy chỉnh.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>Chọn tệp</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>Nhập liên kết</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>Khởi động chương trình khác qua liên kết (giao thức URL), ví dụ hutao://launch. Tham số dòng lệnh sẽ không được truyền; nếu chương trình hỗ trợ, hãy đưa chúng vào liên kết.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>Hãy nhập liên kết giao thức tùy chỉnh, ví dụ hutao://launch. Không hỗ trợ liên kết http, https, file và của chính Moonward.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>Không tìm thấy chương trình có thể mở liên kết này. Hãy kiểm tra chương trình đã được cài đặt chưa.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>Khi khởi động qua liên kết, tham số dòng lệnh sẽ không được truyền.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>Khi dùng chương trình khởi động tùy chỉnh, sẽ không tự động đăng nhập tài khoản đã chọn.</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>Thống kê thời gian chơi</value>

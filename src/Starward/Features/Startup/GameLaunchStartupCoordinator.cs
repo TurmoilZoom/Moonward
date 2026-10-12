@@ -69,6 +69,7 @@ internal static class GameLaunchStartupCoordinator
         ArgumentException when ex.Message.StartsWith("Cannot parse the game_biz", StringComparison.Ordinal)
             => Lang.UrlProtocol_InvalidGameBiz,
         GameRunningException => Lang.LauncherPage_GameIsRunning,
+        ThirdPartyToolUrlNotRegisteredException e => string.Format(Lang.LauncherPage_ThirdPartyToolUrlNotRegistered, e.Url),
         _ => $"{Lang.UrlProtocol_UnhandledError}\n{ex.Message}",
     };
 

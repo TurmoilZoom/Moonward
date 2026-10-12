@@ -201,8 +201,15 @@
                               BorderThickness="0"
                               CornerRadius="8"
                               DisplayMemberPath="DisplayName"
+                              IsEnabled="{x:Bind IsLoginAccountEnabled, Mode=OneWay}"
                               ItemsSource="{x:Bind LoginAccountOptions}"
                               SelectedItem="{x:Bind SelectedLoginAccountOption, Mode=TwoWay}" />
+                    <!--  设了自定义启动程序（程序或链接）时登录票据不会传给游戏，下拉框禁用（选择保留，去掉启动程序后照常使用）  -->
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind LoginAccountIgnoredVisibility, Mode=OneWay}" />
                 </StackPanel>
 
                 <!--  命令行参数：标题行右侧打开常用参数面板；DX12 自动附加的参数在输入框下方说明  -->
@@ -220,7 +227,8 @@
                                          Margin="0,0,-7,0"
                                          Padding="6,2"
                                          VerticalAlignment="Center"
-                                         Click="Button_CommandLineArgumentPicker_Click">
+                                         Click="Button_CommandLineArgumentPicker_Click"
+                                         IsEnabled="{x:Bind IsArgumentEnabled, Mode=OneWay}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <FontIcon FontSize="14" Glyph="&#xE8FD;" />
                                 <TextBlock Text="{x:Bind lang:Lang.CmdArg_PickerButtonTooltip}" />
@@ -231,9 +239,16 @@
                     <TextBox MinHeight="36"
                              Padding="10,8,6,8"
                              HorizontalTextAlignment="Left"
+                             IsEnabled="{x:Bind IsArgumentEnabled, Mode=OneWay}"
                              IsSpellCheckEnabled="False"
                              VerticalContentAlignment="Center"
                              Text="{x:Bind EditingArgument, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <!--  自定义启动程序是链接时参数无处可传，输入框禁用（内容保留，换回程序后照常使用）  -->
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind lang:Lang.GameLaunchProfileDialog_ArgumentNotPassedToUrl}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind ArgumentNotPassedToUrlVisibility, Mode=OneWay}" />
                     <!--  DX12 自动附加参数：全局开启且本配置未关闭时显示；「本配置不附加」只作用于当前配置文件  -->
                     <Grid ColumnSpacing="8" Visibility="{x:Bind Dx12ArgumentVisibility, Mode=OneWay}">
                         <Grid.ColumnDefinitions>
@@ -270,7 +285,7 @@
                     </Grid>
                 </StackPanel>
 
-                <!--  自定义启动程序：未设置时显示说明，设置后为路径条（点击打开所在文件夹、× 清除），同游戏设置「安装位置」  -->
+                <!--  自定义启动程序：未设置时显示说明，设置后为路径条（点击打开所在文件夹、× 清除），同游戏设置「安装位置」；是链接时点击改为编辑链接  -->
                 <StackPanel Spacing="8">
                     <TextBlock Text="{x:Bind lang:Lang.LauncherPage_CustomStartExecutable}" TextWrapping="Wrap" />
                     <Grid ColumnSpacing="8">
@@ -298,7 +313,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <!--  打开自定义启动程序所在文件夹  -->
+                            <!--  打开自定义启动程序所在文件夹（链接则打开编辑框）  -->
                             <Button Padding="12,0,8,1"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Stretch"
@@ -327,15 +342,58 @@
                                           Glyph="&#xE711;" />
                             </Button>
                         </Grid>
-                        <!--  开启 CMD 启动时禁用（两者互斥）  -->
-                        <Button Grid.Column="1"
-                                MinWidth="72"
-                                Height="36"
-                                VerticalAlignment="Top"
-                                Command="{x:Bind ChangeThirdPartyPathCommand}"
-                                Content="{x:Bind lang:Lang.Common_Select}"
-                                CornerRadius="8"
-                                IsEnabled="{x:Bind IsThirdPartyToolEnabled, Mode=OneWay}" />
+                        <!--  开启 CMD 启动时禁用（两者互斥）；下拉里选文件或输入链接，链接在挂着的 Flyout 里填  -->
+                        <DropDownButton x:Name="Button_ThirdPartyToolSelect"
+                                        Grid.Column="1"
+                                        MinWidth="72"
+                                        Height="36"
+                                        VerticalAlignment="Top"
+                                        Content="{x:Bind lang:Lang.Common_Select}"
+                                        CornerRadius="8"
+                                        IsEnabled="{x:Bind IsThirdPartyToolEnabled, Mode=OneWay}">
+                            <DropDownButton.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                    <MenuFlyoutItem Command="{x:Bind ChangeThirdPartyPathCommand}" Text="{x:Bind lang:Lang.GameLaunchProfileDialog_PickThirdPartyToolFile}">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE8E5;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Click="MenuFlyoutItem_EnterThirdPartyToolUrl_Click" Text="{x:Bind lang:Lang.GameLaunchProfileDialog_EnterThirdPartyToolUrl}">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE71B;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </DropDownButton.Flyout>
+                            <FlyoutBase.AttachedFlyout>
+                                <Flyout Opened="Flyout_ThirdPartyToolUrl_Opened" Placement="BottomEdgeAlignedRight">
+                                    <StackPanel Width="320" Spacing="12">
+                                        <TextBlock FontSize="12"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   Text="{x:Bind lang:Lang.GameLaunchProfileDialog_ThirdPartyToolUrlDesc}"
+                                                   TextWrapping="Wrap" />
+                                        <TextBox x:Name="TextBox_ThirdPartyToolUrl"
+                                                 IsSpellCheckEnabled="False"
+                                                 PreviewKeyDown="TextBox_ThirdPartyToolUrl_PreviewKeyDown"
+                                                 TextChanged="TextBox_ThirdPartyToolUrl_TextChanged" />
+                                        <!--  确认时才校验（协议不能用 / 没有程序注册该协议），输入过程中不提示  -->
+                                        <TextBlock FontSize="12"
+                                                   Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                   Text="{x:Bind ThirdPartyToolUrlError, Mode=OneWay}"
+                                                   TextWrapping="Wrap"
+                                                   Visibility="{x:Bind ThirdPartyToolUrlErrorVisibility, Mode=OneWay}" />
+                                        <StackPanel HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                            <Button Click="ThirdPartyToolUrl_Cancel_Click" Content="{x:Bind lang:Lang.Common_Cancel}" />
+                                            <Button Click="ThirdPartyToolUrl_Confirm_Click"
+                                                    Content="{x:Bind lang:Lang.Common_Confirm}"
+                                                    Style="{ThemeResource AccentButtonStyle}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Flyout>
+                            </FlyoutBase.AttachedFlyout>
+                        </DropDownButton>
                     </Grid>
                     <!--  选了 Moonward 本体时拒绝并提示；旧配置里已存的同样提示（启动时会被忽略）  -->
                     <TextBlock FontSize="12"
@@ -343,6 +401,12 @@
                                Text="{x:Bind lang:Lang.GameLaunchProfileDialog_ThirdPartyToolIsMoonward}"
                                TextWrapping="Wrap"
                                Visibility="{x:Bind ThirdPartyToolMoonwardWarningVisibility, Mode=OneWay}" />
+                    <!--  已设置的链接用不了（对应程序后来卸载了，或手改配置写入的不可用协议）；启动时不会启动游戏或会被忽略  -->
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                               Text="{x:Bind ThirdPartyToolUrlWarning, Mode=OneWay}"
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind ThirdPartyToolUrlWarningVisibility, Mode=OneWay}" />
                 </StackPanel>
 
                 <!--  分隔线下：使用 CMD 启动游戏（按配置文件保存），与自定义启动程序互斥  -->

@@ -600,6 +600,9 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>Gioco in esecuzione</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>Non è stato trovato alcun programma in grado di aprire {0}, quindi il gioco non è stato avviato. Verifica che il programma sia installato oppure cambia l'eseguibile di avvio personalizzato in «Profili argomenti di avvio».</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>Avvia</value>
   </data>
@@ -3871,6 +3874,27 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>Non è possibile usare Moonward stesso come eseguibile di avvio personalizzato.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>Scegli file</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>Inserisci link</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>Avvia un altro programma tramite il suo link (protocollo URL), ad es. hutao://launch. Gli argomenti della riga di comando non vengono passati; includili nel link se il programma lo supporta.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>Inserisci un link con protocollo personalizzato, ad es. hutao://launch. I link http, https, file e di Moonward non sono supportati.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>Non è stato trovato alcun programma in grado di aprire questo link. Verifica che il programma sia installato.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>Avviando tramite link gli argomenti della riga di comando non vengono passati.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>Usando un eseguibile di avvio personalizzato non viene effettuato l'accesso automatico con l'account selezionato.</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>Statistiche del tempo di gioco</value>

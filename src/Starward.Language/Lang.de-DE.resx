@@ -600,6 +600,9 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>Spiel läuft gerade</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>Es wurde kein Programm gefunden, das {0} öffnen kann; das Spiel wurde nicht gestartet. Prüfe, ob das Programm installiert ist, oder ändere das benutzerdefinierte Startprogramm unter „Startargument-Profile“.</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>Beginn</value>
   </data>
@@ -3869,6 +3872,27 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>Moonward selbst kann nicht als benutzerdefiniertes Startprogramm verwendet werden.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>Datei auswählen</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>Link eingeben</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>Startet ein anderes Programm über seinen Link (URL-Protokoll), z. B. hutao://launch. Befehlszeilenargumente werden nicht übergeben; nimm sie in den Link auf, falls das Programm das unterstützt.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>Gib einen Link mit eigenem Protokoll ein, z. B. hutao://launch. http-, https-, file- und Moonward-Links werden nicht unterstützt.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>Es wurde kein Programm gefunden, das diesen Link öffnen kann. Prüfe, ob das Programm installiert ist.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>Beim Start über einen Link werden keine Befehlszeilenargumente übergeben.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>Bei Verwendung eines benutzerdefinierten Startprogramms wird nicht automatisch mit dem ausgewählten Konto angemeldet.</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>Spielzeit-Statistiken</value>

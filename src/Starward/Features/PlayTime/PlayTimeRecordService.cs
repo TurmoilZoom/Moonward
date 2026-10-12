@@ -211,14 +211,19 @@ internal class PlayTimeRecordService
     /// <param name="gameId"></param>
     /// <param name="launcherProcess">
     /// 拉起游戏的自定义启动程序进程。不为 <see langword="null"/> 时先在它存活期间持续查找游戏进程，
-    /// 它退出后仍未找到再按固定时长（约 12 秒）查找。
+    /// 它退出后仍未找到再按 <paramref name="waitTimeout"/> 查找。
+    /// </param>
+    /// <param name="waitTimeout">
+    /// 没有启动程序进程可等（或它已退出）时，找不到游戏进程最多再等多久；为 <see langword="null"/> 时约 12 秒，不足 12 秒按 12 秒算。
     /// </param>
     /// <returns></returns>
-    public async Task<Process?> StartProcessToLogAsync(GameId gameId, Process? launcherProcess = null)
+    public async Task<Process?> StartProcessToLogAsync(GameId gameId, Process? launcherProcess = null, TimeSpan? waitTimeout = null)
     {
         try
         {
             var biz = gameId.GameBiz;
+            // 每 2 秒查一次，第 giveUpIndex 次（从 0 起）仍没有游戏进程就放弃；默认 5 即约 12 秒
+            int giveUpIndex = Math.Max(5, (int)((waitTimeout ?? TimeSpan.Zero).TotalMilliseconds / 2000) - 1);
             string name = await GetGameExeNameWithoutExtensionAsync(gameId);
             if (launcherProcess is not null)
             {
@@ -234,13 +239,13 @@ internal class PlayTimeRecordService
                 }
                 _logger.LogInformation("Launcher process ({launcherPid}) exited before game process ({biz}) was found", launcherProcess.Id, biz);
             }
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < giveUpIndex + 10; i++)
             {
                 await Task.Delay(2000);
                 var processes = Process.GetProcessesByName(name);
                 if (processes.Length == 0)
                 {
-                    if (i < 5)
+                    if (i < giveUpIndex)
                     {
                         continue;
                     }

@@ -599,6 +599,9 @@
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>遊戲執行緊</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>搵唔到可以開啟 {0} 嘅程式，遊戲未有啟動。請確認對應程式已經安裝，或者喺「啟動參數設定」更換自訂啟動程式。</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>開始</value>
   </data>
@@ -3870,6 +3873,27 @@
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>唔可以用 Moonward 本身做自訂啟動程式</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>揀選檔案</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>輸入連結</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>透過連結（URL 協定）啟動其他程式，例如 hutao://launch。唔會傳遞命令列參數，程式支援嘅話請寫入連結度。</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>請輸入自訂協定連結，例如 hutao://launch；唔支援 http、https、file 同 Moonward 本身嘅連結</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>搵唔到可以開啟呢條連結嘅程式，請確認對應程式已經安裝</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>透過連結啟動時唔會傳遞命令列參數</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>使用自訂啟動程式時唔會自動登入所揀嘅帳號</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>遊戲時間統計</value>

@@ -600,6 +600,9 @@
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>Игра уже запущена</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>Не найдена программа, которая может открыть {0}, поэтому игра не запущена. Убедитесь, что программа установлена, или смените пользовательский исполняемый файл запуска в «Профили аргументов запуска».</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>Начать</value>
   </data>
@@ -3891,6 +3894,27 @@ ChatGPT может допускать ошибки. Проверьте важн�
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>Нельзя использовать сам Moonward в качестве пользовательского исполняемого файла запуска.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>Выбрать файл</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>Ввести ссылку</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>Запуск другой программы по её ссылке (URL-протокол), например hutao://launch. Аргументы командной строки не передаются; если программа поддерживает, укажите их в ссылке.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>Введите ссылку с собственным протоколом, например hutao://launch. Ссылки http, https, file и самого Moonward не поддерживаются.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>Не найдена программа, которая может открыть эту ссылку. Убедитесь, что программа установлена.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>При запуске по ссылке аргументы командной строки не передаются.</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>При использовании пользовательского исполняемого файла запуска автоматический вход в выбранную учётную запись не выполняется.</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>Статистика времени в игре</value>

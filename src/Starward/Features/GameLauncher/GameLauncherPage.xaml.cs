@@ -696,6 +696,12 @@ public sealed partial class GameLauncherPage : PageBase
                 InAppToast.MainWindow?.Warning(null, Lang.LauncherPage_GameIsRunning);
             }
         }
+        catch (ThirdPartyToolUrlNotRegisteredException ex)
+        {
+            // 可预期：自定义启动链接的程序没装（或已卸载），游戏不启动，提示去换启动程序
+            _logger.LogWarning("Start game: {message}", ex.Message);
+            InAppToast.MainWindow?.Warning(null, string.Format(Lang.LauncherPage_ThirdPartyToolUrlNotRegistered, ex.Url));
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Start game");

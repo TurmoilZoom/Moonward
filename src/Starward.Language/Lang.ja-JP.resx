@@ -600,6 +600,9 @@
   <data name="LauncherPage_GameIsRunning" xml:space="preserve">
     <value>ゲームを実行中です</value>
   </data>
+  <data name="LauncherPage_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>{0} を開けるプログラムが見つからないため、ゲームは起動されませんでした。対応するプログラムがインストールされているか確認するか、「起動引数プロファイル」でカスタム起動プログラムを変更してください。</value>
+  </data>
   <data name="Common_Start" xml:space="preserve">
     <value>開始</value>
   </data>
@@ -3870,6 +3873,27 @@
   </data>
   <data name="GameLaunchProfileDialog_ThirdPartyToolIsMoonward" xml:space="preserve">
     <value>Moonward 自体はカスタム起動プログラムとして使用できません</value>
+  </data>
+  <data name="GameLaunchProfileDialog_PickThirdPartyToolFile" xml:space="preserve">
+    <value>ファイルを選択</value>
+  </data>
+  <data name="GameLaunchProfileDialog_EnterThirdPartyToolUrl" xml:space="preserve">
+    <value>リンクを入力</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlDesc" xml:space="preserve">
+    <value>リンク（URL プロトコル）で別のプログラムを起動します（例: hutao://launch）。コマンドライン引数は渡されません。プログラムが対応していればリンクに含めてください。</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlInvalid" xml:space="preserve">
+    <value>hutao://launch のようなカスタムプロトコルのリンクを入力してください。http、https、file および Moonward 自身のリンクは使用できません</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ThirdPartyToolUrlNotRegistered" xml:space="preserve">
+    <value>このリンクを開けるプログラムが見つかりません。対応するプログラムがインストールされているか確認してください</value>
+  </data>
+  <data name="GameLaunchProfileDialog_ArgumentNotPassedToUrl" xml:space="preserve">
+    <value>リンクで起動する場合、コマンドライン引数は渡されません</value>
+  </data>
+  <data name="GameLaunchProfileDialog_LoginAccountIgnoredForThirdPartyTool" xml:space="preserve">
+    <value>カスタム起動プログラムを使用する場合、選択したアカウントへの自動ログインは行われません</value>
   </data>
   <data name="PlayTimeStatsDialog_PlaytimeStatistics" xml:space="preserve">
     <value>プレイ時間の統計</value>
