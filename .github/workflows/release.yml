@@ -183,14 +183,57 @@ jobs:
           "--title", $version
         )
         if ($notes) {
-          $notesPath = Join-Path $env:RUNNER_TEMP "release-notes-$version.md"
-          $utf8 = New-Object System.Text.UTF8Encoding $false
-          [System.IO.File]::WriteAllText($notesPath, $notes + "`n", $utf8)
-          Write-Host "Using annotated tag notes ($($notes.Length) chars) -> $notesPath"
-          $createArgs += @("--notes-file", $notesPath)
+          Write-Host "Using annotated tag notes ($($notes.Length) chars)"
         } else {
           Write-Host "::warning::No annotated tag message for $version; using gh --generate-notes"
+          # 下方下载表格仍经 --notes-file 传入，gh 会把它放在自动生成的说明之前
           $createArgs += "--generate-notes"
+        }
+
+        # 说明末尾追加下载表格：按本次实际产物生成（缺哪个包就不列哪个），tag 注释里不写。
+        # shields.io 已不提供 Windows 图标（logo=windows 不显示），改用内嵌的四格窗口图标。
+        $logoSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" d="M3 3h8.5v8.5H3zm9.5 0H21v8.5h-8.5zM3 12.5h8.5V21H3zm9.5 0H21V21h-8.5z"/></svg>'
+        $logo = [Uri]::EscapeDataString("data:image/svg+xml;base64," + [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($logoSvg)))
+        $downloadBase = "https://github.com/$repo/releases/download/$version"
+        $archs = @(
+          @{ Name = "x64"; Rid = "win-x64"; Setup = "0078D4"; Portable = "2B88D8" },
+          @{ Name = "ARM64"; Rid = "win-arm64"; Setup = "5C2D91"; Portable = "8661C5" }
+        )
+        $rows = foreach ($arch in $archs) {
+          $packages = @(
+            @{ Kind = "Setup"; File = "Moonward-$($arch.Rid)-Setup.exe"; Color = $arch.Setup },
+            @{ Kind = "Portable"; File = "Moonward-$($arch.Rid)-Portable.zip"; Color = $arch.Portable }
+          ) | Where-Object { $files.Name -contains $_.File }
+          if (-not $packages) { continue }
+          $badges = foreach ($p in $packages) {
+            $img = "https://img.shields.io/badge/$($p.Kind)-$($arch.Name)-$($p.Color)?logo=$logo"
+            "<a href=`"$downloadBase/$($p.File)`"><img alt=`"$($p.Kind) $($arch.Name)`" src=`"$img`"></a>"
+          }
+          "<tr><td>$($arch.Name)</td><td>$($badges -join '<br>')</td></tr>"
+        }
+        $downloads = ""
+        if ($rows) {
+          $downloads = @(
+            "### 下载",
+            "",
+            "<table>",
+            "<thead><tr><th>架构</th><th>下载</th></tr></thead>",
+            "<tbody>",
+            ($rows -join "`n"),
+            "</tbody>",
+            "</table>",
+            "",
+            "一般电脑选 x64，骁龙等 ARM 处理器的电脑选 ARM64。"
+          ) -join "`n"
+        }
+
+        $body = (@($notes, $downloads) | Where-Object { $_ }) -join "`n`n"
+        if ($body) {
+          $notesPath = Join-Path $env:RUNNER_TEMP "release-notes-$version.md"
+          $utf8 = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText($notesPath, $body + "`n", $utf8)
+          Write-Host "Release body ($($body.Length) chars) -> $notesPath"
+          $createArgs += @("--notes-file", $notesPath)
         }
         if ($pre) { $createArgs += "--prerelease" }
         $createArgs += $files.FullName

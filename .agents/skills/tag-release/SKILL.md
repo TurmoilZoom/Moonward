@@ -22,14 +22,15 @@ description: >
   → 全文写入 annotated tag 注释（subject + body）
   → push tag 到全部 remote（含 origin）
   → release.yml：Velopack 打包 + gh release create
-       └── 从 tag 注释读取 notes，填入 GitHub Release body
+       ├── 从 tag 注释读取 notes，填入 GitHub Release body
+       └── 末尾自动追加「### 下载」表格（GitHub 直链，按实际产物生成）
 ```
 
 | 组件 | 职责 |
 |------|------|
 | **release-notes** skill | 归纳文风、分组、Markdown 结构（**必须完整遵循**） |
 | **tag-release**（本 skill） | 确认版本 → 生成 notes → 打 tag → 推送 |
-| **release.yml** | 打包资源；`gh release create --notes-file` 使用 tag 注释 |
+| **release.yml** | 打包资源；`gh release create --notes-file` 使用 tag 注释，并在末尾追加下载表格 |
 
 不要在对话里生成一套 notes、tag 注释里另写简略要点：CI **只**读 tag 注释，对话中的版本不会进 GitHub。
 
@@ -224,5 +225,6 @@ gh release edit <tag> --notes-file <path>
 - 在 notes 正文末尾附「共涉及约 N 个提交」「完整对比」/ GitHub Compare 链接等范围总结  
 - 不遵循 release-notes 的分组与「无 emoji / 面向用户」文风  
 - 在说明里引用 issue / PR（写 `#N` 或加 issue 链接）  
+- 在 tag 注释里手写下载链接或下载表格（release.yml 会自动追加，重复会出现两份）  
 - 在汇报里写「已发布」但 origin push 实际失败  
 - 修改业务源码或 `global.json` / NuGet 版本来「配合发版」（版本号由 tag / CI 的 `-p:Version=` 注入）

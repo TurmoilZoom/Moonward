@@ -160,6 +160,8 @@ git diff <old>..<new> --stat
 
 `/tag-release` **必须**按本 skill 生成完整用户向 Markdown，并写入 **annotated tag 注释**，供 `.github/workflows/release.yml` 在 `gh release create` 时填入 GitHub Release body。
 
+Release body 末尾的「### 下载」表格（GitHub 直链）由 `release.yml` 按实际产物自动追加；本 skill 生成的正文**不要**包含下载链接或下载表格。
+
 ### Annotated tag 注释格式（固定）
 
 ```text
@@ -232,3 +234,4 @@ git for-each-ref "refs/tags/$version" --format="%(contents:body)"
 - **不要**在正文首部生成 `## 版本号（日期）` 或「与上一版相比…」导语；直接分类总结
 - **不要**在正文末尾附范围总结：`---` 分隔线、「共涉及约 N 个提交」、「完整对比」/ GitHub Compare 链接
 - 不要把完整用户向 notes 只打印在对话里却不写进 tag（tag-release 场景）
+- 不要在正文里写下载链接或下载表格（由 release.yml 自动追加）
