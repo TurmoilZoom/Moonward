@@ -3219,15 +3219,6 @@ Repository:</value>
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>Migrate to Setup</value>
   </data>
-  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
-    <value>A game is still running. Restarting now to finish the update will stop recording its play time, and the rest of this session won't be counted. It's best to restart after you close the game.</value>
-  </data>
-  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
-    <value>Play time is being recorded</value>
-  </data>
-  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
-    <value>Restart anyway</value>
-  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>Critical Node: Fourth Frontier</value>
   </data>

@@ -11005,33 +11005,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 A game is still running. Restarting now to finish the update will stop record... 的本地化字符串。
-        /// </summary>
-        public static string UpdateWindow_PlayTimeRecordingContent {
-            get {
-                return ResourceManager.GetString("UpdateWindow_PlayTimeRecordingContent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Play time is being recorded 的本地化字符串。
-        /// </summary>
-        public static string UpdateWindow_PlayTimeRecordingTitle {
-            get {
-                return ResourceManager.GetString("UpdateWindow_PlayTimeRecordingTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Restart anyway 的本地化字符串。
-        /// </summary>
-        public static string UpdateWindow_RestartAnyway {
-            get {
-                return ResourceManager.GetString("UpdateWindow_RestartAnyway", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Before starting, some necessary environment checks are required. 的本地化字符串。
         /// </summary>
         public static string WelcomeView_BeforeStartingSomeNecessaryEnvironmentChecksAreRequired {

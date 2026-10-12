@@ -3161,15 +3161,6 @@ You are welcome to submit exported data to:</value>
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>Migrar a instalación</value>
   </data>
-  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
-    <value>Todavía hay un juego en ejecución. Si reinicias ahora para completar la actualización, se detendrá el registro del tiempo de juego y el resto de esta sesión no se contará. Es mejor reiniciar después de cerrar el juego.</value>
-  </data>
-  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
-    <value>Registrando el tiempo de juego</value>
-  </data>
-  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
-    <value>Reiniciar de todos modos</value>
-  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>Nodo crítico: Cuarta frontera</value>
   </data>

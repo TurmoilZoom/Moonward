@@ -3161,15 +3161,6 @@ You are welcome to submit exported data to:</value>
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>Migra alla versione installer</value>
   </data>
-  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
-    <value>Un gioco è ancora in esecuzione. Riavviando ora per completare l'aggiornamento, la registrazione del tempo di gioco verrà interrotta e il resto di questa sessione non verrà conteggiato. È consigliabile riavviare dopo aver chiuso il gioco.</value>
-  </data>
-  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
-    <value>Registrazione del tempo di gioco in corso</value>
-  </data>
-  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
-    <value>Riavvia comunque</value>
-  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>Nodo critico: Quarta frontiera</value>
   </data>

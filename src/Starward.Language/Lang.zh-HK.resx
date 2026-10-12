@@ -3160,15 +3160,6 @@
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>遷移到安裝版</value>
   </data>
-  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
-    <value>遊戲仲執行緊。而家重新啟動嚟完成更新會中斷遊戲時長記錄，今次遊戲之後嘅時間唔會計入。建議關閉遊戲之後先重新啟動。</value>
-  </data>
-  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
-    <value>記錄緊遊戲時長</value>
-  </data>
-  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
-    <value>照樣重新啟動</value>
-  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>劇變節點第四防線</value>
   </data>

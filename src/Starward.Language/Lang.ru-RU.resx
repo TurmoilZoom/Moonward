@@ -3181,15 +3181,6 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>Перенести в настройки</value>
   </data>
-  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
-    <value>Игра всё ещё запущена. Если перезапустить сейчас, чтобы завершить обновление, запись времени игры прервётся и оставшееся время этого сеанса не будет учтено. Рекомендуется перезапустить после закрытия игры.</value>
-  </data>
-  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
-    <value>Идёт запись времени игры</value>
-  </data>
-  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
-    <value>Всё равно перезапустить</value>
-  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>Критический узел: Четвертая линия обороны</value>
   </data>

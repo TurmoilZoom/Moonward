@@ -23,11 +23,6 @@ internal class PlayTimeRecordService
 
     private readonly PlayTimeStatsService _playTimeStatsService;
 
-    /// <summary>
-    /// 记录进程注册 <see cref="AppInstance"/> 的键前缀，完整键为 <c>playtime_{游戏 pid}</c>。
-    /// </summary>
-    private const string InstanceKeyPrefix = "playtime_";
-
 
 
     public PlayTimeRecordService(ILogger<PlayTimeRecordService> logger, HoYoPlayService hoYoPlayService, PlayTimeStatsService playTimeStatsService)
@@ -44,7 +39,7 @@ internal class PlayTimeRecordService
         try
         {
             biz = biz.IsBilibili() ? $"{biz.Game}_cn" : biz;
-            var instance = AppInstance.FindOrRegisterForKey($"{InstanceKeyPrefix}{pid}");
+            var instance = AppInstance.FindOrRegisterForKey($"playtime_{pid}");
             if (!instance.IsCurrent)
             {
                 _logger.LogWarning("Game process ({biz}, {gamePid}) has been recorded by process ({playtimePid})", biz, pid, instance.ProcessId);
@@ -284,7 +279,7 @@ internal class PlayTimeRecordService
                 _logger.LogWarning("Game process ({biz}, {gamePid}) is not in the current session", biz, process.Id);
                 continue;
             }
-            var instance = App.FindInstanceForKey($"{InstanceKeyPrefix}{process.Id}");
+            var instance = App.FindInstanceForKey($"playtime_{process.Id}");
             if (instance != null)
             {
                 // 已经有进程在记录该游戏（如首页与快捷方式先后启动、各自在等），不重复记录；
@@ -324,37 +319,6 @@ internal class PlayTimeRecordService
 
 
     /// <summary>
-    /// 是否有记录进程仍在记录游戏时长（任一按 <c>playtime_{pid}</c> 注册的实例存活）。
-    /// </summary>
-    /// <returns>有存活的记录进程时返回 <see langword="true"/>；查询失败返回 <see langword="false"/>。</returns>
-    public static bool IsRecordingAnyGame()
-    {
-        try
-        {
-            foreach (var instance in AppInstance.GetInstances())
-            {
-                if (!instance.Key.StartsWith(InstanceKeyPrefix, StringComparison.Ordinal))
-                {
-                    continue;
-                }
-                try
-                {
-                    // 只认仍存活的进程，避免残留登记让调用方（如退出时安装更新）一直推迟
-                    using var process = Process.GetProcessById((int)instance.ProcessId);
-                    if (!process.HasExited)
-                    {
-                        return true;
-                    }
-                }
-                catch { }
-            }
-        }
-        catch { }
-        return false;
-    }
-
-
-    /// <summary>
     /// 启动进程记录游戏时间
     /// </summary>
     /// <param name="gameId"></param>
@@ -372,7 +336,7 @@ internal class PlayTimeRecordService
                 _logger.LogWarning("Game process ({biz}, {gamePid}) is not the expected process ({name})", biz, pid, process.ProcessName);
                 return;
             }
-            var instance = App.FindInstanceForKey($"{InstanceKeyPrefix}{pid}");
+            var instance = App.FindInstanceForKey($"playtime_{pid}");
             if (instance != null)
             {
                 _logger.LogWarning("Game process ({biz}, {gamePid}) has been recorded by process ({playtimePid})", biz, pid, instance.ProcessId);

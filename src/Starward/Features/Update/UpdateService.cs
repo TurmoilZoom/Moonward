@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using NuGet.Versioning;
-using Starward.Features.PlayTime;
 using Starward.Features.RPC;
 using System;
 using System.Net;
@@ -518,7 +517,6 @@ internal class UpdateService
     /// <summary>
     /// 若已下载更新，通知 Update.exe 在本进程退出后静默安装（不重启、不显示进度窗口）。
     /// Update.exe 最多等待 60 秒；应在真正退出前调用。
-    /// 仍有记录游戏时长的子进程时推迟到下次退出再装。
     /// </summary>
     public void ApplySilentlyOnExit()
     {
@@ -531,13 +529,6 @@ internal class UpdateService
             var manager = GetManager(_lastDownloadSource);
             if (!manager.IsInstalled)
             {
-                return;
-            }
-            if (PlayTimeRecordService.IsRecordingAnyGame())
-            {
-                // Update.exe 安装前会结束安装目录下的所有进程，记录游戏时长的子进程也在其中，游戏剩下的时间就不计了。
-                // 已下载的包留在本地，下次启动静默更新会直接用上，再退出时安装
-                _logger.LogInformation("Defer silent update on exit: play time is being recorded");
                 return;
             }
             AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);

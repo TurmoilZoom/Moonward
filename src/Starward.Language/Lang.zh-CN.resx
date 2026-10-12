@@ -3219,15 +3219,6 @@
   <data name="UpdateWindow_MigrateToSetup" xml:space="preserve">
     <value>迁移到安装版</value>
   </data>
-  <data name="UpdateWindow_PlayTimeRecordingContent" xml:space="preserve">
-    <value>游戏仍在运行。现在重启以完成更新会中断游戏时长记录，本次游戏之后的时间不会计入。建议关闭游戏后再重启。</value>
-  </data>
-  <data name="UpdateWindow_PlayTimeRecordingTitle" xml:space="preserve">
-    <value>正在记录游戏时长</value>
-  </data>
-  <data name="UpdateWindow_RestartAnyway" xml:space="preserve">
-    <value>仍然重启</value>
-  </data>
   <data name="ShiyuDefensePage_CriticalNodeFourthFrontier" xml:space="preserve">
     <value>剧变节点第四防线</value>
   </data>

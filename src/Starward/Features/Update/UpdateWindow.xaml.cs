@@ -4,11 +4,9 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Web.WebView2.Core;
 using NuGet.Versioning;
-using Starward.Features.PlayTime;
 using Starward.Features.RPC;
 using Starward.Features.Setting;
 using Starward.Frameworks;
@@ -492,21 +490,17 @@ public sealed partial class UpdateWindow : WindowEx
         AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);
         if (AutoRestartWhenUpdateFinished && !skipRestart)
         {
-            _ = RestartAsync();
+            Restart();
         }
     }
 
 
 
     [RelayCommand]
-    private async Task RestartAsync()
+    private void Restart()
     {
         try
         {
-            if (PlayTimeRecordService.IsRecordingAnyGame() && !await ConfirmRestartWhilePlayTimeRecordingAsync())
-            {
-                return;
-            }
             // 确保 RPC 子进程随主进程退出，避免占用 current 目录导致 Velopack 替换文件失败。
             AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);
             // 由 Velopack 的 Update.exe 在主进程退出后替换文件并重启。
@@ -517,27 +511,6 @@ public sealed partial class UpdateWindow : WindowEx
             _logger.LogWarning(ex, "Apply update and restart");
             ErrorMessage = ex.Message;
         }
-    }
-
-
-    /// <summary>
-    /// 有游戏仍在记录时长时询问是否仍要重启。Update.exe 安装前会结束安装目录下的所有进程，
-    /// 记录游戏时长的子进程也在其中，重启后这局游戏剩下的时间就不计了。
-    /// </summary>
-    /// <returns>用户选择仍然重启时返回 <see langword="true"/>；取消则返回 <see langword="false"/>，重启按钮保留。</returns>
-    private async Task<bool> ConfirmRestartWhilePlayTimeRecordingAsync()
-    {
-        var dialog = new ContentDialog
-        {
-            Title = Lang.UpdateWindow_PlayTimeRecordingTitle,
-            Content = Lang.UpdateWindow_PlayTimeRecordingContent,
-            PrimaryButtonText = Lang.UpdateWindow_RestartAnyway,
-            CloseButtonText = Lang.Common_Cancel,
-            DefaultButton = ContentDialogButton.Close,
-            RequestedTheme = RootGrid.ActualTheme,
-            XamlRoot = RootGrid.XamlRoot,
-        };
-        return await dialog.ShowAsync() is ContentDialogResult.Primary;
     }
 
 
