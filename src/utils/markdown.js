@@ -29,13 +29,24 @@ function inline(s) {
 }
 
 /**
+ * 去掉 release.yml 在发布说明末尾追加的「### 下载」表格。
+ * 那段是 HTML 徽章（本渲染器只会把它转义成源码），链接也固定指向 GitHub；
+ * 页面旁边已有按渠道/架构切换的下载区，这里不再重复展示。
+ * @param {string} md 已统一为 \n 换行
+ * @returns {string}
+ */
+export function stripAppendedDownloads(md) {
+  return md.replace(/(?:^|\n)#{1,4}[ \t]+(?:下载|Downloads?)[ \t]*\n\s*<table\b[\s\S]*$/i, '')
+}
+
+/**
  * @param {string | null | undefined} md
  * @returns {string} HTML
  */
 export function renderReleaseMarkdown(md) {
   if (!md || !String(md).trim()) return ''
 
-  const lines = String(md).replace(/\r\n/g, '\n').split('\n')
+  const lines = stripAppendedDownloads(String(md).replace(/\r\n/g, '\n')).split('\n')
   /** @type {string[]} */
   const html = []
   /** @type {'ul' | 'ol' | null} */
