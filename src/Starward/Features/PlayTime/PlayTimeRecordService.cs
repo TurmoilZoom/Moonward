@@ -9,6 +9,7 @@ using Starward.Features.HoYoPlay;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -205,14 +206,18 @@ internal class PlayTimeRecordService
     /// </summary>
     /// <param name="gameId"></param>
     /// <param name="launcherProcess">
-    /// 拉起游戏的自定义启动程序进程。不为 <see langword="null"/> 时先在它存活期间持续查找游戏进程，
-    /// 它退出后仍未找到再按 <paramref name="waitTimeout"/> 查找。
+    /// 拉起游戏的自定义启动程序进程。不为 <see langword="null"/> 时先在它（或它转交给的同一程序已运行实例，见 <paramref name="launcherImagePath"/>）
+    /// 存活期间持续查找游戏进程，都退出后仍未找到再按 <paramref name="waitTimeout"/> 查找。
     /// </param>
     /// <param name="waitTimeout">
     /// 没有启动程序进程可等（或它已退出）时，找不到游戏进程最多再等多久；为 <see langword="null"/> 时约 12 秒，不足 12 秒按 12 秒算。
     /// </param>
+    /// <param name="launcherImagePath">
+    /// 启动程序的 exe 完整路径。<paramref name="launcherProcess"/> 退出后，只要还有同一路径的进程在运行就继续等；
+    /// 为 <see langword="null"/> 时只等 <paramref name="launcherProcess"/> 本身。
+    /// </param>
     /// <returns></returns>
-    public async Task<Process?> StartProcessToLogAsync(GameId gameId, Process? launcherProcess = null, TimeSpan? waitTimeout = null)
+    public async Task<Process?> StartProcessToLogAsync(GameId gameId, Process? launcherProcess = null, TimeSpan? waitTimeout = null, string? launcherImagePath = null)
     {
         try
         {
@@ -223,9 +228,25 @@ internal class PlayTimeRecordService
             if (launcherProcess is not null)
             {
                 // 工具何时拉起游戏不确定（如胡桃工具箱要用户在工具里手动点启动），固定时长常常不够，工具还在就一直等
-                _logger.LogInformation("Wait for game process ({biz}) while launcher process ({launcherPid}) is running", biz, launcherProcess.Id);
-                while (IsProcessRunning(launcherProcess))
+                _logger.LogInformation("Wait for game process ({biz}) while launcher process ({launcherPid}) is running, path: {path}", biz, launcherProcess.Id, launcherImagePath);
+                bool following = false;
+                while (true)
                 {
+                    if (!IsProcessRunning(launcherProcess))
+                    {
+                        // 单实例工具（如常驻托盘的胡桃）已在运行时，新实例把请求转交给已有实例后马上退出，游戏由已有实例拉起，
+                        // 改为跟随同一路径的实例；每轮重新查找，转交多次或工具重启都能跟上
+                        if (FindRunningInstance(launcherImagePath) is not int instancePid)
+                        {
+                            break;
+                        }
+                        if (!following)
+                        {
+                            following = true;
+                            _logger.LogInformation("Launcher process ({launcherPid}) exited, wait for game process ({biz}) while running instance ({instancePid}) of the same program is running",
+                                launcherProcess.Id, biz, instancePid);
+                        }
+                    }
                     await Task.Delay(2000).ConfigureAwait(false);
                     if (TryStartProcessToLog(biz, Process.GetProcessesByName(name)) is Process process)
                     {
@@ -296,6 +317,35 @@ internal class PlayTimeRecordService
             });
             return process;
         }
+        return null;
+    }
+
+
+    /// <summary>
+    /// 在当前会话中查找指定 exe 路径正在运行的进程。
+    /// </summary>
+    /// <param name="imagePath">exe 完整路径；为 <see langword="null"/> 时不查找。</param>
+    /// <returns>任意一个匹配进程的 PID；没有时返回 <see langword="null"/>。</returns>
+    private static int? FindRunningInstance(string? imagePath)
+    {
+        if (string.IsNullOrWhiteSpace(imagePath))
+        {
+            return null;
+        }
+        try
+        {
+            int sessionId = Process.GetCurrentProcess().SessionId;
+            foreach (var process in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(imagePath)))
+            {
+                // 只按进程名会把同名的其他程序也算上，须比对完整路径
+                if (process.SessionId == sessionId
+                    && string.Equals(GameLauncherService.TryGetProcessImagePath(process), imagePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    return process.Id;
+                }
+            }
+        }
+        catch { }
         return null;
     }
 

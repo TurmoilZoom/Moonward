@@ -662,15 +662,18 @@ internal partial class GameLauncherService
     /// </summary>
     /// <param name="process">进程</param>
     /// <returns>exe 完整路径；无权访问或进程已退出时返回 <see langword="null"/></returns>
-    private static string? TryGetProcessImagePath(Process process)
+    internal static string? TryGetProcessImagePath(Process process)
     {
         try
         {
             // 游戏以管理员权限运行，Process.MainModule 要读进程内存会被拒绝；查询受限信息的权限就足够取路径
             using Kernel32.SafeHPROCESS handle = Kernel32.OpenProcess((uint)Kernel32.ProcessAccess.PROCESS_QUERY_LIMITED_INFORMATION, false, (uint)process.Id);
-            if (!handle.IsInvalid && Kernel32.QueryFullProcessImageName(handle, Kernel32.PROCESS_NAME.PROCESS_NAME_WIN32, out string? path) && !string.IsNullOrWhiteSpace(path))
+            // Vanara 5.0.5 的 out string 重载恒失败（实测 ERROR_INSUFFICIENT_BUFFER），须自己给缓冲区
+            var sb = new StringBuilder(1024);
+            uint size = (uint)sb.Capacity;
+            if (!handle.IsInvalid && Kernel32.QueryFullProcessImageName(handle, Kernel32.PROCESS_NAME.PROCESS_NAME_WIN32, sb, ref size) && size > 0)
             {
-                return Path.GetFullPath(path);
+                return Path.GetFullPath(sb.ToString(0, (int)size));
             }
         }
         catch { }
@@ -895,11 +898,12 @@ internal partial class GameLauncherService
             }
             if (thirdPartyTool || startWithCmd)
             {
-                // 自定义启动程序与 CMD 只是中转，游戏进程要另外按进程名找；自定义启动程序存活期间一直等它拉起游戏。
-                // ShellExecute 打开 .url 等非可执行文件时可能拿不到进程（返回 null），此时也要找，只是按固定时长。
-                // 链接常拿不到进程，或拿到的是转交给已运行实例后马上退出的新实例，按更长时长找。
+                // 自定义启动程序与 CMD 只是中转，游戏进程要另外按进程名找；自定义启动程序（或它转交给的同一程序已运行实例）
+                // 存活期间一直等它拉起游戏。ShellExecute 打开 .url 等非可执行文件时可能拿不到进程（返回 null），此时也要找，只是按固定时长。
+                // 链接常拿不到进程，冷启动又慢，按更长时长找。
                 return await _playTimeRecorderService.StartProcessToLogAsync(gameId, thirdPartyTool ? process : null,
-                    thirdPartyUrl ? LaunchUrlGameWaitTimeout : null);
+                    thirdPartyUrl ? LaunchUrlGameWaitTimeout : null,
+                    thirdPartyTool ? GetThirdPartyToolImagePath(exe, thirdPartyUrl, process) : null);
             }
             if (process != null)
             {
@@ -1249,6 +1253,39 @@ internal partial class GameLauncherService
         catch
         {
             return false;
+        }
+    }
+
+
+    /// <summary>
+    /// 取刚启动的自定义启动程序的 exe 完整路径。单实例程序（如常驻托盘的胡桃工具箱）已在运行时，
+    /// 新实例把请求转交给已有实例后马上退出，之后要按此路径找到已有实例继续等它拉起游戏。
+    /// </summary>
+    /// <param name="exe">启动时打开的文件或链接。</param>
+    /// <param name="isUrl"><paramref name="exe"/> 是否为链接。</param>
+    /// <param name="process">打开后拿到的进程，可为 <see langword="null"/>。</param>
+    /// <returns>exe 完整路径；拿不到，或是系统目录下的程序（不代表启动程序本身）时返回 <see langword="null"/>。</returns>
+    private static string? GetThirdPartyToolImagePath(string? exe, bool isUrl, Process? process)
+    {
+        try
+        {
+            // 进程一退出就读不到路径（实测 QueryFullProcessImageName 返回错误 31），链接、.lnk 只能趁刚启动时读
+            string? path = process is null ? null : TryGetProcessImagePath(process);
+            if (path is null && !isUrl && string.Equals(Path.GetExtension(exe), ".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                path = Path.GetFullPath(exe!);
+            }
+            // .bat 拿到的是 cmd.exe；系统程序随时可能有无关的实例在运行，按路径跟随会一直等下去
+            string windows = Path.TrimEndingDirectorySeparator(Environment.GetFolderPath(Environment.SpecialFolder.Windows)) + Path.DirectorySeparatorChar;
+            if (path is not null && path.StartsWith(windows, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+            return path;
+        }
+        catch
+        {
+            return null;
         }
     }
 
