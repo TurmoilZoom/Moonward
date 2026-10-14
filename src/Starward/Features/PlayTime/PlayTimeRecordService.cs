@@ -408,6 +408,99 @@ internal class PlayTimeRecordService
     }
 
 
+    /// <summary>
+    /// 当前是否有游戏时长记录进程在运行（以记录进程注册的 <c>playtime_{pid}</c> 实例键为准）。
+    /// </summary>
+    /// <returns>有则返回 <see langword="true"/>；查询失败时也返回 <see langword="true"/>，让调用方按「正在记录」保守处理。</returns>
+    public static bool IsAnyRecorderRunning()
+    {
+        try
+        {
+            return AppInstance.GetInstances().Any(x => x.Key.StartsWith("playtime_", StringComparison.Ordinal));
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
+
+    /// <summary>
+    /// 给「记录进程中途没了、游戏还在运行」的会话重新拉起记录进程，例如在更新窗口点了重启，
+    /// Update.exe 安装前把记录进程一并结束了。新的记录进程会在 <see cref="LogStartState"/> 里补齐中断期间的心跳。
+    /// <para>
+    /// 只接续心跳表里还留着记录的进程：正常结束的会话心跳已归档删除，不是本程序拉起的游戏也不会被接管。
+    /// </para>
+    /// </summary>
+    public void ResumeInterruptedRecordings()
+    {
+        try
+        {
+            using var dapper = DatabaseService.CreateConnection();
+            List<PlayTimeItemStruct> sessions = dapper.Query<PlayTimeItemStruct>("SELECT GameBiz, Pid, MAX(TimeStamp) AS TimeStamp FROM PlayTimeItem GROUP BY GameBiz, Pid;").ToList();
+            int sessionId = Process.GetCurrentProcess().SessionId;
+            foreach (PlayTimeItemStruct session in sessions)
+            {
+                using Process? process = TryGetRunningProcess(session.Pid);
+                if (process is null || process.SessionId != sessionId)
+                {
+                    continue;
+                }
+                // PID 会被复用：最后一条心跳之后才启动的进程不是当时记录的那个游戏
+                if (new DateTimeOffset(process.StartTime).ToUnixTimeMilliseconds() > session.TimeStamp)
+                {
+                    continue;
+                }
+                string? exeName = GameLauncherService.GetGameExeName(session.GameBiz);
+                if (!string.IsNullOrWhiteSpace(exeName) && !string.Equals(process.ProcessName, Path.GetFileNameWithoutExtension(exeName), StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                if (App.FindInstanceForKey($"playtime_{session.Pid}") is not null)
+                {
+                    continue;
+                }
+                Process? p = Process.Start(new ProcessStartInfo
+                {
+                    FileName = AppConfig.MoonwardExecutePath,
+                    Arguments = $"playtime --biz {session.GameBiz} --pid {session.Pid} {AppConfig.GetDataFolderArgument()}",
+                    CreateNoWindow = true,
+                });
+                _logger.LogInformation("Resume interrupted play time recording: GameBiz {biz}, Pid {pid}, LastHeartbeat {last}, ProcessId {processId}",
+                    session.GameBiz, session.Pid, DateTimeOffset.FromUnixTimeMilliseconds(session.TimeStamp).ToLocalTime(), p?.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Resume interrupted play time recording");
+        }
+    }
+
+
+    /// <summary>
+    /// 按 PID 取仍在运行的进程。
+    /// </summary>
+    /// <param name="pid">进程 ID。</param>
+    /// <returns>进程在运行且可查询启动时间时返回该进程，否则返回 <see langword="null"/>。</returns>
+    private static Process? TryGetRunningProcess(int pid)
+    {
+        Process? process = null;
+        try
+        {
+            process = Process.GetProcessById(pid);
+            // 先取一次启动时间：无权限查询的进程在这里就排除，记录进程拿不到启动时间也接续不了
+            _ = process.StartTime;
+            if (!process.HasExited)
+            {
+                return process;
+            }
+        }
+        catch { }
+        process?.Dispose();
+        return null;
+    }
+
+
 
 
     /// <summary>

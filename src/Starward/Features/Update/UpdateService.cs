@@ -1,7 +1,11 @@
 using Microsoft.Extensions.Logging;
 using NuGet.Versioning;
+using Starward.Features.PlayTime;
 using Starward.Features.RPC;
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.ExceptionServices;
@@ -391,7 +395,7 @@ internal class UpdateService
     /// <summary>
     /// 后台下载已检查到的更新（不弹窗）。下载完成后由 <see cref="ApplySilentlyOnExit"/> 在退出时静默安装，
     /// 并置位 <see cref="AppConfig.PendingSilentUpdateContent"/>，下次启动弹出更新内容。
-    /// 若进程未走到退出钩子，下次启动时 Velopack 默认也会自动应用已下载的包。
+    /// 退出时没装上（有游戏在记录时长，或进程没走到退出钩子），下次主程序启动时由 <see cref="ApplyPendingUpdateOnStartup"/> 安装。
     /// </summary>
     /// <param name="release">检查更新阶段得到的版本信息。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -515,12 +519,16 @@ internal class UpdateService
 
 
     /// <summary>
-    /// 若已下载更新，通知 Update.exe 在本进程退出后静默安装（不重启、不显示进度窗口）。
+    /// 若有已下载待安装的更新，通知 Update.exe 在本进程退出后静默安装（不重启、不显示进度窗口）。
     /// Update.exe 最多等待 60 秒；应在真正退出前调用。
+    /// <para>
+    /// 有游戏时长记录进程在运行时不装：Update.exe 安装前会把安装目录下的进程全部结束，记录就断了。
+    /// 包留在本地，等下次没有游戏在记录时退出，或下次主程序启动时（<see cref="ApplyPendingUpdateOnStartup"/>）再装。
+    /// </para>
     /// </summary>
     public void ApplySilentlyOnExit()
     {
-        if (_applyOnExitScheduled || !UpdateFinished || !AppConfig.EnableSilentUpdate)
+        if (_applyOnExitScheduled || !AppConfig.EnableSilentUpdate)
         {
             return;
         }
@@ -531,15 +539,86 @@ internal class UpdateService
             {
                 return;
             }
+            // 本次没有下载过时，看本地有没有之前留下、还没装上的包（上次退出时正好有游戏在记录）
+            VelopackAsset? target = UpdateFinished ? _downloadedUpdate?.TargetFullRelease : manager.UpdatePendingRestart;
+            if (!UpdateFinished && target is null)
+            {
+                return;
+            }
+            if (PlayTimeRecordService.IsAnyRecorderRunning())
+            {
+                _logger.LogInformation("Defer silent update because play time is being recorded: {version}", target?.Version);
+                return;
+            }
             AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);
-            _logger.LogInformation("Apply silent update on exit: {version}", _downloadedUpdate?.TargetFullRelease?.Version);
+            _logger.LogInformation("Apply silent update on exit: {version}", target?.Version);
             _applyOnExitScheduled = true;
-            manager.WaitExitThenApplyUpdates(_downloadedUpdate?.TargetFullRelease, silent: true, restart: false);
+            manager.WaitExitThenApplyUpdates(target, silent: true, restart: false);
         }
         catch (Exception ex)
         {
             _applyOnExitScheduled = false;
             _logger.LogWarning(ex, "Apply silent update on exit");
+        }
+    }
+
+
+    /// <summary>
+    /// 主程序启动时安装之前下载好、还没装上的更新（显示 Velopack 进度窗口，装完按原参数重启）。
+    /// 取代 Velopack 自带的启动时自动安装（已在 Program.Main 关闭）：那个在任何 Moonward 进程启动时都会装，
+    /// 包括游戏时长记录与 RPC 子进程。
+    /// <para>
+    /// 安装目录下还有其他 Moonward 进程（时长记录、后台 RPC 等）时不装，留到退出或下次启动。
+    /// 安装时本方法不返回，进程直接退出。
+    /// </para>
+    /// </summary>
+    /// <param name="args">本次启动的命令行参数，重启时原样传回。</param>
+    public void ApplyPendingUpdateOnStartup(string[] args)
+    {
+        try
+        {
+            var manager = GetManager();
+            if (!manager.IsInstalled || manager.UpdatePendingRestart is not VelopackAsset pending)
+            {
+                return;
+            }
+            if (IsOtherMoonwardProcessRunning())
+            {
+                _logger.LogInformation("Defer pending update on startup because other Moonward processes are running: {version}", pending.Version);
+                return;
+            }
+            _logger.LogInformation("Apply pending update on startup: {version}", pending.Version);
+            manager.ApplyUpdatesAndRestart(pending, args);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Apply pending update on startup");
+        }
+    }
+
+
+    /// <summary>
+    /// 除本进程外是否还有同名的 Moonward 进程在运行。Update.exe 安装前会结束安装目录下的所有进程，
+    /// 只按进程名判断会把其他目录的同名程序也算上，那样只是推迟安装，不会误杀。
+    /// </summary>
+    /// <returns>有其他进程，或拿不到本进程路径时返回 <see langword="true"/>。</returns>
+    private static bool IsOtherMoonwardProcessRunning()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.ProcessPath))
+        {
+            return true;
+        }
+        Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Environment.ProcessPath));
+        try
+        {
+            return processes.Any(x => x.Id != Environment.ProcessId);
+        }
+        finally
+        {
+            foreach (Process process in processes)
+            {
+                process.Dispose();
+            }
         }
     }
 

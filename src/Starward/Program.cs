@@ -26,8 +26,12 @@ public static class Program
         // 安装/更新/卸载等 hook 会在此处理并直接退出进程，不会进入 WinUI。
         // 卸载钩子（控制面板卸载或 Update.exe uninstall 都会触发）按用户设置清理数据目录与注册表残留，
         // 钩子有 30 秒超时且禁止任何 UI，故 PerformUninstallCleanup 全程静默。
+        // 关掉「启动时自动安装已下载的更新」：游戏时长记录、RPC 子进程也是 Moonward.exe，默认行为下它们一启动就会装更新，
+        // 而 Update.exe 安装前会结束安装目录下的所有进程（含正在记录的时长进程）。改由主程序启动/退出时按条件安装，
+        // 见 UpdateService.ApplyPendingUpdateOnStartup / ApplySilentlyOnExit。
         VelopackApp.Build()
             .OnBeforeUninstallFastCallback(_ => Features.Setting.AppUninstallService.PerformUninstallCleanup())
+            .SetAutoApplyOnStartup(false)
             .Run();
 
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;

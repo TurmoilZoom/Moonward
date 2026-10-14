@@ -132,6 +132,13 @@ public partial class App : Application
             Environment.Exit(0);
         }
 
+        // 安装之前下载好、还没装上的更新（装时会按原参数重启）。启动游戏时不装：刚拉起的时长记录进程可能还没注册，
+        // 会被 Update.exe 一并结束
+        if (!context.IsGameLaunchRequest)
+        {
+            AppConfig.GetService<UpdateService>().ApplyPendingUpdateOnStartup(args);
+        }
+
         // 仅驻留系统托盘、不显示主窗口：--hide（开机静默启动），或本次是快捷方式/命令行启动游戏。
         // 后者恒定常驻，让全局热键、手柄与 GameBar 引导键接管有一个知道「游戏正在跑」的宿主。
         if (args.Contains(StartupVerbs.Hide) || context.IsGameLaunchRequest)

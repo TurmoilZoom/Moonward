@@ -5,6 +5,7 @@ using Starward.Features.Gacha;
 using Starward.Features.GamepadControl;
 using Starward.Features.GameRecord.AutoRefresh;
 using Starward.Features.GameRecord.SignIn;
+using Starward.Features.PlayTime;
 using Starward.Features.RPC;
 using Starward.Features.Setting;
 using Starward.Features.Update;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 namespace Starward.Features.Startup;
 
 /// <summary>
-/// 常驻实例的后台宿主：全局热键、手柄驱动、GameBar 引导键接管、RPC 环境下发、抽卡物品名缓存、自动签到与云游戏免费时长常驻循环、后台静默更新。
+/// 常驻实例的后台宿主：全局热键、手柄驱动、GameBar 引导键接管、RPC 环境下发、抽卡物品名缓存、自动签到与云游戏免费时长常驻循环、后台静默更新、接续中断的游戏时长记录。
 /// <para>
 /// 这些职责过去全挂在 <c>MainView_Loaded</c> 上，导致仅托盘驻留（<c>--hide</c>）或快捷方式启动时统统缺席
 /// —— 用户按 Alt+D 截不了图，手柄与引导键接管也不生效。现由系统托盘窗口（常驻实例中唯一必然存在
@@ -50,6 +51,8 @@ internal static class ResidentHost
             // 自愈：上次进程被强杀/崩溃可能把 GameBar 引导键停在「已接管」状态，
             // 当前配置并非「总是接管」时先还原，避免注册表残留导致引导键永久失灵。
             GamepadController.RestoreGamepadGuideButtonIfNotAlwaysTakenOver();
+            // 接续被中断的游戏时长记录：如更新窗口点重启时 Update.exe 把记录进程一并结束了，游戏还开着。
+            _ = Task.Run(() => AppConfig.GetService<PlayTimeRecordService>().ResumeInterruptedRecordings());
             // 启动时为三个游戏按当前语言确保物品名称映射缓存；首次启动/更新后会一次性迁移存量记录名称。
             _ = Task.Run(() => AppConfig.GetService<GachaItemNameService>().EnsureCurrentLanguageOnStartupAsync());
             // 启动后批量签到，并在进程常驻期间跨日再签（绝对到期 + 休眠唤醒补判）。
