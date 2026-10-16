@@ -1709,6 +1709,12 @@
   <data name="ImaginariumTheaterPage_SupportingCastCharactersAssistOtherPlayers" xml:space="preserve">
     <value>ตัวละครสมทบช่วยเหลือผู้เล่นอื่น</value>
   </data>
+  <data name="ImaginariumTheaterPage_TrialCharacter" xml:space="preserve">
+    <value>ทดลอง</value>
+  </data>
+  <data name="ImaginariumTheaterPage_SupportingCastCharacter" xml:space="preserve">
+    <value>สมทบ</value>
+  </data>
   <data name="ImaginariumTheaterPage_TotalPerformanceDuration" xml:space="preserve">
     <value>ระยะเวลาการแสดงทั้งหมด</value>
   </data>

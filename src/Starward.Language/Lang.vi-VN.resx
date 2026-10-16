@@ -1710,6 +1710,12 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="ImaginariumTheaterPage_SupportingCastCharactersAssistOtherPlayers" xml:space="preserve">
     <value>Diễn Viên Hỗ Trợ chi viện người chơi khác</value>
   </data>
+  <data name="ImaginariumTheaterPage_TrialCharacter" xml:space="preserve">
+    <value>Dùng thử</value>
+  </data>
+  <data name="ImaginariumTheaterPage_SupportingCastCharacter" xml:space="preserve">
+    <value>Hỗ Trợ</value>
+  </data>
   <data name="ImaginariumTheaterPage_TotalPerformanceDuration" xml:space="preserve">
     <value>Tổng Thời Gian Biểu Diễn</value>
   </data>

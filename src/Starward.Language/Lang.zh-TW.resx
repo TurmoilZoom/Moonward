@@ -1710,6 +1710,12 @@
   <data name="ImaginariumTheaterPage_SupportingCastCharactersAssistOtherPlayers" xml:space="preserve">
     <value>助演角色支援其他玩家</value>
   </data>
+  <data name="ImaginariumTheaterPage_TrialCharacter" xml:space="preserve">
+    <value>試用</value>
+  </data>
+  <data name="ImaginariumTheaterPage_SupportingCastCharacter" xml:space="preserve">
+    <value>助演</value>
+  </data>
   <data name="ImaginariumTheaterPage_TotalPerformanceDuration" xml:space="preserve">
     <value>演出總時長</value>
   </data>

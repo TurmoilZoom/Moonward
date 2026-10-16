@@ -1710,6 +1710,12 @@
   <data name="ImaginariumTheaterPage_SupportingCastCharactersAssistOtherPlayers" xml:space="preserve">
     <value>조연 캐릭터가 다른 플레이어 지원</value>
   </data>
+  <data name="ImaginariumTheaterPage_TrialCharacter" xml:space="preserve">
+    <value>체험</value>
+  </data>
+  <data name="ImaginariumTheaterPage_SupportingCastCharacter" xml:space="preserve">
+    <value>조연</value>
+  </data>
   <data name="ImaginariumTheaterPage_TotalPerformanceDuration" xml:space="preserve">
     <value>총 공연 시간</value>
   </data>

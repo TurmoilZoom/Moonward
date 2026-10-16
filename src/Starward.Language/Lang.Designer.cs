@@ -6935,6 +6935,24 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Trial 的本地化字符串。
+        /// </summary>
+        public static string ImaginariumTheaterPage_TrialCharacter {
+            get {
+                return ResourceManager.GetString("ImaginariumTheaterPage_TrialCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Support 的本地化字符串。
+        /// </summary>
+        public static string ImaginariumTheaterPage_SupportingCastCharacter {
+            get {
+                return ResourceManager.GetString("ImaginariumTheaterPage_SupportingCastCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Team that Completed the Performance Fastest 的本地化字符串。
         /// </summary>
         public static string ImaginariumTheaterPage_TeamThatCompletedThePerformanceFastest {

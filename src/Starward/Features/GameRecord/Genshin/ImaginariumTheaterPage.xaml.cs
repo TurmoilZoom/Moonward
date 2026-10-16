@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
@@ -16,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Windows.UI;
 
 
 namespace Starward.Features.GameRecord.Genshin;
@@ -305,6 +307,58 @@ public sealed partial class ImaginariumTheaterPage : PageBase
             0 => 0.3,
             _ => 1,
         };
+    }
+
+
+    /// <summary>
+    /// 参演角色角标文字。
+    /// </summary>
+    /// <param name="avatarType"><see cref="ImaginariumTheaterAvatar.AvatarType"/>：1 自己角色，2 试用角色，3 助演角色</param>
+    /// <returns>试用 / 助演；自己的角色返回空串</returns>
+    public static string AvatarTypeBadgeText(int avatarType)
+    {
+        return avatarType switch
+        {
+            2 => Lang.ImaginariumTheaterPage_TrialCharacter,
+            3 => Lang.ImaginariumTheaterPage_SupportingCastCharacter,
+            _ => "",
+        };
+    }
+
+
+    /// <summary>
+    /// 参演角色角标底色，取自米游社：试用红、助演蓝。页面与分享图共用。
+    /// </summary>
+    /// <param name="avatarType"><see cref="ImaginariumTheaterAvatar.AvatarType"/></param>
+    /// <returns>自己的角色返回全透明</returns>
+    public static Color AvatarTypeBadgeColor(int avatarType)
+    {
+        return avatarType switch
+        {
+            2 => Color.FromArgb(0xFF, 0xDC, 0x6B, 0x78),
+            3 => Color.FromArgb(0xFF, 0x4A, 0x84, 0xBF),
+            _ => default,
+        };
+    }
+
+
+    /// <summary>
+    /// 参演角色角标画刷。
+    /// </summary>
+    /// <param name="avatarType"><see cref="ImaginariumTheaterAvatar.AvatarType"/></param>
+    public static SolidColorBrush AvatarTypeBadgeBrush(int avatarType)
+    {
+        return new SolidColorBrush(AvatarTypeBadgeColor(avatarType));
+    }
+
+
+    /// <summary>
+    /// 仅试用、助演角色显示角标。
+    /// </summary>
+    /// <param name="avatarType"><see cref="ImaginariumTheaterAvatar.AvatarType"/></param>
+    public static Visibility AvatarTypeBadgeVisibility(int avatarType)
+    {
+        return avatarType is 2 or 3 ? Visibility.Visible : Visibility.Collapsed;
     }
 
 

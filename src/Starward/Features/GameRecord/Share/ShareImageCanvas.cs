@@ -417,6 +417,8 @@ internal static class ShareImageCanvas
 
     /// <summary>原神角色卡：稀有度底 + 立绘 + 命座 + Lv。</summary>
     /// <param name="footer">卡底文案；为 null 时绘制 Lv.{level}。</param>
+    /// <param name="badgeText">右上角文字角标（如剧诗试用/助演）；与命座同位置，有命座时不画。</param>
+    /// <param name="badgeFill">文字角标底色。</param>
     public static void DrawGenshinAvatar(
         CanvasDrawingSession ds,
         ShareImageContext ctx,
@@ -428,7 +430,9 @@ internal static class ShareImageCanvas
         string? icon,
         int level,
         int rank = 0,
-        string? footer = null)
+        string? footer = null,
+        string? badgeText = null,
+        Color badgeFill = default)
     {
         DrawImage(ds, ctx.Icons.Get(GenshinRarityBg(rarity)), new Rect(x, y, width, height));
         float iconHeight = height - 18f;
@@ -449,6 +453,15 @@ internal static class ShareImageCanvas
             using var badge = CanvasGeometry.CreateRoundedRectangle(ctx.Device, badgeX, y, badgeW, badgeH, 0, 4);
             ds.FillGeometry(badge, RankBadgeFill);
             DrawText(ds, rank.ToString(), badgeX + 4f, y, ctx.Small, SecondaryText);
+        }
+        else if (!string.IsNullOrEmpty(badgeText))
+        {
+            float badgeW = MeasureTextWidth(ds, badgeText, ctx.Small) + 8f;
+            float badgeH = 17f;
+            float badgeX = x + width - badgeW;
+            using var badge = CanvasGeometry.CreateRoundedRectangle(ctx.Device, badgeX, y, badgeW, badgeH, 3, 3);
+            ds.FillGeometry(badge, badgeFill);
+            DrawText(ds, badgeText, badgeX + 4f, y, ctx.Small, PrimaryText);
         }
 
         string lv = footer ?? $"Lv.{level}";

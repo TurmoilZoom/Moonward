@@ -316,7 +316,10 @@ internal static class ImaginariumTheaterShareRenderer
         {
             foreach (ImaginariumTheaterAvatar avatar in round.Avatars)
             {
-                ShareImageCanvas.DrawGenshinAvatar(ds, ctx, ax, ay, AvatarW, AvatarH, avatar.Rarity, avatar.Image, avatar.Level);
+                ShareImageCanvas.DrawGenshinAvatar(
+                    ds, ctx, ax, ay, AvatarW, AvatarH, avatar.Rarity, avatar.Image, avatar.Level,
+                    badgeText: ImaginariumTheaterPage.AvatarTypeBadgeText(avatar.AvatarType),
+                    badgeFill: ImaginariumTheaterPage.AvatarTypeBadgeColor(avatar.AvatarType));
                 ax += AvatarW + AvatarGap;
             }
         }
