@@ -36,7 +36,7 @@ Moonward（产品品牌；工程目录与 C# 命名空间仍为 `Starward.*`）�
 
 ## 构建与运行
 
-**没有 .sln**，直接编主项目（会带上 ProjectReference）：
+解决方案文件是 `Starward.slnx`（供 Visual Studio 打开）；命令行验证直接编主项目即可（会带上 ProjectReference）：
 
 ```powershell
 # 日常验证（最快）
