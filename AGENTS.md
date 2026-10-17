@@ -22,6 +22,8 @@ Moonward（产品品牌；工程目录与 C# 命名空间仍为 `Starward.*`）�
 | `AppConfig.*.cs`、新增服务或设置项、`GameFeatureConfig`、数据目录、更新分发 | `.agents/rules/architecture.md` |
 | `*.xaml` / `*.xaml.cs`、页面外观或动画、控件模板、Composition、窗口与 Win32 互操作、图片与视频显示 | `.agents/rules/winui-ui.md` |
 | 新建 worktree | `.agents/rules/worktree.md` |
+| 看日志、排查崩溃、评估近期提交有没有回归 | `.agents/skills/log-eval/SKILL.md` |
+| 需要运行 Debug 版看界面效果、截图核对 | `.agents/skills/debug-ui-verify/SKILL.md` |
 | 提交并推送 / 打 tag 发版 | `.agents/skills/commit-push/`、`.agents/skills/tag-release/` |
 
 ## 解决方案结构
