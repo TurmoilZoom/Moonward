@@ -1,25 +1,25 @@
 using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Effects;
+using Microsoft.UI;
 using Microsoft.UI.Xaml.Media.Imaging;
-using Starward.Codec.AVIF;
-using Starward.Codec.JpegXL;
-using Starward.Codec.JpegXL.Decode;
+using Starward.Codec.ICC;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Hashing;
-using System.Runtime.CompilerServices;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
-using WinRT;
 using DeviceInformation = Windows.Devices.Enumeration.DeviceInformation;
 
 namespace Starward.Features.Codec;
@@ -48,6 +48,12 @@ internal static class ImageThumbnail
     private static readonly SemaphoreSlim Semaphore = new(Math.Clamp(Environment.ProcessorCount / 2, 1, int.MaxValue));
 
 
+    /// <summary>
+    /// AVIF / JPEG XL 缩略图缓存名后缀。旧版由系统解码器生成（可能偏色）或回退分支写出 0 字节文件，换名使其失效。
+    /// </summary>
+    private const string BundledDecoderCacheSuffix = "_2";
+
+
     static ImageThumbnail()
     {
         try
@@ -71,8 +77,12 @@ internal static class ImageThumbnail
 
     public static async Task<BitmapSource> GetImageThumbnailAsync(string path, bool png, CancellationToken cancellationToken = default)
     {
+        string extension = Path.GetExtension(path).ToLowerInvariant();
+        // AVIF / JPEG XL 不走系统解码器：HEIF 扩展解内嵌 ICC 接近 Display P3 的 AVIF 会整图偏色，与查看器不一致
+        // https://github.com/Scighost/Starward/issues/1953
+        bool bundledDecoder = extension is ".avif" or ".jxl";
         string fileName = GetCachedThumbnailName(path);
-        string cachePath = Path.Combine(CacheFolder, fileName);
+        string cachePath = Path.Combine(CacheFolder, bundledDecoder ? fileName + BundledDecoderCacheSuffix : fileName);
         if (File.Exists(cachePath))
         {
             return new BitmapImage(new Uri(cachePath));
@@ -81,14 +91,9 @@ internal static class ImageThumbnail
         try
         {
             await Task.Delay(300, cancellationToken);
-            string extension = Path.GetExtension(path).ToLowerInvariant();
-            if (!AvifDecoderSupported && extension is ".avif")
+            if (bundledDecoder)
             {
-                return await LoadAvifImageAsync(path, cachePath, cancellationToken);
-            }
-            else if (!JxlDecoderSupported && extension is ".jxl")
-            {
-                return await LoadJxlImageAsync(path, cachePath, cancellationToken);
+                return await LoadBundledCodecImageAsync(path, cachePath, Path.Combine(CacheFolder, fileName), cancellationToken);
             }
             else
             {
@@ -120,90 +125,124 @@ internal static class ImageThumbnail
 
 
 
-    private static async Task<BitmapSource> LoadAvifImageAsync(string filePath, string cachePath, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// 用自带解码器（与查看器相同的 <see cref="ImageLoader"/>）生成 AVIF / JPEG XL 缩略图：转换到 sRGB 色域，HDR 色调映射到 SDR。
+    /// </summary>
+    /// <param name="filePath">原图路径</param>
+    /// <param name="cachePath">缩略图缓存路径</param>
+    /// <param name="legacyCachePath">旧版缓存路径，生成成功后删除</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>缩略图</returns>
+    private static async Task<BitmapSource> LoadBundledCodecImageAsync(string filePath, string cachePath, string legacyCachePath, CancellationToken cancellationToken = default)
     {
         await Task.Run(async () =>
         {
-            using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-            using var decoder = await avifDecoderLite.CreateAsync(fs);
+            using ImageInfo info = await ImageLoader.LoadImageAsync(filePath, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
+            CanvasBitmap bitmap = info.CanvasBitmap;
+            (uint width, uint height) = GetThumbnailSize(bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height);
 
-            uint width = decoder.Width;
-            uint height = decoder.Height;
-            uint depth = decoder.Depth > 8u ? 16u : 8u;
-
-            using var image = decoder.GetNextImage();
-            using var rgb = image.ToRGBImage(depth, avifRGBFormat.RGBA);
-            var pixelBytes = rgb.GetPixelBytes();
-
-            using var softwareBitmap = new SoftwareBitmap(depth == 8 ? BitmapPixelFormat.Rgba8 : BitmapPixelFormat.Rgba16, (int)rgb.Width, (int)rgb.Height);
-            using (var buffer = softwareBitmap.LockBuffer(BitmapBufferAccessMode.Write))
+            List<IDisposable> effects = [];
+            try
             {
-                using var refer = buffer.CreateReference();
-                refer.As<IMemoryBufferByteAccess>().GetBuffer(out nint ptr, out uint capacity);
-                if (capacity < pixelBytes.Length)
+                var scaleEffect = new ScaleEffect
                 {
-                    throw new InvalidOperationException("Buffer size is smaller than pixel data size.");
-                }
-                unsafe
+                    Source = bitmap,
+                    Scale = new Vector2((float)width / bitmap.SizeInPixels.Width, (float)height / bitmap.SizeInPixels.Height),
+                    InterpolationMode = CanvasImageInterpolation.HighQualityCubic,
+                    BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                };
+                effects.Add(scaleEffect);
+                ICanvasImage output = scaleEffect;
+
+                // HDR 与浮点像素是线性 scRGB；其余为 sRGB 曲线编码，换色域前须先线性化
+                bool linear = info.HDR || bitmap.Format is DirectXPixelFormat.R16G16B16A16Float or DirectXPixelFormat.R32G32B32A32Float;
+                bool convertPrimaries = !(info.ColorPrimaries.TryGetDefinedPrimaries(out int id) && id == 1);
+                if (linear)
                 {
-                    NativeMemory.Copy(Unsafe.AsPointer(ref MemoryMarshal.GetReference(pixelBytes)), ptr.ToPointer(), (nuint)pixelBytes.Length);
+                    // 与截图完成提示窗口相同：300 nits 映射为 SDR 白
+                    var toneMapEffect = new HdrToneMapEffect
+                    {
+                        Source = output,
+                        InputMaxLuminance = 1000,
+                        OutputMaxLuminance = 300,
+                        DisplayMode = HdrToneMapEffectDisplayMode.Hdr,
+                        BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                    };
+                    var whiteLevelEffect = new WhiteLevelAdjustmentEffect
+                    {
+                        Source = toneMapEffect,
+                        InputWhiteLevel = 80,
+                        OutputWhiteLevel = 300,
+                        BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                    };
+                    effects.Add(toneMapEffect);
+                    effects.Add(whiteLevelEffect);
+                    output = whiteLevelEffect;
                 }
+                else if (convertPrimaries)
+                {
+                    var eotfEffect = new SrgbGammaEffect
+                    {
+                        Source = output,
+                        GammaMode = SrgbGammaMode.EOTF,
+                        BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                    };
+                    effects.Add(eotfEffect);
+                    output = eotfEffect;
+                }
+                if (convertPrimaries)
+                {
+                    Matrix4x4 m = ColorPrimaries.GetColorTransferMatrix(info.ColorPrimaries, ColorPrimaries.BT709);
+                    var matrixEffect = new ColorMatrixEffect
+                    {
+                        Source = output,
+                        ColorMatrix = new Matrix5x4(m.M11, m.M12, m.M13, m.M14,
+                                                    m.M21, m.M22, m.M23, m.M24,
+                                                    m.M31, m.M32, m.M33, m.M34,
+                                                    m.M41, m.M42, m.M43, m.M44,
+                                                    0, 0, 0, 0),
+                        ClampOutput = false,
+                        BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                    };
+                    effects.Add(matrixEffect);
+                    output = matrixEffect;
+                }
+                if (linear || convertPrimaries)
+                {
+                    var oetfEffect = new SrgbGammaEffect
+                    {
+                        Source = output,
+                        GammaMode = SrgbGammaMode.OETF,
+                        BufferPrecision = CanvasBufferPrecision.Precision16Float,
+                    };
+                    effects.Add(oetfEffect);
+                    output = oetfEffect;
+                }
+
+                using var renderTarget = new CanvasRenderTarget(CanvasDevice.GetSharedDevice(), width, height, 96);
+                using (var ds = renderTarget.CreateDrawingSession())
+                {
+                    ds.Clear(Colors.Transparent);
+                    ds.DrawImage(output);
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+
+                using var ms = new MemoryStream();
+                await renderTarget.SaveAsync(ms.AsRandomAccessStream(), CanvasBitmapFileFormat.Jpeg, 0.6f).AsTask(cancellationToken).ConfigureAwait(false);
+                ms.Position = 0;
+                await SaveStreamToFileAsync(cachePath, ms, cancellationToken).ConfigureAwait(false);
             }
-            cancellationToken.ThrowIfCancellationRequested();
-
-            Directory.CreateDirectory(CacheFolder);
-            var tmp = cachePath + "_tmp";
-            using var fs_tmp = File.Create(tmp);
-            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, fs.AsRandomAccessStream(), ImageQuality).AsTask(cancellationToken).ConfigureAwait(false);
-            encoder.SetSoftwareBitmap(softwareBitmap);
-            (uint scaledWidth, uint scaledHeight) = GetThumbnailSize(rgb.Width, rgb.Height);
-            encoder.BitmapTransform.ScaledWidth = scaledWidth;
-            encoder.BitmapTransform.ScaledHeight = scaledHeight;
-            encoder.BitmapTransform.InterpolationMode = BitmapInterpolationMode.Fant;
-            await encoder.FlushAsync();
-            fs_tmp.Dispose();
-            File.Move(tmp, cachePath, true);
-        }, cancellationToken);
-        return new BitmapImage(new Uri(cachePath));
-    }
-
-
-
-    private static async Task<BitmapSource> LoadJxlImageAsync(string filePath, string cachePath, CancellationToken cancellationToken = default)
-    {
-        await Task.Run(async () =>
-        {
-            using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-            using var decoder = await JxlDecoderLite.CreateAsync(fs);
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var pixelBytes = decoder.GetPixelBytes(JxlPixelFormat.R8G8B8A8UInt);
-            using var softwareBitmap = new SoftwareBitmap(BitmapPixelFormat.Rgba8, (int)decoder.Width, (int)decoder.Height);
-            using (var buffer = softwareBitmap.LockBuffer(BitmapBufferAccessMode.Write))
+            finally
             {
-                using var refer = buffer.CreateReference();
-                refer.As<IMemoryBufferByteAccess>().GetBuffer(out nint ptr, out uint capacity);
-                if (capacity < pixelBytes.Length)
-                {
-                    throw new InvalidOperationException("Buffer size is smaller than pixel data size.");
-                }
-                Marshal.Copy(pixelBytes, 0, ptr, pixelBytes.Length);
+                effects.ForEach(x => x.Dispose());
             }
-            cancellationToken.ThrowIfCancellationRequested();
 
-            Directory.CreateDirectory(CacheFolder);
-            var tmp = cachePath + "_tmp";
-            using var fs_tmp = File.Create(tmp);
-            BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, fs.AsRandomAccessStream(), ImageQuality).AsTask(cancellationToken).ConfigureAwait(false);
-            encoder.SetSoftwareBitmap(softwareBitmap);
-            (uint width, uint height) = GetThumbnailSize(decoder.Width, decoder.Height);
-            encoder.BitmapTransform.ScaledWidth = width;
-            encoder.BitmapTransform.ScaledHeight = height;
-            encoder.BitmapTransform.InterpolationMode = BitmapInterpolationMode.Fant;
-            await encoder.FlushAsync();
-            fs_tmp.Dispose();
-            File.Move(tmp, cachePath, true);
+            try
+            {
+                File.Delete(legacyCachePath);
+            }
+            catch { }
         }, cancellationToken);
         return new BitmapImage(new Uri(cachePath));
     }
@@ -276,16 +315,6 @@ internal static class ImageThumbnail
             width = TargetWidth;
         }
         return (width, height);
-    }
-
-
-
-    [ComImport]
-    [Guid("5B0D3235-4DBA-4D44-865E-8F1D0E4FD04D")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public unsafe interface IMemoryBufferByteAccess
-    {
-        void GetBuffer([Out] out nint buffer, [Out] out uint capacity);
     }
 
 
