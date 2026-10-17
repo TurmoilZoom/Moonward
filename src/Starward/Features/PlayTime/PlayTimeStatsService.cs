@@ -8,12 +8,10 @@ using System.Linq;
 
 namespace Starward.Features.PlayTime;
 
-internal sealed class PlayTimeStatsService
+internal sealed partial class PlayTimeStatsService
 {
 
     private readonly ILogger<PlayTimeStatsService> _logger;
-
-    private const long MAX_INTERVAL = 60_000;
 
     /// <summary>
     /// 心跳记录归档成会话前的等待时间：结束超过一天的会话才算定型，更近的可能还在记录（记录进程重启会接着补心跳）。
@@ -66,80 +64,6 @@ internal sealed class PlayTimeStatsService
     {
         long before = DateTimeOffset.Now.Subtract(ArchiveDelay).ToUnixTimeMilliseconds();
         return GetPlayTimeStats(items).Where(x => x.EndTime < before).ToList();
-    }
-
-
-
-    public static List<PlayTimeStats> GetPlayTimeStats(List<PlayTimeItemStruct> items)
-    {
-        List<PlayTimeStats> list = new();
-        Dictionary<(GameBiz, int), PlayTimeStats> statsSession = new();
-        foreach (var item in items)
-        {
-            var key = (item.GameBiz, item.Pid);
-            if (statsSession.TryGetValue((item.GameBiz, item.Pid), out PlayTimeStats? stats))
-            {
-                if (item.State is PlayTimeState.Start)
-                {
-                    stats.Interruption = true;
-                    list.Add(stats);
-                    statsSession[key] = new PlayTimeStats
-                    {
-                        GameBiz = item.GameBiz,
-                        Pid = item.Pid,
-                        StartTime = item.TimeStamp,
-                        EndTime = item.TimeStamp,
-                    };
-                    continue;
-                }
-                if (item.TimeStamp - stats.EndTime > MAX_INTERVAL)
-                {
-                    stats.Interruption = true;
-                    list.Add(stats);
-                    statsSession.Remove((item.GameBiz, item.Pid));
-                    if (item.State is PlayTimeState.Play)
-                    {
-                        statsSession[key] = new PlayTimeStats
-                        {
-                            GameBiz = item.GameBiz,
-                            Pid = item.Pid,
-                            StartTime = item.TimeStamp,
-                            EndTime = item.TimeStamp,
-                        };
-                    }
-                }
-                else if (item.State is PlayTimeState.Play)
-                {
-                    stats.EndTime = item.TimeStamp;
-                    continue;
-                }
-                else if (item.State is PlayTimeState.Stop or PlayTimeState.Error)
-                {
-                    stats.Interruption = item.State is PlayTimeState.Error;
-                    stats.EndTime = item.TimeStamp;
-                    list.Add(stats);
-                    statsSession.Remove((item.GameBiz, item.Pid));
-                    continue;
-                }
-            }
-            else if (item.State is PlayTimeState.Start or PlayTimeState.Play)
-            {
-                statsSession[key] = new PlayTimeStats
-                {
-                    GameBiz = item.GameBiz,
-                    Pid = item.Pid,
-                    StartTime = item.TimeStamp,
-                    EndTime = item.TimeStamp,
-                };
-            }
-        }
-        foreach (var item in statsSession)
-        {
-            item.Value.Interruption = true;
-            list.Add(item.Value);
-        }
-        statsSession.Clear();
-        return list;
     }
 
 
