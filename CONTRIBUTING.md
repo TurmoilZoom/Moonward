@@ -97,7 +97,7 @@ src/Starward.RPC/       独立 gRPC 服务进程（需提权的安装等操作�
 src/Starward.Setup.Core/  GitHub Release 发行说明拉取
 ```
 
-更详细的架构说明见 [`AGENTS.md`](AGENTS.md) 与 [`CLAUDE.md`](CLAUDE.md)（面向维护者与 AI 编码助手）。
+更详细的架构说明见 [`AGENTS.md`](AGENTS.md) 及其按任务引用的 [`.agents/rules/`](.agents/rules/)（面向维护者与 AI 编码助手）。
 
 ### 新增 GameRecord 类功能
 
