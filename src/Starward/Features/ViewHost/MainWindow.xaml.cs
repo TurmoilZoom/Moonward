@@ -93,6 +93,8 @@ public sealed partial class MainWindow : WindowEx
         SetDragRectangles(new RectInt32(0, 0, AppWindow.Size.Width - (int)(CaptionButtonsWidthDip * UIScale), (int)(48 * UIScale)));
         SetIcon();
         WTSRegisterSessionNotification(WindowHandle, 0);
+        // 显示器开关：熄屏后帧服务器模式的 MediaPlayer 等不到垂直同步会空转吃满一个核心，背景视频据此释放 / 重建播放器
+        RegisterPowerSettingNotification(WindowHandle, in GUID_SESSION_DISPLAY_STATUS, 0 /* DEVICE_NOTIFY_WINDOW_HANDLE */);
         if (AppWindow.Presenter is OverlappedPresenter presenter)
         {
             presenter.IsMaximizable = false;
@@ -579,12 +581,18 @@ public sealed partial class MainWindow : WindowEx
             {
                 // WTS_SESSION_LOCK
                 // 锁屏，暂停视频背景
+                IsSessionLocked = true;
                 WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { SessionLock = true, CurrentTime = DateTimeOffset.Now });
             }
             else if (wParam == 0x8)
             {
-                // WTS_SESSION_UNLOCK 
+                // WTS_SESSION_UNLOCK
+                IsSessionLocked = false;
             }
+        }
+        else if (uMsg == (uint)User32.WindowMessage.WM_POWERBROADCAST && wParam == 0x8013 /* PBT_POWERSETTINGCHANGE */)
+        {
+            OnPowerSettingChanged(lParam);
         }
         else if (uMsg == 0x0005 /* WM_SIZE */)
         {
@@ -633,6 +641,59 @@ public sealed partial class MainWindow : WindowEx
     [LibraryImport("wtsapi32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool WTSRegisterSessionNotification(IntPtr hWnd, int dwFlags);
+
+
+
+    /// <summary>
+    /// 当前会话是否处于锁屏状态（由 WTS 锁屏 / 解锁通知维护）。
+    /// </summary>
+    public bool IsSessionLocked { get; private set; }
+
+
+    /// <summary>
+    /// 当前会话的显示器是否已关闭。调暗不算关闭：调暗时仍有垂直同步。
+    /// </summary>
+    public bool IsDisplayOff { get; private set; }
+
+
+    /// <summary>
+    /// GUID_SESSION_DISPLAY_STATUS：本会话显示器的开关状态。交互式会话里的应用应订阅它，而不是 GUID_CONSOLE_DISPLAY_STATE。
+    /// </summary>
+    private static readonly Guid GUID_SESSION_DISPLAY_STATUS = new("2B84C20E-AD23-4DDF-93DB-05FFBD7EFCA5");
+
+
+    /// <summary>
+    /// 处理 PBT_POWERSETTINGCHANGE：显示器在关闭与开启之间切换时更新 <see cref="IsDisplayOff"/>，
+    /// 并广播 <see cref="MainWindowStateChangedMessage.DisplayOff"/> / <see cref="MainWindowStateChangedMessage.DisplayOn"/>。
+    /// 注册时系统会先发一次当前状态，与已知状态相同则不广播。
+    /// </summary>
+    /// <param name="lParam">指向 POWERBROADCAST_SETTING 的指针。</param>
+    private void OnPowerSettingChanged(nint lParam)
+    {
+        if (lParam == 0 || Marshal.PtrToStructure<Guid>(lParam) != GUID_SESSION_DISPLAY_STATUS)
+        {
+            return;
+        }
+        // POWERBROADCAST_SETTING = Guid(16) + DataLength(4) + Data；Data 为 MONITOR_DISPLAY_STATE：0 关 / 1 开 / 2 调暗
+        bool off = Marshal.ReadInt32(lParam, 20) == 0;
+        if (off == IsDisplayOff)
+        {
+            return;
+        }
+        IsDisplayOff = off;
+        WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage { DisplayOff = off, DisplayOn = !off, CurrentTime = DateTimeOffset.Now });
+    }
+
+
+    /// <summary>
+    /// 注册电源设置变化通知，变化时向窗口发送 WM_POWERBROADCAST / PBT_POWERSETTINGCHANGE。
+    /// </summary>
+    /// <param name="hRecipient">接收通知的窗口句柄。</param>
+    /// <param name="powerSettingGuid">要订阅的电源设置 GUID。</param>
+    /// <param name="flags">0 表示 <paramref name="hRecipient"/> 是窗口句柄（DEVICE_NOTIFY_WINDOW_HANDLE）。</param>
+    /// <returns>通知句柄；失败返回 0。窗口销毁后通知自然停止，进程内不再注销。</returns>
+    [LibraryImport("user32.dll")]
+    private static partial nint RegisterPowerSettingNotification(nint hRecipient, in Guid powerSettingGuid, int flags);
 
 
 }

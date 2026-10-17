@@ -4,6 +4,7 @@ using CommunityToolkit.WinUI.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -513,6 +514,13 @@ public sealed partial class AppBackground : UserControl
     private SemaphoreSlim _videoSemaphore = new SemaphoreSlim(1, 1);
 
     /// <summary>
+    /// 熄屏时释放了播放器（或熄屏期间跳过了创建），等亮屏再重建。
+    /// 帧服务器模式的 MediaPlayer 在线程池线程上靠等垂直同步定节拍，熄屏后没有 vblank，等待立即返回，
+    /// 空转吃满一个核心；Pause 也停不下这个循环，只能释放播放器。
+    /// </summary>
+    private bool _videoPlayerReleasedForDisplayOff;
+
+    /// <summary>
     /// 当前播放器所用的备用音频输出设备；null 表示跟随系统默认设备。
     /// 默认设备建不了音频流时才会换到备用设备，见 <see cref="OnVideoAudioOutputFailed"/>。
     /// </summary>
@@ -697,6 +705,16 @@ public sealed partial class AppBackground : UserControl
             {
                 source.Dispose();
                 memoryStream?.Dispose();
+                return;
+            }
+            if (IsDisplayOff())
+            {
+                // 熄屏期间不建播放器（建了就空转，见 _videoPlayerReleasedForDisplayOff），例如熄屏时音频设备变化触发的重建；亮屏再建
+                source.Dispose();
+                memoryStream?.Dispose();
+                DisposeMediaPlayback();
+                _videoPlayerReleasedForDisplayOff = true;
+                _logger.LogInformation("Display is off, defer starting video background player: '{File}'", requestedFile);
                 return;
             }
 
@@ -1370,6 +1388,82 @@ public sealed partial class AppBackground : UserControl
 
 
     /// <summary>
+    /// 主窗口是否正摆在用户眼前：可见、未最小化、会话未锁屏。亮屏后据此决定立即重建视频播放器，还是留给窗口激活。
+    /// </summary>
+    private static bool IsMainWindowShowing()
+    {
+        try
+        {
+            MainWindow window = MainWindow.Current;
+            return window.AppWindow.IsVisible
+                && window.AppWindow.Presenter is not OverlappedPresenter { State: OverlappedPresenterState.Minimized }
+                && !window.IsSessionLocked;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
+    /// <summary>
+    /// 当前会话的显示器是否已关闭。
+    /// </summary>
+    private static bool IsDisplayOff()
+    {
+        try
+        {
+            return MainWindow.Current?.IsDisplayOff ?? false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
+    /// <summary>
+    /// 熄屏：先把当前画面冻成 CPU 位图，再释放播放器。Win2D 表面、叠加图和解码器注册都保留，亮屏后直接重建。
+    /// 不能只 Pause：暂停的播放器熄屏后照样空转（见 <see cref="_videoPlayerReleasedForDisplayOff"/>）。
+    /// </summary>
+    private void ReleaseVideoPlayerForDisplayOff()
+    {
+        if (_mediaPlayer is null && _startMediaPlayerCts is null)
+        {
+            return;
+        }
+        if (!_videoDisplayFrozen)
+        {
+            FreezeVideoDisplay();
+        }
+        _startMediaPlayerCts?.Cancel();
+        DisposeMediaPlayback();
+        _videoPlayerReleasedForDisplayOff = true;
+        _logger.LogInformation("Display is off, release video background player: '{File}'", _lastBackgroundFile);
+    }
+
+
+    /// <summary>
+    /// 亮屏：熄屏时释放过播放器，且主窗口正摆在眼前（未隐藏、未最小化、未锁屏）时立即重建续播。
+    /// 其余情况交给窗口激活时的兜底重启（<see cref="OnMainWindowStateChanged"/> 的 Activate 分支），与锁屏后靠激活续播的行为一致。
+    /// </summary>
+    private void RestoreVideoPlayerAfterDisplayOn()
+    {
+        if (!_videoPlayerReleasedForDisplayOff)
+        {
+            return;
+        }
+        _videoPlayerReleasedForDisplayOff = false;
+        if (_mediaPlayer is not null || IsUpdateBackgroundRunning || !IsMainWindowShowing() || !BackgroundService.FileIsSupportedVideo(_lastBackgroundFile))
+        {
+            return;
+        }
+        _logger.LogInformation("Display is on, restart video background player: '{File}'", _lastBackgroundFile);
+        _ = StartMediaPlayerAsync(_lastBackgroundFile!);
+    }
+
+
+    /// <summary>
     /// 藏到托盘后、窗口仍不可见时换好感壁纸。这样 Activate 把窗口拉回来时已经是新角色，
     /// 不会先把上一张好感视频画出来再闪过去（切游戏不会有这个问题，因为那时屏幕上还是别的游戏）。
     /// </summary>
@@ -1671,6 +1765,14 @@ public sealed partial class AppBackground : UserControl
             else if (message.SessionLock)
             {
                 _mediaPlayer?.Pause();
+            }
+            else if (message.DisplayOff)
+            {
+                ReleaseVideoPlayerForDisplayOff();
+            }
+            else if (message.DisplayOn)
+            {
+                RestoreVideoPlayerAfterDisplayOn();
             }
             else if (message.Activate)
             {
