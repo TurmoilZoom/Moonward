@@ -6,6 +6,7 @@ using Starward.Features.Background;
 using Starward.Features.Codec;
 using Starward.Helpers;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -155,6 +156,13 @@ public sealed partial class CachedImage : ImageEx
             }
 
             BitmapImage bitmap = CreateBitmapImage(null);
+            string uriKey = imageUri.ToString();
+            // 本次运行里坏过的图：XAML 图片缓存按文件路径记着那次解码失败，重新下载到同一路径后仍会直接判失败，
+            // 不绕过缓存就会陷入「下载→判失败→删除」的循环。CreateOptions 须在设置 UriSource 之前赋值。
+            if (_refreshedUris.ContainsKey(uriKey))
+            {
+                bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            }
 
             void OnOpened(object sender, RoutedEventArgs e)
             {
@@ -170,7 +178,12 @@ public sealed partial class CachedImage : ImageEx
                 {
                     RemoveCachedImage(cacheKey!);
                 }
-                FileCache.DeleteCacheFile(bitmap.UriSource);
+                // 每个地址每次运行只删一次：重新下载的文件仍解不出来（如缺少解码器）时保留，免得每次显示都重下。
+                // 缓存文件名按远程 URI 计算；bitmap.UriSource 已是本地缓存文件路径，传它会算错文件名、什么也删不掉
+                if (_refreshedUris.TryAdd(uriKey, 0))
+                {
+                    FileCache.DeleteCacheFile(imageUri);
+                }
             }
             bitmap.ImageOpened += OnOpened;
             bitmap.ImageFailed += OnFailed;
@@ -216,6 +229,13 @@ public sealed partial class CachedImage : ImageEx
 
     /// <summary>按「URI + 解码尺寸」构造内存缓存键，使同一图标的不同解码尺寸互不串用。</summary>
     private string GetCacheKey(Uri uri) => $"{uri}|{DecodeWidth}x{DecodeHeight}";
+
+
+    /// <summary>
+    /// 本次运行中解码失败过、已删除磁盘缓存并会重新下载的远程地址（<see cref="Uri.ToString"/>）。
+    /// 用于两件事：之后加载这些地址时绕过 XAML 图片缓存；同一地址只删一次磁盘缓存。
+    /// </summary>
+    private static readonly ConcurrentDictionary<string, byte> _refreshedUris = new();
 
 
     #region 已解码图片的内存缓存（去重 + 避免重复解码 / 重复磁盘 IO）
