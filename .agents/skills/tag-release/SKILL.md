@@ -10,7 +10,7 @@ description: >
 
 # Tag Release（全远程 + Release Notes）
 
-为指定提交创建 **annotated tag**，**推送到每一个 git remote**，并生成相对上一 tag 的用户向发布说明。
+为指定提交创建 **annotated tag**，**推送到每一个 git remote**，并生成相对上一版的用户向发布说明（正式版从上一个正式版累计，规则见 release-notes）。
 
 **不**改业务代码、**不**改工作区源码（除创建/推送 tag、以及写临时 notes 文件再删除外）。**禁止** `git tag -f` / `git push --force` 覆盖已有 tag，除非用户明确要求强制覆盖。
 
