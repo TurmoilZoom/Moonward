@@ -870,8 +870,16 @@ internal sealed class ShareImageIconCache : IDisposable
                 string? cached = await FileCache.GetFromCacheAsync(uri, false);
                 if (cached is not null && File.Exists(cached))
                 {
-                    ImageInfo info = await ImageLoader.LoadImageAsync(cached);
-                    return info.CanvasBitmap;
+                    try
+                    {
+                        ImageInfo info = await ImageLoader.LoadImageAsync(cached);
+                        return info.CanvasBitmap;
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        // 解码失败多半是缓存文件损坏；缓存不按时间过期，不删就会一直坏下去
+                        FileCache.DeleteCacheFile(uri);
+                    }
                 }
             }
         }

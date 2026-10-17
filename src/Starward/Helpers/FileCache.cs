@@ -21,7 +21,8 @@ namespace Starward.Helpers;
 /// <item>按 URI 计算稳定文件名（XxHash64 + MD5 混合哈希）。</item>
 /// <item>并发去重：相同 URI 的多次请求会共享同一个下载 Task，避免重复下载。</item>
 /// <item>支持断点续传（HTTP Range + _tmp 临时文件 + 原子 Move）。</item>
-/// <item>基于文件最后写入时间 + <see cref="CacheDuration"/> 判断缓存是否有效（默认 90 天）。</item>
+/// <item>缓存不按时间过期：文件存在且非空即有效。损坏的缓存由 <see cref="CachedImage"/> 解码失败时删除；
+/// 地址不变而内容更新的资源须换地址才会重新下载（或手动清除缓存）。</item>
 /// <item>可配置重试次数，默认 3 次。</item>
 /// <item>磁盘下载不绑定调用方 CancellationToken：UI（CachedImage Source 切换）取消不应打断可共享的缓存写入，
 /// 否则大图容易留下 0 字节 _tmp 且永远下不完。</item>
@@ -62,9 +63,6 @@ internal static class FileCache
 
     /// <summary>下载失败时的最大重试次数（默认 3）。</summary>
     public static int RetryCount { get; set; } = 3;
-
-    /// <summary>缓存有效期（默认 90 天）。超过此时间或文件为空则视为失效，会重新下载。</summary>
-    public static TimeSpan CacheDuration { get; set; } = TimeSpan.FromDays(90);
 
     /// <summary>
     /// 单次下载的停滞超时：等响应头或两次收到数据之间超过此时长即判定卡死。
@@ -177,7 +175,7 @@ internal static class FileCache
 
         // 缓存命中检查放到线程池执行：避免在 UI 线程上做文件元数据 IO。
         // 这个 await 也会立即让出控制权，使 GetItemAsync 能先把本任务登记进并发去重字典，再继续后续下载。
-        if (await Task.Run(() => IsFileCacheAvailable(filePath, CacheDuration)).ConfigureAwait(false))
+        if (await Task.Run(() => IsFileCacheAvailable(filePath)).ConfigureAwait(false))
         {
             return filePath;
         }
@@ -189,7 +187,7 @@ internal static class FileCache
             {
                 await DownloadFileAsync(uri, filePath).ConfigureAwait(false);
                 // 成功落盘则立刻返回，避免原实现「成功后仍再下 2 次」导致多余 _tmp / 二次取消窗口。
-                if (IsFileCacheAvailable(filePath, CacheDuration))
+                if (IsFileCacheAvailable(filePath))
                 {
                     return filePath;
                 }
@@ -211,7 +209,7 @@ internal static class FileCache
         }
 
         // 全部失败：若正式文件仍无效，清掉 0 字节/残缺 _tmp，避免下次误判或脏状态残留。
-        if (!IsFileCacheAvailable(filePath, CacheDuration))
+        if (!IsFileCacheAvailable(filePath))
         {
             TryDeleteFile(filePath + "_tmp");
             return null;
@@ -369,17 +367,15 @@ internal static class FileCache
 
 
     /// <summary>
-    /// 判断指定路径的缓存文件是否仍然有效。
-    /// 条件：文件存在 + 文件大小 &gt; 0 + 最后写入时间在 CacheDuration 之内。
+    /// 判断指定路径的缓存文件是否可用：文件存在且大小 &gt; 0。
+    /// 不看写入时间：过期重下在断网时会让完好的旧文件也显示不出来，而缓存内容只在地址变化时才需要更新。
     /// </summary>
-    private static bool IsFileCacheAvailable(string path, TimeSpan duration)
+    /// <param name="path">缓存文件完整路径。</param>
+    /// <returns>文件存在且非空时为 true。</returns>
+    private static bool IsFileCacheAvailable(string path)
     {
-        if (File.Exists(path))
-        {
-            var fileInfo = new FileInfo(path);
-            return fileInfo.Length > 0 && (DateTime.Now - fileInfo.LastWriteTime <= duration);
-        }
-        return false;
+        var fileInfo = new FileInfo(path);
+        return fileInfo.Exists && fileInfo.Length > 0;
     }
 
 
