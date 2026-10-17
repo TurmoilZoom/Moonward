@@ -20,7 +20,7 @@ Moonward（产品品牌；工程目录与 C# 命名空间仍为 `Starward.*`）�
 | `Features/Database/`（`DatabaseService`、`DatabaseSqls`）、新增表或列 | `.agents/rules/database.md` |
 | `Program.cs`、`App.xaml.cs`、`Features/Startup/`、命令行参数、URL 协议 | `.agents/rules/startup.md` |
 | `AppConfig.*.cs`、新增服务或设置项、`GameFeatureConfig`、数据目录、更新分发 | `.agents/rules/architecture.md` |
-| `*.xaml`、页面外观或动画、控件模板、Composition | `.agents/rules/winui-ui.md` |
+| `*.xaml` / `*.xaml.cs`、页面外观或动画、控件模板、Composition、窗口与 Win32 互操作、图片与视频显示 | `.agents/rules/winui-ui.md` |
 | 新建 worktree | `.agents/rules/worktree.md` |
 | 提交并推送 / 打 tag 发版 | `.agents/skills/commit-push/`、`.agents/skills/tag-release/` |
 
