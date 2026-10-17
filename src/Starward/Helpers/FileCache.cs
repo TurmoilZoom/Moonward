@@ -25,6 +25,8 @@ namespace Starward.Helpers;
 /// <item>可配置重试次数，默认 3 次。</item>
 /// <item>磁盘下载不绑定调用方 CancellationToken：UI（CachedImage Source 切换）取消不应打断可共享的缓存写入，
 /// 否则大图容易留下 0 字节 _tmp 且永远下不完。</item>
+/// <item>停滞超时：超过 <see cref="StallTimeout"/> 没有收到新数据即中断本次下载并重试（断点续传），
+/// 避免连接卡死时该 URI 的共享下载 Task 永远不结束、所有等待者一起挂住。</item>
 /// </list>
 /// 主要由 <see cref="CachedImage"/> 使用，也可直接调用获取任意远程资源的本地缓存路径。
 /// </summary>
@@ -63,6 +65,12 @@ internal static class FileCache
 
     /// <summary>缓存有效期（默认 90 天）。超过此时间或文件为空则视为失效，会重新下载。</summary>
     public static TimeSpan CacheDuration { get; set; } = TimeSpan.FromDays(90);
+
+    /// <summary>
+    /// 单次下载的停滞超时：等响应头或两次收到数据之间超过此时长即判定卡死。
+    /// 按停滞而非总时长计时，慢网下仍在推进的大图不会被误杀。
+    /// </summary>
+    private static readonly TimeSpan StallTimeout = TimeSpan.FromSeconds(30);
 
     /// <summary>缓存根目录。必须先调用 <see cref="Initialize(string)"/> 才能使用。</summary>
     public static string CacheFolder { get; private set; }
@@ -194,6 +202,11 @@ internal static class FileCache
             {
                 Debug.WriteLine($"FileCache IO error ({uri}): {ex.Message}");
             }
+            catch (TimeoutException ex)
+            {
+                // 已收到的部分留在 _tmp，下一轮用 Range 续传
+                Debug.WriteLine($"FileCache timeout ({uri}): {ex.Message}");
+            }
             retries++;
         }
 
@@ -215,9 +228,15 @@ internal static class FileCache
     /// </summary>
     /// <param name="uri">远程资源地址。</param>
     /// <param name="path">目标缓存文件完整路径（无 _tmp 后缀）。</param>
+    /// <exception cref="HttpRequestException">请求失败、Range 无效或响应体为空。</exception>
+    /// <exception cref="TimeoutException">超过 <see cref="StallTimeout"/> 没有收到响应头或新数据。</exception>
+    /// <exception cref="IOException">读写 _tmp 或移动到正式文件失败（被占用、磁盘已满等），或连接中途断开。</exception>
     private static async Task DownloadFileAsync(Uri uri, string path)
     {
         string path_tmp = path + "_tmp";
+
+        // 不使用外部 CancellationToken（控件取消 ≠ 取消缓存写入），只受停滞超时约束；每收到一段数据重新计时。
+        using CancellationTokenSource stallCts = new CancellationTokenSource(StallTimeout);
 
         // 流作用域结束并释放句柄后再 Move，避免文件占用。
         try
@@ -233,10 +252,9 @@ internal static class FileCache
             }
             request.VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
 
-            // 不使用外部 CancellationToken：控件取消 ≠ 取消缓存写入。
-            using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None).ConfigureAwait(false);
+            using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, stallCts.Token).ConfigureAwait(false);
 
-            // 续传时若服务器返回 416（Range 无效），抛出让 finally 删 _tmp，上层重试全量下。
+            // 续传时若服务器返回 416（Range 无效），抛出让下方 catch 删 _tmp，上层重试全量下。
             if (response.StatusCode == HttpStatusCode.RequestedRangeNotSatisfiable)
             {
                 throw new HttpRequestException($"Range not satisfiable for {uri}", null, response.StatusCode);
@@ -255,14 +273,33 @@ internal static class FileCache
                 fs.Position = from;
             }
 
-            await using Stream hs = await response.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(false);
-            await hs.CopyToAsync(fs, CancellationToken.None).ConfigureAwait(false);
+            await using Stream hs = await response.Content.ReadAsStreamAsync(stallCts.Token).ConfigureAwait(false);
+            // 手动拷贝而非 CopyToAsync：需要每读到一段就重置停滞计时。
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(81920);
+            try
+            {
+                int read;
+                while ((read = await hs.ReadAsync(buffer, stallCts.Token).ConfigureAwait(false)) > 0)
+                {
+                    stallCts.CancelAfter(StallTimeout);
+                    await fs.WriteAsync(buffer.AsMemory(0, read), CancellationToken.None).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
             await fs.FlushAsync(CancellationToken.None).ConfigureAwait(false);
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.RequestedRangeNotSatisfiable)
         {
             TryDeleteFile(path_tmp);
             throw;
+        }
+        catch (OperationCanceledException) when (stallCts.IsCancellationRequested)
+        {
+            // 转成 TimeoutException 交给上层重试；_tmp 保留已收到的部分，下一轮续传。
+            throw new TimeoutException($"No data received for {StallTimeout.TotalSeconds} seconds: {uri}");
         }
 
         if (!File.Exists(path_tmp) || new FileInfo(path_tmp).Length == 0)
