@@ -4328,4 +4328,7 @@
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>安裝資料夾與目前伺服器相同或位於其中，即使保留其他伺服器也會一併刪除。</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>音訊輸出裝置無法使用，影片背景已暫停並顯示靜態圖片。裝置恢復後會自動繼續播放。</value>
+  </data>
 </root>

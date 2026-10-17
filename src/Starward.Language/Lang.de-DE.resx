@@ -4326,4 +4326,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>Der Installationsordner ist derselbe wie der dieses Servers (oder liegt darin) und wird daher auch gelöscht, wenn andere Server behalten werden.</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>Das Audioausgabegerät ist nicht verfügbar. Der Videohintergrund wurde pausiert und es wird ein Standbild angezeigt. Die Wiedergabe wird automatisch fortgesetzt, sobald das Gerät wieder verfügbar ist.</value>
+  </data>
 </root>

@@ -4328,4 +4328,7 @@ You are welcome to submit exported data to:</value>
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>Su carpeta de instalación es la misma que la de este servidor (o está dentro de ella), por lo que también se eliminará aunque se conserven los demás servidores.</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>El dispositivo de salida de audio no está disponible, por lo que el fondo de video se ha pausado y se muestra una imagen estática. La reproducción se reanudará automáticamente cuando el dispositivo vuelva a estar disponible.</value>
+  </data>
 </root>

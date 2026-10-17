@@ -4322,4 +4322,7 @@ You are welcome to submit exported data to:</value>
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>โฟลเดอร์ติดตั้งเป็นโฟลเดอร์เดียวกับเซิร์ฟเวอร์นี้ (หรืออยู่ภายใน) จึงจะถูกลบไปด้วยแม้จะเก็บเซิร์ฟเวอร์อื่นไว้</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>อุปกรณ์เอาต์พุตเสียงไม่พร้อมใช้งาน จึงหยุดพื้นหลังวิดีโอไว้ชั่วคราวและแสดงภาพนิ่งแทน จะเล่นต่อโดยอัตโนมัติเมื่ออุปกรณ์กลับมาใช้งานได้</value>
+  </data>
 </root>

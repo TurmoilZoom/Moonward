@@ -4328,4 +4328,7 @@
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>설치 폴더가 현재 서버와 같거나 그 안에 있어, 다른 서버를 유지해도 함께 삭제됩니다.</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>오디오 출력 장치를 사용할 수 없어 비디오 배경을 일시 정지하고 정지 이미지를 표시합니다. 장치를 다시 사용할 수 있게 되면 자동으로 재생을 재개합니다.</value>
+  </data>
 </root>

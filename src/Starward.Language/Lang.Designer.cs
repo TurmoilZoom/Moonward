@@ -205,6 +205,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 The audio output device is unavailable, so the video background has been paused and a static image is shown. Playback will resume automatically once the device is available again. 的本地化字符串。
+        /// </summary>
+        public static string AppBackground_AudioOutputUnavailableVideoPaused {
+            get {
+                return ResourceManager.GetString("AppBackground_AudioOutputUnavailableVideoPaused", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Image decoding failed 的本地化字符串。
         /// </summary>
         public static string AppBackground_ImageDecodingFailed {

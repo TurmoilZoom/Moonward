@@ -20,6 +20,7 @@ using Windows.Media.Playback;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
 using WinRT;
+using DeviceInformation = Windows.Devices.Enumeration.DeviceInformation;
 
 namespace Starward.Features.Codec;
 
@@ -349,18 +350,63 @@ internal static class ImageThumbnail
 
     private static async Task<BitmapSource> GetVideoThumbnailFromMediaPlayerAsync(string path, string cachePath, CancellationToken cancellation = default)
     {
-        MediaPlayer? player = null;
         try
         {
             Debug.WriteLine(path);
             VP9Helper.RegisterVP9Decoder();
+            while (true)
+            {
+                // 挑不出能用的设备时照旧用默认设备，让真实错误抛出去
+                (_, DeviceInformation? audioDevice) = await MediaAudioOutputHelper.SelectRenderDeviceAsync();
+                string? audioDeviceId = audioDevice?.Id ?? MediaAudioOutputHelper.GetDefaultRenderDeviceId();
+                try
+                {
+                    return await CaptureVideoThumbnailAsync(path, cachePath, audioDevice, cancellation);
+                }
+                catch (Exception ex) when (MediaAudioOutputHelper.IsAudioOutputError(ex) && MediaAudioOutputHelper.MarkBroken(audioDeviceId))
+                {
+                    // 音频输出设备建不了流（实测 0x8889000F）时静音取帧也会整段失败：记下这个设备，换一个设备再取。
+                    // MarkBroken 只对新设备返回 true，重试一定有进展，不会死循环。
+                    Debug.WriteLine(ex);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+            throw;
+        }
+        finally
+        {
+            VP9Helper.UnregisterVP9Decoder();
+        }
+    }
+
+
+    /// <summary>
+    /// 用帧服务器模式的 MediaPlayer 取视频第一帧，存成缩略图缓存。
+    /// </summary>
+    /// <param name="path">视频文件。</param>
+    /// <param name="cachePath">缩略图缓存路径。</param>
+    /// <param name="audioDevice">音频输出设备；null 表示系统默认设备。</param>
+    /// <param name="cancellation">取消令牌；另有 3 秒超时。</param>
+    /// <returns>缩略图。</returns>
+    private static async Task<BitmapSource> CaptureVideoThumbnailAsync(string path, string cachePath, DeviceInformation? audioDevice, CancellationToken cancellation)
+    {
+        MediaPlayer? player = null;
+        try
+        {
             var completion = new TaskCompletionSource();
             player = new MediaPlayer
             {
                 IsMuted = true,
                 IsVideoFrameServerEnabled = true,
-                Source = MediaSource.CreateFromUri(new Uri(path))
             };
+            if (audioDevice is not null)
+            {
+                player.AudioDevice = audioDevice;
+            }
+            player.Source = MediaSource.CreateFromUri(new Uri(path));
             player.CommandManager.IsEnabled = false;
             player.SystemMediaTransportControls.IsEnabled = false;
             player.VideoFrameAvailable += (s, e) => { s.Pause(); completion.TrySetResult(); };
@@ -384,14 +430,8 @@ internal static class ImageThumbnail
             await SaveStreamToFileAsync(cachePath, ms, cancellation);
             return new BitmapImage(new Uri(cachePath));
         }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-            throw;
-        }
         finally
         {
-            VP9Helper.UnregisterVP9Decoder();
             player?.Dispose();
         }
     }

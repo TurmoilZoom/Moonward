@@ -4417,4 +4417,7 @@ Repository:</value>
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>Its install folder is the same as (or inside) this server's folder, so it will be deleted too even if other servers are kept.</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>The audio output device is unavailable, so the video background has been paused and a static image is shown. Playback will resume automatically once the device is available again.</value>
+  </data>
 </root>

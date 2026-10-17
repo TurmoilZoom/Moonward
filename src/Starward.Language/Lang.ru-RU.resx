@@ -4348,4 +4348,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>Его папка установки совпадает с папкой этого сервера (или находится внутри неё), поэтому она будет удалена, даже если другие серверы сохраняются.</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>Устройство вывода звука недоступно, поэтому видеофон приостановлен и показано статичное изображение. Воспроизведение возобновится автоматически, когда устройство снова станет доступно.</value>
+  </data>
 </root>

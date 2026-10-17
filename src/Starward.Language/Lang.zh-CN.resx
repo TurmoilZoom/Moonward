@@ -4416,4 +4416,7 @@
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>安装文件夹与当前区服相同或位于其中，即使保留其他区服也会一并删除。</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>音频输出设备不可用，视频背景已暂停并显示静态图。设备恢复后会自动继续播放。</value>
+  </data>
 </root>

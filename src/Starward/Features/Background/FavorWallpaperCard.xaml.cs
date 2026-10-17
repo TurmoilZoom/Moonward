@@ -11,10 +11,12 @@ using Starward.Helpers;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Threading.Tasks;
 using Windows.Foundation.Collections;
 using Windows.Media.Core;
 using Windows.Media.MediaProperties;
 using Windows.Media.Playback;
+using DeviceInformation = Windows.Devices.Enumeration.DeviceInformation;
 
 namespace Starward.Features.Background;
 
@@ -56,6 +58,15 @@ public sealed partial class FavorWallpaperCard : UserControl
 
     /// <summary>包住 <see cref="_mediaSource"/> 的播放项，用来监听视频轨打开失败。</summary>
     private MediaPlaybackItem? _playbackItem;
+
+    /// <summary>当前预览的视频文件，音频输出设备建不了流时换设备重开要用。</summary>
+    private string? _previewPath;
+
+    /// <summary>当前预览播放器开播时所用音频输出设备的 ID（跟随默认设备时为开播那一刻的默认设备）。</summary>
+    private string? _playerAudioDeviceId;
+
+    /// <summary>每拆一次播放器加一，挑音频设备期间预览被停掉或换掉时，据此丢弃过期的打开。</summary>
+    private int _previewGeneration;
 
     private bool _pointerInside;
     private bool _previewing;
@@ -437,9 +448,33 @@ public sealed partial class FavorWallpaperCard : UserControl
         StopPlaybackOnly();
         _previewing = true;
         EnsureDecoders(path);
+        _ = OpenPreviewPlayerAsync(path);
+    }
 
+
+    /// <summary>
+    /// 创建预览播放器。默认音频输出设备已知建不了流时换到备用设备（预览本来就静音），一个能用的都没有就保留封面。
+    /// </summary>
+    /// <param name="path">本地视频文件。</param>
+    private async Task OpenPreviewPlayerAsync(string path)
+    {
+        int generation = _previewGeneration;
         try
         {
+            (bool audioAvailable, DeviceInformation? audioDevice) = await MediaAudioOutputHelper.SelectRenderDeviceAsync();
+            // 挑设备期间鼠标可能已经移走，或换了一张卡片预览
+            if (generation != _previewGeneration || !_previewing)
+            {
+                return;
+            }
+            if (!audioAvailable)
+            {
+                s_logger.LogWarning("No audio output device can create audio stream, skip favor wallpaper preview: '{File}'", path);
+                _previewUnavailable = true;
+                StopPreview();
+                return;
+            }
+
             var player = new MediaPlayer
             {
                 IsLoopingEnabled = true,
@@ -447,6 +482,12 @@ public sealed partial class FavorWallpaperCard : UserControl
                 Volume = 0,
                 AutoPlay = false,
             };
+            if (audioDevice is not null)
+            {
+                player.AudioDevice = audioDevice;
+            }
+            _playerAudioDeviceId = audioDevice?.Id ?? MediaAudioOutputHelper.GetDefaultRenderDeviceId();
+            _previewPath = path;
             player.CommandManager.IsEnabled = false;
             player.SystemMediaTransportControls.IsEnabled = false;
             player.MediaOpened += Player_MediaOpened;
@@ -465,7 +506,10 @@ public sealed partial class FavorWallpaperCard : UserControl
         }
         catch
         {
-            StopPreview();
+            if (generation == _previewGeneration)
+            {
+                StopPreview();
+            }
         }
     }
 
@@ -485,7 +529,28 @@ public sealed partial class FavorWallpaperCard : UserControl
 
     private void Player_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
     {
-        DispatcherQueue.TryEnqueue(StopPreview);
+        Exception? error = args.ExtendedErrorCode;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (!ReferenceEquals(sender, _player))
+            {
+                return;
+            }
+            if (MediaAudioOutputHelper.IsAudioOutputError(error) && _previewPath is string path)
+            {
+                // 建不了音频流（实测 0x8889000F）与视频能否解码无关，不提示「视频解码失败」：记下这个设备，换一个设备重开预览。
+                // 重试已没有进展就保留封面，悬停不是用户主动操作，也不弹提示。
+                s_logger.LogWarning(error, "Audio output device unavailable for favor wallpaper preview ({DeviceId}): '{File}'", _playerAudioDeviceId, path);
+                if (MediaAudioOutputHelper.MarkBroken(_playerAudioDeviceId))
+                {
+                    StopPlaybackOnly();
+                    _ = OpenPreviewPlayerAsync(path);
+                    return;
+                }
+                _previewUnavailable = true;
+            }
+            StopPreview();
+        });
     }
 
 
@@ -601,6 +666,9 @@ public sealed partial class FavorWallpaperCard : UserControl
         _player = null;
         _mediaSource = null;
         _playbackItem = null;
+        _previewPath = null;
+        _playerAudioDeviceId = null;
+        _previewGeneration++;
         if (item is not null)
         {
             item.VideoTracksChanged -= PlaybackItem_VideoTracksChanged;

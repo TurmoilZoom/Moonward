@@ -4328,4 +4328,7 @@ You are welcome to submit exported data to:</value>
   <data name="UninstallGameDialog_SameFolderDescription" xml:space="preserve">
     <value>Thư mục cài đặt trùng với (hoặc nằm trong) thư mục của máy chủ này, nên vẫn sẽ bị xóa cùng dù giữ lại các máy chủ khác.</value>
   </data>
+  <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
+    <value>Thiết bị đầu ra âm thanh không khả dụng nên hình nền video đã tạm dừng và hiển thị ảnh tĩnh. Video sẽ tự động phát lại khi thiết bị khả dụng trở lại.</value>
+  </data>
 </root>
