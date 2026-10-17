@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
+		<PackageReference Include="xunit" Version="2.9.3" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<!-- 链接的 GachaLogItemEx 用到 [INotifyPropertyChanged] 源生成，版本与主项目一致 -->
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Starward.Core\Starward.Core.csproj" />
+		<ProjectReference Include="..\..\src\Starward.RPC\Starward.RPC.csproj" />
+	</ItemGroup>
+
+	<!-- 主项目依赖 WinUI，不直接引用；只链接其中不依赖数据库与 WinUI 的纯计算源文件 -->
+	<ItemGroup>
+		<Compile Include="..\..\src\Starward\Features\PlayTime\PlayTimeItem.cs" Link="Linked\PlayTime\PlayTimeItem.cs" />
+		<Compile Include="..\..\src\Starward\Features\PlayTime\PlayTimeState.cs" Link="Linked\PlayTime\PlayTimeState.cs" />
+		<Compile Include="..\..\src\Starward\Features\PlayTime\PlayTimeStatsService.Sessions.cs" Link="Linked\PlayTime\PlayTimeStatsService.Sessions.cs" />
+		<Compile Include="..\..\src\Starward\Features\Gacha\GachaLogItemEx.cs" Link="Linked\Gacha\GachaLogItemEx.cs" />
+		<Compile Include="..\..\src\Starward\Features\Gacha\GachaLogService.FiftyFifty.cs" Link="Linked\Gacha\GachaLogService.FiftyFifty.cs" />
+	</ItemGroup>
+
+</Project>

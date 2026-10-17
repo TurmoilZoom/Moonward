@@ -48,7 +48,8 @@ dotnet build src/Starward/Starward.csproj -c Debug -p:Platform=x64
 dotnet build src/Starward/Starward.csproj -c Release -p:Platform=x64 -p:RuntimeIdentifier=win-x64
 ```
 
-- **0 error 即视为通过**（无单元测试；必要时手动跑应用）。Release 全量约数分钟级。
+- **0 error 即视为通过**；需要看实际效果时手动跑应用（见 `.agents/skills/debug-ui-verify/SKILL.md`）。Release 全量约数分钟级。
+- 单元测试只覆盖少量纯计算（游戏时长切段、Chunk 复用、小保底统计）：改到 `tests/Starward.Tests` 引用或链接的代码时，再跑 `dotnet test tests/Starward.Tests/Starward.Tests.csproj`。主项目依赖 WinUI，测试项目只链接其中的纯计算文件；新写的纯计算尽量放进不依赖数据库与 WinUI 的单独文件，便于链接。
 - SDK 由 `global.json` 锁定——**不要擅自升级 SDK 或 NuGet 包**。
 - 平台：`x86` / `x64` / `ARM64`。**没有编译类 CI**，改动是否通过以本地构建为准；发版产物由 `.github/workflows/release.yml` 按 tag 构建（Release × x64/arm64）。
 - 常量：`DONOT_CHECK_UPDATE` 跳过启动更新检查（需手动加 `-p:DefineConstants=DONOT_CHECK_UPDATE`）；`DISABLE_XAML_GENERATED_MAIN` 由 `Program.Main` 接管入口。

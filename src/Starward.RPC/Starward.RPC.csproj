@@ -36,6 +36,11 @@
 	  <ProjectReference Include="..\Starward.Core\Starward.Core.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<!-- tests/Starward.Tests 测 GameInstallFile 等内部类型的纯计算 -->
+		<InternalsVisibleTo Include="Starward.Tests" />
+	</ItemGroup>
+
 	<!--<ItemGroup>
 	  <None Update="appsettings.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
