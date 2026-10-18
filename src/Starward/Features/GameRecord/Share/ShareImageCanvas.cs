@@ -54,6 +54,7 @@ internal static class ShareImageCanvas
     public const string StarIconChallengePeakBoss = "ms-appx:///Assets/Image/boss_star.ae0258cf.png";
     public const string StarIconChallengePeakMob = "ms-appx:///Assets/Image/normal_star.751a6e2d.png";
     public const string FlowerIconTheater = "ms-appx:///Assets/Image/UI_DisplayItemIcon_410016.png";
+    public const string QuickClearedStarRail = "ms-appx:///Assets/Image/20004.png";
 
     private static readonly Color BgPreDarkenOverlay = Color.FromArgb(0x28, 0x00, 0x00, 0x00);
     private const float CardAcrylicBlurAmount = 40f;

@@ -152,6 +152,12 @@ internal static class ApocalypticShadowShareRenderer
         ds.FillRectangle(x, y, FloorWidth, 56f, Color.FromArgb(0x28, 0xFF, 0xFF, 0xFF));
         ShareImageCanvas.DrawText(ds, floor.Name, x + 20f, y + 10f, ctx.Title, ShareImageCanvas.PrimaryText, 200f);
         StarRailSharePrimitives.DrawFloorStars(ds, ctx, x + FloorWidth - 16f, y + 8f, floor.NormalStarNum, floor.ExtraStarNum);
+        if (floor.IsFast)
+        {
+            // 快速通关无分数，对齐页面不画总分
+            return;
+        }
+
         ShareImageCanvas.DrawTextRight(
             ds,
             $"{Lang.ApocalypticShadowPage_TotalScore} {floor.TotalScore}",
@@ -159,11 +165,6 @@ internal static class ApocalypticShadowShareRenderer
             y + 32f,
             ctx.Small,
             ctx.Accent);
-
-        if (floor.IsFast)
-        {
-            return;
-        }
 
         DrawNode(ds, ctx, x, y + 64f, floor.Node1, 1);
         DrawNode(ds, ctx, x, y + 200f, floor.Node2, 2);

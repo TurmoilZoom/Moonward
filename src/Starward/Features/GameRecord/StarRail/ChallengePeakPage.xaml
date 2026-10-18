@@ -308,10 +308,15 @@
 
 
                     <StackPanel Grid.Row="0" Margin="20,12,0,0">
-                        <!--  BOSS 名称  -->
-                        <TextBlock FontSize="16"
-                                   FontWeight="Bold"
-                                   Text="{x:Bind CurrentChallengePeakRecord.BossInfo.NameMi18n}" />
+                        <!--  BOSS 名称（高难度通关时带难度前缀；绑 BossHardModeName 而非 BossRecord.HardMode，无记录时后者不会更新而常显）  -->
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock FontSize="16"
+                                       FontWeight="Bold"
+                                       Visibility="{x:Bind CurrentChallengePeakRecord.BossHardModeName, Converter={StaticResource ObjectToVisibilityConverter}}"><Run Text="[" /><Run Text="{x:Bind CurrentChallengePeakRecord.BossHardModeName}" /><Run Text="]" /></TextBlock>
+                            <TextBlock FontSize="16"
+                                       FontWeight="Bold"
+                                       Text="{x:Bind CurrentChallengePeakRecord.BossInfo.NameMi18n}" />
+                        </StackPanel>
 
                         <!--  通关数据  -->
                         <StackPanel Margin="0,8,0,0"
@@ -432,10 +437,11 @@
                                     </Grid>
 
                                     <StackPanel Grid.Row="0" Margin="20,12,0,0">
-                                        <!--  BOSS 名称  -->
-                                        <TextBlock FontSize="16"
-                                                   FontWeight="Bold"
-                                                   Text="{x:Bind MobInfo.MonsterName}" />
+                                        <!--  关卡名 + BOSS 名称  -->
+                                        <TextBlock FontSize="16" FontWeight="Bold">
+                                            <Run Text="{x:Bind MobInfo.Name}" />
+                                            <Run Text="{x:Bind MobInfo.MonsterName}" />
+                                        </TextBlock>
 
                                         <!--  通关数据  -->
                                         <StackPanel Margin="0,8,0,0"
@@ -447,7 +453,7 @@
                                                 <Run Text="{x:Bind MobRecord.RoundNum}" />
                                             </TextBlock>
 
-                                            <!--  已通关  -->
+                                            <!--  已通关 / 快速通关  -->
                                             <FontIcon Margin="20,2,4,0"
                                                       VerticalAlignment="Center"
                                                       FontSize="12"
@@ -455,7 +461,12 @@
                                                       Glyph="&#xEC61;" />
                                             <TextBlock Margin="0,0,4,0"
                                                        VerticalAlignment="Center"
-                                                       Text="{x:Bind lang:Lang.ChallengePeakPage_Cleared}" />
+                                                       Text="{x:Bind lang:Lang.ChallengePeakPage_Cleared}"
+                                                       Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                                            <TextBlock Margin="0,0,4,0"
+                                                       VerticalAlignment="Center"
+                                                       Text="{x:Bind lang:Lang.ForgottenHallPage_QuickCleared}"
+                                                       Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                                             <!--  星星数  -->
                                             <ItemsControl HorizontalAlignment="Right" ItemsSource="{x:Bind linq:Enumerable.Range(0, MobRecord.StarNum)}">
@@ -485,25 +496,33 @@
                                     </StackPanel>
 
 
+                                    <!--  可见性绑包装类上的 HasChallengeRecord / IsFast：无记录时 MobRecord 为 null，绑 MobRecord.* 不会更新而常显  -->
                                     <StackPanel Grid.Row="1"
                                                 Margin="20,4,0,0"
                                                 VerticalAlignment="Top"
                                                 Spacing="8"
-                                                Visibility="{x:Bind MobRecord.HasChallengeRecord, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <!--  通关时间  -->
-                                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind MobRecord.ChallengeTime.ToString('yyyy.MM.dd HH:mm', x:Null)}" />
-                                        <!--  队伍  -->
-                                        <ItemsControl Grid.Row="3"
-                                                      Grid.ColumnSpan="3"
-                                                      HorizontalAlignment="Left"
-                                                      ItemTemplate="{StaticResource StarRailTeamDataTemplate}"
-                                                      ItemsSource="{x:Bind MobRecord.Avatars}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal" Spacing="12" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                        </ItemsControl>
+                                                Visibility="{x:Bind HasChallengeRecord, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <StackPanel Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                                            <!--  通关时间  -->
+                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind MobRecord.ChallengeTime.ToString('yyyy.MM.dd HH:mm', x:Null)}" />
+                                            <!--  队伍  -->
+                                            <ItemsControl HorizontalAlignment="Left"
+                                                          ItemTemplate="{StaticResource StarRailTeamDataTemplate}"
+                                                          ItemsSource="{x:Bind MobRecord.Avatars}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                            </ItemsControl>
+                                        </StackPanel>
+
+                                        <!--  快速通关  -->
+                                        <Image Width="120"
+                                               Margin="60,0,0,0"
+                                               HorizontalAlignment="Left"
+                                               Source="ms-appx:///Assets/Image/20004.png"
+                                               Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                                     </StackPanel>
 

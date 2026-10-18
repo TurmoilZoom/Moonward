@@ -436,8 +436,10 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
                                         </StackPanel>
-                                        <!--  总分  -->
-                                        <TextBlock HorizontalAlignment="Right" FontSize="12">
+                                        <!--  总分（快速通关无分数）  -->
+                                        <TextBlock HorizontalAlignment="Right"
+                                                   FontSize="12"
+                                                   Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
                                             <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.ApocalypticShadowPage_TotalScore}" />
                                             <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind TotalScore}" />
                                         </TextBlock>

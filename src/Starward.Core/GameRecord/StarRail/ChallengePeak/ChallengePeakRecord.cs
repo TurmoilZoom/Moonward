@@ -36,6 +36,13 @@ public class ChallengePeakRecord
     public Dictionary<string, object>? ExtensionData { get; set; }
 
 
+    /// <summary>
+    /// 王棋以高难度通关时为难度名（如「将杀王棋·绝境」），否则为 null；无通关记录时同样为 null，页面据此隐藏难度前缀。
+    /// </summary>
+    [JsonIgnore]
+    public string? BossHardModeName => BossRecord?.HardMode == true && !string.IsNullOrWhiteSpace(BossInfo?.HardModeNameMi18n) ? BossInfo.HardModeNameMi18n : null;
+
+
     [JsonIgnore]
     public List<ChallengePeakRecordMob> Mobs => MobInfos.LeftJoin(MobRecords, x => x.MazeId, y => y.MazeId, (x, y) => new ChallengePeakRecordMob(x, y)).ToList();
 }

@@ -110,6 +110,12 @@ internal static class PureFictionShareRenderer
         ShareImageCanvas.DrawText(ds, floor.Name, x + 20f, y + 8f, ctx.Title, ShareImageCanvas.PrimaryText, 200f);
         ShareImageCanvas.DrawText(ds, $"{Lang.ForgottenHallPage_CyclesUsed} {floor.RoundNum}", x + 20f, y + 30f, ctx.Small, ShareImageCanvas.SecondaryText);
         StarRailSharePrimitives.DrawFloorStars(ds, ctx, x + FloorWidth - 16f, y + 10f, floor.NormalStarNum, floor.ExtraStarNum);
+        if (floor.IsFast)
+        {
+            // 快速通关无分数，对齐页面不画总分
+            return;
+        }
+
         ShareImageCanvas.DrawTextRight(
             ds,
             $"{Lang.ApocalypticShadowPage_TotalScore} {floor.TotalScore}",
@@ -117,11 +123,6 @@ internal static class PureFictionShareRenderer
             y + 34f,
             ctx.Small,
             ctx.Accent);
-
-        if (floor.IsFast)
-        {
-            return;
-        }
 
         DrawNode(ds, ctx, x, y + 64f, floor.Node1, 1);
         DrawNode(ds, ctx, x, y + 174f, floor.Node2, 2);

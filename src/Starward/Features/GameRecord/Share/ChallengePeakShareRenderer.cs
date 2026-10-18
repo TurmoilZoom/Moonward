@@ -3,6 +3,7 @@ using Starward.Core.GameRecord.StarRail.ChallengePeak;
 using Starward.Language;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -78,7 +79,11 @@ internal static class ChallengePeakShareRenderer
         foreach (ChallengePeakRecordMob mob in record.Mobs)
         {
             icons.Add(mob.MobInfo?.MonsterIcon);
-            if (mob.MobRecord?.Avatars is not null)
+            if (mob.IsFast)
+            {
+                icons.Add(ShareImageCanvas.QuickClearedStarRail);
+            }
+            else if (mob.MobRecord?.Avatars is not null)
             {
                 CollectAvatars(mob.MobRecord.Avatars, icons);
             }
@@ -171,7 +176,8 @@ internal static class ChallengePeakShareRenderer
     {
         ShareImageCanvas.DrawAcrylicCard(ds, ctx, bg, x, y, ContentWidth, 192f);
         ShareImageCanvas.DrawUniformImage(ds, ctx.Icons.Get(record.BossInfo?.Icon), new Rect(x + ContentWidth - 240f, y + 8f, 230f, 176f));
-        ShareImageCanvas.DrawText(ds, record.BossInfo?.NameMi18n, x + 20f, y + 12f, ctx.Title, ShareImageCanvas.PrimaryText, 400f);
+        string? bossName = record.BossHardModeName is { } hardMode ? $"[{hardMode}] {record.BossInfo?.NameMi18n}" : record.BossInfo?.NameMi18n;
+        ShareImageCanvas.DrawText(ds, bossName, x + 20f, y + 12f, ctx.Title, ShareImageCanvas.PrimaryText, 400f);
         if (record.BossRecord is null)
         {
             ShareImageCanvas.DrawText(ds, Lang.ChallengePeakPage_NoClearanceRecords, x + 20f, y + 44f, ctx.Body, ShareImageCanvas.SecondaryText);
@@ -203,7 +209,7 @@ internal static class ChallengePeakShareRenderer
     private static void DrawMob(CanvasDrawingSession ds, ShareImageContext ctx, float x, float y, ChallengePeakRecordMob mob)
     {
         ShareImageCanvas.DrawUniformImage(ds, ctx.Icons.Get(mob.MobInfo?.MonsterIcon), new Rect(x + ContentWidth - 100f, y + 12f, 80f, 80f));
-        ShareImageCanvas.DrawText(ds, mob.MobInfo?.MonsterName, x + 20f, y + 12f, ctx.Title, ShareImageCanvas.PrimaryText, 500f);
+        ShareImageCanvas.DrawText(ds, string.Join(' ', new[] { mob.MobInfo?.Name, mob.MobInfo?.MonsterName }.Where(s => !string.IsNullOrWhiteSpace(s))), x + 20f, y + 12f, ctx.Title, ShareImageCanvas.PrimaryText, 500f);
         if (!mob.HasChallengeRecord || mob.MobRecord is null)
         {
             ShareImageCanvas.DrawText(ds, Lang.ChallengePeakPage_NoClearanceRecords, x + 20f, y + 44f, ctx.Body, ShareImageCanvas.SecondaryText);
@@ -212,8 +218,18 @@ internal static class ChallengePeakShareRenderer
 
         ChallengePeakMobRecord rec = mob.MobRecord;
         ShareImageCanvas.DrawText(ds, $"{Lang.ForgottenHallPage_CyclesUsed} {rec.RoundNum}", x + 20f, y + 40f, ctx.Body, ShareImageCanvas.PrimaryText);
-        ShareImageCanvas.DrawText(ds, Lang.ChallengePeakPage_Cleared, x + 160f, y + 40f, ctx.Body, ShareImageCanvas.SecondaryText);
-        ShareImageCanvas.DrawStarRow(ds, ctx.Icons.Get(ShareImageCanvas.StarIconStarRail), x + 240f, y + 38f, rec.StarNum, 20f, 2f);
+        // 「快速通关」及其英文比「已通关」长，星星位置按文字宽度排，避免与固定位置重叠
+        string clearedText = rec.IsFast ? Lang.ForgottenHallPage_QuickCleared : Lang.ChallengePeakPage_Cleared;
+        ShareImageCanvas.DrawText(ds, clearedText, x + 160f, y + 40f, ctx.Body, ShareImageCanvas.SecondaryText);
+        float starX = Math.Max(x + 240f, x + 160f + ShareImageCanvas.MeasureTextWidth(ds, clearedText, ctx.Body) + 8f);
+        ShareImageCanvas.DrawStarRow(ds, ctx.Icons.Get(ShareImageCanvas.StarIconStarRail), starX, y + 38f, rec.StarNum, 20f, 2f);
+        if (rec.IsFast)
+        {
+            // 快速通关没有通关时间与队伍，对齐页面画帕姆图
+            ShareImageCanvas.DrawUniformImage(ds, ctx.Icons.Get(ShareImageCanvas.QuickClearedStarRail), new Rect(x + 80f, y + 66f, 120f, 120f));
+            return;
+        }
+
         ShareImageCanvas.DrawText(ds, rec.ChallengeTime.ToString("yyyy.MM.dd HH:mm"), x + 20f, y + 64f, ctx.Small, ShareImageCanvas.SecondaryText);
         StarRailSharePrimitives.DrawAvatarRow(ds, ctx, x + 20f, y + 88f, Map(rec.Avatars));
     }
