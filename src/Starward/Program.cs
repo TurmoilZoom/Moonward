@@ -29,9 +29,12 @@ public static class Program
         // 关掉「启动时自动安装已下载的更新」：游戏时长记录、RPC 子进程也是 Moonward.exe，默认行为下它们一启动就会装更新，
         // 而 Update.exe 安装前会结束安装目录下的所有进程（含正在记录的时长进程）。改由主程序启动/退出时按条件安装，
         // 见 UpdateService.ApplyPendingUpdateOnStartup / ApplySilentlyOnExit。
+        // OnRestarted：Velopack 装完更新（含安装失败）重启拉起时触发；Run() 会清掉 VELOPACK_RESTART，之后无从判断，只能在这里记下，
+        // 启动安装据此跳过，免得「装失败→重启→再装」死循环。
         VelopackApp.Build()
             .OnBeforeUninstallFastCallback(_ => Features.Setting.AppUninstallService.PerformUninstallCleanup())
             .SetAutoApplyOnStartup(false)
+            .OnRestarted(_ => Features.Update.UpdateService.RestartedByVelopack = true)
             .Run();
 
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;

@@ -97,6 +97,12 @@ internal class UpdateService
     public static bool UpdateFinished { get; private set; }
 
     /// <summary>
+    /// 本进程是否是 Velopack 安装更新后重启拉起的（安装失败也会重启旧版本）。
+    /// 由 <c>Program.Main</c> 里 Velopack 的 OnRestarted 钩子置位，见 <see cref="ApplyPendingUpdateOnStartup"/>。
+    /// </summary>
+    public static bool RestartedByVelopack { get; set; }
+
+    /// <summary>
     /// 当前是否正在下载更新包（含静默下载）。
     /// </summary>
     public bool IsUpdating => _isUpdating;
@@ -569,6 +575,7 @@ internal class UpdateService
     /// 包括游戏时长记录与 RPC 子进程。
     /// <para>
     /// 安装目录下还有其他 Moonward 进程（时长记录、后台 RPC 等）时不装，留到退出或下次启动。
+    /// 本进程是 Velopack 重启拉起的（<see cref="RestartedByVelopack"/>）也不装，与 Velopack 自带的启动安装一致。
     /// 安装时本方法不返回，进程直接退出。
     /// </para>
     /// </summary>
@@ -580,6 +587,13 @@ internal class UpdateService
             var manager = GetManager();
             if (!manager.IsInstalled || manager.UpdatePendingRestart is not VelopackAsset pending)
             {
+                return;
+            }
+            // Update.exe 安装失败时仍会按原参数重启旧版本，这时再装多半还是失败、又重启，就成了死循环；
+            // 留到退出时（不重启）或用户下次自己启动时再装
+            if (RestartedByVelopack)
+            {
+                _logger.LogInformation("Skip pending update on startup because the app was just restarted by Velopack: {version}", pending.Version);
                 return;
             }
             if (IsOtherMoonwardProcessRunning())
