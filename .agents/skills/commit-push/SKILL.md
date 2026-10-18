@@ -22,6 +22,7 @@ description: >
 | 常用类型 | `feat` / `fix` / `docs` / `refactor` / `improve` / `remove` / `chore` 等 |
 | 示例 | `feat: 为首页添加功能图钉`；`fix: 修复自定义背景在分辨率变化后回退的问题` |
 | 关联 Issue | 用户指定了 Issue 时，标题末尾加 `#N`（GitHub 会做成可跳转链接；见「3. 撰写提交信息」） |
+| 跨仓库引用 | **禁止** `owner/repo#N` 与指向其他仓库 issue / PR 的链接：推到 GitHub 会在对方 issue 留下引用记录。提上游写纯文本「上游 issue N」 |
 | 远程 | 通常有 `origin`（GitHub）与 `cnb`（CNB 镜像）；**两个都要推当前分支**。名为 `upstream` 的远程跳过，不推 |
 | 日常分支 | 多在 `rebase/develop`；在 `main` / `master` 上操作前须确认 |
 | 不提交 | `bin/`、`obj/`、日志；勿把无关大范围重构塞进同一提交 |
@@ -97,6 +98,8 @@ EOF
 
 仅在用户**明确指定** Issue 时附加（命令参数、本轮对话里的编号/链接，或「关联 #N」）。**不要**根据文件名或 diff 自行猜测编号。未指定则标题不加 `#N`。
 
+`#N` 只用于本仓（`TurmoilZoom/Moonward`）的 Issue。用户给的是其他仓库（如上游 `Scighost/Starward`）的编号或链接时，**不要**写成 `#N`（会指到本仓同号 Issue），也不要写 `owner/repo#N` 或链接（会在对方 issue 留引用），只在正文写纯文本「上游 issue N」。
+
 识别：从用户输入取出编号 `N`（`#42`、纯数字 `42`、或 URL 里的 `/issues/42` `/pull/42`）。多个编号只关联用户点名的那些，按顺序空格写在标题最后：`#12 #34`。
 
 标题写法（`#N` 紧挨末尾，前面一个空格）：
@@ -133,6 +136,18 @@ gh issue view <N> --json url,title,state
 - 在 `main` / `master` / 默认分支上：**先停下来确认**是否真要直接提交并推送。
 - 工作区仍有未纳入本次提交的改动：提交后在汇报里提醒。
 - 敏感文件（密钥、本地路径配置等）误入暂存：先移出，再提交。
+- **跨仓库引用**：推送会带上所有未推送的提交，不只是本次这条。推之前检查待推送范围（有跟踪分支用 `@{u}..HEAD`，没有则用 `origin/<branch>..HEAD`）：
+
+  ```powershell
+  # 本仓自己的链接（TurmoilZoom/Moonward）和裸 #N 不算
+  $pattern = '[\w.-]+/[\w.-]+#\d+|github\.com/(?!TurmoilZoom/Moonward/)[^\s/]+/[^\s/]+/(issues|pull)/\d+'
+  git log '@{u}..HEAD' --format='%h' | ForEach-Object {
+    $msg = (git log -1 --format='%B' $_) -join "`n"
+    if ($msg -match $pattern) { "$_  $($Matches[0])" }
+  }
+  ```
+
+  命中就停下：告诉用户是哪几条提交、哪段文字，问是否先改写（未推送的提交改写不影响远程）再推，**不要**原样推上去。
 
 ### 5. 提交并推送到 fork 远程
 
@@ -197,6 +212,7 @@ foreach ($r in $remotes) {
 - 英文-only 标题或与仓库风格不符的长英文 subject（本仓说明主体用中文）  
 - 用户指定了 Issue，却漏掉标题末尾的 `#N`、改成完整 URL、写成 `(#N)`、或只写在正文  
 - 用户没提 Issue 却自行加 `#N`，或猜错编号  
+- 提交信息里写 `Scighost/Starward#N` 或上游 issue / PR 链接（会在上游 issue 留引用记录）  
 - 只「关联」却擅自写 `Closes` / `Fixes`  
 - 把不相关改动塞进同一提交  
 - 提交 `bin/`、`obj/`、日志或用户数据  

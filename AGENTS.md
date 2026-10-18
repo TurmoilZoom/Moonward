@@ -67,6 +67,8 @@ docs: 补充 URL 协议说明
 
 常用类型：`feat` / `fix` / `docs` / `refactor` / `improve` / `remove` / `chore` 等。一次提交只做一件事；不相关改动拆开。正文可补充原因与影响（中文）。
 
+**提交信息里不引用其他仓库的 issue / PR**：`owner/repo#N`（如 `Scighost/Starward#1944`）和指向其他仓库 issue / PR 的链接，推到 GitHub 后会在对方时间线留下「referenced this issue」，变基后重推还会再留一次。需要提上游时写纯文本，如「上游 issue 1944」「上游 PR 1945」。本仓自己的 `#N` 不受此限。
+
 ## 编码要点
 
 - `Nullable` 开启；异步方法带 `CancellationToken cancellationToken = default`
