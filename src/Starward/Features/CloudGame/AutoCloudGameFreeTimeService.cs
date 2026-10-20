@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Features.Database;
+using Starward.Features.Startup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -347,7 +348,11 @@ internal sealed class AutoCloudGameFreeTimeService
         await _batchGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            return await RunBatchCoreAsync(cancellationToken).ConfigureAwait(false);
+            // 登记为后台自动任务：优先级更低的定时提交元数据会等这一轮跑完
+            using (BackgroundAutomationActivity.Enter())
+            {
+                return await RunBatchCoreAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
         finally
         {

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Features.Database;
+using Starward.Features.Startup;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -360,7 +361,11 @@ internal class AutoSignInService
         await _batchGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            return await RunBatchCoreAsync(cancellationToken).ConfigureAwait(false);
+            // 登记为后台自动任务：优先级更低的定时提交元数据会等这一轮跑完
+            using (BackgroundAutomationActivity.Enter())
+            {
+                return await RunBatchCoreAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
         finally
         {

@@ -4351,4 +4351,58 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
     <value>Устройство вывода звука недоступно, поэтому видеофон приостановлен и показано статичное изображение. Воспроизведение возобновится автоматически, когда устройство снова станет доступно.</value>
   </data>
+  <data name="ZZZGachaInfoWindow_AutoPublish" xml:space="preserve">
+    <value>Scheduled Publish</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishDescription" xml:space="preserve">
+    <value>After the set time (UTC+8) each day, the app fetches item metadata with the signed-in account and publishes it to the metadata branch; nothing is committed if the content is unchanged. It runs after auto sign-in, cloud game free time and auto record refresh, and retries automatically on failure. The app must be running (staying in the tray is fine).</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishEnable" xml:space="preserve">
+    <value>Fetch and publish daily</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishTime" xml:space="preserve">
+    <value>Publish time (UTC+8)</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishLocalTime" xml:space="preserve">
+    <value>Local time: {0}</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishSaveAndRunNow" xml:space="preserve">
+    <value>Save and Run Now</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishLastRun" xml:space="preserve">
+    <value>Last run {0} (UTC+8): {1}</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishNeverRun" xml:space="preserve">
+    <value>Not run yet.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishNextRun" xml:space="preserve">
+    <value>Next run: {0} (UTC+8)</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishNextRunSoon" xml:space="preserve">
+    <value>Next run: soon, once other background tasks finish</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishRunning" xml:space="preserve">
+    <value>Fetching metadata and publishing…</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishEnabled" xml:space="preserve">
+    <value>Scheduled publish is on: daily at {0} (UTC+8).</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishDisabled" xml:space="preserve">
+    <value>Scheduled publish is off.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishCheckingPermission" xml:space="preserve">
+    <value>Checking the PAT's write access…</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishNoPermission" xml:space="preserve">
+    <value>The PAT cannot write to {0} (push access is required; a classic PAT also needs the repo or public_repo scope). Scheduled publish was not turned on.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishPermissionCheckFailed" xml:space="preserve">
+    <value>Couldn't verify the PAT's write access, so scheduled publish was not turned on: {0}</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishBusy" xml:space="preserve">
+    <value>A fetch and publish is already running.</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_PublishUnchanged" xml:space="preserve">
+    <value>{0} file(s) already match the metadata branch; no new commit was made.</value>
+  </data>
 </root>

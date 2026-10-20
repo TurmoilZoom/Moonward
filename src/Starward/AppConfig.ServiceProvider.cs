@@ -97,6 +97,8 @@ public static partial class AppConfig
             sc.AddSingleton<GenshinBeyondGachaService>();
             // 维护者：将 ZZZ 抽卡元数据提交到 GitHub metadata 分支（PAT 走 PasswordVault）
             sc.AddSingleton<ZZZGachaMetadataPublishService>();
+            // 维护者：每天定时获取并提交上述元数据（需有写入权限的 PAT），优先级低于签到等其他后台自动任务
+            sc.AddSingleton<ZZZGachaMetadataAutoPublishService>();
 
             sc.AddSingleton<HoyolabClient>();
             sc.AddSingleton<HyperionClient>();

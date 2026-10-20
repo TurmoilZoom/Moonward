@@ -89,6 +89,11 @@
                             Command="{x:Bind PublishToMetadataBranchCommand}"
                             Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_PublishToMetadata}"
                             IsEnabled="False" />
+                    <!--  定时获取并提交：仅已存 PAT 时显示，开启时校验写入权限  -->
+                    <Button x:Name="Button_AutoPublish"
+                            Command="{x:Bind ConfigureAutoPublishCommand}"
+                            Content="{x:Bind lang:Lang.ZZZGachaInfoWindow_AutoPublish}"
+                            Visibility="Collapsed" />
                 </StackPanel>
 
             </StackPanel>

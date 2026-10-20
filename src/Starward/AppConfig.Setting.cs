@@ -573,6 +573,52 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 维护者：每天定时用已登录账号获取绝区零抽卡物品元数据并提交到 metadata 分支。
+    /// 只能在已存有可写入 metadata 仓库的 GitHub PAT 时开启，默认关闭。
+    /// </summary>
+    public static bool ZZZGachaMetadataAutoPublishEnabled
+    {
+        get => GetValue<bool>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 定时提交元数据的时刻：UTC+8 一天中的第几分钟，默认 720（12:00）。
+    /// </summary>
+    public static int ZZZGachaMetadataAutoPublishMinutes
+    {
+        get => GetValue(720);
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 定时提交元数据上次成功的期（UTC+8 日期，见 <see cref="Features.Gacha.ZZZGachaToolbox.ZZZGachaMetadataPublishSchedule"/>），从未成功为 null。
+    /// </summary>
+    public static DateOnly? ZZZGachaMetadataAutoPublishLastSuccessPeriod
+    {
+        get => DateOnly.TryParse(GetValue<string>(), CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly date) ? date : null;
+        set => SetValue(value?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// 定时提交元数据上次运行结束的时刻（UTC ticks），0 表示从未运行。
+    /// </summary>
+    public static long ZZZGachaMetadataAutoPublishLastRunTicks
+    {
+        get => GetValue<long>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 定时提交元数据上次运行的结果说明（运行时已本地化），供工具箱窗口展示。
+    /// </summary>
+    public static string? ZZZGachaMetadataAutoPublishLastRunMessage
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
 
     #endregion
 

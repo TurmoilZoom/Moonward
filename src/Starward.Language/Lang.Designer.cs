@@ -11277,6 +11277,159 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Scheduled Publish 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublish {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublish", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 A fetch and publish is already running. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishBusy {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishBusy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Checking the PAT's write access… 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishCheckingPermission {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishCheckingPermission", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 After the set time (UTC+8) each day, the app fetches item metadata with the signed-in account and publishes it to the metadata branch; nothing is committed if the content is unchanged. It runs after auto sign-in, cloud game free time and auto record refresh, and retries automatically on failure. The app must be running (staying in the tray is fine). 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishDescription {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Scheduled publish is off. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishDisabled {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fetch and publish daily 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishEnable {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishEnable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Scheduled publish is on: daily at {0} (UTC+8). 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishEnabled {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Last run {0} (UTC+8): {1} 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishLastRun {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishLastRun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Local time: {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishLocalTime {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishLocalTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not run yet. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishNeverRun {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishNeverRun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Next run: {0} (UTC+8) 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishNextRun {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishNextRun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Next run: soon, once other background tasks finish 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishNextRunSoon {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishNextRunSoon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The PAT cannot write to {0} (push access is required; a classic PAT also needs the repo or public_repo scope). Scheduled publish was not turned on. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishNoPermission {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishNoPermission", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Couldn't verify the PAT's write access, so scheduled publish was not turned on: {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishPermissionCheckFailed {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishPermissionCheckFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fetching metadata and publishing… 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishRunning {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Save and Run Now 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishSaveAndRunNow {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishSaveAndRunNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Publish time (UTC+8) 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_AutoPublishTime {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_AutoPublishTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Export to Folder 的本地化字符串。
         /// </summary>
         public static string ZZZGachaInfoWindow_ExportToFolder {
@@ -11498,6 +11651,15 @@ namespace Starward.Language {
         public static string ZZZGachaInfoWindow_PublishUnauthorized {
             get {
                 return ResourceManager.GetString("ZZZGachaInfoWindow_PublishUnauthorized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} file(s) already match the metadata branch; no new commit was made. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_PublishUnchanged {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_PublishUnchanged", resourceCulture);
             }
         }
         

@@ -11,14 +11,13 @@ using Microsoft.Web.WebView2.Core;
 using Octokit;
 using Starward.Core;
 using Starward.Core.Gacha.ZZZ;
-using Starward.Core.GameRecord;
 using Starward.Features.Database;
-using Starward.Features.GameRecord;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -43,10 +42,10 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
     private readonly HttpClient _httpClient = AppConfig.GetService<HttpClient>();
 
 
-    private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
-
-
     private readonly ZZZGachaMetadataPublishService _metadataPublishService = AppConfig.GetService<ZZZGachaMetadataPublishService>();
+
+
+    private readonly ZZZGachaMetadataAutoPublishService _autoPublishService = AppConfig.GetService<ZZZGachaMetadataAutoPublishService>();
 
 
     private const string Source_cn = "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html";
@@ -168,7 +167,7 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
     {
         try
         {
-            bool hasCookie = PickZZZGameRecordRolesWithCookie().Count > 0;
+            bool hasCookie = _metadataPublishService.PickZZZGameRecordRolesWithCookie().Count > 0;
             Button_FetchWithGameRecord.IsEnabled = hasCookie && !isFetchingFromGameRecord;
             if (!hasCookie && string.IsNullOrWhiteSpace(StatusMessage))
             {
@@ -179,34 +178,6 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         {
             _logger.LogError(ex, "ZZZGachaInfoWindow: RefreshGameRecordFetchAvailability");
         }
-    }
-
-
-    /// <summary>
-    /// 选取国服/国际服各至多一个带 Cookie 的绝区零战绩角色（优先上次同步角色）。
-    /// </summary>
-    /// <returns>可用角色列表（可能为空）。</returns>
-    private List<GameRecordRole> PickZZZGameRecordRolesWithCookie()
-    {
-        var result = new List<GameRecordRole>();
-        foreach (GameBiz biz in new[] { GameBiz.nap_cn, GameBiz.nap_global })
-        {
-            GameRecordRole? preferred = _gameRecordService.GetLastSelectGachaSyncRoleOrTheFirstOne(biz);
-            if (preferred is not null && !string.IsNullOrWhiteSpace(preferred.Cookie))
-            {
-                result.Add(preferred);
-                continue;
-            }
-            foreach (GameRecordRole role in _gameRecordService.GetGameRoles(biz))
-            {
-                if (!string.IsNullOrWhiteSpace(role.Cookie))
-                {
-                    result.Add(role);
-                    break;
-                }
-            }
-        }
-        return result;
     }
 
 
@@ -227,8 +198,8 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
             isFetchingFromGameRecord = true;
             Button_FetchWithGameRecord.IsEnabled = false;
 
-            List<GameRecordRole> roles = PickZZZGameRecordRolesWithCookie();
-            if (roles.Count == 0)
+            List<ZZZGachaMetadataFetchRequest> plan = _metadataPublishService.GetFetchPlan();
+            if (plan.Count == 0)
             {
                 StatusMessage = Lang.GachaLogPage_PleaseLoginMiyousheAndAddZZZRole;
                 return;
@@ -237,40 +208,25 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
             int languageCount = 0;
             int itemCount = 0;
 
-            foreach (GameRecordRole role in roles)
+            foreach (ZZZGachaMetadataFetchRequest request in plan)
             {
                 cts.Token.ThrowIfCancellationRequested();
-                bool isHoyolab = role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false;
-                // 目录键与 WebView 抓包路径一致：nap_cn / nap_global
-                string bizKey = isHoyolab ? GameBiz.nap_global : GameBiz.nap_cn;
-                List<string> languages = isHoyolab
-                    ? LanguageUtil.GetAllLanguages()
-                    : ["zh-cn"];
+                StatusMessage = string.Format(Lang.GachaLogPage_FetchingItemInfoLanguage, request.Key);
 
-                foreach (string lang in languages)
+                (string key, List<ZZZGachaInfo>? list) = await _metadataPublishService.FetchPackageAsync(request, cts.Token).ConfigureAwait(true);
+                if (list is null)
                 {
-                    cts.Token.ThrowIfCancellationRequested();
-                    StatusMessage = string.Format(Lang.GachaLogPage_FetchingItemInfoLanguage, $"{bizKey}.{lang}");
+                    continue;
+                }
 
-                    ZZZGachaWiki wiki = await _gameRecordService.GetZZZGachaWikiFromCultivateToolAsync(role, lang, cts.Token).ConfigureAwait(true);
-                    if (wiki.List is null || wiki.List.Count == 0)
-                    {
-                        continue;
-                    }
+                AddOrUpdateGachaInfoResult(key, list);
+                languageCount++;
+                itemCount = Math.Max(itemCount, list.Count);
 
-                    string actualLang = string.IsNullOrWhiteSpace(wiki.Language)
-                        ? LanguageUtil.FilterLanguage(lang)
-                        : LanguageUtil.FilterLanguage(wiki.Language);
-                    string key = $"{bizKey}.{actualLang}";
-                    AddOrUpdateGachaInfoResult(key, wiki.List);
-                    languageCount++;
-                    itemCount = Math.Max(itemCount, wiki.List.Count);
-
-                    // 全语言循环时轻微限流，降低 act 接口风控概率
-                    if (isHoyolab && languages.Count > 1)
-                    {
-                        await Task.Delay(Random.Shared.Next(200, 300), cts.Token).ConfigureAwait(true);
-                    }
+                // 全语言循环时轻微限流，降低 act 接口风控概率
+                if (request.IsGlobal)
+                {
+                    await Task.Delay(Random.Shared.Next(200, 300), cts.Token).ConfigureAwait(true);
                 }
             }
 
@@ -287,7 +243,7 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         {
             StatusMessage = Lang.GachaLogPage_OperationCanceled;
         }
-        catch (miHoYoApiException ex) when (IsCultivateToolRiskControl(ex.ReturnCode))
+        catch (miHoYoApiException ex) when (ZZZGachaMetadataPublishService.IsCultivateToolRiskControl(ex.ReturnCode))
         {
             // 10035 等是 act 极验风控，与战绩页「验证账号」无关；可改用网页登录抓包
             _logger.LogWarning(ex, "ZZZ cultivate tool risk control ({retcode}) in toolbox", ex.ReturnCode);
@@ -312,10 +268,6 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
             RefreshGameRecordFetchAvailability();
         }
     }
-
-
-    /// <summary>养成/badge 接口极验风控 retcode（与 ZZZGachaService 一致）。</summary>
-    private static bool IsCultivateToolRiskControl(int retcode) => retcode is 10035 or 10041 or 1034 or 5003 or -3503;
 
 
     /// <summary>
@@ -625,7 +577,11 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
         Button_SaveToDatabase.IsEnabled = selected == 1;
         Button_ExportFiles.IsEnabled = selected > 0;
         // 维护者提交：需已存 PAT 且至少选中一个语言包
-        Button_PublishMetadata.IsEnabled = selected > 0 && _metadataPublishService.HasStoredPat && !isPublishingMetadata;
+        bool hasPat = _metadataPublishService.HasStoredPat;
+        Button_PublishMetadata.IsEnabled = selected > 0 && hasPat && !isPublishingMetadata;
+        // 定时提交只对已存 PAT 的维护者显示，开启时再校验写入权限
+        Button_AutoPublish.Visibility = hasPat ? Visibility.Visible : Visibility.Collapsed;
+        Button_AutoPublish.IsEnabled = !isPublishingMetadata;
     }
 
 
@@ -720,17 +676,21 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
                 {
                     string login = await _metadataPublishService.ValidatePatAsync(cts.Token).ConfigureAwait(true);
                     StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_GitHubPatValidated, login);
+                    // 换了新 PAT：定时提交之前因 PAT 失败排到 2 小时后的重试作废，按排期重新判断
+                    _autoPublishService.RequestImmediateCheck();
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "GitHub PAT validation failed");
                     _metadataPublishService.ClearPat();
+                    DisableAutoPublishWithoutPat();
                     StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_GitHubPatValidateFailed, ex.Message);
                 }
             }
             else if (result is ContentDialogResult.Secondary)
             {
                 _metadataPublishService.ClearPat();
+                DisableAutoPublishWithoutPat();
                 StatusMessage = Lang.ZZZGachaInfoWindow_GitHubPatCleared;
             }
 
@@ -782,8 +742,10 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
             RefreshPublishButtons();
             StatusMessage = Lang.ZZZGachaInfoWindow_PublishingMetadata;
 
-            (string sha, int fileCount) = await _metadataPublishService.PublishAsync(packages, cancellationToken: cts.Token).ConfigureAwait(true);
-            StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_PublishSucceeded, fileCount, sha);
+            ZZZGachaMetadataPublishResult publish = await _metadataPublishService.PublishAsync(packages, cancellationToken: cts.Token).ConfigureAwait(true);
+            StatusMessage = publish.Unchanged
+                ? string.Format(Lang.ZZZGachaInfoWindow_PublishUnchanged, publish.FileCount)
+                : string.Format(Lang.ZZZGachaInfoWindow_PublishSucceeded, publish.FileCount, publish.CommitSha);
         }
         catch (OperationCanceledException)
         {
@@ -810,6 +772,235 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
             isPublishingMetadata = false;
             RefreshPublishButtons();
         }
+    }
+
+
+    /// <summary>
+    /// 维护者：配置定时提交（开关 + UTC+8 时刻），可选保存后立即执行一次。从关闭改为开启时先校验 PAT 写入权限。
+    /// </summary>
+    [RelayCommand]
+    private async Task ConfigureAutoPublishAsync()
+    {
+        try
+        {
+            if (!_metadataPublishService.HasStoredPat)
+            {
+                StatusMessage = Lang.ZZZGachaInfoWindow_GitHubPatNotConfigured;
+                return;
+            }
+
+            var toggle = new ToggleSwitch
+            {
+                Header = Lang.ZZZGachaInfoWindow_AutoPublishEnable,
+                IsOn = _autoPublishService.Enabled,
+            };
+            var timePicker = new TimePicker
+            {
+                Header = Lang.ZZZGachaInfoWindow_AutoPublishTime,
+                ClockIdentifier = "24HourClock",
+                MinuteIncrement = 1,
+                Time = _autoPublishService.TimeOfDay,
+            };
+            var localTimeText = new TextBlock
+            {
+                TextWrapping = TextWrapping.Wrap,
+                Opacity = 0.8,
+            };
+            void UpdateLocalTime()
+            {
+                // 本机不在 UTC+8 时给出换算，免得按本机时间填错
+                string? local = FormatLocalTimeOfDay(timePicker.Time);
+                localTimeText.Text = local is null ? "" : string.Format(Lang.ZZZGachaInfoWindow_AutoPublishLocalTime, local);
+                localTimeText.Visibility = local is null ? Visibility.Collapsed : Visibility.Visible;
+            }
+            UpdateLocalTime();
+            timePicker.TimeChanged += (_, _) => UpdateLocalTime();
+
+            var panel = new StackPanel { Spacing = 12, Width = 360 };
+            panel.Children.Add(new TextBlock
+            {
+                Text = Lang.ZZZGachaInfoWindow_AutoPublishDescription,
+                TextWrapping = TextWrapping.Wrap,
+            });
+            panel.Children.Add(toggle);
+            panel.Children.Add(timePicker);
+            panel.Children.Add(localTimeText);
+            panel.Children.Add(new TextBlock
+            {
+                Text = BuildAutoPublishStatus(),
+                TextWrapping = TextWrapping.Wrap,
+                Opacity = 0.8,
+            });
+
+            var dialog = new ContentDialog
+            {
+                Title = Lang.ZZZGachaInfoWindow_AutoPublish,
+                Content = panel,
+                PrimaryButtonText = Lang.Common_Save,
+                SecondaryButtonText = Lang.ZZZGachaInfoWindow_AutoPublishSaveAndRunNow,
+                CloseButtonText = Lang.Common_Cancel,
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.Content.XamlRoot,
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+            if (result is ContentDialogResult.None)
+            {
+                return;
+            }
+
+            bool enable = toggle.IsOn;
+            var time = new TimeSpan(timePicker.Time.Hours, timePicker.Time.Minutes, 0);
+            // 只改时刻不必再联网校验；从关闭改为开启才确认这个 PAT 能写入
+            if (enable && !_autoPublishService.Enabled && !await EnsureAutoPublishPermissionAsync())
+            {
+                return;
+            }
+            _autoPublishService.ApplySettings(enable, time);
+            StatusMessage = enable
+                ? string.Format(Lang.ZZZGachaInfoWindow_AutoPublishEnabled, time.ToString(@"hh\:mm", CultureInfo.InvariantCulture))
+                : Lang.ZZZGachaInfoWindow_AutoPublishDisabled;
+
+            if (result is ContentDialogResult.Secondary)
+            {
+                await RunAutoPublishNowAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Configure ZZZ metadata auto publish");
+            StatusMessage = ex.Message;
+        }
+    }
+
+
+    /// <summary>
+    /// 确认已存 PAT 能写入 metadata 仓库，不能时在状态栏说明原因。
+    /// </summary>
+    /// <returns>可写入为 true。</returns>
+    private async Task<bool> EnsureAutoPublishPermissionAsync()
+    {
+        try
+        {
+            Button_AutoPublish.IsEnabled = false;
+            StatusMessage = Lang.ZZZGachaInfoWindow_AutoPublishCheckingPermission;
+            if (await _metadataPublishService.HasWritePermissionAsync(cts.Token).ConfigureAwait(true))
+            {
+                return true;
+            }
+            StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_AutoPublishNoPermission, $"{ZZZGachaMetadataPaths.RepositoryOwner}/{ZZZGachaMetadataPaths.RepositoryName}");
+            return false;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // 不记录 token
+            _logger.LogWarning(ex, "Check GitHub PAT write permission");
+            StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_AutoPublishPermissionCheckFailed, ex.Message);
+            return false;
+        }
+        finally
+        {
+            RefreshPublishButtons();
+        }
+    }
+
+
+    /// <summary>
+    /// 立即用已登录账号获取全部语言包并提交，与定时提交走同一条路径（成功同样算本期已完成）。
+    /// </summary>
+    private async Task RunAutoPublishNowAsync()
+    {
+        if (isPublishingMetadata)
+        {
+            return;
+        }
+
+        try
+        {
+            isPublishingMetadata = true;
+            RefreshPublishButtons();
+            StatusMessage = Lang.ZZZGachaInfoWindow_AutoPublishRunning;
+            ZZZGachaMetadataAutoPublishResult result = await _autoPublishService.RunNowAsync(cts.Token).ConfigureAwait(true);
+            StatusMessage = result.Message;
+        }
+        catch (OperationCanceledException)
+        {
+            StatusMessage = Lang.GachaLogPage_OperationCanceled;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Run ZZZ metadata auto publish now");
+            StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_PublishFailed, ex.Message);
+        }
+        finally
+        {
+            isPublishingMetadata = false;
+            RefreshPublishButtons();
+        }
+    }
+
+
+    /// <summary>
+    /// PAT 已被清除：定时提交无法再运行，一并关闭，免得设置里一直显示「已开启」。
+    /// </summary>
+    private void DisableAutoPublishWithoutPat()
+    {
+        if (_autoPublishService.Enabled)
+        {
+            _autoPublishService.ApplySettings(false, _autoPublishService.TimeOfDay);
+        }
+    }
+
+
+    /// <summary>
+    /// 定时提交对话框里的状态：上次运行结果 + 下次运行时刻（未开启时不显示下次）。
+    /// </summary>
+    /// <returns>多行文本。</returns>
+    private string BuildAutoPublishStatus()
+    {
+        var lines = new List<string>();
+        long lastRunTicks = AppConfig.ZZZGachaMetadataAutoPublishLastRunTicks;
+        lines.Add(lastRunTicks > 0
+            ? string.Format(Lang.ZZZGachaInfoWindow_AutoPublishLastRun, FormatServerTime(new DateTimeOffset(lastRunTicks, TimeSpan.Zero)), AppConfig.ZZZGachaMetadataAutoPublishLastRunMessage)
+            : Lang.ZZZGachaInfoWindow_AutoPublishNeverRun);
+        if (_autoPublishService.IsRunning)
+        {
+            lines.Add(Lang.ZZZGachaInfoWindow_AutoPublishRunning);
+        }
+        else if (_autoPublishService.GetNextDue() is DateTimeOffset due)
+        {
+            lines.Add(due <= DateTimeOffset.UtcNow
+                ? Lang.ZZZGachaInfoWindow_AutoPublishNextRunSoon
+                : string.Format(Lang.ZZZGachaInfoWindow_AutoPublishNextRun, FormatServerTime(due)));
+        }
+        return string.Join(Environment.NewLine, lines);
+    }
+
+
+    /// <summary>
+    /// 按 UTC+8 显示时刻，与设定时刻同一时区，便于对照。
+    /// </summary>
+    private static string FormatServerTime(DateTimeOffset time)
+    {
+        return time.ToOffset(ZZZGachaMetadataPublishSchedule.ServerOffset).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+    }
+
+
+    /// <summary>
+    /// UTC+8 的某个时刻对应的本机时刻（按今天换算）。
+    /// </summary>
+    /// <param name="serverTimeOfDay">UTC+8 一天中的时刻。</param>
+    /// <returns>本机时刻文本；本机就在 UTC+8 时为 null。</returns>
+    private static string? FormatLocalTimeOfDay(TimeSpan serverTimeOfDay)
+    {
+        TimeSpan offset = ZZZGachaMetadataPublishSchedule.ServerOffset;
+        DateTimeOffset serverNow = DateTimeOffset.UtcNow.ToOffset(offset);
+        DateTimeOffset local = new DateTimeOffset(serverNow.Year, serverNow.Month, serverNow.Day, 0, 0, 0, offset).Add(serverTimeOfDay).ToLocalTime();
+        return local.Offset == offset ? null : local.ToString("HH:mm", CultureInfo.InvariantCulture);
     }
 
 

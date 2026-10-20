@@ -2,6 +2,7 @@ using Microsoft.UI.Dispatching;
 using Serilog;
 using Starward.Features.CloudGame;
 using Starward.Features.Gacha;
+using Starward.Features.Gacha.ZZZGachaToolbox;
 using Starward.Features.GamepadControl;
 using Starward.Features.GameRecord.AutoRefresh;
 using Starward.Features.GameRecord.SignIn;
@@ -63,7 +64,10 @@ internal static class ResidentHost
             autoCloudGameFreeTime.StartResident(autoSignIn.StartupBatchCompleted);
             // 自动更新战绩：等前面两轮启动批量都打完再检查一次到期板块。只判这一次，不跨日重判。
             // 挂在这里而不是主窗口：用户不必开启开机自启，软件（含仅托盘驻留）跑起来就有效。
-            AppConfig.GetService<AutoRecordRefreshService>().StartStartupCheck(autoCloudGameFreeTime.StartupBatchCompleted);
+            AutoRecordRefreshService autoRecordRefresh = AppConfig.GetService<AutoRecordRefreshService>();
+            autoRecordRefresh.StartStartupCheck(autoCloudGameFreeTime.StartupBatchCompleted);
+            // 维护者定时提交绝区零抽卡元数据：优先级最低，排在上面这条启动链之后；未开启时只挂着等设置变化
+            AppConfig.GetService<ZZZGachaMetadataAutoPublishService>().StartResident(autoRecordRefresh.StartupCheckCompleted);
             AppConfig.GetService<RpcService>().TrySetEnviromentAsync();
             // 后台驻留期间也检查并静默下载更新：仅托盘驻留或主窗口长期最小化时，
             // MainView 那条「窗口激活才查」的路径永远不会触发。

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.GameRecord;
+using Starward.Features.Startup;
 using Starward.Features.ViewHost;
 using System;
 using System.Collections.Generic;
@@ -67,6 +68,11 @@ internal class AutoRecordRefreshService
     /// <summary>保证启动检查每个进程只跑一次。</summary>
     private int _startupCheckStarted;
 
+    /// <summary>
+    /// 启动检查已结束（跑完、没有到期任务、出错都算）。优先级更低的定时提交元数据等这一下再开始。
+    /// </summary>
+    private readonly TaskCompletionSource _startupCheckCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
 
     /// <summary>
     /// 初始化自动更新战绩服务。
@@ -78,6 +84,12 @@ internal class AutoRecordRefreshService
         _logger = logger;
         _gameRecordService = gameRecordService;
     }
+
+
+    /// <summary>
+    /// 启动检查已结束。启动时的自动任务链（签到 → 云游戏免费时长 → 战绩）以它收尾。
+    /// </summary>
+    internal Task StartupCheckCompleted => _startupCheckCompleted.Task;
 
 
     /// <summary>
@@ -103,6 +115,10 @@ internal class AutoRecordRefreshService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Auto record refresh startup check failed.");
+            }
+            finally
+            {
+                _startupCheckCompleted.TrySetResult();
             }
         });
     }
@@ -252,7 +268,9 @@ internal class AutoRecordRefreshService
         }
 
         int success = 0;
+        // 登记为后台自动任务：优先级更低的定时提交元数据会等这一轮跑完。
         // 遇到 aigis 不要弹极验；月报翻页也走同一套 3–8 秒间隔，避免一页接一页连打
+        using (BackgroundAutomationActivity.Enter())
         using (_gameRecordService.SuppressInteractiveRiskChallenge())
         using (_gameRecordService.UseRequestPacing(PaceAsync))
         {

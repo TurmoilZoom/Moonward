@@ -31,6 +31,7 @@
 		<Compile Include="..\..\src\Starward\Features\PlayTime\PlayTimeStatsService.Sessions.cs" Link="Linked\PlayTime\PlayTimeStatsService.Sessions.cs" />
 		<Compile Include="..\..\src\Starward\Features\Gacha\GachaLogItemEx.cs" Link="Linked\Gacha\GachaLogItemEx.cs" />
 		<Compile Include="..\..\src\Starward\Features\Gacha\GachaLogService.FiftyFifty.cs" Link="Linked\Gacha\GachaLogService.FiftyFifty.cs" />
+		<Compile Include="..\..\src\Starward\Features\Gacha\ZZZGachaToolbox\ZZZGachaMetadataPublishSchedule.cs" Link="Linked\Gacha\ZZZGachaMetadataPublishSchedule.cs" />
 	</ItemGroup>
 
 </Project>

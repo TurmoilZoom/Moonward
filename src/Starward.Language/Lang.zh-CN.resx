@@ -4419,4 +4419,58 @@
   <data name="AppBackground_AudioOutputUnavailableVideoPaused" xml:space="preserve">
     <value>音频输出设备不可用，视频背景已暂停并显示静态图。设备恢复后会自动继续播放。</value>
   </data>
+  <data name="ZZZGachaInfoWindow_AutoPublish" xml:space="preserve">
+    <value>定时提交</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishDescription" xml:space="preserve">
+    <value>每天过了设定的时刻（UTC+8）后，自动用已登录的账号获取物品元数据并提交到 metadata 分支，内容没有变化时不提交。排在自动签到、云游戏免费时长、战绩自动更新之后运行，失败会自动重试。需要软件保持运行（托盘驻留也可以）。</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishEnable" xml:space="preserve">
+    <value>每天自动获取并提交</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishTime" xml:space="preserve">
+    <value>提交时间（UTC+8）</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishLocalTime" xml:space="preserve">
+    <value>相当于本机时间 {0}</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishSaveAndRunNow" xml:space="preserve">
+    <value>保存并立即执行</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishLastRun" xml:space="preserve">
+    <value>上次运行 {0}（UTC+8）：{1}</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishNeverRun" xml:space="preserve">
+    <value>尚未运行过。</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishNextRun" xml:space="preserve">
+    <value>下次运行：{0}（UTC+8）</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishNextRunSoon" xml:space="preserve">
+    <value>下次运行：马上（等其他自动任务结束后）</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishRunning" xml:space="preserve">
+    <value>正在获取元数据并提交…</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishEnabled" xml:space="preserve">
+    <value>已开启定时提交：每天 {0}（UTC+8）。</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishDisabled" xml:space="preserve">
+    <value>已关闭定时提交。</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishCheckingPermission" xml:space="preserve">
+    <value>正在确认 PAT 的写入权限…</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishNoPermission" xml:space="preserve">
+    <value>PAT 没有 {0} 的写入权限（需要 push 权限，经典 PAT 还需勾选 repo 或 public_repo），未开启定时提交。</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishPermissionCheckFailed" xml:space="preserve">
+    <value>无法确认 PAT 的写入权限，未开启定时提交：{0}</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_AutoPublishBusy" xml:space="preserve">
+    <value>已有一次获取并提交正在进行。</value>
+  </data>
+  <data name="ZZZGachaInfoWindow_PublishUnchanged" xml:space="preserve">
+    <value>{0} 个文件与 metadata 分支上的内容一致，未产生新提交。</value>
+  </data>
 </root>
