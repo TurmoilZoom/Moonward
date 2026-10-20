@@ -1,4 +1,6 @@
-<h1 align="center">Moonward</h1>
+<p align="center">
+  <img src="images/banner.png" alt="Moonward" width="720" />
+</p>
 
 <p align="center">
   Un lanzador de terceros de código abierto basado en <a href="https://github.com/Scighost/Starward">Starward</a> para los juegos de PC de miHoYo<br/>
@@ -22,38 +24,55 @@
 
 ---
 
-Sobre el Starward original, las acciones habituales caben en un acceso directo de escritorio y una sola URL, con mejoras en el check-in, el gacha y los fondos. Funciones principales:
+Sobre el Starward original, las acciones habituales caben en un acceso directo de escritorio y una sola URL, con mejoras en el gacha, los registros de combate, la instalación de juegos, los fondos y más. Funciones principales:
 
 #### Gacha
 
-- **Historial de gacha** — Las estadísticas de banners se reordenan arrastrando (desplazamiento horizontal automático al acercarse al borde); la lista se desplaza arrastrando; las estadísticas quedan fijas arriba. Rachas UP / fallos y probabilidad de acierto se ven de un vistazo. El pity de Miliastra Wonderland usa una barra de progreso
-- **Filtro y compartir** — El desplegable de la barra de título elige qué banners mostrar: seleccionar todo / invertir / restablecer. Un clic genera una imagen mate para compartir, con el pity y el progreso de la garantía
-- **Sincronización de gacha** — Genshin Impact / Zenless Zone Zero y otros pueden actualizar el historial por miHoYo BBS. Los personajes nuevos que aún no están en el catálogo reciben icono y nombre automáticamente. Los nombres de objetos siguen el idioma de la app
-- **Intercambio de datos** — Importar / exportar historial de gacha en UIGF. Se puede importar el historial de Starward original en solo lectura
+- **Historial de gacha** — Las estadísticas de banners se reordenan arrastrando y quedan fijas arriba. Se puede alternar entre vista de lista y cuadrícula compacta de iconos. Las rachas de UP / fallos y la tasa de acierto del 50/50 se ven de un vistazo
+- **Filtro y compartir** — Un desplegable en la barra de título elige qué banners mostrar, con seleccionar todo / invertir / restablecer. Un clic genera una imagen para compartir con estilo esmerilado, con el conteo de pity y el progreso de la garantía
+- **Sincronización de gacha** — Genshin Impact (servidor de China) y Zenless Zone Zero pueden sincronizar registros desde miHoYo BBS; Zenless Zone Zero también admite HoYoLAB. Los objetos nuevos que aún no están en el catálogo reciben icono y nombre automáticamente. Los nombres de los objetos siguen el idioma de la aplicación
+- **Miliastra Wonderland** — La página del historial de deseos funciona como la del historial de gacha (filtro, vista compacta, reordenar arrastrando, imagen para compartir) y completa los iconos de objetos que faltan en el original
+- **UIGF** — Importa / exporta registros de gacha en formato UIGF
 
-#### Cuenta y caja de herramientas
+#### Registros de combate y caja de herramientas
 
-- **Check-in diario** — Check-in de miHoYo BBS / HoYoLAB, interruptor por juego, check-in automático y recuperación. Al iniciar el juego con acceso directo / URL / línea de comandos, esa cuenta también hace un check-in aparte
-- **Inicio de sesión** — Servidor chino: código SMS al móvil; servidor internacional: inicio web. Si la sesión caduca, se renueva automáticamente cuando es posible, sin volver a entrar una y otra vez
-- **Informes mensuales y notas** — Los informes mensuales de la caja de herramientas (Calendario mensual de exploración / Informe mensual de Inter-Knot / Diario del Viajero) comparten el mismo diseño. El informe de Inter-Knot corrige los datos diarios entre husos horarios y muestra el mes actual por defecto. Si las notas en tiempo real chocan con el control de riesgo, hay una entrada de verificación
+- **Check-in diario** — Check-in en miHoYo BBS / HoYoLAB, interruptores por juego, check-in automático y de recuperación. Mientras reside en la bandeja, vuelve a hacer check-in tras cada reinicio diario
+- **Inicio de sesión** — Servidores de China con código SMS; servidores internacionales con inicio de sesión web. Las sesiones caducadas se renuevan automáticamente cuando es posible, para no tener que iniciar sesión una y otra vez
+- **Actualización automática de registros** — Define una frecuencia por cuenta y por sección de datos (incluidos el mes actual y el anterior de los informes mensuales); se actualizan automáticamente al iniciar la aplicación
+- **Informes mensuales y notas** — Los informes mensuales de la caja de herramientas (Calendario mensual del trazacaminos / Informe mensual de Inter-Knot / Diario del viajero) comparten diseño. El informe de Inter-Knot cuenta los datos diarios en la zona horaria del servidor y muestra el mes actual por defecto. Las notas en tiempo real de Genshin Impact muestran más detalles. Hay un acceso de verificación cuando salta el control de riesgo
+- **Presentación de registros** — Los registros de combate y los informes mensuales se pueden exportar como imagen para compartir. El Teatro Imaginarium marca los personajes de prueba y de apoyo; Anomaly Arbitration muestra las victorias rápidas y los nombres de dificultad
+- **Juego en la nube** — Consulta el tiempo restante de Cloud Genshin y Cloud Zenless Zone Zero y reclama automáticamente el tiempo gratuito diario
 
 #### Inicio
 
-- **Varios perfiles de inicio** — Para un mismo juego se pueden guardar conjuntos ilimitados de argumentos y programas de inicio personalizados. Cambiar o editar no obliga a rellenar de nuevo; se puede nombrar y crear un acceso directo de escritorio
-- **Protocolo URL** — `moonward://` inicia / detiene / reinicia el juego, perfil y cuenta indicados, o solo dispara el check-in. Se puede incrustar en scripts o páginas web (véase [docs/UrlProtocol](UrlProtocol.md))
-- **Inicio rápido** — El menú hamburguesa de inicio reúne ajustes del juego, inicio rápido y «crear acceso directo del menú Inicio»
+- **Varios perfiles de inicio** — Conjuntos ilimitados de argumentos de inicio y lanzadores personalizados por juego. Cada perfil tiene su propio argumento DX12 y la opción «iniciar mediante CMD»; ponle nombre a un perfil y crea un acceso directo en el escritorio
+- **Herramientas de terceros** — Un lanzador personalizado también puede ser un enlace de protocolo URL. Los argumentos de línea de comandos habituales incluyen grupos para BetterGI, ZZZ OneDragon y March7th Assistant
+- **Protocolo URL** — `moonward://` inicia / detiene / reinicia un juego, perfil y cuenta concretos, o solo hace el check-in. Se puede incrustar en scripts o páginas web (consulta [docs/UrlProtocol](UrlProtocol.md))
+- **Inicio rápido** — El menú hamburguesa de la página de inicio reúne la configuración del juego, el inicio rápido y los accesos directos del juego. Los accesos directos pueden iniciarse sin el aviso de UAC, y las tareas programadas correspondientes se gestionan por juego en la configuración
+- **Tiempo de juego** — Mientras el juego está abierto, el botón Iniciar juego muestra un temporizador. Las estadísticas de tiempo de juego permiten cambiar de juego, elegir año y mes y generar una imagen para compartir. El tiempo que el PC pasa en suspensión no se cuenta
+
+#### Instalación y actualizaciones
+
+- **Servidores con enlaces físicos** — Al actualizar o reparar un juego también se procesan los demás servidores que comparten archivos mediante enlaces físicos (la instalación base siempre se actualiza primero). El diálogo de desinstalación muestra todos los servidores instalados del mismo juego y puede quitarlos a la vez
+- **Opciones de instalación** — Zenless Zone Zero puede instalar los recursos completos o los básicos. Junto a la ruta de instalación se indica el tipo de disco (SSD / HDD / extraíble / red). Las descargas por chunks se hacen en paralelo por bloque
+- **Reparación e información de versión** — La reparación tiene ahora su propio diálogo y puede reparar solo el Miliastra Sandbox; el número de hilos de verificación se ajusta al tipo de disco. La página «Información de versión» de la configuración del juego muestra la versión, los parches incrementales y el MD5 del ejecutable principal. La búsqueda automática encuentra los juegos instalados desde la aplicación (incluidos los enlaces físicos)
 
 #### Apariencia y fondo
 
-- **Fondos Trust** — En Zenless Zone Zero se pueden descargar los fondos dinámicos Trust y los estáticos Mindscape de la wiki y usarlos como fondo personalizado. Al abrir la galería se usa la caché local; las actualizaciones se comprueban en segundo plano
-- **Fondo personalizado** — Diálogo propio para imagen / vídeo (arrastrar a la página de inicio para reemplazar). Restaurar desde la bandeja ya no parpadea. Tras actualizar la lista de fondos se conserva la preferencia del póster
+- **Fondos Trust** — En Zenless Zone Zero, los fondos animados Trust y los fondos estáticos Mindscape de la wiki se pueden descargar y usar como fondo personalizado. El modo aleatorio cambia la imagen al iniciar, al cambiar de juego o al abrir desde la bandeja. La galería usa la caché local; las actualizaciones se comprueban en silencio en segundo plano
+- **Fondo personalizado** — Diálogo propio para imagen / vídeo (arrastra a la página de inicio para reemplazar). La elección del póster se mantiene tras actualizarse la lista de fondos
+- **Fondos de vídeo** — Los vídeos que no se pueden decodificar por hardware se convierten a H.264 automáticamente. Si falta la extensión HEVC / VP9, la aplicación guía su instalación o muestra una imagen fija. Con la pantalla apagada se libera el decodificador, así que ya no consume CPU
+- **Barra de herramientas de inicio** — Cronología (cuentas atrás de banners / eventos), códigos de canje de las retransmisiones (servidor de China) y mapas interactivos (Genshin Impact / Honkai: Star Rail)
 
 #### Otros
 
-- **Integración con el sistema** — Inicio opcional con Windows hacia la bandeja. En Acerca de se rellenan de un clic los datos de diagnóstico, se abre el feedback de GitHub y la carpeta de registros
-- **Actualizaciones silenciosas** — La versión nueva se descarga en segundo plano, se instala al salir y el siguiente arranque muestra el contenido de la actualización (Velopack + GitHub Releases)
+- **Residente en la bandeja** — Inicio opcional en la bandeja al iniciar sesión. Los atajos globales y el control con mando siguen funcionando; el menú de la bandeja puede activarlos y buscar actualizaciones
+- **Sincronización LAN** — Trae registros de gacha, datos de la caja de herramientas y tiempo de juego desde otro dispositivo de la red local. Solo se añaden los registros que faltan en este PC; las credenciales de inicio de sesión nunca se sincronizan
+- **Gestión de datos** — La base de datos, la caché, los registros y los fondos se guardan en una carpeta de tu elección. Desde la configuración se puede hacer copia de seguridad de la base de datos y vaciar la caché. En el primer inicio puedes importar datos del Starward original (solo lectura; los datos originales no se tocan)
+- **Comentarios** — La página Acerca de rellena la información del entorno con un clic, abre la página de issues de GitHub y abre la carpeta de registros
+- **Actualizaciones silenciosas** — Las nuevas versiones se descargan en segundo plano (también se comprueban periódicamente desde la bandeja) y se instalan al salir o en el siguiente inicio, sin interrumpir un juego cuyo tiempo se está registrando. Tras instalar se muestra el registro de cambios. Los paquetes se descargan primero de CNB y, si falla, de GitHub (Velopack)
 
-Los instaladores están en [Releases](https://github.com/TurmoilZoom/Moonward/releases).
+Los instaladores están en [GitHub Releases](https://github.com/TurmoilZoom/Moonward/releases); desde China continental también se pueden descargar en [CNB](https://cnb.cool/TurmoilZoom/Moonward/-/releases).
 
 Proyecto original: [Scighost/Starward](https://github.com/Scighost/Starward)  
 Agradecimientos: [CREDITS.md](../CREDITS.md) (proyectos de código abierto de referencia en funciones y diseño)  
