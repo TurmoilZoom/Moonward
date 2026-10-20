@@ -136,7 +136,7 @@ public sealed partial class GameBannerAndPost : UserControl
 
     /// <summary>
     /// 控制整个面板的可见性与命中测试。显示时需同时满足 Banner 与帖子均有数据，
-    /// 并恢复 <see cref="BannerCarousel"/> 自动轮播；隐藏时暂停轮播。
+    /// 并在主窗口显示着时恢复 <see cref="BannerCarousel"/> 自动轮播；隐藏时暂停轮播。
     /// </summary>
     public bool ShowBannerAndPost
     {
@@ -145,7 +145,16 @@ public sealed partial class GameBannerAndPost : UserControl
         {
             if (value && Banners?.Count > 0 && PostGroups?.Count > 0)
             {
-                BannerCarousel.ResumeAutoPlay();
+                // 内容可能在主窗口隐藏到托盘/最小化之后才加载完（重建轮播时会按默认状态直接开转），
+                // 这时不能当作窗口已激活去恢复，否则轮播会在看不见的窗口里一直转，见 MainWindow 激活消息处的说明
+                if (IsHostWindowShown())
+                {
+                    BannerCarousel.ResumeAutoPlay();
+                }
+                else
+                {
+                    BannerCarousel.PauseAutoPlay();
+                }
                 this.Opacity = 1;
                 this.IsHitTestVisible = true;
             }
@@ -158,6 +167,30 @@ public sealed partial class GameBannerAndPost : UserControl
         }
     }
 
+
+
+
+
+    /// <summary>
+    /// 宿主窗口当前是否显示在屏幕上（未隐藏到托盘、未最小化）。
+    /// </summary>
+    /// <returns>窗口可见且未最小化时为 <see langword="true"/>；尚未进入可视树或查询失败时也返回 <see langword="true"/>，保持原有行为。</returns>
+    private bool IsHostWindowShown()
+    {
+        try
+        {
+            if (XamlRoot is null)
+            {
+                return true;
+            }
+            nint hwnd = XamlRoot.GetWindowHandle();
+            return User32.IsWindowVisible(hwnd) && !User32.IsIconic(hwnd);
+        }
+        catch
+        {
+            return true;
+        }
+    }
 
 
 

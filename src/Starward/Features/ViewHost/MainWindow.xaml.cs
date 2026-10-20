@@ -295,6 +295,8 @@ public sealed partial class MainWindow : WindowEx
             CenterInScreen(1200, 676);
         }
         base.Show();
+        // 与正常恢复的顺序一致：先激活消息、后「从托盘恢复」消息
+        SendSkippedActivatedMessage();
         NotifyShownFromHidden();
     }
 
@@ -308,6 +310,7 @@ public sealed partial class MainWindow : WindowEx
         CenterInScreen(1200, 676);
         User32.SetCursorPos(AppWindow.Position.X + AppWindow.Size.Width / 2, AppWindow.Position.Y + AppWindow.Size.Height / 2);
         base.Show();
+        SendSkippedActivatedMessage();
         NotifyShownFromHidden();
     }
 
@@ -521,6 +524,47 @@ public sealed partial class MainWindow : WindowEx
     private DateTimeOffset _lastActivatedTime = DateTimeOffset.Now;
 
 
+    /// <summary>
+    /// 窗口不可见时收到过激活，激活消息被压下未广播。重新显示时据此补发一次，
+    /// 防止系统先激活后才把窗口显示出来时，背景视频与轮播停在暂停状态。
+    /// </summary>
+    private bool _activationSkippedWhileHidden;
+
+
+
+    /// <summary>
+    /// 广播主窗口激活消息（背景视频续播、轮播恢复、更新检查等据此响应），并记录本次激活时间。
+    /// </summary>
+    private void SendActivatedMessage()
+    {
+        _activationSkippedWhileHidden = false;
+        var now = DateTimeOffset.Now;
+        WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage
+        {
+            Activate = true,
+            CurrentTime = now,
+            LastActivatedTime = _lastActivatedTime,
+        });
+        _lastActivatedTime = now;
+    }
+
+
+
+    /// <summary>
+    /// 若此前的激活因窗口不可见被压下、而窗口现在已显示且是前台，补发激活消息。
+    /// 仍不可见（隐藏期间被激活）或没拿到前台时不补发，后者等用户点击窗口时的正常激活。
+    /// </summary>
+    private void SendSkippedActivatedMessage()
+    {
+        if (_activationSkippedWhileHidden
+            && User32.IsWindowVisible(WindowHandle)
+            && User32.GetForegroundWindow() == WindowHandle)
+        {
+            SendActivatedMessage();
+        }
+    }
+
+
 
     /// <summary>
     /// 窗口子类过程：处理非客户区命中测试、激活/锁屏/最小化、热键与可移动存储设备变更等系统消息。
@@ -555,15 +599,21 @@ public sealed partial class MainWindow : WindowEx
             // 窗口激活
             if (wParam is 0x1 or 0x2)
             {
-                // WA_ACTIVE or WA_CLICKACTIVE
-                var now = DateTimeOffset.Now;
-                WeakReferenceMessenger.Default.Send(new MainWindowStateChangedMessage
+                // WA_ACTIVE or WA_CLICKACTIVE（高位字非 0 表示最小化状态下被激活，本就不进这里）
+                if (User32.IsWindowVisible(hWnd))
                 {
-                    Activate = true,
-                    CurrentTime = now,
-                    LastActivatedTime = _lastActivatedTime,
-                });
-                _lastActivatedTime = now;
+                    SendActivatedMessage();
+                }
+                else
+                {
+                    // 隐藏到托盘后窗口仍可能被激活：WinUI 在持有焦点的元素被移除/禁用时会把焦点挪给下一个元素，
+                    // 顺带把顶层窗口激活成前台（microsoft-ui-xaml#8520），窗口却不会显示出来。
+                    // 此时若照常广播，轮播与视频背景会在看不见的窗口里恢复播放；上游 FlipView 轮播每切回第一张
+                    // 又会再抢一次前台，游戏中每隔「张数 × 5 秒」就丢一次键盘输入（Scighost/Starward#540、#1950）。
+                    _activationSkippedWhileHidden = true;
+                    // 若系统是先激活后显示（首次 Activate、从托盘恢复），同步流程走完窗口就可见了，到时补发
+                    DispatcherQueue.TryEnqueue(SendSkippedActivatedMessage);
+                }
             }
         }
         else if (uMsg == (uint)User32.WindowMessage.WM_SYSCOMMAND)
