@@ -138,6 +138,7 @@ public sealed partial class RecordRefreshConfigButton : UserControl
 
     /// <summary>
     /// 当前在浮层里编辑的月份（月报类板块）。切换后配置块改读对应月份的配置；其余板块恒为当月。
+    /// 打开浮层时若只开了其中一个月份，会先切到那个月份（<see cref="SyncMonthTarget"/>）。
     /// </summary>
     public RecordRefreshMonthTarget MonthTarget
     {
@@ -185,9 +186,36 @@ public sealed partial class RecordRefreshConfigButton : UserControl
 
     private void Flyout_Opening(object? sender, object e)
     {
+        SyncMonthTarget();
         // 后台可能刚写过 lastRun / 清过异常；不重载的话会显示旧值，改频率还会把成功记录盖掉
         JobPanel.Reload();
         UpdateErrorState();
+    }
+
+
+    /// <summary>
+    /// 打开浮层时定下要显示的月份（仅月报类板块）：只开了当月、上月其中一个时，直接切到开着的那个；
+    /// 两个都开或都没开，保持上次所选的月份（首次打开为当月）。
+    /// </summary>
+    private void SyncMonthTarget()
+    {
+        if (!IsMonthlyReportItem)
+        {
+            return;
+        }
+        if (GameRole is not null)
+        {
+            bool currentEnabled = RecordRefreshConfigStore.Load(GameRole, Item, RecordRefreshMonthTarget.Current).Enabled;
+            bool previousEnabled = RecordRefreshConfigStore.Load(GameRole, Item, RecordRefreshMonthTarget.Previous).Enabled;
+            if (currentEnabled != previousEnabled)
+            {
+                MonthTarget = currentEnabled ? RecordRefreshMonthTarget.Current : RecordRefreshMonthTarget.Previous;
+            }
+        }
+        // Segmented（8.2.250402）首次套模板时会把选中项还原成它见过的第一个非 -1 索引；
+        // XAML 里若写了 SelectedIndex="0"，第一次打开就会把这里切到的「上月」又拉回「当月」。
+        // 所以 XAML 不给初值，每次打开都由这里显式设一次，让它第一次见到的就是要显示的月份
+        Segmented_MonthTarget.SelectedIndex = (int)MonthTarget;
     }
 
 
