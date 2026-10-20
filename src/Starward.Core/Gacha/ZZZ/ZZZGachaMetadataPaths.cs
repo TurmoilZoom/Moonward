@@ -10,8 +10,11 @@ public static class ZZZGachaMetadataPaths
     /// <summary>托管元数据的 GitHub 仓库 owner（与发行说明同源）。</summary>
     public const string RepositoryOwner = "TurmoilZoom";
 
-    /// <summary>托管元数据的 GitHub 仓库名。</summary>
-    public const string RepositoryName = "Starward";
+    /// <summary>
+    /// 托管元数据的 GitHub 仓库名，即本仓库。旧名 Starward 靠 GitHub 改名重定向也能访问，
+    /// 但同一 owner 下一旦再出现名为 Starward 的仓库（如 fork 上游）重定向就失效，推送和 CDN 都会指错仓库。
+    /// </summary>
+    public const string RepositoryName = "Moonward";
 
     /// <summary>元数据所在分支。</summary>
     public const string Branch = "metadata";
