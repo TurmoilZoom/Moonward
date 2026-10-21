@@ -4383,4 +4383,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="ZZZGachaInfoWindow_PublishUnchanged" xml:space="preserve">
     <value>{0} file(s) already match the metadata branch; no new commit was made.</value>
   </data>
+  <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
+    <value>{0} language package(s) could not be fetched: {1}</value>
+  </data>
 </root>

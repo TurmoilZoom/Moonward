@@ -22,7 +22,8 @@ namespace Starward.Features.Gacha.ZZZGachaToolbox;
 /// </para>
 /// <para>
 /// 失败按 1、5、15、30 分钟、之后每小时重试；PAT 权限、没有可用账号、风控这类重试也好不了的问题改为每 2 小时再试。
-/// 重试都不越过下一次到点。同一期内已拉到的语言包会缓存，重试只补没拉到的，少打米哈游接口。
+/// 重试都不越过下一次到点。某个区服的账号失效或风控时只跳过这个区服，其余照常提交并算本期完成；
+/// 同期缓存在「一个包都没拿到」或提交 GitHub 失败重试时才派上用场，重试只补没拉到的。
 /// 软件没在运行（含托盘驻留）时不会提交，下次启动后补上。
 /// </para>
 /// </remarks>
@@ -446,9 +447,14 @@ internal sealed class ZZZGachaMetadataAutoPublishService
 
 
     /// <summary>
-    /// 拉齐全部语言包（复用本期缓存）后一次性提交。
+    /// 按计划拉取语言包（复用本期缓存）。某个区服失败时跳过该区服，只要还有拿到的包就提交，并算本期完成；
+    /// 一个包都没拿到时不提交。
     /// 「没有 PAT」「没有带 Cookie 的绝区零角色」按 <see cref="ZZZGachaMetadataAutoPublishOutcome.Blocked"/> 返回，不抛异常。
     /// </summary>
+    /// <param name="period">当前期，用于缓存归属。</param>
+    /// <param name="background">定时运行为 true：节奏放慢并给其他自动任务让路。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>有包时为已提交或内容一致；一个包都没拿到时为失败或受阻。</returns>
     private async Task<ZZZGachaMetadataAutoPublishResult> FetchAndPublishAsync(DateOnly period, bool background, CancellationToken cancellationToken)
     {
         if (!_publishService.HasStoredPat)
@@ -461,25 +467,50 @@ internal sealed class ZZZGachaMetadataAutoPublishService
             return new ZZZGachaMetadataAutoPublishResult(ZZZGachaMetadataAutoPublishOutcome.Blocked, Lang.GachaLogPage_PleaseLoginMiyousheAndAddZZZRole);
         }
 
-        Dictionary<string, IReadOnlyList<ZZZGachaInfo>> packages = await FetchAllAsync(plan, period, background, cancellationToken).ConfigureAwait(false);
-        if (packages.Count == 0)
+        FetchRoundResult fetched = await FetchAllAsync(plan, period, background, cancellationToken).ConfigureAwait(false);
+        if (fetched.Packages.Count == 0)
         {
+            if (fetched.Failures.Count > 0)
+            {
+                // 不提交；缓存留着，重试只补没拉到的
+                return CombineFailureResults(fetched.Failures);
+            }
             return new ZZZGachaMetadataAutoPublishResult(ZZZGachaMetadataAutoPublishOutcome.Failed, Lang.GachaLogPage_UpdateIconsNoItemData);
         }
 
-        ZZZGachaMetadataPublishResult publish = await _publishService.PublishAsync(packages, preserveExistingItems: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+        ZZZGachaMetadataPublishResult publish = await _publishService.PublishAsync(fetched.Packages, preserveExistingItems: true, cancellationToken: cancellationToken).ConfigureAwait(false);
         _fetchCache = null;
-        return publish.Unchanged
-            ? new ZZZGachaMetadataAutoPublishResult(ZZZGachaMetadataAutoPublishOutcome.Unchanged, string.Format(Lang.ZZZGachaInfoWindow_PublishUnchanged, publish.FileCount))
-            : new ZZZGachaMetadataAutoPublishResult(ZZZGachaMetadataAutoPublishOutcome.Published, string.Format(Lang.ZZZGachaInfoWindow_PublishSucceeded, publish.FileCount, publish.CommitSha));
+        string message = publish.Unchanged
+            ? string.Format(Lang.ZZZGachaInfoWindow_PublishUnchanged, publish.FileCount)
+            : string.Format(Lang.ZZZGachaInfoWindow_PublishSucceeded, publish.FileCount, publish.CommitSha);
+        if (fetched.Failures.Count > 0)
+        {
+            var reasons = new List<string>(fetched.Failures.Count);
+            foreach (Exception ex in fetched.Failures)
+            {
+                reasons.Add(ZZZGachaMetadataPublishService.FormatFetchError(ex));
+            }
+            message += " " + string.Format(Lang.ZZZGachaInfoWindow_PartialFetchFailed, fetched.MissingCount, JoinDistinct(reasons));
+            _logger.LogInformation("ZZZ gacha metadata auto publish finished with a partial fetch ({packageCount} package(s) fetched, {missingCount} request(s) missing).",
+                fetched.Packages.Count, fetched.MissingCount);
+        }
+        return new ZZZGachaMetadataAutoPublishResult(
+            publish.Unchanged ? ZZZGachaMetadataAutoPublishOutcome.Unchanged : ZZZGachaMetadataAutoPublishOutcome.Published,
+            message);
     }
 
 
     /// <summary>
-    /// 逐个请求拉取语言包。同一期内已完成的请求直接复用缓存；中途失败时已拉到的留在缓存里，重试只补剩下的。
+    /// 逐个请求拉取语言包。同一期内已完成的请求直接复用缓存。
+    /// 某个请求失败时记下异常，并跳过同一区服剩下的请求；失败或被跳过的请求不记入已完成。
     /// </summary>
-    /// <exception cref="miHoYoApiException">接口返回错误（风控、登录失效等）。</exception>
-    private async Task<Dictionary<string, IReadOnlyList<ZZZGachaInfo>>> FetchAllAsync(List<ZZZGachaMetadataFetchRequest> plan, DateOnly period, bool background, CancellationToken cancellationToken)
+    /// <param name="plan">获取计划。</param>
+    /// <param name="period">当前期，用于缓存归属。</param>
+    /// <param name="background">定时运行为 true。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>已拿到的语言包、本轮失败的异常，以及计划里仍未完成的请求数。</returns>
+    /// <exception cref="OperationCanceledException">调用方取消。接口错误不再抛出。</exception>
+    private async Task<FetchRoundResult> FetchAllAsync(List<ZZZGachaMetadataFetchRequest> plan, DateOnly period, bool background, CancellationToken cancellationToken)
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
         if (_fetchCache is not { } cache || cache.Period != period || now - cache.CreatedAt > FetchCacheLifetime)
@@ -488,6 +519,9 @@ internal sealed class ZZZGachaMetadataAutoPublishService
             _fetchCache = cache;
         }
 
+        var failures = new List<Exception>();
+        // 每个区服只选一个角色：Cookie 失效或风控时，剩下的语言注定还是失败，没必要继续打接口
+        var failedBizKeys = new HashSet<string>(StringComparer.Ordinal);
         // HoYoLAB 的语言是 HoyolabClient 上的共享状态，逐个语言切过去后要还原，免得界面之后的国际服请求变成最后一种语言
         string originalLanguage = _gameRecordService.Language;
         bool requested = false;
@@ -503,17 +537,34 @@ internal sealed class ZZZGachaMetadataAutoPublishService
                     {
                         continue;
                     }
+                    if (failedBizKeys.Contains(request.BizKey))
+                    {
+                        continue;
+                    }
                     if (requested)
                     {
                         await PaceAsync(background, cancellationToken).ConfigureAwait(false);
                     }
                     requested = true;
-                    (string key, List<ZZZGachaInfo>? list) = await _publishService.FetchPackageAsync(request, cancellationToken).ConfigureAwait(false);
-                    if (list is not null)
+                    try
                     {
-                        cache.Packages[key] = list;
+                        (string key, List<ZZZGachaInfo>? list) = await _publishService.FetchPackageAsync(request, cancellationToken).ConfigureAwait(false);
+                        if (list is not null)
+                        {
+                            cache.Packages[key] = list;
+                        }
+                        cache.CompletedRequests.Add(request.Key);
                     }
-                    cache.CompletedRequests.Add(request.Key);
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Fetch ZZZ gacha metadata package failed ({key}); skip the rest of {biz} this round.", request.Key, request.BizKey);
+                        failures.Add(ex);
+                        failedBizKeys.Add(request.BizKey);
+                    }
                 }
             }
         }
@@ -521,7 +572,16 @@ internal sealed class ZZZGachaMetadataAutoPublishService
         {
             _gameRecordService.Language = originalLanguage;
         }
-        return new Dictionary<string, IReadOnlyList<ZZZGachaInfo>>(cache.Packages, StringComparer.Ordinal);
+
+        int missingCount = 0;
+        foreach (ZZZGachaMetadataFetchRequest request in plan)
+        {
+            if (!cache.CompletedRequests.Contains(request.Key))
+            {
+                missingCount++;
+            }
+        }
+        return new FetchRoundResult(new Dictionary<string, IReadOnlyList<ZZZGachaInfo>>(cache.Packages, StringComparer.Ordinal), failures, missingCount);
     }
 
 
@@ -551,9 +611,9 @@ internal sealed class ZZZGachaMetadataAutoPublishService
         return ex switch
         {
             miHoYoApiException api when ZZZGachaMetadataPublishService.IsCultivateToolRiskControl(api.ReturnCode)
-                => new(ZZZGachaMetadataAutoPublishOutcome.Blocked, string.Format(Lang.GachaLogPage_UpdateIconsRiskControl, api.ReturnCode)),
+                => new(ZZZGachaMetadataAutoPublishOutcome.Blocked, ZZZGachaMetadataPublishService.FormatFetchError(ex)),
             miHoYoApiException api
-                => new(api.IsLoginExpired ? ZZZGachaMetadataAutoPublishOutcome.Blocked : ZZZGachaMetadataAutoPublishOutcome.Failed, FormatApiError(api)),
+                => new(api.IsLoginExpired ? ZZZGachaMetadataAutoPublishOutcome.Blocked : ZZZGachaMetadataAutoPublishOutcome.Failed, ZZZGachaMetadataPublishService.FormatFetchError(ex)),
             // 限流是 403 的子类，要排在 ForbiddenException 前面；它等一等就会恢复
             RateLimitExceededException or SecondaryRateLimitExceededException
                 => new(ZZZGachaMetadataAutoPublishOutcome.Failed, string.Format(Lang.ZZZGachaInfoWindow_PublishFailed, ex.Message)),
@@ -565,12 +625,54 @@ internal sealed class ZZZGachaMetadataAutoPublishService
 
 
     /// <summary>
-    /// 米哈游接口错误的展示文案。不用 ex.Message：它构造时已是「原文 (retcode)」，再拼会重复。
+    /// 一个包都没拿到时，把本轮各次失败合成一个结果。
     /// </summary>
-    private static string FormatApiError(miHoYoApiException ex)
+    /// <param name="failures">本轮实际抛出的异常。</param>
+    /// <returns>任一为 <see cref="ZZZGachaMetadataAutoPublishOutcome.Failed"/> 时整体按它返回（重试更快），否则为受阻；文案去重后用分号连接。</returns>
+    private static ZZZGachaMetadataAutoPublishResult CombineFailureResults(IReadOnlyList<Exception> failures)
     {
-        return string.IsNullOrWhiteSpace(ex.ResponseMessage) ? $"retcode={ex.ReturnCode}" : $"{ex.ResponseMessage} ({ex.ReturnCode})";
+        var outcome = ZZZGachaMetadataAutoPublishOutcome.Blocked;
+        var messages = new List<string>(failures.Count);
+        foreach (Exception ex in failures)
+        {
+            ZZZGachaMetadataAutoPublishResult result = ToFailureResult(ex);
+            // 只要有一次按退避能恢复，整体就按 Failed，重试比受阻更快
+            if (result.Outcome == ZZZGachaMetadataAutoPublishOutcome.Failed)
+            {
+                outcome = ZZZGachaMetadataAutoPublishOutcome.Failed;
+            }
+            messages.Add(result.Message);
+        }
+        return new ZZZGachaMetadataAutoPublishResult(outcome, JoinDistinct(messages));
     }
+
+
+    /// <summary>
+    /// 按首次出现的顺序去重，再用 <c>; </c> 连成一句。
+    /// </summary>
+    /// <param name="messages">各次失败的说明。</param>
+    /// <returns>去重后的说明。</returns>
+    private static string JoinDistinct(IEnumerable<string> messages)
+    {
+        var distinct = new List<string>();
+        foreach (string message in messages)
+        {
+            if (!distinct.Contains(message))
+            {
+                distinct.Add(message);
+            }
+        }
+        return string.Join("; ", distinct);
+    }
+
+
+    /// <summary>
+    /// 一轮拉取的结果。
+    /// </summary>
+    /// <param name="Packages">语言包键 → 物品列表（含本期缓存里已经拉到的）。</param>
+    /// <param name="Failures">本轮实际失败的异常；同一区服只记第一次。</param>
+    /// <param name="MissingCount">计划里本轮结束后仍未完成的请求数（失败的和被跳过的）。</param>
+    private sealed record FetchRoundResult(Dictionary<string, IReadOnlyList<ZZZGachaInfo>> Packages, IReadOnlyList<Exception> Failures, int MissingCount);
 
 
     /// <summary>

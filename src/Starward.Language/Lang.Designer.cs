@@ -11664,6 +11664,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 {0} language package(s) could not be fetched: {1} 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaInfoWindow_PartialFetchFailed {
+            get {
+                return ResourceManager.GetString("ZZZGachaInfoWindow_PartialFetchFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Saved {1} items ({0}) to database. 的本地化字符串。
         /// </summary>
         public static string ZZZGachaInfoWindow_SavedToDatabase {

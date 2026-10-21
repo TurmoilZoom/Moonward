@@ -165,6 +165,28 @@ internal sealed class ZZZGachaMetadataPublishService
 
 
     /// <summary>
+    /// 把获取元数据失败的异常整理成给用户看的说明。
+    /// </summary>
+    /// <param name="ex">获取时抛出的异常。</param>
+    /// <returns>
+    /// 风控用抽卡图标更新的风控文案；其他米哈游接口错误为返回消息与 retcode；其余异常为 <see cref="Exception.Message"/>。
+    /// </returns>
+    internal static string FormatFetchError(Exception ex)
+    {
+        if (ex is miHoYoApiException api)
+        {
+            if (IsCultivateToolRiskControl(api.ReturnCode))
+            {
+                return string.Format(Lang.GachaLogPage_UpdateIconsRiskControl, api.ReturnCode);
+            }
+            // 不用 ex.Message：构造时已是「原文 (retcode)」，再拼会重复
+            return string.IsNullOrWhiteSpace(api.ResponseMessage) ? $"retcode={api.ReturnCode}" : $"{api.ResponseMessage} ({api.ReturnCode})";
+        }
+        return ex.Message;
+    }
+
+
+    /// <summary>
     /// 发一次养成指南请求（badge → item_list + icon_info），得到一个语言包。
     /// </summary>
     /// <param name="request">要发的请求。</param>

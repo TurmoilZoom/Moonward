@@ -4473,4 +4473,7 @@
   <data name="ZZZGachaInfoWindow_PublishUnchanged" xml:space="preserve">
     <value>{0} 个文件与 metadata 分支上的内容一致，未产生新提交。</value>
   </data>
+  <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
+    <value>另有 {0} 个语言包没有获取到：{1}</value>
+  </data>
 </root>

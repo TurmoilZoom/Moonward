@@ -184,6 +184,7 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
     /// <summary>
     /// 使用本地战绩 Cookie 调用养成指南接口（badge → item_list + icon_info）。
     /// 国服写 nap_cn.zh-cn；国际服写 nap_global 下全部 UI 语言。
+    /// 某个区服失败时跳过它，继续拉另一个区服。
     /// </summary>
     [RelayCommand]
     private async Task FetchFromGameRecordAsync()
@@ -207,55 +208,91 @@ public sealed partial class ZZZGachaInfoWindow : WindowEx
 
             int languageCount = 0;
             int itemCount = 0;
+            int missingCount = 0;
+            // 每个区服只选一个角色：Cookie 失效或风控时，剩下的语言注定还是失败
+            var failedBizKeys = new HashSet<string>(StringComparer.Ordinal);
+            var failureMessages = new List<string>();
 
             foreach (ZZZGachaMetadataFetchRequest request in plan)
             {
                 cts.Token.ThrowIfCancellationRequested();
-                StatusMessage = string.Format(Lang.GachaLogPage_FetchingItemInfoLanguage, request.Key);
-
-                (string key, List<ZZZGachaInfo>? list) = await _metadataPublishService.FetchPackageAsync(request, cts.Token).ConfigureAwait(true);
-                if (list is null)
+                if (failedBizKeys.Contains(request.BizKey))
                 {
+                    missingCount++;
                     continue;
                 }
 
-                AddOrUpdateGachaInfoResult(key, list);
-                languageCount++;
-                itemCount = Math.Max(itemCount, list.Count);
-
-                // 全语言循环时轻微限流，降低 act 接口风控概率
-                if (request.IsGlobal)
+                StatusMessage = string.Format(Lang.GachaLogPage_FetchingItemInfoLanguage, request.Key);
+                try
                 {
-                    await Task.Delay(Random.Shared.Next(200, 300), cts.Token).ConfigureAwait(true);
+                    (string key, List<ZZZGachaInfo>? list) = await _metadataPublishService.FetchPackageAsync(request, cts.Token).ConfigureAwait(true);
+                    if (list is null)
+                    {
+                        continue;
+                    }
+
+                    AddOrUpdateGachaInfoResult(key, list);
+                    languageCount++;
+                    itemCount = Math.Max(itemCount, list.Count);
+
+                    // 全语言循环时轻微限流，降低 act 接口风控概率
+                    if (request.IsGlobal)
+                    {
+                        await Task.Delay(Random.Shared.Next(200, 300), cts.Token).ConfigureAwait(true);
+                    }
+                }
+                catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
+                {
+                    // 只有窗口关闭才算取消；HTTP 超时也是 TaskCanceledException，按这个区服失败处理
+                    throw;
+                }
+                catch (miHoYoApiException ex) when (ZZZGachaMetadataPublishService.IsCultivateToolRiskControl(ex.ReturnCode))
+                {
+                    // 10035 等是 act 极验风控，与战绩页「验证账号」无关；可改用网页登录抓包
+                    _logger.LogWarning(ex, "ZZZ cultivate tool risk control ({retcode}) in toolbox", ex.ReturnCode);
+                    failureMessages.Add(ZZZGachaMetadataPublishService.FormatFetchError(ex));
+                    failedBizKeys.Add(request.BizKey);
+                    missingCount++;
+                }
+                catch (miHoYoApiException ex)
+                {
+                    _logger.LogWarning(ex, "Fetch ZZZ gacha info from game record ({retcode})", ex.ReturnCode);
+                    failureMessages.Add(ZZZGachaMetadataPublishService.FormatFetchError(ex));
+                    failedBizKeys.Add(request.BizKey);
+                    missingCount++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Fetch ZZZ gacha info from game record");
+                    failureMessages.Add(ZZZGachaMetadataPublishService.FormatFetchError(ex));
+                    failedBizKeys.Add(request.BizKey);
+                    missingCount++;
                 }
             }
 
-            if (languageCount == 0)
+            string? failureText = failureMessages.Count == 0
+                ? null
+                : string.Join("; ", failureMessages.Distinct(StringComparer.Ordinal));
+            if (languageCount > 0)
             {
-                StatusMessage = Lang.GachaLogPage_UpdateIconsNoItemData;
+                StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_FetchSucceeded, languageCount, itemCount);
+                if (failureText is not null)
+                {
+                    StatusMessage += " " + string.Format(Lang.ZZZGachaInfoWindow_PartialFetchFailed, missingCount, failureText);
+                }
+            }
+            else if (failureText is not null)
+            {
+                StatusMessage = failureText;
             }
             else
             {
-                StatusMessage = string.Format(Lang.ZZZGachaInfoWindow_FetchSucceeded, languageCount, itemCount);
+                StatusMessage = Lang.GachaLogPage_UpdateIconsNoItemData;
             }
         }
         catch (OperationCanceledException)
         {
             StatusMessage = Lang.GachaLogPage_OperationCanceled;
-        }
-        catch (miHoYoApiException ex) when (ZZZGachaMetadataPublishService.IsCultivateToolRiskControl(ex.ReturnCode))
-        {
-            // 10035 等是 act 极验风控，与战绩页「验证账号」无关；可改用网页登录抓包
-            _logger.LogWarning(ex, "ZZZ cultivate tool risk control ({retcode}) in toolbox", ex.ReturnCode);
-            StatusMessage = string.Format(Lang.GachaLogPage_UpdateIconsRiskControl, ex.ReturnCode);
-        }
-        catch (miHoYoApiException ex)
-        {
-            // 勿用 ex.Message 再拼 ReturnCode：Message 构造时已是「原文 (retcode)」
-            _logger.LogWarning(ex, "Fetch ZZZ gacha info from game record ({retcode})", ex.ReturnCode);
-            StatusMessage = string.IsNullOrWhiteSpace(ex.ResponseMessage)
-                ? $"retcode={ex.ReturnCode}"
-                : $"{ex.ResponseMessage} ({ex.ReturnCode})";
         }
         catch (Exception ex)
         {
