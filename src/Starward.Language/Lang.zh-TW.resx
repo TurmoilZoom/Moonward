@@ -4388,4 +4388,25 @@
   <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
     <value>{0} language package(s) could not be fetched: {1}</value>
   </data>
+  <data name="AboutSetting_ReleaseNotes" xml:space="preserve">
+    <value>發行說明</value>
+  </data>
+  <data name="AboutSetting_LastChecked" xml:space="preserve">
+    <value>上次檢查：{0}</value>
+  </data>
+  <data name="AboutSetting_TodayAt" xml:space="preserve">
+    <value>今天 {0}</value>
+  </data>
+  <data name="AboutSetting_YesterdayAt" xml:space="preserve">
+    <value>昨天 {0}</value>
+  </data>
+  <data name="AboutSetting_CheckUpdateFailed" xml:space="preserve">
+    <value>無法檢查更新：{0}</value>
+  </data>
+  <data name="AboutSetting_UpdateDownloaded" xml:space="preserve">
+    <value>新版本 {0} 已下載，下次啟動時生效</value>
+  </data>
+  <data name="AboutSetting_RestartToInstall" xml:space="preserve">
+    <value>立即重新啟動安裝</value>
+  </data>
 </root>

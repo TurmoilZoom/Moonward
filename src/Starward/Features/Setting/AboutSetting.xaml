@@ -26,14 +26,20 @@
                            FontWeight="Bold"
                            Text="Moonward" />
 
-                <!--  当前版本  -->
+                <!--  当前版本 + 发行说明  -->
                 <StackPanel Margin="0,12,0,0"
                             Orientation="Horizontal"
                             Spacing="4">
-                    <TextBlock Text="{x:Bind lang:Lang.SettingPage_CurrentVersion}" />
-                    <TextBlock FontWeight="SemiBold"
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.SettingPage_CurrentVersion}" />
+                    <TextBlock VerticalAlignment="Center"
+                               FontWeight="SemiBold"
                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                Text="{x:Bind s:AppConfig.AppVersion}" />
+                    <HyperlinkButton Margin="8,0,0,0"
+                                     Padding="6,2,6,2"
+                                     VerticalAlignment="Center"
+                                     Click="Button_ReleaseNotes_Click"
+                                     Content="{x:Bind lang:Lang.AboutSetting_ReleaseNotes}" />
                 </StackPanel>
 
                 <!--  预览版 / 推送更新 / 静默更新：静默是推送的子选项  -->
@@ -61,8 +67,7 @@
                 <Grid Margin="0,12,0,0" ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <!--  检查更新  -->
                     <Button Height="40"
@@ -76,26 +81,34 @@
                             <TextBlock Text="{x:Bind lang:Lang.SettingPage_CheckForUpdate}" />
                         </StackPanel>
                     </Button>
-                    <!--  已是最新版本  -->
-                    <TextBlock Grid.Column="1"
-                               HorizontalAlignment="Left"
-                               VerticalAlignment="Center"
-                               Visibility="{x:Bind LatestVersion, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.AboutSetting_UpdatedToTheLatestVersion}" />
-                        <Run Text="" />
-                        <Run Foreground="{ThemeResource SystemFillColorSuccessBrush}" Text="{x:Bind LatestVersion}" />
-                    </TextBlock>
+                    <!--  更新状态（已是最新 / 有新版本 / 已下载待安装 / 检查失败）+ 上次成功检查的时间；检查中两行都清空，只显示转圈  -->
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Spacing="2">
+                        <TextBlock HorizontalAlignment="Left"
+                                   TextWrapping="Wrap"
+                                   Visibility="{x:Bind UpdateStatusText, Converter={StaticResource ObjectToVisibilityConverter}}">
+                            <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind UpdateStatusText}" />
+                            <Run Text="" />
+                            <Run Foreground="{ThemeResource SystemFillColorSuccessBrush}" Text="{x:Bind LatestVersion}" />
+                        </TextBlock>
+                        <TextBlock HorizontalAlignment="Left"
+                                   FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                   Text="{x:Bind LastCheckedText}"
+                                   Visibility="{x:Bind LastCheckedText, Converter={StaticResource ObjectToVisibilityConverter}}" />
+                        <!--  已下载待安装：立即重启安装  -->
+                        <Button Margin="0,6,0,0"
+                                Command="{x:Bind RestartToInstallCommand}"
+                                Content="{x:Bind lang:Lang.AboutSetting_RestartToInstall}"
+                                Visibility="{x:Bind PendingInstallVersion, Converter={StaticResource ObjectToVisibilityConverter}}" />
+                    </StackPanel>
                     <ProgressRing Grid.Column="1"
                                   Width="20"
                                   Height="20"
                                   HorizontalAlignment="Left"
                                   IsIndeterminate="{x:Bind CheckUpdateCommand.IsRunning}"
                                   Visibility="{x:Bind CheckUpdateCommand.IsRunning}" />
-                    <TextBlock Grid.Column="1"
-                               VerticalAlignment="Center"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind UpdateErrorText}"
-                               TextWrapping="Wrap" />
                 </Grid>
 
                 <!--  相关链接  -->

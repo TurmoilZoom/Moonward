@@ -4382,4 +4382,25 @@ You are welcome to submit exported data to:</value>
   <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
     <value>{0} language package(s) could not be fetched: {1}</value>
   </data>
+  <data name="AboutSetting_ReleaseNotes" xml:space="preserve">
+    <value>บันทึกประจำรุ่น</value>
+  </data>
+  <data name="AboutSetting_LastChecked" xml:space="preserve">
+    <value>ตรวจสอบล่าสุด: {0}</value>
+  </data>
+  <data name="AboutSetting_TodayAt" xml:space="preserve">
+    <value>วันนี้ เวลา {0}</value>
+  </data>
+  <data name="AboutSetting_YesterdayAt" xml:space="preserve">
+    <value>เมื่อวาน เวลา {0}</value>
+  </data>
+  <data name="AboutSetting_CheckUpdateFailed" xml:space="preserve">
+    <value>ไม่สามารถตรวจสอบการอัปเดต: {0}</value>
+  </data>
+  <data name="AboutSetting_UpdateDownloaded" xml:space="preserve">
+    <value>ดาวน์โหลดเวอร์ชัน {0} แล้ว จะมีผลเมื่อเปิดแอปครั้งถัดไป</value>
+  </data>
+  <data name="AboutSetting_RestartToInstall" xml:space="preserve">
+    <value>รีสตาร์ทเพื่อติดตั้ง</value>
+  </data>
 </root>

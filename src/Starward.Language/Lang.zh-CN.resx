@@ -4476,4 +4476,25 @@
   <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
     <value>另有 {0} 个语言包没有获取到：{1}</value>
   </data>
+  <data name="AboutSetting_ReleaseNotes" xml:space="preserve">
+    <value>发行说明</value>
+  </data>
+  <data name="AboutSetting_LastChecked" xml:space="preserve">
+    <value>上次检查：{0}</value>
+  </data>
+  <data name="AboutSetting_TodayAt" xml:space="preserve">
+    <value>今天 {0}</value>
+  </data>
+  <data name="AboutSetting_YesterdayAt" xml:space="preserve">
+    <value>昨天 {0}</value>
+  </data>
+  <data name="AboutSetting_CheckUpdateFailed" xml:space="preserve">
+    <value>无法检查更新：{0}</value>
+  </data>
+  <data name="AboutSetting_UpdateDownloaded" xml:space="preserve">
+    <value>新版本 {0} 已下载，下次启动时生效</value>
+  </data>
+  <data name="AboutSetting_RestartToInstall" xml:space="preserve">
+    <value>立即重启安装</value>
+  </data>
 </root>

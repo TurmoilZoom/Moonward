@@ -4388,4 +4388,25 @@ You are welcome to submit exported data to:</value>
   <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
     <value>{0} language package(s) could not be fetched: {1}</value>
   </data>
+  <data name="AboutSetting_ReleaseNotes" xml:space="preserve">
+    <value>Notas de la versión</value>
+  </data>
+  <data name="AboutSetting_LastChecked" xml:space="preserve">
+    <value>Última comprobación: {0}</value>
+  </data>
+  <data name="AboutSetting_TodayAt" xml:space="preserve">
+    <value>Hoy a las {0}</value>
+  </data>
+  <data name="AboutSetting_YesterdayAt" xml:space="preserve">
+    <value>Ayer a las {0}</value>
+  </data>
+  <data name="AboutSetting_CheckUpdateFailed" xml:space="preserve">
+    <value>No se pudieron buscar actualizaciones: {0}</value>
+  </data>
+  <data name="AboutSetting_UpdateDownloaded" xml:space="preserve">
+    <value>La versión {0} se ha descargado y se aplicará en el próximo inicio.</value>
+  </data>
+  <data name="AboutSetting_RestartToInstall" xml:space="preserve">
+    <value>Reiniciar e instalar</value>
+  </data>
 </root>

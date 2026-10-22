@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:WindowEx x:Class="Starward.Features.Update.ReleaseNotesWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
+             xmlns:local="using:Starward.Features.Update"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sf="using:Starward.Frameworks"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid" Loaded="RootGrid_Loaded">
+        <Grid.Resources>
+            <!--  左侧菜单项的内容；菜单项由代码按分组生成（悬停高亮条只认 MenuItems 里的 NavigationViewItem），模板放这里以便 ThemeResource 跟随本窗口主题  -->
+            <DataTemplate x:Key="GroupItemTemplate" x:DataType="local:ReleaseNotesGroup">
+                <StackPanel Padding="0,6,0,6" Spacing="2">
+                    <TextBlock FontSize="16"
+                               FontWeight="SemiBold"
+                               Text="{x:Bind Key, Mode=OneTime}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind Subtitle, Mode=OneTime}" />
+                </StackPanel>
+            </DataTemplate>
+        </Grid.Resources>
+
+        <!--  左侧按「主版本.次版本」分组；与设置页一样用流体悬停高亮条（FluidNavigationViewHoverEffect）+ 自带选中指示条。顶部 40 留给标题栏  -->
+        <NavigationView x:Name="NavView"
+                        Margin="0,40,0,0"
+                        IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False"
+                        IsSettingsVisible="False"
+                        OpenPaneLength="232"
+                        PaneDisplayMode="Left"
+                        SelectionChanged="NavView_SelectionChanged">
+            <NavigationView.Resources>
+                <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+                <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
+                <Thickness x:Key="NavigationViewContentMargin">0</Thickness>
+                <Thickness x:Key="NavigationViewHeaderMargin">0</Thickness>
+                <x:Double x:Key="PaneToggleButtonHeight">0</x:Double>
+                <!--  悬停 / 按下的内置背景由流体高亮条接管，同设置页  -->
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="Transparent" />
+                <!--  菜单项是两行（版本 + 年月），默认 3×16 的选中指示条相对 50 高的项太小，按设置页的比例加高  -->
+                <x:Double x:Key="NavigationViewSelectionIndicatorHeight">24</x:Double>
+            </NavigationView.Resources>
+
+            <NavigationView.PaneHeader>
+                <TextBlock Margin="16,0,0,8"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           Text="{x:Bind lang:Lang.AboutSetting_ReleaseNotes}" />
+            </NavigationView.PaneHeader>
+
+            <!--  列表只取最近几个月，更早的版本去 GitHub 看  -->
+            <NavigationView.PaneFooter>
+                <HyperlinkButton Margin="8,8,8,12"
+                                 Content="{x:Bind lang:Lang.SettingPage_ReleaseHistroy}"
+                                 NavigateUri="https://github.com/TurmoilZoom/Moonward/releases" />
+            </NavigationView.PaneFooter>
+
+            <!--  右侧说明正文  -->
+            <Grid>
+                <Border Background="{ThemeResource LayerOnAcrylicFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1,1,0,0"
+                        CornerRadius="8,0,0,0" />
+
+                <!--  首次加载  -->
+                <ProgressRing x:Name="ProgressRing_Loading"
+                              Width="32"
+                              Height="32"
+                              IsActive="True" />
+
+                <!--  加载出错  -->
+                <StackPanel x:Name="StackPanel_Error"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="24"
+                            Visibility="Collapsed">
+                    <TextBlock x:Name="TextBlock_Error"
+                               HorizontalAlignment="Center"
+                               FontSize="16"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap" />
+                    <Button Height="36"
+                            HorizontalAlignment="Center"
+                            BorderThickness="0"
+                            Command="{x:Bind RetryCommand}"
+                            CornerRadius="18">
+                        <TextBlock Margin="8,0,8,0"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind lang:Lang.DownloadGamePage_Retry}" />
+                    </Button>
+                </StackPanel>
+
+                <!--  webview2：只加载一次外壳页，各分组竖排成一列，切换时由脚本竖直平移（同上游游戏设置弹窗竖排的 FlipView）  -->
+                <WebView2 x:Name="webview"
+                          Margin="1,1,0,0"
+                          DefaultBackgroundColor="Transparent"
+                          IsTabStop="False"
+                          Visibility="Collapsed">
+                    <WebView2.Resources>
+                        <SolidColorBrush x:Key="BrushForThemeBackgroundColor" Color="Transparent" />
+                    </WebView2.Resources>
+                </WebView2>
+            </Grid>
+        </NavigationView>
+
+        <!--  流体悬停高亮条宿主：覆盖在导航窗格之上承载 Composition 高亮条，IsHitTestVisible=False 让指针穿透到菜单项（同设置页）  -->
+        <Grid x:Name="NavIndicatorHost"
+              Width="232"
+              Margin="0,40,0,0"
+              HorizontalAlignment="Left"
+              IsHitTestVisible="False" />
+
+    </Grid>
+
+</sf:WindowEx>

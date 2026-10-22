@@ -733,79 +733,16 @@ public sealed partial class UpdateWindow : WindowEx
     {
         stringBuilder.AppendLine($"# {release.Name}");
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine(release.Body);
+        stringBuilder.AppendLine(ReleaseNotesFormatter.StripAppendedDownloads(release.Body));
         stringBuilder.AppendLine("<br>");
         stringBuilder.AppendLine();
     }
 
 
 
-    private async Task<string> RenderMarkdownAsync(string markdown)
+    private Task<string> RenderMarkdownAsync(string markdown)
     {
-        string html = await _releaseClient.RenderGithubMarkdownAsync(markdown);
-        var cssFile = Path.Combine(AppContext.BaseDirectory, @"Assets\CSS\github-markdown.css");
-        string? css = null;
-        if (File.Exists(cssFile))
-        {
-            css = await File.ReadAllTextAsync(cssFile);
-            css = $"<style>{css}</style>";
-        }
-        else
-        {
-            css = """<link href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css" type="text/css" rel="stylesheet" />""";
-        }
-        return $$"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <base target="_blank">
-              {{css}}
-              <style>
-                @media (prefers-color-scheme: light) {
-                  ::-webkit-scrollbar {
-                    width: 6px
-                  }
-                  ::-webkit-scrollbar-thumb {
-                    background-color: #b8b8b8;
-                    border-radius: 1000px 0px 0px 1000px
-                  }
-                  ::-webkit-scrollbar-thumb:hover {
-                    background-color: #8b8b8b
-                  }
-                }
-                @media (prefers-color-scheme: dark) {
-                  ::-webkit-scrollbar {
-                    width: 6px
-                  }
-                  ::-webkit-scrollbar-thumb {
-                    background-color: #646464;
-                    border-radius: 1000px 0px 0px 1000px
-                  }
-                  ::-webkit-scrollbar-thumb:hover {
-                    background-color: #8b8b8b
-                  }
-                }
-              </style>
-            </head>
-            <body style="margin: 12px 24px 12px 24px; overflow-x: hidden;">
-              <article class="markdown-body" style="background: transparent;">
-                {{html}}
-              </article>
-              <script>
-                document.querySelectorAll('img[data-canonical-src]').forEach(img => {
-                  const canonical = img.getAttribute('data-canonical-src');
-                  if (canonical) {
-                    img.src = canonical;
-                  }
-                  const parent = img.parentElement;
-                  if (parent && parent.tagName.toLowerCase() === 'a') {
-                    parent.href = canonical;
-                  }
-                });
-              </script>
-            </body>
-            </html>
-            """;
+        return ReleaseNotesHtml.BuildPageAsync(_releaseClient, markdown);
     }
 
 

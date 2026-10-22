@@ -4388,4 +4388,25 @@
   <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
     <value>{0} language package(s) could not be fetched: {1}</value>
   </data>
+  <data name="AboutSetting_ReleaseNotes" xml:space="preserve">
+    <value>릴리스 노트</value>
+  </data>
+  <data name="AboutSetting_LastChecked" xml:space="preserve">
+    <value>마지막 확인: {0}</value>
+  </data>
+  <data name="AboutSetting_TodayAt" xml:space="preserve">
+    <value>오늘 {0}</value>
+  </data>
+  <data name="AboutSetting_YesterdayAt" xml:space="preserve">
+    <value>어제 {0}</value>
+  </data>
+  <data name="AboutSetting_CheckUpdateFailed" xml:space="preserve">
+    <value>업데이트를 확인할 수 없습니다: {0}</value>
+  </data>
+  <data name="AboutSetting_UpdateDownloaded" xml:space="preserve">
+    <value>버전 {0}이(가) 다운로드되었으며 다음 실행 시 적용됩니다.</value>
+  </data>
+  <data name="AboutSetting_RestartToInstall" xml:space="preserve">
+    <value>다시 시작하여 설치</value>
+  </data>
 </root>

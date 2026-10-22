@@ -4387,4 +4387,25 @@
   <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
     <value>{0} language package(s) could not be fetched: {1}</value>
   </data>
+  <data name="AboutSetting_ReleaseNotes" xml:space="preserve">
+    <value>リリースノート</value>
+  </data>
+  <data name="AboutSetting_LastChecked" xml:space="preserve">
+    <value>最終確認：{0}</value>
+  </data>
+  <data name="AboutSetting_TodayAt" xml:space="preserve">
+    <value>今日 {0}</value>
+  </data>
+  <data name="AboutSetting_YesterdayAt" xml:space="preserve">
+    <value>昨日 {0}</value>
+  </data>
+  <data name="AboutSetting_CheckUpdateFailed" xml:space="preserve">
+    <value>アップデートを確認できませんでした：{0}</value>
+  </data>
+  <data name="AboutSetting_UpdateDownloaded" xml:space="preserve">
+    <value>バージョン {0} はダウンロード済みです。次回起動時に適用されます。</value>
+  </data>
+  <data name="AboutSetting_RestartToInstall" xml:space="preserve">
+    <value>再起動してインストール</value>
+  </data>
 </root>

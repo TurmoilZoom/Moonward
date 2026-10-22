@@ -1,14 +1,17 @@
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
 using Starward.Controls;
 using Starward.Features.Feedback;
+using Starward.Features.RPC;
 using Starward.Features.Update;
 using Starward.Frameworks;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 
 
@@ -36,6 +39,12 @@ public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
     protected override void OnLoaded()
     {
         Lottie_AboutLogo.SetProgress(0);
+        // 主窗口激活、托盘常驻循环的后台检查与静默下载也会改变状态，页面开着时跟着刷新
+        if (!WeakReferenceMessenger.Default.IsRegistered<UpdateStatusChangedMessage>(this))
+        {
+            WeakReferenceMessenger.Default.Register<UpdateStatusChangedMessage>(this, (_, _) => DispatcherQueue.TryEnqueue(() => RefreshUpdateStatus()));
+        }
+        RefreshUpdateStatus();
     }
 
 
@@ -62,6 +71,7 @@ public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
     protected override void OnUnloaded()
     {
         Lottie_AboutLogo.Stop();
+        WeakReferenceMessenger.Default.Unregister<UpdateStatusChangedMessage>(this);
     }
 
 
@@ -136,15 +146,33 @@ public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
 
 
     /// <summary>
-    /// 是最新版
+    /// 更新状态文本：已是最新 / 有新版本 / 已下载待安装 / 检查失败；没有可显示的结果时为 null。
+    /// </summary>
+    public string? UpdateStatusText { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>
+    /// 已是最新时跟在状态文本后、以成功色显示的当前版本号；其他状态为 null。
     /// </summary>
     public string? LatestVersion { get; set => SetProperty(ref field, value); }
 
 
     /// <summary>
-    /// 更新错误文本
+    /// 「上次检查：…」，取上次成功检查的时间（后台检查也算）；从未成功检查过为 null。
     /// </summary>
-    public string? UpdateErrorText { get; set => SetProperty(ref field, value); }
+    public string? LastCheckedText { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>
+    /// 已下载、等待安装的新版本号；不为 null 时显示「立即重启安装」。
+    /// </summary>
+    public string? PendingInstallVersion { get; set => SetProperty(ref field, value); }
+
+
+    /// <summary>
+    /// 手动检查得到、但 <see cref="UpdateService"/> 不记录的提示（如非 Velopack 部署无法检查）。
+    /// </summary>
+    private string? _manualCheckMessage;
 
 
     /// <summary>
@@ -154,11 +182,14 @@ public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
     [RelayCommand]
     private async Task CheckUpdateAsync()
     {
+        var service = AppConfig.GetService<UpdateService>();
+        _manualCheckMessage = null;
+        UpdateStatusText = null;
+        LatestVersion = null;
+        LastCheckedText = null;
+        PendingInstallVersion = null;
         try
         {
-            LatestVersion = null;
-            UpdateErrorText = null;
-            var service = AppConfig.GetService<UpdateService>();
             var release = await service.GetLatestVersionAsync();
             if (release is not null)
             {
@@ -168,21 +199,120 @@ public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
                     new UpdateWindow { NewVersion = release }.Activate();
                 }
             }
-            else if (service.IsUpdaterAvailable)
-            {
-                // 已是最新版本
-                LatestVersion = AppConfig.AppVersion;
-            }
-            else
+            else if (!service.IsUpdaterAvailable)
             {
                 // 非 Velopack 部署（开发态/裸发布目录），无法检查更新
-                UpdateErrorText = Lang.UpdateService_CannotUpdateAutomatically;
+                _manualCheckMessage = Lang.UpdateService_CannotUpdateAutomatically;
             }
         }
         catch (Exception ex)
         {
-            UpdateErrorText = UpdateService.GetDisplayErrorMessage(ex);
+            // 向更新源检查失败时 UpdateService 已记下提示，其余异常（如创建更新管理器失败）在这里补上
+            if (service.LastCheckErrorMessage is null)
+            {
+                _manualCheckMessage = UpdateService.GetDisplayErrorMessage(ex);
+            }
             _logger.LogError(ex, "Check update");
+        }
+        RefreshUpdateStatus(ignoreRunning: true);
+    }
+
+
+    /// <summary>
+    /// 按 <see cref="UpdateService"/> 记下的结果刷新状态区。优先级：已下载待安装 &gt; 手动检查的提示 &gt; 检查失败 &gt; 有新版本 &gt; 已是最新。
+    /// </summary>
+    /// <param name="ignoreRunning">手动检查结束时传 true；其余时候手动检查还在跑就不动，等它结束再刷新，免得状态与转圈同时出现。</param>
+    private void RefreshUpdateStatus(bool ignoreRunning = false)
+    {
+        if (!ignoreRunning && CheckUpdateCommand.IsRunning)
+        {
+            return;
+        }
+        var service = AppConfig.GetService<UpdateService>();
+        string? pendingVersion = service.GetPendingInstallVersion();
+        string? statusText = null;
+        string? latestVersion = null;
+        if (pendingVersion is not null)
+        {
+            statusText = string.Format(Lang.AboutSetting_UpdateDownloaded, pendingVersion);
+        }
+        else if (_manualCheckMessage is not null)
+        {
+            statusText = _manualCheckMessage;
+        }
+        else if (service.LastCheckErrorMessage is not null)
+        {
+            statusText = string.Format(Lang.AboutSetting_CheckUpdateFailed, service.LastCheckErrorMessage);
+        }
+        else if (service.LastFoundVersion is not null)
+        {
+            statusText = string.Format(Lang.AboutSettingPage_CurrentVersionIsNotTheLatestVersion, service.LastFoundVersion);
+        }
+        else if (service.HasCheckedSuccessfully)
+        {
+            statusText = Lang.AboutSetting_UpdatedToTheLatestVersion;
+            latestVersion = AppConfig.AppVersion;
+        }
+        UpdateStatusText = statusText;
+        LatestVersion = latestVersion;
+        PendingInstallVersion = pendingVersion;
+        LastCheckedText = AppConfig.LastUpdateCheckTime is DateTimeOffset time ? string.Format(Lang.AboutSetting_LastChecked, FormatCheckTime(time)) : null;
+    }
+
+
+    /// <summary>
+    /// 把检查时间格式化为「今天 14:32」「昨天 09:10」，更早的显示完整日期。
+    /// </summary>
+    /// <param name="time">检查时间。</param>
+    /// <returns>本地时间文本。</returns>
+    private static string FormatCheckTime(DateTimeOffset time)
+    {
+        DateTime local = time.LocalDateTime;
+        string clock = local.ToString("HH:mm", CultureInfo.CurrentUICulture);
+        if (local.Date == DateTime.Today)
+        {
+            return string.Format(Lang.AboutSetting_TodayAt, clock);
+        }
+        if (local.Date == DateTime.Today.AddDays(-1))
+        {
+            return string.Format(Lang.AboutSetting_YesterdayAt, clock);
+        }
+        return local.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentUICulture);
+    }
+
+
+    /// <summary>
+    /// 安装已下载的更新并重启。关于页安装的多是静默下载的包，用户还没看过说明，重启后照常弹出「最近更新内容」。
+    /// </summary>
+    [RelayCommand]
+    private void RestartToInstall()
+    {
+        try
+        {
+            // 确保 RPC 子进程随主进程退出，避免占用 current 目录导致 Velopack 替换文件失败。
+            AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);
+            AppConfig.GetService<UpdateService>().ApplyAndRestart(showUpdateContentAfterRestart: true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Apply update and restart");
+            UpdateStatusText = ex.Message;
+        }
+    }
+
+
+    /// <summary>
+    /// 打开发行说明窗口。
+    /// </summary>
+    private void Button_ReleaseNotes_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            ReleaseNotesWindow.ShowOrActivate();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Open release notes window");
         }
     }
 

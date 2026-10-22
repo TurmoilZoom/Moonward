@@ -125,6 +125,21 @@ internal class UpdateService
     public UpdateDownloadSource LastCheckSource { get; private set; } = UpdateDownloadSource.Cnb;
 
     /// <summary>
+    /// 本进程内最近一次检查更新失败的提示文本；之后检查成功即清空。供关于页显示后台检查的结果。
+    /// </summary>
+    public string? LastCheckErrorMessage { get; private set; }
+
+    /// <summary>
+    /// 本进程内最近一次成功检查发现的新版本号（不过滤「忽略此版本」）；已是最新为 null。
+    /// </summary>
+    public string? LastFoundVersion { get; private set; }
+
+    /// <summary>
+    /// 本进程内是否已有一次检查成功完成。为 false 时 <see cref="LastFoundVersion"/> 为 null 不代表已是最新。
+    /// </summary>
+    public bool HasCheckedSuccessfully { get; private set; }
+
+    /// <summary>
     /// 距上次检查是否已超过 <see cref="CheckInterval"/>。
     /// </summary>
     public bool IsCheckDue => DateTimeOffset.UtcNow.UtcTicks - Interlocked.Read(ref _lastCheckTicks) > CheckInterval.Ticks;
@@ -147,6 +162,30 @@ internal class UpdateService
                 _logger.LogWarning(ex, "Check updater available");
                 return false;
             }
+        }
+    }
+
+
+
+    /// <summary>
+    /// 已下载、等待安装的新版本号：本次会话下载完成的，或之前留在本地还没装上的包（退出时正好有游戏在记录时长等）。
+    /// </summary>
+    /// <returns>版本号；没有待装的包或不是 Velopack 部署时为 null。</returns>
+    public string? GetPendingInstallVersion()
+    {
+        if (UpdateFinished)
+        {
+            return _downloadedUpdate?.TargetFullRelease?.Version?.ToString();
+        }
+        try
+        {
+            var manager = GetManager();
+            return manager.IsInstalled ? manager.UpdatePendingRestart?.Version?.ToString() : null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get pending update");
+            return null;
         }
     }
 
@@ -243,23 +282,42 @@ internal class UpdateService
 
     /// <summary>
     /// 真正向更新源发起一次检查，并记录当前/最新版本。CNB 被限流(429)时自动回落到 GitHub 源。
+    /// 无论成功失败都记下结果（<see cref="LastCheckErrorMessage"/> 等）并发出 <see cref="UpdateStatusChangedMessage"/>，
+    /// 主窗口、托盘与常驻循环的检查都走这里，关于页据此显示后台检查的状态。
     /// </summary>
+    /// <param name="manager">CNB 源的更新管理器。</param>
+    /// <returns>可更新的版本信息；已是最新时为 null。</returns>
+    /// <exception cref="Exception">CNB（及回落的 GitHub）检查失败时原样抛出。</exception>
     private async Task<UpdateInfo?> CheckForUpdatesCoreAsync(UpdateManager manager)
     {
         UpdateInfo? info;
         try
         {
-            info = await manager.CheckForUpdatesAsync();
-            LastCheckSource = UpdateDownloadSource.Cnb;
+            try
+            {
+                info = await manager.CheckForUpdatesAsync();
+                LastCheckSource = UpdateDownloadSource.Cnb;
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode is HttpStatusCode.TooManyRequests)
+            {
+                // CNB 匿名接口限流 20 次/分钟，被限流时整个检查会失败；GitHub 源的资产托管在 CDN 上，可作为备用。
+                _logger.LogWarning(ex, "CNB update source is rate limited, fall back to GitHub.");
+                info = await CheckFromGitHubOrRethrowAsync(ex);
+            }
         }
-        catch (HttpRequestException ex) when (ex.StatusCode is HttpStatusCode.TooManyRequests)
+        catch (Exception ex)
         {
-            // CNB 匿名接口限流 20 次/分钟，被限流时整个检查会失败；GitHub 源的资产托管在 CDN 上，可作为备用。
-            _logger.LogWarning(ex, "CNB update source is rate limited, fall back to GitHub.");
-            info = await CheckFromGitHubOrRethrowAsync(ex);
+            LastCheckErrorMessage = GetDisplayErrorMessage(ex);
+            UpdateStatusChangedMessage.Send();
+            throw;
         }
         _logger.LogInformation("Current version: {currentVersion}, latest version: {latestVersion}, source: {source}.",
                                manager.CurrentVersion, info?.TargetFullRelease?.Version, LastCheckSource);
+        LastFoundVersion = info?.TargetFullRelease?.Version?.ToString();
+        LastCheckErrorMessage = null;
+        HasCheckedSuccessfully = true;
+        AppConfig.LastUpdateCheckTime = DateTimeOffset.Now;
+        UpdateStatusChangedMessage.Send();
         return info;
     }
 
@@ -367,6 +425,7 @@ internal class UpdateService
             // 退出时需要替换 current\，RPC 不能在主进程退出后继续占用文件
             AppConfig.GetService<RpcService>().KeepRunningOnExited(false, noLongerChange: true);
             _logger.LogInformation("Update downloaded from {source}: {version}", source, updateInfo.TargetFullRelease?.Version);
+            UpdateStatusChangedMessage.Send();
         }
         catch (OperationCanceledException)
         {
@@ -509,15 +568,18 @@ internal class UpdateService
     /// 应用已下载的更新并重启应用（由 Velopack 的 Update.exe 完成文件替换后重启）。
     /// 调用前应确保后台子进程（如 RPC）会随主进程退出。
     /// </summary>
-    public void ApplyAndRestart()
+    /// <param name="showUpdateContentAfterRestart">
+    /// 重启后是否弹出「最近更新内容」。更新窗口里已经看过说明，传 false；
+    /// 关于页安装的多是静默下载的包，用户还没看过说明，传 true。
+    /// </param>
+    public void ApplyAndRestart(bool showUpdateContentAfterRestart = false)
     {
         var manager = GetManager(_lastDownloadSource);
         if (!manager.IsInstalled)
         {
             return;
         }
-        // 从更新窗口重启视为手动更新，不在下次启动弹出更新内容
-        AppConfig.PendingSilentUpdateContent = false;
+        AppConfig.PendingSilentUpdateContent = showUpdateContentAfterRestart;
         // _downloadedUpdate 为 null 时（如重开更新窗口）传 null，Velopack 会应用已下载/暂存的最新包。
         _logger.LogInformation("Apply update and restart: {version}", _downloadedUpdate?.TargetFullRelease?.Version);
         manager.ApplyUpdatesAndRestart(_downloadedUpdate?.TargetFullRelease);

@@ -66,6 +66,16 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 上次成功检查更新的时间（失败不记），供关于页显示「上次检查」。
+    /// 存 Unix 毫秒：<see cref="SetValue{T}"/> 用 ToString() 持久化，<see cref="DateTimeOffset"/> 会跟随系统区域格式，换区域后就解析不回来。
+    /// </summary>
+    public static DateTimeOffset? LastUpdateCheckTime
+    {
+        get => GetValue<long>() is > 0 and var ms ? DateTimeOffset.FromUnixTimeMilliseconds(ms) : null;
+        set => SetValue(value?.ToUnixTimeMilliseconds());
+    }
+
     public static string? IgnoreVersion
     {
         get => GetValue<string>();

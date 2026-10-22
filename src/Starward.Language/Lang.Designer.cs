@@ -70,6 +70,69 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Release notes 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_ReleaseNotes {
+            get {
+                return ResourceManager.GetString("AboutSetting_ReleaseNotes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Last checked: {0} 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_LastChecked {
+            get {
+                return ResourceManager.GetString("AboutSetting_LastChecked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Today at {0} 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_TodayAt {
+            get {
+                return ResourceManager.GetString("AboutSetting_TodayAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Yesterday at {0} 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_YesterdayAt {
+            get {
+                return ResourceManager.GetString("AboutSetting_YesterdayAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Couldn't check for updates: {0} 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_CheckUpdateFailed {
+            get {
+                return ResourceManager.GetString("AboutSetting_CheckUpdateFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Version {0} has been downloaded and will take effect the next time the app starts. 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_UpdateDownloaded {
+            get {
+                return ResourceManager.GetString("AboutSetting_UpdateDownloaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restart to install 的本地化字符串。
+        /// </summary>
+        public static string AboutSetting_RestartToInstall {
+            get {
+                return ResourceManager.GetString("AboutSetting_RestartToInstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Push update notifications 的本地化字符串。
         /// </summary>
         public static string AboutSetting_PushUpdate {

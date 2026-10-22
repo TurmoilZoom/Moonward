@@ -22,6 +22,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\Starward.Core\Starward.Core.csproj" />
 		<ProjectReference Include="..\..\src\Starward.RPC\Starward.RPC.csproj" />
+		<!-- 链接的 ReleaseNotesFormatter 用到 GithubRelease -->
+		<ProjectReference Include="..\..\src\Starward.Setup.Core\Starward.Setup.Core.csproj" />
 	</ItemGroup>
 
 	<!-- 主项目依赖 WinUI，不直接引用；只链接其中不依赖数据库与 WinUI 的纯计算源文件 -->
@@ -32,6 +34,7 @@
 		<Compile Include="..\..\src\Starward\Features\Gacha\GachaLogItemEx.cs" Link="Linked\Gacha\GachaLogItemEx.cs" />
 		<Compile Include="..\..\src\Starward\Features\Gacha\GachaLogService.FiftyFifty.cs" Link="Linked\Gacha\GachaLogService.FiftyFifty.cs" />
 		<Compile Include="..\..\src\Starward\Features\Gacha\ZZZGachaToolbox\ZZZGachaMetadataPublishSchedule.cs" Link="Linked\Gacha\ZZZGachaMetadataPublishSchedule.cs" />
+		<Compile Include="..\..\src\Starward\Features\Update\ReleaseNotesFormatter.cs" Link="Linked\Update\ReleaseNotesFormatter.cs" />
 	</ItemGroup>
 
 </Project>

@@ -4388,4 +4388,25 @@ You are welcome to submit exported data to:</value>
   <data name="ZZZGachaInfoWindow_PartialFetchFailed" xml:space="preserve">
     <value>{0} language package(s) could not be fetched: {1}</value>
   </data>
+  <data name="AboutSetting_ReleaseNotes" xml:space="preserve">
+    <value>Ghi chú phát hành</value>
+  </data>
+  <data name="AboutSetting_LastChecked" xml:space="preserve">
+    <value>Lần kiểm tra cuối: {0}</value>
+  </data>
+  <data name="AboutSetting_TodayAt" xml:space="preserve">
+    <value>Hôm nay lúc {0}</value>
+  </data>
+  <data name="AboutSetting_YesterdayAt" xml:space="preserve">
+    <value>Hôm qua lúc {0}</value>
+  </data>
+  <data name="AboutSetting_CheckUpdateFailed" xml:space="preserve">
+    <value>Không thể kiểm tra cập nhật: {0}</value>
+  </data>
+  <data name="AboutSetting_UpdateDownloaded" xml:space="preserve">
+    <value>Đã tải xuống phiên bản {0}, sẽ áp dụng ở lần khởi động tiếp theo.</value>
+  </data>
+  <data name="AboutSetting_RestartToInstall" xml:space="preserve">
+    <value>Khởi động lại để cài đặt</value>
+  </data>
 </root>
