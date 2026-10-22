@@ -554,6 +554,7 @@ internal class ZZZGachaService : GachaLogService
             return data.Language;
         }
         WriteZZZGachaInfoAndNameCache(data.List, data.Language);
+        _logger.LogInformation("ZZZ gacha info updated, source {source}, {count} items", data.SourceUrl, data.List.Count);
         return data.Language;
     }
 

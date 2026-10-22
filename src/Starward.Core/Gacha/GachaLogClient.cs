@@ -5,6 +5,7 @@ using Starward.Core.Gacha.ZZZ;
 using System.Net.Http.Json;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Starward.Core.Gacha;
@@ -746,14 +747,21 @@ public abstract class GachaLogClient
 
 
     /// <summary>
+    /// 绝区零物品信息单个数据源的超时，超时后换下一个源。
+    /// </summary>
+    private static readonly TimeSpan ZZZGachaInfoSourceTimeout = TimeSpan.FromSeconds(10);
+
+
+    /// <summary>
     /// 获取绝区零频段记录相关物品信息（角色、音擎、邦布等）。
-    /// 经 jsDelivr 读取 GitHub <c>metadata</c> 分支上的静态 JSON（见 <see cref="ZZZGachaMetadataPaths"/>）。
+    /// 读取 GitHub <c>metadata</c> 分支上的静态 JSON，按 <see cref="ZZZGachaMetadataPaths.GetSourceUrls"/> 的顺序尝试 CNB、jsDelivr 等数据源。
     /// 国服中文优先 <c>nap_cn.zh-cn</c>；其余走 <c>nap_global.{lang}</c>。
     /// </summary>
     /// <param name="gameBiz">nap 相关业务线。</param>
     /// <param name="lang">语言代码。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns><see cref="ZZZGachaWiki"/>。</returns>
+    /// <returns><see cref="ZZZGachaWiki"/>，<see cref="ZZZGachaWiki.SourceUrl"/> 为实际返回数据的源。</returns>
+    /// <exception cref="HttpRequestException">所有数据源都失败时抛出，InnerException 为最后一个数据源的错误。</exception>
     public async Task<ZZZGachaWiki> GetZZZGachaInfoAsync(GameBiz gameBiz, string lang, CancellationToken cancellationToken = default)
     {
         lang = LanguageUtil.FilterLanguage(lang);
@@ -761,13 +769,33 @@ public abstract class GachaLogClient
         string languageKey = gameBiz.IsChinaServer() && lang is "zh-cn"
             ? "nap_cn.zh-cn"
             : $"nap_global.{lang}";
-        string url = ZZZGachaMetadataPaths.GetJsDelivrUrl(languageKey);
-        ZZZGachaWiki wiki = await CommonGetAsync<ZZZGachaWiki>(url, cancellationToken);
-        if (string.IsNullOrWhiteSpace(wiki.Language))
+        Exception? lastException = null;
+        // 每次都从第一个源开始，不记上次成功的源：前面的源恢复后自动切回
+        foreach (string url in ZZZGachaMetadataPaths.GetSourceUrls(languageKey))
         {
-            wiki.Language = lang;
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(ZZZGachaInfoSourceTimeout);
+            try
+            {
+                ZZZGachaWiki wiki = await CommonGetAsync<ZZZGachaWiki>(url, timeoutCts.Token);
+                if (wiki.List is not { Count: > 0 })
+                {
+                    lastException = new InvalidDataException($"ZZZ gacha info from {url} has no item.");
+                    continue;
+                }
+                if (string.IsNullOrWhiteSpace(wiki.Language))
+                {
+                    wiki.Language = lang;
+                }
+                wiki.SourceUrl = url;
+                return wiki;
+            }
+            catch (Exception ex) when ((ex is HttpRequestException or JsonException or miHoYoApiException or OperationCanceledException) && !cancellationToken.IsCancellationRequested)
+            {
+                lastException = ex;
+            }
         }
-        return wiki;
+        throw new HttpRequestException("All ZZZ gacha info sources failed.", lastException);
     }
 
 
