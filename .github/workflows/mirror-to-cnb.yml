@@ -1,0 +1,45 @@
+# metadata 分支专用：每次提交后把本分支推送到 CNB 的同名仓库。
+# 客户端优先从 CNB 读取绝区零抽卡元数据（国内可直连、不缓存），jsDelivr 等作为回退。
+# 定时提交服务在分支原有的树上追加文件，本文件不会被覆盖。
+# 需要仓库密钥 CNB_TOKEN（与 release.yml 共用），令牌须有 CNB 仓库代码写入权限。
+name: 同步 metadata 分支到 CNB
+
+on:
+  push:
+    branches: [metadata]
+
+permissions:
+  contents: read
+
+# 连续提交时只留最新一次：每次推送的都是分支当时最新的提交
+concurrency:
+  group: mirror-metadata-to-cnb
+  cancel-in-progress: true
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 推送到 CNB
+        env:
+          CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CNB_TOKEN}" ]; then
+            echo "::error::未配置 CNB_TOKEN 密钥"
+            exit 1
+          fi
+          # 完整克隆本分支：CNB 上是旧提交，浅克隆推不上去
+          git clone --quiet --bare --single-branch --branch metadata "https://github.com/${GITHUB_REPOSITORY}.git" metadata.git
+          cd metadata.git
+          # GitHub 托管的运行器连 cnb.cool 偶发超时，重试几次
+          for attempt in 1 2 3; do
+            if git push "https://cnb:${CNB_TOKEN}@cnb.cool/${GITHUB_REPOSITORY}.git" refs/heads/metadata:refs/heads/metadata; then
+              exit 0
+            fi
+            echo "::warning::第 ${attempt} 次推送到 CNB 失败"
+            sleep $((attempt * 15))
+          done
+          echo "::error::推送到 CNB 失败"
+          exit 1
