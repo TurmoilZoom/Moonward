@@ -100,6 +100,7 @@ internal class ZZZGachaService : GachaLogService
         var list = dapper.Query<GachaLogItemEx>("""
             SELECT item.*, info.Icon FROM ZZZGachaItem item LEFT JOIN ZZZGachaInfo info ON item.ItemId=Info.Id WHERE Uid=@uid ORDER BY item.Id;
             """, new { uid }).ToList();
+        FillMissingAgentIcons(list);
         foreach (var type in QueryGachaTypes)
         {
             var l = GetGachaLogItemsByQueryType(list, type);
@@ -136,6 +137,28 @@ internal class ZZZGachaService : GachaLogService
             }
         }
         return list;
+    }
+
+
+    /// <summary>
+    /// 物品信息表还没收录的代理人（版本更新当天、元数据源连不上）按 Id 推算头像地址，收录后以信息表为准。
+    /// 音擎、邦布推不出地址，仍按无图标显示名称。
+    /// </summary>
+    /// <param name="list">已关联信息表图标的抽卡记录，就地补全 <see cref="GachaLogItemEx.Icon"/>。</param>
+    private static void FillMissingAgentIcons(List<GachaLogItemEx> list)
+    {
+        if (!list.Exists(x => string.IsNullOrWhiteSpace(x.Icon) && ZZZGachaAgentIcon.IsAgentId(x.ItemId)))
+        {
+            return;
+        }
+        string template = ZZZGachaAgentIcon.GetUrlTemplate(list.Select(x => ((long)x.ItemId, (string?)x.Icon)));
+        foreach (var item in list)
+        {
+            if (string.IsNullOrWhiteSpace(item.Icon) && ZZZGachaAgentIcon.GetIcon(item.ItemId, template) is string icon)
+            {
+                item.Icon = icon;
+            }
+        }
     }
 
 
