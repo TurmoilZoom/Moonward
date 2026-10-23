@@ -2,9 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.Web.WebView2.Core;
 using Starward.Frameworks;
-using Starward.Helpers;
 using Starward.Language;
 using Starward.Setup.Core;
 using System;
@@ -13,13 +11,16 @@ using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.System;
 
 
 namespace Starward.Features.UrlProtocol;
 
+/// <summary>
+/// URL 协议帮助文档（设置 - 高级）。文档运行时拉取、不随程序打包，用 <see cref="Controls.MarkdownView"/> 在本地渲染。
+/// </summary>
 public sealed partial class UrlProtocolDocWindow : WindowEx
 {
 
@@ -27,8 +28,8 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
     private const string DocPathZhCN = "docs/UrlProtocol.zh-CN.md";
 
     /// <summary>
-    /// 文档来源（仓库, 分支），运行时从 GitHub 拉取，不随程序打包 md 文件。
-    /// 主仓库的文档位于其默认分支 rebase/develop（含中文文档）；上游 Scighost 仅 main 分支有英文文档，作兜底。
+    /// 文档来源（仓库, 分支）。主仓库的文档位于其默认分支 rebase/develop（含中文文档），上游 Scighost 仅 main 分支有英文文档，作兜底。
+    /// 每个仓库先取 CNB 镜像（仅主仓库有）再取 GitHub：raw.githubusercontent.com 在部分国内网络连不上（同 issue #28 的 jsDelivr）。
     /// </summary>
     private static readonly (string Repository, string Branch)[] DocSources =
     [
@@ -36,33 +37,33 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
         ("Scighost/Starward", "main"),
     ];
 
+    /// <summary>主仓库在 CNB 上的镜像，推送时与 GitHub 同步。</summary>
+    private const string CnbRepository = "TurmoilZoom/Moonward";
+
+    /// <summary>单个来源的超时：连不上时常常是挂起而不是立刻失败。</summary>
+    private static readonly TimeSpan SourceTimeout = TimeSpan.FromSeconds(10);
+
 
     /// <summary>
-    /// 拉取失败时外开浏览器的 GitHub 页面地址；命中 raw 文档后更新为实际来源与语言。
-    /// 不在 WebView 内打开 GitHub，避免搜索/登录框激活 Chromium TSF（issue #1）。
+    /// 拉取失败时外开浏览器的 GitHub 页面地址。
+    /// 不在应用内打开 GitHub 网页，避免搜索/登录框激活 Chromium TSF（issue #1）。
     /// </summary>
-    private string _browserUrl = $"https://github.com/{DocSources[0].Repository}/blob/{DocSources[0].Branch}/{DocPath}";
+    private readonly string _browserUrl = $"https://github.com/{DocSources[0].Repository}/blob/{DocSources[0].Branch}/{DocPath}";
 
 
     private readonly ILogger<UrlProtocolDocWindow> _logger = AppConfig.GetLogger<UrlProtocolDocWindow>();
 
-    private readonly ReleaseClient _releaseClient = AppConfig.GetService<ReleaseClient>();
-
     private readonly HttpClient _httpClient = AppConfig.GetService<HttpClient>();
 
 
-    private bool _webviewClosed;
+    private bool _closed;
 
 
     public UrlProtocolDocWindow()
     {
         InitializeComponent();
         InitializeWindow();
-        Closed += (_, _) =>
-        {
-            _webviewClosed = true;
-            WebView2Helper.Close(webview);
-        };
+        Closed += (_, _) => _closed = true;
     }
 
 
@@ -105,52 +106,31 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
         {
             StackPanel_Loading.Visibility = Visibility.Visible;
             StackPanel_Error.Visibility = Visibility.Collapsed;
-            webview.Visibility = Visibility.Collapsed;
-
-            await webview.EnsureCoreWebView2Async();
-            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
-            string ua = webview.CoreWebView2.Settings.UserAgent;
-            if (!ua.Contains("Moonward"))
-            {
-                webview.CoreWebView2.Settings.UserAgent = $"{ua} Moonward/{AppConfig.AppVersion}";
-            }
-            webview.CoreWebView2.Profile.PreferredColorScheme = ShouldAppsUseDarkMode()
-                ? CoreWebView2PreferredColorScheme.Dark
-                : CoreWebView2PreferredColorScheme.Light;
-            webview.CoreWebView2.DOMContentLoaded -= CoreWebView2_DOMContentLoaded;
-            webview.CoreWebView2.DOMContentLoaded += CoreWebView2_DOMContentLoaded;
-            webview.CoreWebView2.NewWindowRequested -= CoreWebView2_NewWindowRequested;
-            webview.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
+            Scroller_Document.Visibility = Visibility.Collapsed;
 
             string markdown = await GetDocumentMarkdownAsync();
-            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
-            string html = await RenderMarkdownAsync(markdown);
-            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
-            webview.NavigateToString(html);
-        }
-        catch (COMException ex)
-        {
-            _logger.LogError(ex, "Load url protocol document");
-            TextBlock_Error.Text = Lang.Common_WebView2ComponentInitializationFailed;
+            if (_closed) return;
+            MarkdownView_Document.Markdown = markdown;
+            Scroller_Document.Visibility = Visibility.Visible;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
-            StackPanel_Error.Visibility = Visibility.Visible;
         }
-        catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
+        catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException or TaskCanceledException)
         {
             _logger.LogError(ex, "Load url protocol document");
+            if (_closed) return;
             try
             {
                 _ = Launcher.LaunchUriAsync(new Uri(_browserUrl));
             }
             catch { }
             TextBlock_Error.Text = Lang.Common_NetworkError;
-            webview.Visibility = Visibility.Collapsed;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             StackPanel_Error.Visibility = Visibility.Visible;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Load url protocol document");
+            if (_closed) return;
             TextBlock_Error.Text = Lang.DownloadGamePage_UnknownError;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             StackPanel_Error.Visibility = Visibility.Visible;
@@ -158,6 +138,10 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
     }
 
 
+    /// <summary>
+    /// 按界面语言决定文档的候选路径：中文界面先取中文文档，没有时退回英文。
+    /// </summary>
+    /// <returns>候选路径，优先的在前。</returns>
     private static IReadOnlyList<string> GetDocumentPaths()
     {
         string? lang = AppConfig.Language ?? CultureInfo.CurrentUICulture.Name;
@@ -169,96 +153,52 @@ public sealed partial class UrlProtocolDocWindow : WindowEx
     }
 
 
-    private async Task<string> GetDocumentMarkdownAsync()
+    /// <summary>
+    /// 文档的原始文件地址，按优先顺序：每个路径依次试各仓库，主仓库先 CNB 后 GitHub。
+    /// </summary>
+    /// <returns>raw 文件地址。</returns>
+    private static IEnumerable<string> GetDocumentUrls()
     {
         foreach (string path in GetDocumentPaths())
         {
             foreach (var (repository, branch) in DocSources)
             {
-                string url = $"https://raw.githubusercontent.com/{repository}/{branch}/{path}";
-                using var response = await _httpClient.GetAsync(url);
-                if (response.IsSuccessStatusCode)
+                if (repository == ReleaseClient.Repository)
                 {
-                    _browserUrl = $"https://github.com/{repository}/blob/{branch}/{path}";
-                    return await response.Content.ReadAsStringAsync();
+                    yield return $"https://cnb.cool/{CnbRepository}/-/git/raw/{branch}/{path}";
                 }
+                yield return $"https://raw.githubusercontent.com/{repository}/{branch}/{path}";
             }
         }
-        throw new HttpRequestException("Cannot fetch UrlProtocol document from GitHub.");
     }
 
 
-    private async Task<string> RenderMarkdownAsync(string markdown)
+    /// <summary>
+    /// 依次尝试各来源，取到第一份文档为止。
+    /// </summary>
+    /// <returns>文档 Markdown。</returns>
+    /// <exception cref="HttpRequestException">所有来源都失败。</exception>
+    private async Task<string> GetDocumentMarkdownAsync()
     {
-        string html = await _releaseClient.RenderGithubMarkdownAsync(markdown);
-        var cssFile = Path.Combine(AppContext.BaseDirectory, @"Assets\CSS\github-markdown.css");
-        string css;
-        if (File.Exists(cssFile))
+        Exception? lastException = null;
+        foreach (string url in GetDocumentUrls())
         {
-            css = $"<style>{await File.ReadAllTextAsync(cssFile)}</style>";
-        }
-        else
-        {
-            css = """<link href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css" type="text/css" rel="stylesheet" />""";
-        }
-        return $$"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <base target="_blank">
-              {{css}}
-              <style>
-                @media (prefers-color-scheme: light) {
-                  ::-webkit-scrollbar { width: 6px }
-                  ::-webkit-scrollbar-thumb { background-color: #b8b8b8; border-radius: 1000px 0px 0px 1000px }
-                  ::-webkit-scrollbar-thumb:hover { background-color: #8b8b8b }
+            try
+            {
+                using var cts = new CancellationTokenSource(SourceTimeout);
+                using var response = await _httpClient.GetAsync(url, cts.Token);
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync(cts.Token);
                 }
-                @media (prefers-color-scheme: dark) {
-                  ::-webkit-scrollbar { width: 6px }
-                  ::-webkit-scrollbar-thumb { background-color: #646464; border-radius: 1000px 0px 0px 1000px }
-                  ::-webkit-scrollbar-thumb:hover { background-color: #8b8b8b }
-                }
-              </style>
-            </head>
-            <body style="margin: 12px 24px 12px 24px; overflow-x: hidden;">
-              <article class="markdown-body" style="background: transparent;">
-                {{html}}
-              </article>
-              <script>
-                document.querySelectorAll('img[data-canonical-src]').forEach(img => {
-                  const canonical = img.getAttribute('data-canonical-src');
-                  if (canonical) {
-                    img.src = canonical;
-                    const parent = img.parentElement;
-                    if (parent && parent.tagName.toLowerCase() === 'a') {
-                      parent.href = canonical;
-                    }
-                  }
-                });
-              </script>
-            </body>
-            </html>
-            """;
-    }
-
-
-    private void CoreWebView2_DOMContentLoaded(CoreWebView2 sender, CoreWebView2DOMContentLoadedEventArgs args)
-    {
-        // 只读 markdown，不抢焦点，避免把微信输入法推进 Chromium TSF（issue #1）
-        webview.Visibility = Visibility.Visible;
-        StackPanel_Loading.Visibility = Visibility.Collapsed;
-        StackPanel_Error.Visibility = Visibility.Collapsed;
-    }
-
-
-    private void CoreWebView2_NewWindowRequested(CoreWebView2 sender, CoreWebView2NewWindowRequestedEventArgs args)
-    {
-        try
-        {
-            _ = Launcher.LaunchUriAsync(new Uri(args.Uri));
-            args.Handled = true;
+            }
+            catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException or TaskCanceledException)
+            {
+                lastException = ex;
+                _logger.LogWarning(ex, "Fetch url protocol document from {url}", url);
+            }
         }
-        catch { }
+        throw new HttpRequestException("Cannot fetch UrlProtocol document.", lastException);
     }
 
 }

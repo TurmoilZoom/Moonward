@@ -6,6 +6,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.UrlProtocol"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
              xmlns:sf="using:Starward.Frameworks"
              mc:Ignorable="d">
 
@@ -40,14 +41,15 @@
             </Button>
         </StackPanel>
 
-        <WebView2 x:Name="webview"
-                  DefaultBackgroundColor="Transparent"
-                  IsTabStop="False"
-                  Visibility="Collapsed">
-            <WebView2.Resources>
-                <SolidColorBrush x:Key="BrushForThemeBackgroundColor" Color="Transparent" />
-            </WebView2.Resources>
-        </WebView2>
+        <!--  文档本地渲染；顶部 32 留给标题栏  -->
+        <ScrollViewer x:Name="Scroller_Document"
+                      Margin="0,32,0,0"
+                      HorizontalScrollBarVisibility="Disabled"
+                      HorizontalScrollMode="Disabled"
+                      VerticalScrollBarVisibility="Auto"
+                      Visibility="Collapsed">
+            <sc:MarkdownView x:Name="MarkdownView_Document" Margin="24,0,24,24" />
+        </ScrollViewer>
     </Grid>
 
 </sf:WindowEx>

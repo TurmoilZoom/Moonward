@@ -7,16 +7,14 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Starward.Setup.Core;
 
 /// <summary>
-/// 从 GitHub Releases 拉取发行说明并渲染 Markdown。
-/// 更新的检查/下载/安装由 Velopack 负责，此类只提供「更新弹窗」展示更新日志所需的数据。
+/// 从 GitHub Releases 拉取发行说明（Markdown 由应用在本地渲染）。
+/// 更新的检查/下载/安装由 Velopack 负责，此类只提供更新窗口与发行说明窗口展示更新日志所需的数据。
 /// </summary>
 public class ReleaseClient
 {
@@ -137,23 +135,6 @@ public class ReleaseClient
     {
         string url = $"https://api.github.com/repos/{Repository}/releases/tags/{tag}";
         return await _httpClient.GetFromJsonAsync(url, ReleaseJsonContext.Default.GithubRelease, cancellationToken);
-    }
-
-
-
-    public async Task<string> RenderGithubMarkdownAsync(string markdown, CancellationToken cancellationToken = default)
-    {
-        const string url = "https://api.github.com/markdown";
-        var request = new GithubMarkdownRequest
-        {
-            Text = markdown,
-            Mode = "gfm",
-            Context = Repository,
-        };
-        var content = new StringContent(JsonSerializer.Serialize(request, ReleaseJsonContext.Default.GithubMarkdownRequest), Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync(url, content, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStringAsync(cancellationToken);
     }
 
 
