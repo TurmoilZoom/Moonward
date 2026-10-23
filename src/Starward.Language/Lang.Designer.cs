@@ -79,6 +79,24 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 GitHub request limit reached. Please try again later. 的本地化字符串。
+        /// </summary>
+        public static string ReleaseNotes_GithubRateLimited {
+            get {
+                return ResourceManager.GetString("ReleaseNotes_GithubRateLimited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 GitHub request limit reached. Please try again after {0}. 的本地化字符串。
+        /// </summary>
+        public static string ReleaseNotes_GithubRateLimitedUntil {
+            get {
+                return ResourceManager.GetString("ReleaseNotes_GithubRateLimitedUntil", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Last checked: {0} 的本地化字符串。
         /// </summary>
         public static string AboutSetting_LastChecked {

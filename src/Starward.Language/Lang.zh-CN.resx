@@ -4497,4 +4497,10 @@
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>立即重启安装</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>GitHub 访问次数已达上限，请稍后再试。</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>GitHub 访问次数已达上限，请在 {0} 后再试。</value>
+  </data>
 </root>

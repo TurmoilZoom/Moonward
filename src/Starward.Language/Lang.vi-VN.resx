@@ -4409,4 +4409,10 @@ You are welcome to submit exported data to:</value>
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>Khởi động lại để cài đặt</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>Đã đạt giới hạn truy cập GitHub. Vui lòng thử lại sau.</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>Đã đạt giới hạn truy cập GitHub. Vui lòng thử lại sau {0}.</value>
+  </data>
 </root>

@@ -132,6 +132,8 @@ public static partial class AppConfig
 
             // ReleaseClient 只用于从 GitHub 拉取发行说明（更新本身由 Velopack 负责），用默认 HttpClient 即可。
             sc.AddHttpClient<ReleaseClient>();
+            // 发行说明窗口与更新窗口共用的发行版本列表（落盘缓存，避开 GitHub 匿名限流）
+            sc.AddSingleton<ReleaseNotesService>();
             sc.AddSingleton<UpdateService>();
 
             sc.AddSingleton<RpcService>();

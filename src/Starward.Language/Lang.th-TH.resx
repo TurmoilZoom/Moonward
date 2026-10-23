@@ -4403,4 +4403,10 @@ You are welcome to submit exported data to:</value>
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>รีสตาร์ทเพื่อติดตั้ง</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>ถึงขีดจำกัดการเรียกใช้ GitHub แล้ว โปรดลองอีกครั้งในภายหลัง</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>ถึงขีดจำกัดการเรียกใช้ GitHub แล้ว โปรดลองอีกครั้งหลังเวลา {0}</value>
+  </data>
 </root>

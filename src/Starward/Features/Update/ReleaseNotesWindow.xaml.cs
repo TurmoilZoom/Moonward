@@ -6,32 +6,29 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.Web.WebView2.Core;
 using NuGet.Versioning;
 using Starward.Controls;
 using Starward.Features.Setting;
 using Starward.Frameworks;
 using Starward.Helpers;
-using Starward.Setup.Core;
 using Starward.Setup.Core.Github;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Net.Http;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Graphics;
-using Windows.System;
 
 
 namespace Starward.Features.Update;
 
 /// <summary>
-/// 发行说明窗口（参考 PowerToys 的 Release notes）：左侧按「主版本.次版本」分组列出最近的版本，右侧渲染该组全部版本的说明。
+/// 发行说明窗口（参考 PowerToys 的 Release notes）：左侧按「主版本.次版本」分组列出最近的版本，右侧显示该组全部版本的说明。
 /// 随时可从关于页打开，与「有新版本」「静默更新后」才出现的 <see cref="UpdateWindow"/> 互不影响。
+/// <para>
+/// 版本列表由 <see cref="ReleaseNotesService"/> 落盘缓存，正文在本地渲染（<see cref="MarkdownView"/>），打开一次至多请求 GitHub 一次。
+/// </para>
 /// </summary>
 [INotifyPropertyChanged]
 public sealed partial class ReleaseNotesWindow : WindowEx
@@ -40,28 +37,19 @@ public sealed partial class ReleaseNotesWindow : WindowEx
 
     private readonly ILogger<ReleaseNotesWindow> _logger = AppConfig.GetLogger<ReleaseNotesWindow>();
 
-    private readonly ReleaseClient _releaseClient = AppConfig.GetService<ReleaseClient>();
+    private readonly ReleaseNotesService _releaseNotesService = AppConfig.GetService<ReleaseNotesService>();
 
-
-    /// <summary>一次拉取的发行版本数，约覆盖最近几个月；更早的去 GitHub 看。</summary>
-    private const int ReleaseCount = 50;
-
-    /// <summary>各分组正文的渲染任务。GitHub 匿名接口每小时只有 60 次：同一组只渲染一次，预取与用户点选共用同一个任务。</summary>
-    private readonly Dictionary<string, Task<string>> _renderTasks = new();
-
-    /// <summary>外壳页的加载任务；加载失败时置空，重试时重新加载（页会重建，已渲染的正文从缓存重新填入）。</summary>
-    private Task? _shellTask;
-
-    /// <summary>本次外壳页里已经发起过预取，避免重复。外壳重载后重新预取。</summary>
-    private bool _prefetchStarted;
 
     /// <summary>左侧导航的流体悬停高亮条，与设置页同一个效果类。</summary>
     private readonly FluidNavigationViewHoverEffect _navHoverEffect = new();
 
-    /// <summary>每次切换分组递增，渲染完成时序号已变说明用户又切走了，丢弃这次结果。</summary>
-    private int _renderVersion;
+    /// <summary>左侧导航与 FlipView 互相同步选中项期间置位，免得来回触发。</summary>
+    private bool _syncingSelection;
 
-    private bool _webviewClosed;
+    /// <summary>已隐藏 FlipView 的翻页按钮并吞掉其滚轮（<see cref="HideFlipViewChrome"/>）。</summary>
+    private bool _flipViewChromeHidden;
+
+    private bool _closed;
 
     private bool _positioned;
 
@@ -168,8 +156,7 @@ public sealed partial class ReleaseNotesWindow : WindowEx
         WeakReferenceMessenger.Default.UnregisterAll(this);
         _navHoverEffect.Detach();
         this.Closed -= ReleaseNotesWindow_Closed;
-        _webviewClosed = true;
-        WebView2Helper.Close(webview);
+        _closed = true;
     }
 
 
@@ -183,26 +170,15 @@ public sealed partial class ReleaseNotesWindow : WindowEx
 
 
     /// <summary>
-    /// 初始化 WebView2、拉取发行版本并分组，然后选中最新的一组。
+    /// 取发行版本并分组、拼好各组正文，然后选中最新的一组。
     /// </summary>
     private async Task LoadAsync()
     {
         try
         {
             ShowLoading();
-            await webview.EnsureCoreWebView2Async();
-            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
-            string ua = webview.CoreWebView2.Settings.UserAgent;
-            if (!ua.Contains("Moonward"))
-            {
-                webview.CoreWebView2.Settings.UserAgent = $"{ua} Moonward/{AppConfig.AppVersion}";
-            }
-            webview.CoreWebView2.Profile.PreferredColorScheme = ShouldAppsUseDarkMode() ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light;
-            webview.CoreWebView2.NewWindowRequested -= CoreWebView2_NewWindowRequested;
-            webview.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
-
-            List<GithubRelease> releases = await _releaseClient.GetGithubReleaseAsync(1, ReleaseCount);
-            if (_webviewClosed) return;
+            List<GithubRelease> releases = await _releaseNotesService.GetReleasesAsync();
+            if (_closed) return;
             // 正在用预览版的人即使关了预览渠道，也该看得到自己这个版本的说明
             bool includePrerelease = AppConfig.EnablePreviewRelease
                 || (NuGetVersion.TryParse(AppConfig.AppVersion, out NuGetVersion? appVersion) && appVersion.IsPrerelease);
@@ -212,6 +188,7 @@ public sealed partial class ReleaseNotesWindow : WindowEx
                 group.Subtitle = group.IsAllPrerelease
                     ? Lang.UpdatePage_PreviewChannel
                     : group.LatestPublishedAt.ToLocalTime().ToString("Y", CultureInfo.CurrentUICulture);
+                group.Markdown = ReleaseNotesFormatter.BuildGroupMarkdown(group.Releases, Lang.UpdatePage_PreviewChannel, Lang.UpdatePage_ReleasePage);
             }
             Groups = groups;
             if (groups.Count == 0)
@@ -219,28 +196,22 @@ public sealed partial class ReleaseNotesWindow : WindowEx
                 ShowError(Lang.DownloadGamePage_UnknownError);
                 return;
             }
-            // 分组变了，外壳页按新的分组数重建
-            _shellTask = null;
             BuildNavItems(groups);
-            // 先布局一次把菜单项建出来再选中：容器还没生成时设 SelectedItem，内容照样切换，但菜单项没有选中态和指示条。
-            // 设好后触发 SelectionChanged，由它渲染
+            FlipView_Groups.ItemsSource = groups;
+            ShowContent();
+            // 先布局一次把菜单项建出来再选中：容器还没生成时设 SelectedItem，菜单项没有选中态和指示条。
+            // 这次布局也让刚显示的 FlipView 建好模板
             NavView.UpdateLayout();
+            HideFlipViewChrome();
             NavView.SelectedItem = NavView.MenuItems[0];
-        }
-        catch (COMException ex)
-        {
-            _logger.LogError(ex, "Load release notes");
-            ShowError(Lang.Common_WebView2ComponentInitializationFailed);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException or TaskCanceledException)
-        {
-            _logger.LogError(ex, "Load release notes");
-            ShowError(Lang.Common_NetworkError);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Load release notes");
-            ShowError(Lang.DownloadGamePage_UnknownError);
+            if (!_closed)
+            {
+                ShowError(ReleaseNotesService.GetDisplayErrorMessage(ex));
+            }
         }
     }
 
@@ -274,148 +245,96 @@ public sealed partial class ReleaseNotesWindow : WindowEx
 
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (args.SelectedItem is NavigationViewItem { Tag: ReleaseNotesGroup group })
+        if (_syncingSelection || args.SelectedItem is not NavigationViewItem item)
         {
-            _ = ShowGroupAsync(group);
+            return;
+        }
+        int target = NavView.MenuItems.IndexOf(item);
+        if (target < 0 || target >= FlipView_Groups.Items.Count)
+        {
+            return;
+        }
+        _syncingSelection = true;
+        try
+        {
+            // 逐页改 SelectedIndex（同上游游戏设置弹窗）：跨几组时一路经过中间的页
+            while (FlipView_Groups.SelectedIndex < target)
+            {
+                FlipView_Groups.SelectedIndex++;
+            }
+            while (FlipView_Groups.SelectedIndex > target)
+            {
+                FlipView_Groups.SelectedIndex--;
+            }
+        }
+        finally
+        {
+            _syncingSelection = false;
         }
     }
 
 
 
     /// <summary>
-    /// 竖直平移到一组版本的说明（同上游游戏设置弹窗里竖排的 FlipView，跨几组时一路经过中间的页）。
-    /// 还没渲染好的页先显示转圈，渲染完填进去；首次显示或出错后恢复时直接跳过去、不播动画。
+    /// 用键盘在正文里翻页时，左侧选中项跟着走。
     /// </summary>
-    /// <param name="group">要显示的分组。</param>
-    private async Task ShowGroupAsync(ReleaseNotesGroup group)
+    private void FlipView_Groups_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        int version = ++_renderVersion;
-        int index = Groups.IndexOf(group);
+        int index = FlipView_Groups.SelectedIndex;
+        if (_syncingSelection || index < 0 || index >= NavView.MenuItems.Count)
+        {
+            return;
+        }
+        _syncingSelection = true;
         try
         {
-            bool firstShow = webview.Visibility is not Visibility.Visible;
-            if (firstShow)
-            {
-                ShowLoading();
-            }
-            await EnsureShellAsync();
-            if (version != _renderVersion || WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
-            bool animate = !firstShow && EntranceAnimation.AnimationsEnabled();
-            await webview.ExecuteScriptAsync(ReleaseNotesHtml.BuildGoToScript(index, animate));
-            string html = await GetGroupHtmlAsync(group);
-            if (_webviewClosed) return;
-            // 渲染期间用户可能又切走了，内容照样填进对应的页，下次切回来不用再等
-            await webview.ExecuteScriptAsync(ReleaseNotesHtml.BuildFillScript(index, html));
-            if (version != _renderVersion || _webviewClosed) return;
-            ShowContent();
-            PrefetchOtherGroups();
+            NavView.SelectedItem = NavView.MenuItems[index];
         }
-        catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException or TaskCanceledException)
+        finally
         {
-            _logger.LogError(ex, "Render release notes {group}", group.Key);
-            if (version == _renderVersion)
+            _syncingSelection = false;
+        }
+    }
+
+
+
+    /// <summary>
+    /// 隐藏 FlipView 自带的翻页按钮、吞掉外层滚轮，只通过左侧导航与键盘翻页（同上游游戏设置弹窗）。
+    /// 要等 FlipView 显示并布局过、模板建好之后调用：它初始是折叠的，Loaded 时还没有模板子元素。只处理一次。
+    /// </summary>
+    private void HideFlipViewChrome()
+    {
+        if (_flipViewChromeHidden)
+        {
+            return;
+        }
+        try
+        {
+            FlipView_Groups.ApplyTemplate();
+            if (VisualTreeHelper.GetChildrenCount(FlipView_Groups) == 0)
             {
-                ShowError(Lang.Common_NetworkError);
+                return;
+            }
+            _flipViewChromeHidden = true;
+            DependencyObject root = VisualTreeHelper.GetChild(FlipView_Groups, 0);
+            int count = VisualTreeHelper.GetChildrenCount(root);
+            for (int i = 0; i < count; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(root, i);
+                if (child is ButtonBase button)
+                {
+                    button.IsHitTestVisible = false;
+                    button.Opacity = 0;
+                }
+                else if (child is ScrollViewer scrollViewer)
+                {
+                    scrollViewer.PointerWheelChanged += (_, args) => args.Handled = true;
+                }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Render release notes {group}", group.Key);
-            if (version == _renderVersion)
-            {
-                ShowError(Lang.DownloadGamePage_UnknownError);
-            }
-        }
-    }
-
-
-
-    /// <summary>
-    /// 取一组的正文 HTML：同一组只向 GitHub 渲染一次，失败的下次重新渲染。
-    /// </summary>
-    /// <param name="group">分组。</param>
-    /// <returns>GitHub 渲染出的正文 HTML。</returns>
-    private Task<string> GetGroupHtmlAsync(ReleaseNotesGroup group)
-    {
-        if (!_renderTasks.TryGetValue(group.Key, out Task<string>? task) || task.IsFaulted || task.IsCanceled)
-        {
-            string markdown = ReleaseNotesFormatter.BuildGroupMarkdown(group.Releases, Lang.UpdatePage_PreviewChannel, Lang.UpdatePage_ReleasePage);
-            task = _releaseClient.RenderGithubMarkdownAsync(markdown);
-            _renderTasks[group.Key] = task;
-        }
-        return task;
-    }
-
-
-
-    /// <summary>
-    /// 第一页显示出来后，按顺序在后台渲染其余分组并填进各自的页，平移经过中间的页时才有内容可看。
-    /// 只是预取：失败不提示，用户点到那一组时再渲染一次。
-    /// </summary>
-    private async void PrefetchOtherGroups()
-    {
-        if (_prefetchStarted)
-        {
-            return;
-        }
-        _prefetchStarted = true;
-        List<ReleaseNotesGroup> groups = Groups;
-        for (int i = 0; i < groups.Count; i++)
-        {
-            try
-            {
-                string html = await GetGroupHtmlAsync(groups[i]);
-                if (_webviewClosed || !ReferenceEquals(groups, Groups)) return;
-                await webview.ExecuteScriptAsync(ReleaseNotesHtml.BuildFillScript(i, html));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Prefetch release notes {group}", groups[i].Key);
-            }
-        }
-    }
-
-
-
-    /// <summary>
-    /// 确保外壳页已加载（见 <see cref="ReleaseNotesHtml.BuildFlipShellAsync"/>）。
-    /// </summary>
-    /// <returns>外壳页加载完成的任务。</returns>
-    private Task EnsureShellAsync()
-    {
-        return _shellTask ??= LoadShellAsync();
-    }
-
-
-
-    /// <summary>
-    /// 导航到外壳页、等它加载完成，再按分组数建好空页；失败时清掉 <see cref="_shellTask"/>，下次重新加载。
-    /// </summary>
-    /// <exception cref="InvalidOperationException">外壳页导航失败。</exception>
-    private async Task LoadShellAsync()
-    {
-        try
-        {
-            _prefetchStarted = false;
-            string shell = await ReleaseNotesHtml.BuildFlipShellAsync();
-            var completed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            void OnNavigationCompleted(CoreWebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
-            {
-                sender.NavigationCompleted -= OnNavigationCompleted;
-                completed.TrySetResult(args.IsSuccess);
-            }
-            webview.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
-            webview.NavigateToString(shell);
-            if (!await completed.Task)
-            {
-                throw new InvalidOperationException("Failed to load release notes shell page.");
-            }
-            await webview.ExecuteScriptAsync(ReleaseNotesHtml.BuildInitScript(Groups.Count));
-        }
-        catch
-        {
-            _shellTask = null;
-            throw;
+            _logger.LogWarning(ex, "Hide release notes flip view buttons");
         }
     }
 
@@ -424,33 +343,23 @@ public sealed partial class ReleaseNotesWindow : WindowEx
     [RelayCommand]
     private async Task RetryAsync()
     {
-        if (Groups.Count > 0 && NavView.SelectedItem is NavigationViewItem { Tag: ReleaseNotesGroup group })
-        {
-            await ShowGroupAsync(group);
-        }
-        else
-        {
-            await LoadAsync();
-        }
+        await LoadAsync();
     }
 
 
 
     private void ShowLoading()
     {
-        webview.Visibility = Visibility.Collapsed;
+        FlipView_Groups.Visibility = Visibility.Collapsed;
         StackPanel_Error.Visibility = Visibility.Collapsed;
         ProgressRing_Loading.Visibility = Visibility.Visible;
     }
 
 
 
-    /// <summary>
-    /// 显示正文。只读 markdown，不给 WebView2 焦点，避免把微信输入法推进 Chromium TSF（issue #1）。
-    /// </summary>
     private void ShowContent()
     {
-        webview.Visibility = Visibility.Visible;
+        FlipView_Groups.Visibility = Visibility.Visible;
         ProgressRing_Loading.Visibility = Visibility.Collapsed;
         StackPanel_Error.Visibility = Visibility.Collapsed;
     }
@@ -464,21 +373,9 @@ public sealed partial class ReleaseNotesWindow : WindowEx
     private void ShowError(string message)
     {
         TextBlock_Error.Text = message;
-        webview.Visibility = Visibility.Collapsed;
+        FlipView_Groups.Visibility = Visibility.Collapsed;
         ProgressRing_Loading.Visibility = Visibility.Collapsed;
         StackPanel_Error.Visibility = Visibility.Visible;
-    }
-
-
-
-    private void CoreWebView2_NewWindowRequested(CoreWebView2 sender, CoreWebView2NewWindowRequestedEventArgs args)
-    {
-        try
-        {
-            _ = Launcher.LaunchUriAsync(new Uri(args.Uri));
-            args.Handled = true;
-        }
-        catch { }
     }
 
 

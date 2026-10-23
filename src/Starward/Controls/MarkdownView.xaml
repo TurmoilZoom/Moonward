@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Controls.MarkdownView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <!--  不带滚动，由外层容器决定；发行说明一个版本一块，帮助文档整篇一块  -->
+    <Grid>
+
+        <cwc:MarkdownTextBlock x:Name="MarkdownBlock"
+                               Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                               IsTextSelectionEnabled="True"
+                               UseAutoLinks="True"
+                               UseEmphasisExtras="True"
+                               UseListExtras="True"
+                               UsePipeTables="True" />
+
+        <!--  隐藏的取色元素：按本控件实际主题解析画刷，渲染前抄给 MarkdownTextBlock（见 ApplyThemeBrushes）  -->
+        <TextBlock x:Name="LinkBrushProvider"
+                   Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                   IsHitTestVisible="False"
+                   Visibility="Collapsed" />
+        <Border x:Name="CodeBrushProvider"
+                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                IsHitTestVisible="False"
+                Visibility="Collapsed" />
+        <Border x:Name="DividerBrushProvider"
+                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                IsHitTestVisible="False"
+                Visibility="Collapsed" />
+
+    </Grid>
+
+</UserControl>

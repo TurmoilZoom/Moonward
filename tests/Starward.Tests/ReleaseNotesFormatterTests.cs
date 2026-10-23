@@ -145,11 +145,46 @@ public class ReleaseNotesFormatterTests
         string markdown = ReleaseNotesFormatter.BuildGroupMarkdown(releases, "预览版", "发布页面");
 
         Assert.StartsWith("# 2026.10.3-beta1", markdown);
-        Assert.Contains("<sub>预览版 · 2026-10-20 · [发布页面](https://github.com/TurmoilZoom/Moonward/releases/tag/2026.10.3-beta1)</sub>", markdown);
-        Assert.Contains("<sub>2026-10-15 · [发布页面]", markdown);
+        Assert.Contains("预览版 · 2026-10-20 · [发布页面](https://github.com/TurmoilZoom/Moonward/releases/tag/2026.10.3-beta1)", markdown);
+        Assert.Contains("2026-10-15 · [发布页面]", markdown);
         Assert.Contains("---", markdown);
+        // 本地渲染只支持少量 HTML：拼出来的部分不夹标签，下载表也已去掉
+        Assert.DoesNotContain("<sub>", markdown);
         Assert.DoesNotContain("<table", markdown);
         Assert.True(markdown.IndexOf("# 2026.10.3-beta1", StringComparison.Ordinal) < markdown.IndexOf("# 2026.10.2", StringComparison.Ordinal));
+    }
+
+
+    [Theory]
+    [InlineData("修复图标不显示的问题 #28", "修复图标不显示的问题 [#28](https://github.com/TurmoilZoom/Moonward/issues/28)")]
+    [InlineData("问题#28修复", "问题[#28](https://github.com/TurmoilZoom/Moonward/issues/28)修复")]
+    [InlineData("（#5、#12）", "（[#5](https://github.com/TurmoilZoom/Moonward/issues/5)、[#12](https://github.com/TurmoilZoom/Moonward/issues/12)）")]
+    public void LinkIssues_PlainReferences(string input, string expected)
+    {
+        Assert.Equal(expected, ReleaseNotesFormatter.LinkIssueReferences(input));
+    }
+
+
+    [Theory]
+    [InlineData("已写成链接的 [#20](https://github.com/TurmoilZoom/Moonward/issues/20)")]
+    [InlineData("### 新功能")]
+    [InlineData("锚点 https://example.com/page#12 与 issue#3、HTML 实体 &#39;")]
+    [InlineData("颜色 #28a745")]
+    public void LinkIssues_LeavesOtherHashesAlone(string input)
+    {
+        Assert.Equal(input, ReleaseNotesFormatter.LinkIssueReferences(input));
+    }
+
+
+    [Theory]
+    [InlineData("2026.10.3", true)]
+    [InlineData("v2026.10.3", true)]
+    [InlineData("2026.10.3-BETA1", true)]
+    [InlineData("2026.10.4", false)]
+    public void ContainsTag_IgnoresPrefixAndCase(string tag, bool expected)
+    {
+        var releases = new[] { Release("2026.10.3", 10, 22), Release("2026.10.3-beta1", 10, 20, prerelease: true) };
+        Assert.Equal(expected, ReleaseNotesFormatter.ContainsTag(releases, tag));
     }
 
 }

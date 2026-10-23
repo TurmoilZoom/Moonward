@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.Web.WebView2.Core;
 using NuGet.Versioning;
 using Starward.Features.RPC;
 using Starward.Features.Setting;
@@ -15,14 +14,13 @@ using Starward.Setup.Core;
 using Starward.Setup.Core.Github;
 using Velopack;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Graphics;
@@ -38,7 +36,7 @@ public sealed partial class UpdateWindow : WindowEx
 
     private readonly ILogger<UpdateWindow> _logger = AppConfig.GetLogger<UpdateWindow>();
 
-    private readonly ReleaseClient _releaseClient = AppConfig.GetService<ReleaseClient>();
+    private readonly ReleaseNotesService _releaseNotesService = AppConfig.GetService<ReleaseNotesService>();
 
     private readonly UpdateService _updateService = AppConfig.GetService<UpdateService>();
 
@@ -50,7 +48,7 @@ public sealed partial class UpdateWindow : WindowEx
     /// </summary>
     private bool _startedDownloadInThisWindow;
 
-    private bool _webviewClosed;
+    private bool _closed;
 
     /// <summary>
     /// 静默更新内容窗口的起始版本（构造时快照）。避免启动检查随后把 <see cref="AppConfig.LastAppVersion"/> 写成当前版本后，发行说明区间为空。
@@ -216,8 +214,7 @@ public sealed partial class UpdateWindow : WindowEx
         }
         WeakReferenceMessenger.Default.UnregisterAll(this);
         this.Closed -= UpdateWindow_Closed;
-        _webviewClosed = true;
-        WebView2Helper.Close(webview);
+        _closed = true;
     }
 
 
@@ -569,7 +566,7 @@ public sealed partial class UpdateWindow : WindowEx
 
 
 
-    #region Update Content WebView
+    #region Update Content
 
 
 
@@ -582,54 +579,36 @@ public sealed partial class UpdateWindow : WindowEx
             StackPanel_Loading.Visibility = Visibility.Visible;
             StackPanel_Error.Visibility = Visibility.Collapsed;
 
-            await webview.EnsureCoreWebView2Async();
-            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
-            string ua = webview.CoreWebView2.Settings.UserAgent;
-            if (!ua.Contains("Moonward"))
-            {
-                webview.CoreWebView2.Settings.UserAgent = $"{ua} Moonward/{AppConfig.AppVersion}";
-            }
-            webview.CoreWebView2.Profile.PreferredColorScheme = ShouldAppsUseDarkMode() ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light;
-            webview.CoreWebView2.DOMContentLoaded -= CoreWebView2_DOMContentLoaded;
-            webview.CoreWebView2.DOMContentLoaded += CoreWebView2_DOMContentLoaded;
-            webview.CoreWebView2.NewWindowRequested -= CoreWebView2_NewWindowRequested;
-            webview.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
-
             string markdown = await GetReleaseContentMarkdownAsync();
-            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
-            string html = await RenderMarkdownAsync(markdown);
-            if (WebView2Helper.CloseIfRequested(webview, _webviewClosed)) return;
-            webview.NavigateToString(html);
+            if (_closed) return;
+            MarkdownView_ReleaseNotes.Markdown = markdown;
+            Scroller_ReleaseNotes.Visibility = Visibility.Visible;
+            StackPanel_Loading.Visibility = Visibility.Collapsed;
             if (NewVersion is null)
             {
                 MarkRecentUpdateContentShown();
             }
         }
-        catch (COMException ex)
+        catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException or TaskCanceledException)
         {
             _logger.LogError(ex, "Load recent update content");
-            TextBlock_Error.Text = Lang.Common_WebView2ComponentInitializationFailed;
-            StackPanel_Loading.Visibility = Visibility.Collapsed;
-            StackPanel_Error.Visibility = Visibility.Visible;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or SocketException or IOException)
-        {
-            _logger.LogError(ex, "Load recent update content");
-            // 内嵌 GitHub 发行页带搜索/登录框，会激活 Chromium TSF（issue #1）
+            if (_closed) return;
+            // 取不到说明（含 GitHub 限流）时直接打开发布页：网页不占 API 配额。不内嵌，GitHub 发行页带搜索/登录框，会激活 Chromium TSF（issue #1）
             string tag = NewVersionText ?? AppConfig.AppVersion;
             try
             {
                 _ = Launcher.LaunchUriAsync(new Uri($"https://github.com/{ReleaseClient.Repository}/releases/tag/{tag}"));
             }
             catch { }
-            TextBlock_Error.Text = Lang.Common_NetworkError;
-            webview.Visibility = Visibility.Collapsed;
+            TextBlock_Error.Text = ReleaseNotesService.GetDisplayErrorMessage(ex);
+            Scroller_ReleaseNotes.Visibility = Visibility.Collapsed;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             StackPanel_Error.Visibility = Visibility.Visible;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Load recent update content");
+            if (_closed) return;
             TextBlock_Error.Text = Lang.DownloadGamePage_UnknownError;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             StackPanel_Error.Visibility = Visibility.Visible;
@@ -638,6 +617,10 @@ public sealed partial class UpdateWindow : WindowEx
 
 
 
+    /// <summary>
+    /// 取要显示的发行版本：有新版本时为当前版本之后到新版本（含），静默更新后为上次版本之后到当前版本；最多 10 个。
+    /// </summary>
+    /// <returns>拼好的 Markdown。</returns>
     private async Task<string> GetReleaseContentMarkdownAsync()
     {
         bool showPrerelease = false;
@@ -674,9 +657,10 @@ public sealed partial class UpdateWindow : WindowEx
             }
         }
 
-        var releases = await _releaseClient.GetGithubReleaseAsync(1, 20);
-        var markdown = new StringBuilder();
-        int count = 0;
+        string targetTag = NewVersionText ?? AppConfig.AppVersion;
+        // 与发行说明窗口共用落盘缓存；缓存里没有目标版本（如刚发布的新版本）时才重新请求
+        List<GithubRelease> releases = await _releaseNotesService.GetReleasesAsync(targetTag);
+        var selected = new List<GithubRelease>();
         foreach (var release in releases)
         {
             if (NuGetVersion.TryParse(release.TagName, out var version))
@@ -690,81 +674,29 @@ public sealed partial class UpdateWindow : WindowEx
                     }
                     if (!(showPrerelease ^ version.IsPrerelease))
                     {
-                        AppendReleaseToStringBuilder(release, markdown);
-                        count++;
+                        selected.Add(release);
                     }
                 }
             }
             else
             {
-                AppendReleaseToStringBuilder(release, markdown);
-                count++;
+                selected.Add(release);
             }
-            if (count >= 10)
+            if (selected.Count >= 10)
             {
                 break;
             }
         }
-        if (markdown.Length == 0)
+        if (selected.Count == 0)
         {
-            try
+            // 版本区间里一个都没有（如版本号解析不了）：显示目标版本，没有就显示最新的
+            GithubRelease? fallback = releases.FirstOrDefault(x => ReleaseNotesFormatter.ContainsTag([x], targetTag)) ?? releases.FirstOrDefault();
+            if (fallback is not null)
             {
-                var r = await _releaseClient.GetGithubReleaseAsync(NewVersionText ?? AppConfig.AppVersion);
-                if (r is not null)
-                {
-                    AppendReleaseToStringBuilder(r, markdown);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                if (releases.FirstOrDefault() is GithubRelease r)
-                {
-                    AppendReleaseToStringBuilder(r, markdown);
-                }
+                selected.Add(fallback);
             }
         }
-        return markdown.ToString();
-    }
-
-
-
-    private static void AppendReleaseToStringBuilder(GithubRelease release, StringBuilder stringBuilder)
-    {
-        stringBuilder.AppendLine($"# {release.Name}");
-        stringBuilder.AppendLine();
-        stringBuilder.AppendLine(ReleaseNotesFormatter.StripAppendedDownloads(release.Body));
-        stringBuilder.AppendLine("<br>");
-        stringBuilder.AppendLine();
-    }
-
-
-
-    private Task<string> RenderMarkdownAsync(string markdown)
-    {
-        return ReleaseNotesHtml.BuildPageAsync(_releaseClient, markdown);
-    }
-
-
-
-    private void CoreWebView2_DOMContentLoaded(CoreWebView2 sender, CoreWebView2DOMContentLoadedEventArgs args)
-    {
-        // 只读 markdown，不抢焦点，避免把微信输入法推进 Chromium TSF（issue #1）
-        webview.Visibility = Visibility.Visible;
-        StackPanel_Loading.Visibility = Visibility.Collapsed;
-        StackPanel_Error.Visibility = Visibility.Collapsed;
-    }
-
-
-
-    private void CoreWebView2_NewWindowRequested(CoreWebView2 sender, CoreWebView2NewWindowRequestedEventArgs args)
-    {
-        try
-        {
-            _ = Launcher.LaunchUriAsync(new Uri(args.Uri));
-            args.Handled = true;
-        }
-        catch { }
+        return ReleaseNotesFormatter.BuildGroupMarkdown(selected, Lang.UpdatePage_PreviewChannel, Lang.UpdatePage_ReleasePage);
     }
 
 

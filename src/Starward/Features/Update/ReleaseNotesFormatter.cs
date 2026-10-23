@@ -110,7 +110,43 @@ public static partial class ReleaseNotesFormatter
 
 
     /// <summary>
+    /// 正文里的 issue / PR 编号（#28）：前面不能是 ASCII 字母数字、斜杠、&amp;、# 或 [，排除链接里的锚点、HTML 实体、标题井号和已经是链接的写法。
+    /// 不用 \w / \b：.NET 的 \w 含汉字，「问题#28」「#28 修复」紧挨汉字的写法会漏掉。
+    /// </summary>
+    [GeneratedRegex(@"(?<![A-Za-z0-9_/&#\[])#([0-9]+)(?![A-Za-z0-9_\]])")]
+    private static partial Regex IssueReferenceRegex();
+
+
+
+    /// <summary>
+    /// 把正文里的 #N 换成本仓 issue 链接（GitHub 渲染时会自动做，本地渲染要自己做；issue 地址对 PR 也会跳转）。
+    /// </summary>
+    /// <param name="markdown">Markdown 文本。</param>
+    /// <returns>替换后的文本。</returns>
+    public static string LinkIssueReferences(string markdown)
+    {
+        return IssueReferenceRegex().Replace(markdown, m => $"[#{m.Groups[1].Value}](https://github.com/TurmoilZoom/Moonward/issues/{m.Groups[1].Value})");
+    }
+
+
+
+    /// <summary>
+    /// 列表里是否有指定版本（忽略 tag 前缀 v 与大小写）。
+    /// </summary>
+    /// <param name="releases">发行版本列表。</param>
+    /// <param name="tag">版本号或 tag，如 2026.10.3-beta1。</param>
+    /// <returns>有为 <see langword="true"/>。</returns>
+    public static bool ContainsTag(IEnumerable<GithubRelease> releases, string tag)
+    {
+        string target = tag.Trim().TrimStart('v', 'V');
+        return releases.Any(x => string.Equals(x.TagName?.Trim().TrimStart('v', 'V'), target, StringComparison.OrdinalIgnoreCase));
+    }
+
+
+
+    /// <summary>
     /// 把一组发行版本拼成一份 Markdown：每个版本一个一级标题，下面一行「预览版 · 日期 · 发布页面」，版本之间用分隔线。
+    /// 只用基本语法、不夹 HTML：本地的 MarkdownTextBlock 只支持少量 HTML 标签。
     /// </summary>
     /// <param name="releases">同一组内的发行版本（新到旧）。</param>
     /// <param name="previewLabel">预览版标记文本。</param>
@@ -144,10 +180,10 @@ public static partial class ReleaseNotesFormatter
             }
             if (meta.Count > 0)
             {
-                sb.AppendLine($"<sub>{string.Join(" · ", meta)}</sub>");
+                sb.AppendLine(string.Join(" · ", meta));
                 sb.AppendLine();
             }
-            sb.AppendLine(StripAppendedDownloads(release.Body));
+            sb.AppendLine(LinkIssueReferences(StripAppendedDownloads(release.Body)));
         }
         return sb.ToString();
     }
@@ -168,6 +204,9 @@ public class ReleaseNotesGroup
 
     /// <summary>副标题（发布年月或「预览版」），由窗口按当前语言填写。</summary>
     public string? Subtitle { get; set; }
+
+    /// <summary>整组的说明正文（<see cref="ReleaseNotesFormatter.BuildGroupMarkdown"/>），由窗口按当前语言填写。</summary>
+    public string Markdown { get; set; } = string.Empty;
 
     /// <summary>组内的发行版本，新到旧。</summary>
     public List<GithubRelease> Releases { get; } = new();

@@ -4407,4 +4407,10 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>Neu starten und installieren</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>GitHub-Anfragelimit erreicht. Bitte versuchen Sie es später erneut.</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>GitHub-Anfragelimit erreicht. Bitte versuchen Sie es nach {0} erneut.</value>
+  </data>
 </root>

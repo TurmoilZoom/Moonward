@@ -4409,4 +4409,10 @@
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>立即重新啟動安裝</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>GitHub 存取次數已達上限，請稍後再試。</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>GitHub 存取次數已達上限，請在 {0} 後再試。</value>
+  </data>
 </root>

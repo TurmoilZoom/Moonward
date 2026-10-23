@@ -4498,4 +4498,10 @@ Repository:</value>
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>Restart to install</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>GitHub request limit reached. Please try again later.</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>GitHub request limit reached. Please try again after {0}.</value>
+  </data>
 </root>

@@ -4409,4 +4409,10 @@ You are welcome to submit exported data to:</value>
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>Riavvia e installa</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>Limite di richieste a GitHub raggiunto. Riprova più tardi.</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>Limite di richieste a GitHub raggiunto. Riprova dopo le {0}.</value>
+  </data>
 </root>

@@ -4429,4 +4429,10 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>Перезапустить и установить</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>Достигнут лимит запросов к GitHub. Повторите попытку позже.</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>Достигнут лимит запросов к GitHub. Повторите попытку после {0}.</value>
+  </data>
 </root>

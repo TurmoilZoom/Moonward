@@ -6,6 +6,7 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.Update"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
              xmlns:sf="using:Starward.Frameworks"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -25,7 +26,7 @@
             </DataTemplate>
         </Grid.Resources>
 
-        <!--  左侧按「主版本.次版本」分组；与设置页一样用流体悬停高亮条（FluidNavigationViewHoverEffect）+ 自带选中指示条。顶部 40 留给标题栏  -->
+        <!--  左侧按「主版本.次版本」分组；与设置页一样用流体悬停高亮条（FluidNavigationViewHoverEffect）+ 自带选中指示条。顶部 40 留给标题栏。正文在本地渲染（MarkdownView）  -->
         <NavigationView x:Name="NavView"
                         Margin="0,40,0,0"
                         IsBackButtonVisible="Collapsed"
@@ -97,16 +98,31 @@
                     </Button>
                 </StackPanel>
 
-                <!--  webview2：只加载一次外壳页，各分组竖排成一列，切换时由脚本竖直平移（同上游游戏设置弹窗竖排的 FlipView）  -->
-                <WebView2 x:Name="webview"
+                <!--  各分组竖排成一列，切换时竖直平移（同上游游戏设置弹窗竖排的 FlipView）：隐藏翻页按钮、吞掉外层滚轮，滚轮只滚当前页  -->
+                <FlipView x:Name="FlipView_Groups"
                           Margin="1,1,0,0"
-                          DefaultBackgroundColor="Transparent"
-                          IsTabStop="False"
+                          Background="Transparent"
+                          SelectionChanged="FlipView_Groups_SelectionChanged"
                           Visibility="Collapsed">
-                    <WebView2.Resources>
-                        <SolidColorBrush x:Key="BrushForThemeBackgroundColor" Color="Transparent" />
-                    </WebView2.Resources>
-                </WebView2>
+                    <FlipView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </FlipView.ItemsPanel>
+                    <FlipView.ItemTemplate>
+                        <DataTemplate x:DataType="local:ReleaseNotesGroup">
+                            <!--  关掉滚动链，滚到头时不带着外层 FlipView 翻页  -->
+                            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                          HorizontalScrollMode="Disabled"
+                                          IsVerticalScrollChainingEnabled="False"
+                                          VerticalScrollBarVisibility="Auto">
+                                <sc:MarkdownView Margin="24,4,24,24"
+                                                 HardLineBreaks="True"
+                                                 Markdown="{x:Bind Markdown, Mode=OneTime}" />
+                            </ScrollViewer>
+                        </DataTemplate>
+                    </FlipView.ItemTemplate>
+                </FlipView>
             </Grid>
         </NavigationView>
 

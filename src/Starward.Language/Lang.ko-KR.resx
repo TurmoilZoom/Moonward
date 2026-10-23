@@ -4409,4 +4409,10 @@
   <data name="AboutSetting_RestartToInstall" xml:space="preserve">
     <value>다시 시작하여 설치</value>
   </data>
+  <data name="ReleaseNotes_GithubRateLimited" xml:space="preserve">
+    <value>GitHub 요청 한도에 도달했습니다. 잠시 후 다시 시도하세요.</value>
+  </data>
+  <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
+    <value>GitHub 요청 한도에 도달했습니다. {0} 이후에 다시 시도하세요.</value>
+  </data>
 </root>
