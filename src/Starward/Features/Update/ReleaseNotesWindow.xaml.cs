@@ -27,7 +27,7 @@ namespace Starward.Features.Update;
 /// 发行说明窗口（参考 PowerToys 的 Release notes）：左侧按「主版本.次版本」分组列出最近的版本，右侧显示该组全部版本的说明。
 /// 随时可从关于页打开，与「有新版本」「静默更新后」才出现的 <see cref="UpdateWindow"/> 互不影响。
 /// <para>
-/// 版本列表由 <see cref="ReleaseNotesService"/> 落盘缓存，正文在本地渲染（<see cref="MarkdownView"/>），打开一次至多请求 GitHub 一次。
+/// 版本列表由 <see cref="ReleaseNotesService"/> 落盘缓存，正文一个版本一段、在本地渲染（<see cref="ReleaseNotesView"/>），打开一次至多请求 GitHub 一次。
 /// </para>
 /// </summary>
 [INotifyPropertyChanged]
@@ -188,7 +188,6 @@ public sealed partial class ReleaseNotesWindow : WindowEx
                 group.Subtitle = group.IsAllPrerelease
                     ? Lang.UpdatePage_PreviewChannel
                     : group.LatestPublishedAt.ToLocalTime().ToString("Y", CultureInfo.CurrentUICulture);
-                group.Markdown = ReleaseNotesFormatter.BuildGroupMarkdown(group.Releases, Lang.UpdatePage_PreviewChannel, Lang.UpdatePage_ReleasePage);
             }
             Groups = groups;
             if (groups.Count == 0)

@@ -134,24 +134,41 @@ public class ReleaseNotesFormatterTests
 
 
     [Fact]
-    public void BuildMarkdown_SeparatesReleasesAndStripsDownloads()
+    public void BuildEntries_OneSectionPerRelease()
     {
         var releases = new[]
         {
             Release("2026.10.3-beta1", 10, 20, prerelease: true, body: BodyWithDownloads),
-            Release("2026.10.2", 10, 15, body: "修复若干问题"),
+            Release("2026.10.2", 10, 15, body: "修复图标不显示的问题 #28"),
         };
 
-        string markdown = ReleaseNotesFormatter.BuildGroupMarkdown(releases, "预览版", "发布页面");
+        var entries = ReleaseNotesFormatter.BuildEntries(releases);
 
-        Assert.StartsWith("# 2026.10.3-beta1", markdown);
-        Assert.Contains("预览版 · 2026-10-20 · [发布页面](https://github.com/TurmoilZoom/Moonward/releases/tag/2026.10.3-beta1)", markdown);
-        Assert.Contains("2026-10-15 · [发布页面]", markdown);
-        Assert.Contains("---", markdown);
-        // 本地渲染只支持少量 HTML：拼出来的部分不夹标签，下载表也已去掉
-        Assert.DoesNotContain("<sub>", markdown);
-        Assert.DoesNotContain("<table", markdown);
-        Assert.True(markdown.IndexOf("# 2026.10.3-beta1", StringComparison.Ordinal) < markdown.IndexOf("# 2026.10.2", StringComparison.Ordinal));
+        Assert.Equal(["2026.10.3-beta1", "2026.10.2"], entries.Select(x => x.Tag));
+        Assert.Equal("2026-10-20", entries[0].Date);
+        Assert.True(entries[0].IsPrerelease);
+        Assert.False(entries[1].IsPrerelease);
+        Assert.Equal("https://github.com/TurmoilZoom/Moonward/releases/tag/2026.10.3-beta1", entries[0].HtmlUri?.AbsoluteUri);
+        // 第一段上方不画分隔线
+        Assert.False(entries[0].ShowSeparator);
+        Assert.True(entries[1].ShowSeparator);
+        // 正文去掉下载表、#N 换成链接
+        Assert.Equal("## 新功能\r\n- 关于页显示上次检查时间", entries[0].Body);
+        Assert.Contains("[#28](https://github.com/TurmoilZoom/Moonward/issues/28)", entries[1].Body);
+    }
+
+
+    [Fact]
+    public void BuildEntries_FallsBackToTagAndToleratesMissingFields()
+    {
+        var release = new GithubRelease { TagName = "2026.9.1", Name = "", Body = null!, HtmlUrl = null! };
+
+        ReleaseNoteEntry entry = Assert.Single(ReleaseNotesFormatter.BuildEntries([release]));
+
+        Assert.Equal("2026.9.1", entry.Title);
+        Assert.Equal(string.Empty, entry.Date);
+        Assert.Equal(string.Empty, entry.Body);
+        Assert.False(entry.HasHtmlUri);
     }
 
 

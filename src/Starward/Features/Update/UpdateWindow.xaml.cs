@@ -579,10 +579,10 @@ public sealed partial class UpdateWindow : WindowEx
             StackPanel_Loading.Visibility = Visibility.Visible;
             StackPanel_Error.Visibility = Visibility.Collapsed;
 
-            string markdown = await GetReleaseContentMarkdownAsync();
+            List<GithubRelease> releases = await GetReleaseContentAsync();
             if (_closed) return;
-            MarkdownView_ReleaseNotes.Markdown = markdown;
-            Scroller_ReleaseNotes.Visibility = Visibility.Visible;
+            View_ReleaseNotes.Releases = releases;
+            View_ReleaseNotes.Visibility = Visibility.Visible;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             if (NewVersion is null)
             {
@@ -601,7 +601,7 @@ public sealed partial class UpdateWindow : WindowEx
             }
             catch { }
             TextBlock_Error.Text = ReleaseNotesService.GetDisplayErrorMessage(ex);
-            Scroller_ReleaseNotes.Visibility = Visibility.Collapsed;
+            View_ReleaseNotes.Visibility = Visibility.Collapsed;
             StackPanel_Loading.Visibility = Visibility.Collapsed;
             StackPanel_Error.Visibility = Visibility.Visible;
         }
@@ -620,8 +620,8 @@ public sealed partial class UpdateWindow : WindowEx
     /// <summary>
     /// 取要显示的发行版本：有新版本时为当前版本之后到新版本（含），静默更新后为上次版本之后到当前版本；最多 10 个。
     /// </summary>
-    /// <returns>拼好的 Markdown。</returns>
-    private async Task<string> GetReleaseContentMarkdownAsync()
+    /// <returns>发行版本，新到旧。</returns>
+    private async Task<List<GithubRelease>> GetReleaseContentAsync()
     {
         bool showPrerelease = false;
         NuGetVersion? startVersion, endVersion;
@@ -696,7 +696,7 @@ public sealed partial class UpdateWindow : WindowEx
                 selected.Add(fallback);
             }
         }
-        return ReleaseNotesFormatter.BuildGroupMarkdown(selected, Lang.UpdatePage_PreviewChannel, Lang.UpdatePage_ReleasePage);
+        return selected;
     }
 
 

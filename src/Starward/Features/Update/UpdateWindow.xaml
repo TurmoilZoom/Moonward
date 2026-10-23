@@ -7,7 +7,6 @@
              xmlns:local="using:Starward.Features.Update"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:s="using:Starward"
-             xmlns:sc="using:Starward.Controls"
              xmlns:sf="using:Starward.Frameworks"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -273,18 +272,11 @@
             </StackPanel>
         </StackPanel>
 
-        <!--  更新内容：本地渲染 Markdown  -->
-        <ScrollViewer x:Name="Scroller_ReleaseNotes"
-                      Grid.Column="1"
-                      Margin="0,32,0,0"
-                      HorizontalScrollBarVisibility="Disabled"
-                      HorizontalScrollMode="Disabled"
-                      VerticalScrollBarVisibility="Auto"
-                      Visibility="Collapsed">
-            <sc:MarkdownView x:Name="MarkdownView_ReleaseNotes"
-                             Margin="24,4,24,24"
-                             HardLineBreaks="True" />
-        </ScrollViewer>
+        <!--  更新内容：一个版本一段、本地渲染，多个版本时顶部有版本条  -->
+        <local:ReleaseNotesView x:Name="View_ReleaseNotes"
+                                        Grid.Column="1"
+                                        Margin="0,32,0,0"
+                                        Visibility="Collapsed" />
 
     </Grid>
 

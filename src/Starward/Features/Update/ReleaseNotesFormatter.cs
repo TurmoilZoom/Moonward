@@ -2,7 +2,6 @@ using Starward.Setup.Core.Github;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Starward.Features.Update;
@@ -145,47 +144,29 @@ public static partial class ReleaseNotesFormatter
 
 
     /// <summary>
-    /// 把一组发行版本拼成一份 Markdown：每个版本一个一级标题，下面一行「预览版 · 日期 · 发布页面」，版本之间用分隔线。
-    /// 只用基本语法、不夹 HTML：本地的 MarkdownTextBlock 只支持少量 HTML 标签。
+    /// 把发行版本转成逐个显示的条目：标题、日期、发布页面由界面原生显示，正文去掉下载表、把 #N 换成链接后交给 Markdown 渲染。
+    /// 一个版本一段，版本条才能直接跳到某个版本。
     /// </summary>
-    /// <param name="releases">同一组内的发行版本（新到旧）。</param>
-    /// <param name="previewLabel">预览版标记文本。</param>
-    /// <param name="releasePageLabel">发布页面链接文本。</param>
-    /// <returns>Markdown 文本。</returns>
-    public static string BuildGroupMarkdown(IEnumerable<GithubRelease> releases, string previewLabel, string releasePageLabel)
+    /// <param name="releases">发行版本（新到旧）。</param>
+    /// <returns>条目列表，顺序不变。</returns>
+    public static List<ReleaseNoteEntry> BuildEntries(IEnumerable<GithubRelease> releases)
     {
-        var sb = new StringBuilder();
+        var entries = new List<ReleaseNoteEntry>();
         foreach (GithubRelease release in releases)
         {
-            if (sb.Length > 0)
+            Uri.TryCreate(release.HtmlUrl, UriKind.Absolute, out Uri? htmlUri);
+            entries.Add(new ReleaseNoteEntry
             {
-                sb.AppendLine();
-                sb.AppendLine("---");
-                sb.AppendLine();
-            }
-            sb.AppendLine($"# {(string.IsNullOrWhiteSpace(release.Name) ? release.TagName : release.Name)}");
-            sb.AppendLine();
-            var meta = new List<string>();
-            if (IsPrerelease(release))
-            {
-                meta.Add(previewLabel);
-            }
-            if (release.PublishedAt != default)
-            {
-                meta.Add(release.PublishedAt.ToLocalTime().ToString("yyyy-MM-dd"));
-            }
-            if (!string.IsNullOrWhiteSpace(release.HtmlUrl))
-            {
-                meta.Add($"[{releasePageLabel}]({release.HtmlUrl})");
-            }
-            if (meta.Count > 0)
-            {
-                sb.AppendLine(string.Join(" · ", meta));
-                sb.AppendLine();
-            }
-            sb.AppendLine(LinkIssueReferences(StripAppendedDownloads(release.Body)));
+                Tag = release.TagName ?? string.Empty,
+                Title = string.IsNullOrWhiteSpace(release.Name) ? release.TagName ?? string.Empty : release.Name,
+                Date = release.PublishedAt == default ? string.Empty : release.PublishedAt.ToLocalTime().ToString("yyyy-MM-dd"),
+                IsPrerelease = IsPrerelease(release),
+                HtmlUri = htmlUri,
+                Body = LinkIssueReferences(StripAppendedDownloads(release.Body)),
+                IsFirst = entries.Count == 0,
+            });
         }
-        return sb.ToString();
+        return entries;
     }
 
 
@@ -205,9 +186,6 @@ public class ReleaseNotesGroup
     /// <summary>副标题（发布年月或「预览版」），由窗口按当前语言填写。</summary>
     public string? Subtitle { get; set; }
 
-    /// <summary>整组的说明正文（<see cref="ReleaseNotesFormatter.BuildGroupMarkdown"/>），由窗口按当前语言填写。</summary>
-    public string Markdown { get; set; } = string.Empty;
-
     /// <summary>组内的发行版本，新到旧。</summary>
     public List<GithubRelease> Releases { get; } = new();
 
@@ -216,5 +194,41 @@ public class ReleaseNotesGroup
 
     /// <summary>组内最新版本的发布时间。</summary>
     public DateTimeOffset LatestPublishedAt => Releases.Count > 0 ? Releases[0].PublishedAt : default;
+
+}
+
+
+/// <summary>
+/// 发行说明里的一个版本（一段）。供 x:Bind 使用，属性都是普通 get/set。
+/// </summary>
+public class ReleaseNoteEntry
+{
+
+    /// <summary>版本 tag，版本条上显示。</summary>
+    public string Tag { get; set; } = string.Empty;
+
+    /// <summary>标题：发行版本名，没有时用 tag。</summary>
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>发布日期（本地时间 yyyy-MM-dd），没有时为空。</summary>
+    public string Date { get; set; } = string.Empty;
+
+    /// <summary>是否为预览版。</summary>
+    public bool IsPrerelease { get; set; }
+
+    /// <summary>GitHub 发布页面。</summary>
+    public Uri? HtmlUri { get; set; }
+
+    /// <summary>是否有发布页面。</summary>
+    public bool HasHtmlUri => HtmlUri is not null;
+
+    /// <summary>正文 Markdown（已去掉下载表、#N 已换成链接）。</summary>
+    public string Body { get; set; } = string.Empty;
+
+    /// <summary>是否为第一段；第一段上方不画分隔线。</summary>
+    public bool IsFirst { get; set; }
+
+    /// <summary>上方是否画分隔线。</summary>
+    public bool ShowSeparator => !IsFirst;
 
 }

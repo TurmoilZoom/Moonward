@@ -6,7 +6,6 @@
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.Update"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:sc="using:Starward.Controls"
              xmlns:sf="using:Starward.Frameworks"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -26,7 +25,7 @@
             </DataTemplate>
         </Grid.Resources>
 
-        <!--  左侧按「主版本.次版本」分组；与设置页一样用流体悬停高亮条（FluidNavigationViewHoverEffect）+ 自带选中指示条。顶部 40 留给标题栏。正文在本地渲染（MarkdownView）  -->
+        <!--  左侧按「主版本.次版本」分组；与设置页一样用流体悬停高亮条（FluidNavigationViewHoverEffect）+ 自带选中指示条。顶部 40 留给标题栏。正文一个版本一段、本地渲染，顶部版本条可跳到某个版本（ReleaseNotesView）  -->
         <NavigationView x:Name="NavView"
                         Margin="0,40,0,0"
                         IsBackButtonVisible="Collapsed"
@@ -111,15 +110,7 @@
                     </FlipView.ItemsPanel>
                     <FlipView.ItemTemplate>
                         <DataTemplate x:DataType="local:ReleaseNotesGroup">
-                            <!--  关掉滚动链，滚到头时不带着外层 FlipView 翻页  -->
-                            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                                          HorizontalScrollMode="Disabled"
-                                          IsVerticalScrollChainingEnabled="False"
-                                          VerticalScrollBarVisibility="Auto">
-                                <sc:MarkdownView Margin="24,4,24,24"
-                                                 HardLineBreaks="True"
-                                                 Markdown="{x:Bind Markdown, Mode=OneTime}" />
-                            </ScrollViewer>
+                            <local:ReleaseNotesView Releases="{x:Bind Releases, Mode=OneTime}" />
                         </DataTemplate>
                     </FlipView.ItemTemplate>
                 </FlipView>
