@@ -144,8 +144,8 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!--  加载中  -->
-                    <ProgressRing Grid.RowSpan="2"
+                    <!--  加载中：只占内容行，在标题下方的内容区居中，不跨标题算整张卡片的中点  -->
+                    <ProgressRing Grid.Row="1"
                                   Width="32"
                                   Height="32"
                                   HorizontalAlignment="Center"

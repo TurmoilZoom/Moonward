@@ -75,7 +75,10 @@ public sealed partial class TimeNodeButton : UserControl
     public ObservableCollection<TimeNodeSectionView> Sections { get; } = new();
 
 
-    public bool IsEmpty { get; set => SetProperty(ref field, value); } = true;
+    /// <summary>
+    /// 加载完成后确实没有节点。默认 false：首次加载前就置 true 会让空态文案和内容区居中的进度环叠在一起。
+    /// </summary>
+    public bool IsEmpty { get; set => SetProperty(ref field, value); }
 
 
     public bool IsLoading { get; set => SetProperty(ref field, value); }
@@ -99,7 +102,7 @@ public sealed partial class TimeNodeButton : UserControl
         CancelLoad();
         Sections.Clear();
         ErrorMessage = null;
-        IsEmpty = true;
+        IsEmpty = false;
     }
 
 

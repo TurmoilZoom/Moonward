@@ -173,8 +173,8 @@
                                TextWrapping="WrapWholeWords"
                                Visibility="{x:Bind ErrorMessage, Converter={StaticResource ObjectToVisibilityConverter}}" />
 
-                    <!--  加载中  -->
-                    <ProgressRing Grid.RowSpan="2"
+                    <!--  加载中：只占内容行居中，底部错误行出现时不会把它挤偏  -->
+                    <ProgressRing Grid.Row="0"
                                   Width="32"
                                   Height="32"
                                   HorizontalAlignment="Center"
