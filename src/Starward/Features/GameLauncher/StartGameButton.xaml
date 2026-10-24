@@ -154,12 +154,13 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <!--  进度圈  -->
+                    <!--  进度圈：要画百分比，保留系统样式（全局默认的经典圆点画不了进度）  -->
                     <Grid Margin="10,0,0,0" HorizontalAlignment="Left">
                         <ProgressRing Width="28"
                                       Height="28"
                                       Background="{ThemeResource ControlOnImageFillColorDefaultBrush}"
                                       IsIndeterminate="{x:Bind InstallStateIsPending}"
+                                      Style="{StaticResource SystemProgressRingStyle}"
                                       Value="{x:Bind ProgressRingValue}" />
                         <TextBlock HorizontalAlignment="Center"
                                    VerticalAlignment="Center"

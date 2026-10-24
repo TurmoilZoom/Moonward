@@ -356,10 +356,12 @@
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                       Glyph="&#xE733;"
                                                       Visibility="{x:Bind IsForbid}" />
+                                            <!--  历练点奖励进度是确定进度，用系统样式（全局默认的经典圆点画不了进度）  -->
                                             <ProgressRing Width="20"
                                                           Height="20"
                                                           IsIndeterminate="False"
                                                           Maximum="2000"
+                                                          Style="{StaticResource SystemProgressRingStyle}"
                                                           Visibility="{x:Bind IsUnfinishedOrWaitTaken}"
                                                           Value="{x:Bind Progress}" />
                                         </Grid>

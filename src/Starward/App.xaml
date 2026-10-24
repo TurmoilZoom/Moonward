@@ -11,6 +11,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <ResourceDictionary Source="/Features/GameLauncher/CompactCheckBoxStyle.xaml" />
+                <ResourceDictionary Source="/Controls/ClassicProgressRingStyle.xaml" />
 
                 <!--  Other merged dictionaries here  -->
             </ResourceDictionary.MergedDictionaries>
@@ -72,6 +73,9 @@
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
             </Style>
+
+            <!--  全局转圈改为 Win8/10 经典圆点；要显示百分比的进度圈显式用 SystemProgressRingStyle  -->
+            <Style BasedOn="{StaticResource ClassicProgressRingStyle}" TargetType="ProgressRing" />
 
             <FontFamily x:Key="SegoeFluentIcons">ms-appx:///Assets/Font/Segoe Fluent Icons.ttf#Segoe Fluent Icons</FontFamily>
             <Style TargetType="FontIcon">
