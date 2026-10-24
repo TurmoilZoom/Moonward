@@ -213,9 +213,10 @@
 
 
 
-        <!--  更新内容加载  -->
+        <!--  更新内容加载：顶部让出 32 标题栏，与下方 View_ReleaseNotes 的内容区同一个中心  -->
         <StackPanel x:Name="StackPanel_Loading"
                     Grid.Column="1"
+                    Margin="0,32,0,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Spacing="24">
@@ -232,6 +233,7 @@
         <!--  更新内容加载出错  -->
         <StackPanel x:Name="StackPanel_Error"
                     Grid.Column="1"
+                    Margin="0,32,0,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Spacing="24"
