@@ -129,13 +129,8 @@ internal sealed class LanSyncService
             string file = snapshotFile;
             LanSyncCounts result = await Task.Run(() =>
             {
-                LanSyncSnapshot.BackupBeforeMerge();
-                LanSyncCounts merged = LanSyncSnapshot.Merge(file, categories, out List<string> playTimeBizs);
-                if (merged.PlayTime > 0)
-                {
-                    RefreshPlayTimeTotals(playTimeBizs);
-                }
-                return merged;
+                DatabaseBackupService.CreateBackup(BackupKind.BeforeLanSync);
+                return MergeCore(file, categories);
             }, CancellationToken.None).ConfigureAwait(false);
 
             _logger.LogInformation("LAN sync from {device} ({address}) added {gacha} gacha, {record} game record and {playtime} playtime rows.",
@@ -147,6 +142,42 @@ internal sealed class LanSyncService
             LanSyncSnapshot.DeleteTempFile(snapshotFile);
             _pullLock.Release();
         }
+    }
+
+
+    /// <summary>
+    /// 合并本机已有的快照文件（如从备份导出的），与拉取同步互斥。不做合并前备份，由调用方负责。在后台线程调用。
+    /// </summary>
+    /// <param name="file">快照文件。</param>
+    /// <param name="categories">要合并的类别。</param>
+    /// <returns>各类别新增的记录数。</returns>
+    public LanSyncCounts MergeSnapshot(string file, LanSyncCategories categories)
+    {
+        _pullLock.Wait();
+        try
+        {
+            LanSyncCounts result = MergeCore(file, categories);
+            _logger.LogInformation("Merged snapshot: added {gacha} gacha, {record} game record and {playtime} playtime rows.", result.Gacha, result.GameRecord, result.PlayTime);
+            return result;
+        }
+        finally
+        {
+            _pullLock.Release();
+        }
+    }
+
+
+    /// <summary>
+    /// 合并快照并重算受影响游戏的时长总计。调用方须持有 <see cref="_pullLock"/>。
+    /// </summary>
+    private LanSyncCounts MergeCore(string file, LanSyncCategories categories)
+    {
+        LanSyncCounts merged = LanSyncSnapshot.Merge(file, categories, out List<string> playTimeBizs);
+        if (merged.PlayTime > 0)
+        {
+            RefreshPlayTimeTotals(playTimeBizs);
+        }
+        return merged;
     }
 
 

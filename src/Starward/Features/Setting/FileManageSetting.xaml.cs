@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
-using SharpSevenZip;
 using Starward.Features.Database;
 using Starward.Features.LanSync;
 using Starward.Frameworks;
@@ -33,7 +32,7 @@ public sealed partial class FileManageSetting : PageBase
 
     protected override void OnLoaded()
     {
-        GetLastBackupTime();
+        _ = RefreshBackupStatusAsync();
         _ = UpdateCacheSizeAsync();
     }
 
@@ -180,37 +179,97 @@ public sealed partial class FileManageSetting : PageBase
 
 
 
-    #region 备份数据库
+    #region 备份与还原
 
 
 
-    /// <summary>备份卡片的说明：有备份后显示上次备份时间，备份失败时显示错误。</summary>
-    public string BackupDescription { get; set => SetProperty(ref field, value); } = Lang.FileSettingPage_BackupDatabaseDesc;
+    /// <summary>备份位置（已核对目录是否还在）。</summary>
+    public string BackupFolder { get; set => SetProperty(ref field, value); } = string.Empty;
+
+
+    /// <summary>备份卡片的说明：上次备份时间与当前数据是否有变化；没有变化时说明未新建；备份失败时显示错误。</summary>
+    public string BackupDescription { get; set => SetProperty(ref field, value); } = Lang.FileSettingPage_BackupDatabaseIntro;
 
 
     /// <summary>上次备份的文件仍在，可以打开所在位置。</summary>
     public bool HasLastBackup { get; set => SetProperty(ref field, value); }
 
 
-    private void GetLastBackupTime()
+    /// <summary>
+    /// 刷新备份位置与上次备份的状态。对比当前数据要读整个库，放在后台线程。
+    /// </summary>
+    private async Task RefreshBackupStatusAsync()
     {
         try
         {
-            if (DatabaseService.TryGetValue("LastBackupDatabase", out string? file, out DateTime time))
+            BackupFolder = DatabaseBackupService.GetBackupFolder();
+            if (!DatabaseBackupService.TryGetLastBackup(out _, out DateTime time, out _))
             {
-                file = Path.Join(AppConfig.UserDataFolder, "DatabaseBackup", file);
-                if (File.Exists(file))
-                {
-                    BackupDescription = $"{Lang.SettingPage_LastBackup}  {time:yyyy-MM-dd HH:mm:ss}";
-                    HasLastBackup = true;
-                }
-                else
-                {
-                    _logger.LogWarning("Last backup database file not found: {file}", file);
-                }
+                HasLastBackup = false;
+                BackupDescription = Lang.FileSettingPage_BackupDatabaseIntro;
+                return;
+            }
+            HasLastBackup = true;
+            string timeText = time.ToString("yyyy-MM-dd HH:mm:ss");
+            BackupDescription = $"{Lang.SettingPage_LastBackup}  {timeText}";
+            bool? same = await Task.Run(DatabaseBackupService.IsSameAsLastBackup);
+            if (same is not null)
+            {
+                BackupDescription = string.Format(same.Value ? Lang.FileSettingPage_BackupStatusSame : Lang.FileSettingPage_BackupStatusChanged, timeText);
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Refresh backup status");
+        }
+    }
+
+
+
+    /// <summary>
+    /// 更改备份位置。选回默认目录时清空设置，跟着数据文件夹走。已有的备份不搬。
+    /// </summary>
+    [RelayCommand]
+    private async Task ChangeBackupFolderAsync()
+    {
+        try
+        {
+            string? folder = await FileDialogHelper.PickFolderAsync(this.XamlRoot, BackupFolder);
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
+            if (!DatabaseBackupService.IsValidBackupFolder(folder))
+            {
+                BackupDescription = Lang.FileSettingPage_InvalidBackupFolder;
+                return;
+            }
+            string target = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
+            string defaultFolder = Path.TrimEndingDirectorySeparator(Path.GetFullPath(DatabaseBackupService.DefaultBackupFolder));
+            AppConfig.BackupFolder = string.Equals(target, defaultFolder, StringComparison.OrdinalIgnoreCase) ? null : target;
+            await RefreshBackupStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Change backup folder");
+        }
+    }
+
+
+
+    [RelayCommand]
+    private async Task OpenBackupFolderAsync()
+    {
+        try
+        {
+            string folder = DatabaseBackupService.GetBackupFolder();
+            Directory.CreateDirectory(folder);
+            await Launcher.LaunchFolderPathAsync(folder);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Open backup folder");
+        }
     }
 
 
@@ -222,20 +281,12 @@ public sealed partial class FileManageSetting : PageBase
         {
             if (Directory.Exists(AppConfig.UserDataFolder))
             {
-                var folder = Path.Combine(AppConfig.UserDataFolder, "DatabaseBackup");
-                Directory.CreateDirectory(folder);
-                DateTime time = DateTime.Now;
-                await Task.Run(() =>
-                {
-                    string file = Path.Combine(folder, $"StarwardDatabase_{time:yyyyMMdd_HHmmss}.db");
-                    string archive = Path.ChangeExtension(file, ".7z");
-                    DatabaseService.BackupDatabase(file);
-                    new SharpSevenZipCompressor().CompressFiles(archive, file);
-                    DatabaseService.SetValue("LastBackupDatabase", Path.GetFileName(archive), time);
-                    File.Delete(file);
-                });
-                BackupDescription = $"{Lang.SettingPage_LastBackup}  {time:yyyy-MM-dd HH:mm:ss}";
+                ManualBackupResult result = await Task.Run(DatabaseBackupService.BackupManually);
                 HasLastBackup = true;
+                string timeText = result.Time.ToString("yyyy-MM-dd HH:mm:ss");
+                BackupDescription = result.Unchanged
+                    ? string.Format(Lang.FileSettingPage_BackupUnchanged, timeText)
+                    : string.Format(Lang.FileSettingPage_BackupStatusSame, timeText);
             }
         }
         catch (Exception ex)
@@ -252,28 +303,47 @@ public sealed partial class FileManageSetting : PageBase
     {
         try
         {
-            if (DatabaseService.TryGetValue("LastBackupDatabase", out string? file, out DateTime time))
+            if (DatabaseBackupService.TryGetLastBackup(out string? file, out _, out _))
             {
-                file = Path.Join(AppConfig.UserDataFolder, "DatabaseBackup", file);
-                if (File.Exists(file))
+                var item = await StorageFile.GetFileFromPathAsync(file);
+                var folder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(file));
+                var options = new FolderLauncherOptions
                 {
-                    var item = await StorageFile.GetFileFromPathAsync(file);
-                    var folder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(file));
-                    var options = new FolderLauncherOptions
-                    {
-                        ItemsToSelect = { item }
-                    };
-                    await Launcher.LaunchFolderAsync(folder, options);
-                }
-                else
-                {
-                    _logger.LogWarning("Last backup database file not found: {file}", file);
-                }
+                    ItemsToSelect = { item }
+                };
+                await Launcher.LaunchFolderAsync(folder, options);
+            }
+            else
+            {
+                HasLastBackup = false;
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Open last backup database");
+        }
+    }
+
+
+
+    /// <summary>
+    /// 打开还原对话框。覆盖还原会在对话框里直接重启；合并还原后刷新状态。
+    /// </summary>
+    [RelayCommand]
+    private async Task RestoreBackupAsync()
+    {
+        try
+        {
+            var dialog = new RestoreBackupDialog { XamlRoot = this.XamlRoot };
+            await dialog.ShowAsync();
+            if (dialog.Merged)
+            {
+                await RefreshBackupStatusAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Show restore backup dialog");
         }
     }
 

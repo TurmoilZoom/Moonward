@@ -4185,9 +4185,6 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
     <value>Sicherung und Zurücksetzen</value>
   </data>
-  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
-    <value>Sichert die Datenbank komprimiert im Ordner DatabaseBackup des Datenordners</value>
-  </data>
   <data name="FileSettingPage_BackupNow" xml:space="preserve">
     <value>Jetzt sichern</value>
   </data>
@@ -4412,5 +4409,122 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   </data>
   <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
     <value>GitHub-Anfragelimit erreicht. Bitte versuchen Sie es nach {0} erneut.</value>
+  </data>
+  <data name="FileSettingPage_BackupFolder" xml:space="preserve">
+    <value>Speicherort der Sicherungen</value>
+  </data>
+  <data name="FileSettingPage_ChangeBackupFolder" xml:space="preserve">
+    <value>Speicherort ändern</value>
+  </data>
+  <data name="FileSettingPage_BackupExcludes" xml:space="preserve">
+    <value>Angemeldete Konten, Geräte-Fingerabdrücke, Gacha-Verlaufslinks und eigene Hintergrundbilder sind nicht enthalten</value>
+  </data>
+  <data name="FileSettingPage_Restore" xml:space="preserve">
+    <value>Wiederherstellen</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseIntro" xml:space="preserve">
+    <value>Sichert Datensätze und Einstellungen, um sie auf diesem oder einem anderen PC wiederherzustellen</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusSame" xml:space="preserve">
+    <value>Letzte Sicherung {0}, entspricht den aktuellen Daten</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusChanged" xml:space="preserve">
+    <value>Letzte Sicherung {0}, die Daten haben sich seitdem geändert</value>
+  </data>
+  <data name="FileSettingPage_InvalidBackupFolder" xml:space="preserve">
+    <value>Dieser Ordner kann nicht für Sicherungen verwendet werden. Wählen Sie einen Ordner, der kein Laufwerksstamm ist und nicht im App-Ordner liegt.</value>
+  </data>
+  <data name="FileSettingPage_BackupUnchanged" xml:space="preserve">
+    <value>Die Daten haben sich seit der letzten Sicherung ({0}) nicht geändert, daher wurde keine neue Sicherung erstellt</value>
+  </data>
+  <data name="RestoreBackupDialog_Title" xml:space="preserve">
+    <value>Aus Sicherung wiederherstellen</value>
+  </data>
+  <data name="RestoreBackupDialog_Description" xml:space="preserve">
+    <value>Angemeldete Konten, Geräte-Fingerabdrücke, Gacha-Verlaufslinks und Spielpfade auf diesem PC bleiben erhalten. Vor dem Wiederherstellen werden die aktuellen Daten gesichert.</value>
+  </data>
+  <data name="RestoreBackupDialog_Backups" xml:space="preserve">
+    <value>Sicherungen am Speicherort</value>
+  </data>
+  <data name="RestoreBackupDialog_Browse" xml:space="preserve">
+    <value>Datei auswählen…</value>
+  </data>
+  <data name="RestoreBackupDialog_NoBackup" xml:space="preserve">
+    <value>Am Speicherort gibt es noch keine Sicherungen.</value>
+  </data>
+  <data name="RestoreBackupDialog_LegacyNote" xml:space="preserve">
+    <value>Dies ist eine alte vollständige Sicherung. Darin enthaltene Anmeldungen und andere Zugangsdaten werden übersprungen.</value>
+  </data>
+  <data name="RestoreBackupDialog_Mode" xml:space="preserve">
+    <value>Art der Wiederherstellung</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeOverwrite" xml:space="preserve">
+    <value>Zum Stand der Sicherung zurückkehren (Moonward wird neu gestartet)</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeMerge" xml:space="preserve">
+    <value>Nur fehlende Datensätze hinzufügen (Gacha, Werkzeugkasten, Spielzeit), Einstellungen bleiben unverändert</value>
+  </data>
+  <data name="RestoreBackupDialog_RestoreAndRestart" xml:space="preserve">
+    <value>Wiederherstellen und neu starten</value>
+  </data>
+  <data name="RestoreBackupDialog_Checking" xml:space="preserve">
+    <value>Sicherung wird geprüft…</value>
+  </data>
+  <data name="RestoreBackupDialog_Merging" xml:space="preserve">
+    <value>Datensätze werden hinzugefügt…</value>
+  </data>
+  <data name="RestoreBackupDialog_SelectBackupFirst" xml:space="preserve">
+    <value>Wählen Sie zuerst eine Sicherung aus.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_RecorderRunning" xml:space="preserve">
+    <value>Die Spielzeit wird gerade aufgezeichnet. Stellen Sie die Daten wieder her, nachdem das Spiel beendet wurde.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Failed" xml:space="preserve">
+    <value>Wiederherstellung fehlgeschlagen: {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeNothingNew" xml:space="preserve">
+    <value>Wiederherstellung abgeschlossen. Dieses Gerät hat bereits alle Datensätze der Sicherung.</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeCompleted" xml:space="preserve">
+    <value>Wiederherstellung abgeschlossen. {0} Gacha-Datensätze, {1} Werkzeugkasten-Datensätze und {2} Spielsitzungen hinzugefügt.</value>
+  </data>
+  <data name="RestoreBackupDialog_CreatedAt" xml:space="preserve">
+    <value>Gesichert am {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_FromMachine" xml:space="preserve">
+    <value>von {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Corrupted" xml:space="preserve">
+    <value>Die Sicherungsdatei ist beschädigt.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_NewerVersion" xml:space="preserve">
+    <value>Diese Sicherung stammt von einer neueren Moonward-Version. Aktualisieren Sie Moonward und versuchen Sie es erneut.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Starward" xml:space="preserve">
+    <value>Dies ist eine Datenbank des ursprünglichen Starward und kann hier nicht wiederhergestellt werden.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_InvalidFile" xml:space="preserve">
+    <value>Diese Datei ist keine Moonward-Sicherung.</value>
+  </data>
+  <data name="DatabaseBackup_LegacyFormat" xml:space="preserve">
+    <value>Altes Format</value>
+  </data>
+  <data name="DatabaseBackup_Kind_Manual" xml:space="preserve">
+    <value>Manuelle Sicherung</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeUpgrade" xml:space="preserve">
+    <value>Vor dem Update</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeRestore" xml:space="preserve">
+    <value>Vor dem Wiederherstellen</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeLanSync" xml:space="preserve">
+    <value>Vor der LAN-Synchronisierung</value>
+  </data>
+  <data name="DatabaseBackup_Kind_LegacyAuto" xml:space="preserve">
+    <value>Alte automatische Sicherung</value>
+  </data>
+  <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
+    <value>Wiederherstellung aus der Sicherung fehlgeschlagen. Ihre Daten wurden nicht geändert: {0}</value>
   </data>
 </root>

@@ -4181,9 +4181,6 @@ You are welcome to submit exported data to:</value>
   <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
     <value>สำรองข้อมูลและรีเซ็ต</value>
   </data>
-  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
-    <value>บีบอัดฐานข้อมูลแล้วสำรองไว้ในโฟลเดอร์ DatabaseBackup ภายในโฟลเดอร์ข้อมูล</value>
-  </data>
   <data name="FileSettingPage_BackupNow" xml:space="preserve">
     <value>สำรองข้อมูลเลย</value>
   </data>
@@ -4408,5 +4405,122 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
     <value>ถึงขีดจำกัดการเรียกใช้ GitHub แล้ว โปรดลองอีกครั้งหลังเวลา {0}</value>
+  </data>
+  <data name="FileSettingPage_BackupFolder" xml:space="preserve">
+    <value>ตำแหน่งที่เก็บข้อมูลสำรอง</value>
+  </data>
+  <data name="FileSettingPage_ChangeBackupFolder" xml:space="preserve">
+    <value>เปลี่ยนตำแหน่ง</value>
+  </data>
+  <data name="FileSettingPage_BackupExcludes" xml:space="preserve">
+    <value>ไม่รวมบัญชีที่เข้าสู่ระบบ ลายนิ้วมืออุปกรณ์ ลิงก์ประวัติการสุ่ม และภาพพื้นหลังที่กำหนดเอง</value>
+  </data>
+  <data name="FileSettingPage_Restore" xml:space="preserve">
+    <value>กู้คืน</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseIntro" xml:space="preserve">
+    <value>สำรองบันทึกและการตั้งค่า เพื่อกู้คืนบนพีซีเครื่องนี้หรือเครื่องอื่น</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusSame" xml:space="preserve">
+    <value>สำรองล่าสุด {0} ตรงกับข้อมูลปัจจุบัน</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusChanged" xml:space="preserve">
+    <value>สำรองล่าสุด {0} ข้อมูลมีการเปลี่ยนแปลงหลังจากนั้น</value>
+  </data>
+  <data name="FileSettingPage_InvalidBackupFolder" xml:space="preserve">
+    <value>ใช้โฟลเดอร์นี้เก็บข้อมูลสำรองไม่ได้ โปรดเลือกโฟลเดอร์ที่ไม่ใช่รูทของไดรฟ์และไม่อยู่ในโฟลเดอร์ของแอป</value>
+  </data>
+  <data name="FileSettingPage_BackupUnchanged" xml:space="preserve">
+    <value>ข้อมูลไม่เปลี่ยนแปลงตั้งแต่การสำรองล่าสุด ({0}) จึงไม่ได้สร้างข้อมูลสำรองใหม่</value>
+  </data>
+  <data name="RestoreBackupDialog_Title" xml:space="preserve">
+    <value>กู้คืนจากข้อมูลสำรอง</value>
+  </data>
+  <data name="RestoreBackupDialog_Description" xml:space="preserve">
+    <value>บัญชีที่เข้าสู่ระบบ ลายนิ้วมืออุปกรณ์ ลิงก์ประวัติการสุ่ม และตำแหน่งเกมบนพีซีเครื่องนี้จะคงไว้ ก่อนกู้คืนจะสำรองข้อมูลปัจจุบันก่อน</value>
+  </data>
+  <data name="RestoreBackupDialog_Backups" xml:space="preserve">
+    <value>ข้อมูลสำรองในตำแหน่งที่เก็บ</value>
+  </data>
+  <data name="RestoreBackupDialog_Browse" xml:space="preserve">
+    <value>เลือกไฟล์…</value>
+  </data>
+  <data name="RestoreBackupDialog_NoBackup" xml:space="preserve">
+    <value>ยังไม่มีข้อมูลสำรองในตำแหน่งที่เก็บ</value>
+  </data>
+  <data name="RestoreBackupDialog_LegacyNote" xml:space="preserve">
+    <value>นี่คือข้อมูลสำรองแบบเต็มรูปแบบเก่า บัญชีที่เข้าสู่ระบบและข้อมูลรับรองอื่น ๆ ในนั้นจะถูกข้าม</value>
+  </data>
+  <data name="RestoreBackupDialog_Mode" xml:space="preserve">
+    <value>วิธีกู้คืน</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeOverwrite" xml:space="preserve">
+    <value>กลับไปเป็นสถานะ ณ เวลาที่สำรอง (Moonward จะรีสตาร์ท)</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeMerge" xml:space="preserve">
+    <value>เพิ่มเฉพาะบันทึกที่ขาดหายไป (การสุ่ม กล่องเครื่องมือ เวลาเล่น) โดยไม่เปลี่ยนการตั้งค่า</value>
+  </data>
+  <data name="RestoreBackupDialog_RestoreAndRestart" xml:space="preserve">
+    <value>กู้คืนและรีสตาร์ท</value>
+  </data>
+  <data name="RestoreBackupDialog_Checking" xml:space="preserve">
+    <value>กำลังตรวจสอบข้อมูลสำรอง…</value>
+  </data>
+  <data name="RestoreBackupDialog_Merging" xml:space="preserve">
+    <value>กำลังเพิ่มบันทึก…</value>
+  </data>
+  <data name="RestoreBackupDialog_SelectBackupFirst" xml:space="preserve">
+    <value>โปรดเลือกข้อมูลสำรองก่อน</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_RecorderRunning" xml:space="preserve">
+    <value>กำลังบันทึกเวลาเล่น โปรดกู้คืนหลังจากปิดเกมแล้ว</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Failed" xml:space="preserve">
+    <value>กู้คืนไม่สำเร็จ: {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeNothingNew" xml:space="preserve">
+    <value>กู้คืนเสร็จสิ้น อุปกรณ์นี้มีบันทึกทั้งหมดในข้อมูลสำรองอยู่แล้ว</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeCompleted" xml:space="preserve">
+    <value>กู้คืนเสร็จสิ้น เพิ่มประวัติการสุ่ม {0} รายการ บันทึกกล่องเครื่องมือ {1} รายการ และเวลาเล่น {2} ช่วง</value>
+  </data>
+  <data name="RestoreBackupDialog_CreatedAt" xml:space="preserve">
+    <value>สำรองเมื่อ {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_FromMachine" xml:space="preserve">
+    <value>จาก {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Corrupted" xml:space="preserve">
+    <value>ไฟล์ข้อมูลสำรองเสียหาย</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_NewerVersion" xml:space="preserve">
+    <value>ข้อมูลสำรองนี้สร้างจาก Moonward เวอร์ชันที่ใหม่กว่า โปรดอัปเดต Moonward แล้วลองอีกครั้ง</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Starward" xml:space="preserve">
+    <value>นี่คือฐานข้อมูลของ Starward ต้นฉบับ จึงกู้คืนที่นี่ไม่ได้</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_InvalidFile" xml:space="preserve">
+    <value>ไฟล์นี้ไม่ใช่ข้อมูลสำรองของ Moonward</value>
+  </data>
+  <data name="DatabaseBackup_LegacyFormat" xml:space="preserve">
+    <value>รูปแบบเก่า</value>
+  </data>
+  <data name="DatabaseBackup_Kind_Manual" xml:space="preserve">
+    <value>สำรองด้วยตนเอง</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeUpgrade" xml:space="preserve">
+    <value>ก่อนอัปเดต</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeRestore" xml:space="preserve">
+    <value>ก่อนกู้คืน</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeLanSync" xml:space="preserve">
+    <value>ก่อนซิงค์ผ่าน LAN</value>
+  </data>
+  <data name="DatabaseBackup_Kind_LegacyAuto" xml:space="preserve">
+    <value>ข้อมูลสำรองอัตโนมัติแบบเก่า</value>
+  </data>
+  <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
+    <value>กู้คืนจากข้อมูลสำรองไม่สำเร็จ ข้อมูลของคุณไม่มีการเปลี่ยนแปลง: {0}</value>
   </data>
 </root>

@@ -4187,9 +4187,6 @@ You are welcome to submit exported data to:</value>
   <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
     <value>Backup e ripristino</value>
   </data>
-  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
-    <value>Salva un backup compresso del database nella cartella DatabaseBackup della cartella dati</value>
-  </data>
   <data name="FileSettingPage_BackupNow" xml:space="preserve">
     <value>Esegui backup</value>
   </data>
@@ -4414,5 +4411,122 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
     <value>Limite di richieste a GitHub raggiunto. Riprova dopo le {0}.</value>
+  </data>
+  <data name="FileSettingPage_BackupFolder" xml:space="preserve">
+    <value>Posizione dei backup</value>
+  </data>
+  <data name="FileSettingPage_ChangeBackupFolder" xml:space="preserve">
+    <value>Cambia posizione</value>
+  </data>
+  <data name="FileSettingPage_BackupExcludes" xml:space="preserve">
+    <value>Non include gli account connessi, le impronte del dispositivo, i link della cronologia Gacha e le immagini di sfondo personalizzate</value>
+  </data>
+  <data name="FileSettingPage_Restore" xml:space="preserve">
+    <value>Ripristina</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseIntro" xml:space="preserve">
+    <value>Esegue il backup di registri e impostazioni per ripristinarli su questo o su un altro PC</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusSame" xml:space="preserve">
+    <value>Ultimo backup {0}, corrisponde ai dati attuali</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusChanged" xml:space="preserve">
+    <value>Ultimo backup {0}, da allora i dati sono cambiati</value>
+  </data>
+  <data name="FileSettingPage_InvalidBackupFolder" xml:space="preserve">
+    <value>Questa cartella non può essere usata per i backup. Scegli una cartella che non sia la radice di un'unità né si trovi nella cartella dell'app.</value>
+  </data>
+  <data name="FileSettingPage_BackupUnchanged" xml:space="preserve">
+    <value>I dati non sono cambiati dall'ultimo backup ({0}), quindi non ne è stato creato uno nuovo</value>
+  </data>
+  <data name="RestoreBackupDialog_Title" xml:space="preserve">
+    <value>Ripristina da backup</value>
+  </data>
+  <data name="RestoreBackupDialog_Description" xml:space="preserve">
+    <value>Gli account connessi, le impronte del dispositivo, i link della cronologia Gacha e i percorsi dei giochi su questo PC vengono mantenuti. Prima del ripristino viene eseguito il backup dei dati attuali.</value>
+  </data>
+  <data name="RestoreBackupDialog_Backups" xml:space="preserve">
+    <value>Backup nella posizione dei backup</value>
+  </data>
+  <data name="RestoreBackupDialog_Browse" xml:space="preserve">
+    <value>Scegli file…</value>
+  </data>
+  <data name="RestoreBackupDialog_NoBackup" xml:space="preserve">
+    <value>Non ci sono ancora backup nella posizione dei backup.</value>
+  </data>
+  <data name="RestoreBackupDialog_LegacyNote" xml:space="preserve">
+    <value>Questo è un vecchio backup completo. Gli account connessi e le altre credenziali al suo interno verranno ignorati.</value>
+  </data>
+  <data name="RestoreBackupDialog_Mode" xml:space="preserve">
+    <value>Modalità di ripristino</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeOverwrite" xml:space="preserve">
+    <value>Torna allo stato del momento del backup (Moonward verrà riavviato)</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeMerge" xml:space="preserve">
+    <value>Aggiungi solo i registri mancanti (Gacha, Strumenti, tempo di gioco) senza cambiare le impostazioni</value>
+  </data>
+  <data name="RestoreBackupDialog_RestoreAndRestart" xml:space="preserve">
+    <value>Ripristina e riavvia</value>
+  </data>
+  <data name="RestoreBackupDialog_Checking" xml:space="preserve">
+    <value>Verifica del backup…</value>
+  </data>
+  <data name="RestoreBackupDialog_Merging" xml:space="preserve">
+    <value>Aggiunta dei registri…</value>
+  </data>
+  <data name="RestoreBackupDialog_SelectBackupFirst" xml:space="preserve">
+    <value>Seleziona prima un backup.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_RecorderRunning" xml:space="preserve">
+    <value>Il tempo di gioco è in registrazione. Esegui il ripristino dopo la chiusura del gioco.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Failed" xml:space="preserve">
+    <value>Ripristino non riuscito: {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeNothingNew" xml:space="preserve">
+    <value>Ripristino completato. Questo dispositivo ha già tutti i registri del backup.</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeCompleted" xml:space="preserve">
+    <value>Ripristino completato. Aggiunti {0} registri Gacha, {1} registri degli Strumenti e {2} sessioni di gioco.</value>
+  </data>
+  <data name="RestoreBackupDialog_CreatedAt" xml:space="preserve">
+    <value>Backup del {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_FromMachine" xml:space="preserve">
+    <value>da {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Corrupted" xml:space="preserve">
+    <value>Il file di backup è danneggiato.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_NewerVersion" xml:space="preserve">
+    <value>Questo backup è stato creato da una versione più recente di Moonward. Aggiorna Moonward e riprova.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Starward" xml:space="preserve">
+    <value>Questo è un database dello Starward originale e non può essere ripristinato qui.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_InvalidFile" xml:space="preserve">
+    <value>Questo file non è un backup di Moonward.</value>
+  </data>
+  <data name="DatabaseBackup_LegacyFormat" xml:space="preserve">
+    <value>Vecchio formato</value>
+  </data>
+  <data name="DatabaseBackup_Kind_Manual" xml:space="preserve">
+    <value>Backup manuale</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeUpgrade" xml:space="preserve">
+    <value>Prima dell'aggiornamento</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeRestore" xml:space="preserve">
+    <value>Prima del ripristino</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeLanSync" xml:space="preserve">
+    <value>Prima della sincronizzazione LAN</value>
+  </data>
+  <data name="DatabaseBackup_Kind_LegacyAuto" xml:space="preserve">
+    <value>Vecchio backup automatico</value>
+  </data>
+  <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
+    <value>Impossibile ripristinare dal backup. I tuoi dati non sono stati modificati: {0}</value>
   </data>
 </root>

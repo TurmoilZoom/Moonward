@@ -1,13 +1,10 @@
 using Dapper;
 using Microsoft.Data.Sqlite;
-using SharpSevenZip;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 
 namespace Starward.Features.Database;
@@ -80,20 +77,51 @@ internal static class DatabaseService
             {
                 con.Execute("PRAGMA JOURNAL_MODE = WAL;");
             }
-            // 不能只按 USER_VERSION Skip：Starward 与 Moonward 在 v18 之后编号分叉，
-            // 导入后的库会被拉回共同祖先再跑本列表。已存在的等价变更（如 ExtraStarNum）要跳过对应脚本。
-            for (int i = version; i < DatabaseSqls.Count; i++)
+            else if (version < DatabaseSqls.Count)
             {
-                int next = i + 1;
-                if (IsMigrationAlreadySatisfied(con, next))
-                {
-                    con.Execute($"PRAGMA USER_VERSION = {next};");
-                    continue;
-                }
-                con.Execute(DatabaseSqls[i]);
+                BackupBeforeUpgrade();
             }
+            MigrateSchema(con);
             // 从 Starward 导入曾只把 Cookie 置空而留下账号行；无凭据的角色不能当已登录。
             PurgeGameRecordAccountsWithoutCookie(con);
+        }
+    }
+
+
+    /// <summary>
+    /// 把库升级到当前版本：从 USER_VERSION 往后逐个执行 <see cref="DatabaseSqls"/>。主库与还原用的备份副本共用。
+    /// </summary>
+    /// <param name="con">要升级的库的连接。</param>
+    internal static void MigrateSchema(SqliteConnection con)
+    {
+        int version = con.QueryFirstOrDefault<int>("PRAGMA USER_VERSION;");
+        // 不能只按 USER_VERSION Skip：Starward 与 Moonward 在 v18 之后编号分叉，
+        // 导入后的库会被拉回共同祖先再跑本列表。已存在的等价变更（如 ExtraStarNum）要跳过对应脚本。
+        for (int i = version; i < DatabaseSqls.Count; i++)
+        {
+            int next = i + 1;
+            if (IsMigrationAlreadySatisfied(con, next))
+            {
+                con.Execute($"PRAGMA USER_VERSION = {next};");
+                continue;
+            }
+            con.Execute(DatabaseSqls[i]);
+        }
+    }
+
+
+    /// <summary>
+    /// 执行新的迁移脚本前先备份一次，脚本出问题时还能还原。失败不影响启动。
+    /// </summary>
+    private static void BackupBeforeUpgrade()
+    {
+        try
+        {
+            DatabaseBackupService.CreateBackup(BackupKind.BeforeUpgrade);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
         }
     }
 
@@ -145,66 +173,6 @@ internal static class DatabaseService
             con.Execute("DELETE FROM GameRecordUser WHERE Cookie IS NULL OR TRIM(Cookie) = '';");
         }
     }
-
-
-
-    public static void BackupDatabase(string file)
-    {
-        using var backupCon = new SqliteConnection($"DataSource={file}; Pooling=False;");
-        backupCon.Open();
-        using var con = CreateConnection();
-        con.Execute("VACUUM;", commandType: CommandType.Text);
-        con.BackupDatabase(backupCon);
-    }
-
-
-
-    public static void AutoBackupToAppDataLocal()
-    {
-        try
-        {
-#if DEBUG
-            return;
-#endif
-#pragma warning disable CS0162 // 检测到无法访问的代码
-            // 统一数据目录版本起，自动备份与其它数据一并存放于 UserDataFolder（不再单独写入 AppData）。
-            if (string.IsNullOrWhiteSpace(AppConfig.UserDataFolder))
-            {
-                return;
-            }
-            string folder = Path.Join(AppConfig.UserDataFolder, "DatabaseBackup");
-#pragma warning restore CS0162 // 检测到无法访问的代码
-            Directory.CreateDirectory(folder);
-            string file = Path.Combine(folder, $"StarwardDatabase_AutoBackup_{DateTime.Now:yyyyMMdd_HHmmss}.db");
-            string archive = Path.ChangeExtension(file, ".7z");
-            string archive_tmp = archive + "_tmp";
-            string[] files = Directory.GetFiles(folder, "StarwardDatabase_AutoBackup_*.7z");
-            if (files.Length == 0)
-            {
-                BackupDatabase(file);
-                new SharpSevenZipCompressor().CompressFiles(archive_tmp, file);
-                File.Move(archive_tmp, archive, true);
-                File.Delete(file);
-            }
-            else
-            {
-                string last = files.OrderByDescending(File.GetLastWriteTime).First();
-                if (DateTime.Now - File.GetLastWriteTime(last) > TimeSpan.FromDays(7))
-                {
-                    BackupDatabase(file);
-                    new SharpSevenZipCompressor().CompressFiles(archive_tmp, file);
-                    File.Move(archive_tmp, archive, true);
-                    File.Delete(file);
-                    File.Delete(last);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-        }
-    }
-
 
 
 

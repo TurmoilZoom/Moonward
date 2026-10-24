@@ -8,7 +8,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using Starward.Features.Background;
-using Starward.Features.Database;
 using Starward.Features.GameLauncher;
 using Starward.Features.Overlay;
 using Starward.Features.Screenshot;
@@ -438,10 +437,6 @@ public sealed partial class MainWindow : WindowEx
             {
                 Close();
                 AppInstance.GetCurrent().UnregisterKey();
-                // 退出前尝试备份数据库，最多等待 30 秒
-                Task backupTask = Task.Run(DatabaseService.AutoBackupToAppDataLocal);
-                Task timeTask = Task.Delay(30000);
-                await Task.WhenAny(backupTask, timeTask);
                 App.Current.Exit();
             }
         }

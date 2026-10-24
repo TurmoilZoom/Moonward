@@ -4186,9 +4186,6 @@
   <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
     <value>バックアップとリセット</value>
   </data>
-  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
-    <value>データベースを圧縮して、データフォルダー内の DatabaseBackup フォルダーにバックアップします</value>
-  </data>
   <data name="FileSettingPage_BackupNow" xml:space="preserve">
     <value>今すぐバックアップ</value>
   </data>
@@ -4413,5 +4410,122 @@
   </data>
   <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
     <value>GitHub へのアクセス回数が上限に達しました。{0} 以降に再度お試しください。</value>
+  </data>
+  <data name="FileSettingPage_BackupFolder" xml:space="preserve">
+    <value>バックアップの保存先</value>
+  </data>
+  <data name="FileSettingPage_ChangeBackupFolder" xml:space="preserve">
+    <value>保存先を変更</value>
+  </data>
+  <data name="FileSettingPage_BackupExcludes" xml:space="preserve">
+    <value>ログイン中のアカウント、デバイス指紋、ガチャ履歴のリンク、カスタム背景画像は含まれません</value>
+  </data>
+  <data name="FileSettingPage_Restore" xml:space="preserve">
+    <value>復元</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseIntro" xml:space="preserve">
+    <value>記録と設定をバックアップし、この PC やほかの PC で復元できます</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusSame" xml:space="preserve">
+    <value>前回のバックアップ {0}、現在のデータと同じです</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusChanged" xml:space="preserve">
+    <value>前回のバックアップ {0}、その後データが変更されています</value>
+  </data>
+  <data name="FileSettingPage_InvalidBackupFolder" xml:space="preserve">
+    <value>このフォルダーはバックアップに使えません。ドライブのルートやアプリのフォルダー以外を選んでください。</value>
+  </data>
+  <data name="FileSettingPage_BackupUnchanged" xml:space="preserve">
+    <value>前回のバックアップ（{0}）からデータが変わっていないため、新しいバックアップは作成しませんでした</value>
+  </data>
+  <data name="RestoreBackupDialog_Title" xml:space="preserve">
+    <value>バックアップから復元</value>
+  </data>
+  <data name="RestoreBackupDialog_Description" xml:space="preserve">
+    <value>この PC のログイン中のアカウント、デバイス指紋、ガチャ履歴のリンク、ゲームのパスはそのまま残ります。復元の前に現在のデータをバックアップします。</value>
+  </data>
+  <data name="RestoreBackupDialog_Backups" xml:space="preserve">
+    <value>保存先にあるバックアップ</value>
+  </data>
+  <data name="RestoreBackupDialog_Browse" xml:space="preserve">
+    <value>ファイルを選択…</value>
+  </data>
+  <data name="RestoreBackupDialog_NoBackup" xml:space="preserve">
+    <value>保存先にはまだバックアップがありません。</value>
+  </data>
+  <data name="RestoreBackupDialog_LegacyNote" xml:space="preserve">
+    <value>旧形式の完全バックアップです。含まれているログイン情報などの認証情報はスキップされます。</value>
+  </data>
+  <data name="RestoreBackupDialog_Mode" xml:space="preserve">
+    <value>復元方法</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeOverwrite" xml:space="preserve">
+    <value>バックアップ時点の状態に戻す（Moonward が再起動します）</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeMerge" xml:space="preserve">
+    <value>足りない記録だけを追加する（ガチャ、ツールボックス、プレイ時間）。設定は変更しません</value>
+  </data>
+  <data name="RestoreBackupDialog_RestoreAndRestart" xml:space="preserve">
+    <value>復元して再起動</value>
+  </data>
+  <data name="RestoreBackupDialog_Checking" xml:space="preserve">
+    <value>バックアップを確認しています…</value>
+  </data>
+  <data name="RestoreBackupDialog_Merging" xml:space="preserve">
+    <value>記録を追加しています…</value>
+  </data>
+  <data name="RestoreBackupDialog_SelectBackupFirst" xml:space="preserve">
+    <value>先にバックアップを選択してください。</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_RecorderRunning" xml:space="preserve">
+    <value>プレイ時間を記録中です。ゲームの終了後に復元してください。</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Failed" xml:space="preserve">
+    <value>復元に失敗しました：{0}</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeNothingNew" xml:space="preserve">
+    <value>復元が完了しました。このデバイスにはバックアップの記録がすべてそろっています。</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeCompleted" xml:space="preserve">
+    <value>復元が完了しました。ガチャ記録 {0} 件、ツールボックスの記録 {1} 件、プレイ時間 {2} 件を追加しました。</value>
+  </data>
+  <data name="RestoreBackupDialog_CreatedAt" xml:space="preserve">
+    <value>{0} にバックアップ</value>
+  </data>
+  <data name="RestoreBackupDialog_FromMachine" xml:space="preserve">
+    <value>{0} から</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Corrupted" xml:space="preserve">
+    <value>バックアップファイルが壊れています。</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_NewerVersion" xml:space="preserve">
+    <value>このバックアップは新しいバージョンの Moonward で作成されました。Moonward を更新してからもう一度お試しください。</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Starward" xml:space="preserve">
+    <value>これはアップストリームの Starward のデータベースのため、ここでは復元できません。</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_InvalidFile" xml:space="preserve">
+    <value>このファイルは Moonward のバックアップではありません。</value>
+  </data>
+  <data name="DatabaseBackup_LegacyFormat" xml:space="preserve">
+    <value>旧形式</value>
+  </data>
+  <data name="DatabaseBackup_Kind_Manual" xml:space="preserve">
+    <value>手動バックアップ</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeUpgrade" xml:space="preserve">
+    <value>更新前</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeRestore" xml:space="preserve">
+    <value>復元前</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeLanSync" xml:space="preserve">
+    <value>LAN 同期前</value>
+  </data>
+  <data name="DatabaseBackup_Kind_LegacyAuto" xml:space="preserve">
+    <value>旧形式の自動バックアップ</value>
+  </data>
+  <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
+    <value>バックアップから復元できませんでした。データは変更されていません：{0}</value>
   </data>
 </root>

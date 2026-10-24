@@ -4187,9 +4187,6 @@ You are welcome to submit exported data to:</value>
   <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
     <value>Sao lưu và đặt lại</value>
   </data>
-  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
-    <value>Nén và sao lưu cơ sở dữ liệu vào thư mục DatabaseBackup trong thư mục dữ liệu</value>
-  </data>
   <data name="FileSettingPage_BackupNow" xml:space="preserve">
     <value>Sao lưu ngay</value>
   </data>
@@ -4414,5 +4411,122 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
     <value>Đã đạt giới hạn truy cập GitHub. Vui lòng thử lại sau {0}.</value>
+  </data>
+  <data name="FileSettingPage_BackupFolder" xml:space="preserve">
+    <value>Vị trí sao lưu</value>
+  </data>
+  <data name="FileSettingPage_ChangeBackupFolder" xml:space="preserve">
+    <value>Đổi vị trí sao lưu</value>
+  </data>
+  <data name="FileSettingPage_BackupExcludes" xml:space="preserve">
+    <value>Không bao gồm tài khoản đã đăng nhập, dấu vân tay thiết bị, liên kết lịch sử gacha và ảnh nền tùy chỉnh</value>
+  </data>
+  <data name="FileSettingPage_Restore" xml:space="preserve">
+    <value>Khôi phục</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseIntro" xml:space="preserve">
+    <value>Sao lưu bản ghi và cài đặt để khôi phục trên máy này hoặc máy khác</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusSame" xml:space="preserve">
+    <value>Sao lưu gần nhất {0}, khớp với dữ liệu hiện tại</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusChanged" xml:space="preserve">
+    <value>Sao lưu gần nhất {0}, dữ liệu đã thay đổi kể từ đó</value>
+  </data>
+  <data name="FileSettingPage_InvalidBackupFolder" xml:space="preserve">
+    <value>Không thể dùng thư mục này để sao lưu. Hãy chọn thư mục không phải gốc ổ đĩa và không nằm trong thư mục ứng dụng.</value>
+  </data>
+  <data name="FileSettingPage_BackupUnchanged" xml:space="preserve">
+    <value>Dữ liệu không thay đổi kể từ lần sao lưu gần nhất ({0}) nên không tạo bản sao lưu mới</value>
+  </data>
+  <data name="RestoreBackupDialog_Title" xml:space="preserve">
+    <value>Khôi phục từ bản sao lưu</value>
+  </data>
+  <data name="RestoreBackupDialog_Description" xml:space="preserve">
+    <value>Tài khoản đã đăng nhập, dấu vân tay thiết bị, liên kết lịch sử gacha và đường dẫn trò chơi trên máy này được giữ nguyên. Dữ liệu hiện tại sẽ được sao lưu trước khi khôi phục.</value>
+  </data>
+  <data name="RestoreBackupDialog_Backups" xml:space="preserve">
+    <value>Bản sao lưu tại vị trí sao lưu</value>
+  </data>
+  <data name="RestoreBackupDialog_Browse" xml:space="preserve">
+    <value>Chọn tệp…</value>
+  </data>
+  <data name="RestoreBackupDialog_NoBackup" xml:space="preserve">
+    <value>Chưa có bản sao lưu nào tại vị trí sao lưu.</value>
+  </data>
+  <data name="RestoreBackupDialog_LegacyNote" xml:space="preserve">
+    <value>Đây là bản sao lưu toàn bộ kiểu cũ. Tài khoản đã đăng nhập và các thông tin xác thực khác trong đó sẽ bị bỏ qua.</value>
+  </data>
+  <data name="RestoreBackupDialog_Mode" xml:space="preserve">
+    <value>Cách khôi phục</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeOverwrite" xml:space="preserve">
+    <value>Quay về trạng thái lúc sao lưu (Moonward sẽ khởi động lại)</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeMerge" xml:space="preserve">
+    <value>Chỉ thêm các bản ghi còn thiếu (gacha, hộp công cụ, thời gian chơi), không thay đổi cài đặt</value>
+  </data>
+  <data name="RestoreBackupDialog_RestoreAndRestart" xml:space="preserve">
+    <value>Khôi phục và khởi động lại</value>
+  </data>
+  <data name="RestoreBackupDialog_Checking" xml:space="preserve">
+    <value>Đang kiểm tra bản sao lưu…</value>
+  </data>
+  <data name="RestoreBackupDialog_Merging" xml:space="preserve">
+    <value>Đang thêm bản ghi…</value>
+  </data>
+  <data name="RestoreBackupDialog_SelectBackupFirst" xml:space="preserve">
+    <value>Hãy chọn một bản sao lưu trước.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_RecorderRunning" xml:space="preserve">
+    <value>Đang ghi thời gian chơi. Hãy khôi phục sau khi thoát trò chơi.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Failed" xml:space="preserve">
+    <value>Khôi phục thất bại: {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeNothingNew" xml:space="preserve">
+    <value>Khôi phục hoàn tất. Thiết bị này đã có mọi bản ghi trong bản sao lưu.</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeCompleted" xml:space="preserve">
+    <value>Khôi phục hoàn tất. Đã thêm {0} bản ghi gacha, {1} bản ghi hộp công cụ và {2} phiên chơi.</value>
+  </data>
+  <data name="RestoreBackupDialog_CreatedAt" xml:space="preserve">
+    <value>Sao lưu lúc {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_FromMachine" xml:space="preserve">
+    <value>từ {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Corrupted" xml:space="preserve">
+    <value>Tệp sao lưu bị hỏng.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_NewerVersion" xml:space="preserve">
+    <value>Bản sao lưu này được tạo bởi phiên bản Moonward mới hơn. Hãy cập nhật Moonward rồi thử lại.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Starward" xml:space="preserve">
+    <value>Đây là cơ sở dữ liệu của Starward gốc nên không thể khôi phục tại đây.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_InvalidFile" xml:space="preserve">
+    <value>Tệp này không phải bản sao lưu của Moonward.</value>
+  </data>
+  <data name="DatabaseBackup_LegacyFormat" xml:space="preserve">
+    <value>Định dạng cũ</value>
+  </data>
+  <data name="DatabaseBackup_Kind_Manual" xml:space="preserve">
+    <value>Sao lưu thủ công</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeUpgrade" xml:space="preserve">
+    <value>Trước khi cập nhật</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeRestore" xml:space="preserve">
+    <value>Trước khi khôi phục</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeLanSync" xml:space="preserve">
+    <value>Trước khi đồng bộ qua mạng LAN</value>
+  </data>
+  <data name="DatabaseBackup_Kind_LegacyAuto" xml:space="preserve">
+    <value>Sao lưu tự động kiểu cũ</value>
+  </data>
+  <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
+    <value>Không thể khôi phục từ bản sao lưu. Dữ liệu của bạn chưa bị thay đổi: {0}</value>
   </data>
 </root>

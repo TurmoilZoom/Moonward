@@ -12873,15 +12873,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Compress the database into the DatabaseBackup folder in the data folder 的本地化字符串。
-        /// </summary>
-        public static string FileSettingPage_BackupDatabaseDesc {
-            get {
-                return ResourceManager.GetString("FileSettingPage_BackupDatabaseDesc", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Back Up Now 的本地化字符串。
         /// </summary>
         public static string FileSettingPage_BackupNow {
@@ -12914,6 +12905,357 @@ namespace Starward.Language {
         public static string WelcomeView_ImportLaterHint {
             get {
                 return ResourceManager.GetString("WelcomeView_ImportLaterHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backup Location 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupFolder {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Change backup location 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_ChangeBackupFolder {
+            get {
+                return ResourceManager.GetString("FileSettingPage_ChangeBackupFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Signed-in accounts, device fingerprints, gacha record links and custom background images are not included 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupExcludes {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupExcludes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_Restore {
+            get {
+                return ResourceManager.GetString("FileSettingPage_Restore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Back up records and settings to restore them on this or another PC 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupDatabaseIntro {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupDatabaseIntro", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Last backup {0}, matches current data 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupStatusSame {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupStatusSame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Last backup {0}, data has changed since then 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupStatusChanged {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupStatusChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This folder can't be used for backups. Choose a folder that isn't a drive root or inside the app folder. 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_InvalidBackupFolder {
+            get {
+                return ResourceManager.GetString("FileSettingPage_InvalidBackupFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Data hasn't changed since the last backup ({0}), so no new backup was created 的本地化字符串。
+        /// </summary>
+        public static string FileSettingPage_BackupUnchanged {
+            get {
+                return ResourceManager.GetString("FileSettingPage_BackupUnchanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore from Backup 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Title {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Signed-in accounts, device fingerprints, gacha record links and game paths on this PC are kept. The current data is backed up before restoring. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Description {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backups in the backup location 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Backups {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Backups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Choose a file… 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Browse {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Browse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 There are no backups in the backup location yet. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_NoBackup {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_NoBackup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This is an old full backup. Signed-in accounts and other credentials in it will be skipped. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_LegacyNote {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_LegacyNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore Mode 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Mode {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Mode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Return to the state at backup time (Moonward will restart) 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_ModeOverwrite {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_ModeOverwrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Only add missing records (gacha, toolbox, play time) without changing settings 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_ModeMerge {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_ModeMerge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore and Restart 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_RestoreAndRestart {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_RestoreAndRestart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Checking the backup… 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Checking {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Checking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Adding records… 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Merging {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Merging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Select a backup first. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_SelectBackupFirst {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_SelectBackupFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Play time is being recorded. Restore after the game exits. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Error_RecorderRunning {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Error_RecorderRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore failed: {0} 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Error_Failed {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Error_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore complete. This device already has all records in the backup. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_MergeNothingNew {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_MergeNothingNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore complete. Added {0} gacha record(s), {1} toolbox record(s) and {2} playtime session(s). 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_MergeCompleted {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_MergeCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backed up {0} 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_CreatedAt {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_CreatedAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 from {0} 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_FromMachine {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_FromMachine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The backup file is damaged. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Error_Corrupted {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Error_Corrupted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This backup was made by a newer version of Moonward. Update Moonward and try again. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Error_NewerVersion {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Error_NewerVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This is an upstream Starward database and can't be restored here. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Error_Starward {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Error_Starward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This file isn't a Moonward backup. 的本地化字符串。
+        /// </summary>
+        public static string RestoreBackupDialog_Error_InvalidFile {
+            get {
+                return ResourceManager.GetString("RestoreBackupDialog_Error_InvalidFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Old format 的本地化字符串。
+        /// </summary>
+        public static string DatabaseBackup_LegacyFormat {
+            get {
+                return ResourceManager.GetString("DatabaseBackup_LegacyFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Manual backup 的本地化字符串。
+        /// </summary>
+        public static string DatabaseBackup_Kind_Manual {
+            get {
+                return ResourceManager.GetString("DatabaseBackup_Kind_Manual", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Before update 的本地化字符串。
+        /// </summary>
+        public static string DatabaseBackup_Kind_BeforeUpgrade {
+            get {
+                return ResourceManager.GetString("DatabaseBackup_Kind_BeforeUpgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Before restore 的本地化字符串。
+        /// </summary>
+        public static string DatabaseBackup_Kind_BeforeRestore {
+            get {
+                return ResourceManager.GetString("DatabaseBackup_Kind_BeforeRestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Before LAN sync 的本地化字符串。
+        /// </summary>
+        public static string DatabaseBackup_Kind_BeforeLanSync {
+            get {
+                return ResourceManager.GetString("DatabaseBackup_Kind_BeforeLanSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Old auto backup 的本地化字符串。
+        /// </summary>
+        public static string DatabaseBackup_Kind_LegacyAuto {
+            get {
+                return ResourceManager.GetString("DatabaseBackup_Kind_LegacyAuto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Couldn't restore from the backup. Your data hasn't been changed: {0} 的本地化字符串。
+        /// </summary>
+        public static string DatabaseBackup_RestoreFailedOnStartup {
+            get {
+                return ResourceManager.GetString("DatabaseBackup_RestoreFailedOnStartup", resourceCulture);
             }
         }
     }

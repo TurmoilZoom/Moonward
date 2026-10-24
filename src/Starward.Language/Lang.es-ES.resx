@@ -4187,9 +4187,6 @@ You are welcome to submit exported data to:</value>
   <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
     <value>Copia de seguridad y restablecimiento</value>
   </data>
-  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
-    <value>Guarda una copia comprimida de la base de datos en la carpeta DatabaseBackup de la carpeta de datos</value>
-  </data>
   <data name="FileSettingPage_BackupNow" xml:space="preserve">
     <value>Hacer copia ahora</value>
   </data>
@@ -4414,5 +4411,122 @@ You are welcome to submit exported data to:</value>
   </data>
   <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
     <value>Se alcanzó el límite de solicitudes de GitHub. Inténtalo de nuevo después de las {0}.</value>
+  </data>
+  <data name="FileSettingPage_BackupFolder" xml:space="preserve">
+    <value>Ubicación de las copias</value>
+  </data>
+  <data name="FileSettingPage_ChangeBackupFolder" xml:space="preserve">
+    <value>Cambiar ubicación</value>
+  </data>
+  <data name="FileSettingPage_BackupExcludes" xml:space="preserve">
+    <value>No incluye las cuentas iniciadas, las huellas del dispositivo, los enlaces del historial de Gacha ni las imágenes de fondo personalizadas</value>
+  </data>
+  <data name="FileSettingPage_Restore" xml:space="preserve">
+    <value>Restaurar</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseIntro" xml:space="preserve">
+    <value>Crea una copia de los registros y ajustes para restaurarlos en este u otro PC</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusSame" xml:space="preserve">
+    <value>Última copia {0}, coincide con los datos actuales</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusChanged" xml:space="preserve">
+    <value>Última copia {0}, los datos han cambiado desde entonces</value>
+  </data>
+  <data name="FileSettingPage_InvalidBackupFolder" xml:space="preserve">
+    <value>Esta carpeta no se puede usar para las copias. Elija una carpeta que no sea la raíz de una unidad ni esté dentro de la carpeta de la aplicación.</value>
+  </data>
+  <data name="FileSettingPage_BackupUnchanged" xml:space="preserve">
+    <value>Los datos no han cambiado desde la última copia ({0}), así que no se creó una nueva</value>
+  </data>
+  <data name="RestoreBackupDialog_Title" xml:space="preserve">
+    <value>Restaurar desde una copia</value>
+  </data>
+  <data name="RestoreBackupDialog_Description" xml:space="preserve">
+    <value>Se conservan las cuentas iniciadas, las huellas del dispositivo, los enlaces del historial de Gacha y las rutas de los juegos de este PC. Antes de restaurar se hace una copia de los datos actuales.</value>
+  </data>
+  <data name="RestoreBackupDialog_Backups" xml:space="preserve">
+    <value>Copias en la ubicación de copias</value>
+  </data>
+  <data name="RestoreBackupDialog_Browse" xml:space="preserve">
+    <value>Elegir archivo…</value>
+  </data>
+  <data name="RestoreBackupDialog_NoBackup" xml:space="preserve">
+    <value>Todavía no hay copias en la ubicación de copias.</value>
+  </data>
+  <data name="RestoreBackupDialog_LegacyNote" xml:space="preserve">
+    <value>Es una copia completa antigua. Se omitirán las cuentas iniciadas y demás credenciales que contenga.</value>
+  </data>
+  <data name="RestoreBackupDialog_Mode" xml:space="preserve">
+    <value>Modo de restauración</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeOverwrite" xml:space="preserve">
+    <value>Volver al estado del momento de la copia (Moonward se reiniciará)</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeMerge" xml:space="preserve">
+    <value>Solo añadir los registros que faltan (Gacha, Toolbox, tiempo de juego) sin cambiar los ajustes</value>
+  </data>
+  <data name="RestoreBackupDialog_RestoreAndRestart" xml:space="preserve">
+    <value>Restaurar y reiniciar</value>
+  </data>
+  <data name="RestoreBackupDialog_Checking" xml:space="preserve">
+    <value>Comprobando la copia…</value>
+  </data>
+  <data name="RestoreBackupDialog_Merging" xml:space="preserve">
+    <value>Añadiendo registros…</value>
+  </data>
+  <data name="RestoreBackupDialog_SelectBackupFirst" xml:space="preserve">
+    <value>Primero seleccione una copia.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_RecorderRunning" xml:space="preserve">
+    <value>Se está registrando el tiempo de juego. Restaure cuando el juego se haya cerrado.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Failed" xml:space="preserve">
+    <value>Error al restaurar: {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeNothingNew" xml:space="preserve">
+    <value>Restauración completada. Este dispositivo ya tiene todos los registros de la copia.</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeCompleted" xml:space="preserve">
+    <value>Restauración completada. Se añadieron {0} registros de Gacha, {1} registros de la Toolbox y {2} sesiones de juego.</value>
+  </data>
+  <data name="RestoreBackupDialog_CreatedAt" xml:space="preserve">
+    <value>Copia del {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_FromMachine" xml:space="preserve">
+    <value>desde {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Corrupted" xml:space="preserve">
+    <value>El archivo de copia está dañado.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_NewerVersion" xml:space="preserve">
+    <value>Esta copia se hizo con una versión más reciente de Moonward. Actualice Moonward y vuelva a intentarlo.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Starward" xml:space="preserve">
+    <value>Es una base de datos del Starward original y no se puede restaurar aquí.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_InvalidFile" xml:space="preserve">
+    <value>Este archivo no es una copia de Moonward.</value>
+  </data>
+  <data name="DatabaseBackup_LegacyFormat" xml:space="preserve">
+    <value>Formato antiguo</value>
+  </data>
+  <data name="DatabaseBackup_Kind_Manual" xml:space="preserve">
+    <value>Copia manual</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeUpgrade" xml:space="preserve">
+    <value>Antes de actualizar</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeRestore" xml:space="preserve">
+    <value>Antes de restaurar</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeLanSync" xml:space="preserve">
+    <value>Antes de la sincronización LAN</value>
+  </data>
+  <data name="DatabaseBackup_Kind_LegacyAuto" xml:space="preserve">
+    <value>Copia automática antigua</value>
+  </data>
+  <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
+    <value>No se pudo restaurar desde la copia. Sus datos no se han modificado: {0}</value>
   </data>
 </root>

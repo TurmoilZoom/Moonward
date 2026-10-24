@@ -4207,9 +4207,6 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="FileSettingPage_BackupAndReset" xml:space="preserve">
     <value>Резервное копирование и сброс</value>
   </data>
-  <data name="FileSettingPage_BackupDatabaseDesc" xml:space="preserve">
-    <value>Сжатая резервная копия базы данных сохраняется в папку DatabaseBackup внутри папки данных</value>
-  </data>
   <data name="FileSettingPage_BackupNow" xml:space="preserve">
     <value>Создать копию</value>
   </data>
@@ -4434,5 +4431,122 @@ ChatGPT может допускать ошибки. Проверьте важн�
   </data>
   <data name="ReleaseNotes_GithubRateLimitedUntil" xml:space="preserve">
     <value>Достигнут лимит запросов к GitHub. Повторите попытку после {0}.</value>
+  </data>
+  <data name="FileSettingPage_BackupFolder" xml:space="preserve">
+    <value>Папка резервных копий</value>
+  </data>
+  <data name="FileSettingPage_ChangeBackupFolder" xml:space="preserve">
+    <value>Изменить папку</value>
+  </data>
+  <data name="FileSettingPage_BackupExcludes" xml:space="preserve">
+    <value>Не включает выполненные входы в аккаунты, отпечатки устройства, ссылки на историю гачи и собственные фоновые изображения</value>
+  </data>
+  <data name="FileSettingPage_Restore" xml:space="preserve">
+    <value>Восстановить</value>
+  </data>
+  <data name="FileSettingPage_BackupDatabaseIntro" xml:space="preserve">
+    <value>Сохраняет записи и настройки, чтобы восстановить их на этом или другом ПК</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusSame" xml:space="preserve">
+    <value>Последняя копия {0}, совпадает с текущими данными</value>
+  </data>
+  <data name="FileSettingPage_BackupStatusChanged" xml:space="preserve">
+    <value>Последняя копия {0}, с тех пор данные изменились</value>
+  </data>
+  <data name="FileSettingPage_InvalidBackupFolder" xml:space="preserve">
+    <value>Эту папку нельзя использовать для резервных копий. Выберите папку, которая не является корнем диска и не находится в папке приложения.</value>
+  </data>
+  <data name="FileSettingPage_BackupUnchanged" xml:space="preserve">
+    <value>Данные не изменились с последней копии ({0}), новая копия не создана</value>
+  </data>
+  <data name="RestoreBackupDialog_Title" xml:space="preserve">
+    <value>Восстановление из резервной копии</value>
+  </data>
+  <data name="RestoreBackupDialog_Description" xml:space="preserve">
+    <value>Входы в аккаунты, отпечатки устройства, ссылки на историю гачи и пути к играм на этом ПК сохраняются. Перед восстановлением создаётся копия текущих данных.</value>
+  </data>
+  <data name="RestoreBackupDialog_Backups" xml:space="preserve">
+    <value>Копии в папке резервных копий</value>
+  </data>
+  <data name="RestoreBackupDialog_Browse" xml:space="preserve">
+    <value>Выбрать файл…</value>
+  </data>
+  <data name="RestoreBackupDialog_NoBackup" xml:space="preserve">
+    <value>В папке резервных копий пока нет копий.</value>
+  </data>
+  <data name="RestoreBackupDialog_LegacyNote" xml:space="preserve">
+    <value>Это старая полная копия. Содержащиеся в ней входы в аккаунты и другие учётные данные будут пропущены.</value>
+  </data>
+  <data name="RestoreBackupDialog_Mode" xml:space="preserve">
+    <value>Способ восстановления</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeOverwrite" xml:space="preserve">
+    <value>Вернуть состояние на момент копии (Moonward перезапустится)</value>
+  </data>
+  <data name="RestoreBackupDialog_ModeMerge" xml:space="preserve">
+    <value>Только добавить недостающие записи (гача, инструменты, игровое время), не меняя настройки</value>
+  </data>
+  <data name="RestoreBackupDialog_RestoreAndRestart" xml:space="preserve">
+    <value>Восстановить и перезапустить</value>
+  </data>
+  <data name="RestoreBackupDialog_Checking" xml:space="preserve">
+    <value>Проверка копии…</value>
+  </data>
+  <data name="RestoreBackupDialog_Merging" xml:space="preserve">
+    <value>Добавление записей…</value>
+  </data>
+  <data name="RestoreBackupDialog_SelectBackupFirst" xml:space="preserve">
+    <value>Сначала выберите копию.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_RecorderRunning" xml:space="preserve">
+    <value>Идёт запись игрового времени. Восстановите после выхода из игры.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Failed" xml:space="preserve">
+    <value>Не удалось восстановить: {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeNothingNew" xml:space="preserve">
+    <value>Восстановление завершено. На этом устройстве уже есть все записи из копии.</value>
+  </data>
+  <data name="RestoreBackupDialog_MergeCompleted" xml:space="preserve">
+    <value>Восстановление завершено. Добавлено записей гачи: {0}, записей инструментов: {1}, игровых сеансов: {2}.</value>
+  </data>
+  <data name="RestoreBackupDialog_CreatedAt" xml:space="preserve">
+    <value>Создана {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_FromMachine" xml:space="preserve">
+    <value>с {0}</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Corrupted" xml:space="preserve">
+    <value>Файл копии повреждён.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_NewerVersion" xml:space="preserve">
+    <value>Эта копия создана более новой версией Moonward. Обновите Moonward и повторите попытку.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_Starward" xml:space="preserve">
+    <value>Это база данных исходного Starward, её нельзя восстановить здесь.</value>
+  </data>
+  <data name="RestoreBackupDialog_Error_InvalidFile" xml:space="preserve">
+    <value>Этот файл не является копией Moonward.</value>
+  </data>
+  <data name="DatabaseBackup_LegacyFormat" xml:space="preserve">
+    <value>Старый формат</value>
+  </data>
+  <data name="DatabaseBackup_Kind_Manual" xml:space="preserve">
+    <value>Ручная копия</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeUpgrade" xml:space="preserve">
+    <value>Перед обновлением</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeRestore" xml:space="preserve">
+    <value>Перед восстановлением</value>
+  </data>
+  <data name="DatabaseBackup_Kind_BeforeLanSync" xml:space="preserve">
+    <value>Перед синхронизацией по локальной сети</value>
+  </data>
+  <data name="DatabaseBackup_Kind_LegacyAuto" xml:space="preserve">
+    <value>Старая автоматическая копия</value>
+  </data>
+  <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
+    <value>Не удалось восстановить из копии. Данные не изменены: {0}</value>
   </data>
 </root>

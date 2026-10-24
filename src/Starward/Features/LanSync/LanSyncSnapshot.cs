@@ -57,11 +57,6 @@ internal static class LanSyncSnapshot
 
     private const string MetaTable = "LanSyncMeta";
 
-    private const string BackupFilePrefix = "StarwardDatabase_BeforeLanSync_";
-
-    /// <summary>同步前备份保留的份数，不压缩，份数多了占空间。</summary>
-    private const int BackupKeepCount = 3;
-
 
     /// <summary>
     /// 参与同步的表。
@@ -153,10 +148,11 @@ internal static class LanSyncSnapshot
     /// </summary>
     /// <param name="file">快照路径，必须尚不存在（ATTACH 会新建）。</param>
     /// <param name="deviceName">写进快照元数据的设备名，仅供排查。</param>
-    public static void Export(string file, string deviceName)
+    /// <param name="sourceDatabase">从这个库导出（还原备份时是备份副本），为空时导出本机主库。须已升级到当前版本。</param>
+    public static void Export(string file, string deviceName, string? sourceDatabase = null)
     {
         // 不进连接池，关闭即释放快照文件，调用方随后要压缩并删除它
-        using var con = DatabaseService.CreateUnpooledConnection();
+        using var con = sourceDatabase is null ? DatabaseService.CreateUnpooledConnection() : OpenUnpooled(sourceDatabase);
         con.Execute($"ATTACH DATABASE @file AS {SnapshotSchema};", new { file });
         // 延迟事务：主库只读，拿到跨表一致的读快照即可，不去抢主库的写锁
         using var transaction = con.BeginTransaction(deferred: true);
@@ -346,28 +342,13 @@ internal static class LanSyncSnapshot
 
 
     /// <summary>
-    /// 合并前把本机数据库备份到 DatabaseBackup，只保留最近几份。
+    /// 打开指定库文件的非池化连接。不能只读打开：ATTACH 的快照沿用主连接的打开方式，只读就建不了表。
     /// </summary>
-    public static void BackupBeforeMerge()
+    private static SqliteConnection OpenUnpooled(string file)
     {
-        string folder = Path.Join(AppConfig.UserDataFolder, "DatabaseBackup");
-        Directory.CreateDirectory(folder);
-        string file = Path.Combine(folder, $"{BackupFilePrefix}{DateTime.Now:yyyyMMdd_HHmmss}.db");
-        using (var backup = new SqliteConnection($"DataSource={file};Pooling=False;"))
-        {
-            backup.Open();
-            using var con = DatabaseService.CreateConnection();
-            con.BackupDatabase(backup);
-        }
-        // 文件名里的时间可按字典序排序
-        foreach (string old in Directory.GetFiles(folder, $"{BackupFilePrefix}*.db").OrderByDescending(x => x, StringComparer.Ordinal).Skip(BackupKeepCount))
-        {
-            try
-            {
-                File.Delete(old);
-            }
-            catch { }
-        }
+        var con = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = file, Pooling = false }.ToString());
+        con.Open();
+        return con;
     }
 
 

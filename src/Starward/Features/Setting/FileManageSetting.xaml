@@ -139,7 +139,54 @@
                        FontSize="20"
                        Text="{x:Bind lang:Lang.FileSettingPage_BackupAndReset}" />
             <StackPanel Margin="0,12,0,0" Spacing="8">
-                <!--  备份数据库：说明位在有备份后显示上次备份时间，右侧可打开备份所在位置  -->
+                <!--  备份位置：默认在数据文件夹下，可改到别处（如网盘目录）  -->
+                <Border Style="{StaticResource DataCardStyle}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Width="24"
+                                  VerticalAlignment="Center"
+                                  FontSize="20"
+                                  Glyph="&#xE8B7;" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind lang:Lang.FileSettingPage_BackupFolder}" TextWrapping="Wrap" />
+                            <TextBlock IsTextSelectionEnabled="True"
+                                       MaxLines="2"
+                                       Style="{StaticResource DataCardDescriptionStyle}"
+                                       Text="{x:Bind BackupFolder}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                            <!--  更改备份位置  -->
+                            <Button Command="{x:Bind ChangeBackupFolderCommand}"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.FileSettingPage_ChangeBackupFolder}"
+                                    Style="{StaticResource DataCardIconButtonStyle}">
+                                <FontIcon FontSize="16"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE8DE;" />
+                            </Button>
+                            <!--  打开备份位置  -->
+                            <Button Command="{x:Bind OpenBackupFolderCommand}"
+                                    sc:InstantTooltip.Placement="Top"
+                                    sc:InstantTooltip.Text="{x:Bind lang:Lang.ScreenshotPage_OpenFolder}"
+                                    Style="{StaticResource DataCardIconButtonStyle}">
+                                <FontIcon FontSize="16"
+                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                          Glyph="&#xE838;" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <!--  备份数据库：说明位显示上次备份时间与当前数据是否有变化，第二行说明不含哪些内容；右侧还原、立即备份  -->
                 <Border Style="{StaticResource DataCardStyle}">
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
@@ -156,6 +203,7 @@
                                     Spacing="2">
                             <TextBlock Text="{x:Bind lang:Lang.SettingPage_BackupDatabase}" TextWrapping="Wrap" />
                             <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind BackupDescription}" />
+                            <TextBlock Style="{StaticResource DataCardDescriptionStyle}" Text="{x:Bind lang:Lang.FileSettingPage_BackupExcludes}" />
                         </StackPanel>
                         <StackPanel Grid.Column="2"
                                     VerticalAlignment="Center"
@@ -174,6 +222,9 @@
                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                           Glyph="&#xE838;" />
                             </Button>
+                            <Button Command="{x:Bind RestoreBackupCommand}"
+                                    Content="{x:Bind lang:Lang.FileSettingPage_Restore}"
+                                    Style="{StaticResource DataCardActionButtonStyle}" />
                             <Button Command="{x:Bind BackupDatabaseCommand}"
                                     Content="{x:Bind lang:Lang.FileSettingPage_BackupNow}"
                                     Style="{StaticResource DataCardActionButtonStyle}" />

@@ -418,6 +418,15 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 用户选的备份目录，为空时用数据目录下的 DatabaseBackup。读取时用 <see cref="Features.Database.DatabaseBackupService.GetBackupFolder"/>，它会核对目录是否还在。
+    /// </summary>
+    public static string? BackupFolder
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
+    /// <summary>
     /// 「显示主窗口」快捷键是否启用，可在系统托盘菜单里随时切换。
     /// 关闭后不向系统注册该热键，但按键配置仍保留，重新打开即按原键恢复。
     /// </summary>

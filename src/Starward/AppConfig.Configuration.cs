@@ -202,6 +202,7 @@ public static partial class AppConfig
                 }
             }
 #endif
+            ApplyPendingRestore();
         }
         catch (Exception ex)
         {
@@ -228,6 +229,20 @@ public static partial class AppConfig
         catch
         {
             return false;
+        }
+    }
+
+
+    /// <summary>
+    /// 设置页发起覆盖还原后会带参数重启（<see cref="DatabaseBackupService.RestartToRestore"/>），在这里完成还原。
+    /// 数据库已打开、语言已加载，设置缓存与各服务都还没启动，还原后读到的就是备份里的设置。
+    /// </summary>
+    private static void ApplyPendingRestore()
+    {
+        string? file = GetCommandLineArgValue(DatabaseBackupService.RestoreArgument);
+        if (!string.IsNullOrWhiteSpace(file) && !string.IsNullOrWhiteSpace(UserDataFolder))
+        {
+            DatabaseBackupService.ApplyRestoreOnStartup(file, GetCommandLineArgValue(DatabaseBackupService.WaitPidArgument));
         }
     }
 
