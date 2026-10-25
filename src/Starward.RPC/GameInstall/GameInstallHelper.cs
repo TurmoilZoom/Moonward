@@ -29,10 +29,10 @@ internal partial class GameInstallHelper
     private const int MD5_BUFFER_SIZE = 1 << 19;
 
     /// <summary>
-    /// 单块下载超过这么久没收到新数据就放弃，交给文件级重试。官方启动器由 getParamsConfig 下发 request_timeout_wait_time=30。
+    /// 单块或整文件下载超过这么久没收到新数据就放弃，交给文件级重试。官方启动器由 getParamsConfig 下发 request_timeout_wait_time=30。
     /// HttpClient.Timeout 只管到收到响应头为止，服务器发到一半停住又不断开时，读数据会一直等下去
     /// </summary>
-    private static readonly TimeSpan ChunkStallTimeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan DownloadStallTimeout = TimeSpan.FromSeconds(30);
 
 
     private readonly ILogger<GameInstallHelper> _logger;
@@ -780,13 +780,13 @@ internal partial class GameInstallHelper
     /// <param name="cancellationToken"></param>
     /// <returns>从 <see cref="ChunkDownloadScheduler.BufferPool"/> 租用的缓冲区，前 <see cref="GameInstallFileChunk.CompressedSize"/> 字节为块数据，用完须归还</returns>
     /// <exception cref="IOException">数据长度或 MD5 不符</exception>
-    /// <exception cref="TimeoutException">超过 <see cref="ChunkStallTimeout"/> 没有收到新数据</exception>
+    /// <exception cref="TimeoutException">超过 <see cref="DownloadStallTimeout"/> 没有收到新数据</exception>
     private async Task<byte[]> DownloadChunkAsync(GameInstallContext task, HttpClient httpClient, GameInstallFileChunk chunk, ChunkDownloadScheduler scheduler, ChunkProgress progress, CancellationToken cancellationToken)
     {
         await scheduler.WaitDownloadSlotAsync(cancellationToken);
         // 排队等下载名额的时间不算，从发出请求开始计时，每收到一段数据重新计时
         using CancellationTokenSource stallCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        stallCts.CancelAfter(ChunkStallTimeout);
+        stallCts.CancelAfter(DownloadStallTimeout);
         try
         {
             using HttpResponseMessage response = await httpClient.GetAsync(chunk.Url, HttpCompletionOption.ResponseHeadersRead, stallCts.Token);
@@ -814,7 +814,7 @@ internal partial class GameInstallHelper
                         await Task.Delay(1, cancellationToken);
                         lease = await _rateLimiter.AcquireAsync(read, cancellationToken);
                     }
-                    stallCts.CancelAfter(ChunkStallTimeout);
+                    stallCts.CancelAfter(DownloadStallTimeout);
                     total += read;
                     progress.AddDownload(read);
                     Interlocked.Add(ref task.networkDownloadBytes, read);
@@ -835,7 +835,7 @@ internal partial class GameInstallHelper
         catch (OperationCanceledException) when (stallCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
         {
             // 必须转成 TimeoutException：取消异常不会被文件级重试接手，还会被当成用户暂停
-            throw new TimeoutException($"No data received for {ChunkStallTimeout.TotalSeconds} seconds, chunk: {chunk.Id}.");
+            throw new TimeoutException($"No data received for {DownloadStallTimeout.TotalSeconds} seconds, chunk: {chunk.Id}.");
         }
         finally
         {
@@ -1007,6 +1007,7 @@ internal partial class GameInstallHelper
     /// <param name="file">下载的是游戏文件时传入，修复时用来一并重新链接共用这个文件的其他区服，见 <see cref="GetSharedInstallFiles"/></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
+    /// <exception cref="TimeoutException">超过 <see cref="DownloadStallTimeout"/> 没有收到新数据，已写入 <c>_tmp</c> 的部分保留，重试时断点续传</exception>
     private async Task DownloadToFileAsync(GameInstallContext task, string path, string url, long size, string md5, GameInstallFile? file, CancellationToken cancellationToken)
     {
         if (await CheckFileMD5InDownloadProgressAsync(task, path, size, md5, cancellationToken))
@@ -1021,12 +1022,15 @@ internal partial class GameInstallHelper
         using FileStream fs = File.Open(path_tmp, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
         if (fs.Length < size)
         {
+            // 从发出请求开始计时，只算等网络的时间，每收到一段数据重新计时
+            using CancellationTokenSource stallCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            stallCts.CancelAfter(DownloadStallTimeout);
             try
             {
                 using HttpClient httpClient = _httpClientFactory.CreateClient();
-                HttpRequestMessage request = new(HttpMethod.Get, url) { VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher };
+                using HttpRequestMessage request = new(HttpMethod.Get, url) { VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher };
                 request.Headers.Range = new RangeHeaderValue(fs.Length, null);
-                using HttpResponseMessage response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                using HttpResponseMessage response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, stallCts.Token);
                 response.EnsureSuccessStatusCode();
                 if (response.Content.Headers.ContentRange?.From is not null)
                 {
@@ -1036,9 +1040,11 @@ internal partial class GameInstallHelper
                 }
                 byte[] buffer = new byte[BUFFER_SIZE];
                 int read = 0;
-                using Stream hs = await response.Content.ReadAsStreamAsync(cancellationToken);
-                while ((read = await hs.ReadAsync(buffer, cancellationToken)) > 0)
+                using Stream hs = await response.Content.ReadAsStreamAsync(stallCts.Token);
+                while ((read = await hs.ReadAsync(buffer, stallCts.Token)) > 0)
                 {
+                    // 限速排队和写盘不算停滞：这段时间暂停计时，读下一段前重新计时
+                    stallCts.CancelAfter(Timeout.InfiniteTimeSpan);
                     RateLimitLease lease = await _rateLimiter.AcquireAsync(read, cancellationToken);
                     while (!lease.IsAcquired)
                     {
@@ -1048,12 +1054,19 @@ internal partial class GameInstallHelper
                     await fs.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
                     Interlocked.Add(ref task._progress_DownloadFinishBytes, read);
                     Interlocked.Add(ref task.networkDownloadBytes, read);
+                    stallCts.CancelAfter(DownloadStallTimeout);
                 }
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
             {
                 Interlocked.Add(ref task._progress_DownloadFinishBytes, -fs.Position);
                 throw ex.InnerException;
+            }
+            catch (OperationCanceledException) when (stallCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                Interlocked.Add(ref task._progress_DownloadFinishBytes, -fs.Position);
+                // 必须转成 TimeoutException：取消异常不会被文件级重试接手，还会被当成用户暂停
+                throw new TimeoutException($"No data received for {DownloadStallTimeout.TotalSeconds} seconds, url: {url}.");
             }
             catch
             {
