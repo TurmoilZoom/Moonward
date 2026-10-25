@@ -102,6 +102,12 @@ public static class RpcRunner
             config.ConfigurePrimaryHttpMessageHandler(GetDefaultSocketsHttpHandler);
         });
         builder.Services.AddHttpClient<HoYoPlayClient>().AddPolicyHandler(GetHttpRetryPolicy());
+        // 游戏文件下载只走 HTTP/1.1，原因见 GameInstallHelper.DownloadHttpClientName；上面的默认配置先生效，这里只覆盖版本
+        builder.Services.AddHttpClient(GameInstallHelper.DownloadHttpClientName, client =>
+        {
+            client.DefaultRequestVersion = HttpVersion.Version11;
+            client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
+        });
 
 
         builder.Logging.ClearProviders();
