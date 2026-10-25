@@ -555,20 +555,31 @@ internal class GameInstallService
         double totalCount = context.TaskFiles?.Count ?? 1;
         double increase = 1 / totalCount;
         Lock _lock = new();
+        ConcurrentBag<GameInstallFile> failedFiles = new();
         await Parallel.ForEachAsync(context.TaskFiles ?? [], cancellationToken, async (GameInstallFile item, CancellationToken token) =>
         {
-            if (item.IsFinished)
+            if (!item.IsFinished)
             {
-                lock (_lock)
+                if (await _gameInstallHelper.PatchDiffFileAsync(context, item, token))
                 {
-                    context.Progress_Percent += increase;
+                    item.IsFinished = true;
                 }
-                return;
+                else
+                {
+                    failedFiles.Add(item);
+                }
             }
-            await _gameInstallHelper.PatchDiffFileAsync(context, item, cancellationToken);
-            context.Progress_Percent += increase;
-            item.IsFinished = true;
+            lock (_lock)
+            {
+                context.Progress_Percent += increase;
+            }
         });
+
+        if (!failedFiles.IsEmpty)
+        {
+            await DownloadPatchFailedFilesAsync(context, failedFiles.ToList(), cancellationToken);
+        }
+        DeletePatchOriginalFiles(context);
 
         if (context.SophonPatchDeleteFiles is not null)
         {
@@ -583,6 +594,98 @@ internal class GameInstallService
             _logger.LogInformation("GameInstallTask ({GameBiz}): Delete files by SophonPatchDeleteFiles, file count: {count}", context.GameId.GameBiz, context.SophonPatchDeleteFiles.Count);
         }
 
+    }
+
+
+
+    /// <summary>
+    /// ldiff 合并失败的文件改为按块重新下载，完成后把这些文件标记为已完成，继续任务时不再处理。
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="failedFiles">合并失败的文件，此时游戏里仍是旧文件</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException">取不到目标版本的 Chunk 清单或清单里缺少文件。任务会出错，
+    /// 但游戏文件只有校验过的才被替换、本地版本号也还没改，修复游戏即可补齐</exception>
+    private async Task DownloadPatchFailedFilesAsync(GameInstallContext context, List<GameInstallFile> failedFiles, CancellationToken cancellationToken = default)
+    {
+        _logger.LogWarning("GameInstallTask ({GameBiz}): {count} files failed to patch, download them in mode chunk", context.GameId.GameBiz, failedFiles.Count);
+        Telemetry.Track("task_patch_fallback", context.GameId.GameBiz,
+            ("op", context.Operation),
+            ("txn", context.TransactionId),
+            ("files", failedFiles.Count));
+        GamePackageService gamePackageService = _serviceProvider.GetRequiredService<GamePackageService>();
+        List<GameInstallFile> chunkFiles = await gamePackageService.PrepareSophonChunkFallbackFilesAsync(context, failedFiles, cancellationToken);
+
+        context.Progress_DownloadTotalBytes = chunkFiles.Sum(x => x.Chunks?.Sum(c => c.CompressedSize) ?? 0);
+        context.Progress_DownloadFinishBytes = 0;
+        context.Progress_WriteTotalBytes = chunkFiles.Sum(x => x.Size);
+        context.Progress_WriteFinishBytes = 0;
+        EnterStage(context, GameInstallState.Downloading);
+        using ChunkDownloadScheduler scheduler = new();
+        await Parallel.ForEachAsync(chunkFiles, cancellationToken, async (GameInstallFile file, CancellationToken token) =>
+        {
+            await _polly.ExecuteAsync(async token => await _gameInstallHelper.DownloadChunksToFileAsync(context, file, scheduler, false, token), token);
+        });
+        foreach (GameInstallFile item in failedFiles)
+        {
+            item.IsFinished = true;
+        }
+    }
+
+
+
+    /// <summary>
+    /// 删除 ldiff 合并用过、新版本不再使用的原文件（原文件与目标不是同一个文件时）。
+    /// 必须在全部文件处理完后调用，因为同一个原文件可能要给多个文件合并；按全部已完成的文件统计，暂停或出错后继续也能删干净。
+    /// 单个文件删不掉只记日志，不影响更新结果。
+    /// </summary>
+    /// <param name="context"></param>
+    private void DeletePatchOriginalFiles(GameInstallContext context)
+    {
+        if (context.TaskFiles is not { Count: > 0 } files)
+        {
+            return;
+        }
+        // 新版本的文件不能删：原文件路径可能正好是另一个文件的目标。任务文件不含已存在而被跳过的文件，所以按完整清单统计
+        HashSet<string> newFiles = new(StringComparer.OrdinalIgnoreCase);
+        foreach (SophonPatchFile item in context.SophonPatchFiles ?? [])
+        {
+            newFiles.Add(Path.GetFullPath(Path.Combine(context.InstallPath, item.File)));
+        }
+        foreach (GameInstallFile item in files)
+        {
+            newFiles.Add(item.FullPath);
+        }
+        HashSet<string> originals = new(StringComparer.OrdinalIgnoreCase);
+        foreach (GameInstallFile item in files)
+        {
+            if (item.IsFinished && item.Patch?.OriginalFileFullPath is { Length: > 0 } original && !newFiles.Contains(original))
+            {
+                originals.Add(original);
+            }
+        }
+        int count = 0;
+        foreach (string path in originals)
+        {
+            if (!File.Exists(path))
+            {
+                continue;
+            }
+            try
+            {
+                File.Delete(path);
+                count++;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogWarning(ex, "GameInstallTask ({GameBiz}): Failed to delete original file of patch: {path}", context.GameId.GameBiz, path);
+            }
+        }
+        if (count > 0)
+        {
+            _logger.LogInformation("GameInstallTask ({GameBiz}): Delete {count} original files of patch no longer used in new version", context.GameId.GameBiz, count);
+        }
     }
 
 

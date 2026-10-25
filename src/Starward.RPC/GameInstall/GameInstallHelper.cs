@@ -1361,27 +1361,50 @@ internal partial class GameInstallHelper
 
 
     /// <summary>
-    /// 合并 patch 下载模式的 diff 文件
+    /// 合并 patch 下载模式的 diff 文件。合并结果按清单的大小和 MD5 校验通过后才替换游戏文件，
+    /// 失败时删掉临时文件，游戏文件保持原样。原文件与目标不是同一个文件时不在这里删除：
+    /// 同一个原文件可能还要给其他文件合并，由调用方在全部合并完后统一删除。
     /// </summary>
     /// <param name="task"></param>
     /// <param name="file"></param>
     /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public async Task PatchDiffFileAsync(GameInstallContext task, GameInstallFile file, CancellationToken cancellationToken = default)
+    /// <returns>合并并校验通过，或文件本次无需更新时为 <see langword="true"/>；原文件缺失或大小不符、合并失败、校验不过为 <see langword="false"/></returns>
+    public async Task<bool> PatchDiffFileAsync(GameInstallContext task, GameInstallFile file, CancellationToken cancellationToken = default)
     {
+        // 清单里没有本地版本的补丁表示文件没有变化
         if (file.IsFinished || file.Patch is null)
         {
-            return;
+            return true;
+        }
+        bool hasSource = !string.IsNullOrWhiteSpace(file.Patch.OriginalFileFullPath);
+        if (hasSource)
+        {
+            FileInfo source = new(file.Patch.OriginalFileFullPath);
+            if (!source.Exists)
+            {
+                _logger.LogWarning("Source file not found {file}", file.Patch.OriginalFileFullPath);
+                return false;
+            }
+            // 大小对不上必然合并不出正确结果，不必再读一遍文件
+            if (file.Patch.OriginalFileSize > 0 && source.Length != file.Patch.OriginalFileSize)
+            {
+                _logger.LogWarning("Source file size not match, expected {expected}, actual {actual}. File: {file}", file.Patch.OriginalFileSize, source.Length, file.Patch.OriginalFileFullPath);
+                return false;
+            }
         }
         Directory.CreateDirectory(Path.GetDirectoryName(file.FullPath)!);
         string ldiff = Path.Combine(task.InstallPath, "ldiff", file.Patch.Id);
-        using FileSliceStream fs_ldiff = new FileSliceStream(ldiff, file.Patch.PatchOffset, file.Patch.PatchLength);
         string path_tmp = file.FullPath + "_tmp";
-        using FileStream fs_tmp = File.Open(path_tmp, FileMode.Create, FileAccess.ReadWrite);
-        if (string.IsNullOrWhiteSpace(file.Patch.OriginalFileFullPath))
+        bool result;
+        using (FileSliceStream fs_ldiff = new FileSliceStream(ldiff, file.Patch.PatchOffset, file.Patch.PatchLength))
+        using (FileStream fs_tmp = File.Open(path_tmp, FileMode.Create, FileAccess.ReadWrite))
         {
-            bool result = false;
-            if (file.Patch.Compression)
+            if (hasSource)
+            {
+                using FileStream fs_source = File.OpenRead(file.Patch.OriginalFileFullPath);
+                result = HPatch.PatchZstandard(fs_source, fs_ldiff, fs_tmp);
+            }
+            else if (file.Patch.Compression)
             {
                 result = HPatch.PatchZstandard(null, fs_ldiff, fs_tmp);
             }
@@ -1390,40 +1413,25 @@ internal partial class GameInstallHelper
                 await fs_ldiff.CopyToAsync(fs_tmp, cancellationToken);
                 result = true;
             }
-            if (result)
-            {
-                fs_tmp.Dispose();
-                File.Move(path_tmp, file.FullPath, true);
-            }
-            else
-            {
-                _logger.LogWarning("Patch file failed. File: {file}", file.FullPath);
-            }
         }
-        else if (File.Exists(file.Patch.OriginalFileFullPath))
+        if (!result)
         {
-
-            using FileStream fs_source = File.OpenRead(file.Patch.OriginalFileFullPath);
-            bool result = HPatch.PatchZstandard(fs_source, fs_ldiff, fs_tmp);
-            if (result)
-            {
-                fs_source.Dispose();
-                fs_tmp.Dispose();
-                File.Move(path_tmp, file.FullPath, true);
-                if (file.Patch.OriginalFileFullPath != file.FullPath && File.Exists(file.Patch.OriginalFileFullPath))
-                {
-                    File.Delete(file.Patch.OriginalFileFullPath);
-                }
-            }
-            else
-            {
-                _logger.LogWarning("Patch file failed. File: {file}", file.FullPath);
-            }
+            File.Delete(path_tmp);
+            _logger.LogWarning("Patch file failed. File: {file}", file.FullPath);
+            return false;
         }
-        else
+        // 只校验结果：原文件损坏同样会让结果对不上，不必另外读一遍原文件。清单缺 MD5 时只能核对大小
+        bool verified = string.IsNullOrWhiteSpace(file.MD5)
+            ? new FileInfo(path_tmp).Length == file.Size
+            : await CheckFileMD5Async(task, path_tmp, file.Size, file.MD5, cancellationToken);
+        if (!verified)
         {
-            _logger.LogWarning("Source file not found {file}", file.Patch.OriginalFileFullPath);
+            File.Delete(path_tmp);
+            _logger.LogWarning("Patched file MD5 not match. File: {file}", file.FullPath);
+            return false;
         }
+        File.Move(path_tmp, file.FullPath, true);
+        return true;
     }
 
 

@@ -802,6 +802,63 @@ internal partial class GamePackageService
 
 
 
+    /// <summary>
+    /// ldiff 更新合并失败时，从目标版本的 Chunk 清单里找出这些文件，改为按块重新下载。
+    /// 不从本地旧文件复用块：合并失败的文件很少，复用还要再取一份旧版本清单。
+    /// </summary>
+    /// <param name="context">ldiff 更新任务</param>
+    /// <param name="files">合并失败的文件</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>按块下载的任务文件，与 <paramref name="files"/> 一一对应</returns>
+    /// <exception cref="InvalidOperationException">取不到目标版本的 Chunk 清单、正式版本已不是本次更新的目标版本，或清单里缺少某个文件</exception>
+    public async Task<List<GameInstallFile>> PrepareSophonChunkFallbackFilesAsync(GameInstallContext context, IReadOnlyCollection<GameInstallFile> files, CancellationToken cancellationToken = default)
+    {
+        GameId gameId = context.GameId;
+        GameBranch? branch = await _hoyoplayClient.GetGameBranchAsync(LauncherId.FromGameId(gameId)!, "en-us", gameId, cancellationToken);
+        if (branch is null)
+        {
+            throw new InvalidOperationException($"GameBranch of ({gameId.GameBiz}) is null, cannot download {files.Count} files that failed to patch.");
+        }
+        // 准备任务之后正式版本又更新了的话，按块下回来的会是更新的版本，和其他文件对不上
+        if (branch.Main.Tag != context.LatestGameVersion)
+        {
+            throw new InvalidOperationException($"Game version of ({gameId.GameBiz}) changed from {context.LatestGameVersion} to {branch.Main.Tag}, cannot download {files.Count} files that failed to patch.");
+        }
+        GameSophonChunkBuild? build = await GetGameSophonChunkBuildAsync(branch, branch.Main, "", cancellationToken);
+        if (build is null)
+        {
+            throw new InvalidOperationException($"Sophon chunk build of ({gameId.GameBiz}) is unavailable, cannot download {files.Count} files that failed to patch.");
+        }
+
+        // Windows 路径不区分大小写
+        HashSet<string> remaining = files.Select(x => x.File).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        List<GameInstallFile> result = new();
+        foreach (GameSophonChunkManifest manifest in GetAvailableGameSophonChunkManifests(build, context.AudioLanguage, GetIgnoreMatchingFields(context)))
+        {
+            List<SophonChunkFile> items = await GetSophonChunkFilesAsync(manifest, cancellationToken);
+            foreach (SophonChunkFile item in items)
+            {
+                if (!item.IsFolder && remaining.Remove(item.File))
+                {
+                    result.Add(GameInstallFile.FromSophonChunkFile(item, null, context.InstallPath, manifest.ChunkDownload.UrlPrefix));
+                }
+            }
+            if (remaining.Count == 0)
+            {
+                break;
+            }
+        }
+        if (remaining.Count > 0)
+        {
+            _logger.LogWarning("Files not found in sophon chunk build ({GameBiz}): {Files}", gameId.GameBiz, string.Join(", ", remaining));
+            throw new InvalidOperationException($"{remaining.Count} files that failed to patch are not found in sophon chunk build of ({gameId.GameBiz}).");
+        }
+        _logger.LogInformation("Prepare sophon chunk fallback files ({GameBiz}): {Count} files.", gameId.GameBiz, result.Count);
+        return result;
+    }
+
+
+
 
     public static List<string> GetIgnoreMatchingFields(GameInstallContext context)
     {
