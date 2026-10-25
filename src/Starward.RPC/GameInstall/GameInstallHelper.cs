@@ -1277,6 +1277,9 @@ internal partial class GameInstallHelper
                         bool result = HPatch.PatchZstandard(fs_source, fs_diff, fs_target);
                         if (result)
                         {
+                            // 下面要替换目标、删除补丁和原文件，还开着会因文件被占用失败
+                            fs_source.Dispose();
+                            fs_diff.Dispose();
                             fs_target.Dispose();
                             File.Move(target_tmp, target, true);
                             if (File.Exists(diff))
@@ -1310,8 +1313,12 @@ internal partial class GameInstallHelper
         var hdifffiles = Path.Combine(task.InstallPath, "hdifffiles.txt");
         if (File.Exists(hdifffiles))
         {
-            using FileStream fs = File.OpenRead(hdifffiles);
-            List<HDiffFile> files = await DeserilizerLinesAsync<HDiffFile>(fs, cancellationToken);
+            List<HDiffFile> files;
+            // 读完就关闭，合并完要删除这个清单
+            using (FileStream fs = File.OpenRead(hdifffiles))
+            {
+                files = await DeserilizerLinesAsync<HDiffFile>(fs, cancellationToken);
+            }
             double increase = percentRatio / files.Count;
             Parallel.ForEach(files, new ParallelOptions { CancellationToken = cancellationToken }, item =>
             {
@@ -1326,6 +1333,9 @@ internal partial class GameInstallHelper
                     bool result = HPatch.PatchZstandard(fs_source, fs_diff, fs_target);
                     if (result)
                     {
+                        // 原地合并：原文件就是要替换的目标，补丁随后要删除，还开着会因文件被占用失败
+                        fs_source.Dispose();
+                        fs_diff.Dispose();
                         fs_target.Dispose();
                         File.Move(target_tmp, target, true);
                         if (File.Exists(diff))
