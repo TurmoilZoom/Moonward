@@ -88,7 +88,6 @@
                                                      IsSpellCheckEnabled="False"
                                                      PlaceholderText="{x:Bind ValuePlaceholder}"
                                                      Text="{x:Bind Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                     TextChanged="OptionValue_TextChanged"
                                                      Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowCompactValueEditor)}" />
 
                                             <!--  宽输入：BetterGI 配置名 / 调度器组名  -->
@@ -106,7 +105,6 @@
                                                      VerticalContentAlignment="Center"
                                                      PlaceholderText="{x:Bind ValuePlaceholder}"
                                                      Text="{x:Bind Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                     TextChanged="OptionValue_TextChanged"
                                                      Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowWideValueEditor)}" />
                                         </Grid>
                                     </DataTemplate>

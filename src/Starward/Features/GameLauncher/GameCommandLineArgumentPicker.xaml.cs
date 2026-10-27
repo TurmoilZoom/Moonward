@@ -21,8 +21,6 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
 
     private string _customArgument = "";
 
-    private bool _suppressCombinedSync;
-
     private bool _suppressOptionSync;
 
     /// <summary>加载初始参数时不向父级回写，避免仅打开面板就把配置标脏。</summary>
@@ -206,9 +204,14 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
             return argument;
         }
         List<string> tokens = GameCommandLineArgumentHelper.Tokenize(argument);
-        tokens.RemoveAll(t =>
+        int removed = tokens.RemoveAll(t =>
             t.Equals("-use-d3d12", StringComparison.OrdinalIgnoreCase)
             || t.Equals("-force-d3d12", StringComparison.OrdinalIgnoreCase));
+        // 没有可剥离的 token 时原样返回：重新拼接会吞掉用户正在输入的空格，写回组合结果框后光标被打回开头
+        if (removed == 0)
+        {
+            return argument;
+        }
         return tokens.Count == 0 ? null : string.Join(' ', tokens);
     }
 
@@ -271,15 +274,7 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
     private void PushCombinedFromOptions()
     {
         string built = GameCommandLineArgumentHelper.BuildArgumentString(_options, _customArgument);
-        _suppressCombinedSync = true;
-        try
-        {
-            CombinedArgument = string.IsNullOrWhiteSpace(built) ? null : built;
-        }
-        finally
-        {
-            _suppressCombinedSync = false;
-        }
+        CombinedArgument = string.IsNullOrWhiteSpace(built) ? null : built;
     }
 
 
@@ -293,24 +288,17 @@ public sealed partial class GameCommandLineArgumentPicker : UserControl
     }
 
 
-    private void OptionValue_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        if (_suppressOptionSync)
-        {
-            return;
-        }
-        PushCombinedFromOptions();
-    }
-
-
     private void CombinedArgument_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (_suppressCombinedSync)
+        string text = (sender as TextBox)?.Text ?? CombinedArgument ?? "";
+        // TextChanged 是异步事件，PushCombinedFromOptions 里同步置位的标志拦不住，只能按内容判断：
+        // 与当前勾选的组合结果一致，说明是勾选/取值框写回的，无需重新解析。
+        // 否则解析会把宽高等取值先重置为默认再写回，绑定整体替换取值框文本，正在输入的光标被打回开头
+        if (string.Equals(text.Trim(), GameCommandLineArgumentHelper.BuildArgumentString(_options, _customArgument), StringComparison.Ordinal))
         {
             return;
         }
         // 用户直接改组合结果：重新解析勾选，保留无法识别的部分为 custom
-        string text = (sender as TextBox)?.Text ?? CombinedArgument ?? "";
         _suppressOptionSync = true;
         try
         {
