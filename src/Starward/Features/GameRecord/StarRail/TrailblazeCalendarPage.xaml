@@ -373,14 +373,17 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="wdd:WeekDateCell">
                                         <StackPanel Width="78" HorizontalAlignment="Center">
-                                            <Grid Width="24"
-                                                  Height="24">
-                                                <Ellipse Width="24"
-                                                         Height="24"
-                                                         Fill="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellBackground(State)}"
-                                                         Stroke="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellBorderBrush(State)}"
-                                                         StrokeThickness="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellStrokeThickness(State)}" />
+                                            <!-- 跨月周显示 M/d（如 10/27），24px 圆圈放不下：宽度随文字伸展成胶囊，一两位数字时仍是正圆 -->
+                                            <Grid MinWidth="24"
+                                                  Height="24"
+                                                  HorizontalAlignment="Center">
+                                                <Rectangle RadiusX="12"
+                                                           RadiusY="12"
+                                                           Fill="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellBackground(State)}"
+                                                           Stroke="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellBorderBrush(State)}"
+                                                           StrokeThickness="{x:Bind wdd:WeeklyDailyDataHelper.GetDateCellStrokeThickness(State)}" />
                                                 <TextBlock Text="{x:Bind DayText}"
+                                                           Margin="5,0,5,0"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center"
                                                            FontSize="12"
@@ -408,7 +411,8 @@
                         <ItemsControl ItemsSource="{x:Bind WeeklyResourceRows}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="wdd:WeeklyResourceRow">
-                                    <Grid ColumnSpacing="2" Margin="0,1">
+                                    <!-- 不设 ColumnSpacing：表头 Grid 没有列间距，设了会让数据格整列比上方日期圆圈右偏 2px -->
+                                    <Grid Margin="0,1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="86" />
                                             <ColumnDefinition Width="Auto" />

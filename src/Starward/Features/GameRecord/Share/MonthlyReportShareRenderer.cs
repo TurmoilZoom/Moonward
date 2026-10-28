@@ -29,6 +29,7 @@ internal static class MonthlyReportShareRenderer
     private const float DayCellGap = 2f;
     private const float DayCellH = 30f;
     private const float DateCircle = 24f;
+    private const float DateCirclePadX = 5f;
     private const float IconCol = 40f;
     private static readonly Color BarTrack = Color.FromArgb(0x2E, 0xFF, 0xFF, 0xFF);
     private static readonly Color CellFill = Color.FromArgb(0x16, 0xFF, 0xFF, 0xFF);
@@ -217,19 +218,22 @@ internal static class MonthlyReportShareRenderer
             float cellX = left + IconCol + i * (DayCellW + DayCellGap);
             float weekdayW = ShareImageCanvas.MeasureTextWidth(ds, day.Weekday, ctx.Small);
             ShareImageCanvas.DrawText(ds, day.Weekday, cellX + (DayCellW - weekdayW) / 2f, headerY, ctx.Small, ShareImageCanvas.SecondaryText);
-            float circleX = cellX + (DayCellW - DateCircle) / 2f;
+            float dayW = ShareImageCanvas.MeasureTextWidth(ds, day.Day, ctx.Small);
+            // 跨月周显示 M/d，圆圈放不下：与页面一致，宽度随文字伸展成胶囊
+            float circleW = Math.Max(DateCircle, dayW + DateCirclePadX * 2);
+            float circleX = cellX + (DayCellW - circleW) / 2f;
+            float radius = DateCircle / 2f;
             if (day.State == WeekDateState.Today)
             {
-                ds.FillEllipse(circleX + DateCircle / 2f, circleY + DateCircle / 2f, DateCircle / 2f, DateCircle / 2f, ctx.Accent);
+                ds.FillRoundedRectangle(circleX, circleY, circleW, DateCircle, radius, radius, ctx.Accent);
             }
             else if (day.State == WeekDateState.Past)
             {
-                ds.DrawEllipse(circleX + DateCircle / 2f, circleY + DateCircle / 2f, DateCircle / 2f, DateCircle / 2f, ShareImageCanvas.SecondaryText, 1f);
+                ds.DrawRoundedRectangle(circleX, circleY, circleW, DateCircle, radius, radius, ShareImageCanvas.SecondaryText, 1f);
             }
 
             Color dayColor = day.State == WeekDateState.Today ? Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF) : ShareImageCanvas.PrimaryText;
-            float dayW = ShareImageCanvas.MeasureTextWidth(ds, day.Day, ctx.Small);
-            ShareImageCanvas.DrawText(ds, day.Day, circleX + (DateCircle - dayW) / 2f, circleY + 4f, ctx.Small, dayColor);
+            ShareImageCanvas.DrawText(ds, day.Day, circleX + (circleW - dayW) / 2f, circleY + 4f, ctx.Small, dayColor);
         }
 
         float rowY = circleY + DateCircle + 8f;
