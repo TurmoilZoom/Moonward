@@ -128,7 +128,21 @@ public sealed partial class WelcomeWindow : WindowEx
     public string? UserDataFolderErrorMessage { get; set => SetProperty(ref field, value); }
 
 
-    public string? WebView2Version { get; set => SetProperty(ref field, value); }
+    public string? WebView2Version
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(HasWebView2));
+            }
+        }
+    }
+
+
+    /// <summary>检测到了 WebView2 运行时。可空字符串不能直接交给函数绑定转 Visibility：参数为 null 时不会调用函数。</summary>
+    public bool HasWebView2 => !string.IsNullOrEmpty(WebView2Version);
 
 
     public bool WebpDecoderSupport { get; set => SetProperty(ref field, value); }
@@ -232,14 +246,36 @@ public sealed partial class WelcomeWindow : WindowEx
         {
             if (SetProperty(ref field, value))
             {
+                OnPropertyChanged(nameof(HasStarwardFolderError));
                 UpdateStarwardNotFoundHint();
             }
         }
     }
 
 
+    /// <summary>
+    /// 有选目录的报错要显示，此时说明换成报错。
+    /// 可空字符串不能直接交给函数绑定转 Visibility：变回 null 时不会重新调用函数，说明就再也回不来了。
+    /// </summary>
+    public bool HasStarwardFolderError => !string.IsNullOrWhiteSpace(StarwardFolderErrorMessage);
+
+
     /// <summary>已解析到的 Starward 数据目录，显示在选择按钮右侧。</summary>
-    public string? StarwardSourcePath { get; set => SetProperty(ref field, value); }
+    public string? StarwardSourcePath
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(HasStarwardSourcePath));
+            }
+        }
+    }
+
+
+    /// <summary>有已解析的 Starward 数据目录可显示。</summary>
+    public bool HasStarwardSourcePath => !string.IsNullOrEmpty(StarwardSourcePath);
 
 
     /// <summary>未指定来源且没有选目录错误时，在按钮右侧显示未检测到提示。</summary>
@@ -435,7 +471,7 @@ public sealed partial class WelcomeWindow : WindowEx
 
     private void UpdateStarwardNotFoundHint()
     {
-        ShowStarwardNotFoundHint = !HasStarwardData && string.IsNullOrWhiteSpace(StarwardFolderErrorMessage);
+        ShowStarwardNotFoundHint = !HasStarwardData && !HasStarwardFolderError;
     }
 
 

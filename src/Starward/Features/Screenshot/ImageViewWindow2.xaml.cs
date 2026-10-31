@@ -205,8 +205,6 @@ public sealed partial class ImageViewWindow2 : Window
             StackPanel_NoImage.Visibility = Visibility.Visible;
             StackPanel_DisplayImageError.Visibility = Visibility.Collapsed;
             ToggleButton_ShowGallery.IsChecked = false;
-            ToggleButton_ShowGallery.IsEnabled = false;
-            TextBlock_ImageIndex.Visibility = Visibility.Collapsed;
         }
         catch { }
     }
@@ -223,16 +221,34 @@ public sealed partial class ImageViewWindow2 : Window
     public string CurrentFileName { get; set => SetProperty(ref field, value); }
 
 
-    public string CurrentPixelSizeText { get; set => SetProperty(ref field, value); }
+    // 没有图片时和 ResetState 一样显示「-」：从工具箱打开时还没加载过图片
+    public string CurrentPixelSizeText { get; set => SetProperty(ref field, value); } = "-";
 
 
-    public string CurrentFileSizeText { get; set => SetProperty(ref field, value); }
+    public string CurrentFileSizeText { get; set => SetProperty(ref field, value); } = "-";
 
 
     public ScreenshotItem? CurrentScreenshot { get; set => SetProperty(ref field, value); }
 
 
-    public ObservableCollection<ScreenshotItem>? ScreenshotCollection { get; set => SetProperty(ref field, value); }
+    public ObservableCollection<ScreenshotItem>? ScreenshotCollection
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(HasScreenshotCollection));
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 有图库可切换，控制上一张 / 下一张、图库按钮和序号。
+    /// 可空集合不能直接交给函数绑定：参数为 null 时不会调用函数，集合清空后这些元素会留着。
+    /// </summary>
+    public bool HasScreenshotCollection => ScreenshotCollection is not null;
 
 
     public bool IsHDRImage { get; set => SetProperty(ref field, value); }
@@ -1360,8 +1376,6 @@ public sealed partial class ImageViewWindow2 : Window
                 CurrentScreenshot = null;
                 ScreenshotCollection = null;
                 ToggleButton_ShowGallery.IsChecked = false;
-                ToggleButton_ShowGallery.IsEnabled = false;
-                TextBlock_ImageIndex.Visibility = Visibility.Collapsed;
                 return;
             }
 
@@ -1604,12 +1618,6 @@ public sealed partial class ImageViewWindow2 : Window
     public static Visibility ObjectToVisibilityReversed(bool? value)
     {
         return value is true ? Visibility.Collapsed : Visibility.Visible;
-    }
-
-
-    public static bool ObjectToBool(object obj)
-    {
-        return obj is not null;
     }
 
 

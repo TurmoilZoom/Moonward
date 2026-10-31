@@ -169,7 +169,7 @@
                                    IsTextScaleFactorEnabled="False"
                                    Text="{x:Bind StarwardSourcePath}"
                                    TextTrimming="CharacterEllipsis"
-                                   Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardSourcePath)}" />
+                                   Visibility="{x:Bind HasStarwardSourcePath}" />
                         <TextBlock FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    IsTextScaleFactorEnabled="False"
@@ -187,11 +187,11 @@
                 <TextBlock Style="{StaticResource DataSourceDescriptionSizerStyle}" Text="{x:Bind LanSyncDescription}" />
                 <TextBlock Style="{StaticResource DataSourceDescriptionStyle}"
                            Text="{x:Bind DataSourceDescription}"
-                           Visibility="{x:Bind sh:BindConverter.ObjectToVisibilityReversed(StarwardFolderErrorMessage)}" />
+                           Visibility="{x:Bind sh:BindConverter.BoolToVisibilityReversed(HasStarwardFolderError)}" />
                 <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
                            Style="{StaticResource DataSourceDescriptionStyle}"
                            Text="{x:Bind StarwardFolderErrorMessage}"
-                           Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StarwardFolderErrorMessage)}" />
+                           Visibility="{x:Bind HasStarwardFolderError}" />
             </Grid>
 
             <!--  旧版本数据迁移提示  -->
@@ -243,19 +243,19 @@
                            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                            IsTextScaleFactorEnabled="False"
                            Text="{x:Bind WebView2Version}"
-                           Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(WebView2Version)}" />
+                           Visibility="{x:Bind HasWebView2}" />
                 <TextBlock VerticalAlignment="Center"
                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
                            IsTextScaleFactorEnabled="False"
                            Text="{x:Bind lang:Lang.WelcomeView_NotInstalled}"
-                           Visibility="{x:Bind sh:BindConverter.ObjectToVisibilityReversed(WebView2Version)}" />
+                           Visibility="{x:Bind sh:BindConverter.BoolToVisibilityReversed(HasWebView2)}" />
                 <HyperlinkButton Padding="8,4,8,4"
                                  VerticalAlignment="Center"
                                  Content="{x:Bind lang:Lang.WelcomeView_InstallNow}"
                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                  IsTextScaleFactorEnabled="False"
                                  NavigateUri="https://developer.microsoft.com/microsoft-edge/webview2"
-                                 Visibility="{x:Bind sh:BindConverter.ObjectToVisibilityReversed(WebView2Version)}" />
+                                 Visibility="{x:Bind sh:BindConverter.BoolToVisibilityReversed(HasWebView2)}" />
             </StackPanel>
 
             <!--  WebP  -->

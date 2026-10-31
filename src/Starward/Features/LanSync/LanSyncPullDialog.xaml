@@ -126,14 +126,15 @@
                        Text="{x:Bind ProgressText}"
                        TextTrimming="CharacterEllipsis" />
         </StackPanel>
+        <!--  可空字符串用 Converter 转 Visibility：函数绑定在参数变回 null 时不会重新调用，重新同步时旧结果会留下空行  -->
         <TextBlock Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                    Text="{x:Bind ResultText}"
                    TextWrapping="Wrap"
-                   Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(ResultText)}" />
+                   Visibility="{x:Bind ResultText, Converter={StaticResource ObjectToVisibilityConverter}}" />
         <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
                    Text="{x:Bind ErrorText}"
                    TextWrapping="Wrap"
-                   Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(ErrorText)}" />
+                   Visibility="{x:Bind ErrorText, Converter={StaticResource ObjectToVisibilityConverter}}" />
 
         <StackPanel Margin="0,8,0,0"
                     HorizontalAlignment="Right"

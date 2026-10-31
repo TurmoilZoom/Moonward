@@ -274,7 +274,7 @@
                 Opacity="0"
                 sc:InstantTooltip.Placement="Right"
                 sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_Previous}"
-                Visibility="{x:Bind local:ImageViewWindow2.ObjectToVisibility(ScreenshotCollection)}">
+                Visibility="{x:Bind HasScreenshotCollection}">
             <FontIcon Glyph="&#xE76B;" IsTextScaleFactorEnabled="False" />
             <Button.Resources>
                 <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="ControlFillColorTransparentBrush" />
@@ -318,7 +318,7 @@
                 Opacity="0"
                 sc:InstantTooltip.Placement="Left"
                 sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_Next}"
-                Visibility="{x:Bind local:ImageViewWindow2.ObjectToVisibility(ScreenshotCollection)}">
+                Visibility="{x:Bind HasScreenshotCollection}">
             <FontIcon Glyph="&#xE76C;" IsTextScaleFactorEnabled="False" />
             <Button.Resources>
                 <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="ControlFillColorTransparentBrush" />
@@ -518,7 +518,7 @@
                           Width="40"
                           Height="36"
                           Padding="0"
-                          IsEnabled="{x:Bind local:ImageViewWindow2.ObjectToBool(ScreenshotCollection)}"
+                          IsEnabled="{x:Bind HasScreenshotCollection}"
                           Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
                           sc:InstantTooltip.Placement="Top"
                           sc:InstantTooltip.Text="{x:Bind lang:Lang.ImageViewWindow2_ShowGallery}">
@@ -543,7 +543,7 @@
                        VerticalAlignment="Center"
                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                        IsTextScaleFactorEnabled="False"
-                       Visibility="{x:Bind local:ImageViewWindow2.ObjectToVisibility(ScreenshotCollection)}">
+                       Visibility="{x:Bind HasScreenshotCollection}">
                 <Run Text="{x:Bind local:ImageViewWindow2.AddOne(GridView_ImageCollection.SelectedIndex)}" /><Run Text="/" /><Run Text="{x:Bind ScreenshotCollection.Count}" />
             </TextBlock>
             <AppBarSeparator Foreground="{ThemeResource ButtonPointerOverBackgroundThemeBrush}" />

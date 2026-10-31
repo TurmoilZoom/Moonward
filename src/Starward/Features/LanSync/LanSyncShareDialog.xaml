@@ -64,8 +64,11 @@
             </StackPanel>
         </Border>
 
-        <!--  共享状态：等待连接 / 已发送  -->
-        <Grid ColumnSpacing="8" Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(StatusText)}">
+        <!--
+            共享状态：等待连接 / 已发送。
+            可空字符串用 Converter 转 Visibility：函数绑定在参数为 null 时不会调用，共享失败或被锁定时会留下空行
+        -->
+        <Grid ColumnSpacing="8" Visibility="{x:Bind StatusText, Converter={StaticResource ObjectToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -82,7 +85,7 @@
         <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
                    Text="{x:Bind ErrorText}"
                    TextWrapping="Wrap"
-                   Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(ErrorText)}" />
+                   Visibility="{x:Bind ErrorText, Converter={StaticResource ObjectToVisibilityConverter}}" />
         <TextBlock FontSize="12"
                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                    Text="{x:Bind lang:Lang.LanSync_FirewallHint}"
