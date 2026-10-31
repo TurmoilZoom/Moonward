@@ -246,7 +246,7 @@ public sealed partial class ImageViewWindow2 : Window
 
     /// <summary>
     /// 有图库可切换，控制上一张 / 下一张、图库按钮和序号。
-    /// 可空集合不能直接交给函数绑定：参数为 null 时不会调用函数，集合清空后这些元素会留着。
+    /// 可空集合不能直接交给函数绑定：参数变回 null 时不会重新调用函数，集合清空后这些元素会留着。
     /// </summary>
     public bool HasScreenshotCollection => ScreenshotCollection is not null;
 

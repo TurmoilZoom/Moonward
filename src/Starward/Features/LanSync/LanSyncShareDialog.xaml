@@ -66,7 +66,7 @@
 
         <!--
             共享状态：等待连接 / 已发送。
-            可空字符串用 Converter 转 Visibility：函数绑定在参数为 null 时不会调用，共享失败或被锁定时会留下空行
+            可空字符串用 Converter 转 Visibility：函数绑定在参数变回 null 时不会重新调用，共享失败或被锁定时会留下空行
         -->
         <Grid ColumnSpacing="8" Visibility="{x:Bind StatusText, Converter={StaticResource ObjectToVisibilityConverter}}">
             <Grid.ColumnDefinitions>

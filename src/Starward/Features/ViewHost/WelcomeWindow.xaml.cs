@@ -141,7 +141,7 @@ public sealed partial class WelcomeWindow : WindowEx
     }
 
 
-    /// <summary>检测到了 WebView2 运行时。可空字符串不能直接交给函数绑定转 Visibility：参数为 null 时不会调用函数。</summary>
+    /// <summary>检测到了 WebView2 运行时。可空字符串不能直接交给函数绑定转 Visibility：参数变回 null 时不会重新调用函数。</summary>
     public bool HasWebView2 => !string.IsNullOrEmpty(WebView2Version);
 
 
