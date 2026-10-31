@@ -29,10 +29,16 @@ public sealed partial class RestoreBackupDialog : ContentDialog
 
     private bool _loaded;
 
+    /// <summary>检查超过这个时长才在原位显示进度，检查很快时界面完全不动。</summary>
+    private const int CheckingIndicatorDelayMs = 300;
+
     /// <summary>每次选择都加一，检查完成时据此丢弃过期的结果。</summary>
     private int _prepareVersion;
 
     private PreparedBackup? _prepared;
+
+    /// <summary>最近一次选择触发的检查。</summary>
+    private Task? _prepareTask;
 
     /// <summary>已把副本交给重启后的新进程，关闭时不能删。</summary>
     private bool _handedOver;
@@ -60,7 +66,7 @@ public sealed partial class RestoreBackupDialog : ContentDialog
         {
             if (SetProperty(ref field, value))
             {
-                _ = PrepareAsync(value?.FilePath);
+                _prepareTask = PrepareAsync(value?.FilePath);
             }
         }
     }
@@ -94,9 +100,28 @@ public sealed partial class RestoreBackupDialog : ContentDialog
 
     public string? ProgressText { get; set => SetProperty(ref field, value); }
 
+    /// <summary>选中的备份检查了一会儿还没出结果。</summary>
+    public bool IsChecking
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(PrepareResultOpacity));
+            }
+        }
+    }
+
+    /// <summary>检查中隐去上一份的结果，但保留它占的高度。</summary>
+    public double PrepareResultOpacity => IsChecking ? 0 : 1;
+
     public string? PreparedInfoText { get; set => SetProperty(ref field, value); }
 
     public bool PreparedIsLegacy { get; set => SetProperty(ref field, value); }
+
+    /// <summary>选中的备份不能还原的原因。</summary>
+    public string? PrepareErrorText { get; set => SetProperty(ref field, value); }
 
     public string? ResultText { get; set => SetProperty(ref field, value); }
 
@@ -164,26 +189,34 @@ public sealed partial class RestoreBackupDialog : ContentDialog
     /// <summary>
     /// 检查选中的备份：解压、校验、升级到当前版本。换了选择时丢掉上一份副本。
     /// </summary>
+    /// <remarks>
+    /// 检查期间先留着上一份的结果和按钮状态，超过 <see cref="CheckingIndicatorDelayMs"/> 才换成进度，
+    /// 以免检查只要几十毫秒时界面闪一下；这段时间里点还原，由 <see cref="RestoreAsync"/> 等检查完成。
+    /// </remarks>
     /// <param name="file">备份文件；为空时只清掉状态。</param>
     private async Task PrepareAsync(string? file)
     {
         int version = ++_prepareVersion;
         DatabaseBackupService.DeletePrepared(_prepared?.DatabaseFile);
         _prepared = null;
-        CanRestore = false;
-        PreparedInfoText = null;
-        PreparedIsLegacy = false;
         ErrorText = null;
         ResultText = null;
         if (string.IsNullOrWhiteSpace(file))
         {
+            CanRestore = false;
+            IsChecking = false;
+            SetPrepareResult(null, false, null);
             return;
         }
-        IsBusy = true;
-        ProgressText = Lang.RestoreBackupDialog_Checking;
+        Task<PreparedBackup> task = Task.Run(() => DatabaseBackupService.PrepareRestore(file));
+        if (await Task.WhenAny(task, Task.Delay(CheckingIndicatorDelayMs)) != task && version == _prepareVersion)
+        {
+            IsChecking = true;
+            CanRestore = false;
+        }
         try
         {
-            PreparedBackup prepared = await Task.Run(() => DatabaseBackupService.PrepareRestore(file));
+            PreparedBackup prepared = await task;
             if (version != _prepareVersion)
             {
                 // 检查期间又换了选择，这份已经没用了
@@ -191,8 +224,7 @@ public sealed partial class RestoreBackupDialog : ContentDialog
                 return;
             }
             _prepared = prepared;
-            PreparedInfoText = GetInfoText(prepared);
-            PreparedIsLegacy = prepared.IsLegacy;
+            SetPrepareResult(GetInfoText(prepared), prepared.IsLegacy, null);
             CanRestore = true;
         }
         catch (DatabaseBackupException ex)
@@ -200,7 +232,8 @@ public sealed partial class RestoreBackupDialog : ContentDialog
             if (version == _prepareVersion)
             {
                 _logger.LogWarning(ex, "Backup {file} can not be restored: {kind}", file, ex.Kind);
-                ErrorText = GetErrorMessage(ex.Kind);
+                SetPrepareResult(null, false, GetErrorMessage(ex.Kind));
+                CanRestore = false;
             }
         }
         catch (Exception ex)
@@ -208,16 +241,31 @@ public sealed partial class RestoreBackupDialog : ContentDialog
             if (version == _prepareVersion)
             {
                 _logger.LogError(ex, "Prepare backup {file}", file);
-                ErrorText = string.Format(Lang.RestoreBackupDialog_Error_Failed, ex.Message);
+                SetPrepareResult(null, false, string.Format(Lang.RestoreBackupDialog_Error_Failed, ex.Message));
+                CanRestore = false;
             }
         }
         finally
         {
             if (version == _prepareVersion)
             {
-                IsBusy = false;
+                IsChecking = false;
             }
         }
+    }
+
+
+    /// <summary>
+    /// 一次换掉备份下方显示的检查结果，几行在同一轮布局里一起变化。
+    /// </summary>
+    /// <param name="info">备份信息；检查失败时为空。</param>
+    /// <param name="legacy">是否显示旧版整库备份的说明。</param>
+    /// <param name="error">不能还原的原因；检查通过时为空。</param>
+    private void SetPrepareResult(string? info, bool legacy, string? error)
+    {
+        PreparedInfoText = info;
+        PreparedIsLegacy = legacy;
+        PrepareErrorText = error;
     }
 
 
@@ -228,9 +276,18 @@ public sealed partial class RestoreBackupDialog : ContentDialog
     [RelayCommand]
     private async Task RestoreAsync()
     {
+        // 刚换了选择、检查还没出结果时按钮仍可点，等这次检查完成再继续
+        if (_prepared is null && _prepareTask is { IsCompleted: false } pending)
+        {
+            await pending;
+        }
         if (_prepared is not PreparedBackup prepared)
         {
-            ErrorText = Lang.RestoreBackupDialog_SelectBackupFirst;
+            // 检查失败时原因已经显示在备份下方
+            if (PrepareErrorText is null)
+            {
+                ErrorText = Lang.RestoreBackupDialog_SelectBackupFirst;
+            }
             return;
         }
         ErrorText = null;

@@ -60,18 +60,43 @@
                    TextWrapping="Wrap"
                    Visibility="{x:Bind sh:BindConverter.BoolToVisibility(ShowNoBackupHint)}" />
 
-        <!--  选中备份的检查结果  -->
-        <StackPanel Spacing="2" Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(PreparedInfoText)}">
-            <TextBlock FontSize="12"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind PreparedInfoText}"
-                       TextWrapping="Wrap" />
-            <TextBlock FontSize="12"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.RestoreBackupDialog_LegacyNote}"
-                       TextWrapping="Wrap"
-                       Visibility="{x:Bind sh:BindConverter.BoolToVisibility(PreparedIsLegacy)}" />
-        </StackPanel>
+        <!--
+            选中备份的检查结果。检查中隐去上一份的结果、在原位显示进度，占的高度不变，
+            免得下面的内容和整个对话框（垂直居中）跟着上下跳。
+            可空字符串用 Converter 转 Visibility：函数绑定在参数变为 null 时不会重新调用
+        -->
+        <Grid MinHeight="16" Visibility="{x:Bind sh:BindConverter.BoolToVisibility(HasBackups)}">
+            <StackPanel Opacity="{x:Bind PrepareResultOpacity}" Spacing="2">
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind PreparedInfoText}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind PreparedInfoText, Converter={StaticResource ObjectToVisibilityConverter}}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.RestoreBackupDialog_LegacyNote}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind sh:BindConverter.BoolToVisibility(PreparedIsLegacy)}" />
+                <TextBlock FontSize="12"
+                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                           Text="{x:Bind PrepareErrorText}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind PrepareErrorText, Converter={StaticResource ObjectToVisibilityConverter}}" />
+            </StackPanel>
+            <StackPanel VerticalAlignment="Top"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        Visibility="{x:Bind sh:BindConverter.BoolToVisibility(IsChecking)}">
+                <ProgressRing Width="16"
+                              Height="16"
+                              IsActive="{x:Bind IsChecking}" />
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="{x:Bind lang:Lang.RestoreBackupDialog_Checking}"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </Grid>
 
         <!--  还原方式  -->
         <RadioButtons Header="{x:Bind lang:Lang.RestoreBackupDialog_Mode}"
@@ -85,7 +110,7 @@
             </RadioButton>
         </RadioButtons>
 
-        <!--  进度与结果  -->
+        <!--  合并还原的进度与结果  -->
         <StackPanel Orientation="Horizontal"
                     Spacing="8"
                     Visibility="{x:Bind sh:BindConverter.BoolToVisibility(IsBusy)}">
@@ -101,11 +126,11 @@
         <TextBlock Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                    Text="{x:Bind ResultText}"
                    TextWrapping="Wrap"
-                   Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(ResultText)}" />
+                   Visibility="{x:Bind ResultText, Converter={StaticResource ObjectToVisibilityConverter}}" />
         <TextBlock Foreground="{ThemeResource SystemFillColorCautionBrush}"
                    Text="{x:Bind ErrorText}"
                    TextWrapping="Wrap"
-                   Visibility="{x:Bind sh:BindConverter.ObjectToVisibility(ErrorText)}" />
+                   Visibility="{x:Bind ErrorText, Converter={StaticResource ObjectToVisibilityConverter}}" />
 
         <StackPanel Margin="0,8,0,0"
                     HorizontalAlignment="Right"
