@@ -85,6 +85,7 @@
 - `x:Bind` 默认 `OneTime`，只在加载时求值一次；之后再改属性，要么用 `OneWay`，要么调 `Bindings.Update()`。
 - 函数绑定只能绑实例方法，写成 `static` 会报 `CS0176`。
 - 函数绑定返回 `bool` 再隐式转 `Visibility`，生成的代码编不过（`CS0103: 名称"obj"不存在`）；让函数直接返回 `Visibility`。属性路径绑定转 `Visibility` 没问题。
+- 函数绑定的参数为 null 时不会调用函数（生成代码里是 `if (obj != null)` 才重新求值）：`sh:BindConverter.ObjectToVisibility(SomeText)` 初始为 null 时保持默认的 `Visible`，之后变回 null 也不会收起，只剩一个空元素。可空值转 `Visibility` 用 `Converter={StaticResource ObjectToVisibilityConverter}`，或绑定算好的 `bool` 属性（`RestoreBackupDialog`）。
 - `Window` 根上的 `x:Bind` 不能用 `Converter={StaticResource …}`（`CS1503`）；改为在 code-behind 暴露算好的属性，或用函数绑定。
 - 被 XAML 实例化的数据类（`x:Bind` 集合元素、`DataTemplate` 的 `x:DataType`）不能用 `required` / `init`（`CS8852` / `CS9035`），用普通 `{ get; set; }`。
 - `ThemeResource` 键编译时不校验，写错要到运行时才崩。只用仓库里已有先例的键（先 `grep` 一下）。
