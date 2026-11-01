@@ -29,9 +29,17 @@ public sealed partial class BackgroundViewPage : PageBase
     private readonly ILogger<BackgroundViewPage> _logger = AppConfig.GetLogger<BackgroundViewPage>();
 
 
+    private readonly ShellFileDragSource? _fileDragSource;
+
+
     public BackgroundViewPage()
     {
         this.InitializeComponent();
+        if (AppConfig.IsAdmin)
+        {
+            // 管理员下 CanDragItems 是关闭的（WinUI 拖放提权后不启动），改走系统拖放
+            _fileDragSource = new ShellFileDragSource(GridView_Images, x => (x as BackgroundFileItem)?.FilePath);
+        }
     }
 
 
