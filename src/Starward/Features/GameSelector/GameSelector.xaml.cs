@@ -46,10 +46,15 @@ public sealed partial class GameSelector : UserControl
     private readonly GameLauncherService _gameLauncherService = AppConfig.GetService<GameLauncherService>();
 
 
+    private readonly GameIconDragReorder _gameIconDragReorder;
+
+
 
     public GameSelector()
     {
         this.InitializeComponent();
+        _gameIconDragReorder = new GameIconDragReorder(ListView_GameIcons, MoveGameBizIcon);
+        _gameIconDragReorder.DragEnded += GameIconDragReorder_DragEnded;
         InitializeGameSelector();
         this.Loaded += GameSelector_Loaded;
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
@@ -385,11 +390,30 @@ public sealed partial class GameSelector : UserControl
     /// <param name="e"></param>
     private void Grid_GameIconsArea_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        if (FullBackgroundVisible || IsPinned)
+        if (FullBackgroundVisible || IsPinned || _gameIconDragReorder.IsDragging)
         {
             return;
         }
         GameIconsAreaVisible = false;
+    }
+
+
+
+    /// <summary>
+    /// 图标拖动结束。拖动期间指针移出图标区域不会收起，松手时指针已在区域外就在这里补上
+    /// </summary>
+    /// <param name="e">结束拖动的指针事件</param>
+    private void GameIconDragReorder_DragEnded(Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        if (FullBackgroundVisible || IsPinned)
+        {
+            return;
+        }
+        Point point = e.GetCurrentPoint(Grid_GameIconsArea).Position;
+        if (point.X < 0 || point.Y < 0 || point.X >= Grid_GameIconsArea.ActualWidth || point.Y >= Grid_GameIconsArea.ActualHeight)
+        {
+            GameIconsAreaVisible = false;
+        }
     }
 
 
@@ -544,6 +568,34 @@ public sealed partial class GameSelector : UserControl
             AppConfig.SelectedGameBizs = sb.ToString().TrimEnd(',');
         }
         catch { }
+    }
+
+
+
+    /// <summary>
+    /// 拖拽松手后移动待选游戏。用移除再插入而不是 Move：Move 会被 WinUI 折叠成 Reset，重建全部图标。
+    /// </summary>
+    /// <param name="oldIndex">旧索引</param>
+    /// <param name="newIndex">新索引</param>
+    /// <param name="pointerOverIcon">指针是否还在换位后的图标上</param>
+    private void MoveGameBizIcon(int oldIndex, int newIndex, bool pointerOverIcon)
+    {
+        GameBizIcon icon = GameBizIcons[oldIndex];
+        // 换位会换掉容器，指针已离开时等不到 PointerExited，图标会一直亮着，这里直接复位悬停遮罩
+        if (!icon.IsSelected && !pointerOverIcon)
+        {
+            icon.MaskOpacity = 1;
+        }
+        // 只在插回后保存一次，缺了这个图标的中间状态不写入配置
+        GameBizIcons.CollectionChanged -= GameBizIcons_CollectionChanged;
+        GameBizIcons.RemoveAt(oldIndex);
+        GameBizIcons.CollectionChanged += GameBizIcons_CollectionChanged;
+        GameBizIcons.Insert(newIndex, icon);
+        if (!icon.IsSelected && pointerOverIcon)
+        {
+            // 指针还在图标上时，换位后遮罩会盖上约 0.6 秒，等新容器收到 PointerEntered 才恢复（实测）；布局后补一次，避免松手后闪暗
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => icon.MaskOpacity = 0);
+        }
     }
 
 
