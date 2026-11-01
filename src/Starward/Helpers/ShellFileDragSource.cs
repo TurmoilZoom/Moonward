@@ -19,11 +19,11 @@ namespace Starward.Helpers;
 
 
 /// <summary>
-/// 让列表里的文件项在管理员权限下也能用鼠标拖到其他程序。
-/// <para>WinUI 的拖放在非打包应用提权后不启动（microsoft-ui-xaml issue 7690），所以列表的 CanDragItems 在管理员下是关闭的。
-/// 但 Windows 并不拦截从高权限往低权限的拖放，实测直接调 OLE 拖放可以把文件拖进普通权限的资源管理器，
-/// 这里绕开 WinUI，自己判断拖动手势，再交给 Shell 的 SHDoDragDrop。</para>
-/// <para>只处理鼠标：OLE 拖放靠鼠标按键状态判断松手，触摸和笔不适用。</para>
+/// 让列表里的文件项能用鼠标拖到其他程序：绕开 WinUI 的拖放，自己判断拖动手势，再交给 Shell 的 SHDoDragDrop。
+/// <para>WinUI 的拖放有两个问题：非打包应用提权后不启动（microsoft-ui-xaml issue 7690）；普通权限下要把 StorageFile 放进 DataPackage，
+/// XAML 之后在渲染帧里释放它时会发起跨套间 COM 调用，等待期间的消息循环重入 XAML，触发 0xC000027B 闪退。
+/// Windows 并不拦截从高权限往低权限的拖放，实测 OLE 拖放在两种权限下都能把文件拖进资源管理器。</para>
+/// <para>只处理鼠标：OLE 拖放靠鼠标按键状态判断松手，触摸和笔不适用。它们在普通权限下仍走列表自带的拖放，管理员下不能拖。</para>
 /// </summary>
 internal sealed class ShellFileDragSource
 {
@@ -48,6 +48,7 @@ internal sealed class ShellFileDragSource
         _listView = listView;
         _getFilePath = getFilePath;
         // 列表项会把指针事件标记为已处理，必须用 handledEventsToo 才收得到
+        listView.AddHandler(UIElement.PointerEnteredEvent, new PointerEventHandler(OnPointerEntered), true);
         listView.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(OnPointerPressed), true);
         listView.AddHandler(UIElement.PointerMovedEvent, new PointerEventHandler(OnPointerMoved), true);
         listView.AddHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(OnPointerEnded), true);
@@ -57,10 +58,35 @@ internal sealed class ShellFileDragSource
 
 
     /// <summary>
+    /// 只在触摸和笔操作时打开列表自带的拖放，否则鼠标拖动时两套拖放会同时启动。
+    /// 管理员下 WinUI 的拖放不启动，一直关闭。
+    /// </summary>
+    /// <param name="e">当前指针事件。</param>
+    private void UpdateListDragEnabled(PointerRoutedEventArgs e)
+    {
+        bool enabled = !AppConfig.IsAdmin && e.Pointer.PointerDeviceType is not PointerDeviceType.Mouse;
+        if (_listView.CanDragItems != enabled)
+        {
+            _listView.CanDragItems = enabled;
+        }
+    }
+
+
+    /// <summary>
+    /// 指针进入列表时按设备类型切换列表自带的拖放。
+    /// </summary>
+    private void OnPointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        UpdateListDragEnabled(e);
+    }
+
+
+    /// <summary>
     /// 记下按在哪一项上，这里不捕获指针，否则会打断列表项的单击。
     /// </summary>
     private void OnPointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        UpdateListDragEnabled(e);
         _pressedContainer = null;
         if (e.Pointer.PointerDeviceType is not PointerDeviceType.Mouse)
         {
@@ -80,6 +106,8 @@ internal sealed class ShellFileDragSource
     /// </summary>
     private void OnPointerMoved(object sender, PointerRoutedEventArgs e)
     {
+        // 触摸抬起后鼠标可能一直停在列表里，不会再有进入事件，要在移动时切回来
+        UpdateListDragEnabled(e);
         if (_pressedContainer is not SelectorItem container)
         {
             return;
@@ -195,7 +223,7 @@ internal sealed class ShellFileDragSource
                 if (GetGUIThreadInfo(threadId, ref info) && info.hwndCapture != 0 && GetCursorPos(out POINT point) && ScreenToClient(info.hwndCapture, ref point))
                 {
                     // 松手后也继续投递：这条消息可能被循环之外的处理吃掉，直到拖放真正结束才停
-                    bool pressed = GetAsyncKeyState(VK_LBUTTON) < 0;
+                    bool pressed = MouseButtonHelper.IsPrimaryButtonPressed();
                     nint position = (point.Y << 16) | (point.X & 0xFFFF);
                     PostMessage(info.hwndCapture, pressed ? WM_MOUSEMOVE : WM_LBUTTONUP, pressed ? MK_LBUTTON : 0, position);
                 }
@@ -208,16 +236,12 @@ internal sealed class ShellFileDragSource
 
 
     private const int MousePollIntervalMs = 16;
-    private const int VK_LBUTTON = 0x01;
     private const uint WM_MOUSEMOVE = 0x0200;
     private const uint WM_LBUTTONUP = 0x0202;
     private const nint MK_LBUTTON = 0x0001;
 
     [DllImport("kernel32.dll")]
     private static extern uint GetCurrentThreadId();
-
-    [DllImport("user32.dll")]
-    private static extern short GetAsyncKeyState(int vKey);
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
