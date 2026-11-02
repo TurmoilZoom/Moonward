@@ -577,25 +577,14 @@ public sealed partial class GameSelector : UserControl
     /// </summary>
     /// <param name="oldIndex">旧索引</param>
     /// <param name="newIndex">新索引</param>
-    /// <param name="pointerOverIcon">指针是否还在换位后的图标上</param>
-    private void MoveGameBizIcon(int oldIndex, int newIndex, bool pointerOverIcon)
+    private void MoveGameBizIcon(int oldIndex, int newIndex)
     {
         GameBizIcon icon = GameBizIcons[oldIndex];
-        // 换位会换掉容器，指针已离开时等不到 PointerExited，图标会一直亮着，这里直接复位悬停遮罩
-        if (!icon.IsSelected && !pointerOverIcon)
-        {
-            icon.MaskOpacity = 1;
-        }
         // 只在插回后保存一次，缺了这个图标的中间状态不写入配置
         GameBizIcons.CollectionChanged -= GameBizIcons_CollectionChanged;
         GameBizIcons.RemoveAt(oldIndex);
         GameBizIcons.CollectionChanged += GameBizIcons_CollectionChanged;
         GameBizIcons.Insert(newIndex, icon);
-        if (!icon.IsSelected && pointerOverIcon)
-        {
-            // 指针还在图标上时，换位后遮罩会盖上约 0.6 秒，等新容器收到 PointerEntered 才恢复（实测）；布局后补一次，避免松手后闪暗
-            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () => icon.MaskOpacity = 0);
-        }
     }
 
 

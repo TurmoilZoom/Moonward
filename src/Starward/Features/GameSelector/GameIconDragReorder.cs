@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Starward.Controls;
 using System;
+using Vanara.PInvoke;
 using Windows.Foundation;
 
 
@@ -48,11 +49,22 @@ internal sealed class GameIconDragReorder
     /// <summary>指针位于热区最边缘时的最大自动滚动速度（DIP/秒）。</summary>
     private const double AutoScrollMaxSpeed = 480d;
 
+    /// <summary>松手后查询光标是否已离开图标的间隔。</summary>
+    private static readonly TimeSpan LingerCheckInterval = TimeSpan.FromMilliseconds(100);
+
+    /// <summary>松手后最多查询的次数。约 2 秒后新容器早已收到 PointerEntered（实测约 0.6 秒），之后离开会有 PointerExited。</summary>
+    private const int LingerCheckCount = 20;
+
 
     private readonly ListView _listView;
-    private readonly Action<int, int, bool> _moveItem;
+    private readonly Action<int, int> _moveItem;
+    private readonly DispatcherQueueTimer _lingerTimer;
 
     private ScrollViewer? _scrollViewer;
+    // 松手时指针还停在上面的图标及其区域（相对 ScrollViewer）
+    private GameBizIcon? _lingeringIcon;
+    private Rect _lingeringBounds;
+    private int _lingerChecksLeft;
     private FrameworkElement? _dragged;
     private Pointer? _pointer;
     private bool _pressed;
@@ -75,11 +87,14 @@ internal sealed class GameIconDragReorder
 
 
     /// <param name="listView">承载图标的列表。</param>
-    /// <param name="moveItem">松手后提交换位，参数为旧索引、新索引、指针是否还在换位后的图标上。</param>
-    public GameIconDragReorder(ListView listView, Action<int, int, bool> moveItem)
+    /// <param name="moveItem">松手后提交换位，参数为旧索引、新索引。</param>
+    public GameIconDragReorder(ListView listView, Action<int, int> moveItem)
     {
         _listView = listView;
         _moveItem = moveItem;
+        _lingerTimer = listView.DispatcherQueue.CreateTimer();
+        _lingerTimer.Interval = LingerCheckInterval;
+        _lingerTimer.Tick += LingerTimer_Tick;
         // ListViewItem 会把指针事件标记为已处理，必须用 handledEventsToo 才收得到
         listView.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(OnPointerPressed), true);
         listView.AddHandler(UIElement.PointerMovedEvent, new PointerEventHandler(OnPointerMoved), true);
@@ -107,6 +122,8 @@ internal sealed class GameIconDragReorder
         }
         // 上一次按下可能在列表外松开、没收到松手事件，这里总是重新开始
         ClearState();
+        // 按下时框架已重新判定指针所在元素，之后的进出事件是可靠的；再拖动时也不能让定时查询把图标压暗
+        StopLingering();
         _scrollViewer ??= _listView.FindDescendant<ScrollViewer>();
         if (_scrollViewer is null || FindContainer(e.OriginalSource as DependencyObject) is not ListViewItem container)
         {
@@ -434,9 +451,11 @@ internal sealed class GameIconDragReorder
                 }
             }
             catch { }
-            if (commit && from != to)
+            int finalSlot = commit ? to : from;
+            SettleHover(finalSlot, e);
+            if (finalSlot != from)
             {
-                MoveWithoutTransitions(from, to, IsPointerOverSlot(to, e));
+                MoveWithoutTransitions(from, finalSlot);
             }
         }
         ClearState();
@@ -453,32 +472,106 @@ internal sealed class GameIconDragReorder
     /// </summary>
     /// <param name="from">旧索引。</param>
     /// <param name="to">新索引。</param>
-    /// <param name="pointerOverItem">指针是否还在换位后的图标上。</param>
-    private void MoveWithoutTransitions(int from, int to, bool pointerOverItem)
+    private void MoveWithoutTransitions(int from, int to)
     {
         TransitionCollection transitions = _listView.ItemContainerTransitions;
         _listView.ItemContainerTransitions = new TransitionCollection();
-        _moveItem(from, to, pointerOverItem);
-        _listView.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () => _listView.ItemContainerTransitions = transitions);
+        _moveItem(from, to);
+
+        void OnLayoutUpdated(object? sender, object e)
+        {
+            _listView.LayoutUpdated -= OnLayoutUpdated;
+            // 布局回调里不改布局相关属性，推到这轮布局之后
+            _listView.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+            {
+                _listView.ItemContainerTransitions = transitions;
+                // 旧容器移除时会收到 PointerExited 盖上遮罩，新容器约 0.6 秒后才收到 PointerEntered（实测），这里补上，避免松手后闪暗
+                if (_lingeringIcon is { IsSelected: false } icon)
+                {
+                    icon.MaskOpacity = 0;
+                }
+            });
+        }
+        // 必须等这次换位的布局走完才恢复过渡。低优先级任务不保证排在布局之后，直接排队时实测约两成会回弹：
+        // 过渡照常播放，图标跳回原位再滑过去，被拖的图标消失半秒以上
+        _listView.LayoutUpdated += OnLayoutUpdated;
     }
 
 
-    /// <summary>判断指针是否落在指定槽位的图标上（容器去掉内边距后的区域）。</summary>
-    /// <param name="slot">槽位。</param>
-    /// <param name="e">提供指针位置的事件。</param>
-    /// <returns>指针在图标上时返回 <see langword="true"/>。</returns>
-    private bool IsPointerOverSlot(int slot, PointerRoutedEventArgs e)
+    /// <summary>
+    /// 拖动结束时校正被拖图标的悬停遮罩。拖动期间指针被列表捕获，松手后图标不一定等得到 PointerExited
+    /// （指针在窗口外或标题栏拖动区、甩到行外马上松手、换位换掉了容器），遮罩会一直亮着。
+    /// 指针已离开就直接复位；还在图标上就定时查光标位置，等它离开时复位。这里靠不了事件：
+    /// 新容器收到 PointerEntered 之前，指针直接移出窗口时列表收不到任何事件。
+    /// </summary>
+    /// <param name="finalSlot">图标最终所在的槽位。</param>
+    /// <param name="e">结束拖动的指针事件。</param>
+    private void SettleHover(int finalSlot, PointerRoutedEventArgs e)
     {
-        if (_scrollViewer is null || _dragged is not Control container)
+        if (_scrollViewer is null || _dragged is not Control container || _listView.ItemFromContainer(container) is not GameBizIcon icon)
+        {
+            return;
+        }
+        // 槽位在内容坐标里等距排列，换算回视口要算上开始拖动以来滚动的距离
+        double slotX = _pressContentX - _pressViewport.X + _draggedOrigin.X + ((finalSlot - _originalSlot) * _pitch) - _offsetX;
+        Thickness padding = container.Padding;
+        Rect bounds = new(slotX + padding.Left,
+                          _draggedOrigin.Y + padding.Top,
+                          Math.Max(0, _pitch - padding.Left - padding.Right),
+                          Math.Max(0, container.ActualHeight - padding.Top - padding.Bottom));
+        // 手指抬起后指针就不存在了，也算离开
+        if (e.Pointer.PointerDeviceType != PointerDeviceType.Touch && bounds.Contains(e.GetCurrentPoint(_scrollViewer).Position))
+        {
+            _lingeringIcon = icon;
+            _lingeringBounds = bounds;
+            _lingerChecksLeft = LingerCheckCount;
+            _lingerTimer.Start();
+        }
+        else if (!icon.IsSelected)
+        {
+            icon.MaskOpacity = 1;
+        }
+    }
+
+
+    /// <summary>定时检查：光标离开松手时停留的图标就复位遮罩；查询次数用完后交给图标自己的进出事件。</summary>
+    /// <param name="sender">定时器；此处不使用。</param>
+    /// <param name="args">事件参数；此处不使用。</param>
+    private void LingerTimer_Tick(DispatcherQueueTimer sender, object args)
+    {
+        bool left = !IsCursorOver(_lingeringBounds);
+        if (left && _lingeringIcon is { IsSelected: false } icon)
+        {
+            icon.MaskOpacity = 1;
+        }
+        if (left || --_lingerChecksLeft <= 0)
+        {
+            StopLingering();
+        }
+    }
+
+
+    /// <summary>判断光标此刻是否在给定区域内。</summary>
+    /// <param name="bounds">相对 ScrollViewer 的区域（DIP）。</param>
+    /// <returns>在区域内时返回 <see langword="true"/>；取不到光标位置时返回 <see langword="false"/>。</returns>
+    private bool IsCursorOver(Rect bounds)
+    {
+        if (_scrollViewer?.XamlRoot is not XamlRoot root || !User32.GetCursorPos(out var point))
         {
             return false;
         }
-        Point point = e.GetCurrentPoint(_scrollViewer).Position;
-        // 槽位在内容坐标里等距排列，换算回视口要算上开始拖动以来滚动的距离
-        double slotX = _pressContentX - _pressViewport.X + _draggedOrigin.X + ((slot - _originalSlot) * _pitch) - _offsetX;
-        Thickness padding = container.Padding;
-        return point.X >= slotX + padding.Left && point.X < slotX + _pitch - padding.Right
-            && point.Y >= _draggedOrigin.Y + padding.Top && point.Y < _draggedOrigin.Y + container.ActualHeight - padding.Bottom;
+        User32.ScreenToClient((nint)root.ContentIslandEnvironment.AppWindowId.Value, ref point);
+        Point origin = _scrollViewer.TransformToVisual(null).TransformPoint(default);
+        double scale = root.RasterizationScale;
+        return bounds.Contains(new Point((point.X / scale) - origin.X, (point.Y / scale) - origin.Y));
+    }
+
+
+    /// <summary>结束对松手时停留的图标的跟踪。</summary>
+    private void StopLingering()
+    {
+        _lingerTimer.Stop();
+        _lingeringIcon = null;
     }
 
 
