@@ -1455,6 +1455,22 @@ public static partial class AppConfig
         SetValue(value, $"enable_dx12_{biz}");
     }
 
+    /// <summary>
+    /// 上次接口返回的「当前显卡可切换 DX12」，启动时先按它显示 DX12 选项，不等接口返回
+    /// </summary>
+    public static bool GetDX12SwitchAvailable(GameBiz biz)
+    {
+        return GetValue<bool>(default, $"dx12_switch_available_{biz}");
+    }
+
+    /// <summary>
+    /// 上次接口返回的「当前显卡可切换 DX12」，启动时先按它显示 DX12 选项，不等接口返回
+    /// </summary>
+    public static void SetDX12SwitchAvailable(GameBiz biz, bool value)
+    {
+        SetValue(value, $"dx12_switch_available_{biz}");
+    }
+
 
     /// <summary>
     /// 获取指定游戏的背景视频音量（0-100）。

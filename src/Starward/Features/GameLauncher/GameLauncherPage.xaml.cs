@@ -171,6 +171,7 @@ public sealed partial class GameLauncherPage : PageBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(InstalledLocateGameEnabled))]
+    [NotifyPropertyChangedFor(nameof(IsDX12OptionVisible))]
     public partial GameState GameState { get; set; }
 
     /// <summary>
@@ -323,9 +324,15 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// 是否显示 DX12 选项
+    /// 当前显卡可切换 DX12，或者已经勾选过
     /// </summary>
-    public bool IsDX12OptionVisible { get; set => SetProperty(ref field, value); }
+    private bool IsDX12OptionAvailable { get; set { if (SetProperty(ref field, value)) OnPropertyChanged(nameof(IsDX12OptionVisible)); } }
+
+
+    /// <summary>
+    /// 是否显示 DX12 选项。只在游戏已安装时显示，未安装时同一位置要显示定位游戏等提示
+    /// </summary>
+    public bool IsDX12OptionVisible => IsDX12OptionAvailable && GameState is GameState.StartGame or GameState.GameIsRunning or GameState.UpdateGame;
 
 
     /// <summary>
@@ -372,6 +379,8 @@ public sealed partial class GameLauncherPage : PageBase
                 GameState = GameState.ResumeDownload;
                 return;
             }
+            // DX12 选项与版本无关，不等下面的版本检查：冷启动时要等好几个请求，请求失败或需要更新时还会一直不显示
+            _ = CheckDX12ConfigAsync();
             await CheckGameRunningAsync();
             (latestGameVersion, predownloadGameVersion) = await _gameLauncherService.GetLatestGameVersionAsync(CurrentGameId);
             if (latestGameVersion > localGameVersion)
@@ -384,7 +393,6 @@ public sealed partial class GameLauncherPage : PageBase
                 IsPredownloadButtonEnabled = true;
                 IsPredownloadFinished = await _gamePackageService.CheckPreDownloadFinishedAsync(CurrentGameId);
             }
-            _ = CheckDX12ConfigAsync();
         }
         catch (Exception ex)
         {
@@ -403,18 +411,16 @@ public sealed partial class GameLauncherPage : PageBase
         try
         {
             EnableDX12 = AppConfig.GetEnableDX12(CurrentGameBiz);
-            if (EnableDX12)
-            {
-                IsDX12OptionVisible = true;
-            }
+            // 先按上次的接口结果显示，接口慢或请求失败时选项也不会缺席
+            IsDX12OptionAvailable = EnableDX12 || AppConfig.GetDX12SwitchAvailable(CurrentGameBiz);
 
             List<GameDXConfig> dxConfigs = await _hoYoPlayService.GetGameDXConfigsAsync([CurrentGameId]);
             _dxConfig = dxConfigs.FirstOrDefault(x => x.GameId == CurrentGameId);
 
-            if (_dxConfig?.EnableDXSwitch is true)
-            {
-                IsDX12OptionVisible = true;
-            }
+            // 是否可切换取决于显卡，换了不支持的显卡时要能收起
+            bool available = _dxConfig?.EnableDXSwitch is true;
+            AppConfig.SetDX12SwitchAvailable(CurrentGameBiz, available);
+            IsDX12OptionAvailable = EnableDX12 || available;
         }
         catch (Exception ex)
         {
@@ -442,9 +448,21 @@ public sealed partial class GameLauncherPage : PageBase
     /// </summary>
     private async void Hyperlink_DX12Intro_Click(Microsoft.UI.Xaml.Documents.Hyperlink sender, Microsoft.UI.Xaml.Documents.HyperlinkClickEventArgs args)
     {
-        if (_dxConfig is not null)
+        try
         {
-            await new DX12IntroDialog { GameDXConfig = _dxConfig, XamlRoot = this.XamlRoot }.ShowAsync();
+            // 选项可能是按本地记录显示的，此时配置还没取到或上次请求失败了，点击时再取一次
+            if (_dxConfig is null)
+            {
+                await CheckDX12ConfigAsync();
+            }
+            if (_dxConfig is not null)
+            {
+                await new DX12IntroDialog { GameDXConfig = _dxConfig, XamlRoot = this.XamlRoot }.ShowAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Show DX12 intro");
         }
     }
 
