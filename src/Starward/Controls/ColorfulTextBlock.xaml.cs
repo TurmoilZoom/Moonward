@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Windows.UI;
 
 
@@ -35,6 +36,13 @@ public sealed partial class ColorfulTextBlock : UserControl
 
 
 
+    /// <summary>
+    /// 匹配游戏内的名词跳转标签 <c>{LINK#N211101}</c> 和 <c>{/LINK}</c>。
+    /// </summary>
+    [GeneratedRegex(@"\{LINK#[^{}]*\}|\{/LINK\}")]
+    private static partial Regex LinkTagRegex();
+
+
     [ObservableProperty]
     public partial string Text { get; set; }
     partial void OnTextChanged(string value)
@@ -47,6 +55,8 @@ public sealed partial class ColorfulTextBlock : UserControl
             {
                 return;
             }
+            // 启动器里没有跳转目标，只保留标签中间的文字；写回 value，解析失败回退纯文本时也不露出标签
+            value = LinkTagRegex().Replace(value, string.Empty);
             var desc = value.AsSpan();
             int lastIndex = 0;
             for (int i = 0; i < desc.Length; i++)
