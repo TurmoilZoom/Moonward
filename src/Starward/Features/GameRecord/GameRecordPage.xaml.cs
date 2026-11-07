@@ -455,11 +455,19 @@ public sealed partial class GameRecordPage : PageBase
     /// <summary>
     /// 国际服（HoYoLAB）网页登录：嵌入 WebView2 打开官网，登录后读取 Cookie 入库。
     /// 国服优先短信验证码，不提供此项。
+    /// 已经停在登录页时也重新进入，否则第二次点击不会清掉当前会话，无法再加一个账号。
     /// </summary>
     [RelayCommand]
     private void WebLogin()
     {
-        NavigateTo(typeof(LoginPage), CurrentGameBiz);
+        bool replaceExistingLogin = frame.SourcePageType == typeof(LoginPage);
+        NavigateTo(typeof(LoginPage), CurrentGameBiz, force_navigate: true);
+        // 只删刚压进返回栈的旧登录页；导航没成功时末项是登录页之前的页面，不能动
+        if (replaceExistingLogin && frame.BackStackDepth > 0
+            && frame.BackStack[frame.BackStackDepth - 1].SourcePageType == typeof(LoginPage))
+        {
+            frame.BackStack.RemoveAt(frame.BackStackDepth - 1);
+        }
     }
 
 
