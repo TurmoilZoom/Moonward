@@ -683,25 +683,28 @@ internal partial class GameLauncherService
 
 
     /// <summary>
-    /// 检测进程挂起
+    /// 进程是否只是挂起残留，不能再当成游戏正在运行。
+    /// 每次调用都读一份系统进程快照（约 2 ms），每秒轮询请用 <see cref="IsProcessEnded"/> 控制读快照的频率。
     /// </summary>
-    /// <param name="process"></param>
-    /// <returns></returns>
+    /// <param name="process">要检查的进程。只取它的 PID，按 PID 另取一份最新快照来读，不改动这个实例的缓存。</param>
+    /// <returns>
+    /// 线程全部处于挂起等待、一个线程都没有，或读不到线程信息时返回 <see langword="true"/>；
+    /// 仍有未挂起的线程时返回 <see langword="false"/>。
+    /// </returns>
     public static bool IsProcessPending(Process process)
     {
         try
         {
-            if (process.HasExited)
+            // 只看线程状态，不先判 HasExited：以前它为 true 时直接当成正在运行，Alt+F4 后的残留因此每秒被重新认回来；
+            // 无权打开进程时它还会抛 Win32Exception。线程信息来自系统进程快照，不需要打开进程。
+            // 有任一线程不是挂起等待，说明游戏还在跑；一个线程都没有，或进程已不在快照里（抛异常），都按残留处理。
+            // 不能 Refresh 传进来的实例：首页和常驻侧的计时器、RunningGame.WindowHandle 共用同一个 Process，
+            // 另一个线程 Refresh 时这边读到被清空的缓存会抛异常，在这里就成了「残留」，正在玩的游戏会被收回。
+            using Process snapshot = Process.GetProcessById(process.Id);
+            foreach (ProcessThread thread in snapshot.Threads)
             {
-                return false;
-            }
-            foreach (ProcessThread thread in process.Threads)
-            {
-                if (thread.ThreadState is not ThreadState.Wait)
-                {
-                    return false;
-                }
-                else if (thread.WaitReason is not ThreadWaitReason.Suspended)
+                if (thread.ThreadState is not ThreadState.Wait
+                    || thread.WaitReason is not ThreadWaitReason.Suspended)
                 {
                     return false;
                 }
@@ -710,6 +713,38 @@ internal partial class GameLauncherService
         }
         catch { }
         return true;
+    }
+
+
+    /// <summary>
+    /// 每秒轮询游戏进程时，每隔多少次才读一次线程快照（计时器周期 1 秒，即约 5 秒一次）。
+    /// </summary>
+    internal const int ProcessThreadCheckInterval = 5;
+
+
+    /// <summary>
+    /// 游戏进程是否已经结束，供首页按钮与常驻侧每秒轮询共用。
+    /// 退出码每次都查（约 0.02 ms）；「只剩挂起线程」的残留要读系统进程快照才看得出来，由调用方按
+    /// <see cref="ProcessThreadCheckInterval"/> 的节奏传 <paramref name="checkThreads"/>，这种残留因此最多晚几秒收回。
+    /// </summary>
+    /// <param name="process">要检查的进程。</param>
+    /// <param name="checkThreads">是否同时用 <see cref="IsProcessPending"/> 检查线程状态。</param>
+    /// <returns>已退出，或 <paramref name="checkThreads"/> 为 true 且只剩挂起残留时返回 <see langword="true"/>。</returns>
+    public static bool IsProcessEnded(Process process, bool checkThreads)
+    {
+        try
+        {
+            // 退出后句柄还被占着的残留，HasExited 同样是 true（读的是退出码），这里直接算结束
+            if (process.HasExited)
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            // 无权打开进程时 HasExited 抛 Win32Exception，只能等下一次线程快照来判断
+        }
+        return checkThreads && IsProcessPending(process);
     }
 
 

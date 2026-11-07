@@ -581,6 +581,9 @@ public sealed partial class GameLauncherPage : PageBase
 
     private Timer processTimer;
 
+    /// <summary><see cref="CheckGameExited"/> 的累计次数，用来决定哪一次顺带读线程快照。</summary>
+    private int _gameExitCheckCount;
+
 
     [ObservableProperty]
     private partial Process? GameProcess { get; set; }
@@ -655,25 +658,60 @@ public sealed partial class GameLauncherPage : PageBase
 
 
 
+    /// <summary>
+    /// 每秒检查当前游戏进程是否还在运行。已退出或只剩挂起残留时，把按钮从「游戏正在运行」收回来。
+    /// 退出码每秒查，线程快照每 <see cref="GameLauncherService.ProcessThreadCheckInterval"/> 秒查一次。
+    /// </summary>
     private void CheckGameExited()
     {
+        Process? process = GameProcess;
+        if (process is null)
+        {
+            return;
+        }
+
+        // System.Timers.Timer 的回调可能重叠，计数用 Interlocked。IsProcessEnded 自己吞掉所有异常
+        bool checkThreads = System.Threading.Interlocked.Increment(ref _gameExitCheckCount) % GameLauncherService.ProcessThreadCheckInterval == 0;
+        if (GameLauncherService.IsProcessEnded(process, checkThreads))
+        {
+            // 计时器在线程池上。RunningGameInfo / RunningGameTime 绑着 x:Bind，必须回 UI 线程再清。
+            DispatcherQueue?.TryEnqueue(() => ClearGameProcess(process));
+            return;
+        }
+
+        TimeSpan? elapsed = null;
         try
         {
-            if (GameProcess != null)
-            {
-                if (GameProcess.HasExited)
-                {
-                    DispatcherQueue.TryEnqueue(() => RunningGameTime = null);
-                    DispatcherQueue.TryEnqueue(CheckGameVersion);
-                    GameProcess = null;
-                }
-                else
-                {
-                    DispatcherQueue?.TryEnqueue(() => RunningGameTime = TimeSpanToString(DateTime.Now - GameProcess.StartTime));
-                }
-            }
+            elapsed = DateTime.Now - process.StartTime;
         }
         catch { }
+
+        if (elapsed is TimeSpan time)
+        {
+            DispatcherQueue?.TryEnqueue(() =>
+            {
+                if (ReferenceEquals(GameProcess, process))
+                {
+                    RunningGameTime = TimeSpanToString(time);
+                }
+            });
+        }
+    }
+
+
+    /// <summary>
+    /// 结束这一轮「游戏正在运行」。调用方必须在 UI 线程上执行。
+    /// </summary>
+    /// <param name="process">发起这次检查时的进程。期间若已换成另一个进程则不动。</param>
+    private void ClearGameProcess(Process process)
+    {
+        if (!ReferenceEquals(GameProcess, process))
+        {
+            return;
+        }
+        RunningGameTime = null;
+        GameProcess = null;
+        CheckGameVersion();
     }
 
 

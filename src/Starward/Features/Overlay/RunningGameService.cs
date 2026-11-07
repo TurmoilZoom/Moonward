@@ -1,4 +1,5 @@
 using Starward.Core;
+using Starward.Features.GameLauncher;
 using Starward.Features.GamepadControl;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -73,14 +74,27 @@ internal static class RunningGameService
     }
 
 
+    /// <summary><see cref="CheckGameExit"/> 的累计次数（只在锁内读写），用来决定哪一次顺带读线程快照。</summary>
+    private static int _checkGameExitCount;
+
+
+    /// <summary>
+    /// 每秒移除已结束的游戏，全部结束后停表、关悬浮窗、恢复手柄引导键。
+    /// 退出码每秒查，线程快照每 <see cref="GameLauncherService.ProcessThreadCheckInterval"/> 秒查一次。
+    /// </summary>
+    /// <param name="sender">计时器（未使用）。</param>
+    /// <param name="e">计时参数（未使用）。</param>
     private static void CheckGameExit(object? sender, ElapsedEventArgs e)
     {
         lock (_runningGameLock)
         {
+            bool checkThreads = ++_checkGameExitCount % GameLauncherService.ProcessThreadCheckInterval == 0;
             for (int i = 0; i < _runningGames.Count; i++)
             {
                 RunningGame runningGame = _runningGames[i];
-                if (runningGame.Process.HasExited)
+                // 与首页按钮用同一套判定：只剩挂起线程的残留也算结束，否则首页已收回、这里仍当游戏在跑。
+                // 不直接用 HasExited：读不到句柄时它会抛异常，这里没有 try，这一轮直接中断、该游戏永远移除不掉。
+                if (GameLauncherService.IsProcessEnded(runningGame.Process, checkThreads))
                 {
                     User32.UnhookWinEvent(runningGame.WinEventHook);
                     _runningGames.RemoveAt(i);
