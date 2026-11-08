@@ -4,6 +4,7 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Starward.Controls;
@@ -150,6 +151,7 @@ public sealed partial class StartGameMenu : UserControl
         try
         {
             _openChildPopupCount = 0;
+            ResetRowTexts();
             CollapseShortcutSection();
             LoadProfiles();
             RefreshUrlProtocolState();
@@ -159,6 +161,135 @@ public sealed partial class StartGameMenu : UserControl
             _logger.LogError(ex, "StartGameMenu OnOpening ({biz})", CurrentGameBiz);
         }
     }
+
+
+    #region 行文字悬停右移（动效同抽卡记录页筛选卡池列表，幅度更小）
+
+
+    // 抽卡筛选卡池列表用的是 FluentAnimations.HoverTranslateX="6"：悬停时只移 CheckBox 的文字、勾选框不动。
+    // 该附加属性挂在 Button 上会连同悬停背景一起移动，所以这里按同样的时长与弹簧参数只移各行文字，行图标相当于勾选框保持不动。
+    // 距离按反馈减半为 3，菜单里只做轻提示；弹簧回弹的过冲随距离等比变小。
+
+    /// <summary>悬停时文字右移的距离（DIP）。抽卡筛选卡池列表为 6，菜单里减半。</summary>
+    private const float RowTextHoverShiftX = 3f;
+
+    /// <summary>右移动画时长（毫秒，线性），同 <c>FluentAnimations.HoverTranslateX</c>。</summary>
+    private const int RowTextHoverDurationMs = 150;
+
+
+    /// <summary>
+    /// 指针进入菜单行：该行文字右移。
+    /// </summary>
+    /// <param name="sender">菜单行按钮。</param>
+    /// <param name="e">指针路由事件参数（未使用）。</param>
+    private void MenuRow_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        AnimateRowText(sender, hovered: true);
+    }
+
+
+    /// <summary>
+    /// 指针离开菜单行：该行文字弹回原位。
+    /// </summary>
+    /// <param name="sender">菜单行按钮。</param>
+    /// <param name="e">指针路由事件参数（未使用）。</param>
+    private void MenuRow_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        AnimateRowText(sender, hovered: false);
+    }
+
+
+    /// <summary>
+    /// 播放菜单行文字的悬停动画：进入时 150ms 线性右移 <see cref="RowTextHoverShiftX"/>，离开时用弹簧（阻尼 0.3 / 周期 40ms）弹回，
+    /// 时长与弹簧参数同抽卡筛选卡池列表。
+    /// 系统关闭动画时不右移。
+    /// </summary>
+    /// <param name="sender">菜单行按钮。</param>
+    /// <param name="hovered">true 进入悬停；false 离开并弹回。</param>
+    private void AnimateRowText(object sender, bool hovered)
+    {
+        try
+        {
+            if (GetRowText(sender) is not TextBlock text)
+            {
+                return;
+            }
+            // Translation 动画要先开启 Translation，否则不生效
+            ElementCompositionPreview.SetIsTranslationEnabled(text, true);
+            Visual visual = ElementCompositionPreview.GetElementVisual(text);
+            Compositor compositor = visual.Compositor;
+            if (!EntranceAnimation.AnimationsEnabled())
+            {
+                visual.StopAnimation("Translation");
+                visual.Properties.InsertVector3("Translation", Vector3.Zero);
+                return;
+            }
+            if (hovered)
+            {
+                Vector3KeyFrameAnimation shift = compositor.CreateVector3KeyFrameAnimation();
+                shift.InsertKeyFrame(1f, new Vector3(RowTextHoverShiftX, 0, 0), compositor.CreateLinearEasingFunction());
+                shift.Duration = TimeSpan.FromMilliseconds(RowTextHoverDurationMs);
+                visual.StartAnimation("Translation", shift);
+            }
+            else
+            {
+                SpringVector3NaturalMotionAnimation spring = compositor.CreateSpringVector3Animation();
+                spring.FinalValue = Vector3.Zero;
+                spring.DampingRatio = 0.3f;
+                spring.Period = TimeSpan.FromMilliseconds(40);
+                visual.StartAnimation("Translation", spring);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Animate start game menu row text.");
+        }
+    }
+
+
+    /// <summary>
+    /// 取菜单行按钮对应的文字。
+    /// </summary>
+    /// <param name="row">菜单行按钮。</param>
+    /// <returns>该行的文字；不是三个菜单行之一时为 null。</returns>
+    private TextBlock? GetRowText(object row)
+    {
+        if (row is not Button button)
+        {
+            return null;
+        }
+        if (button == Button_GameSetting)
+        {
+            return TextBlock_GameSetting;
+        }
+        if (button == Button_LaunchProfileConfig)
+        {
+            return TextBlock_LaunchProfileConfig;
+        }
+        if (button == Button_ShortcutHeader)
+        {
+            return TextBlock_ShortcutHeader;
+        }
+        return null;
+    }
+
+
+    /// <summary>
+    /// 把三行文字直接复位。菜单每次打开时调用：点击行后菜单随对话框关闭，收不到 PointerExited，文字可能停在右移状态。
+    /// </summary>
+    private void ResetRowTexts()
+    {
+        foreach (TextBlock text in new[] { TextBlock_GameSetting, TextBlock_LaunchProfileConfig, TextBlock_ShortcutHeader })
+        {
+            ElementCompositionPreview.SetIsTranslationEnabled(text, true);
+            Visual visual = ElementCompositionPreview.GetElementVisual(text);
+            visual.StopAnimation("Translation");
+            visual.Properties.InsertVector3("Translation", Vector3.Zero);
+        }
+    }
+
+
+    #endregion
 
 
     #region 注册 URL 协议（.url 快捷方式依赖；菜单内无开关，仅生成快捷方式时检测/引导）

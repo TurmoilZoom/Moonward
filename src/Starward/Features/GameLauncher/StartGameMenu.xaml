@@ -40,8 +40,12 @@
                 Padding="8"
                 Spacing="2">
 
-        <!--  游戏设置  -->
-        <Button Click="Button_GameSetting_Click" Style="{StaticResource MenuRowButtonStyle}">
+        <!--  游戏设置（悬停时文字右移，动效同抽卡筛选卡池列表、幅度更小，见后端 MenuRow_PointerEntered）  -->
+        <Button x:Name="Button_GameSetting"
+                Click="Button_GameSetting_Click"
+                PointerEntered="MenuRow_PointerEntered"
+                PointerExited="MenuRow_PointerExited"
+                Style="{StaticResource MenuRowButtonStyle}">
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -50,14 +54,19 @@
                 <FontIcon FontSize="16"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xE713;" />
-                <TextBlock Grid.Column="1"
+                <TextBlock x:Name="TextBlock_GameSetting"
+                           Grid.Column="1"
                            VerticalAlignment="Center"
                            Text="{x:Bind lang:Lang.LauncherPage_GameSetting}" />
             </Grid>
         </Button>
 
-        <!--  启动参数配置  -->
-        <Button Click="Button_LaunchProfileConfig_Click" Style="{StaticResource MenuRowButtonStyle}">
+        <!--  启动参数配置（悬停时文字右移）  -->
+        <Button x:Name="Button_LaunchProfileConfig"
+                Click="Button_LaunchProfileConfig_Click"
+                PointerEntered="MenuRow_PointerEntered"
+                PointerExited="MenuRow_PointerExited"
+                Style="{StaticResource MenuRowButtonStyle}">
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -66,7 +75,8 @@
                 <FontIcon FontSize="16"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xEC7A;" />
-                <TextBlock Grid.Column="1"
+                <TextBlock x:Name="TextBlock_LaunchProfileConfig"
+                           Grid.Column="1"
                            VerticalAlignment="Center"
                            Text="{x:Bind lang:Lang.StartGameMenu_LaunchProfileConfig}" />
             </Grid>
@@ -126,6 +136,8 @@
         <Button x:Name="Button_ShortcutHeader"
                 Margin="0,8,0,0"
                 Click="Button_ShortcutHeader_Click"
+                PointerEntered="MenuRow_PointerEntered"
+                PointerExited="MenuRow_PointerExited"
                 Style="{StaticResource MenuRowButtonStyle}">
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
@@ -136,7 +148,8 @@
                 <FontIcon FontSize="16"
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Glyph="&#xE945;" />
-                <TextBlock Grid.Column="1"
+                <TextBlock x:Name="TextBlock_ShortcutHeader"
+                           Grid.Column="1"
                            VerticalAlignment="Center"
                            Text="{x:Bind lang:Lang.StartGameMenu_AddTaskbarLaunch}" />
                 <FontIcon x:Name="FontIcon_ShortcutChevron"
