@@ -84,6 +84,7 @@
                   Grid.Row="1"
                   Margin="0,12,0,0"
                   Padding="12,0,12,0"
+                  ItemContainerStyle="{StaticResource GameRecordListViewItemStyle}"
                   ItemsSource="{x:Bind SOList}"
                   SelectionChanged="ListView_StygianOnslaughtPageList_SelectionChanged"
                   SelectionMode="Single">
@@ -93,12 +94,6 @@
                     <StackPanel />
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
-            <ListView.ItemContainerStyle>
-                <Style BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
-                    <Setter Property="Margin" Value="0,4,0,4" />
-                    <Setter Property="Padding" Value="4,0,4,0" />
-                </Style>
-            </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="so:StygianOnslaughtInfo">
                     <Grid Padding="12,8,12,8"
