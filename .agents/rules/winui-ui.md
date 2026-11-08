@@ -55,6 +55,7 @@
 
 - 位移动 `Translation`（先 `ElementCompositionPreview.SetIsTranslationEnabled`），不要改 `Visual.Offset`：Offset 会覆盖布局给的位置。
 - `Forever` 循环动画会让合成器按刷新率持续出帧，哪怕关键帧大部分时间不动；`DropShadow` 动画每帧重绘，代价尤其大（开始按钮的呼吸光晕加流光实测约占单核 15%，已删）。确需常驻动画，要在最小化 / 托盘 / 锁屏时暂停，并跟随系统动画开关。
+- `Visual.Clip` 会把子树里 `ThemeShadow` 溢出边界的投影一起裁掉：贴边的揭示裁剪播完再卸下，投影会突然冒出来。用 `InsetClip` 做揭示时把不动的边设成负值外扩到投影之外，动的那边终点也越过边界（`GameLauncherPage.PlayTimeCardShadowExtent`）。
 - 交互型动效先判 `EntranceAnimation.AnimationsEnabled()`（命名空间 `Starward.Controls`），关闭时直接落到终态。
 - 元素离开视觉树时，停掉它身上还在跑的 Composition 动画（`Unloaded` / `ElementClearing` 里 `StopAnimation`），以免合成器继续持有该视觉。
 - Storyboard 默认 `FillBehavior=HoldEnd` 会锁住属性值：动画结束后直接赋值不生效，要先 `Stop()` 再归位。

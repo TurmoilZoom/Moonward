@@ -614,11 +614,11 @@
                                        PredownloadCommand="{x:Bind PredownloadCommand}"
                                        Visibility="{x:Bind IsPredownloadButtonEnabled}" />
 
-                <!--  游戏时间  -->
+                <!--  游戏时间。显隐由 code-behind 驱动（UpdatePlayTimeCardVisual）：
+                      隐藏要先播完卷起动画再收起布局，x:Bind 直改 Visibility 做不到  -->
                 <sfp:PlayTimeButton x:Name="Button_PlayTime"
                                     Margin="12,0,0,0"
-                                    CurrentGameBiz="{x:Bind CurrentGameBiz}"
-                                    Visibility="{x:Bind EnablePlayTime, Mode=OneWay}" />
+                                    CurrentGameBiz="{x:Bind CurrentGameBiz}" />
 
                 <!--  千星沙箱修复进度：与官方启动器一样在后台修复，不占用开始游戏按钮，进度贴在按钮旁  -->
                 <Grid Height="44"

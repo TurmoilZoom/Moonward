@@ -95,6 +95,9 @@ public sealed partial class GameLauncherPage : PageBase
             ToolbarPinTooltip = Lang.GameLauncherPage_PinToolbar;
         }
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
+        // 游戏时长卡片显隐由 UpdatePlayTimeCardVisual 驱动（隐藏要先播完卷起动画再收起），
+        // 这里按设置直接落初始状态、不播动画。
+        Button_PlayTime.Visibility = EnablePlayTime ? Visibility.Visible : Visibility.Collapsed;
     }
 
 
@@ -1636,6 +1639,7 @@ public sealed partial class GameLauncherPage : PageBase
     {
         EnablePlayTime = !EnablePlayTime;
         UpdatePlayTimeToggleVisual(animate: true);
+        UpdatePlayTimeCardVisual(animate: true);
     }
 
 
@@ -1676,9 +1680,9 @@ public sealed partial class GameLauncherPage : PageBase
             return;
         }
 
-        // 拨钮行进方向：开→右(+1)、关→左(-1)。
+        // 拨钮行进方向：开→右(+1)、关→左(-1)。行程 7px 在 16px 图标上足够可感知。
         float dir = shown ? 1f : -1f;
-        const float slide = 4f;
+        const float slide = 7f;
         TimeSpan duration = TimeSpan.FromMilliseconds(250);
         Compositor compositor = vin.Compositor;
         CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1f));
@@ -1703,6 +1707,380 @@ public sealed partial class GameLauncherPage : PageBase
         outFade.InsertKeyFrame(1f, 0f, ease);
         outFade.Duration = duration;
         vout.StartAnimation(nameof(Visual.Opacity), outFade);
+    }
+
+
+    /// <summary>
+    /// 游戏时长卡片（右下角 ⏱ 胶囊）的揭示裁剪。仅在揭示/卷起动画期间挂到卡片 Visual 上
+    /// （挂着 = 正在播，见 <see cref="UpdatePlayTimeCardVisual"/>）。
+    /// 上、右、下三边固定外扩 <see cref="PlayTimeCardShadowExtent"/>，左边在 卡片宽 ↔ -外扩 之间动画：
+    /// 贴边的裁剪会把 ThemeShadow 溢出边界外的投影裁掉，等动画播完卸下裁剪时投影才突然冒出来。
+    /// </summary>
+    private InsetClip? _playTimeCardClip;
+
+    /// <summary>
+    /// 卡片 ThemeShadow（Translation Z=16）溢出卡片边界的距离上限（DIP）。揭示裁剪四周外扩这么多，
+    /// 完全展开时投影已整个露出，卸下裁剪不会再有跳变。实测投影只溢出约 6 DIP（左、下侧，上方几乎没有），
+    /// 留一倍余量；外扩越大，揭示/卷起在左侧空白里走的路越长，内容动画的节奏就偏离原曲线越多。
+    /// </summary>
+    private const float PlayTimeCardShadowExtent = 16f;
+
+    /// <summary>
+    /// 显隐操作的代数。延迟揭示和动画完成回调只认发起那一次，连点时旧回调直接作废。
+    /// </summary>
+    private int _playTimeCardGeneration;
+
+    /// <summary>
+    /// 上次量到的卡片内容宽度（不含 Margin），折叠后 ActualWidth 为 0 时给 FLIP 用。
+    /// </summary>
+    private double _playTimeCardWidth;
+
+    /// <summary>
+    /// 已经 Visible、但揭示还要等进入可视树的那一帧同步完才开播。
+    /// 这段时间 XAML Opacity 为 0，隐藏应直接收起，不能先把视觉透明度拉回 1。
+    /// </summary>
+    private bool _playTimeCardRevealPending;
+
+
+    /// <summary>
+    /// 取游戏时长卡片的揭示裁剪（首次调用时创建；挂载由调用方在动画起止时负责）。
+    /// 上、右、下三边创建时就外扩到投影之外（InsetClip 允许负值），之后只动左边。
+    /// </summary>
+    private InsetClip GetPlayTimeCardClip()
+    {
+        _playTimeCardClip ??= ElementCompositionPreview.GetElementVisual(Button_PlayTime).Compositor.CreateInsetClip(
+            -PlayTimeCardShadowExtent, -PlayTimeCardShadowExtent, -PlayTimeCardShadowExtent, -PlayTimeCardShadowExtent);
+        return _playTimeCardClip;
+    }
+
+
+    /// <summary>
+    /// 更新游戏时长卡片的显隐。显示和隐藏都在卡片留在可视树时播 Composition：
+    /// 隐藏先卷回开始游戏按钮一侧再收起布局；显示先进入布局（XAML Opacity 保持 0，
+    /// 避免框架在进入树时把 Visual.Opacity 写成 1），等这一帧同步过去后再反向擦出。
+    /// 占位变化由 <see cref="StartPredownloadButtonFlip"/> 平滑。
+    /// </summary>
+    /// <param name="animate">true 播放动画（用户切换）；false 直接落到目标状态（不播）。</param>
+    private void UpdatePlayTimeCardVisual(bool animate)
+    {
+        bool shown = EnablePlayTime;
+        bool motion = animate && EntranceAnimation.AnimationsEnabled();
+        int generation = ++_playTimeCardGeneration;
+        bool revealWasPending = _playTimeCardRevealPending;
+        _playTimeCardRevealPending = false;
+
+        Visual card = ElementCompositionPreview.GetElementVisual(Button_PlayTime);
+        InsetClip clip = GetPlayTimeCardClip();
+
+        // 挂着裁剪 = 揭示或卷起播到一半（静止态会卸下裁剪）。这时不 Stop：直接起反向动画替换旧动画，
+        // 起点用 this.StartingValue 接着合成器上的当前值（见 InsertStartKeyFrame）。
+        // 其余情况结束上一段动画并复位；旧的完成回调由代数作废。预下载按钮的 FLIP 直接停掉归位，
+        // 连点下的轻微跳变可接受，同 StartGameMenu。
+        bool midFlight = card.Clip is not null;
+        if (!motion || !midFlight)
+        {
+            card.StopAnimation(nameof(Visual.Opacity));
+            clip.StopAnimation(nameof(InsetClip.LeftInset));
+        }
+        StopPredownloadButtonFlip();
+
+        if (!motion)
+        {
+            Button_PlayTime.Opacity = 1;
+            Button_PlayTime.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+            clip.LeftInset = -PlayTimeCardShadowExtent;
+            card.Opacity = 1;
+            card.Clip = null;
+            return;
+        }
+
+        if (shown)
+        {
+            // 还在树上（收起动画播到一半）：从当前裁剪直接反向擦出。
+            // 从 Collapsed 进来要等框架写完 handout Visual 再开播，否则揭示会被盖掉。
+            if (Button_PlayTime.Visibility == Visibility.Visible)
+            {
+                StartPlayTimeCardReveal(generation);
+                return;
+            }
+
+            Button_PlayTime.Opacity = 0;
+            Button_PlayTime.Visibility = Visibility.Visible;
+            double width = MeasurePlayTimeCardWidth();
+            if (width > 0)
+            {
+                _playTimeCardWidth = width;
+                StartPredownloadButtonFlip(width + Button_PlayTime.Margin.Left);
+            }
+            SchedulePlayTimeCardReveal(generation);
+            return;
+        }
+
+        if (revealWasPending)
+        {
+            // 揭示还没开播，卡片停在 XAML Opacity 0。直接收起，避免先把视觉透明度拉回 1 造成闪一下。
+            double width = MeasurePlayTimeCardWidth();
+            Button_PlayTime.Visibility = Visibility.Collapsed;
+            Button_PlayTime.Opacity = 1;
+            clip.LeftInset = -PlayTimeCardShadowExtent;
+            card.Opacity = 1;
+            card.Clip = null;
+            if (width > 0)
+            {
+                StartPredownloadButtonFlip(-(width + Button_PlayTime.Margin.Left));
+            }
+            return;
+        }
+
+        // 从当前揭示进度卷回 + 淡出（静止态即从完全展开开始），播完再收起布局。
+        double hideWidth = MeasurePlayTimeCardWidth();
+        if (hideWidth > 0)
+        {
+            _playTimeCardWidth = hideWidth;
+        }
+        double delta = hideWidth + Button_PlayTime.Margin.Left;
+        // 静止态从完全展开（裁剪左边外扩到投影之外，挂上时画面不变）开始；揭示播到一半则不写静态值，接着当前值卷回。
+        if (!midFlight)
+        {
+            clip.LeftInset = -PlayTimeCardShadowExtent;
+            card.Clip = clip;
+            card.Opacity = 1;
+        }
+
+        CubicBezierEasingFunction ease = card.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.7f, 0f), new Vector2(1f, 0.5f));
+        TimeSpan duration = TimeSpan.FromMilliseconds(180);
+
+        // 卷到卡片右缘为止：右侧外扩区里剩下的那截投影此时已随透明度淡到 0。
+        ScalarKeyFrameAnimation roll = card.Compositor.CreateScalarKeyFrameAnimation();
+        InsertStartKeyFrame(roll, midFlight ? null : -PlayTimeCardShadowExtent);
+        roll.InsertKeyFrame(1f, (float)hideWidth, ease);
+        roll.Duration = duration;
+
+        ScalarKeyFrameAnimation fade = card.Compositor.CreateScalarKeyFrameAnimation();
+        InsertStartKeyFrame(fade, midFlight ? null : 1f);
+        fade.InsertKeyFrame(1f, 0f, ease);
+        fade.Duration = duration;
+
+        CompositionScopedBatch batch = card.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        clip.StartAnimation(nameof(InsetClip.LeftInset), roll);
+        card.StartAnimation(nameof(Visual.Opacity), fade);
+        batch.Completed += (_, _) =>
+        {
+            // 完成回调不保证在 UI 线程；改 Visibility 须回到 DispatcherQueue。
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (generation != _playTimeCardGeneration)
+                {
+                    return;
+                }
+                if (!EnablePlayTime && Button_PlayTime.Visibility == Visibility.Visible)
+                {
+                    // 收起布局并复位裁剪/透明度（静止态卸下裁剪），随后预下载滑回贴住开始游戏按钮。
+                    Button_PlayTime.Visibility = Visibility.Collapsed;
+                    Button_PlayTime.Opacity = 1;
+                    clip.LeftInset = -PlayTimeCardShadowExtent;
+                    card.Opacity = 1;
+                    card.Clip = null;
+                    StartPredownloadButtonFlip(-delta);
+                }
+            });
+        };
+        batch.End();
+    }
+
+
+    /// <summary>
+    /// 等卡片进入可视树的那一帧把 handout Visual 按 XAML 状态写完，再开始擦出。
+    /// 同一次调用里开播会被这次写回停掉。
+    /// </summary>
+    /// <param name="generation">发起这次显示的代数。</param>
+    private void SchedulePlayTimeCardReveal(int generation)
+    {
+        _playTimeCardRevealPending = true;
+        void OnRendering(object? sender, object e)
+        {
+            Microsoft.UI.Xaml.Media.CompositionTarget.Rendering -= OnRendering;
+            if (generation != _playTimeCardGeneration)
+            {
+                return;
+            }
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (generation != _playTimeCardGeneration || !EnablePlayTime || Button_PlayTime.Visibility != Visibility.Visible)
+                {
+                    return;
+                }
+                _playTimeCardRevealPending = false;
+                double laidOut = Button_PlayTime.ActualWidth;
+                if (laidOut > 0)
+                {
+                    _playTimeCardWidth = laidOut;
+                }
+                StartPlayTimeCardReveal(generation);
+            });
+        }
+        Microsoft.UI.Xaml.Media.CompositionTarget.Rendering += OnRendering;
+    }
+
+
+    /// <summary>
+    /// 从当前裁剪进度擦出到完全展开。卡片须已经在可视树上。
+    /// </summary>
+    /// <param name="generation">发起这次显示的代数，完成回调用它丢弃过期收尾。</param>
+    private void StartPlayTimeCardReveal(int generation)
+    {
+        Visual card = ElementCompositionPreview.GetElementVisual(Button_PlayTime);
+        InsetClip clip = GetPlayTimeCardClip();
+        double width = MeasurePlayTimeCardWidth();
+        if (width <= 0)
+        {
+            Button_PlayTime.Opacity = 1;
+            clip.LeftInset = -PlayTimeCardShadowExtent;
+            card.Opacity = 1;
+            card.Clip = null;
+            return;
+        }
+        _playTimeCardWidth = width;
+
+        // 静止或刚进入树：从完全裁住开始。收起播到一半（挂着裁剪、XAML Opacity 已是 1）则不写静态值，
+        // 接着当前值反向展开。
+        bool midFlight = card.Clip is not null;
+        if (!midFlight)
+        {
+            card.Clip = clip;
+            clip.LeftInset = (float)width;
+            card.Opacity = 0;
+            // Opacity 的依赖属性会同步写回 Visual。先回到 1（命中与之后的属性同步），再盖回隐藏态开播。
+            Button_PlayTime.Opacity = 1;
+            card.Clip = clip;
+            clip.LeftInset = (float)width;
+            card.Opacity = 0;
+        }
+
+        CubicBezierEasingFunction ease = card.Compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1f));
+
+        // 刚进入树时关键帧写明起点：框架可能已把透明度写成 1、裁剪清掉，不能靠「当前值」。
+        // 终点越过卡片左缘再外扩一截，把左侧投影也擦出来；投影随揭示边缘与透明度一起出现，播完卸下裁剪时画面不变。
+        ScalarKeyFrameAnimation reveal = card.Compositor.CreateScalarKeyFrameAnimation();
+        InsertStartKeyFrame(reveal, midFlight ? null : (float)width);
+        reveal.InsertKeyFrame(1f, -PlayTimeCardShadowExtent, ease);
+        reveal.Duration = TimeSpan.FromMilliseconds(280);
+
+        // 淡入快于揭示：先让露出的内容尽快到全不透明，随后揭示边缘的扫动才不被半透明掩盖。
+        ScalarKeyFrameAnimation fade = card.Compositor.CreateScalarKeyFrameAnimation();
+        InsertStartKeyFrame(fade, midFlight ? null : 0f);
+        fade.InsertKeyFrame(1f, 1f, ease);
+        fade.Duration = TimeSpan.FromMilliseconds(200);
+
+        CompositionScopedBatch batch = card.Compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
+        clip.StartAnimation(nameof(InsetClip.LeftInset), reveal);
+        card.StartAnimation(nameof(Visual.Opacity), fade);
+        batch.Completed += (_, _) =>
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                if (generation != _playTimeCardGeneration)
+                {
+                    return;
+                }
+                if (EnablePlayTime && Button_PlayTime.Visibility == Visibility.Visible)
+                {
+                    // 静止态卸下裁剪：挂着裁剪是「正在播」的标记（反向时靠它判断要不要接着当前值）。
+                    // XAML Opacity 回到 1，之后的属性同步才不会把卡片重新写成全透明。
+                    clip.LeftInset = -PlayTimeCardShadowExtent;
+                    card.Opacity = 1;
+                    card.Clip = null;
+                    Button_PlayTime.Opacity = 1;
+                }
+            });
+        };
+        batch.End();
+    }
+
+
+    /// <summary>
+    /// 写入关键帧动画的起点。反向播放必须接着合成器上的当前值：UI 线程在 Stop 后读
+    /// LeftInset / Opacity 拿到的是上次写入的静态值（动画起点）而非中途值（2026-11 实测，
+    /// 显示后马上隐藏会让卡片整块消失），所以中途改用 this.StartingValue，由合成器在开播时取值。
+    /// </summary>
+    /// <param name="animation">要写起点的关键帧动画。</param>
+    /// <param name="from">固定起点；为 null 时用 this.StartingValue（属性开播时的当前值，含旧动画播到的位置）。</param>
+    private static void InsertStartKeyFrame(ScalarKeyFrameAnimation animation, float? from)
+    {
+        if (from is float value)
+        {
+            animation.InsertKeyFrame(0f, value);
+        }
+        else
+        {
+            animation.InsertExpressionKeyFrame(0f, "this.StartingValue");
+        }
+    }
+
+
+    /// <summary>
+    /// 卡片内容宽度（不含左侧 Margin）。已布局用 ActualWidth；否则在 Visible 下 Measure 一次。
+    /// </summary>
+    /// <returns>内容宽度；量不到时返回上次记下的宽度，仍没有则为 0。</returns>
+    private double MeasurePlayTimeCardWidth()
+    {
+        if (Button_PlayTime.ActualWidth > 0)
+        {
+            return Button_PlayTime.ActualWidth;
+        }
+        if (Button_PlayTime.Visibility != Visibility.Visible)
+        {
+            return _playTimeCardWidth;
+        }
+        // 折叠元素的 Measure 被框架短路成 DesiredSize=(0,0)，调用方须先 Visible。
+        Button_PlayTime.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        double width = Button_PlayTime.DesiredSize.Width - Button_PlayTime.Margin.Left;
+        return width > 0 ? width : _playTimeCardWidth;
+    }
+
+
+    /// <summary>
+    /// 游戏时长卡片占位变化时，让左侧的预下载按钮平滑滑到新位置（FLIP）：布局已一次性落位，
+    /// 这里预置 Translation 让按钮先停在视觉原位，再动画归零。卡片在原位揭示、不平移——
+    /// 预下载滑行距离（卡片占位宽，含边距）不小于卡片揭示宽度且同曲线、时长更短，
+    /// 滑行右缘始终位于卡片揭示左缘左侧，不会与揭示中的卡片重叠；千星修复进度槽位在卡片之后，
+    /// 面板原点平移与槽位平移相抵、全局位置不变，无需补偿。
+    /// 下载进度信息框展示中时跳过 FLIP：Popup 跟随布局而非渲染位移，平移会造成气泡与按钮脱节，
+    /// 此时按钮直接随布局跳位、与气泡保持同步。
+    /// </summary>
+    /// <param name="offset">本次布局后预下载按钮原点相对旧位置的横向位移：显示卡片为 +Δ（向左让位），收起为 -Δ（向右滑回）。</param>
+    private void StartPredownloadButtonFlip(double offset)
+    {
+        if (offset == 0
+            || Button_Predownload.Visibility != Visibility.Visible
+            || Button_Predownload.IsProgressPopupOpen)
+        {
+            return;
+        }
+        Visual visual = ElementCompositionPreview.GetElementVisual(Button_Predownload);
+        Compositor compositor = visual.Compositor;
+        CubicBezierEasingFunction ease = compositor.CreateCubicBezierEasingFunction(new Vector2(0.1f, 0.9f), new Vector2(0.2f, 1f));
+
+        ElementCompositionPreview.SetIsTranslationEnabled(Button_Predownload, true);
+        visual.Properties.InsertVector3("Translation", new Vector3((float)offset, 0, 0));
+        Vector3KeyFrameAnimation flip = compositor.CreateVector3KeyFrameAnimation();
+        flip.InsertKeyFrame(1f, Vector3.Zero, ease);
+        flip.Duration = TimeSpan.FromMilliseconds(250);
+        visual.StartAnimation("Translation", flip);
+    }
+
+
+    /// <summary>
+    /// 停掉预下载按钮身上还在跑的 FLIP 动画并把 Translation 基础值归零。
+    /// </summary>
+    private void StopPredownloadButtonFlip()
+    {
+        Visual visual = ElementCompositionPreview.GetElementVisual(Button_Predownload);
+        // 顺序不能反：Translation 属性必须先创建（SetIsTranslationEnabled + InsertVector3），
+        // 否则 StopAnimation 找不到属性会抛 ArgumentException（E_INVALIDARG）。
+        ElementCompositionPreview.SetIsTranslationEnabled(Button_Predownload, true);
+        visual.Properties.InsertVector3("Translation", Vector3.Zero);
+        visual.StopAnimation("Translation");
     }
 
 

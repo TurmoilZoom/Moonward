@@ -33,6 +33,12 @@ public sealed partial class PreDownloadButton : UserControl
 
     public bool PointerOver { get; set => SetProperty(ref field, value); }
 
+    /// <summary>
+    /// 下载进度信息框是否正在展示（预下载进行中）。宿主页面做 FLIP 平移前据此跳过：
+    /// Popup 跟随布局而非渲染位移，平移会造成信息框与按钮脱节。
+    /// </summary>
+    public bool IsProgressPopupOpen => Popup_DownloadProgress.IsOpen;
+
     public string ProgressPercentText { get; set => SetProperty(ref field, value); }
 
     public string? DownloadBytesText { get; set => SetProperty(ref field, value); }
