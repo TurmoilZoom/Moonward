@@ -51,11 +51,12 @@ internal static class GachaStatsListDragScrollHelper
     /// 为指定的 <see cref="ScrollViewer"/> 注入鼠标拖拽滚动 + 回弹行为。
     /// </summary>
     /// <param name="scrollViewer">包含记录列表的竖直滚动容器。</param>
-    /// <param name="onDragEnd">拖拽结束（松手 / 捕获丢失）时、释放指针捕获之前回调（原地单击未移动不回调），用于清理记录项的悬停高亮等拖拽期间被指针捕获压制的状态。</param>
+    /// <param name="onDragEnd">拖拽结束（松手 / 捕获丢失）时、释放指针捕获之前回调（原地单击未移动不回调）。拖拽期间指针被捕获、记录项收不到 PointerExited，卡片在此按当前指针位置校正悬停高亮（保持 / 切换 / 清除）。</param>
+    /// <param name="onDragSettled">内容彻底停稳（松手无甩动 / 回弹动画结束 / 甩动停止）后回调，供卡片按最终指针位置校正悬停高亮。</param>
     /// <returns>绑定句柄，须在控件 Unloaded 时调用 <see cref="GachaStatsListDragScrollBinding.Dispose"/> 解除绑定。</returns>
-    public static GachaStatsListDragScrollBinding Bind(ScrollViewer scrollViewer, Action? onDragEnd = null)
+    public static GachaStatsListDragScrollBinding Bind(ScrollViewer scrollViewer, Action? onDragEnd = null, Action? onDragSettled = null)
     {
-        return new GachaStatsListDragScrollBinding(scrollViewer, onDragEnd);
+        return new GachaStatsListDragScrollBinding(scrollViewer, onDragEnd, onDragSettled);
     }
 
 
@@ -72,6 +73,7 @@ internal static class GachaStatsListDragScrollHelper
         private readonly FrameworkElement _content;
         private readonly Visual _contentVisual;
         private readonly Action? _onDragEnd;
+        private readonly Action? _onDragSettled;
         private readonly PointerEventHandler _wheelHandler;
         private bool _disposed;
 
@@ -99,7 +101,7 @@ internal static class GachaStatsListDragScrollHelper
         private static readonly double TickToSeconds = 1.0 / Stopwatch.Frequency;
 
 
-        public GachaStatsListDragScrollBinding(ScrollViewer scrollViewer, Action? onDragEnd = null)
+        public GachaStatsListDragScrollBinding(ScrollViewer scrollViewer, Action? onDragEnd = null, Action? onDragSettled = null)
         {
             _scrollViewer = scrollViewer;
             _content = scrollViewer.Content as FrameworkElement
@@ -107,6 +109,7 @@ internal static class GachaStatsListDragScrollHelper
             _contentVisual = ElementCompositionPreview.GetElementVisual(_content);
             ElementCompositionPreview.SetIsTranslationEnabled(_content, true);
             _onDragEnd = onDragEnd;
+            _onDragSettled = onDragSettled;
 
             _scrollViewer.PointerPressed += OnPointerPressed;
             _scrollViewer.PointerMoved += OnPointerMoved;
@@ -117,6 +120,13 @@ internal static class GachaStatsListDragScrollHelper
             _wheelHandler = OnPointerWheelChanged;
             _scrollViewer.AddHandler(UIElement.PointerWheelChangedEvent, _wheelHandler, handledEventsToo: true);
         }
+
+
+        /// <summary>
+        /// 是否正在鼠标左键拖拽滚动中。
+        /// 供统计卡片在指针移动时区分「用户拖拽列表」（内容在指针下移动，不能按指针位置清除悬停高亮）与普通悬停移动。
+        /// </summary>
+        internal bool IsDragging => _isDragging;
 
 
         #region Pointer Events
@@ -236,6 +246,8 @@ internal static class GachaStatsListDragScrollHelper
             {
                 StopFling();
                 RestoreTooltip();
+                // 甩动被滚轮打断：内容停在当前位置，直接按停稳处理。
+                _onDragSettled?.Invoke();
             }
         }
 
@@ -254,10 +266,10 @@ internal static class GachaStatsListDragScrollHelper
                 return;
             }
 
-            // 拖拽期间指针被本容器捕获，记录项收不到 PointerExited；松手时指针可能已不在任何记录上，
-            // 回调让卡片清理残留的悬停高亮（IsPointerIn）。原地单击记录时指针没离开过该记录，高亮仍然有效，不回调。
-            // 必须排在 EndDragSession 释放捕获之前：释放捕获时指针下方的记录会补发 PointerEntered，
-            // 先清后放，高亮才会落回指针所在的记录；反过来会把刚补回的高亮清掉。
+            // 拖拽期间指针被本容器捕获，记录项收不到 PointerExited，悬停状态只能靠回调校正：
+            // 让卡片按当前指针位置命中，保持 / 切换 / 清除高亮。原地单击记录时指针没离开过该记录，高亮仍然有效，不回调。
+            // 必须排在 EndDragSession 释放捕获之前：释放捕获时指针下方的记录可能补发 PointerEntered，
+            // 回调先校正后，补发的 Entered 只会把高亮设到同一位置，不会与回调互相清掉。
             if (_dragMoved)
             {
                 _onDragEnd?.Invoke();
@@ -277,7 +289,9 @@ internal static class GachaStatsListDragScrollHelper
                 return;
             }
 
+            // 无甩动也无回弹：内容已停稳，通知回调方按最终位置校正。
             RestoreTooltip();
+            _onDragSettled?.Invoke();
         }
 
 
@@ -378,9 +392,15 @@ internal static class GachaStatsListDragScrollHelper
                 _virtualOffset = Math.Clamp(_virtualOffset, 0, maxOffset);
                 if (Math.Abs(_overscrollY) > OverscrollEpsilon)
                 {
+                    // 有回弹位移：停稳回调由回弹动画批次完成时补发。
                     PlaySpringBackAnimation();
+                    RestoreTooltip();
                 }
-                RestoreTooltip();
+                else
+                {
+                    RestoreTooltip();
+                    _onDragSettled?.Invoke();
+                }
                 return;
             }
 
@@ -388,6 +408,7 @@ internal static class GachaStatsListDragScrollHelper
             {
                 StopFling();
                 RestoreTooltip();
+                _onDragSettled?.Invoke();
             }
         }
 
@@ -446,6 +467,7 @@ internal static class GachaStatsListDragScrollHelper
         /// <summary>
         /// 播放回弹动画：将 Content Translation 从当前过拉位置缓动回 Vector3.Zero。
         /// 动画使用 <see cref="CubicBezierEasingFunction"/> 减速曲线，与项目中其他 Composition 动画风格一致。
+        /// 动画完成时通知停稳回调。
         /// </summary>
         private void PlaySpringBackAnimation()
         {
@@ -463,11 +485,24 @@ internal static class GachaStatsListDragScrollHelper
                 anim.InsertKeyFrame(1f, Vector3.Zero, ease);
                 anim.Duration = TimeSpan.FromMilliseconds(SpringBackDurationMs);
 
+                CompositionScopedBatch batch = compositor.CreateScopedBatch(CompositionBatchTypes.Animation);
                 _contentVisual.StartAnimation("Translation", anim);
+                batch.End();
+                batch.Completed += (_, _) =>
+                {
+                    if (!_disposed)
+                    {
+                        _onDragSettled?.Invoke();
+                    }
+                };
             }
             catch
             {
                 ClearOverscrollInstant();
+                if (!_disposed)
+                {
+                    _onDragSettled?.Invoke();
+                }
             }
         }
 

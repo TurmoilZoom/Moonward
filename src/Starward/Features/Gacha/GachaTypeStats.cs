@@ -291,25 +291,38 @@ public class GachaTypeStats
 
 
     /// <summary>
-    /// 清除 5 星与 4 星记录上的悬停高亮（<see cref="GachaLogItemEx.IsPointerIn"/>）。
-    /// 统计卡片在记录列表拖拽滚动结束时调用：拖拽期间指针被列表捕获，记录项收不到 PointerExited，松手后高亮可能残留。
+    /// 按物品名设置 5 星与 4 星记录上的悬停高亮（<see cref="GachaLogItemEx.IsPointerIn"/>）：同名项为 true，其余为 false。
+    /// 同一物品在列表里可能有多条记录，悬停任意一条时全部高亮。
     /// </summary>
-    public void ClearPointerIn()
+    /// <param name="itemName">当前悬停记录的物品名；为 null 或空时清除全部高亮。</param>
+    public void SetPointerIn(string? itemName)
     {
+        // 物品名可能为空（数据库缺名称），这里显式判空，避免清除高亮时把名称同为空的记录点亮。
+        bool hasItemName = !string.IsNullOrEmpty(itemName);
         if (List_5 is not null)
         {
             foreach (GachaLogItemEx item in List_5)
             {
-                item.IsPointerIn = false;
+                item.IsPointerIn = hasItemName && item.Name == itemName;
             }
         }
         if (List_4 is not null)
         {
             foreach (GachaLogItemEx item in List_4)
             {
-                item.IsPointerIn = false;
+                item.IsPointerIn = hasItemName && item.Name == itemName;
             }
         }
+    }
+
+
+    /// <summary>
+    /// 清除 5 星与 4 星记录上的悬停高亮（<see cref="GachaLogItemEx.IsPointerIn"/>）。
+    /// 统计卡片在记录列表拖拽滚动结束时调用：拖拽期间指针被列表捕获，记录项收不到 PointerExited，松手后高亮可能残留。
+    /// </summary>
+    public void ClearPointerIn()
+    {
+        SetPointerIn(null);
     }
 
 }

@@ -46,7 +46,6 @@
                   Height="62"
                   Background="Transparent"
                   PointerEntered="Grid_Rarity5Item_PointerEntered"
-                  PointerExited="Grid_Rarity5Item_PointerExited"
                   RowSpacing="2"
                   Tag="{x:Bind}"
                   sc:InstantTooltip.Placement="Top"
@@ -125,7 +124,6 @@
                   Height="62"
                   Background="Transparent"
                   PointerEntered="Grid_Rarity4Item_PointerEntered"
-                  PointerExited="Grid_Rarity4Item_PointerExited"
                   RowSpacing="2"
                   Tag="{x:Bind}"
                   sc:InstantTooltip.Placement="Top"
@@ -359,7 +357,6 @@
                                   Height="28"
                                   Background="Transparent"
                                   PointerEntered="Grid_Rarity5Item_PointerEntered"
-                                  PointerExited="Grid_Rarity5Item_PointerExited"
                                   Tag="{x:Bind}"
                                   sc:InstantTooltip.Placement="Top"
                                   sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
@@ -429,7 +426,6 @@
                                   Background="Transparent"
                                   ColumnSpacing="8"
                                   PointerEntered="Grid_Rarity4Item_PointerEntered"
-                                  PointerExited="Grid_Rarity4Item_PointerExited"
                                   Tag="{x:Bind}"
                                   sc:InstantTooltip.Placement="Top"
                                   sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
