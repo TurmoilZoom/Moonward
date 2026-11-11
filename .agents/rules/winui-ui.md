@@ -66,7 +66,7 @@
 
 - `Background` 为 null 的面板不参与命中测试：要接指针的 `Grid` / `Border` 显式设 `Background="Transparent"`；裸 `FontIcon` 挂提示命中不稳，外面包一层透明 `Border`。
 - `IsEnabled=false` 的控件不参与命中测试，输入会穿到下层或父级。给禁用按钮加提示，要挂在透明父容器上（`PreDownloadButton`）。
-- `PointerEntered` / `PointerExited` 会冒泡：挂在大容器上，子元素的进出也会触发。只想响应某一块，就给那块单独做透明命中层（关于页的猫，`AboutSetting.xaml`）。
+- `PointerEntered` / `PointerExited` 会冒泡：挂在大容器上，子元素的进出也会触发。只想响应某一块，就给那块单独做透明命中层（`Background="Transparent"` 的外层 Border）。
 - 弹出菜单的整行按钮里不要再嵌套 `ToggleSwitch` 等可点控件，两者会抢命中。
 - 拖拽期间 ScrollViewer 持有指针捕获，滚轮直接路由给 ScrollViewer，挂在 Content 上收不到；要拦截用 `AddHandler(PointerWheelChangedEvent, …, handledEventsToo: true)`。原生滚轮动画不会被 `ChangeView(disableAnimation: true)` 取消，自管拖拽 / 惯性时，滚轮一来就交给原生滚轮（`GachaStatsListDragScrollHelper`）。
 - 刚好包住内容的小窗口（如托盘菜单）里，`Popup`（`Flyout`、`MenuFlyoutSubItem`、`InstantTooltip`）会被窗口边界裁掉，二级内容只能放在同一窗口里。

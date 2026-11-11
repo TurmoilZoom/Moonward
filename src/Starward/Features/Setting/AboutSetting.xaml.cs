@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Documents;
-using Microsoft.UI.Xaml.Input;
 using Starward.Controls;
 using Starward.Features.Feedback;
 using Starward.Features.RPC;
@@ -35,10 +34,9 @@ public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
     }
 
 
-    /// <summary>静止显示首帧，避免 AutoPlay 常驻循环。</summary>
+    /// <summary>订阅更新状态变化并刷新一次。</summary>
     protected override void OnLoaded()
     {
-        Lottie_AboutLogo.SetProgress(0);
         // 主窗口激活、托盘常驻循环的后台检查与静默下载也会改变状态，页面开着时跟着刷新
         if (!WeakReferenceMessenger.Default.IsRegistered<UpdateStatusChangedMessage>(this))
         {
@@ -50,7 +48,7 @@ public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
 
     /// <summary>
     /// 入场级联：左侧逐项上滑，致谢卡片紧随标题出场。
-    /// 根 Grid 上并列可交互的致谢卡片与小猫命中层，通用推断会把整块滚动区当成一项，故在此显式列出；小猫为装饰，保持静止。
+    /// 根 Grid 上与滚动区并列的还有致谢卡片，通用推断会把整块滚动区当成一项，故在此显式列出。
     /// </summary>
     /// <returns>按出场顺序排列的元素。</returns>
     public IEnumerable<UIElement?> GetEntranceAnimationElements()
@@ -67,30 +65,10 @@ public sealed partial class AboutSetting : PageBase, IEntranceAnimationElements
     }
 
 
-    /// <summary>离开页面时停止动画，避免卸载后仍占用合成资源。</summary>
+    /// <summary>离开页面时取消订阅更新状态变化。</summary>
     protected override void OnUnloaded()
     {
-        Lottie_AboutLogo.Stop();
         WeakReferenceMessenger.Default.Unregister<UpdateStatusChangedMessage>(this);
-    }
-
-
-    /// <summary>
-    /// 悬浮时播放一次 Lottie 后停在末帧；离开后回到首帧。
-    /// </summary>
-    private void Lottie_AboutLogo_PointerEntered(object sender, PointerRoutedEventArgs e)
-    {
-        _ = Lottie_AboutLogo.PlayAsync(fromProgress: 0, toProgress: 1, looped: false);
-    }
-
-
-    /// <summary>
-    /// 指针离开后停止动画并回到首帧。
-    /// </summary>
-    private void Lottie_AboutLogo_PointerExited(object sender, PointerRoutedEventArgs e)
-    {
-        Lottie_AboutLogo.Stop();
-        Lottie_AboutLogo.SetProgress(0);
     }
 
 

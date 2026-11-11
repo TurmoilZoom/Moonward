@@ -3,7 +3,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:animatedvisuals="using:Starward.AnimatedVisuals"
              xmlns:lang="using:Starward.Language"
              xmlns:local="using:Starward.Features.Setting"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,7 +12,7 @@
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
-    <!--  右列的致谢卡片与右下角的猫不在滚动区内，自己与窗口右缘留出 24（设置页 Frame 右侧不留边）  -->
+    <!--  右列的致谢卡片不在滚动区内，自己与窗口右缘留出 24（设置页 Frame 右侧不留边）  -->
     <Grid Margin="0,0,24,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -154,28 +153,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!--  Logo：LottieGen 生成的 C# 动画源（源 JSON：static/cat_playing_animation.json），固定在页面右下角，跨两列以保持在整页右下角。
-              悬浮播放的命中层是外层透明 Border（只覆盖猫本体这一块），播放器本身 IsHitTestVisible=False，
-              这样只有鼠标移到猫身上才触发（而非整页），命中区也限制在右下角空白处、尽量不挡左侧链接与滚动。  -->
-        <Border x:Name="Border_CatHover"
-                Grid.ColumnSpan="2"
-                Margin="0,0,0,12"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Background="Transparent"
-                PointerEntered="Lottie_AboutLogo_PointerEntered"
-                PointerExited="Lottie_AboutLogo_PointerExited">
-            <AnimatedVisualPlayer x:Name="Lottie_AboutLogo"
-                                  Width="376"
-                                  Height="160"
-                                  AutoPlay="False"
-                                  IsHitTestVisible="False"
-                                  Stretch="Uniform">
-                <animatedvisuals:Cat_playing_animation />
-            </AnimatedVisualPlayer>
-        </Border>
-
-        <!--  致谢卡片：功能 / 设计参考的开源项目，固定在页面右侧顶部。项目名为专有名词故用字面量，不进 resx；仅标题与说明本地化。声明在 Lottie 之后以确保重叠时卡片在上层  -->
+        <!--  致谢卡片：功能 / 设计参考的开源项目，固定在页面右侧顶部。项目名为专有名词故用字面量，不进 resx；仅标题与说明本地化  -->
         <Border x:Name="Border_Acknowledgements"
                 Grid.Column="1"
                 Width="280"
