@@ -486,6 +486,14 @@
         "profession": 2
       },
       {
+        "id": 1631,
+        "name": "セヴェリアン",
+        "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1631.png",
+        "rarity": 4,
+        "element_type": 204,
+        "profession": 1
+      },
+      {
         "id": 1641,
         "name": "フィオニー",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1641.png",
@@ -496,7 +504,7 @@
       {
         "id": 12001,
         "name": "「月相」-望",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9087d41f70d59e9015c34f46b368df50.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/1d729ce399f2dc658d38299c322876e3.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 1
@@ -504,7 +512,7 @@
       {
         "id": 12002,
         "name": "「月相」-晦",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/d8dde192c782d78542ffc43aa1c200f4.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/150b485efd04186b32b8f48acfb35d4e.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 1
@@ -512,7 +520,7 @@
       {
         "id": 12003,
         "name": "「月相」-朔",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/00d01fb7d544d52a8e9c02e169324779.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/a1eb202e6d747643fa507515d8af4ace.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 1
@@ -520,7 +528,7 @@
       {
         "id": 12004,
         "name": "「残響」-Ⅰ型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/880146aa32113dd28275a1ba3a68ff1e.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ba654b7b16aaf40f24a0706fdac40ba1.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 4
@@ -528,7 +536,7 @@
       {
         "id": 12005,
         "name": "「残響」-Ⅱ型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/3b077e3843fd36061e58a71f908f864b.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/33bc8c4785f59279ebe0f7ac7d63600a.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 4
@@ -536,7 +544,7 @@
       {
         "id": 12006,
         "name": "「残響」-Ⅲ型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/2e8c5657ec3ef5fdf1ee722fb573e93b.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/dca23b11bf11e13c4c73454ba459a3cd.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 4
@@ -544,7 +552,7 @@
       {
         "id": 12007,
         "name": "「激流」-銃型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/d88d876c84c30df89b9a6f92939b8395.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/9c1c0debc56b45c48498bde0b2aa3c50.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 2
@@ -552,7 +560,7 @@
       {
         "id": 12008,
         "name": "「激流」-矢型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/3a2d5935972321c8605d912827afc19e.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6ed5dc6f1becea51d51ec6f13b068a33.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 2
@@ -560,7 +568,7 @@
       {
         "id": 12009,
         "name": "「激流」-斧型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/a80263b831f65604a76d6e91705e4025.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/f9df07cc3897286c7b45ebc2291e6baf.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 2
@@ -568,7 +576,7 @@
       {
         "id": 12010,
         "name": "「磁気嵐」-壱式",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9e8b4f2c5a00668ff372ed277bf54f27.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/b6a0c25f9f2750864c54315b3637ed20.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 3
@@ -576,7 +584,7 @@
       {
         "id": 12011,
         "name": "「磁気嵐」-弐式",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/d1025c9772e239fb68474bf276428230.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/49a5d4a398df5089b63957e503e31661.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 3
@@ -584,7 +592,7 @@
       {
         "id": 12012,
         "name": "「磁気嵐」-参式",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/320ba37d967c01e190f806bd15369708.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/0c2643e679aab44b8920d10d425875a4.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 3
@@ -592,7 +600,7 @@
       {
         "id": 12013,
         "name": "「恒等式」-本格",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/43bead15d68e1ed28a558e0be329c372.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/543af31814431a10e477c411a871cfbc.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 5
@@ -600,7 +608,7 @@
       {
         "id": 12014,
         "name": "「恒等式」-変格",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/de4b98820c6c2df726cc3aff6da3beeb.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ac396c77861e4b1a8f9f3894d0ecdfca.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 5
@@ -608,7 +616,7 @@
       {
         "id": 12015,
         "name": "「灰燼」-蒼藍",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/bfd1e437fbdab51867c23199d7fc027b.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/4948c2e881e55f075f7224975a8a3155.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 6
@@ -616,7 +624,7 @@
       {
         "id": 12016,
         "name": "「月相」-弦",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/2b3287a9698959e1d0e76795d37cd1d0.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6a436f02552698c5ede08897a5f9e44c.png",
         "rarity": 2,
         "element_type": 0,
         "profession": 7
@@ -624,7 +632,7 @@
       {
         "id": 13001,
         "name": "ストリートスター",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/f6e0e1de80c0be68664ebf8d3e609f5c.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/97d065ba2e5bef135e3f5f8bf4ea3f0a.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 1
@@ -632,7 +640,7 @@
       {
         "id": 13002,
         "name": "歳月の薄片",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/6c8fe7bb3451d2569e58622bd832b45e.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/3a55eb3df16b08e0a4386f3d07ac5e7f.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 4
@@ -640,7 +648,7 @@
       {
         "id": 13003,
         "name": "密林の食いしん坊",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/84017eb92e04ba8130fe9771ded62439.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/a4333364615a34542e1acf1160a52bcf.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 3
@@ -648,7 +656,7 @@
       {
         "id": 13004,
         "name": "スターライトエンジン",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/16574a3404ecf1ade04de470e8d0bc9a.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/f644daa72aa799b67b17d14d3a639b44.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 1
@@ -656,7 +664,7 @@
       {
         "id": 13005,
         "name": "まな板の鯉",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/fffdff969cb81ccb5c52e1fafd149f29.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/54c5956d6e4634bf723155005297e097.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 2
@@ -664,7 +672,7 @@
       {
         "id": 13006,
         "name": "貴重な石化コア",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/6000218a403afdedb6783b622f822486.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/3ac750a20cb7cb6ff9f6c89e9d92dc09.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 2
@@ -672,7 +680,7 @@
       {
         "id": 13007,
         "name": "正規版変身装置",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/1d81bfbefe1cbf59c5c837104ad34c1c.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/dfc17b6a64b9d300b3441c25373407d8.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 5
@@ -680,7 +688,7 @@
       {
         "id": 13008,
         "name": "双生の涙",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b58f14256fbccaccb846fc1e2b81d49e.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6c5a2d18d0c2cf5160de788bec6716a7.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 3
@@ -688,7 +696,7 @@
       {
         "id": 13009,
         "name": "電撃リップグロス",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/338ba709d0b0e2dd819064677f39740e.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/0bd19a20190bcc858da3688ba9720c59.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 3
@@ -696,7 +704,7 @@
       {
         "id": 13010,
         "name": "ラビットチャージャー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/0569e9d6de5635cd9ec3b8c7c8fb3bb2.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/b7166e297fea191adb4b0398e54a784a.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 5
@@ -704,7 +712,7 @@
       {
         "id": 13011,
         "name": "ホットスプリング",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/32043676fe13d45a23d713a2fb2cbf4c.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/9a9ee6d3c6dd3530a4ef3e95b1f2f41a.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 5
@@ -712,7 +720,7 @@
       {
         "id": 13012,
         "name": "魔法の立体パズル",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/f9dc58f989a20e643b4c4d851e6410dd.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/03b2f82ecb0085546ceb0a4d068bd796.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 6
@@ -720,7 +728,7 @@
       {
         "id": 13013,
         "name": "金メッキの花信",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/09d83b69d2f83fc3a017443e33069bb1.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/d9235ac6ce248ab7b63f453068d93761.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 1
@@ -728,7 +736,7 @@
       {
         "id": 13014,
         "name": "エレクトロウォーク",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/fdf254604b2f0e0773470ecb5d64738f.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/655ffb567eece90fe9e3bc493b6b7314.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 6
@@ -736,7 +744,7 @@
       {
         "id": 13015,
         "name": "強音デザイア",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/3c6195dd6ad5d895e95109468830d527.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6f863cae2a6f9bc26ee78254e60c5538.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 1
@@ -744,7 +752,7 @@
       {
         "id": 13016,
         "name": "光と影のカット",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/c358b3ae68ef13c3028e5f180baa3400.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/7abde6bc2ad7a7cdafc0812cab5ffa39.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 5
@@ -752,7 +760,7 @@
       {
         "id": 13017,
         "name": "ニャン運到来",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/10e2b87ea2452446e83829d4efa5be56.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ddd85616f103b2b184c84825ba65cb44.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 7
@@ -760,7 +768,7 @@
       {
         "id": 13018,
         "name": "ドンカツエコー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/bd6de8ae18320e88c90028d18d7db12d.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/f0332d1d8fb117c979500239cf392b5b.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 3
@@ -768,7 +776,7 @@
       {
         "id": 13019,
         "name": "蒼き波の霊器",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/468fb56daee2569e072fff3d4da10ccc.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/b56bb626d2929d4d3db8d2e72c384c7c.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 6
@@ -776,7 +784,7 @@
       {
         "id": 13020,
         "name": "炎々沸々鍋一丁",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/32c53b6eed54dc6fe8a4fa89270bf370.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/54cffc82e3cf8a9a58a0ef988c57a1dc.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 2
@@ -784,7 +792,7 @@
       {
         "id": 13021,
         "name": "ブラッドボックス",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9dcc3cd0889415020d8d9f42425edc1a.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/7ce45e72688dc812b7ef528d57d4e4ec.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 7
@@ -792,7 +800,7 @@
       {
         "id": 13022,
         "name": "キャンドル・トリック",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/100ca3fee0aa90523ad05a26ab803d7e.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ef1ce037e34a64819e8fa76eb733d996.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 7
@@ -800,7 +808,7 @@
       {
         "id": 13101,
         "name": "デマラ式電池Ⅱ型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/e46d6498fbe5fd48ed11df3f3cfe4fb9.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/e014d64ecf0eddf836f8e7eedda2d543.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 2
@@ -808,7 +816,7 @@
       {
         "id": 13103,
         "name": "ザ・ボールト",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/c6a08aaaa757d7ff71297aa97dc792ba.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ac71b30741f6d80fdebeea98e7c6c853.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 4
@@ -816,7 +824,7 @@
       {
         "id": 13106,
         "name": "ハウスキーパー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/ce96855532440fe4d385a863d9f4a966.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/2431216da5b522c4d56a0d2db5263dde.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 1
@@ -824,7 +832,7 @@
       {
         "id": 13108,
         "name": "なんちゃってスターライトエンジン",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/5ae5d093815e89b36319ba7a2df9aea2.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/8f3b4d71215d7fc47be74fd440498fd4.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 1
@@ -832,7 +840,7 @@
       {
         "id": 13111,
         "name": "ドリルリグ-レッドシャフト",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/95fdcd3b8cc7c73e626d4f2268fe4b97.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/3f175b3572cf4493e98cd2e7cdfd9bee.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 1
@@ -840,7 +848,7 @@
       {
         "id": 13112,
         "name": "ビガー・シリンダー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/84ea1cfbcc5f4acbcab71654bc2092ed.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/b96a7f3609cd409c6cd47b55a1a37949.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 5
@@ -848,7 +856,7 @@
       {
         "id": 13113,
         "name": "恥じらう悪面",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/0fc26ecc4043cb6edb28aff6369afab0.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ec0495679e100f927108db3b399dabbd.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 4
@@ -856,7 +864,7 @@
       {
         "id": 13115,
         "name": "喧嘩腰のボンバルダム",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9fb5bce8d67624bfca4a16f5a5ff31c3.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/3bdca386be27cbfe440ed7fca6be0f87.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 4
@@ -864,7 +872,7 @@
       {
         "id": 13127,
         "name": "秩序の守り手・特化型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/843a94778664508236d71fe3ccceb1ae.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/1d86e5324fe23d6b2c6a232dfa3e402d.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 5
@@ -872,7 +880,7 @@
       {
         "id": 13128,
         "name": "グロウル・マイ・カー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/61ab440bb6ced147ceea3f84bef6b473.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/a0071b04cb96792fc1e683e7b242e3db.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 3
@@ -880,7 +888,7 @@
       {
         "id": 13135,
         "name": "ペーパーカッター",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/ce80bac4b988d717af3e00e6ead19e41.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/0789e35c95b2cc4ae247d77e6c65cea8.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 2
@@ -888,7 +896,7 @@
       {
         "id": 13142,
         "name": "雷鳴が如き八卦",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/fdecab6955e475cf74c21ed27610a4c2.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/221b3133dabb00cdbb6005048dd6d6cc.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 5
@@ -896,7 +904,7 @@
       {
         "id": 13144,
         "name": "燔火の朧夜",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b0954a1f7c3a6143bb960bdb99b33afa.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/a26ac1bc1cbab5a5da7c23509e211e94.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 6
@@ -904,7 +912,7 @@
       {
         "id": 14001,
         "name": "キャノンローラー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/d0c3acb0c5607b803516d5a2b8cef4e6.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/5a6d4907a8b359258fe4db001a1615e7.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 1
@@ -912,7 +920,7 @@
       {
         "id": 14002,
         "name": "ゲームボール",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9a3f12b8ef63dc5e172bbed377d01ccc.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/3e46d5e08fd68b90db3072a065683ff0.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 4
@@ -920,7 +928,7 @@
       {
         "id": 14003,
         "name": "シックスシューター",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/aea653287ec25012a031d413297de42a.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/3569d4e49d17c0d5d53e919f0e9ecc94.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 2
@@ -928,7 +936,7 @@
       {
         "id": 14102,
         "name": "鋼の肉球",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9e1e3cd931053489b85377635f9244be.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/c231825683b1f99f168bbcc831aed9d4.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -936,7 +944,7 @@
       {
         "id": 14104,
         "name": "ブリムストーン",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9d011d7749099f57169e81a19fad6a03.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/f58ef8dd6b34f8ef0f4a131e81344ee4.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -944,7 +952,7 @@
       {
         "id": 14105,
         "name": "セイレーンクレードル",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/620b1a4205afb279044a6ea0e00ba6ee.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/90fb399a730103f99b3bd083f99c271c.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 6
@@ -952,7 +960,7 @@
       {
         "id": 14107,
         "name": "猛進するキバ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/e0e22e66c6bb9e72116ff1918bbfeb92.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/9124c95b87781786a002a5fa4e9dc7d0.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 5
@@ -960,7 +968,7 @@
       {
         "id": 14109,
         "name": "あられ落つ星殿",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/c97ff33b53d9ec847643651ad6a1a3d7.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ed5594caf8ef7208107ccca1fd1d7c6f.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -968,7 +976,7 @@
       {
         "id": 14110,
         "name": "燃獄ギア",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b786f03e5332661a3168465406c1cee8.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/18aea68562725e562d359fbf26248ccb.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -976,7 +984,7 @@
       {
         "id": 14114,
         "name": "拘縛されし者",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/2fae2718cb6e01e95fb8110a8180d422.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/c3d5cc6f3880e889319371c3688de536.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -984,7 +992,7 @@
       {
         "id": 14116,
         "name": "炎心の桂冠",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/470682010a923c615dbb0f2da664bf69.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/96b554836df9fef23a09ed421d7433fa.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -992,7 +1000,7 @@
       {
         "id": 14117,
         "name": "バーニング・シェイカー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/c918391e502dc02b3007fa02e6775f73.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/856216b32ac3b58e252b05f9494ef1bc.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1000,7 +1008,7 @@
       {
         "id": 14118,
         "name": "複合コンパイラ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/64c74d01fea694d521cecac066b79b94.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/33120c30fe66f1f53c991a17136f9520.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1008,7 +1016,7 @@
       {
         "id": 14119,
         "name": "ディープシー・ビジター",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/1020d985e9d0096bf82e0641bd874c29.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6faa9f9d1e0891292be30b602317b247.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1016,7 +1024,7 @@
       {
         "id": 14120,
         "name": "残心の青籠",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b863cb8d213872f91e06f689badc81a1.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/68a17a9774ed1f3ca5a8517adc7a39af.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1024,7 +1032,7 @@
       {
         "id": 14121,
         "name": "啜り泣くゆりかご",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b7208cfbb31e6f1cf4bf00b1a6bd2791.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/d93f74f32a482a52884aa6e4863d0ea2.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 4
@@ -1032,7 +1040,7 @@
       {
         "id": 14122,
         "name": "刻流の賢者",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/34ba9eb92bad560baccae072ab3dfc17.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/e67369616d7e2167fa9eef6d616a82bb.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1040,7 +1048,7 @@
       {
         "id": 14124,
         "name": "サプレッサーⅥ型",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/c6c1548f823179f0cb59b0319727f110.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/a3b3e2dd49dbba43dd7aab08771ec123.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1048,7 +1056,7 @@
       {
         "id": 14125,
         "name": "玉壺青氷",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/fa30f4d9767ae3e34a74563fc0c046dd.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/fa4dac409e310dbfc21b53a9513448f3.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -1056,7 +1064,7 @@
       {
         "id": 14126,
         "name": "磨き抜かれた切っ先",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/7d2ee4e7ba02b81f394559b3fadb7185.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/8ffebe0043e422fe901c01475c16bdf0.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1064,7 +1072,7 @@
       {
         "id": 14129,
         "name": "千面の落日",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/3970162cd1f417b49f9c05d04061a4cd.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/e9dbdebfe2b0547b5ee02aa18fe23bd2.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1072,7 +1080,7 @@
       {
         "id": 14130,
         "name": "憤怒の銃騒",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/4b74c0dfc35d9a4dd829706d5e11a1e0.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/cb44040956d20a35e9bdf519e6c2bcfd.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1080,7 +1088,7 @@
       {
         "id": 14131,
         "name": "優美のヴァニティ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/d407ccf4c04443df20e6702aabb2fb77.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/da7924d15588b3573539924723a8463a.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 4
@@ -1088,7 +1096,7 @@
       {
         "id": 14132,
         "name": "心弦のノクターン",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/f481a794c6b7d7933c1433db0dc96ee4.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/da9fb27b45242665a327e2e159630cad.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1096,7 +1104,7 @@
       {
         "id": 14133,
         "name": "鳥は夢へと羽ばたいて",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/fac447f750f94f22d91b13113aaee2f9.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ac90b9c736d10677ebcbe8f12c99c486.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1104,7 +1112,7 @@
       {
         "id": 14134,
         "name": "甘さ控えめ雪うさぎ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9ba6461f7f9a37c0307db879958ad351.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/9014d182059b09f20d428e9705eea68b.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 5
@@ -1112,7 +1120,7 @@
       {
         "id": 14136,
         "name": "奪魂の瞑目",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/cc80ee0d777ea1250c495760d86e1f52.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/e76205a9b2b3dcaafe92d85b3f14b4e7.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -1120,7 +1128,7 @@
       {
         "id": 14137,
         "name": "青溟の鳥籠",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/05129168e7102c1d32d5901019f28f83.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/a57e36f1c2e2346e1dd82b11ed7f8840.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 6
@@ -1128,7 +1136,7 @@
       {
         "id": 14138,
         "name": "純然たる犠牲",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/6e23005715eabd162e6191e9fb36b073.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6163b18c411cac5ee5e984086c2983e9.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1136,7 +1144,7 @@
       {
         "id": 14139,
         "name": "招福の虎炉",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/ce190547c53fd70e77a16d8130e7ce8c.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/02dc5fbee66ae5c454b2a7def200179a.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -1144,7 +1152,7 @@
       {
         "id": 14140,
         "name": "十面百錬の星",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b446e69fb4f7f145c1084a7dd788b7d4.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/aded2496d3475320dcadc782f33978a3.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1152,7 +1160,7 @@
       {
         "id": 14141,
         "name": "狸の七変化",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/46351ed7403d8b91ee7d687051495283.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/4b4511d461041529667c878153915b8d.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 4
@@ -1160,7 +1168,7 @@
       {
         "id": 14143,
         "name": "孤光彩雲",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/be9650197c68765f26845dab05bdbeef.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/8c30ac4357b3f6ff01ad5ed5890f2bfd.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1168,7 +1176,7 @@
       {
         "id": 14145,
         "name": "炉で歌い上げられる夢",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/dbbf59a3f797325e5fbbad5610b54a05.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6317e40e8553ef640527c3a4b761fbc1.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 4
@@ -1176,7 +1184,7 @@
       {
         "id": 14146,
         "name": "駆動する種",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/ec02824b7904e6ef88a563b8b939ec1a.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ef7f8596ada1ef30f33101036a60821f.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1184,7 +1192,7 @@
       {
         "id": 14147,
         "name": "金剛不壊怒髪衝冠",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/c6d2430ceddb132ee310b9ea7eb51ef9.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/7eb592f695f3b742726267b1815542db.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 6
@@ -1192,7 +1200,7 @@
       {
         "id": 14148,
         "name": "昨夜からの着信",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/525867b056febf9cedf67a14b61f30a7.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/3c58a36d60f147ccccd4c518d38527a3.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -1200,7 +1208,7 @@
       {
         "id": 14149,
         "name": "想いが織りなす歌",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/253862a9548d691b1e7519d0aa4cf374.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/b02ad9e1a30d74619cc9f41f249fe898.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 4
@@ -1208,7 +1216,7 @@
       {
         "id": 14150,
         "name": "殻の中の魂",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/942044ab971d53218c7501c906954c23.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/8f795e38a12e8942ebb4afeeccbc0bc3.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1216,7 +1224,7 @@
       {
         "id": 14151,
         "name": "妄想ディスコテック",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/adff21006cb03a511f9b09797e55b122.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/811c7f5d2d0b0a84144d21035b27d70c.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -1224,7 +1232,7 @@
       {
         "id": 14152,
         "name": "影を追う白き牙",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b31e5fc83ad8f3f66813ee667ad08c0e.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/f9684711088b14c85898c5b9d9a11e47.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1232,7 +1240,7 @@
       {
         "id": 14153,
         "name": "スターライトバイザー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/f1a3e98647aad25d8ff378a4da532434.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/9439827337ef74631bed9991aa733dd5.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 6
@@ -1240,7 +1248,7 @@
       {
         "id": 14154,
         "name": "フロスト・クレセント",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/e5392c2b88ff5b73505fdd919d1d5ed4.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/f152db981b333431f481977339614cc5.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1248,7 +1256,7 @@
       {
         "id": 14155,
         "name": "太陽の抜け殻",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/6ea6ff4a0ab7a9f4e78648a9b374c6ed.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/e282dc1a16a3d1260ab30c97bf7c41db.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1256,7 +1264,7 @@
       {
         "id": 14156,
         "name": "金襴の心",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/83199cc2e726ba2f0cd613b952a5b82a.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6975c5af197fed0a65b9e6da3c9a41eb.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1264,7 +1272,7 @@
       {
         "id": 14157,
         "name": "エースのオトモ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/7026e77b578cf858909ae83d8dddc250.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ebe088a8ccec0ba657e2db2c162420fc.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
@@ -1272,7 +1280,7 @@
       {
         "id": 14158,
         "name": "目覚めし翼の聖歌",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9ee9adbcc126daf9118e6b39cc379fb4.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/7da8b08b39a597aa5a626998203e2abf.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1280,7 +1288,7 @@
       {
         "id": 14159,
         "name": "栄光の騎士道",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/974ad3916b011130c13583be1bbb717e.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/dda3bcd7728156a270b4d45d3139d259.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 1
@@ -1288,7 +1296,7 @@
       {
         "id": 14161,
         "name": "深紅の渇望",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/6e2dd4514f7012e833c84cda20058576.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/21e30200c80addf3c027f5dd7e3e0f42.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 7
@@ -1296,15 +1304,23 @@
       {
         "id": 14162,
         "name": "緋月の銀棺",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b052095fe4348cde136dadc940acc775.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/71116a870b898c95cfcb4fce2ae43581.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 2
       },
       {
+        "id": 14163,
+        "name": "罪捕らえる牢獄",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/2bcd89b47374183562320ab3789c82bb.png",
+        "rarity": 4,
+        "element_type": 0,
+        "profession": 1
+      },
+      {
         "id": 14164,
         "name": "転生の炎翼",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/70ebfb9805d48068f6b885a52be08132.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/2a980cd4da2765954c7cca5c2053a46f.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 3
@@ -1312,7 +1328,7 @@
       {
         "id": 53001,
         "name": "ペンギンボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/12e8b89293e27879bbff5520a73aee84.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/155c915f4ab33a4ea4b754023e9afc1f.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1320,7 +1336,7 @@
       {
         "id": 53002,
         "name": "オマネキボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/a8f6d6ab1147b1293b32551e61251e0f.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/f65cb229d1b27e5c31f91499776fb3db.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1328,7 +1344,7 @@
       {
         "id": 53003,
         "name": "タンケンボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/7115359b096fc9a9c09edd344a10c9c4.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/525dec15243aa7a0f9f915b2eaf74aae.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1336,7 +1352,7 @@
       {
         "id": 53004,
         "name": "オスモウボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/f81443d1e1e68fef97a2bab53accd87d.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/dfc7898936395fb32955fddc25e5f49f.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1344,7 +1360,7 @@
       {
         "id": 53005,
         "name": "ハコイリボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/8abdecdfa597605dc9a279cf603704cd.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/67b7ba384e71e9b5e7dbe07549c34848.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1352,7 +1368,7 @@
       {
         "id": 53006,
         "name": "フクロノボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/f51cfc074261379b4bbf7c5497a32f66.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/615a7eb0c27a5fecd678119f3239afa3.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1360,7 +1376,7 @@
       {
         "id": 53007,
         "name": "ウルリンボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/8c0f682c1235373db20d0e51444b3c0c.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/0dd29f62e0313ca90f5b71fe6d90e060.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1368,7 +1384,7 @@
       {
         "id": 53008,
         "name": "アボカドボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/061f971e5cb92c544eb08efed5290648.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/da3f1434fe32e06bb2a6a8baaedd9295.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1376,7 +1392,7 @@
       {
         "id": 53009,
         "name": "ズバットボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/c30b333cd542d654f85b9505de266dfc.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/bff0e1fbe051e70d61178b8678517684.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1384,7 +1400,7 @@
       {
         "id": 53010,
         "name": "ビリビリボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/981f02d13e5cda23cbc8e2a0a0f55de3.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/4820c0a90f1a2af2cb528054a195e095.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1392,7 +1408,7 @@
       {
         "id": 53011,
         "name": "クッツキボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/65bd7b215b176e480c3f8b3bfc81d0fa.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/b4f18ef92793af5b067f7f2b67266cdd.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1400,7 +1416,7 @@
       {
         "id": 53012,
         "name": "キアツデボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/21fe5cc2a75e34510c41fed7c41c5219.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/6284cc42c078c988b2544ff045be1b76.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1408,7 +1424,7 @@
       {
         "id": 53013,
         "name": "カチコミボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/a3151c50212034826ca354b9732131a8.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/f9a4b3f67cb2c2a03eb776b206cf76cc.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1416,7 +1432,7 @@
       {
         "id": 53014,
         "name": "サビザンボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/47cb0a7b28e76e6d7a2dd3dbec947464.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/640bc3d3e5c5f29700c1ba0a86fbe33a.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1424,7 +1440,7 @@
       {
         "id": 53015,
         "name": "カクトウボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/879c562b2d9d763befc139da64c428ea.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/e0910e53ddc6ec88fab11699d1c1d3a3.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1432,7 +1448,7 @@
       {
         "id": 53016,
         "name": "セイケンボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/ab21a0e54425e548e961cb12dbe515f6.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/2a556d90126fed778a3f27fb2798aa81.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1440,7 +1456,7 @@
       {
         "id": 53017,
         "name": "キシドウボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/ca14ae40a6e32591a0b932d5df07998c.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/5cfda4522f62d5019e10a298a45565a0.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1448,7 +1464,7 @@
       {
         "id": 53019,
         "name": "ブロックボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/3c2952a25588ddd99bf1ba8e0f01a2cf.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/bb46f28afb0e4456eef83760610fd3f5.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1456,7 +1472,7 @@
       {
         "id": 53021,
         "name": "ユウレイボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/efc9bcb152462ba46754fd19f868ceb7.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/62d895f7087da43bd29745ef542655dc.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1464,7 +1480,7 @@
       {
         "id": 54001,
         "name": "ガブットボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/9b8957095f90bb84a27650b7770cbdee.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/0d56670313d7a57414d7db4a5362925b.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1472,7 +1488,7 @@
       {
         "id": 54002,
         "name": "ゴアンゼン",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/a1964eba91a8d91739bc054bb8138cc3.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/8dc3bcdd2fdedcca75ccd276f6ee1303.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1480,7 +1496,7 @@
       {
         "id": 54003,
         "name": "アクマデボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/e53923434eaf321dfd80b277b9f4a140.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/38e1cfd3adff2d7b4eff2e28cb070cd9.png",
         "rarity": 3,
         "element_type": 0,
         "profession": 0
@@ -1488,7 +1504,7 @@
       {
         "id": 54004,
         "name": "バトラー",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/f146b697fec3cb6d5232894c74368c39.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/088e5b2bbdf578c92b680fcc76629989.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1496,7 +1512,7 @@
       {
         "id": 54005,
         "name": "アミリオン",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/776ee23574a9aa3fe4b9e441f9021a7f.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/812e3559fbafebde88b7dcb9f7c22b70.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1504,7 +1520,7 @@
       {
         "id": 54006,
         "name": "ハヤスギボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/e79747f4796d54c7d12f3e74fab34ac9.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/b807b7f12d413bf23b094f7b0db697cd.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1512,7 +1528,7 @@
       {
         "id": 54008,
         "name": "プラグノボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/0081996b796cb7de4fb0b3405821501f.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/2c0cb9c453e4e166098da49c6d5b83a7.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1520,7 +1536,7 @@
       {
         "id": 54009,
         "name": "レゾナンボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/e3dac079eb37878a205eaf68f5dd72fc.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/cd5cb9d807f625f5ea12a39e4c229235.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1528,7 +1544,7 @@
       {
         "id": 54010,
         "name": "コサン",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/817a0c40a567100def53522f8c5236eb.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/a5c607e534a83bc4d37d0103557d9871.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1536,7 +1552,7 @@
       {
         "id": 54011,
         "name": "真紅のモックス",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/0e7401c48e3f4a580877f0b2f4b5c340.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/886e35843aedad1019f055c97d256adb.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1544,7 +1560,7 @@
       {
         "id": 54012,
         "name": "ツェイ巡査",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/c58591fa19ed0a75f4c80f96ee3f5ed9.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/2926ead4ce882338a65272803a42a77e.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1552,7 +1568,7 @@
       {
         "id": 54013,
         "name": "リボルバボンプ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b8eb11b0fd67fd9289e69ea31ebd2002.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/3a368ad453ad7ed784e8ce1cb5bd72f1.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1560,7 +1576,7 @@
       {
         "id": 54014,
         "name": "ガリバー隊員",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/f31058a550e702fa7d6be8024e6196e8.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/09d87406fab7efbacf04b0b9cb7ac5f2.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1568,7 +1584,7 @@
       {
         "id": 54015,
         "name": "カチャコ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/83313770a62e4a6de2c652ce98178345.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/7fbe6ef8dd39d596a047634f591fc67e.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1576,7 +1592,7 @@
       {
         "id": 54016,
         "name": "ロビン",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/ed012abda3b1d1c1dafe7edd5d4b248b.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/d32a6d2005154792df89f424d101e186.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1584,7 +1600,7 @@
       {
         "id": 54017,
         "name": "オシシ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/558c2a98d7fcbfa1a31c0c0ddfc9f9e6.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/a6cc8625798a5286fcca9e281d470622.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1592,7 +1608,7 @@
       {
         "id": 54018,
         "name": "ミス・エスメ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/30228c32a67591ec349c3465351e85f7.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/aa045ae0b435bff828fd6e6a5fe3d3a4.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1600,7 +1616,7 @@
       {
         "id": 54019,
         "name": "「マーキュリー」",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/4b7cf30402020e675e05e97d12fda0c7.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/ccd4490be97d1e0fff35e968c29e0a37.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1608,7 +1624,7 @@
       {
         "id": 54020,
         "name": "ビャークブリック",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/29ea85151b27c61ef984c99d47c30199.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/1dd96a6090f9779d9a00d35c29e28250.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1616,7 +1632,7 @@
       {
         "id": 54021,
         "name": "メメ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/78f43e2645df9382fbab21b679d98a23.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/e0c54e785334fed145e2f6e44d1085dd.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1624,7 +1640,7 @@
       {
         "id": 54022,
         "name": "ウルトラネイヴ",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/3454f35eee208f8b23ad8f0af84eaf50.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/b5d08a618b1bf08053b0a56cff3de143.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
@@ -1632,7 +1648,7 @@
       {
         "id": 54023,
         "name": "アリエル",
-        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ua8fhe/b84bd231b2366d30812f4427deee431c.png",
+        "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_ub3eje/4eefe4be7e1ca6f0f6b968f8811df999.png",
         "rarity": 4,
         "element_type": 0,
         "profession": 0
