@@ -821,6 +821,25 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 实时便笺提醒的检查间隔（分钟）。预计更早到点的项目会提前检查，与此无关。
+    /// </summary>
+    public static int DailyNoteNotifyIntervalMinutes
+    {
+        get => GetValue(60);
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 有游戏在运行时，便笺提醒不弹出横幅，直接进通知中心。默认开启。
+    /// </summary>
+    public static bool DailyNoteNotifySilentWhenGameRunning
+    {
+        get => GetValue(true);
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
     /// 获取指定游戏、指定账号最近一次成功领取免费时长的云游戏日历日（见 <see cref="Features.CloudGame.CloudGameFreeTimeSchedule.GetServerDate"/>）。
     /// 钱包接口不下发「今天是否已领」，只能由本机记账避免同一天重复领取。
     /// </summary>

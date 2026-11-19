@@ -1,6 +1,9 @@
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
+using Starward.Core;
+using Starward.Features.GameSelector;
 using Starward.Features.GamepadControl;
 using Starward.Features.Overlay;
 using Starward.Features.Setting;
@@ -209,6 +212,28 @@ public partial class App : Application
         m_MainWindow ??= new MainWindow();
         m_MainWindow.Activate();
         m_MainWindow.Show();
+    }
+
+
+    /// <summary>
+    /// 打开主窗口并切到指定游戏（点击系统通知时）。主窗口还没建时先改写「当前游戏」设置，建好后游戏选择器按它初始化；
+    /// 已建好时发 <see cref="SelectGameBizMessage"/> 让游戏选择器切换。
+    /// </summary>
+    /// <param name="biz">要切到的游戏区服；为空或无法识别时只打开主窗口。</param>
+    public void EnsureMainWindow(GameBiz? biz)
+    {
+        if (biz is { } target && target.IsKnown())
+        {
+            if (m_MainWindow is null)
+            {
+                AppConfig.CurrentGameBiz = SelectGameBizMessage.ResolveTarget(AppConfig.CurrentGameBiz, target);
+            }
+            else
+            {
+                WeakReferenceMessenger.Default.Send(new SelectGameBizMessage(target));
+            }
+        }
+        EnsureMainWindow();
     }
 
 

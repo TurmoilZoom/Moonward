@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog x:Class="Starward.Features.GameRecord.DailyNote.Notify.DailyNoteNotifyDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:lang="using:Starward.Language"
+               xmlns:local="using:Starward.Features.GameRecord.DailyNote.Notify"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:sc="using:Starward.Controls"
+               x:DefaultBindMode="OneWay"
+               Background="{ThemeResource CustomAcrylicBrush}"
+               BorderThickness="0"
+               CornerRadius="8"
+               Style="{ThemeResource DefaultContentDialogStyle}"
+               mc:Ignorable="d">
+
+    <ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMaxWidth">1200</x:Double>
+        <Thickness x:Key="ContentDialogPadding">0</Thickness>
+        <!--  模板里空的 Title 行仍带 0,0,0,12 的下边距，不清零的话顶部会比左右多空 12（同启动参数配置对话框）  -->
+        <Thickness x:Key="ContentDialogTitleMargin">0</Thickness>
+        <StaticResource x:Key="ContentDialogSmokeFill" ResourceKey="ControlFillColorTransparentBrush" />
+        <StaticResource x:Key="ContentDialogTopOverlay" ResourceKey="ControlFillColorTransparentBrush" />
+    </ContentDialog.Resources>
+
+    <!--
+      外框宽 760，Padding 24 后内容区宽 712。
+      自上而下：标题行（标题 + 关闭）→ 主体（左：所有支持实时便笺的账号；右：所选账号的提醒项目）→ 底栏（全局选项与通知状态）。
+      主体固定高度，切换账号时（各游戏项目数不同）对话框不跳动。
+    -->
+    <Grid Width="760" Padding="24,24,24,20">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  标题行：负边距把整行上移 16、右伸 16，关闭按钮贴到右上角，标题仍与下方内容左缘对齐  -->
+        <Grid Height="32"
+              Margin="0,-16,-16,16"
+              ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="20"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.DailyNoteNotify_Title}"
+                       TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="1"
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    BorderThickness="0"
+                    Command="{x:Bind CloseCommand}"
+                    CornerRadius="8"
+                    Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                <FontIcon FontSize="16"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Glyph="&#xE711;"
+                          IsTextScaleFactorEnabled="False" />
+            </Button>
+        </Grid>
+
+
+        <!--  主体  -->
+        <Grid Grid.Row="1"
+              Height="320"
+              ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  账号列表：跨游戏，开了提醒的账号带铃铛  -->
+            <Border Padding="0,4"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <Grid>
+                    <ListView x:Name="ListView_Roles"
+                              AutomationProperties.Name="{x:Bind lang:Lang.DailyNoteNotify_Account}"
+                              ItemsSource="{x:Bind Roles}"
+                              SelectionChanged="ListView_Roles_SelectionChanged"
+                              SelectionMode="Single">
+                        <ListView.Resources>
+                            <!--  自带的选中指示条只会在新项上直接出现，换成下面叠加的滑动指示条  -->
+                            <x:Boolean x:Key="ListViewItemSelectionIndicatorVisualEnabled">False</x:Boolean>
+                        </ListView.Resources>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:DailyNoteNotifyRoleView">
+                                <Grid Height="52" ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <sc:CachedImage Width="32"
+                                                    Height="32"
+                                                    VerticalAlignment="Center"
+                                                    CornerRadius="16"
+                                                    Source="{x:Bind HeadIcon}" />
+                                    <StackPanel Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                Spacing="2">
+                                        <TextBlock Text="{x:Bind Nickname}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock FontSize="12"
+                                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                   Text="{x:Bind GameAndServer}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <FontIcon Grid.Column="2"
+                                              Margin="0,0,4,0"
+                                              VerticalAlignment="Center"
+                                              FontSize="12"
+                                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                              Glyph="&#xEA8F;"
+                                              Visibility="{x:Bind ReminderVisibility, Mode=OneWay}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <!--
+                      滑动选中指示条（ListViewSlidingIndicator 驱动）：宿主与列表同位置同大小、负责裁剪；
+                      中间一层跟随列表滚动；指示条尺寸与颜色同自带指示条（宽 3、高 16、强调色）。
+                    -->
+                    <Grid x:Name="Grid_RoleIndicatorHost" IsHitTestVisible="False">
+                        <Grid x:Name="Grid_RoleIndicatorFollower">
+                            <Border x:Name="Border_RoleIndicator"
+                                    Width="3"
+                                    Height="16"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Background="{ThemeResource ListViewItemSelectionIndicatorBrush}"
+                                    CornerRadius="1.5" />
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!--  所选账号的提醒项目  -->
+            <Border Grid.Column="1"
+                    Padding="20,16,20,14"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <Grid RowSpacing="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  账号信息  -->
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <sc:CachedImage Width="40"
+                                        Height="40"
+                                        CornerRadius="20"
+                                        Source="{x:Bind SelectedRole.HeadIcon}" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Text="{x:Bind SelectedRole.Nickname, FallbackValue=''}"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind SelectedRole.GameServerAndUid, FallbackValue=''}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Rectangle Grid.Row="1"
+                               Height="1"
+                               Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+                    <!--  项目：左边开关 + 当前数值，右边阈值  -->
+                    <ScrollViewer Grid.Row="2"
+                                  Margin="0,0,-12,0"
+                                  Padding="0,0,12,0"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{x:Bind Items}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="10" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="local:DailyNoteNotifyItemView">
+                                    <Grid MinHeight="48" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <CheckBox Content="{x:Bind Name}" IsChecked="{x:Bind Enabled, Mode=TwoWay}" />
+                                            <!--  与复选框文字左缘对齐  -->
+                                            <TextBlock Margin="28,-4,0,0"
+                                                       FontSize="12"
+                                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                       Text="{x:Bind StatusText}"
+                                                       Visibility="{x:Bind StatusVisibility}" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       FontSize="12"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       Text="{x:Bind lang:Lang.DailyNoteNotify_Threshold}" />
+                                            <NumberBox Width="132"
+                                                       IsEnabled="{x:Bind Enabled, Mode=OneWay}"
+                                                       LargeChange="40"
+                                                       Maximum="{x:Bind Maximum}"
+                                                       Minimum="1"
+                                                       PlaceholderText="{x:Bind lang:Lang.DailyNoteNotify_Max}"
+                                                       SmallChange="10"
+                                                       SpinButtonPlacementMode="Compact"
+                                                       Value="{x:Bind Threshold, Mode=TwoWay}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <TextBlock Grid.Row="3"
+                               FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Text="{x:Bind lang:Lang.DailyNoteNotify_ItemsHint}"
+                               TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+        </Grid>
+
+
+        <!--  底栏：对所有账号生效的选项与系统通知状态  -->
+        <Grid Grid.Row="2"
+              Margin="0,16,0,0"
+              ColumnSpacing="24"
+              RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!--  跨两列：只放左列时宽度被右下角按钮挤掉，复选框文字会被截断  -->
+            <StackPanel Grid.ColumnSpan="2"
+                        Orientation="Horizontal"
+                        Spacing="24">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.SystemNotificationSetting_Interval}" />
+                    <ComboBox x:Name="ComboBox_Interval"
+                              Height="36"
+                              MinWidth="120"
+                              VerticalAlignment="Center"
+                              AutomationProperties.Name="{x:Bind lang:Lang.SystemNotificationSetting_Interval}"
+                              BorderThickness="0"
+                              CornerRadius="8"
+                              SelectionChanged="ComboBox_Interval_SelectionChanged" />
+                </StackPanel>
+                <CheckBox VerticalAlignment="Center"
+                          Content="{x:Bind lang:Lang.SystemNotificationSetting_SilentWhenGameRunning}"
+                          IsChecked="{x:Bind SilentWhenGameRunning, Mode=TwoWay}" />
+            </StackPanel>
+
+            <!--
+              状态：系统关了通知 / 测试失败时用提示色，否则是运行条件说明。
+              整块与右侧按钮垂直居中；图标与文字都顶对齐，文字折行时图标仍对着第一行。
+            -->
+            <Grid Grid.Row="1"
+                  VerticalAlignment="Center"
+                  ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Margin="0,1,0,0"
+                          VerticalAlignment="Top"
+                          FontSize="14"
+                          Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                          Glyph="&#xE946;"
+                          Visibility="{x:Bind HintVisibility}" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Top"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                           Text="{x:Bind lang:Lang.DailyNoteNotify_RunningHint}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind HintVisibility}" />
+                <FontIcon Margin="0,1,0,0"
+                          VerticalAlignment="Top"
+                          FontSize="14"
+                          Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                          Glyph="&#xE7BA;"
+                          Visibility="{x:Bind WarningVisibility}" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Top"
+                           FontSize="12"
+                           Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                           Text="{x:Bind WarningText}"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind WarningVisibility}" />
+            </Grid>
+
+            <StackPanel Grid.Row="1"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                <HyperlinkButton Command="{x:Bind OpenSystemNotificationSettingsCommand}" Content="{x:Bind lang:Lang.DailyNoteNotify_OpenSystemSettings}" />
+                <Button Height="36"
+                        Command="{x:Bind SendTestNotificationCommand}"
+                        Content="{x:Bind lang:Lang.SystemNotificationSetting_SendTest}"
+                        CornerRadius="8" />
+            </StackPanel>
+        </Grid>
+
+    </Grid>
+
+</ContentDialog>

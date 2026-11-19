@@ -13258,5 +13258,185 @@ namespace Starward.Language {
                 return ResourceManager.GetString("DatabaseBackup_RestoreFailedOnStartup", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Reminders 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_Title {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Original Resin 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_GenshinResin {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_GenshinResin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Trailblaze Power 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_StarRailStamina {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_StarRailStamina", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Stamina 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_BH3Stamina {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_BH3Stamina", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Remind at 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_Threshold {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_Threshold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Max 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_Max {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_Max", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Moonward must keep running (the tray is enough) to send reminders. 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_RunningHint {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_RunningHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Notifications for Moonward are turned off in Windows settings. 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_SystemDisabled {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_SystemDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Windows notification settings 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_OpenSystemSettings {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_OpenSystemSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} is full ({1}/{2}) 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_ItemFull {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_ItemFull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} has reached {1}/{2} 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_ItemReached {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_ItemReached", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Current {0}/{1} 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_CurrentValue {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_CurrentValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Check the items to be reminded of. Leave the threshold empty to be reminded when it's full. 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_ItemsHint {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_ItemsHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Check every 的本地化字符串。
+        /// </summary>
+        public static string SystemNotificationSetting_Interval {
+            get {
+                return ResourceManager.GetString("SystemNotificationSetting_Interval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} minutes 的本地化字符串。
+        /// </summary>
+        public static string SystemNotificationSetting_IntervalMinutes {
+            get {
+                return ResourceManager.GetString("SystemNotificationSetting_IntervalMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Don't pop up while a game is running (still kept in the notification center) 的本地化字符串。
+        /// </summary>
+        public static string SystemNotificationSetting_SilentWhenGameRunning {
+            get {
+                return ResourceManager.GetString("SystemNotificationSetting_SilentWhenGameRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Send a test notification 的本地化字符串。
+        /// </summary>
+        public static string SystemNotificationSetting_SendTest {
+            get {
+                return ResourceManager.GetString("SystemNotificationSetting_SendTest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 System notifications are working. 的本地化字符串。
+        /// </summary>
+        public static string SystemNotificationSetting_TestMessage {
+            get {
+                return ResourceManager.GetString("SystemNotificationSetting_TestMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Couldn't send the notification. See the log for details. 的本地化字符串。
+        /// </summary>
+        public static string SystemNotificationSetting_SendFailed {
+            get {
+                return ResourceManager.GetString("SystemNotificationSetting_SendFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Account 的本地化字符串。
+        /// </summary>
+        public static string DailyNoteNotify_Account {
+            get {
+                return ResourceManager.GetString("DailyNoteNotify_Account", resourceCulture);
+            }
+        }
     }
 }

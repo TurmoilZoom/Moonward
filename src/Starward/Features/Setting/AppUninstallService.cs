@@ -46,7 +46,7 @@ internal static class AppUninstallService
 
     /// <summary>
     /// 在 Velopack 卸载钩子（<c>OnBeforeUninstallFastCallback</c>）中调用：
-    /// 清空用户数据目录但保留数据库 db 文件，并删除 <c>moonward://</c> 协议键、Moonward 配置键与开机启动项。
+    /// 清空用户数据目录但保留数据库 db 文件，并删除 <c>moonward://</c> 协议键、系统通知登记、Moonward 配置键与开机启动项。
     /// 必须保持静默、无 UI、尽快返回（钩子 30 秒超时）。
     /// </summary>
     public static void PerformUninstallCleanup()
@@ -68,6 +68,15 @@ internal static class AppUninstallService
             TryCleanUserDataFolderKeepDatabase(dataFolder);
             // moonward:// 协议注册（HKCU\Software\Classes\Moonward），卸载后已无意义。
             TryDeleteSubKeyTree(Registry.CurrentUser, ProtocolKeyPath, "protocol key");
+            // 系统通知的身份（AUMID）、点击协议与系统为它建的通知设置键
+            try
+            {
+                Notification.SystemNotificationService.RemoveRegistration();
+            }
+            catch (Exception ex)
+            {
+                Log($"Remove system notification registration failed: {ex.Message}");
+            }
             // 删除 Moonward 自己的注册表键（含 DataFolder / 语言 / 登录票据），最后删（前面要读它）。
             TryDeleteSubKeyTree(Registry.CurrentUser, RegistryKeyPath, "config key");
             Log("Uninstall cleanup done.");

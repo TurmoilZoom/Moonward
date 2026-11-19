@@ -1,0 +1,38 @@
+using Starward.Core;
+using Starward.Features.GameSelector;
+using Starward.Features.Notification;
+using System.Threading.Tasks;
+
+namespace Starward.Features.Startup;
+
+/// <summary>
+/// 点击系统通知后的协议激活（<c>moonward-notify://open/?biz=…</c>，见 <see cref="NotificationActivation"/>）。
+/// <para>
+/// 通知平台总以普通权限拉起本进程，常驻实例却可能是提权的，所以不走 <c>AppInstance.RedirectActivationToAsync</c>，
+/// 而是经 <see cref="ResidentInstanceMessenger"/>（已放行低 → 高的 <c>WM_COPYDATA</c>）请常驻实例打开主窗口，随后退出。
+/// 没有常驻实例时（Moonward 已退出、点的是通知中心里的旧通知）放行，本进程照常启动并打开主窗口。
+/// </para>
+/// </summary>
+internal sealed class NotificationActivationStartupHandler : IStartupHandler
+{
+
+    public bool CanHandle(StartupContext context) =>
+        context.Args is [var arg, ..] && NotificationActivation.IsActivationArgument(arg);
+
+
+    public Task<StartupOutcome> HandleAsync(StartupContext context)
+    {
+        NotificationActivation.TryParseOpen(context.Args[0], out GameBiz? biz, out long uid);
+        if (ResidentInstanceMessenger.NotifyOpenMainWindow(biz, uid))
+        {
+            return Task.FromResult(StartupOutcome.Exit);
+        }
+        // 主窗口建好后游戏选择器按「当前游戏」设置初始化，先写进去
+        if (biz is { } target && target.IsKnown())
+        {
+            AppConfig.CurrentGameBiz = SelectGameBizMessage.ResolveTarget(AppConfig.CurrentGameBiz, target);
+        }
+        return Task.FromResult(StartupOutcome.Continue);
+    }
+
+}

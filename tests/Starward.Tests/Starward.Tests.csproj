@@ -37,6 +37,8 @@
 		<Compile Include="..\..\src\Starward\Features\Update\ReleaseNotesFormatter.cs" Link="Linked\Update\ReleaseNotesFormatter.cs" />
 		<Compile Include="..\..\src\Starward\Features\Database\BackupDataPolicy.cs" Link="Linked\Database\BackupDataPolicy.cs" />
 		<Compile Include="..\..\src\Starward\Features\Database\DatabaseBackupNaming.cs" Link="Linked\Database\DatabaseBackupNaming.cs" />
+		<Compile Include="..\..\src\Starward\Features\GameRecord\DailyNote\Notify\DailyNoteNotifyEvaluator.cs" Link="Linked\GameRecord\DailyNoteNotifyEvaluator.cs" />
+		<Compile Include="..\..\src\Starward\Features\GameRecord\DailyNote\Notify\DailyNoteNotifyItem.cs" Link="Linked\GameRecord\DailyNoteNotifyItem.cs" />
 	</ItemGroup>
 
 </Project>

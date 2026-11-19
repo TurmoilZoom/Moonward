@@ -50,21 +50,36 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <!--  刷新  -->
-                    <Button Margin="-8"
-                            Padding="4"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            BorderThickness="0"
-                            Command="{x:Bind RefreshDailyNoteCommand}"
-                            CornerRadius="4"
-                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                            sc:InstantTooltip.Placement="Top"
-                            sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
-                        <FontIcon FontSize="14"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                  Glyph="&#xE72C;" />
-                    </Button>
+                    <!--  提醒设置（打开对话框） / 刷新  -->
+                    <StackPanel Margin="-8"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Orientation="Horizontal"
+                                Spacing="2">
+                        <Button Padding="4"
+                                AutomationProperties.Name="{x:Bind lang:Lang.DailyNoteNotify_Title}"
+                                BorderThickness="0"
+                                Command="{x:Bind OpenNotifySettingsCommand}"
+                                CornerRadius="4"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.DailyNoteNotify_Title}">
+                            <FontIcon FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xEA8F;" />
+                        </Button>
+                        <Button Padding="4"
+                                BorderThickness="0"
+                                Command="{x:Bind RefreshDailyNoteCommand}"
+                                CornerRadius="4"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
+                            <FontIcon FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE72C;" />
+                        </Button>
+                    </StackPanel>
 
                     <!--  角色信息  -->
                     <StackPanel Orientation="Horizontal" Spacing="12">

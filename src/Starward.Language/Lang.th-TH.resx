@@ -4523,4 +4523,64 @@ You are welcome to submit exported data to:</value>
   <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
     <value>กู้คืนจากข้อมูลสำรองไม่สำเร็จ ข้อมูลของคุณไม่มีการเปลี่ยนแปลง: {0}</value>
   </data>
+  <data name="DailyNoteNotify_Title" xml:space="preserve">
+    <value>Reminders</value>
+  </data>
+  <data name="DailyNoteNotify_GenshinResin" xml:space="preserve">
+    <value>Original Resin</value>
+  </data>
+  <data name="DailyNoteNotify_StarRailStamina" xml:space="preserve">
+    <value>Trailblaze Power</value>
+  </data>
+  <data name="DailyNoteNotify_BH3Stamina" xml:space="preserve">
+    <value>Stamina</value>
+  </data>
+  <data name="DailyNoteNotify_Threshold" xml:space="preserve">
+    <value>Remind at</value>
+  </data>
+  <data name="DailyNoteNotify_Max" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="DailyNoteNotify_RunningHint" xml:space="preserve">
+    <value>Moonward must keep running (the tray is enough) to send reminders.</value>
+  </data>
+  <data name="DailyNoteNotify_SystemDisabled" xml:space="preserve">
+    <value>Notifications for Moonward are turned off in Windows settings.</value>
+  </data>
+  <data name="DailyNoteNotify_OpenSystemSettings" xml:space="preserve">
+    <value>Windows notification settings</value>
+  </data>
+  <data name="DailyNoteNotify_ItemFull" xml:space="preserve">
+    <value>{0} is full ({1}/{2})</value>
+  </data>
+  <data name="DailyNoteNotify_ItemReached" xml:space="preserve">
+    <value>{0} has reached {1}/{2}</value>
+  </data>
+  <data name="DailyNoteNotify_CurrentValue" xml:space="preserve">
+    <value>Current {0}/{1}</value>
+  </data>
+  <data name="DailyNoteNotify_ItemsHint" xml:space="preserve">
+    <value>Check the items to be reminded of. Leave the threshold empty to be reminded when it's full.</value>
+  </data>
+  <data name="SystemNotificationSetting_Interval" xml:space="preserve">
+    <value>Check every</value>
+  </data>
+  <data name="SystemNotificationSetting_IntervalMinutes" xml:space="preserve">
+    <value>{0} minutes</value>
+  </data>
+  <data name="SystemNotificationSetting_SilentWhenGameRunning" xml:space="preserve">
+    <value>Don't pop up while a game is running (still kept in the notification center)</value>
+  </data>
+  <data name="SystemNotificationSetting_SendTest" xml:space="preserve">
+    <value>Send a test notification</value>
+  </data>
+  <data name="SystemNotificationSetting_TestMessage" xml:space="preserve">
+    <value>System notifications are working.</value>
+  </data>
+  <data name="SystemNotificationSetting_SendFailed" xml:space="preserve">
+    <value>Couldn't send the notification. See the log for details.</value>
+  </data>
+  <data name="DailyNoteNotify_Account" xml:space="preserve">
+    <value>Account</value>
+  </data>
 </root>

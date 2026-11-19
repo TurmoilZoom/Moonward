@@ -60,6 +60,42 @@ public sealed partial class GameSelector : UserControl
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
         WeakReferenceMessenger.Default.Register<MainWindowStateChangedMessage>(this, OnMainWindowStateChanged);
         WeakReferenceMessenger.Default.Register<MainWindowDragRectAdaptToGameIconMessage>(this, OnMainWindowStateChanged);
+        WeakReferenceMessenger.Default.Register<SelectGameBizMessage>(this, OnSelectGameBiz);
+    }
+
+
+
+    /// <summary>
+    /// 切到指定游戏（点击系统通知打开主窗口时），效果同单击该游戏图标。不在已选图标里时按初始化的做法临时建一个图标。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="message">要切到的游戏区服。</param>
+    private void OnSelectGameBiz(object _, SelectGameBizMessage message)
+    {
+        GameBiz target = SelectGameBizMessage.ResolveTarget(CurrentGameBiz, message.GameBiz);
+        if (target == CurrentGameBiz)
+        {
+            return;
+        }
+        GameBizIcon? icon = GameBizIcons.FirstOrDefault(x => x.GameBiz == target);
+        if (icon is null)
+        {
+            if (!target.IsKnown())
+            {
+                return;
+            }
+            icon = new GameBizIcon(target);
+        }
+        if (CurrentGameBizIcon is not null)
+        {
+            CurrentGameBizIcon.IsSelected = false;
+        }
+        CurrentGameBizIcon = icon;
+        CurrentGameBiz = icon.GameBiz;
+        CurrentGameId = icon.GameId;
+        icon.IsSelected = true;
+        CurrentGameChanged?.Invoke(this, (icon.GameId, false));
+        AppConfig.CurrentGameBiz = icon.GameBiz;
     }
 
 

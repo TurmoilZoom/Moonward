@@ -26,6 +26,7 @@ using Starward.Features.GameInstall;
 using Starward.Features.GameLauncher;
 using Starward.Features.GameRecord;
 using Starward.Features.GameRecord.AutoRefresh;
+using Starward.Features.GameRecord.DailyNote.Notify;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Features.HoYoPlay;
 using Starward.Features.LanSync;
@@ -112,6 +113,8 @@ public static partial class AppConfig
             sc.AddSingleton<AutoSignInService>();
             // 自动更新战绩：启动时检查一次到期的账号+板块并补档；进程常驻期间不跨日再跑（与自动签到不同）
             sc.AddSingleton<AutoRecordRefreshService>();
+            // 实时便笺提醒：常驻检查各账号便笺，达到阈值时发 Windows 系统通知
+            sc.AddSingleton<DailyNoteNotifyService>();
 
             // 首页时间节点：百科 blackboard 卡池 / 活动倒计时（公开接口，无 Cookie）
             sc.AddSingleton<BlackboardClient>();
@@ -150,6 +153,7 @@ public static partial class AppConfig
             sc.AddSingleton<IStartupHandler, PlayTimeStartupHandler>();
             sc.AddSingleton<IStartupHandler, StartGameStartupHandler>();
             sc.AddSingleton<IStartupHandler, UrlProtocolStartupHandler>();
+            sc.AddSingleton<IStartupHandler, NotificationActivationStartupHandler>();
 
             _serviceProvider = sc.BuildServiceProvider();
         }

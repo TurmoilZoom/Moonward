@@ -4529,4 +4529,64 @@
   <data name="DatabaseBackup_RestoreFailedOnStartup" xml:space="preserve">
     <value>從備份還原失敗，資料未變更：{0}</value>
   </data>
+  <data name="DailyNoteNotify_Title" xml:space="preserve">
+    <value>提醒設定</value>
+  </data>
+  <data name="DailyNoteNotify_GenshinResin" xml:space="preserve">
+    <value>原粹樹脂</value>
+  </data>
+  <data name="DailyNoteNotify_StarRailStamina" xml:space="preserve">
+    <value>開拓力</value>
+  </data>
+  <data name="DailyNoteNotify_BH3Stamina" xml:space="preserve">
+    <value>體力</value>
+  </data>
+  <data name="DailyNoteNotify_Threshold" xml:space="preserve">
+    <value>提醒閾值</value>
+  </data>
+  <data name="DailyNoteNotify_Max" xml:space="preserve">
+    <value>上限</value>
+  </data>
+  <data name="DailyNoteNotify_RunningHint" xml:space="preserve">
+    <value>需保持 Moonward 執行（只留在系統工作列也可以）才能提醒。</value>
+  </data>
+  <data name="DailyNoteNotify_SystemDisabled" xml:space="preserve">
+    <value>Windows 設定中關閉了 Moonward 的通知。</value>
+  </data>
+  <data name="DailyNoteNotify_OpenSystemSettings" xml:space="preserve">
+    <value>Windows 通知設定</value>
+  </data>
+  <data name="DailyNoteNotify_ItemFull" xml:space="preserve">
+    <value>{0}已滿（{1}/{2}）</value>
+  </data>
+  <data name="DailyNoteNotify_ItemReached" xml:space="preserve">
+    <value>{0}已達到 {1}/{2}</value>
+  </data>
+  <data name="DailyNoteNotify_CurrentValue" xml:space="preserve">
+    <value>目前 {0}/{1}</value>
+  </data>
+  <data name="DailyNoteNotify_ItemsHint" xml:space="preserve">
+    <value>勾選要提醒的項目，提醒閾值留空表示滿了再提醒。</value>
+  </data>
+  <data name="SystemNotificationSetting_Interval" xml:space="preserve">
+    <value>檢查間隔</value>
+  </data>
+  <data name="SystemNotificationSetting_IntervalMinutes" xml:space="preserve">
+    <value>{0} 分鐘</value>
+  </data>
+  <data name="SystemNotificationSetting_SilentWhenGameRunning" xml:space="preserve">
+    <value>遊戲執行時不彈出（仍會留在通知中心）</value>
+  </data>
+  <data name="SystemNotificationSetting_SendTest" xml:space="preserve">
+    <value>傳送測試通知</value>
+  </data>
+  <data name="SystemNotificationSetting_TestMessage" xml:space="preserve">
+    <value>系統通知運作正常。</value>
+  </data>
+  <data name="SystemNotificationSetting_SendFailed" xml:space="preserve">
+    <value>通知傳送失敗，詳情見日誌。</value>
+  </data>
+  <data name="DailyNoteNotify_Account" xml:space="preserve">
+    <value>帳號</value>
+  </data>
 </root>

@@ -45,6 +45,9 @@ internal static partial class ResidentInstanceMessenger
     /// <summary><c>COPYDATASTRUCT.dwData</c> 取值：游戏已启动，负载为 <c>{game_biz}|{pid}</c>。</summary>
     private const nint MSG_GAME_STARTED = 1;
 
+    /// <summary><c>COPYDATASTRUCT.dwData</c> 取值：打开主窗口（点击了系统通知），负载为 <c>{game_biz}|{uid}</c>，两段都可为空 / 0。</summary>
+    private const nint MSG_OPEN_MAIN_WINDOW = 2;
+
     private const uint MSGFLT_ALLOW = 1;
 
     private const uint SMTO_ABORTIFHUNG = 0x0002;
@@ -127,20 +130,9 @@ internal static partial class ResidentInstanceMessenger
         {
             return false;
         }
-        nint buffer = 0;
         try
         {
-            string payload = $"{biz}|{pid.ToString(CultureInfo.InvariantCulture)}";
-            buffer = Marshal.StringToHGlobalUni(payload);
-            var data = new COPYDATASTRUCT
-            {
-                dwData = MSG_GAME_STARTED,
-                // 含结尾终止符，接收端按 cbData 反算字符数时一并裁掉
-                cbData = (payload.Length + 1) * sizeof(char),
-                lpData = buffer,
-            };
-            // WM_COPYDATA 必须同步发送（数据指针要在处理期间有效）；限时 3 秒，避免常驻实例卡住时拖住游戏启动
-            SendMessageTimeout(target, WM_COPYDATA, 0, ref data, SMTO_ABORTIFHUNG, 3000, out _);
+            SendCopyData(target, MSG_GAME_STARTED, $"{biz}|{pid.ToString(CultureInfo.InvariantCulture)}");
             return true;
         }
         catch (Exception ex)
@@ -148,12 +140,64 @@ internal static partial class ResidentInstanceMessenger
             Log.Warning(ex, "Notify resident instance that game started ({biz}, {pid})", biz, pid);
             return false;
         }
+    }
+
+
+    /// <summary>
+    /// 通知常驻实例：用户点了系统通知，请打开主窗口并切到对应游戏。
+    /// </summary>
+    /// <param name="biz">要切到的游戏区服，空则只打开主窗口。</param>
+    /// <param name="uid">触发通知的角色 uid，0 表示不指定。</param>
+    /// <returns>已成功投递返回 <see langword="true"/>；未找到常驻实例或投递失败返回 <see langword="false"/>。</returns>
+    public static bool NotifyOpenMainWindow(GameBiz? biz, long uid)
+    {
+        nint target = FindResidentWindow();
+        if (target == 0)
+        {
+            return false;
+        }
+        try
+        {
+            // 本进程由用户点击通知拉起，持有前台权；转给常驻实例，否则它激活的主窗口只会在任务栏闪烁
+            if (GetWindowThreadProcessId(target, out uint residentPid) != 0 && residentPid != 0)
+            {
+                AllowSetForegroundWindow(residentPid);
+            }
+            SendCopyData(target, MSG_OPEN_MAIN_WINDOW, $"{biz}|{uid.ToString(CultureInfo.InvariantCulture)}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Notify resident instance to open main window ({biz}, {uid})", biz, uid);
+            return false;
+        }
+    }
+
+
+    /// <summary>
+    /// 以 <c>WM_COPYDATA</c> 同步投递一段字符串负载。
+    /// </summary>
+    /// <param name="target">常驻实例的 message-only 窗口。</param>
+    /// <param name="kind">消息种类（<c>COPYDATASTRUCT.dwData</c>）。</param>
+    /// <param name="payload">负载字符串。</param>
+    private static void SendCopyData(nint target, nint kind, string payload)
+    {
+        nint buffer = Marshal.StringToHGlobalUni(payload);
+        try
+        {
+            var data = new COPYDATASTRUCT
+            {
+                dwData = kind,
+                // 含结尾终止符，接收端按 cbData 反算字符数时一并裁掉
+                cbData = (payload.Length + 1) * sizeof(char),
+                lpData = buffer,
+            };
+            // WM_COPYDATA 必须同步发送（数据指针要在处理期间有效）；限时 3 秒，避免常驻实例卡住时拖住发送方
+            SendMessageTimeout(target, WM_COPYDATA, 0, ref data, SMTO_ABORTIFHUNG, 3000, out _);
+        }
         finally
         {
-            if (buffer != 0)
-            {
-                Marshal.FreeHGlobal(buffer);
-            }
+            Marshal.FreeHGlobal(buffer);
         }
     }
 
@@ -178,10 +222,17 @@ internal static partial class ResidentInstanceMessenger
             try
             {
                 COPYDATASTRUCT data = Marshal.PtrToStructure<COPYDATASTRUCT>(lParam);
-                if (data.dwData == MSG_GAME_STARTED && data.lpData != 0 && data.cbData > sizeof(char))
+                if (data.lpData != 0 && data.cbData > sizeof(char))
                 {
                     string payload = Marshal.PtrToStringUni(data.lpData, data.cbData / sizeof(char) - 1) ?? "";
-                    OnGameStartedMessageReceived(payload);
+                    if (data.dwData == MSG_GAME_STARTED)
+                    {
+                        OnGameStartedMessageReceived(payload);
+                    }
+                    else if (data.dwData == MSG_OPEN_MAIN_WINDOW)
+                    {
+                        OnOpenMainWindowMessageReceived(payload);
+                    }
                 }
             }
             catch (Exception ex)
@@ -222,6 +273,20 @@ internal static partial class ResidentInstanceMessenger
     }
 
 
+    /// <summary>
+    /// 处理「打开主窗口」通知：排到 UI 队列里再做，让发送方的同步 <c>SendMessageTimeout</c> 立即返回，不必等主窗口建好。
+    /// </summary>
+    /// <param name="payload">负载，格式 <c>{game_biz}|{uid}</c>，game_biz 可为空。</param>
+    private static void OnOpenMainWindowMessageReceived(string payload)
+    {
+        string[] parts = payload.Split('|');
+        GameBiz? biz = parts.Length > 0 && GameBiz.TryParse(parts[0], out GameBiz parsed) ? parsed : null;
+        Log.Information("Resident IPC: open main window requested by notification ({biz})", biz);
+        // 子类化过程跑在托盘窗口的 UI 线程上
+        Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() => App.Current.EnsureMainWindow(biz));
+    }
+
+
     [StructLayout(LayoutKind.Sequential)]
     private struct COPYDATASTRUCT
     {
@@ -245,6 +310,13 @@ internal static partial class ResidentInstanceMessenger
     [LibraryImport("user32.dll", EntryPoint = "SendMessageTimeoutW")]
     private static partial nint SendMessageTimeout(nint hWnd, uint msg, nint wParam, ref COPYDATASTRUCT lParam,
                                                    uint fuFlags, uint uTimeout, out nint lpdwResult);
+
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowThreadProcessId")]
+    private static partial uint GetWindowThreadProcessId(nint hWnd, out uint lpdwProcessId);
+
+    [LibraryImport("user32.dll", EntryPoint = "AllowSetForegroundWindow")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool AllowSetForegroundWindow(uint dwProcessId);
 
     [LibraryImport("user32.dll", EntryPoint = "ChangeWindowMessageFilterEx", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

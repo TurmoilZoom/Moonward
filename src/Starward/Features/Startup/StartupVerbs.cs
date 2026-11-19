@@ -16,6 +16,9 @@ internal static class StartupVerbs
     /// <summary>命令行直接启动游戏：<c>Moonward.exe startgame --biz {game_biz}</c>。</summary>
     public const string StartGame = "startgame";
 
+    // 点击系统通知的协议激活（moonward-notify://）不在此列：协议名随 Debug / 安装版不同，
+    // 见 Features.Notification.SystemNotificationService.ActivationScheme
+
     /// <summary><c>moonward://</c> 自定义 URL 协议前缀。</summary>
     public const string UrlProtocolScheme = "moonward://";
 

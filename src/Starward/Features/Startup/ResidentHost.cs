@@ -5,6 +5,7 @@ using Starward.Features.Gacha;
 using Starward.Features.Gacha.ZZZGachaToolbox;
 using Starward.Features.GamepadControl;
 using Starward.Features.GameRecord.AutoRefresh;
+using Starward.Features.GameRecord.DailyNote.Notify;
 using Starward.Features.GameRecord.SignIn;
 using Starward.Features.PlayTime;
 using Starward.Features.RPC;
@@ -17,7 +18,7 @@ using System.Threading.Tasks;
 namespace Starward.Features.Startup;
 
 /// <summary>
-/// 常驻实例的后台宿主：全局热键、手柄驱动、GameBar 引导键接管、RPC 环境下发、抽卡物品名缓存、自动签到与云游戏免费时长常驻循环、后台静默更新、接续中断的游戏时长记录。
+/// 常驻实例的后台宿主：全局热键、手柄驱动、GameBar 引导键接管、RPC 环境下发、抽卡物品名缓存、自动签到与云游戏免费时长常驻循环、实时便笺提醒、后台静默更新、接续中断的游戏时长记录。
 /// <para>
 /// 这些职责过去全挂在 <c>MainView_Loaded</c> 上，导致仅托盘驻留（<c>--hide</c>）或快捷方式启动时统统缺席
 /// —— 用户按 Alt+D 截不了图，手柄与引导键接管也不生效。现由系统托盘窗口（常驻实例中唯一必然存在
@@ -62,6 +63,8 @@ internal static class ResidentHost
             // 自动领云游戏每日免费时长：排在签到首轮之后，之后按云游戏日界（UTC+8 4:00）跨日再领。
             AutoCloudGameFreeTimeService autoCloudGameFreeTime = AppConfig.GetService<AutoCloudGameFreeTimeService>();
             autoCloudGameFreeTime.StartResident(autoSignIn.StartupBatchCompleted);
+            // 实时便笺提醒：排在签到首轮之后，之后按检查间隔与推算的到点时刻常驻检查
+            AppConfig.GetService<DailyNoteNotifyService>().StartResident(autoSignIn.StartupBatchCompleted);
             // 自动更新战绩：等前面两轮启动批量都打完再检查一次到期板块。只判这一次，不跨日重判。
             // 挂在这里而不是主窗口：用户不必开启开机自启，软件（含仅托盘驻留）跑起来就有效。
             AutoRecordRefreshService autoRecordRefresh = AppConfig.GetService<AutoRecordRefreshService>();

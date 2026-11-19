@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Starward.Features.GameRecord.SignIn;
+using Starward.Features.GameRecord.DailyNote.Notify;
 using Starward.Features.CloudGame;
 using Starward.Features.Gacha.ZZZGachaToolbox;
 using Starward.Features.Overlay;
@@ -342,6 +343,7 @@ public sealed partial class SystemTrayWindow : WindowEx
                 AppConfig.GetService<AutoSignInService>().NotifySystemResumed();
                 AppConfig.GetService<AutoCloudGameFreeTimeService>().NotifySystemResumed();
                 AppConfig.GetService<ZZZGachaMetadataAutoPublishService>().NotifySystemResumed();
+                AppConfig.GetService<DailyNoteNotifyService>().NotifySystemResumed();
             }
         }
         return base.WindowSubclassProc(hWnd, uMsg, wParam, lParam, uIdSubclass, dwRefData);
