@@ -4615,4 +4615,13 @@
   <data name="ZZZGachaService_FillSkipped" xml:space="preserve">
     <value>{0}：ローカルの記録が公式の統計と一致しないため、スキップしました</value>
   </data>
+  <data name="GachaLogPage_GroupByVersion" xml:space="preserve">
+    <value>バージョン別に表示</value>
+  </data>
+  <data name="GachaStatsCard_VersionHeader" xml:space="preserve">
+    <value>Ver.{0}</value>
+  </data>
+  <data name="GachaLogPage_VersionScheduleUnavailable" xml:space="preserve">
+    <value>バージョン情報を取得できないため、今はバージョン別に表示しません。しばらくしてからこのページを開き直してください。</value>
+  </data>
 </root>

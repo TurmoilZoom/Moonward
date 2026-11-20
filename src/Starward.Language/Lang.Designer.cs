@@ -106,6 +106,33 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Group by version 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_GroupByVersion {
+            get {
+                return ResourceManager.GetString("GachaLogPage_GroupByVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Couldn't get version info, so records aren't grouped by version for now. Reopen this page later to try again. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_VersionScheduleUnavailable {
+            get {
+                return ResourceManager.GetString("GachaLogPage_VersionScheduleUnavailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Version {0} 的本地化字符串。
+        /// </summary>
+        public static string GachaStatsCard_VersionHeader {
+            get {
+                return ResourceManager.GetString("GachaStatsCard_VersionHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 GitHub request limit reached. Please try again later. 的本地化字符串。
         /// </summary>
         public static string ReleaseNotes_GithubRateLimited {

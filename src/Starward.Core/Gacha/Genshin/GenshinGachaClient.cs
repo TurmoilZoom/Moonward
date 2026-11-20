@@ -10,6 +10,10 @@ public class GenshinGachaClient : GachaLogClient
     public override IReadOnlyCollection<IGachaType> QueryGachaTypes { get; init; } = new GenshinGachaType[] { 100, 200, 301, 302, 500 }.Cast<IGachaType>().ToList().AsReadOnly();
 
 
+    /// <summary>Moonward-Assets 里的版本表目录。</summary>
+    protected override string? VersionScheduleGame => "genshin";
+
+
 
     public GenshinGachaClient(HttpClient? httpClient = null) : base(httpClient)
     {

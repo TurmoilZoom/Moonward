@@ -457,8 +457,101 @@ internal abstract partial class GachaLogService
                                  .ThenByDescending(x => x.ItemCount)
                                  .ThenByDescending(x => x.Time)
                                  .ToList();
+            AttachVersionGroups(statsList, uid);
         }
         return (statsList, groupStats);
+    }
+
+
+
+    /// <summary>
+    /// 本地是否已有当前游戏的版本表（从 Moonward-Assets 拉取成功过）。没有时「按版本分组」无法生效。
+    /// </summary>
+    public bool HasVersionSchedule => GachaVersionTable.ParseEntries(AppConfig.GetGachaRemoteVersionStarts(GameKey)).Count > 0;
+
+
+    /// <summary>
+    /// 从 Moonward-Assets 更新当前游戏的版本表缓存（按版本分组用）；已有缓存时一天只检查一次，失败只记日志。
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>缓存内容有变化时为 true，调用方据此重新计算统计。</returns>
+    public async Task<bool> RefreshVersionScheduleAsync(CancellationToken cancellationToken = default)
+    {
+        string game = GameKey;
+        DateTimeOffset now = DateTimeOffset.Now;
+        if (now - AppConfig.GetGachaRemoteVersionLastCheckTime(game) < TimeSpan.FromDays(1) && HasVersionSchedule)
+        {
+            return false;
+        }
+        AppConfig.SetGachaRemoteVersionLastCheckTime(game, now);
+        try
+        {
+            GameVersionScheduleFetchResult result = await _client.GetVersionScheduleAsync(AppConfig.GetGachaRemoteVersionSource(game), AppConfig.GetGachaRemoteVersionETag(game), cancellationToken);
+            if (result.FailedSources.Count > 0)
+            {
+                _logger.LogWarning("Version schedule of {Game} fell back to {Source}; failed: {Failed}", game, result.SourceUrl, string.Join("; ", result.FailedSources));
+            }
+            AppConfig.SetGachaRemoteVersionSource(game, result.SourceUrl);
+            AppConfig.SetGachaRemoteVersionETag(game, result.ETag);
+            if (result.NotModified || result.Schedule is null)
+            {
+                return false;
+            }
+            string text = GachaVersionTable.SerializeEntries(result.Schedule.Versions.Select(x => (x.Version, x.Start)));
+            if (text == AppConfig.GetGachaRemoteVersionStarts(game))
+            {
+                return false;
+            }
+            AppConfig.SetGachaRemoteVersionStarts(game, text);
+            _logger.LogInformation("Version schedule of {Game} updated from {Source}, latest {Version}", game, result.SourceUrl, result.Schedule.Versions.LastOrDefault()?.Version);
+            return true;
+        }
+        catch (Exception ex) when (ex is System.Net.Http.HttpRequestException or NotSupportedException)
+        {
+            _logger.LogWarning(ex, "Refresh version schedule of {Game} failed", game);
+            return false;
+        }
+    }
+
+
+    /// <summary>
+    /// 给各卡池统计附上按版本分组（最高、次高稀有度列表各一份）；本地没有版本表时不附，卡片退回不分组。
+    /// </summary>
+    /// <param name="statsList">各卡池统计，<see cref="GachaTypeStats.List_5"/> / <see cref="GachaTypeStats.List_4"/> 须已填好。</param>
+    /// <param name="uid">玩家 UID，用于推断服务器时区。</param>
+    protected void AttachVersionGroups(List<GachaTypeStats> statsList, long uid)
+    {
+        var table = GachaVersionTable.GetTable(GachaVersionTable.ParseEntries(AppConfig.GetGachaRemoteVersionStarts(GameKey)));
+        if (table.Count == 0)
+        {
+            return;
+        }
+        TimeSpan serverOffset = GachaVersionTable.GetServerUtcOffset(GameKey, uid);
+        foreach (var stats in statsList)
+        {
+            stats.VersionGroups_5 = BuildVersionGroups(stats.List_5, serverOffset, table);
+            stats.VersionGroups_4 = BuildVersionGroups(stats.List_4, serverOffset, table);
+        }
+    }
+
+
+    /// <summary>
+    /// 把卡片列表按抽取时间所属版本分组，保持原顺序（新记录在前，故新版本组在前）。
+    /// </summary>
+    /// <param name="items">卡片列表。</param>
+    /// <param name="serverOffset">服务器时区。</param>
+    /// <param name="versionTable">版本表。</param>
+    /// <returns>版本分组；列表为空时为空列表。</returns>
+    private static List<GachaVersionGroup> BuildVersionGroups(List<GachaLogItemEx>? items, TimeSpan serverOffset, IReadOnlyList<(string Version, DateTimeOffset Start)> versionTable)
+    {
+        return (items ?? []).GroupBy(x => GachaVersionTable.GetVersion(x.Time, serverOffset, versionTable))
+                            .Select(g => new GachaVersionGroup
+                            {
+                                Version = g.Key,
+                                Header = string.Format(Lang.GachaStatsCard_VersionHeader, g.Key ?? "?"),
+                                Items = g.ToList(),
+                            })
+                            .ToList();
     }
 
 

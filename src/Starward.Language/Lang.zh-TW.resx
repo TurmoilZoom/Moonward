@@ -4616,4 +4616,13 @@
   <data name="ZZZGachaService_FillSkipped" xml:space="preserve">
     <value>{0}：本機記錄與官方統計對不上，已略過</value>
   </data>
+  <data name="GachaLogPage_GroupByVersion" xml:space="preserve">
+    <value>按版本分組</value>
+  </data>
+  <data name="GachaStatsCard_VersionHeader" xml:space="preserve">
+    <value>{0} 版本</value>
+  </data>
+  <data name="GachaLogPage_VersionScheduleUnavailable" xml:space="preserve">
+    <value>暫時無法取得版本資訊，先不按版本分組，稍後重新開啟本頁再試</value>
+  </data>
 </root>

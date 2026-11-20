@@ -10,6 +10,10 @@ public class StarRailGachaClient : GachaLogClient
     public override IReadOnlyCollection<IGachaType> QueryGachaTypes { get; init; } = new StarRailGachaType[] { 1, 2, 11, 12, 21, 22 }.Cast<IGachaType>().ToList().AsReadOnly();
 
 
+    /// <summary>Moonward-Assets 里的版本表目录。</summary>
+    protected override string? VersionScheduleGame => "starrail";
+
+
 
     public StarRailGachaClient(HttpClient? httpClient = null) : base(httpClient)
     {

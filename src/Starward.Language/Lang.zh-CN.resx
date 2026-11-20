@@ -4704,4 +4704,13 @@
   <data name="ZZZGachaService_FillSkipped" xml:space="preserve">
     <value>{0}：本地记录与官方统计对不上，已跳过</value>
   </data>
+  <data name="GachaLogPage_GroupByVersion" xml:space="preserve">
+    <value>按版本分组</value>
+  </data>
+  <data name="GachaStatsCard_VersionHeader" xml:space="preserve">
+    <value>{0} 版本</value>
+  </data>
+  <data name="GachaLogPage_VersionScheduleUnavailable" xml:space="preserve">
+    <value>暂时获取不到版本信息，先不按版本分组，稍后重新打开本页再试</value>
+  </data>
 </root>

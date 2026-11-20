@@ -124,25 +124,39 @@
                     </Flyout>
                 </DropDownButton.Flyout>
             </DropDownButton>
-            <!--  记录视图：列表 / 紧凑图标网格。项顺序与 GachaRecordViewMode 数值对应；全局持久化，切换时重建卡片，分享图按当前视图绘制。  -->
-            <cwc:Segmented x:Name="Segmented_RecordViewMode"
-                           VerticalAlignment="Center"
-                           SelectionChanged="Segmented_RecordViewMode_SelectionChanged">
-                <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_ListView}"
-                                   sc:InstantTooltip.Placement="Top"
-                                   sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ListView}">
-                    <cwc:SegmentedItem.Icon>
-                        <FontIcon Glyph="&#xE8FD;" />
-                    </cwc:SegmentedItem.Icon>
-                </cwc:SegmentedItem>
-                <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CompactView}"
-                                   sc:InstantTooltip.Placement="Top"
-                                   sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_CompactView}">
-                    <cwc:SegmentedItem.Icon>
-                        <FontIcon Glyph="&#xF0E2;" />
-                    </cwc:SegmentedItem.Icon>
-                </cwc:SegmentedItem>
-            </cwc:Segmented>
+            <!--  显示方式：列表 / 紧凑切换 + 按版本分组开关，间距比顶栏其他控件更紧，视觉上是一组  -->
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <!--  记录视图：列表 / 紧凑图标网格。项顺序与 GachaRecordViewMode 数值对应；全局持久化，切换时重建卡片，分享图按当前视图绘制。  -->
+                <cwc:Segmented x:Name="Segmented_RecordViewMode"
+                               VerticalAlignment="Center"
+                               SelectionChanged="Segmented_RecordViewMode_SelectionChanged">
+                    <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_ListView}"
+                                       sc:InstantTooltip.Placement="Top"
+                                       sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ListView}">
+                        <cwc:SegmentedItem.Icon>
+                            <FontIcon Glyph="&#xE8FD;" />
+                        </cwc:SegmentedItem.Icon>
+                    </cwc:SegmentedItem>
+                    <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CompactView}"
+                                       sc:InstantTooltip.Placement="Top"
+                                       sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_CompactView}">
+                        <cwc:SegmentedItem.Icon>
+                            <FontIcon Glyph="&#xF0E2;" />
+                        </cwc:SegmentedItem.Icon>
+                    </cwc:SegmentedItem>
+                </cwc:Segmented>
+                <!--  按版本分组（原神、星铁、绝区零）：图标开关，开启时卡片记录列表按抽取时间所属版本插入标题；全局持久化，切换时重建卡片。  -->
+                <ToggleButton x:Name="ToggleButton_GroupByVersion"
+                              Height="34"
+                              VerticalAlignment="Center"
+                              helpers:FluentAnimations.PressScale="0.94"
+                              AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_GroupByVersion}"
+                              Click="ToggleButton_GroupByVersion_Click"
+                              sc:InstantTooltip.Placement="Top"
+                              sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GroupByVersion}">
+                    <FontIcon FontSize="16" Glyph="&#xF168;" />
+                </ToggleButton>
+            </StackPanel>
             <Button Height="34"
                     VerticalAlignment="Center"
                     helpers:FluentAnimations.PressScale="0.94"

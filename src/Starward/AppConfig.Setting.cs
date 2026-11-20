@@ -125,6 +125,46 @@ public static partial class AppConfig
     }
 
     /// <summary>
+    /// 抽卡记录卡片的最高/次高稀有度列表是否按版本分组（原神、星铁、绝区零共用），全局。默认不分组。
+    /// </summary>
+    public static bool GachaGroupByVersion
+    {
+        get => GetValue<bool>();
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
+    /// 上次从 Moonward-Assets 取到的版本表（<c>版本=Unix秒;…</c>），是「按版本分组」唯一的版本数据，见 <see cref="Starward.Features.Gacha.GachaVersionTable"/>。
+    /// </summary>
+    /// <param name="game">游戏键（GameBiz.Game：hk4e / hkrpg / nap）。</param>
+    public static string? GetGachaRemoteVersionStarts(string game) => GetValue<string>(null, $"GachaRemoteVersionStarts_{game}");
+
+    /// <inheritdoc cref="GetGachaRemoteVersionStarts"/>
+    public static void SetGachaRemoteVersionStarts(string game, string? value) => SetValue(value, $"GachaRemoteVersionStarts_{game}");
+
+    /// <summary>上次成功返回该游戏版本表的数据源地址，只对它发送条件请求。</summary>
+    /// <param name="game">游戏键。</param>
+    public static string? GetGachaRemoteVersionSource(string game) => GetValue<string>(null, $"GachaRemoteVersionSource_{game}");
+
+    /// <inheritdoc cref="GetGachaRemoteVersionSource"/>
+    public static void SetGachaRemoteVersionSource(string game, string? value) => SetValue(value, $"GachaRemoteVersionSource_{game}");
+
+    /// <summary>上次成功的数据源返回的 ETag。</summary>
+    /// <param name="game">游戏键。</param>
+    public static string? GetGachaRemoteVersionETag(string game) => GetValue<string>(null, $"GachaRemoteVersionETag_{game}");
+
+    /// <inheritdoc cref="GetGachaRemoteVersionETag"/>
+    public static void SetGachaRemoteVersionETag(string game, string? value) => SetValue(value, $"GachaRemoteVersionETag_{game}");
+
+    /// <summary>上次检查该游戏版本表的时间（成功、304 或失败都记），一天内不重复检查。</summary>
+    /// <param name="game">游戏键。</param>
+    public static DateTimeOffset GetGachaRemoteVersionLastCheckTime(string game) => GetValue<DateTimeOffset>(default, $"GachaRemoteVersionLastCheckTime_{game}");
+
+    /// <inheritdoc cref="GetGachaRemoteVersionLastCheckTime"/>
+    public static void SetGachaRemoteVersionLastCheckTime(string game, DateTimeOffset value) => SetValue(value, $"GachaRemoteVersionLastCheckTime_{game}");
+
+    /// <summary>
     /// 上次完成抽卡物品名称回写所用的语言（规整后的语言键，如 "zh-cn"）。
     /// 用于判断软件语言是否变化：与当前 UI 语言不一致（含首次启动后为 null）时触发存量记录名称迁移。
     /// 取代旧的 GachaLanguage（抽卡名称现跟随软件 UI 语言）。

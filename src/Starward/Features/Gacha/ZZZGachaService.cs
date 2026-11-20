@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -622,6 +623,7 @@ internal class ZZZGachaService : GachaLogService
                                  .ThenByDescending(x => x.ItemCount)
                                  .ThenByDescending(x => x.Time)
                                  .ToList();
+            AttachVersionGroups(statsList, uid);
         }
         return (statsList, groupStats);
     }

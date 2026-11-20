@@ -29,6 +29,10 @@ public class ZZZGachaClient : GachaLogClient
     public override IReadOnlyCollection<IGachaType> QueryGachaTypes { get; init; } = new ZZZGachaType[] { 1, 2, 3, 5, 102, 103 }.Cast<IGachaType>().ToList().AsReadOnly();
 
 
+    /// <summary>Moonward-Assets 里的版本表目录。</summary>
+    protected override string? VersionScheduleGame => "zzz";
+
+
 
     /// <summary>
     /// 初始化 <see cref="ZZZGachaClient"/> 实例。

@@ -204,6 +204,16 @@ public class GachaTypeStats
     public List<GachaLogItemEx> List_4 { get; set; }
 
     /// <summary>
+    /// <see cref="List_5"/> 按版本分组（新版本在前，组内顺序不变），绝区零勾选「按版本分组」时展示；其他游戏为 null。
+    /// </summary>
+    public List<GachaVersionGroup>? VersionGroups_5 { get; set; }
+
+    /// <summary>
+    /// <see cref="List_4"/> 按版本分组，规则同 <see cref="VersionGroups_5"/>。
+    /// </summary>
+    public List<GachaVersionGroup>? VersionGroups_4 { get; set; }
+
+    /// <summary>
     /// 5 星平均抽数展示文本：有 5 星时形如「62.50」，无样本时为「—」（与 <see cref="FiftyFiftyNoUpText"/> 一致）。
     /// </summary>
     public string Average_5_Text => Count_5 == 0 ? "—" : $"{Average_5:F2}";

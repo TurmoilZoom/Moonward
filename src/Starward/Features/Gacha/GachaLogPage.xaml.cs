@@ -63,6 +63,9 @@ public sealed partial class GachaLogPage : PageBase
     /// <summary>当前记录区视图模式（列表 / 紧凑图标网格）；全局持久化，新建卡片与分享图均按此模式。</summary>
     private GachaRecordViewMode _recordViewMode;
 
+    /// <summary>卡片记录列表是否按版本分组（全局设置的本页副本，切换时重建卡片）。</summary>
+    private bool _groupByVersion;
+
     /// <summary>当前软件 UI 语言代码。</summary>
     private static string CurrentLanguage => System.Globalization.CultureInfo.CurrentUICulture.Name;
 
@@ -73,9 +76,11 @@ public sealed partial class GachaLogPage : PageBase
         // 先读出视图模式再给 Segmented 赋选中项：赋值触发的 SelectionChanged 因模式未变而被忽略，不会提前重建卡片。
         // 设置里若存了未定义的数值，一律按列表处理。
         _recordViewMode = AppConfig.GachaRecordViewMode is GachaRecordViewMode.Compact ? GachaRecordViewMode.Compact : GachaRecordViewMode.List;
+        _groupByVersion = AppConfig.GachaGroupByVersion;
         this.InitializeComponent();
         _dragReorder = new GachaStatsCardDragReorder(ScrollViewer_GachaStats, Grid_GachaStats, StackPanel_GachaStats, SaveGachaCardOrder);
         Segmented_RecordViewMode.SelectedIndex = (int)_recordViewMode;
+        ToggleButton_GroupByVersion.IsChecked = _groupByVersion;
     }
 
 
@@ -208,6 +213,36 @@ public sealed partial class GachaLogPage : PageBase
         Grid_GachaStats.PointerWheelChanged += Grid_GachaStats_PointerWheelChanged;
         Initialize();
         await EnsureWikiDataAsync();
+        await EnsureVersionScheduleAsync();
+    }
+
+
+    /// <summary>
+    /// 从 Moonward-Assets 更新当前游戏的版本表（已有缓存时一天一次，不阻塞页面）；有变化且正按版本分组时重新计算统计。
+    /// 失败只记日志；本地一直没有版本表时不分组并提示。
+    /// </summary>
+    private async Task EnsureVersionScheduleAsync()
+    {
+        try
+        {
+            bool changed = await _gachaLogService.RefreshVersionScheduleAsync();
+            if (!_groupByVersion)
+            {
+                return;
+            }
+            if (changed && SelectUid is long uid && uid > 0)
+            {
+                UpdateGachaTypeStats(uid);
+            }
+            if (!_gachaLogService.HasVersionSchedule)
+            {
+                InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_VersionScheduleUnavailable);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Ensure version schedule");
+        }
     }
 
 
@@ -811,6 +846,7 @@ public sealed partial class GachaLogPage : PageBase
         element.Width = GachaStatsCardWidth;
         element.DataContext = stats;     // 供拖拽手柄识别其卡池数据
         card.RecordViewMode = _recordViewMode; // 须在加入可视化树前赋值：紧凑模式要在记录列表生成容器前换好面板与模板
+        card.GroupByVersion = _groupByVersion; // 同上，且须早于 WarpTypeStats：卡片按它选模板与数据源
         card.WarpTypeStats = stats;      // 须在加入可视化树前赋值，卡片内 OneTime x:Bind 才能取到
         _dragReorder.Attach(card.DragHandle);
         _gachaCardPool[stats.GachaType] = element;
@@ -842,6 +878,43 @@ public sealed partial class GachaLogPage : PageBase
         _recordViewMode = mode;
         AppConfig.GachaRecordViewMode = mode;
         RebuildGachaCardsForViewMode();
+    }
+
+
+    /// <summary>
+    /// 「按版本分组」开关按钮：持久化并重建卡片（与切换视图同一路径）。
+    /// </summary>
+    /// <param name="sender">开关按钮。</param>
+    /// <param name="e">路由事件参数（未使用）。</param>
+    private async void ToggleButton_GroupByVersion_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            bool value = ToggleButton_GroupByVersion.IsChecked == true;
+            if (value == _groupByVersion)
+            {
+                return;
+            }
+            _groupByVersion = value;
+            AppConfig.GachaGroupByVersion = value;
+            if (value && !_gachaLogService.HasVersionSchedule)
+            {
+                // 本地还没有版本表：先拉一次，拿到后要重新计算统计才有分组
+                await _gachaLogService.RefreshVersionScheduleAsync();
+                if (!_gachaLogService.HasVersionSchedule)
+                {
+                    InAppToast.MainWindow?.Warning(null, Lang.GachaLogPage_VersionScheduleUnavailable);
+                    return;
+                }
+                UpdateGachaTypeStats(SelectUid);
+                return;
+            }
+            RebuildGachaCardsForViewMode();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Toggle group by version");
+        }
     }
 
 

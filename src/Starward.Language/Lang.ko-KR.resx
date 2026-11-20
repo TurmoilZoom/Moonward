@@ -4616,4 +4616,13 @@
   <data name="ZZZGachaService_FillSkipped" xml:space="preserve">
     <value>{0}: 로컬 기록이 공식 통계와 맞지 않아 건너뛰었습니다</value>
   </data>
+  <data name="GachaLogPage_GroupByVersion" xml:space="preserve">
+    <value>버전별로 묶기</value>
+  </data>
+  <data name="GachaStatsCard_VersionHeader" xml:space="preserve">
+    <value>{0} 버전</value>
+  </data>
+  <data name="GachaLogPage_VersionScheduleUnavailable" xml:space="preserve">
+    <value>버전 정보를 가져올 수 없어 지금은 버전별로 묶지 않습니다. 잠시 후 이 페이지를 다시 열어 주세요.</value>
+  </data>
 </root>

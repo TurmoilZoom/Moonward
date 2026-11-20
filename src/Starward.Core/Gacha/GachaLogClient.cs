@@ -142,6 +142,83 @@ public abstract class GachaLogClient
 
 
 
+    #region 版本表（Moonward-Assets）
+
+    /// <summary>
+    /// 版本表数据源根地址，按顺序尝试：Cloudflare Pages 为主，GitHub Pages（同一仓库，内容相同）兜底。
+    /// </summary>
+    private static readonly string[] VersionScheduleBaseUrls =
+    [
+        "https://moonward-assets.pages.dev/",
+        "https://turmoilzoom.github.io/Moonward-Assets/",
+    ];
+
+    /// <summary>单个数据源的超时，超时后换下一个源。</summary>
+    private static readonly TimeSpan VersionScheduleSourceTimeout = TimeSpan.FromSeconds(15);
+
+
+    /// <summary>
+    /// Moonward-Assets 里该游戏的目录名（如 zzz）；为 null 表示没有版本表。
+    /// </summary>
+    protected virtual string? VersionScheduleGame => null;
+
+
+    /// <summary>
+    /// 获取该游戏各版本的开始时间（Moonward-Assets 的 <c>&lt;游戏&gt;/versions/versions.json</c>），对上次成功的数据源发送条件请求。
+    /// </summary>
+    /// <param name="lastSourceUrl">上次成功的数据源地址。</param>
+    /// <param name="lastETag">上次该数据源返回的 ETag；只对 <paramref name="lastSourceUrl"/> 发送 If-None-Match。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>获取结果；数据源返回 304 时 <see cref="GameVersionScheduleFetchResult.NotModified"/> 为 true。</returns>
+    /// <exception cref="NotSupportedException">该游戏没有版本表。</exception>
+    /// <exception cref="HttpRequestException">所有数据源都失败时抛出，InnerException 为最后一个数据源的错误。</exception>
+    public async Task<GameVersionScheduleFetchResult> GetVersionScheduleAsync(string? lastSourceUrl = null, string? lastETag = null, CancellationToken cancellationToken = default)
+    {
+        string game = VersionScheduleGame ?? throw new NotSupportedException($"{GetType().Name} has no version schedule.");
+        Exception? lastException = null;
+        var failedSources = new List<string>();
+        // 每次都从主源开始：主源恢复后自动切回
+        foreach (string baseUrl in VersionScheduleBaseUrls)
+        {
+            string url = $"{baseUrl}{game}/versions/versions.json";
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(VersionScheduleSourceTimeout);
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                if (url == lastSourceUrl && System.Net.Http.Headers.EntityTagHeaderValue.TryParse(lastETag, out var etag))
+                {
+                    request.Headers.IfNoneMatch.Add(etag);
+                }
+                using var response = await _httpClient.SendAsync(request, timeoutCts.Token);
+                string? responseETag = response.Headers.ETag?.ToString();
+                if (response.StatusCode is System.Net.HttpStatusCode.NotModified)
+                {
+                    return new GameVersionScheduleFetchResult { SourceUrl = url, ETag = responseETag ?? lastETag, NotModified = true, FailedSources = failedSources };
+                }
+                response.EnsureSuccessStatusCode();
+                var schedule = await response.Content.ReadFromJsonAsync(typeof(GameVersionSchedule), GachaLogJsonContext.Default, timeoutCts.Token) as GameVersionSchedule;
+                if (schedule is null || schedule.Versions.Count == 0)
+                {
+                    throw new JsonException("Version schedule is empty.");
+                }
+                return new GameVersionScheduleFetchResult { SourceUrl = url, ETag = responseETag, Schedule = schedule, FailedSources = failedSources };
+            }
+            catch (Exception ex) when ((ex is HttpRequestException or JsonException or OperationCanceledException) && !cancellationToken.IsCancellationRequested)
+            {
+                lastException = ex;
+                // 超时表现为 OperationCanceledException，消息里看不出是超时，单独标出
+                string reason = ex is OperationCanceledException ? $"timeout after {VersionScheduleSourceTimeout.TotalSeconds:0}s" : $"{ex.GetType().Name}: {ex.Message}";
+                failedSources.Add($"{url} ({reason})");
+            }
+        }
+        throw new HttpRequestException($"All version schedule sources failed: {string.Join("; ", failedSources)}", lastException);
+    }
+
+    #endregion
+
+
+
     #region public method
 
 

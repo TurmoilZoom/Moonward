@@ -4614,4 +4614,13 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="ZZZGachaService_FillSkipped" xml:space="preserve">
     <value>{0}: local records don't match the official stats; skipped</value>
   </data>
+  <data name="GachaLogPage_GroupByVersion" xml:space="preserve">
+    <value>Group by version</value>
+  </data>
+  <data name="GachaStatsCard_VersionHeader" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="GachaLogPage_VersionScheduleUnavailable" xml:space="preserve">
+    <value>Couldn't get version info, so records aren't grouped by version for now. Reopen this page later to try again.</value>
+  </data>
 </root>

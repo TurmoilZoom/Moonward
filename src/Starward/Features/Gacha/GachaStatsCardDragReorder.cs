@@ -23,6 +23,9 @@ internal interface IGachaStatsDragCard
 
     /// <summary>记录区视图模式；须在卡片加入可视化树前赋值，运行中切换由页面重建卡片完成。</summary>
     GachaRecordViewMode RecordViewMode { get; set; }
+
+    /// <summary>记录列表是否按版本分组；同样须在入树前、<see cref="WarpTypeStats"/> 之前赋值。</summary>
+    bool GroupByVersion { get; set; }
 }
 
 

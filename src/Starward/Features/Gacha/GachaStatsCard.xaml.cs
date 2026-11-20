@@ -100,6 +100,7 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
         var card = (GachaStatsCard)d;
         card._hoveredRecordElement = null;
         card.ApplyRarityTier();
+        card.ApplyRecordList();
     }
 
 
@@ -135,28 +136,48 @@ public sealed partial class GachaStatsCard : UserControl, IGachaStatsDragCard
         set
         {
             field = value;
-            ApplyRecordViewMode();
+            ApplyRecordList();
         }
     }
 
 
     /// <summary>
-    /// 紧凑模式下把 5/4 星记录列表换成 WrapPanel 面板 + 图标方块模板；列表模式保持 XAML 内联模板不动。
+    /// 最高/次高稀有度列表是否按版本分组（插入版本标题）。与 <see cref="RecordViewMode"/> 一样须在入树前赋值，切换由页面重建卡片完成。
+    /// 数据没有版本分组（如千星奇域、本地还没有版本表）时退回不分组。
+    /// </summary>
+    public bool GroupByVersion
+    {
+        get;
+        set
+        {
+            field = value;
+            ApplyRecordList();
+        }
+    }
+
+
+    /// <summary>
+    /// 按视图模式与是否分组，给两个记录列表配面板、模板与数据源：
+    /// 不分组时列表视图用记录行、紧凑视图用 WrapPanel + 图标方块；分组时外层竖排各版本，组内再按列表行或图标方块排。
     /// </summary>
     /// <remarks>
-    /// 只在 ItemsControl 生成容器之前调用：入树前 x:Bind 尚未给 ItemsSource 赋值，替换面板不会触发已有容器的重新生成。
+    /// 只在卡片入树、ItemsControl 生成容器之前调用（页面先赋视图与分组，再赋 <see cref="WarpTypeStats"/>）。
+    /// 先设模板再设数据源，避免用不匹配的模板生成容器。
     /// </remarks>
-    private void ApplyRecordViewMode()
+    private void ApplyRecordList()
     {
-        if (RecordViewMode != GachaRecordViewMode.Compact)
-        {
-            return;
-        }
-        var panel = (ItemsPanelTemplate)Resources["GachaRecordTilePanelTemplate"];
+        GachaTypeStats? stats = WarpTypeStats;
+        bool grouped = GroupByVersion && stats?.VersionGroups_5 is not null && stats.VersionGroups_4 is not null;
+        bool compact = RecordViewMode == GachaRecordViewMode.Compact;
+        var panel = (ItemsPanelTemplate)Resources[compact && !grouped ? "GachaRecordTilePanelTemplate" : "GachaRecordStackPanelTemplate"];
+        string style = compact ? "Tile" : "Row";
+        string kind = grouped ? "GroupTemplate" : "Template";
         ItemsRepeater_List_5.ItemsPanel = panel;
-        ItemsRepeater_List_5.ItemTemplate = (DataTemplate)Resources["Rarity5TileTemplate"];
+        ItemsRepeater_List_5.ItemTemplate = (DataTemplate)Resources[$"Rarity5{style}{kind}"];
         ItemsRepeater_List_4.ItemsPanel = panel;
-        ItemsRepeater_List_4.ItemTemplate = (DataTemplate)Resources["Rarity4TileTemplate"];
+        ItemsRepeater_List_4.ItemTemplate = (DataTemplate)Resources[$"Rarity4{style}{kind}"];
+        ItemsRepeater_List_5.ItemsSource = stats is null ? null : grouped ? stats.VersionGroups_5 : stats.List_5;
+        ItemsRepeater_List_4.ItemsSource = stats is null ? null : grouped ? stats.VersionGroups_4 : stats.List_4;
     }
 
 

@@ -30,7 +30,7 @@
 
         <local:GachaPityProgressBackgroundBrushConverter x:Key="GachaPityProgressBackgroundBrushConverter" />
 
-        <!--  紧凑视图（图标网格）资源：卡片入树前按 RecordViewMode 替换两个记录 ItemsControl 的 ItemsPanel / ItemTemplate，列表视图沿用下方内联模板。  -->
+        <!--  紧凑视图（图标网格）资源：卡片入树前按 RecordViewMode 替换两个记录 ItemsControl 的 ItemsPanel / ItemTemplate，列表视图用下方 Rarity5RowTemplate / Rarity4RowTemplate。  -->
         <SolidColorBrush x:Key="TopRarityTileBackgroundBrush">#40FFA500</SolidColorBrush>
         <SolidColorBrush x:Key="SecondRarityTileBackgroundBrush">#40C864E0</SolidColorBrush>
 
@@ -173,6 +173,165 @@
                                TextLineBounds="Tight" />
                 </Grid>
             </Grid>
+        </DataTemplate>
+
+        <!--  列表视图的记录行：放在资源里，供不分组时的两个记录 ItemsControl 与按版本分组的组模板共用。  -->
+        <DataTemplate x:Key="Rarity5RowTemplate" x:DataType="local:GachaLogItemEx">
+            <Grid Name="Grid_Rarity5Item"
+                  Height="28"
+                  Background="Transparent"
+                  PointerEntered="Grid_Rarity5Item_PointerEntered"
+                  Tag="{x:Bind}"
+                  sc:InstantTooltip.Placement="Top"
+                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" MinWidth="20" />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="PityBar"
+                        Grid.Column="1"
+                        Height="24"
+                        Margin="-4,0,-4,0"
+                        VerticalAlignment="Center"
+                        Background="{x:Bind Converter={StaticResource GachaPityProgressBackgroundBrushConverter}}"
+                        CornerRadius="4"
+                        local:GachaPityBarAnimation.AnimateOnLoad="True" />
+                <sc:CachedImage Width="28"
+                                Height="28"
+                                HorizontalAlignment="Left"
+                                Source="{x:Bind Icon}" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind Name}"
+                           TextTrimming="CharacterEllipsis"
+                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                <TextBlock Grid.Column="3"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind Pity}"
+                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Foreground="{ThemeResource TopRarityForegroundBrush}"
+                           Text="{x:Bind Name}"
+                           TextTrimming="CharacterEllipsis"
+                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="3"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Foreground="{ThemeResource TopRarityForegroundBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Text="{x:Bind Pity}"
+                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="2"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           FontStyle="Italic"
+                           Foreground="{ThemeResource TopRarityForegroundBrush}"
+                           IsTextScaleFactorEnabled="False"
+                           Opacity="{x:Bind UpTextOpacity}"
+                           Text="up!"
+                           Visibility="{x:Bind HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="Rarity4RowTemplate" x:DataType="local:GachaLogItemEx">
+            <Grid Name="Grid_Rarity4Item"
+                  Height="28"
+                  Background="Transparent"
+                  ColumnSpacing="8"
+                  PointerEntered="Grid_Rarity4Item_PointerEntered"
+                  Tag="{x:Bind}"
+                  sc:InstantTooltip.Placement="Top"
+                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="24" />
+                </Grid.ColumnDefinitions>
+                <sc:CachedImage Width="28"
+                                Height="28"
+                                Source="{x:Bind Icon}" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind Name}"
+                           TextTrimming="CharacterEllipsis"
+                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                <TextBlock Grid.Column="2"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind Pity}"
+                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Foreground="{ThemeResource SecondRarityForegroundBrush}"
+                           Text="{x:Bind Name}"
+                           TextTrimming="CharacterEllipsis"
+                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock Grid.Column="2"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Foreground="{ThemeResource SecondRarityForegroundBrush}"
+                           Text="{x:Bind Pity}"
+                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </Grid>
+        </DataTemplate>
+
+        <!--  按版本分组：外层各版本竖排，组内沿用列表行 / 图标方块模板。卡片入树前按 GroupByVersion 与 RecordViewMode 选用（见 ApplyRecordList）。  -->
+        <ItemsPanelTemplate x:Key="GachaRecordStackPanelTemplate">
+            <StackPanel />
+        </ItemsPanelTemplate>
+
+        <DataTemplate x:Key="Rarity5RowGroupTemplate" x:DataType="local:GachaVersionGroup">
+            <StackPanel>
+                <Grid Height="22" Margin="0,4,0,0">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Text="{x:Bind Header, Mode=OneTime}" />
+                </Grid>
+                <ItemsControl ItemTemplate="{StaticResource Rarity5RowTemplate}"
+                              ItemsSource="{x:Bind Items, Mode=OneTime}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="Rarity4RowGroupTemplate" x:DataType="local:GachaVersionGroup">
+            <StackPanel>
+                <Grid Height="22" Margin="0,4,0,0">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Text="{x:Bind Header, Mode=OneTime}" />
+                </Grid>
+                <ItemsControl ItemTemplate="{StaticResource Rarity4RowTemplate}"
+                              ItemsSource="{x:Bind Items, Mode=OneTime}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="Rarity5TileGroupTemplate" x:DataType="local:GachaVersionGroup">
+            <StackPanel>
+                <Grid Height="22" Margin="0,4,0,4">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Text="{x:Bind Header, Mode=OneTime}" />
+                </Grid>
+                <ItemsControl ItemTemplate="{StaticResource Rarity5TileTemplate}" ItemsPanel="{StaticResource GachaRecordTilePanelTemplate}"
+                              ItemsSource="{x:Bind Items, Mode=OneTime}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="Rarity4TileGroupTemplate" x:DataType="local:GachaVersionGroup">
+            <StackPanel>
+                <Grid Height="22" Margin="0,4,0,4">
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Text="{x:Bind Header, Mode=OneTime}" />
+                </Grid>
+                <ItemsControl ItemTemplate="{StaticResource Rarity4TileTemplate}" ItemsPanel="{StaticResource GachaRecordTilePanelTemplate}"
+                              ItemsSource="{x:Bind Items, Mode=OneTime}" />
+            </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
 
@@ -348,121 +507,11 @@
                           VerticalScrollBarVisibility="Hidden"
                           VerticalScrollMode="Enabled">
                 <Grid>
-            <!--  行高固定、数量有限：用 ItemsControl 避免 ItemsRepeater 虚拟化在跨显示器 DPI 变化时 MeasureOverride 失败。  -->
-            <ItemsControl x:Name="ItemsRepeater_List_5"
-                           ItemsSource="{x:Bind WarpTypeStats.List_5}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="local:GachaLogItemEx">
-                            <Grid Name="Grid_Rarity5Item"
-                                  Height="28"
-                                  Background="Transparent"
-                                  PointerEntered="Grid_Rarity5Item_PointerEntered"
-                                  Tag="{x:Bind}"
-                                  sc:InstantTooltip.Placement="Top"
-                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40" />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" MinWidth="20" />
-                                </Grid.ColumnDefinitions>
-                                <Border x:Name="PityBar"
-                                        Grid.Column="1"
-                                        Height="24"
-                                        Margin="-4,0,-4,0"
-                                        VerticalAlignment="Center"
-                                        Background="{x:Bind Converter={StaticResource GachaPityProgressBackgroundBrushConverter}}"
-                                        CornerRadius="4"
-                                        local:GachaPityBarAnimation.AnimateOnLoad="True" />
-                                <sc:CachedImage Width="28"
-                                                Height="28"
-                                                HorizontalAlignment="Left"
-                                                Source="{x:Bind Icon}" />
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Text="{x:Bind Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                                <TextBlock Grid.Column="3"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           IsTextScaleFactorEnabled="False"
-                                           Text="{x:Bind Pity}"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Foreground="{ThemeResource TopRarityForegroundBrush}"
-                                           Text="{x:Bind Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                <TextBlock Grid.Column="3"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           Foreground="{ThemeResource TopRarityForegroundBrush}"
-                                           IsTextScaleFactorEnabled="False"
-                                           Text="{x:Bind Pity}"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                <TextBlock Grid.Column="2"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           FontSize="12"
-                                           FontStyle="Italic"
-                                           Foreground="{ThemeResource TopRarityForegroundBrush}"
-                                           IsTextScaleFactorEnabled="False"
-                                           Opacity="{x:Bind UpTextOpacity}"
-                                           Text="up!"
-                                           Visibility="{x:Bind HasUpItem, Converter={StaticResource BoolToVisibilityConverter}}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+            <!--  行高固定、数量有限：用 ItemsControl 避免 ItemsRepeater 虚拟化在跨显示器 DPI 变化时 MeasureOverride 失败。
+                  ItemsSource / ItemTemplate / ItemsPanel 由 ApplyRecordList 在入树前按视图与是否按版本分组设置。  -->
+            <ItemsControl x:Name="ItemsRepeater_List_5" ItemTemplate="{StaticResource Rarity5RowTemplate}" />
 
-            <ItemsControl x:Name="ItemsRepeater_List_4"
-                           ItemsSource="{x:Bind WarpTypeStats.List_4}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="local:GachaLogItemEx">
-                            <Grid Name="Grid_Rarity4Item"
-                                  Height="28"
-                                  Background="Transparent"
-                                  ColumnSpacing="8"
-                                  PointerEntered="Grid_Rarity4Item_PointerEntered"
-                                  Tag="{x:Bind}"
-                                  sc:InstantTooltip.Placement="Top"
-                                  sc:InstantTooltip.Text="{x:Bind Time.ToString('yyyy-MM-dd HH:mm:ss', x:Null)}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="28" />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="24" />
-                                </Grid.ColumnDefinitions>
-                                <sc:CachedImage Width="28"
-                                                Height="28"
-                                                Source="{x:Bind Icon}" />
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Text="{x:Bind Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                                <TextBlock Grid.Column="2"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           Text="{x:Bind Pity}"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Foreground="{ThemeResource SecondRarityForegroundBrush}"
-                                           Text="{x:Bind Name}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                <TextBlock Grid.Column="2"
-                                           HorizontalAlignment="Right"
-                                           VerticalAlignment="Center"
-                                           Foreground="{ThemeResource SecondRarityForegroundBrush}"
-                                           Text="{x:Bind Pity}"
-                                           Visibility="{x:Bind IsPointerIn, Converter={StaticResource BoolToVisibilityConverter}}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+            <ItemsControl x:Name="ItemsRepeater_List_4" ItemTemplate="{StaticResource Rarity4RowTemplate}" />
                 </Grid>
             </ScrollViewer>
         </Grid>
