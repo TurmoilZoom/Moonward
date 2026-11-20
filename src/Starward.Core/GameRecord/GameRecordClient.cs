@@ -973,20 +973,49 @@ public abstract class GameRecordClient
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>总览、当前卡池与按频段分组的 S 级记录。</returns>
     /// <exception cref="miHoYoApiException">badge 登录或数据接口返回非 0。</exception>
-    public async Task<ZZZOfficialGachaStat> GetZZZOfficialGachaStatAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    public Task<ZZZOfficialGachaStat> GetZZZOfficialGachaStatAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        return SendWithZZZBadgeCookieAsync(role, language, cookie => FetchZZZOfficialGachaStatAsync(role, cookie, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 只拉官方抽卡统计的总览（<c>index</c>）：各频段累计数、当前垫抽与当前持有的抽卡资源，不查各卡池的 S 级记录。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">期望语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>总览数据。</returns>
+    /// <exception cref="miHoYoApiException">badge 登录或数据接口返回非 0。</exception>
+    public Task<ZZZGachaStatIndex> GetZZZOfficialGachaIndexAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        return SendWithZZZBadgeCookieAsync(role, language, cookie => GetZZZGachaStatIndexAsync(role, cookie, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 先 badge 登录换 <c>e_nap_token</c> 再发请求；登录失效（-100）时重登一次后重试。
+    /// </summary>
+    /// <typeparam name="T">响应数据类型。</typeparam>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">badge 登录用的语言。</param>
+    /// <param name="send">用合并后的 Cookie 发请求。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>请求结果。</returns>
+    private async Task<T> SendWithZZZBadgeCookieAsync<T>(GameRecordRole role, string? language, Func<string, Task<T>> send, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(role);
         string lang = LanguageUtil.FilterLanguage(language);
         string cookie = await LoginZZZCultivateBadgeAsync(role, lang, cancellationToken);
         try
         {
-            return await FetchZZZOfficialGachaStatAsync(role, cookie, cancellationToken);
+            return await send(cookie);
         }
         catch (miHoYoApiException ex) when (ex.IsLoginExpired)
         {
             // e_nap_token 约 48h 有效，过期时重登一次
             cookie = await LoginZZZCultivateBadgeAsync(role, lang, cancellationToken);
-            return await FetchZZZOfficialGachaStatAsync(role, cookie, cancellationToken);
+            return await send(cookie);
         }
     }
 

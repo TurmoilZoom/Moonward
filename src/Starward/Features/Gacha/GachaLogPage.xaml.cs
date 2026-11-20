@@ -173,6 +173,202 @@ public sealed partial class GachaLogPage : PageBase
         AppConfig.SetLastUidInGachaLogPage(CurrentGameBiz.Game, value ?? 0);
         UpdateGachaTypeStats(value);
         ShareGachaImageCommand.NotifyCanExecuteChanged();
+        _ = UpdateGachaResourcesAsync(value, force: false);
+    }
+
+
+    /// <summary>顶栏抽卡资源胶囊是否显示：绝区零、当前 UID 有登录过的战绩角色且拉到了资源。</summary>
+    [ObservableProperty]
+    public partial bool IsGachaResourcesVisible { get; set; }
+
+
+    /// <summary>当前 UID 的抽卡资源；为 null 时胶囊隐藏。</summary>
+    [ObservableProperty]
+    public partial ZZZGachaResources? GachaResources { get; set; }
+
+
+    /// <summary>胶囊上的文字（限定频段可抽数）。</summary>
+    [ObservableProperty]
+    public partial string? GachaResourcesCapsuleText { get; set; }
+
+
+    /// <summary>
+    /// 抽卡资源缓存（按 UID，进程内）：页面每次导航都会重建，缓存避免短时间内反复请求官方接口。
+    /// </summary>
+    private static readonly Dictionary<long, ZZZGachaResources> _gachaResourcesCache = new();
+
+    /// <summary>缓存有效期，过期后进页面或切 UID 时重新拉取。</summary>
+    private static readonly TimeSpan GachaResourcesCacheDuration = TimeSpan.FromMinutes(10);
+
+    /// <summary>进行中的抽卡资源请求；切 UID 或离开页面时取消。</summary>
+    private CancellationTokenSource? _gachaResourcesCancelSource;
+
+    /// <summary>每次点刷新加一；延迟恢复图标前比对，避免旧的恢复盖掉新一次刷新的状态。</summary>
+    private int _gachaResourcesRefreshVersion;
+
+    /// <summary>刷新太快时转圈一闪而过，至少转这么久让人看得见。</summary>
+    private static readonly TimeSpan GachaResourcesRefreshMinSpin = TimeSpan.FromMilliseconds(500);
+
+    /// <summary>刷新成功后打勾停留的时间。</summary>
+    private static readonly TimeSpan GachaResourcesRefreshedDuration = TimeSpan.FromMilliseconds(1500);
+
+
+    /// <summary>
+    /// 刷新顶栏抽卡资源（弹出层里的刷新按钮）：忽略缓存重新拉取，失败时提示。
+    /// 按钮图标依次显示转圈、打勾，再回到刷新图标；打勾阶段命令已结束，按钮不再是禁用色。
+    /// </summary>
+    [RelayCommand]
+    private async Task RefreshGachaResourcesAsync()
+    {
+        int version = ++_gachaResourcesRefreshVersion;
+        ShowGachaResourcesRefreshState(refreshing: true, refreshed: false);
+        long start = System.Diagnostics.Stopwatch.GetTimestamp();
+        bool success = await UpdateGachaResourcesAsync(SelectUid, force: true);
+        TimeSpan remaining = GachaResourcesRefreshMinSpin - System.Diagnostics.Stopwatch.GetElapsedTime(start);
+        if (remaining > TimeSpan.Zero)
+        {
+            await Task.Delay(remaining);
+        }
+        if (version != _gachaResourcesRefreshVersion)
+        {
+            return;
+        }
+        ShowGachaResourcesRefreshState(refreshing: false, refreshed: success);
+        if (success)
+        {
+            _ = ResetGachaResourcesRefreshStateAsync(version);
+        }
+    }
+
+
+    /// <summary>
+    /// 打勾停留一会儿后恢复成刷新图标；期间又点了刷新则不动。
+    /// </summary>
+    /// <param name="version">打勾时的刷新序号。</param>
+    private async Task ResetGachaResourcesRefreshStateAsync(int version)
+    {
+        await Task.Delay(GachaResourcesRefreshedDuration);
+        if (version == _gachaResourcesRefreshVersion)
+        {
+            ShowGachaResourcesRefreshState(refreshing: false, refreshed: false);
+        }
+    }
+
+
+    /// <summary>
+    /// 切换刷新按钮里的图标：刷新中转圈、刷新成功打勾，否则显示刷新图标。
+    /// </summary>
+    /// <param name="refreshing">是否正在刷新。</param>
+    /// <param name="refreshed">是否刚刷新成功（refreshing 为 false 时生效）。</param>
+    private void ShowGachaResourcesRefreshState(bool refreshing, bool refreshed)
+    {
+        ProgressRing_GachaResourcesRefresh.IsActive = refreshing;
+        ProgressRing_GachaResourcesRefresh.Visibility = refreshing ? Visibility.Visible : Visibility.Collapsed;
+        FontIcon_GachaResourcesRefreshed.Visibility = !refreshing && refreshed ? Visibility.Visible : Visibility.Collapsed;
+        FontIcon_GachaResourcesRefresh.Visibility = !refreshing && !refreshed ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+
+    /// <summary>
+    /// 拉取当前 UID 的抽卡资源（官方抽卡统计 index）并更新顶栏胶囊。
+    /// 只对绝区零、且该 UID 有带 Cookie 的战绩角色时请求；没有角色或接口没返回资源时隐藏胶囊。
+    /// </summary>
+    /// <param name="uid">当前选中的 UID。</param>
+    /// <param name="force">true 时忽略缓存，失败时提示用户；false 为进页面 / 切 UID 时的静默加载。</param>
+    /// <returns>拿到了可显示的资源（含命中缓存）时为 true；无角色、失败、取消或接口没返回资源时为 false。</returns>
+    private async Task<bool> UpdateGachaResourcesAsync(long? uid, bool force)
+    {
+        _gachaResourcesCancelSource?.Cancel();
+        _gachaResourcesCancelSource = null;
+        if (CurrentGameBiz.Game != GameBiz.nap || uid is not long currentUid || currentUid <= 0)
+        {
+            ApplyGachaResources(null);
+            return false;
+        }
+        // B 服角色在米游社绑定表中仍记为 _cn
+        GameBiz roleGameBiz = CurrentGameBiz.Value == GameBiz.nap_bilibili ? GameBiz.nap_cn : CurrentGameBiz;
+        GameRecordRole? role = null;
+        try
+        {
+            role = _gameRecordService.GetGameRoles(roleGameBiz).FirstOrDefault(x => x.Uid == currentUid && !string.IsNullOrWhiteSpace(x.Cookie));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get game record roles for gacha resources");
+        }
+        if (role is null)
+        {
+            ApplyGachaResources(null);
+            return false;
+        }
+        _gachaResourcesCache.TryGetValue(currentUid, out var cached);
+        // 过期的缓存也先贴上，拉到新数据再换；没有缓存时先隐藏，免得显示上一个 UID 的数据
+        ApplyGachaResources(cached);
+        if (!force && cached is not null && DateTimeOffset.Now - cached.UpdateTime < GachaResourcesCacheDuration)
+        {
+            return true;
+        }
+        var cancelSource = new CancellationTokenSource();
+        _gachaResourcesCancelSource = cancelSource;
+        try
+        {
+            var index = await _gameRecordService.GetZZZOfficialGachaIndexAsync(role, CurrentLanguage, cancelSource.Token);
+            if (cancelSource.IsCancellationRequested || SelectUid != currentUid)
+            {
+                return false;
+            }
+            var resources = ZZZGachaResources.FromIndex(index, DateTimeOffset.Now);
+            if (resources is null)
+            {
+                _gachaResourcesCache.Remove(currentUid);
+            }
+            else
+            {
+                _gachaResourcesCache[currentUid] = resources;
+            }
+            ApplyGachaResources(resources);
+            return resources is not null;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (miHoYoApiException ex)
+        {
+            _logger.LogWarning(ex, "Get ZZZ gacha resources ({retcode})", ex.ReturnCode);
+            if (force)
+            {
+                GameRecordPage.HandleMiHoYoApiException(ex, roleGameBiz, role);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get ZZZ gacha resources");
+            if (force)
+            {
+                InAppToast.MainWindow?.Error(ex);
+            }
+        }
+        finally
+        {
+            if (_gachaResourcesCancelSource == cancelSource)
+            {
+                _gachaResourcesCancelSource = null;
+            }
+            cancelSource.Dispose();
+        }
+        return false;
+    }
+
+
+    /// <summary>
+    /// 把抽卡资源写到顶栏胶囊与弹出层绑定的属性上（须在 UI 线程调用）。
+    /// </summary>
+    /// <param name="resources">抽卡资源；null 时隐藏胶囊。</param>
+    private void ApplyGachaResources(ZZZGachaResources? resources)
+    {
+        GachaResources = resources;
+        IsGachaResourcesVisible = resources is not null;
+        GachaResourcesCapsuleText = resources is null ? null : string.Format(Lang.GachaLogPage_ResourcePulls, resources.LimitedPulls);
     }
 
 
@@ -258,6 +454,8 @@ public sealed partial class GachaLogPage : PageBase
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
         Grid_GachaStats.PointerWheelChanged -= Grid_GachaStats_PointerWheelChanged;
+        _gachaResourcesCancelSource?.Cancel();
+        _gachaResourcesCancelSource = null;
         ClearGachaCards();
         if (GachaItemStats is not null)
         {

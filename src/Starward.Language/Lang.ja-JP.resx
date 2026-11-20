@@ -4624,4 +4624,31 @@
   <data name="GachaLogPage_VersionScheduleUnavailable" xml:space="preserve">
     <value>バージョン情報を取得できないため、今はバージョン別に表示しません。しばらくしてからこのページを開き直してください。</value>
   </data>
+  <data name="GachaLogPage_GachaResources" xml:space="preserve">
+    <value>ガチャ資源</value>
+  </data>
+  <data name="GachaLogPage_ResourcePulls" xml:space="preserve">
+    <value>{0} 回</value>
+  </data>
+  <data name="GachaLogPage_Polychrome" xml:space="preserve">
+    <value>ポリクローム</value>
+  </data>
+  <data name="GachaLogPage_Monochrome" xml:space="preserve">
+    <value>モノクローム</value>
+  </data>
+  <data name="GachaLogPage_EncryptedMasterTape" xml:space="preserve">
+    <value>暗号化マスターテープ</value>
+  </data>
+  <data name="GachaLogPage_MasterTape" xml:space="preserve">
+    <value>マスターテープ</value>
+  </data>
+  <data name="GachaLogPage_Boopon" xml:space="preserve">
+    <value>ボンプ券</value>
+  </data>
+  <data name="GachaLogPage_ToHardPity" xml:space="preserve">
+    <value>天井まで</value>
+  </data>
+  <data name="GachaLogPage_CanReachHardPity" xml:space="preserve">
+    <value>今の資源で天井まで引けます</value>
+  </data>
 </root>

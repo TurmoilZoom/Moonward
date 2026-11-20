@@ -165,6 +165,221 @@
                     sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
                 <FontIcon FontSize="16" Glyph="&#xE72D;" />
             </Button>
+            <!--  绝区零抽卡资源胶囊：显示限定频段可抽数，点开看各资源与各频段保底进度。数据来自官方抽卡统计 index，只在当前 UID 有登录过的战绩角色时显示。  -->
+            <DropDownButton x:Name="DropDownButton_GachaResources"
+                            Height="34"
+                            VerticalAlignment="Center"
+                            helpers:FluentAnimations.PressScale="0.94"
+                            AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_GachaResources}"
+                            Visibility="{x:Bind IsGachaResourcesVisible}"
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaResources}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Image Width="18" Height="18">
+                        <Image.Source>
+                            <BitmapImage DecodePixelWidth="36" UriSource="ms-appx:///Assets/Image/GachaTicket2Big.png" />
+                        </Image.Source>
+                    </Image>
+                    <TextBlock VerticalAlignment="Center" Text="{x:Bind GachaResourcesCapsuleText}" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                    <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
+                        <!--  两段共用左右边界：图标 / 频段名贴左，数字贴右；行高统一 28，列间距统一 10  -->
+                        <StackPanel Width="256" Spacing="4">
+                            <Grid Height="32" Margin="0,0,0,4">
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="16"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_GachaResources}" />
+                                <!--  右边距 -9：14px 图标在 32px 按钮里居中，外扩后图标右缘与下方数字右缘对齐  -->
+                                <Button Width="32"
+                                        Height="32"
+                                        Margin="0,0,-9,0"
+                                        Padding="0"
+                                        HorizontalAlignment="Right"
+                                        AutomationProperties.Name="{x:Bind lang:Lang.Common_Refresh}"
+                                        Command="{x:Bind RefreshGachaResourcesCommand}"
+                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                        sc:InstantTooltip.Placement="Top"
+                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
+                                    <!--  刷新反馈：刷新中转圈 → 成功后打勾约 1.5 秒 → 回到刷新图标；三者同格切换显隐  -->
+                                    <Grid>
+                                        <FontIcon x:Name="FontIcon_GachaResourcesRefresh"
+                                                  FontSize="14"
+                                                  Glyph="&#xE72C;" />
+                                        <ProgressRing x:Name="ProgressRing_GachaResourcesRefresh"
+                                                      Width="16"
+                                                      Height="16"
+                                                      IsActive="False"
+                                                      Visibility="Collapsed" />
+                                        <FontIcon x:Name="FontIcon_GachaResourcesRefreshed"
+                                                  FontSize="14"
+                                                  Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                  Glyph="&#xE73E;"
+                                                  Visibility="Collapsed" />
+                                    </Grid>
+                                </Button>
+                            </Grid>
+
+                            <!--  当前持有量：图标 | 名称 | 数量  -->
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="28" />
+                                    <RowDefinition Height="28" />
+                                    <RowDefinition Height="28" />
+                                    <RowDefinition Height="28" />
+                                    <RowDefinition Height="28" />
+                                </Grid.RowDefinitions>
+                                <Image Grid.Row="0"
+                                       Width="20"
+                                       Height="20">
+                                    <Image.Source>
+                                        <BitmapImage DecodePixelWidth="40" UriSource="ms-appx:///Assets/Image/IconCurrency.png" />
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_Polychrome}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind GachaResources.Polychrome}" />
+                                <Image Grid.Row="1"
+                                       Width="20"
+                                       Height="20">
+                                    <Image.Source>
+                                        <BitmapImage DecodePixelWidth="40" UriSource="ms-appx:///Assets/Image/IconCurrency02.png" />
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_Monochrome}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind GachaResources.Monochrome}" />
+                                <Image Grid.Row="2"
+                                       Width="20"
+                                       Height="20">
+                                    <Image.Source>
+                                        <BitmapImage DecodePixelWidth="40" UriSource="ms-appx:///Assets/Image/GachaTicket2Big.png" />
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_EncryptedMasterTape}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind GachaResources.EncryptedMasterTape}" />
+                                <Image Grid.Row="3"
+                                       Width="20"
+                                       Height="20">
+                                    <Image.Source>
+                                        <BitmapImage DecodePixelWidth="40" UriSource="ms-appx:///Assets/Image/GachaTicket1Big.png" />
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Grid.Row="3"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_MasterTape}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="3"
+                                           Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind GachaResources.MasterTape}" />
+                                <Image Grid.Row="4"
+                                       Width="20"
+                                       Height="20">
+                                    <Image.Source>
+                                        <BitmapImage DecodePixelWidth="40" UriSource="ms-appx:///Assets/Image/GachaTicket3Big.png" />
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Grid.Row="4"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_Boopon}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="4"
+                                           Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           Text="{x:Bind GachaResources.Boopon}" />
+                            </Grid>
+
+                            <MenuFlyoutSeparator Margin="0,4" />
+
+                            <!--  各频段保底进度（官方统计覆盖全部历史）：频段 | 已垫 | 距保底（够到保底时数字前打勾）；表头与各行列宽一致  -->
+                            <Grid Height="20" ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="72" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="1"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           FontSize="12"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Text="{x:Bind lang:Lang.GachaStatsCard_Pity}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="2"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           FontSize="12"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_ToHardPity}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                            <ItemsControl ItemsSource="{x:Bind GachaResources.PityProgress}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="local:ZZZGachaPityProgress">
+                                        <Grid Height="28" ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="48" />
+                                                <ColumnDefinition Width="72" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Text="{x:Bind GachaTypeText}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1"
+                                                       HorizontalAlignment="Right"
+                                                       VerticalAlignment="Center"
+                                                       Text="{x:Bind CurrentPity}" />
+                                            <StackPanel Grid.Column="2"
+                                                        HorizontalAlignment="Right"
+                                                        Orientation="Horizontal"
+                                                        Spacing="6">
+                                                <!--  裸 FontIcon 挂提示命中不稳，外包透明 Border  -->
+                                                <Border VerticalAlignment="Center"
+                                                        Background="Transparent"
+                                                        Visibility="{x:Bind CanReachHardPity}"
+                                                        sc:InstantTooltip.Placement="Top"
+                                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_CanReachHardPity}">
+                                                    <FontIcon FontSize="12"
+                                                              Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                              Glyph="&#xE73E;" />
+                                                </Border>
+                                                <TextBlock VerticalAlignment="Center" Text="{x:Bind RemainingToHardPity}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
         </StackPanel>
 
 

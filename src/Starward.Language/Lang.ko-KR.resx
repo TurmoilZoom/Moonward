@@ -4625,4 +4625,31 @@
   <data name="GachaLogPage_VersionScheduleUnavailable" xml:space="preserve">
     <value>버전 정보를 가져올 수 없어 지금은 버전별로 묶지 않습니다. 잠시 후 이 페이지를 다시 열어 주세요.</value>
   </data>
+  <data name="GachaLogPage_GachaResources" xml:space="preserve">
+    <value>뽑기 재화</value>
+  </data>
+  <data name="GachaLogPage_ResourcePulls" xml:space="preserve">
+    <value>{0}회</value>
+  </data>
+  <data name="GachaLogPage_Polychrome" xml:space="preserve">
+    <value>폴리크롬</value>
+  </data>
+  <data name="GachaLogPage_Monochrome" xml:space="preserve">
+    <value>모노크롬</value>
+  </data>
+  <data name="GachaLogPage_EncryptedMasterTape" xml:space="preserve">
+    <value>암호화된 마스터 테이프</value>
+  </data>
+  <data name="GachaLogPage_MasterTape" xml:space="preserve">
+    <value>마스터 테이프</value>
+  </data>
+  <data name="GachaLogPage_Boopon" xml:space="preserve">
+    <value>방부 티켓</value>
+  </data>
+  <data name="GachaLogPage_ToHardPity" xml:space="preserve">
+    <value>천장까지</value>
+  </data>
+  <data name="GachaLogPage_CanReachHardPity" xml:space="preserve">
+    <value>현재 재화로 천장까지 뽑을 수 있습니다</value>
+  </data>
 </root>

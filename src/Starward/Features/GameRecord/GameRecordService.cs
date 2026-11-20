@@ -1998,10 +1998,38 @@ internal class GameRecordService
     /// <returns>官方统计。</returns>
     public async Task<ZZZOfficialGachaStat> GetZZZOfficialGachaStatAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
     {
+        string lang = await PrepareZZZOfficialGachaRequestAsync(role, language, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZOfficialGachaStatAsync(role, lang, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 只拉绝区零官方抽卡统计的总览（当前持有的抽卡资源、各频段垫抽），用于抽卡页顶栏的资源胶囊。
+    /// 登录失效时按通用恢复逻辑凭 stoken 刷新 Cookie 后重试一次。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">期望语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>总览数据。</returns>
+    public async Task<ZZZGachaStatIndex> GetZZZOfficialGachaIndexAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        string lang = await PrepareZZZOfficialGachaRequestAsync(role, language, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZOfficialGachaIndexAsync(role, lang, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 官方抽卡统计请求前的准备：国际服设置请求语言，国服确保设备指纹已就绪。
+    /// </summary>
+    /// <param name="role">绝区零角色。</param>
+    /// <param name="language">期望语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>过滤后的语言代码。</returns>
+    private async Task<string> PrepareZZZOfficialGachaRequestAsync(GameRecordRole role, string? language, CancellationToken cancellationToken)
+    {
         ArgumentNullException.ThrowIfNull(role);
-        bool isHoyolab = IsGlobalServerRole(role);
         string lang = LanguageUtil.FilterLanguage(language);
-        if (isHoyolab)
+        if (IsGlobalServerRole(role))
         {
             Language = lang;
         }
@@ -2009,7 +2037,7 @@ internal class GameRecordService
         {
             await UpdateHyperionDeviceFpWithLockAsync(false, cancellationToken);
         }
-        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZOfficialGachaStatAsync(role, lang, cancellationToken), cancellationToken);
+        return lang;
     }
 
 

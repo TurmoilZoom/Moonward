@@ -79,6 +79,33 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Boopon 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_Boopon {
+            get {
+                return ResourceManager.GetString("GachaLogPage_Boopon", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Your current resources are enough to reach hard pity 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_CanReachHardPity {
+            get {
+                return ResourceManager.GetString("GachaLogPage_CanReachHardPity", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Encrypted Master Tape 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_EncryptedMasterTape {
+            get {
+                return ResourceManager.GetString("GachaLogPage_EncryptedMasterTape", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Fill missing from Miyoushe 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_FillFromMiyoushe {
@@ -106,6 +133,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Gacha Resources 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_GachaResources {
+            get {
+                return ResourceManager.GetString("GachaLogPage_GachaResources", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   查找类似 Group by version 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_GroupByVersion {
@@ -114,6 +150,51 @@ namespace Starward.Language {
             }
         }
         
+        /// <summary>
+        ///   查找类似 Master Tape 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_MasterTape {
+            get {
+                return ResourceManager.GetString("GachaLogPage_MasterTape", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Monochrome 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_Monochrome {
+            get {
+                return ResourceManager.GetString("GachaLogPage_Monochrome", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Polychrome 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_Polychrome {
+            get {
+                return ResourceManager.GetString("GachaLogPage_Polychrome", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 {0} pulls 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_ResourcePulls {
+            get {
+                return ResourceManager.GetString("GachaLogPage_ResourcePulls", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 To Hard Pity 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_ToHardPity {
+            get {
+                return ResourceManager.GetString("GachaLogPage_ToHardPity", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Couldn't get version info, so records aren't grouped by version for now. Reopen this page later to try again. 的本地化字符串。
         /// </summary>

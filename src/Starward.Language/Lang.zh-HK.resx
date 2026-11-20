@@ -4624,4 +4624,31 @@
   <data name="GachaLogPage_VersionScheduleUnavailable" xml:space="preserve">
     <value>暫時無法取得版本資訊，先不按版本分組，稍後重新開啟本頁再試</value>
   </data>
+  <data name="GachaLogPage_GachaResources" xml:space="preserve">
+    <value>抽卡資源</value>
+  </data>
+  <data name="GachaLogPage_ResourcePulls" xml:space="preserve">
+    <value>{0} 抽</value>
+  </data>
+  <data name="GachaLogPage_Polychrome" xml:space="preserve">
+    <value>菲林</value>
+  </data>
+  <data name="GachaLogPage_Monochrome" xml:space="preserve">
+    <value>單色菲林</value>
+  </data>
+  <data name="GachaLogPage_EncryptedMasterTape" xml:space="preserve">
+    <value>加密母帶</value>
+  </data>
+  <data name="GachaLogPage_MasterTape" xml:space="preserve">
+    <value>原裝母帶</value>
+  </data>
+  <data name="GachaLogPage_Boopon" xml:space="preserve">
+    <value>邦布券</value>
+  </data>
+  <data name="GachaLogPage_ToHardPity" xml:space="preserve">
+    <value>距保底</value>
+  </data>
+  <data name="GachaLogPage_CanReachHardPity" xml:space="preserve">
+    <value>現有資源夠抽到保底</value>
+  </data>
 </root>
