@@ -77,6 +77,7 @@
 - ScrollViewer 横向滚动没禁用时，按无限宽测量子元素，`TextTrimming` 失效、行变宽并出现横向滚动条。
 - `Grid.RowSpacing` 对塌陷的行照样计入；`RowDefinition` 上的 `MinHeight` 会让隐藏的行仍占高度。可折叠元素优先用 `x:Load`（必须同时写 `x:Name`）。
 - `FlyoutPresenter` 默认内边距是 `FlyoutContentPadding` = 16,15,16,17，最大宽 `FlyoutThemeMaxWidth` = 456；`ToggleSwitch` 上下各自带 10px 空行（`ToggleSwitchPreContentMargin` / `PostContentMargin`）。卡片底部留白偏大时，先查末元素自带的尾巴。
+- `ToggleSwitch` 模板在开关与内容之间写死了一列 12 宽，`OnContent` / `OffContent` 为空也照留，所以靠右放的开关会比同列其他控件往里缩 12。对齐用 `Margin="0,0,-12,0"`，同时把焦点框右边收回来 `FocusVisualMargin="-7,-3,5,-3"`（默认 -7,-3,-7,-3，焦点框按整个模板区域画，不收会伸出容器）（`SignInButton`）。
 - `TextLineBounds="Tight"` 的 `TextBlock` 行框只有字高，要显式 `VerticalAlignment="Center"`，否则贴顶。
 - 同一行里多个元素的 `Visibility` 必须来自同一个条件，否则会剩下半行孤儿元素。
 - 还没连进可视树的虚拟化 `ListView` 提前 `Measure` 会少算高度；需要提前测高时给它固定高度。

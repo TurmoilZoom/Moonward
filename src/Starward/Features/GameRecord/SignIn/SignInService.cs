@@ -133,6 +133,22 @@ internal class SignInService
 
 
     /// <summary>
+    /// 取本月第 <paramref name="dayIndex"/> 天（从 0 起）的签到奖励。读的是缓存的奖励列表（内存 / KVT，跨重启复用），每月一般只请求一次。
+    /// </summary>
+    /// <param name="role">游戏角色。</param>
+    /// <param name="info">签到状态，提供服务器日期用于缓存键与月份校验。</param>
+    /// <param name="dayIndex">第几天，从 0 起；签到前的 <see cref="SignInRewardInfo.TotalSignDay"/> 正是今天这一签的下标。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>当天奖励；下标越界时为 null。</returns>
+    public async Task<SignInAward?> GetAwardAsync(GameRecordRole role, SignInRewardInfo info, int dayIndex, CancellationToken cancellationToken = default)
+    {
+        SignInReward reward = await GetSignInRewardCachedAsync(role, info, cancellationToken);
+        return dayIndex >= 0 && dayIndex < reward.Awards.Count ? reward.Awards[dayIndex] : null;
+    }
+
+
+
+    /// <summary>
     /// 将米游社 API retcode 映射为 UI 可消费的结构化结果。
     /// </summary>
     /// <param name="returnCode">接口返回码。</param>

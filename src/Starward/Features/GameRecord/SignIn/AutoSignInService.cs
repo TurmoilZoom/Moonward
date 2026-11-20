@@ -364,7 +364,11 @@ internal class AutoSignInService
             // 登记为后台自动任务：优先级更低的定时提交元数据会等这一轮跑完
             using (BackgroundAutomationActivity.Enter())
             {
-                return await RunBatchCoreAsync(cancellationToken).ConfigureAwait(false);
+                var report = new AutoSignInBatchReport();
+                AutoSignInRoundOutcome outcome = await RunBatchCoreAsync(report, cancellationToken).ConfigureAwait(false);
+                // 整轮跑完再通知：成功按轮汇总成一条，失败按账号当天去重
+                await AutoSignInNotifier.NotifyAsync(report, _signInService, _logger, cancellationToken).ConfigureAwait(false);
+                return outcome;
             }
         }
         finally
@@ -377,7 +381,9 @@ internal class AutoSignInService
     /// <summary>
     /// 遍历所有支持签到、且已开启自动签到的角色：先 GET info，未签再 POST。聚合 Early &gt; Incomplete &gt; Blocked &gt; Completed。
     /// </summary>
-    private async Task<AutoSignInRoundOutcome> RunBatchCoreAsync(CancellationToken cancellationToken)
+    /// <param name="report">记下本轮需要通知的结果。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    private async Task<AutoSignInRoundOutcome> RunBatchCoreAsync(AutoSignInBatchReport report, CancellationToken cancellationToken)
     {
         List<GameRecordRole> roles;
         try
@@ -428,7 +434,7 @@ internal class AutoSignInService
             AutoSignInRoleResult result;
             try
             {
-                result = await SignInRoleCoreAsync(role, expectedDate, PaceAsync, cancellationToken);
+                result = await SignInRoleCoreAsync(role, expectedDate, PaceAsync, report, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -485,12 +491,14 @@ internal class AutoSignInService
     /// <param name="role">待签到的游戏角色。</param>
     /// <param name="expectedDate">本轮开始时本机推算的 UTC+8 日期。</param>
     /// <param name="pace">请求节奏控制委托，在每次 API 调用前执行。</param>
+    /// <param name="report">记下需要通知的结果。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>该角色对本轮聚合的贡献。</returns>
     private async Task<AutoSignInRoleResult> SignInRoleCoreAsync(
         GameRecordRole role,
         DateOnly expectedDate,
         Func<CancellationToken, Task> pace,
+        AutoSignInBatchReport report,
         CancellationToken cancellationToken)
     {
         string failureKey = GetFailureKey(role);
@@ -500,7 +508,7 @@ internal class AutoSignInService
         }
         try
         {
-            return await SignInRoleRequestAsync(role, expectedDate, failureKey, pace, cancellationToken);
+            return await SignInRoleRequestAsync(role, expectedDate, failureKey, pace, report, cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -512,6 +520,10 @@ internal class AutoSignInService
             SetSettingValue(failureKey, DateTimeOffset.UtcNow.Ticks.ToString());
             bool loginExpired = ex is miHoYoApiException { IsLoginExpired: true };
             _logger.LogWarning(ex, "Auto sign-in request failed (biz {biz}, uid {uid}, login expired {expired}).", role.GameBiz, role.Uid, loginExpired);
+            if (loginExpired)
+            {
+                report.Blocked.Add((role, SignInActionResult.CookieExpired));
+            }
             // Cookie 失效不会自己恢复，退到 BlockedRetry 的长间隔；断网等临时故障仍按当天重试
             return loginExpired ? AutoSignInRoleResult.Blocked : AutoSignInRoleResult.Failed;
         }
@@ -525,6 +537,7 @@ internal class AutoSignInService
     /// <param name="expectedDate">本轮开始时本机推算的 UTC+8 日期。</param>
     /// <param name="failureKey">该角色记录失败时间的 Setting 键。</param>
     /// <param name="pace">请求节奏控制委托，在每次 API 调用前执行。</param>
+    /// <param name="report">记下需要通知的结果。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>该角色对本轮聚合的贡献。</returns>
     private async Task<AutoSignInRoleResult> SignInRoleRequestAsync(
@@ -532,6 +545,7 @@ internal class AutoSignInService
         DateOnly expectedDate,
         string failureKey,
         Func<CancellationToken, Task> pace,
+        AutoSignInBatchReport report,
         CancellationToken cancellationToken)
     {
         await pace(cancellationToken);
@@ -555,6 +569,11 @@ internal class AutoSignInService
         if (result.Kind is SignInActionResult.Success or SignInActionResult.AlreadySigned)
         {
             SetSettingValue(failureKey, "0");
+            // AlreadySigned 是查询后到签到前之间被别处签掉了，不算本轮签成
+            if (result.Kind is SignInActionResult.Success)
+            {
+                report.Signed.Add((role, info));
+            }
             _logger.LogInformation("Auto sign-in succeeded (biz {biz}, uid {uid}, result {result}).", role.GameBiz, role.Uid, result);
             if (!rolled)
             {
@@ -572,6 +591,7 @@ internal class AutoSignInService
         _logger.LogInformation("Auto sign-in not completed (biz {biz}, uid {uid}, result {result}).", role.GameBiz, role.Uid, result);
         if (result.Kind is SignInActionResult.CookieExpired or SignInActionResult.RiskControl)
         {
+            report.Blocked.Add((role, result.Kind));
             return AutoSignInRoleResult.Blocked;
         }
         return AutoSignInRoleResult.Failed;

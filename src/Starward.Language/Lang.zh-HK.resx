@@ -4651,4 +4651,46 @@
   <data name="GachaLogPage_CanReachHardPity" xml:space="preserve">
     <value>現有資源夠抽到保底</value>
   </data>
+  <data name="SignInButton_Notify" xml:space="preserve">
+    <value>簽到通知</value>
+  </data>
+  <data name="SignInButton_NotifyOff" xml:space="preserve">
+    <value>不通知</value>
+  </data>
+  <data name="SignInButton_NotifyFailures" xml:space="preserve">
+    <value>僅失敗時</value>
+  </data>
+  <data name="SignInButton_NotifyAll" xml:space="preserve">
+    <value>每次簽到後</value>
+  </data>
+  <data name="AutoSignInNotify_SuccessTitle" xml:space="preserve">
+    <value>自動簽到完成</value>
+  </data>
+  <data name="AutoSignInNotify_SignedWithAward" xml:space="preserve">
+    <value>{0}：第 {1} 日，{2} ×{3}</value>
+  </data>
+  <data name="AutoSignInNotify_Signed" xml:space="preserve">
+    <value>{0}：第 {1} 日</value>
+  </data>
+  <data name="AutoSignInNotify_SignedCount" xml:space="preserve">
+    <value>已為 {0} 個帳號簽到</value>
+  </data>
+  <data name="AutoSignInNotify_AwardsTotal" xml:space="preserve">
+    <value>共獲得 {0}</value>
+  </data>
+  <data name="AutoSignInNotify_ListSeparator" xml:space="preserve">
+    <value>、</value>
+  </data>
+  <data name="AutoSignInNotify_FailedTitle" xml:space="preserve">
+    <value>自動簽到失敗</value>
+  </data>
+  <data name="AutoSignInNotify_LoginExpired" xml:space="preserve">
+    <value>{0}：登入已失效，請重新登入</value>
+  </data>
+  <data name="AutoSignInNotify_NeedVerify" xml:space="preserve">
+    <value>{0}：需要驗證，請在米遊社或 HoYoLAB 手動簽到一次</value>
+  </data>
+  <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
+    <value>{0} 個帳號未能簽到</value>
+  </data>
 </root>

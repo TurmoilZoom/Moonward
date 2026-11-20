@@ -13627,5 +13627,131 @@ namespace Starward.Language {
                 return ResourceManager.GetString("DailyNoteNotify_Account", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Notifications 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_Notify {
+            get {
+                return ResourceManager.GetString("SignInButton_Notify", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Off 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_NotifyOff {
+            get {
+                return ResourceManager.GetString("SignInButton_NotifyOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Only on failure 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_NotifyFailures {
+            get {
+                return ResourceManager.GetString("SignInButton_NotifyFailures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Every check-in 的本地化字符串。
+        /// </summary>
+        public static string SignInButton_NotifyAll {
+            get {
+                return ResourceManager.GetString("SignInButton_NotifyAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Auto check-in complete 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_SuccessTitle {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_SuccessTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: day {1}, {2} ×{3} 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_SignedWithAward {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_SignedWithAward", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: day {1} 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_Signed {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_Signed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Checked in {0} accounts 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_SignedCount {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_SignedCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Received {0} 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_AwardsTotal {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_AwardsTotal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ,  的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_ListSeparator {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_ListSeparator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Auto check-in failed 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_FailedTitle {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_FailedTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: login expired, please sign in again 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_LoginExpired {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_LoginExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: verification required, check in manually once on HoYoLAB / Miyoushe 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_NeedVerify {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_NeedVerify", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} accounts could not be checked in 的本地化字符串。
+        /// </summary>
+        public static string AutoSignInNotify_FailedCount {
+            get {
+                return ResourceManager.GetString("AutoSignInNotify_FailedCount", resourceCulture);
+            }
+        }
     }
 }

@@ -169,6 +169,65 @@ public sealed partial class SignInButton : UserControl
 
 
 
+    /// <summary>
+    /// 标题栏签到通知铃铛的图标：不通知时显示划掉的铃铛，不点开菜单也能看出状态。
+    /// </summary>
+    public string AutoSignInNotifyGlyph => AppConfig.AutoSignInNotifyMode is AutoSignInNotifyMode.Off ? "" : "";
+
+
+
+    /// <summary>
+    /// 签到通知铃铛的悬停提示，带上当前选项（如「签到通知 · 仅失败时」）。
+    /// </summary>
+    public string AutoSignInNotifyTooltip => $"{Lang.SignInButton_Notify} · {GetNotifyModeText(AppConfig.AutoSignInNotifyMode)}";
+
+
+
+    /// <summary>
+    /// 通知方式对应的菜单文字。
+    /// </summary>
+    /// <param name="mode">通知方式。</param>
+    /// <returns>本地化后的选项文字。</returns>
+    private static string GetNotifyModeText(AutoSignInNotifyMode mode) => mode switch
+    {
+        AutoSignInNotifyMode.Off => Lang.SignInButton_NotifyOff,
+        AutoSignInNotifyMode.All => Lang.SignInButton_NotifyAll,
+        _ => Lang.SignInButton_NotifyFailures,
+    };
+
+
+
+    /// <summary>
+    /// 签到通知菜单打开时按当前设置勾选对应项。
+    /// </summary>
+    private void MenuFlyout_SignInNotify_Opening(object sender, object e)
+    {
+        AutoSignInNotifyMode mode = AppConfig.AutoSignInNotifyMode;
+        RadioMenuFlyoutItem_NotifyOff.IsChecked = mode is AutoSignInNotifyMode.Off;
+        RadioMenuFlyoutItem_NotifyFailures.IsChecked = mode is AutoSignInNotifyMode.FailuresOnly;
+        RadioMenuFlyoutItem_NotifyAll.IsChecked = mode is AutoSignInNotifyMode.All;
+    }
+
+
+
+    /// <summary>
+    /// 选中签到通知方式（对所有游戏生效）：保存设置并刷新铃铛图标与提示。菜单项的 Tag 是 <see cref="AutoSignInNotifyMode"/> 的取值。
+    /// </summary>
+    private void RadioMenuFlyoutItem_SignInNotify_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: string tag }
+            && int.TryParse(tag, out int value)
+            && Enum.IsDefined((AutoSignInNotifyMode)value)
+            && (AutoSignInNotifyMode)value != AppConfig.AutoSignInNotifyMode)
+        {
+            AppConfig.AutoSignInNotifyMode = (AutoSignInNotifyMode)value;
+            OnPropertyChanged(nameof(AutoSignInNotifyGlyph));
+            OnPropertyChanged(nameof(AutoSignInNotifyTooltip));
+        }
+    }
+
+
+
     /// <summary>控件加载时按当前游戏初始化可见性与角色。</summary>
     private void SignInButton_Loaded(object sender, RoutedEventArgs e)
     {

@@ -4650,4 +4650,46 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GachaLogPage_CanReachHardPity" xml:space="preserve">
     <value>Your current resources are enough to reach hard pity</value>
   </data>
+  <data name="SignInButton_Notify" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="SignInButton_NotifyOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="SignInButton_NotifyFailures" xml:space="preserve">
+    <value>Only on failure</value>
+  </data>
+  <data name="SignInButton_NotifyAll" xml:space="preserve">
+    <value>Every check-in</value>
+  </data>
+  <data name="AutoSignInNotify_SuccessTitle" xml:space="preserve">
+    <value>Auto check-in complete</value>
+  </data>
+  <data name="AutoSignInNotify_SignedWithAward" xml:space="preserve">
+    <value>{0}: day {1}, {2} ×{3}</value>
+  </data>
+  <data name="AutoSignInNotify_Signed" xml:space="preserve">
+    <value>{0}: day {1}</value>
+  </data>
+  <data name="AutoSignInNotify_SignedCount" xml:space="preserve">
+    <value>Checked in {0} accounts</value>
+  </data>
+  <data name="AutoSignInNotify_AwardsTotal" xml:space="preserve">
+    <value>Received {0}</value>
+  </data>
+  <data name="AutoSignInNotify_ListSeparator" xml:space="preserve">
+    <value>, </value>
+  </data>
+  <data name="AutoSignInNotify_FailedTitle" xml:space="preserve">
+    <value>Auto check-in failed</value>
+  </data>
+  <data name="AutoSignInNotify_LoginExpired" xml:space="preserve">
+    <value>{0}: login expired, please sign in again</value>
+  </data>
+  <data name="AutoSignInNotify_NeedVerify" xml:space="preserve">
+    <value>{0}: verification required, check in manually once on HoYoLAB / Miyoushe</value>
+  </data>
+  <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
+    <value>{0} accounts could not be checked in</value>
+  </data>
 </root>

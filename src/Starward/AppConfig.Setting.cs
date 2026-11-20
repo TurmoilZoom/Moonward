@@ -2,6 +2,7 @@ using Dapper;
 using Starward.Core;
 using Starward.Features.Database;
 using Starward.Features.GameLauncher;
+using Starward.Features.GameRecord.SignIn;
 using Starward.Features.ViewHost;
 using System;
 using System.Collections.Generic;
@@ -840,6 +841,16 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 自动签到结果的系统通知方式，对所有游戏生效。默认不通知，由用户在签到卡片的铃铛菜单里自行开启。
+    /// </summary>
+    public static AutoSignInNotifyMode AutoSignInNotifyMode
+    {
+        get => GetValue(AutoSignInNotifyMode.Off);
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
     /// 自动领取云游戏每日免费时长（软件启动后静默领取，并在常驻期间跨日再领），按游戏区分，默认关闭。
     /// </summary>
     /// <param name="biz">游戏业务线，如 hk4e_cn。</param>
@@ -870,7 +881,8 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 有游戏在运行时，便笺提醒不弹出横幅，直接进通知中心。默认开启。
+    /// 有游戏在运行时，系统通知（便笺提醒、自动签到结果）不弹出横幅，直接进通知中心。默认开启。
+    /// 设置入口在提醒设置对话框；键名沿用最初只给便笺提醒用时的名字。
     /// </summary>
     public static bool DailyNoteNotifySilentWhenGameRunning
     {
