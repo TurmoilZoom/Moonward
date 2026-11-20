@@ -79,6 +79,33 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Fill missing from Miyoushe 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_FillFromMiyoushe {
+            get {
+                return ResourceManager.GetString("GachaLogPage_FillFromMiyoushe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fill missing from HoYoLAB 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_FillFromHoYoLAB {
+            get {
+                return ResourceManager.GetString("GachaLogPage_FillFromHoYoLAB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Your existing records won't be changed. Only the missing S-Rank records will be added for display. 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_FillMissingRecordsConfirm {
+            get {
+                return ResourceManager.GetString("GachaLogPage_FillMissingRecordsConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 GitHub request limit reached. Please try again later. 的本地化字符串。
         /// </summary>
         public static string ReleaseNotes_GithubRateLimited {
@@ -11786,6 +11813,60 @@ namespace Starward.Language {
         public static string ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide {
             get {
                 return ResourceManager.GetString("ZZZGachaInfoWindow_ZZZGachaInfoWindowGuide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: recent records haven't synced yet. Try again later. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaService_FillLocalBehind {
+            get {
+                return ResourceManager.GetString("ZZZGachaService_FillLocalBehind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: the official stats haven't caught up with your latest pulls yet (about 1 hour delay). Try again later. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaService_FillOfficialBehind {
+            get {
+                return ResourceManager.GetString("ZZZGachaService_FillOfficialBehind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Local records are complete. Nothing to fill. 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaService_FillNothingMissing {
+            get {
+                return ResourceManager.GetString("ZZZGachaService_FillNothingMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: filled {1} pulls, including {2} S-Rank 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaService_FillResult {
+            get {
+                return ResourceManager.GetString("ZZZGachaService_FillResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: local records don't match the official stats; skipped 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaService_FillSkipped {
+            get {
+                return ResourceManager.GetString("ZZZGachaService_FillSkipped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fetching official gacha stats 的本地化字符串。
+        /// </summary>
+        public static string ZZZGachaService_GettingOfficialGachaStats {
+            get {
+                return ResourceManager.GetString("ZZZGachaService_GettingOfficialGachaStats", resourceCulture);
             }
         }
         

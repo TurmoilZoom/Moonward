@@ -4588,4 +4588,31 @@
   <data name="DailyNoteNotify_Account" xml:space="preserve">
     <value>Account</value>
   </data>
+  <data name="GachaLogPage_FillFromMiyoushe" xml:space="preserve">
+    <value>米游社から欠けている記録を補完</value>
+  </data>
+  <data name="GachaLogPage_FillFromHoYoLAB" xml:space="preserve">
+    <value>HoYoLABから欠けている記録を補完</value>
+  </data>
+  <data name="GachaLogPage_FillMissingRecordsConfirm" xml:space="preserve">
+    <value>既存の記録は変更されません。欠けているSランクの記録のみを補って表示します。</value>
+  </data>
+  <data name="ZZZGachaService_GettingOfficialGachaStats" xml:space="preserve">
+    <value>公式の統計を取得しています</value>
+  </data>
+  <data name="ZZZGachaService_FillResult" xml:space="preserve">
+    <value>{0}：{1} 回分を補完（うちSランク {2} 件）</value>
+  </data>
+  <data name="ZZZGachaService_FillNothingMissing" xml:space="preserve">
+    <value>ローカルの記録は揃っています。補完は不要です。</value>
+  </data>
+  <data name="ZZZGachaService_FillLocalBehind" xml:space="preserve">
+    <value>{0}：最近の記録がまだ同期されていません。しばらくしてからもう一度お試しください。</value>
+  </data>
+  <data name="ZZZGachaService_FillOfficialBehind" xml:space="preserve">
+    <value>{0}：公式の統計に最近の記録がまだ反映されていません（約1時間の遅延があります）。しばらくしてからもう一度お試しください。</value>
+  </data>
+  <data name="ZZZGachaService_FillSkipped" xml:space="preserve">
+    <value>{0}：ローカルの記録が公式の統計と一致しないため、スキップしました</value>
+  </data>
 </root>

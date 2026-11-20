@@ -14,6 +14,7 @@ using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
 using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
 using Starward.Core.GameRecord.ZZZ.GachaRecord;
+using Starward.Core.GameRecord.ZZZ.GachaStat;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Core.GameRecord.SignIn;
@@ -54,6 +55,8 @@ namespace Starward.Core.GameRecord;
 [JsonSerializable(typeof(miHoYoApiWrapper<DeadlyAssaultInfo>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ZZZDailyNote>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ZZZGachaRecordData>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<ZZZGachaStatIndex>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<ZZZGachaPoolStatData>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<GameAuthKey>))]
 [JsonSerializable(typeof(GenAuthKeyPostBody))]
 [JsonSerializable(typeof(GameAuthKey))]

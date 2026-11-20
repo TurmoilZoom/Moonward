@@ -721,7 +721,7 @@ internal abstract partial class GachaLogService
     /// </summary>
     /// <param name="uid">玩家 UID。</param>
     /// <returns>存在未收录记录返回 true。</returns>
-    protected bool HasUnknownGachaItems(long uid)
+    protected virtual bool HasUnknownGachaItems(long uid)
     {
         using var dapper = DatabaseService.CreateConnection();
         return dapper.QueryFirstOrDefault<int>($"""

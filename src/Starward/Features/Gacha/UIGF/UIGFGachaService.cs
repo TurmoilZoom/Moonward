@@ -110,11 +110,12 @@ internal class UIGFGachaService
     {
         using var dapper = DatabaseService.CreateConnection();
         List<GachaUidArchiveDisplay> result = new();
-        var uidList = dapper.Query<long>($"SELECT DISTINCT Uid FROM ZZZGachaItem;");
+        // 官方统计补全的记录不导出，条数与最后一条也不算它们
+        var uidList = dapper.Query<long>($"SELECT DISTINCT Uid FROM ZZZGachaItem WHERE NOT {ZZZGachaService.FillRecordSqlCondition};");
         foreach (long uid in uidList)
         {
-            int count = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM ZZZGachaItem WHERE Uid=@Uid;", new { Uid = uid });
-            GachaLogItem lastItem = dapper.QueryFirst<GachaLogItem>($"SELECT * FROM ZZZGachaItem WHERE Uid=@Uid ORDER BY Time DESC LIMIT 1;", new { Uid = uid });
+            int count = dapper.QueryFirstOrDefault<int>($"SELECT COUNT(*) FROM ZZZGachaItem WHERE Uid=@Uid AND NOT {ZZZGachaService.FillRecordSqlCondition};", new { Uid = uid });
+            GachaLogItem lastItem = dapper.QueryFirst<GachaLogItem>($"SELECT * FROM ZZZGachaItem WHERE Uid=@Uid AND NOT {ZZZGachaService.FillRecordSqlCondition} ORDER BY Time DESC LIMIT 1;", new { Uid = uid });
             var display = new GachaUidArchiveDisplay
             {
                 Game = GameBiz.nap,
@@ -270,7 +271,8 @@ internal class UIGFGachaService
     private UIGF4GachaArchive<ZZZGachaItem> GetUIGFGachaArchiveForZZZ(long uid)
     {
         using var dapper = DatabaseService.CreateConnection();
-        IEnumerable<ZZZGachaItem> list = dapper.Query<ZZZGachaItem>($"SELECT * FROM ZZZGachaItem WHERE Uid=@Uid ORDER BY Id;", new { Uid = uid });
+        // 补全记录的 Id 是本地生成的、占位没有物品 Id，导出会污染其他工具的数据，也会让再导入时报缺少物品 ID
+        IEnumerable<ZZZGachaItem> list = dapper.Query<ZZZGachaItem>($"SELECT * FROM ZZZGachaItem WHERE Uid=@Uid AND NOT {ZZZGachaService.FillRecordSqlCondition} ORDER BY Id;", new { Uid = uid });
         UIGF4GachaArchive<ZZZGachaItem> archive = new()
         {
             Uid = uid,
@@ -986,8 +988,15 @@ internal class UIGFGachaService
         List<ZZZGachaItem> list = new();
         DateTime TIME = new DateTime(2024, 7, 1);
         bool noName = false;
+        int skippedPlaceholders = 0;
         foreach (ZZZGachaItem item in archive.napList ?? [])
         {
+            // 修复前导出的文件带着补全占位（无物品 Id），跳过即可，需要时在本地重新补全
+            if (ZZZGachaGapFiller.IsPlaceholder(item.Id, item.Count, item.RankType) && item.ItemId == 0)
+            {
+                skippedPlaceholders++;
+                continue;
+            }
             var clone = item.Clone();
             if (clone.Id == 0)
             {
@@ -1026,12 +1035,14 @@ internal class UIGFGachaService
         }
         using var dapper = DatabaseService.CreateConnection();
         using var t = dapper.BeginTransaction();
+        // 导入的老记录插进已补全的历史时，该频段补全记录会重复计数，先删掉
+        int removedFill = ZZZGachaService.RemoveFillRecordsInvalidatedBy(dapper, t, list);
         var affect = dapper.Execute("""
             INSERT OR REPLACE INTO ZZZGachaItem (Uid, Id, Name, Time, ItemId, ItemType, RankType, GachaType, Count, Lang)
             VALUES (@Uid, @Id, @Name, @Time, @ItemId, @ItemType, @RankType, @GachaType, @Count, @Lang);
             """, list, t);
         t.Commit();
-        _logger.LogInformation("Imported {count} gacha records for {game}.", affect, archive.Game);
+        _logger.LogInformation("Imported {count} gacha records for {game}, skipped {skipped} fill placeholders, removed {removed} local fill records.", affect, archive.Game, skippedPlaceholders, removedFill);
         return noName ? Lang.UIGFGachaService_ImportSuccessfulButNoRecordItemName : Lang.UIGFGachaService_ImportSuccessful;
     }
 

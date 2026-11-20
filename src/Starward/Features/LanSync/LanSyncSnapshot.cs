@@ -1,6 +1,8 @@
 using Dapper;
 using Microsoft.Data.Sqlite;
+using Starward.Core.Gacha;
 using Starward.Features.Database;
+using Starward.Features.Gacha;
 using Starward.Features.PlayTime;
 using System;
 using System.Collections.Generic;
@@ -69,14 +71,18 @@ internal static class LanSyncSnapshot
     /// 与刷新接口的增量逻辑一致，同一账号、月份、类型下以 Time 区分记录。
     /// </param>
     /// <param name="AutoIncrementId">Id 是本机自增列，不能跨设备复制。</param>
-    private sealed record SyncTable(string Name, LanSyncCategories Category, string[]? MatchColumns = null, bool AutoIncrementId = false);
+    /// <param name="ExcludeCondition">满足此 SQL 条件的行是本机派生数据，不导出、也不从对方快照合并。</param>
+    /// <param name="BeforeMerge">合并该表前在同一事务里执行的清理。</param>
+    private sealed record SyncTable(string Name, LanSyncCategories Category, string[]? MatchColumns = null, bool AutoIncrementId = false,
+        string? ExcludeCondition = null, Action<SqliteConnection, SqliteTransaction>? BeforeMerge = null);
 
 
     private static readonly SyncTable[] Tables =
     [
         new("GenshinGachaItem", LanSyncCategories.Gacha),
         new("StarRailGachaItem", LanSyncCategories.Gacha),
-        new("ZZZGachaItem", LanSyncCategories.Gacha),
+        // 官方统计补全的记录只对本机的真实记录成立，换台设备可能和对方的真实记录重复计数，由对方自己补全
+        new("ZZZGachaItem", LanSyncCategories.Gacha, ExcludeCondition: ZZZGachaService.FillRecordSqlCondition, BeforeMerge: RemoveZZZFillRecordsInvalidatedBySnapshot),
         new("GenshinBeyondGachaItem", LanSyncCategories.Gacha),
 
         new("GenshinSpiralAbyssInfo", LanSyncCategories.GameRecord),
@@ -160,7 +166,8 @@ internal static class LanSyncSnapshot
         {
             if (TableExists(con, "main", table.Name, transaction))
             {
-                con.Execute($"CREATE TABLE {SnapshotSchema}.{Quote(table.Name)} AS SELECT * FROM main.{Quote(table.Name)};", transaction: transaction);
+                string where = table.ExcludeCondition is null ? "" : $" WHERE NOT {table.ExcludeCondition}";
+                con.Execute($"CREATE TABLE {SnapshotSchema}.{Quote(table.Name)} AS SELECT * FROM main.{Quote(table.Name)}{where};", transaction: transaction);
             }
         }
         if (TableExists(con, SnapshotSchema, "PlayTimeStats", transaction))
@@ -214,7 +221,8 @@ internal static class LanSyncSnapshot
             {
                 continue;
             }
-            int count = con.QueryFirst<int>($"SELECT COUNT(*) FROM main.{Quote(table.Name)};");
+            string where = table.ExcludeCondition is null ? "" : $" WHERE NOT {table.ExcludeCondition}";
+            int count = con.QueryFirst<int>($"SELECT COUNT(*) FROM main.{Quote(table.Name)}{where};");
             switch (table.Category)
             {
                 case LanSyncCategories.Gacha:
@@ -321,8 +329,12 @@ internal static class LanSyncSnapshot
             return 0;
         }
 
+        table.BeforeMerge?.Invoke(con, transaction);
         string target = $"main.{Quote(table.Name)}";
-        string source = $"{SnapshotSchema}.{Quote(table.Name)}";
+        // 旧版本导出的快照可能还带着对方的派生数据，合并时再筛一次
+        string source = table.ExcludeCondition is null
+            ? $"{SnapshotSchema}.{Quote(table.Name)}"
+            : $"(SELECT * FROM {SnapshotSchema}.{Quote(table.Name)} WHERE NOT {table.ExcludeCondition})";
         string columnList = string.Join(", ", columns.Select(Quote));
         string sql;
         if (table.MatchColumns is null)
@@ -339,6 +351,24 @@ internal static class LanSyncSnapshot
         return con.Execute(sql, transaction: transaction);
     }
 
+
+
+    /// <summary>
+    /// 合并绝区零记录前：快照里的真实记录若插进了本机某频段已补全的历史，删掉该频段的补全记录，避免重复计数（与同步、导入一致）。
+    /// </summary>
+    /// <param name="con">已附加快照的连接；未加 schema 的表名解析到本机主库。</param>
+    /// <param name="transaction">合并所在事务。</param>
+    private static void RemoveZZZFillRecordsInvalidatedBySnapshot(SqliteConnection con, SqliteTransaction transaction)
+    {
+        if (!TableExists(con, SnapshotSchema, "ZZZGachaItem", transaction))
+        {
+            return;
+        }
+        List<GachaLogItem> incoming = con.Query<GachaLogItem>(
+            $"SELECT Uid, Id, GachaType, Count FROM {SnapshotSchema}.ZZZGachaItem WHERE NOT {ZZZGachaService.FillRecordSqlCondition};",
+            transaction: transaction).ToList();
+        ZZZGachaService.RemoveFillRecordsInvalidatedBy(con, transaction, incoming);
+    }
 
 
     /// <summary>

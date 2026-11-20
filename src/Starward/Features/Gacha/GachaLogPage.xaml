@@ -194,6 +194,15 @@
                                         CommandParameter="all"
                                         Text="{x:Bind lang:Lang.GachaLogPage_SyncAllFromHoYoLAB}"
                                         Visibility="Collapsed" />
+                        <!--  补全缺失（绝区零）：先同步，再用米游社 / HoYoLAB 官方抽卡统计补全超出保留期的老记录  -->
+                        <MenuFlyoutItem x:Name="MenuFlyoutItem_FillFromMiyoushe"
+                                        Command="{x:Bind FillFromOfficialStatsCommand}"
+                                        Text="{x:Bind lang:Lang.GachaLogPage_FillFromMiyoushe}"
+                                        Visibility="Collapsed" />
+                        <MenuFlyoutItem x:Name="MenuFlyoutItem_FillFromHoYoLAB"
+                                        Command="{x:Bind FillFromOfficialStatsCommand}"
+                                        Text="{x:Bind lang:Lang.GachaLogPage_FillFromHoYoLAB}"
+                                        Visibility="Collapsed" />
                         <!--  更新全部：位于「通过 URL 更新」之上  -->
                         <MenuFlyoutItem Command="{x:Bind UpdateGachaLogCommand}"
                                         CommandParameter="all"

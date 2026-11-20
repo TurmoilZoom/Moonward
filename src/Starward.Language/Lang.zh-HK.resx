@@ -4588,4 +4588,31 @@
   <data name="DailyNoteNotify_Account" xml:space="preserve">
     <value>帳號</value>
   </data>
+  <data name="GachaLogPage_FillFromMiyoushe" xml:space="preserve">
+    <value>從米遊社補全缺失</value>
+  </data>
+  <data name="GachaLogPage_FillFromHoYoLAB" xml:space="preserve">
+    <value>從 HoYoLAB 補全缺失</value>
+  </data>
+  <data name="GachaLogPage_FillMissingRecordsConfirm" xml:space="preserve">
+    <value>不影響原有記錄，只補充顯示缺失的 S 級記錄</value>
+  </data>
+  <data name="ZZZGachaService_GettingOfficialGachaStats" xml:space="preserve">
+    <value>正在取得官方抽卡統計</value>
+  </data>
+  <data name="ZZZGachaService_FillResult" xml:space="preserve">
+    <value>{0}：補全 {1} 抽，其中 S 級 {2} 個</value>
+  </data>
+  <data name="ZZZGachaService_FillNothingMissing" xml:space="preserve">
+    <value>本機記錄已完整，無需補全</value>
+  </data>
+  <data name="ZZZGachaService_FillLocalBehind" xml:space="preserve">
+    <value>{0}：最近的記錄還沒同步到，請稍後再試</value>
+  </data>
+  <data name="ZZZGachaService_FillOfficialBehind" xml:space="preserve">
+    <value>{0}：官方統計還沒更新到最近幾抽（約有 1 小時延遲），請稍後再試</value>
+  </data>
+  <data name="ZZZGachaService_FillSkipped" xml:space="preserve">
+    <value>{0}：本機記錄與官方統計對不上，已略過</value>
+  </data>
 </root>

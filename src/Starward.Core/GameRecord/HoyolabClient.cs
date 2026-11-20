@@ -15,6 +15,7 @@ using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
 using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
 using Starward.Core.GameRecord.ZZZ.GachaRecord;
+using Starward.Core.GameRecord.ZZZ.GachaStat;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Core.GameRecord.ZZZ.ThresholdSimulation;
@@ -943,6 +944,54 @@ public class HoyolabClient : GameRecordClient
             request.Headers.Add(x_rpc_device_fp, DeviceFp);
         }
         return await CommonSendCultivateAsync<UpgradeGuidIconInfo>(request, cancellationToken);
+    }
+
+
+
+    /// <summary>
+    /// 官方抽卡统计总览（国际服 sg-act-public-api）。
+    /// </summary>
+    public override Task<ZZZGachaStatIndex> GetZZZGachaStatIndexAsync(GameRecordRole role, string cookie, CancellationToken cancellationToken = default)
+    {
+        var url = $"https://sg-act-public-api.hoyolab.com/event/nap_gacha_record/api/zzz/index?uid={role.Uid}&region={role.Region}";
+        return SendZZZGachaStatRequestAsync<ZZZGachaStatIndex>(url, cookie, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 官方抽卡统计当前版本卡池（国际服 sg-act-public-api）。
+    /// </summary>
+    public override Task<ZZZGachaPoolStatData> GetZZZGachaCurrentPoolStatAsync(GameRecordRole role, string cookie, int gachaType, CancellationToken cancellationToken = default)
+    {
+        var url = $"https://sg-act-public-api.hoyolab.com/event/nap_gacha_record/api/zzz/cur_pool_stat?uid={role.Uid}&region={role.Region}&gacha_type={gachaType}";
+        return SendZZZGachaStatRequestAsync<ZZZGachaPoolStatData>(url, cookie, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 官方抽卡统计历史版本（国际服 sg-act-public-api）。
+    /// </summary>
+    public override Task<ZZZGachaPoolStatData> GetZZZGachaHistoryPoolStatAsync(GameRecordRole role, string cookie, int gachaType, IReadOnlyList<string> versions, CancellationToken cancellationToken = default)
+    {
+        var url = $"https://sg-act-public-api.hoyolab.com/event/nap_gacha_record/api/zzz/hist_pool_stat?uid={role.Uid}&region={role.Region}&gacha_type={gachaType}&vers={string.Join(',', versions)}";
+        return SendZZZGachaStatRequestAsync<ZZZGachaPoolStatData>(url, cookie, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 发送官方抽卡统计请求：只靠 Cookie（国际服 Cookie 自带 DEVICEFP），不带 DS 与 x-rpc 头。
+    /// </summary>
+    /// <typeparam name="T">响应数据类型。</typeparam>
+    /// <param name="url">完整请求地址。</param>
+    /// <param name="cookie">badge 登录后合并的 Cookie。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>响应 data。</returns>
+    private Task<T> SendZZZGachaStatRequestAsync<T>(string url, string cookie, CancellationToken cancellationToken) where T : class
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add(Cookie, ApplyMi18nLangToCookie(cookie, Language));
+        request.Headers.Add(Referer, "https://act.hoyolab.com/");
+        return CommonSendCultivateAsync<T>(request, cancellationToken);
     }
 
 

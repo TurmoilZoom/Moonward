@@ -4609,4 +4609,31 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="DailyNoteNotify_Account" xml:space="preserve">
     <value>Account</value>
   </data>
+  <data name="GachaLogPage_FillFromMiyoushe" xml:space="preserve">
+    <value>Fill missing from Miyoushe</value>
+  </data>
+  <data name="GachaLogPage_FillFromHoYoLAB" xml:space="preserve">
+    <value>Fill missing from HoYoLAB</value>
+  </data>
+  <data name="GachaLogPage_FillMissingRecordsConfirm" xml:space="preserve">
+    <value>Your existing records won't be changed. Only the missing S-Rank records will be added for display.</value>
+  </data>
+  <data name="ZZZGachaService_GettingOfficialGachaStats" xml:space="preserve">
+    <value>Fetching official gacha stats</value>
+  </data>
+  <data name="ZZZGachaService_FillResult" xml:space="preserve">
+    <value>{0}: filled {1} pulls, including {2} S-Rank</value>
+  </data>
+  <data name="ZZZGachaService_FillNothingMissing" xml:space="preserve">
+    <value>Local records are complete. Nothing to fill.</value>
+  </data>
+  <data name="ZZZGachaService_FillLocalBehind" xml:space="preserve">
+    <value>{0}: recent records haven't synced yet. Try again later.</value>
+  </data>
+  <data name="ZZZGachaService_FillOfficialBehind" xml:space="preserve">
+    <value>{0}: the official stats haven't caught up with your latest pulls yet (about 1 hour delay). Try again later.</value>
+  </data>
+  <data name="ZZZGachaService_FillSkipped" xml:space="preserve">
+    <value>{0}: local records don't match the official stats; skipped</value>
+  </data>
 </root>

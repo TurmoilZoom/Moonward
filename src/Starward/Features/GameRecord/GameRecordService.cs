@@ -20,6 +20,7 @@ using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
 using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.GameRecord.ZZZ.DeadlyAssault;
 using Starward.Core.GameRecord.ZZZ.GachaRecord;
+using Starward.Core.GameRecord.ZZZ.GachaStat;
 using Starward.Core.GameRecord.SignIn;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
@@ -1984,6 +1985,31 @@ internal class GameRecordService
             await UpdateHyperionDeviceFpWithLockAsync(false, cancellationToken);
         }
         return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZGachaWikiAsync(role, lang, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 拉取绝区零官方抽卡统计（米游社 / HoYoLAB 抽卡记录活动页）：总览 + 各频段全部历史 S 级记录。
+    /// 登录失效时按通用恢复逻辑凭 stoken 刷新 Cookie 后重试一次。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">期望语言；国服名称固定中文，国际服随此语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>官方统计。</returns>
+    public async Task<ZZZOfficialGachaStat> GetZZZOfficialGachaStatAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(role);
+        bool isHoyolab = IsGlobalServerRole(role);
+        string lang = LanguageUtil.FilterLanguage(language);
+        if (isHoyolab)
+        {
+            Language = lang;
+        }
+        else
+        {
+            await UpdateHyperionDeviceFpWithLockAsync(false, cancellationToken);
+        }
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZOfficialGachaStatAsync(role, lang, cancellationToken), cancellationToken);
     }
 
 
