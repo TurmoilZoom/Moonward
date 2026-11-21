@@ -59,6 +59,7 @@
 - 交互型动效先判 `EntranceAnimation.AnimationsEnabled()`（命名空间 `Starward.Controls`），关闭时直接落到终态。
 - 元素离开视觉树时，停掉它身上还在跑的 Composition 动画（`Unloaded` / `ElementClearing` 里 `StopAnimation`），以免合成器继续持有该视觉。
 - Storyboard 默认 `FillBehavior=HoldEnd` 会锁住属性值：动画结束后直接赋值不生效，要先 `Stop()` 再归位。
+- 新建的 `ToggleSwitch` 初始为开时，会先露出「关」的外观（空心、浅色圆点），再用 83ms 渐变成「开」：系统模板 `On` 状态自己的 Storyboard 用 `ControlFasterAnimationDuration` 关键帧改透明度，套上模板时也会播。重建一批开关时看起来像闪烁。加载后取模板根上的 `ToggleStates` 组，对 `CurrentState.Storyboard` 调 `SkipToFill()`（`RightToolbarCustomizeRow`）。
 - `SplineDoubleKeyFrame.KeySpline` 写成 `x:String` 资源（`"x1,y1,x2,y2"`），不能用 `<KeySpline>` 对象资源，否则运行时 `XamlParseException`（`BannerCarousel.xaml`）。
 - `Grid` / `Panel` 设了 `CornerRadius` 会裁剪子元素；需要溢出圆角的效果放到不裁剪的外层宿主上。
 
