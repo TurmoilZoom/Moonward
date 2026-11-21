@@ -2225,18 +2225,6 @@ Accetti il rischio e desideri continuare?</value>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Nota in tempo reale</value>
   </data>
-  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
-    <value>Accesso con autorizzazione disattivato</value>
-  </data>
-  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
-    <value>Accesso con autorizzazione attivato</value>
-  </data>
-  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
-    <value>ID passaporto: </value>
-  </data>
-  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
-    <value>Ri-autentica</value>
-  </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>Immagini oggetti gacha ZZZ</value>
   </data>

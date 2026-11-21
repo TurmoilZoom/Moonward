@@ -4518,42 +4518,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Auth login disabled 的本地化字符串。
-        /// </summary>
-        public static string GameAuthLoginButton_AuthLoginDisabled {
-            get {
-                return ResourceManager.GetString("GameAuthLoginButton_AuthLoginDisabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Auth login enabled 的本地化字符串。
-        /// </summary>
-        public static string GameAuthLoginButton_AuthLoginEnabled {
-            get {
-                return ResourceManager.GetString("GameAuthLoginButton_AuthLoginEnabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Passport ID:  的本地化字符串。
-        /// </summary>
-        public static string GameAuthLoginButton_PassportId {
-            get {
-                return ResourceManager.GetString("GameAuthLoginButton_PassportId", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Re-authenticate 的本地化字符串。
-        /// </summary>
-        public static string GameAuthLoginButton_ReAuthenticate {
-            get {
-                return ResourceManager.GetString("GameAuthLoginButton_ReAuthenticate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Auto Search 的本地化字符串。
         /// </summary>
         public static string GameBizSelector_AutoSearch {

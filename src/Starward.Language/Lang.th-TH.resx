@@ -2224,18 +2224,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>บันทึกเรียลไทม์</value>
   </data>
-  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
-    <value>ปิดใช้งานการเข้าสู่ระบบแบบอนุญาต</value>
-  </data>
-  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
-    <value>เปิดใช้งานการเข้าสู่ระบบแบบอนุญาต</value>
-  </data>
-  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
-    <value>รหัสพาสปอร์ต: </value>
-  </data>
-  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
-    <value>ยืนยันตัวตนอีกครั้ง</value>
-  </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>รูปภาพไอเทมกาชาของ ZZZ</value>
   </data>

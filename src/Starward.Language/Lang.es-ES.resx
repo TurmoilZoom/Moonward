@@ -2225,18 +2225,6 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Nota en tiempo real</value>
   </data>
-  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
-    <value>Inicio de sesión de autorización desactivado</value>
-  </data>
-  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
-    <value>Inicio de sesión de autorización activado</value>
-  </data>
-  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
-    <value>ID de pasaporte: </value>
-  </data>
-  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
-    <value>Volver a autenticar</value>
-  </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>Imágenes de objetos de Gacha de ZZZ</value>
   </data>

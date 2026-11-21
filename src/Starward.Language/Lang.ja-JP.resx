@@ -2224,18 +2224,6 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>リアルタイムメモ</value>
   </data>
-  <data name="GameAuthLoginButton_AuthLoginDisabled" xml:space="preserve">
-    <value>認証ログイン無効</value>
-  </data>
-  <data name="GameAuthLoginButton_AuthLoginEnabled" xml:space="preserve">
-    <value>認証ログイン有効</value>
-  </data>
-  <data name="GameAuthLoginButton_PassportId" xml:space="preserve">
-    <value>パスポート ID: </value>
-  </data>
-  <data name="GameAuthLoginButton_ReAuthenticate" xml:space="preserve">
-    <value>再認証</value>
-  </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>ZZZのガチャアイテム画像</value>
   </data>

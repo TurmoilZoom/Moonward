@@ -820,10 +820,6 @@
                 <sfgs:SignInButton Width="40"
                                    Height="40"
                                    CurrentGameId="{x:Bind CurrentGameId}" />
-                <!--  通行证授权登录  -->
-                <local:GameAuthLoginButton Width="40"
-                                           Height="40"
-                                           CurrentGameId="{x:Bind CurrentGameId}" />
             </StackPanel>
         </Border>
 
