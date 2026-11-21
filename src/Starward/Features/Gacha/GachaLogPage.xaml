@@ -184,16 +184,22 @@
                 </StackPanel>
                 <DropDownButton.Flyout>
                     <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
-                        <!--  两段共用左右边界：图标 / 频段名贴左，数字贴右；行高统一 28，列间距统一 10  -->
-                        <StackPanel Width="256" Spacing="4">
+                        <!--
+                            两段共用列网格：图标 20 | 名称 * | （已垫 40）| 数字 72，列间距统一 10，行高统一 28。
+                            每行都以图标起头，名称同一起点；数字一律在定宽列里居中，持有量与「距保底」共用最右一列（同一条中轴）。
+                            宽度随最长的名称伸缩（外语频段名较长），各行右侧都是定宽列，伸缩只拉宽名称列，对齐不受影响
+                        -->
+                        <StackPanel MinWidth="272"
+                                    MaxWidth="360"
+                                    Spacing="4">
                             <Grid Height="32" Margin="0,0,0,4">
                                 <TextBlock VerticalAlignment="Center"
                                            FontSize="16"
                                            Text="{x:Bind lang:Lang.GachaLogPage_GachaResources}" />
-                                <!--  右边距 -9：14px 图标在 32px 按钮里居中，外扩后图标右缘与下方数字右缘对齐  -->
+                                <!--  右边距 20 =（72 - 32）/ 2：按钮与下方 72 宽数字列同中轴，刷新图标正对一列数字  -->
                                 <Button Width="32"
                                         Height="32"
-                                        Margin="0,0,-9,0"
+                                        Margin="0,0,20,0"
                                         Padding="0"
                                         HorizontalAlignment="Right"
                                         AutomationProperties.Name="{x:Bind lang:Lang.Common_Refresh}"
@@ -220,12 +226,12 @@
                                 </Button>
                             </Grid>
 
-                            <!--  当前持有量：图标 | 名称 | 数量  -->
+                            <!--  当前持有量：图标 | 名称 | 数量（居中，与下方「距保底」同列）  -->
                             <Grid ColumnSpacing="10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="20" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="72" />
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="28" />
@@ -248,6 +254,7 @@
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock Grid.Row="0"
                                            Grid.Column="2"
+                                           HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            Text="{x:Bind GachaResources.Polychrome}" />
                                 <Image Grid.Row="1"
@@ -264,6 +271,7 @@
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="2"
+                                           HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            Text="{x:Bind GachaResources.Monochrome}" />
                                 <Image Grid.Row="2"
@@ -280,6 +288,7 @@
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock Grid.Row="2"
                                            Grid.Column="2"
+                                           HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            Text="{x:Bind GachaResources.EncryptedMasterTape}" />
                                 <Image Grid.Row="3"
@@ -296,6 +305,7 @@
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock Grid.Row="3"
                                            Grid.Column="2"
+                                           HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            Text="{x:Bind GachaResources.MasterTape}" />
                                 <Image Grid.Row="4"
@@ -312,28 +322,30 @@
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock Grid.Row="4"
                                            Grid.Column="2"
+                                           HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            Text="{x:Bind GachaResources.Boopon}" />
                             </Grid>
 
                             <MenuFlyoutSeparator Margin="0,4" />
 
-                            <!--  各频段保底进度（官方统计覆盖全部历史）：频段 | 已垫 | 距保底（够到保底时数字前打勾）；表头与各行列宽一致  -->
+                            <!--  各频段保底进度（官方统计覆盖全部历史）：频段 | 已垫 | 距保底（够到保底时数字前打勾）；表头与各行列宽一致，表头与数字都居中  -->
                             <Grid Height="20" ColumnSpacing="10">
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="40" />
                                     <ColumnDefinition Width="72" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="1"
-                                           HorizontalAlignment="Right"
+                                <TextBlock Grid.Column="2"
+                                           HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            FontSize="12"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                            Text="{x:Bind lang:Lang.GachaStatsCard_Pity}"
                                            TextTrimming="CharacterEllipsis" />
-                                <TextBlock Grid.Column="2"
-                                           HorizontalAlignment="Right"
+                                <TextBlock Grid.Column="3"
+                                           HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            FontSize="12"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -345,23 +357,36 @@
                                     <DataTemplate x:DataType="local:ZZZGachaPityProgress">
                                         <Grid Height="28" ColumnSpacing="10">
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20" />
                                                 <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="48" />
+                                                <ColumnDefinition Width="40" />
                                                 <ColumnDefinition Width="72" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock VerticalAlignment="Center"
+                                            <!--  该频段消耗的抽卡券，与上方持有量同一图标  -->
+                                            <Image Width="20" Height="20">
+                                                <Image.Source>
+                                                    <BitmapImage DecodePixelWidth="40" UriSource="{x:Bind TicketIcon}" />
+                                                </Image.Source>
+                                            </Image>
+                                            <TextBlock Grid.Column="1"
+                                                       VerticalAlignment="Center"
                                                        Text="{x:Bind GachaTypeText}"
                                                        TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Grid.Column="1"
-                                                       HorizontalAlignment="Right"
+                                            <TextBlock Grid.Column="2"
+                                                       HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
                                                        Text="{x:Bind CurrentPity}" />
-                                            <StackPanel Grid.Column="2"
-                                                        HorizontalAlignment="Right"
-                                                        Orientation="Horizontal"
-                                                        Spacing="6">
+                                            <!--  数字居中占中间的 Auto 列，勾放在左侧 * 列里贴着数字：有没有勾，数字都停在同一条中轴上  -->
+                                            <Grid Grid.Column="3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
                                                 <!--  裸 FontIcon 挂提示命中不稳，外包透明 Border  -->
-                                                <Border VerticalAlignment="Center"
+                                                <Border Margin="0,0,4,0"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center"
                                                         Background="Transparent"
                                                         Visibility="{x:Bind CanReachHardPity}"
                                                         sc:InstantTooltip.Placement="Top"
@@ -370,8 +395,10 @@
                                                               Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                                                               Glyph="&#xE73E;" />
                                                 </Border>
-                                                <TextBlock VerticalAlignment="Center" Text="{x:Bind RemainingToHardPity}" />
-                                            </StackPanel>
+                                                <TextBlock Grid.Column="1"
+                                                           VerticalAlignment="Center"
+                                                           Text="{x:Bind RemainingToHardPity}" />
+                                            </Grid>
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

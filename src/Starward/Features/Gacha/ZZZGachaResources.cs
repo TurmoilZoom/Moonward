@@ -151,6 +151,14 @@ public sealed class ZZZGachaPityProgress
     /// <summary>频段本地化名称。</summary>
     public string GachaTypeText => new ZZZGachaType(GachaType).ToLocalization();
 
+    /// <summary>该频段消耗的抽卡券图标（与上方持有量里的图标相同）：限定频段用加密母带，常驻用原装母带，邦布用邦布券。</summary>
+    public Uri TicketIcon => GachaType switch
+    {
+        ZZZGachaType.StandardChannel => new("ms-appx:///Assets/Image/GachaTicket1Big.png"),
+        ZZZGachaType.BangbooChannel => new("ms-appx:///Assets/Image/GachaTicket3Big.png"),
+        _ => new("ms-appx:///Assets/Image/GachaTicket2Big.png"),
+    };
+
     /// <summary>距上一个 S 级已垫的抽数。</summary>
     public int CurrentPity { get; set; }
 
