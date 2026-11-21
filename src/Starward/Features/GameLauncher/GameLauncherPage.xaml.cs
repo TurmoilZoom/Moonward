@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 using Starward.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
@@ -73,10 +74,22 @@ public sealed partial class GameLauncherPage : PageBase
     /// <summary>已按窗口尺寸恢复位置并显示；此前 Opacity=0，避免 Transform 原点在左上时首帧闪一下。</summary>
     private bool _rightToolbarLayoutRevealed;
 
+    /// <summary>右侧功能栏各功能项对应的按钮；被用户关掉的不在面板里，但仍在这里。</summary>
+    private readonly Dictionary<RightToolbarItem, FrameworkElement> _rightToolbarItemElements;
+
 
     public GameLauncherPage()
     {
         this.InitializeComponent();
+        _rightToolbarItemElements = new()
+        {
+            [RightToolbarItem.CloudGame] = Button_CloudGame,
+            [RightToolbarItem.DailyNote] = Button_DailyNote,
+            [RightToolbarItem.TimeNode] = Button_TimeNode,
+            [RightToolbarItem.MapTool] = Button_MapTool,
+            [RightToolbarItem.RedeemCode] = Button_RedeemCode,
+            [RightToolbarItem.SignIn] = Button_SignIn,
+        };
         _dispatchTimer = DispatcherQueue.CreateTimer();
         _dispatchTimer.Interval = TimeSpan.FromMilliseconds(100);
         _dispatchTimer.Tick += UpdateGameInstallTaskProgress;
@@ -116,6 +129,15 @@ public sealed partial class GameLauncherPage : PageBase
 
 
 
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        // 早于 Loaded：被关掉的功能按钮先移出面板，就不会加载、不会发请求
+        ApplyRightToolbarItemLayout();
+    }
+
+
+
     protected override void OnLoaded()
     {
         InitializeGameFeature();
@@ -135,6 +157,7 @@ public sealed partial class GameLauncherPage : PageBase
         WeakReferenceMessenger.Default.Register<GameInstallTaskStartedMessage>(this, OnGameInstallTaskStarted);
         WeakReferenceMessenger.Default.Register<BackgroundChangedMessage>(this, OnBackgroundChanged);
         WeakReferenceMessenger.Default.Register<BackgroundDisplayedMessage>(this, OnBackgroundDisplayed);
+        WeakReferenceMessenger.Default.Register<RightToolbarLayoutChangedMessage>(this, OnRightToolbarLayoutChanged);
     }
 
 
@@ -2111,6 +2134,126 @@ public sealed partial class GameLauncherPage : PageBase
     #endregion
 
 
+    #region Right Toolbar Items
+
+
+    /// <summary>
+    /// 按用户设置（按游戏保存）排列右侧功能栏：关掉的按钮移出面板，其余按设置的先后排好。
+    /// 当前游戏不支持的按钮照旧留在面板里，由它自己收起。
+    /// </summary>
+    /// <remarks>
+    /// 移出面板的按钮会 Unloaded（停掉定时刷新等），重新放回时 Loaded 再按当前游戏初始化；
+    /// 只是换位的用 <see cref="UIElementCollection.Move(uint, uint)"/>，不重建可视树、不会重新加载。
+    /// </remarks>
+    private void ApplyRightToolbarItemLayout()
+    {
+        try
+        {
+            RightToolbarLayout layout = RightToolbarLayout.Parse(AppConfig.GetRightToolbarItems(CurrentGameBiz));
+            UIElementCollection children = StackPanel_RightToolbar.Children;
+            // [0, index) 已是排好的可见项；没处理到的项要么在 index 之后，要么不在面板里
+            int index = 0;
+            foreach (RightToolbarItem item in layout.Order)
+            {
+                FrameworkElement element = _rightToolbarItemElements[item];
+                int current = children.IndexOf(element);
+                if (layout.IsHidden(item))
+                {
+                    if (current >= 0)
+                    {
+                        children.RemoveAt(current);
+                    }
+                    continue;
+                }
+                if (current < 0)
+                {
+                    children.Insert(index, element);
+                }
+                else if (current != index)
+                {
+                    children.Move((uint)current, (uint)index);
+                }
+                index++;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Apply right toolbar item layout");
+        }
+    }
+
+
+    /// <summary>
+    /// 自定义功能栏对话框改了设置：是当前游戏就立即重排，并同步高度、弹出方向与 Flyout 挂接。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="message">改动的游戏。</param>
+    private void OnRightToolbarLayoutChanged(object _, RightToolbarLayoutChangedMessage message)
+    {
+        if (message.Game != CurrentGameBiz.Game)
+        {
+            return;
+        }
+        ApplyRightToolbarItemLayout();
+        if (!_rightToolbarInitialized)
+        {
+            return;
+        }
+        EnsureRightToolbarFlyoutHooks();
+        UpdateRightToolbarPopupSide();
+        UpdateRightToolbarEmptyState();
+        if (Border_RightToolbar.Visibility == Visibility.Visible && _rightToolbarState is not RightToolbarState.Dragging)
+        {
+            SyncRightToolbarHeightForState(animate: false);
+        }
+    }
+
+
+    /// <summary>
+    /// 右键（触摸长按）功能栏时弹出自定义菜单。贴边收纳、拖动中或浮出动画还没完成时按钮本身也不可点，菜单一并不弹。
+    /// </summary>
+    private void Border_RightToolbar_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
+    {
+        if (_rightToolbarState is RightToolbarState.Docked or RightToolbarState.Dragging
+            || (_rightToolbarState is RightToolbarState.DockRevealed && !_rightToolbarRevealInteractive)
+            || _rightToolbarDragging
+            || _rightToolbarSuppressClick)
+        {
+            // 标记为已处理，ContextFlyout 就不会弹出
+            args.Handled = true;
+            return;
+        }
+        // 已经会用右键了，以后不必再弹右键自定义引导
+        AppConfig.HasSeenRightToolbarCustomizeHint = true;
+        CloseAnyRightToolbarFlyout();
+    }
+
+
+    private async void MenuFlyoutItem_CustomizeRightToolbar_Click(object sender, RoutedEventArgs e)
+    {
+        await OpenRightToolbarCustomizeDialogAsync();
+    }
+
+
+    /// <summary>
+    /// 打开自定义功能栏对话框，默认选中当前游戏。
+    /// </summary>
+    private async Task OpenRightToolbarCustomizeDialogAsync()
+    {
+        try
+        {
+            await new RightToolbarCustomizeDialog { InitialGame = CurrentGameBiz, XamlRoot = this.XamlRoot }.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Open right toolbar customize dialog");
+        }
+    }
+
+
+    #endregion
+
+
     #region Right Toolbar State Machine
 
 
@@ -2182,7 +2325,7 @@ public sealed partial class GameLauncherPage : PageBase
     private bool _rightToolbarSuppressClick;
 
     /// <summary>TeachingTip.Closed 时是否记「已看过」；卸载强关为 false。</summary>
-    private bool _rightToolbarDragTipMarkSeenOnClose = true;
+    private bool _rightToolbarGuideMarkSeenOnClose = true;
 
     private uint _rightToolbarPointerId;
 
@@ -2242,7 +2385,8 @@ public sealed partial class GameLauncherPage : PageBase
         Border_RightToolbar.AddHandler(UIElement.PointerCanceledEvent, _rightToolbarPointerCanceledHandler, handledEventsToo: true);
         Border_RightToolbar.AddHandler(UIElement.PointerCaptureLostEvent, _rightToolbarPointerCaptureLostHandler, handledEventsToo: true);
         // 整条折叠后 StackPanel 不再参与布局、收不到 SizeChanged，只能盯子项自身的 Visibility。
-        foreach (UIElement child in StackPanel_RightToolbar.Children)
+        // 被用户关掉、暂时不在面板里的按钮也挂上，之后重新打开时不用再补。
+        foreach (UIElement child in _rightToolbarItemElements.Values)
         {
             long token = child.RegisterPropertyChangedCallback(UIElement.VisibilityProperty, RightToolbarChild_VisibilityChanged);
             _rightToolbarVisibilityCallbacks.Add((child, token));
@@ -2259,10 +2403,10 @@ public sealed partial class GameLauncherPage : PageBase
                 return;
             }
             EnsureRightToolbarFlyoutHooks();
-            // 尺寸未就绪时不弹引导：TryShowRightToolbarDragTip 会先抑制 Tooltip，而内层拿不到高度直接返回，抑制就留着了。
+            // 尺寸未就绪时不弹引导：TryShowRightToolbarGuide 会先抑制 Tooltip，而内层拿不到高度直接返回，抑制就留着了。
             if (TryRevealRightToolbarLayout())
             {
-                TryShowRightToolbarDragTip();
+                TryShowRightToolbarGuide();
             }
         });
     }
@@ -2274,7 +2418,7 @@ public sealed partial class GameLauncherPage : PageBase
     private void TeardownRightToolbarCollapse()
     {
         // 离开页面时持久化当前布局；未关掉的引导下次再出。
-        DismissRightToolbarDragTip(markSeen: false);
+        DismissRightToolbarGuide(markSeen: false);
         // 未 Restore 前 _rightToolbarX/Y 仍是 0，不能写回，否则会把上次位置覆盖成左上角。
         if (_rightToolbarLayoutRevealed)
         {
@@ -2336,7 +2480,7 @@ public sealed partial class GameLauncherPage : PageBase
         {
             if (TryRevealRightToolbarLayout())
             {
-                TryShowRightToolbarDragTip();
+                TryShowRightToolbarGuide();
             }
             return;
         }
@@ -2384,10 +2528,10 @@ public sealed partial class GameLauncherPage : PageBase
                 SetRightToolbarPosition(revealed.X, revealed.Y, animate: false);
             }
 
-            // 进页时按钮多是异步出现，整条先折叠着；等真正有高度后再补弹拖拽引导。
-            if (_rightToolbarLayoutRevealed && e.NewSize.Height > 0 && !TeachingTip_RightToolbarDrag.IsOpen)
+            // 进页时按钮多是异步出现，整条先折叠着；等真正有高度后再补弹引导。
+            if (_rightToolbarLayoutRevealed && e.NewSize.Height > 0 && !IsRightToolbarGuideOpen())
             {
-                TryShowRightToolbarDragTip();
+                TryShowRightToolbarGuide();
             }
         }
         catch (Exception ex)
@@ -2425,7 +2569,7 @@ public sealed partial class GameLauncherPage : PageBase
         }
 
         // 折叠后收不到 PointerExited，悬停 / 浮出 / 引导状态都要在这里收干净。
-        DismissRightToolbarDragTip(markSeen: false);
+        DismissRightToolbarGuide(markSeen: false);
         StopRightToolbarCollapseTimer();
         _rightToolbarPointerOver = false;
         if (_rightToolbarState is RightToolbarState.DockRevealed)
@@ -2594,7 +2738,7 @@ public sealed partial class GameLauncherPage : PageBase
         _rightToolbarDragging = true;
         _rightToolbarSuppressClick = true;
         StopRightToolbarCollapseTimer();
-        DismissRightToolbarDragTip(markSeen: true);
+        DismissRightToolbarGuide(markSeen: true);
         CloseAnyRightToolbarFlyout();
         InstantTooltip.SetSuppressed(XamlRoot, true);
         // 先禁用子按钮命中，再 Capture，避免 Button 继续抢指针 / 松手误点。
@@ -2813,12 +2957,15 @@ public sealed partial class GameLauncherPage : PageBase
                     {
                         _rightToolbarRevealInteractive = true;
                         SetRightToolbarButtonsHitTestVisible(true);
+                        // 贴边用户只有浮出时才看得到功能栏，右键自定义引导在这时弹
+                        TryShowRightToolbarGuide();
                     }
                 });
                 if (!animate)
                 {
                     _rightToolbarRevealInteractive = true;
                     SetRightToolbarButtonsHitTestVisible(true);
+                    TryShowRightToolbarGuide();
                 }
                 break;
         }
@@ -2845,7 +2992,7 @@ public sealed partial class GameLauncherPage : PageBase
         if (_rightToolbarPointerOver
             || _rightToolbarDragging
             || _rightToolbarPressed
-            || TeachingTip_RightToolbarDrag.IsOpen
+            || IsRightToolbarGuideOpen()
             || IsAnyRightToolbarFlyoutOpen())
         {
             return;
@@ -2868,20 +3015,11 @@ public sealed partial class GameLauncherPage : PageBase
 
 
     /// <summary>
-    /// 首次进入且功能条在自由态时展开并弹出拖拽引导；已看过或已贴边则跳过。
+    /// 弹出下一条还没看过的功能栏引导（先拖拽收纳，再右键自定义）。时机不合适就跳过，等下次进页、尺寸变化或浮出时再试。
     /// </summary>
-    private void TryShowRightToolbarDragTip()
+    private void TryShowRightToolbarGuide()
     {
-        if (!_rightToolbarInitialized || AppConfig.HasSeenRightToolbarDragHint)
-        {
-            return;
-        }
-        if (_rightToolbarState is RightToolbarState.Docked or RightToolbarState.DockRevealed)
-        {
-            return;
-        }
-        // 空条已折叠：没有可指向的目标。
-        if (Border_RightToolbar.Visibility != Visibility.Visible)
+        if (!CanShowRightToolbarGuide(GetPendingRightToolbarGuide()))
         {
             return;
         }
@@ -2889,31 +3027,90 @@ public sealed partial class GameLauncherPage : PageBase
         InstantTooltip.SetSuppressed(XamlRoot, true);
         DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
         {
-            if (!_rightToolbarInitialized || AppConfig.HasSeenRightToolbarDragHint)
-            {
-                return;
-            }
-            if (Border_RightToolbar.Visibility != Visibility.Visible || Border_RightToolbar.ActualHeight <= 0)
+            TeachingTip? tip = GetPendingRightToolbarGuide();
+            if (!CanShowRightToolbarGuide(tip) || Border_RightToolbar.ActualHeight <= 0)
             {
                 // 弹不出引导就别留着窗口级抑制，否则下侧工具栏 / 导航的 InstantTooltip 也会一起失效。
-                if (!_rightToolbarDragging && !_rightToolbarPressed)
+                if (_rightToolbarInitialized && !_rightToolbarDragging && !_rightToolbarPressed && !IsRightToolbarGuideOpen())
                 {
                     InstantTooltip.SetSuppressed(XamlRoot, false);
                 }
                 return;
             }
-            TeachingTip_RightToolbarDrag.IsOpen = true;
+            tip!.IsOpen = true;
         });
     }
 
 
     /// <summary>
-    /// 关掉拖拽引导。<paramref name="markSeen"/> 为 true 时写入设置，卸载离开时传 false 以便下次再出。
+    /// 下一条该弹的引导：拖拽引导没看过就是它，看过了再看右键自定义引导。
+    /// </summary>
+    /// <returns>引导；都看过时为 null。</returns>
+    private TeachingTip? GetPendingRightToolbarGuide()
+    {
+        if (!AppConfig.HasSeenRightToolbarDragHint)
+        {
+            return TeachingTip_RightToolbarDrag;
+        }
+        if (!AppConfig.HasSeenRightToolbarCustomizeHint)
+        {
+            return TeachingTip_RightToolbarCustomize;
+        }
+        return null;
+    }
+
+
+    /// <summary>
+    /// 现在能不能弹这条引导：功能栏要可见、没在按住 / 拖动、没有弹层开着。
+    /// 拖拽引导只在自由态弹（贴边时说拖动没意义）；右键自定义引导在贴边浮出且可点后也弹，否则贴边用户永远看不到。
+    /// </summary>
+    /// <param name="tip">要弹的引导。</param>
+    /// <returns>可以弹时为 <see langword="true"/>。</returns>
+    private bool CanShowRightToolbarGuide(TeachingTip? tip)
+    {
+        if (tip is null || !_rightToolbarInitialized || IsRightToolbarGuideOpen())
+        {
+            return false;
+        }
+        // 空条已折叠：没有可指向的目标。
+        if (Border_RightToolbar.Visibility != Visibility.Visible)
+        {
+            return false;
+        }
+        if (_rightToolbarDragging || _rightToolbarPressed || IsAnyRightToolbarFlyoutOpen())
+        {
+            return false;
+        }
+        if (ReferenceEquals(tip, TeachingTip_RightToolbarDrag))
+        {
+            return _rightToolbarState is RightToolbarState.Expanded;
+        }
+        return _rightToolbarState is RightToolbarState.Expanded
+            || (_rightToolbarState is RightToolbarState.DockRevealed && _rightToolbarRevealInteractive);
+    }
+
+
+    /// <summary>
+    /// 有功能栏引导开着。
+    /// </summary>
+    /// <returns>开着时为 <see langword="true"/>。</returns>
+    private bool IsRightToolbarGuideOpen()
+    {
+        return TeachingTip_RightToolbarDrag.IsOpen || TeachingTip_RightToolbarCustomize.IsOpen;
+    }
+
+
+    /// <summary>
+    /// 关掉开着的引导。<paramref name="markSeen"/> 为 true 时把开着的那条记为已看过（没开着时记拖拽引导，与原来一致），
+    /// 卸载离开、空条折叠时传 false 以便下次再出。
     /// </summary>
     /// <param name="markSeen">是否记为已看过。</param>
-    private void DismissRightToolbarDragTip(bool markSeen)
+    private void DismissRightToolbarGuide(bool markSeen)
     {
-        if (!TeachingTip_RightToolbarDrag.IsOpen)
+        TeachingTip? open = TeachingTip_RightToolbarDrag.IsOpen ? TeachingTip_RightToolbarDrag
+            : TeachingTip_RightToolbarCustomize.IsOpen ? TeachingTip_RightToolbarCustomize
+            : null;
+        if (open is null)
         {
             if (markSeen)
             {
@@ -2921,26 +3118,52 @@ public sealed partial class GameLauncherPage : PageBase
             }
             return;
         }
-        _rightToolbarDragTipMarkSeenOnClose = markSeen;
-        TeachingTip_RightToolbarDrag.IsOpen = false;
+        _rightToolbarGuideMarkSeenOnClose = markSeen;
+        open.IsOpen = false;
     }
 
 
     /// <summary>
-    /// TeachingTip 关闭后：按需记「已看过」，恢复 InstantTooltip，贴边浮出态允许空闲回贴边。
+    /// 引导关闭后：按需记「已看过」，恢复 InstantTooltip，贴边浮出态允许空闲回贴边；
+    /// 拖拽引导是用户自己关掉的，就接着弹右键自定义引导。
     /// </summary>
-    private void TeachingTip_RightToolbarDrag_Closed(TeachingTip sender, TeachingTipClosedEventArgs args)
+    private void TeachingTip_RightToolbarGuide_Closed(TeachingTip sender, TeachingTipClosedEventArgs args)
     {
-        if (_rightToolbarDragTipMarkSeenOnClose)
+        bool markSeen = _rightToolbarGuideMarkSeenOnClose;
+        if (markSeen)
         {
-            AppConfig.HasSeenRightToolbarDragHint = true;
+            if (ReferenceEquals(sender, TeachingTip_RightToolbarDrag))
+            {
+                AppConfig.HasSeenRightToolbarDragHint = true;
+            }
+            else
+            {
+                AppConfig.HasSeenRightToolbarCustomizeHint = true;
+            }
         }
-        _rightToolbarDragTipMarkSeenOnClose = true;
+        _rightToolbarGuideMarkSeenOnClose = true;
         if (!_rightToolbarDragging && !_rightToolbarPressed)
         {
             InstantTooltip.SetSuppressed(XamlRoot, false);
         }
-        ScheduleRightToolbarIdleCollapse();
+        if (markSeen && ReferenceEquals(sender, TeachingTip_RightToolbarDrag) && args.Reason is TeachingTipCloseReason.CloseButton)
+        {
+            TryShowRightToolbarGuide();
+        }
+        if (!IsRightToolbarGuideOpen())
+        {
+            ScheduleRightToolbarIdleCollapse();
+        }
+    }
+
+
+    /// <summary>
+    /// 右键自定义引导上的「去设置」：记为看过，打开自定义功能栏对话框。
+    /// </summary>
+    private async void TeachingTip_RightToolbarCustomize_ActionButtonClick(TeachingTip sender, object args)
+    {
+        DismissRightToolbarGuide(markSeen: true);
+        await OpenRightToolbarCustomizeDialogAsync();
     }
 
 
@@ -2950,7 +3173,7 @@ public sealed partial class GameLauncherPage : PageBase
         if (_rightToolbarPointerOver
             || _rightToolbarDragging
             || _rightToolbarPressed
-            || TeachingTip_RightToolbarDrag.IsOpen
+            || IsRightToolbarGuideOpen()
             || IsAnyRightToolbarFlyoutOpen())
         {
             return;
@@ -3526,6 +3749,10 @@ public sealed partial class GameLauncherPage : PageBase
 
     private bool IsAnyRightToolbarFlyoutOpen()
     {
+        if (MenuFlyout_RightToolbar.IsOpen)
+        {
+            return true;
+        }
         foreach (UIElement child in StackPanel_RightToolbar.Children)
         {
             if (child is not FrameworkElement fe || fe.Visibility != Visibility.Visible)
@@ -3545,6 +3772,10 @@ public sealed partial class GameLauncherPage : PageBase
 
     private void CloseAnyRightToolbarFlyout()
     {
+        if (MenuFlyout_RightToolbar.IsOpen)
+        {
+            MenuFlyout_RightToolbar.Hide();
+        }
         foreach (UIElement child in StackPanel_RightToolbar.Children)
         {
             if (child is not FrameworkElement fe)
@@ -3595,7 +3826,7 @@ public sealed partial class GameLauncherPage : PageBase
             return;
         }
 
-        DismissRightToolbarDragTip(markSeen: true);
+        DismissRightToolbarGuide(markSeen: true);
         StopRightToolbarCollapseTimer();
         if (_rightToolbarState is RightToolbarState.Docked)
         {

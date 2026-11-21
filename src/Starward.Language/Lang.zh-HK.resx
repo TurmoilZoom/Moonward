@@ -4681,4 +4681,25 @@
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} 個帳號未能簽到</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>自訂功能列</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>按住拖曳調整順序，關閉開關即可隱藏。部分項目需登入帳號後才會出現在功能列中。</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>僅{0}</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>首頁功能列</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>調整首頁右側功能列中各項的顯示與順序，每款遊戲分別儲存。也可以在首頁對功能列按右鍵開啟。</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>在功能列上按右鍵，可以選擇顯示哪些功能、調整它們的順序。</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>前往設定</value>
+  </data>
 </root>

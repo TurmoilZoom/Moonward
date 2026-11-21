@@ -286,6 +286,32 @@ public static partial class AppConfig
         set => SetValue(value);
     }
 
+    /// <summary>
+    /// 是否已看过首页右侧功能栏的「右键自定义」引导，或已用过自定义（右键过功能栏、打开过自定义对话框）。默认 false。
+    /// </summary>
+    public static bool HasSeenRightToolbarCustomizeHint
+    {
+        get => GetValue(false);
+        set => SetValue(value);
+    }
+
+    /// <summary>
+    /// 首页右侧功能栏在某个游戏下的顺序与隐藏项（<see cref="Starward.Features.GameLauncher.RightToolbarLayout"/> 的逗号串）；
+    /// 没改过时为 null，跟随默认顺序。
+    /// </summary>
+    /// <param name="game">游戏（<see cref="GameBiz.Game"/>，不分区服）。</param>
+    public static string? GetRightToolbarItems(GameBiz game)
+    {
+        return GetValue<string>(default, $"right_toolbar_items_{game.Game}");
+    }
+
+    /// <param name="game">游戏（<see cref="GameBiz.Game"/>，不分区服）。</param>
+    /// <param name="value">逗号串；null 表示恢复默认。</param>
+    public static void SetRightToolbarItems(GameBiz game, string? value)
+    {
+        SetValue(value, $"right_toolbar_items_{game.Game}");
+    }
+
     public static StartGameAction StartGameAction
     {
         get => GetValue(Starward.Features.GameLauncher.StartGameAction.Minimize);

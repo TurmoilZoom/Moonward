@@ -786,6 +786,7 @@
                 IsHitTestVisible="False"
                 ManipulationMode="None"
                 Opacity="0"
+                ContextRequested="Border_RightToolbar_ContextRequested"
                 PointerEntered="Border_RightToolbar_PointerEntered"
                 PointerExited="Border_RightToolbar_PointerExited"
                 Shadow="{StaticResource ThemeShadow}"
@@ -793,6 +794,22 @@
             <Border.RenderTransform>
                 <TranslateTransform x:Name="Transform_RightToolbar" X="0" Y="48" />
             </Border.RenderTransform>
+            <!--  右键（触摸长按）：自定义功能栏。贴边收纳 / 拖动中由 ContextRequested 拦下不弹  -->
+            <Border.ContextFlyout>
+                <MenuFlyout x:Name="MenuFlyout_RightToolbar"
+                            Closed="RightToolbarFlyout_Closed"
+                            Opened="RightToolbarFlyout_Opened">
+                    <MenuFlyoutItem Click="MenuFlyoutItem_CustomizeRightToolbar_Click" Text="{x:Bind lang:Lang.RightToolbarCustomize_Title}">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE70F;" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+            </Border.ContextFlyout>
+            <!--
+              子项的先后与是否在面板里由 ApplyRightToolbarItemLayout 按用户设置调整（RightToolbarItem 一一对应）：
+              关掉的项直接移出面板（不加载、不请求），下面的排列只是默认顺序（RightToolbarLayout.DefaultOrder）。
+            -->
             <StackPanel x:Name="StackPanel_RightToolbar" Spacing="4">
                 <!--  云游戏  -->
                 <sfc:CloudGameButton x:Name="Button_CloudGame"
@@ -801,32 +818,42 @@
                                      CurrentGameId="{x:Bind CurrentGameId}"
                                      Visibility="Collapsed" />
                 <!--  每日便笺  -->
-                <sfgd:DailyNoteButton Width="40"
+                <sfgd:DailyNoteButton x:Name="Button_DailyNote"
+                                      Width="40"
                                       Height="40"
                                       CurrentGameId="{x:Bind CurrentGameId}" />
                 <!--  时间节点：百科卡池 / 活动倒计时  -->
-                <sft:TimeNodeButton Width="40"
+                <sft:TimeNodeButton x:Name="Button_TimeNode"
+                                    Width="40"
                                     Height="40"
                                     CurrentGameId="{x:Bind CurrentGameId}" />
                 <!--  地图工具：点击打开站点列表，跳转浏览器  -->
-                <sfm:MapToolButton Width="40"
+                <sfm:MapToolButton x:Name="Button_MapTool"
+                                   Width="40"
                                    Height="40"
                                    CurrentGameId="{x:Bind CurrentGameId}" />
                 <!--  兑换码：国服前瞻直播码展示（可复制，不兑换）  -->
-                <sfr:RedeemCodeButton Width="40"
+                <sfr:RedeemCodeButton x:Name="Button_RedeemCode"
+                                      Width="40"
                                       Height="40"
                                       CurrentGameId="{x:Bind CurrentGameId}" />
                 <!--  每日签到：图标按钮 + Flyout 卡片（手动签到 / 补签 / 自动签到开关）  -->
-                <sfgs:SignInButton Width="40"
+                <sfgs:SignInButton x:Name="Button_SignIn"
+                                   Width="40"
                                    Height="40"
                                    CurrentGameId="{x:Bind CurrentGameId}" />
             </StackPanel>
         </Border>
 
-        <!--  首次进入：指向功能条，说明可按住拖动、拖到边缘可贴边；看过或拖过后不再出  -->
+        <!--
+          功能栏引导依次出现（TryShowRightToolbarGuide），各自看过后不再出：
+          1. 首次进入：指向功能条，说明可按住拖动、拖到边缘可贴边；看过或拖过后不再出。
+          2. 看过 1 之后：说明右键可以自定义显示与顺序；看过、右键过功能栏或打开过自定义对话框后不再出。
+             功能栏贴边时在悬停浮出后再弹，引导开着时不会自动收回。
+        -->
         <TeachingTip x:Name="TeachingTip_RightToolbarDrag"
                      Background="{ThemeResource CustomOverlayAcrylicBrush}"
-                     Closed="TeachingTip_RightToolbarDrag_Closed"
+                     Closed="TeachingTip_RightToolbarGuide_Closed"
                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                      IsLightDismissEnabled="False"
                      PreferredPlacement="Left"
@@ -834,6 +861,18 @@
                      Subtitle="{x:Bind lang:Lang.GameLauncherPage_RightToolbarDragTipSubtitle}"
                      Target="{x:Bind Border_RightToolbar}"
                      Title="{x:Bind lang:Lang.GameLauncherPage_RightToolbarDragTipTitle}" />
+        <TeachingTip x:Name="TeachingTip_RightToolbarCustomize"
+                     ActionButtonClick="TeachingTip_RightToolbarCustomize_ActionButtonClick"
+                     ActionButtonContent="{x:Bind lang:Lang.RightToolbarCustomize_TipAction}"
+                     Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                     Closed="TeachingTip_RightToolbarGuide_Closed"
+                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                     IsLightDismissEnabled="False"
+                     PreferredPlacement="Left"
+                     ShouldConstrainToRootBounds="True"
+                     Subtitle="{x:Bind lang:Lang.RightToolbarCustomize_TipSubtitle}"
+                     Target="{x:Bind Border_RightToolbar}"
+                     Title="{x:Bind lang:Lang.RightToolbarCustomize_Title}" />
 
     </Grid>
 

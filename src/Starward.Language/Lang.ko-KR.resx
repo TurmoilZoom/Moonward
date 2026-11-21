@@ -4682,4 +4682,25 @@
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>기능 막대 사용자 지정</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>끌어서 순서를 바꾸고, 끄면 숨겨집니다. 일부 항목은 로그인한 후에만 기능 막대에 표시됩니다.</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>{0} 전용</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>홈 기능 막대</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>홈 오른쪽 기능 막대에 표시할 항목과 순서를 설정합니다. 게임별로 따로 저장됩니다. 홈에서 기능 막대를 마우스 오른쪽 버튼으로 클릭해도 열 수 있습니다.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>기능 막대를 마우스 오른쪽 버튼으로 클릭하면 표시할 항목과 순서를 바꿀 수 있습니다.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>사용자 지정</value>
+  </data>
 </root>

@@ -4681,4 +4681,25 @@
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>ツールバーのカスタマイズ</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>ドラッグで並べ替え、オフにすると非表示になります。一部の項目はログイン後にのみツールバーに表示されます。</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>{0}のみ</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>ホームのツールバー</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>ホーム右側のツールバーに表示する項目と順番を設定します。ゲームごとに保存されます。ホームでツールバーを右クリックしても開けます。</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>ツールバーを右クリックすると、表示する項目と順番を変更できます。</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>カスタマイズ</value>
+  </data>
 </root>

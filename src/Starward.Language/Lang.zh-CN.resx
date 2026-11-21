@@ -4770,4 +4770,25 @@
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} 个账号未能签到</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>自定义功能栏</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>按住拖动调整顺序，关闭开关即可隐藏。部分项目需要登录账号后才会出现在功能栏里。</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>仅{0}</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>首页功能栏</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>调整首页右侧功能栏里各项的显示与顺序，每个游戏分别保存。也可以在首页右键功能栏打开。</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>在功能栏上右键，可以选择显示哪些功能、调整它们的顺序。</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>去设置</value>
+  </data>
 </root>

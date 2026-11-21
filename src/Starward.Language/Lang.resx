@@ -4771,4 +4771,25 @@ Repository:</value>
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>Customize toolbar</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>Drag to reorder and turn off to hide. Some items only appear on the toolbar after you sign in.</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>{0} only</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>Home toolbar</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>Choose which items appear in the toolbar on the right side of the home page and in what order. Each game is saved separately. You can also right-click the toolbar to open this.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>Right-click the toolbar to choose which items appear and in what order.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>Customize</value>
+  </data>
 </root>

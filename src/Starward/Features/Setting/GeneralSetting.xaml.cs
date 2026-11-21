@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Starward.Controls;
+using Starward.Features.GameLauncher;
 using Starward.Features.ViewHost;
 using Starward.Frameworks;
 using Starward.Helpers;
@@ -578,6 +579,30 @@ public sealed partial class GeneralSetting : PageBase
     private async void Hyperlink_StartupApps_Click(Microsoft.UI.Xaml.Documents.Hyperlink sender, Microsoft.UI.Xaml.Documents.HyperlinkClickEventArgs args)
     {
         await Launcher.LaunchUriAsync(new Uri("ms-settings:startupapps"));
+    }
+
+
+    #endregion
+
+
+
+
+    #region 首页功能栏
+
+
+    /// <summary>
+    /// 打开自定义功能栏对话框，默认选中当前游戏。
+    /// </summary>
+    private async void Button_CustomizeRightToolbar_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await new RightToolbarCustomizeDialog { InitialGame = AppConfig.CurrentGameBiz, XamlRoot = this.XamlRoot }.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Open right toolbar customize dialog");
+        }
     }
 
 

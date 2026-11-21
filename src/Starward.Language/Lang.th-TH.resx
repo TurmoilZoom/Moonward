@@ -4676,4 +4676,25 @@ You are welcome to submit exported data to:</value>
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>ปรับแต่งแถบเครื่องมือ</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>ลากเพื่อจัดลำดับ ปิดสวิตช์เพื่อซ่อน บางรายการจะแสดงบนแถบหลังจากเข้าสู่ระบบแล้วเท่านั้น</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>เฉพาะ{0}</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>แถบเครื่องมือหน้าแรก</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>เลือกรายการที่จะแสดงบนแถบเครื่องมือด้านขวาของหน้าแรกและลำดับของรายการ บันทึกแยกตามแต่ละเกม คลิกขวาที่แถบเครื่องมือเพื่อเปิดได้เช่นกัน</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>คลิกขวาที่แถบเครื่องมือเพื่อเลือกรายการที่จะแสดงและลำดับของรายการ</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>ปรับแต่ง</value>
+  </data>
 </root>

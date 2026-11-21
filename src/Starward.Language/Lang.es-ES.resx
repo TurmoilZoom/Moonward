@@ -4682,4 +4682,25 @@ You are welcome to submit exported data to:</value>
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>Personalizar barra de herramientas</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>Arrastra para reordenar y desactiva para ocultar. Algunos elementos solo aparecen en la barra tras iniciar sesión.</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>Solo {0}</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>Barra de herramientas de inicio</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>Elige qué elementos muestra la barra de herramientas del lado derecho de la página de inicio y en qué orden. Se guarda por separado para cada juego. También puedes abrirlo haciendo clic derecho en la barra.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>Haz clic derecho en la barra para elegir qué elementos se muestran y en qué orden.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>Personalizar</value>
+  </data>
 </root>

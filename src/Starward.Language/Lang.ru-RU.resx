@@ -4702,4 +4702,25 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>Настроить панель</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>Перетаскивайте, чтобы изменить порядок, и отключайте, чтобы скрыть. Некоторые элементы появляются на панели только после входа в аккаунт.</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>Только {0}</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>Панель на главной странице</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>Выберите, какие элементы показывать на панели справа на главной странице и в каком порядке. Настройки сохраняются отдельно для каждой игры. Также можно открыть, щёлкнув панель правой кнопкой мыши.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>Щёлкните панель правой кнопкой мыши, чтобы выбрать, какие элементы показывать и в каком порядке.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>Настроить</value>
+  </data>
 </root>

@@ -4682,4 +4682,25 @@ You are welcome to submit exported data to:</value>
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>Personalizza barra degli strumenti</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>Trascina per riordinare e disattiva per nascondere. Alcune voci compaiono nella barra solo dopo l'accesso.</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>Solo {0}</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>Barra degli strumenti della home</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>Scegli quali voci mostra la barra degli strumenti a destra della home e in quale ordine. Viene salvato separatamente per ogni gioco. Puoi aprirlo anche con un clic destro sulla barra.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>Fai clic destro sulla barra per scegliere quali voci mostrare e in quale ordine.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>Personalizza</value>
+  </data>
 </root>

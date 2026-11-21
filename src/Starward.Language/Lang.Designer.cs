@@ -13717,5 +13717,68 @@ namespace Starward.Language {
                 return ResourceManager.GetString("AutoSignInNotify_FailedCount", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Customize toolbar 的本地化字符串。
+        /// </summary>
+        public static string RightToolbarCustomize_Title {
+            get {
+                return ResourceManager.GetString("RightToolbarCustomize_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Drag to reorder and turn off to hide. Some items only appear on the toolbar after you sign in. 的本地化字符串。
+        /// </summary>
+        public static string RightToolbarCustomize_Hint {
+            get {
+                return ResourceManager.GetString("RightToolbarCustomize_Hint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0} only 的本地化字符串。
+        /// </summary>
+        public static string RightToolbarCustomize_ServerLimited {
+            get {
+                return ResourceManager.GetString("RightToolbarCustomize_ServerLimited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Home toolbar 的本地化字符串。
+        /// </summary>
+        public static string RightToolbarCustomize_SettingTitle {
+            get {
+                return ResourceManager.GetString("RightToolbarCustomize_SettingTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Choose which items appear in the toolbar on the right side of the home page and in what order. Each game is saved separately. You can also right-click the toolbar to open this. 的本地化字符串。
+        /// </summary>
+        public static string RightToolbarCustomize_SettingDesc {
+            get {
+                return ResourceManager.GetString("RightToolbarCustomize_SettingDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Right-click the toolbar to choose which items appear and in what order. 的本地化字符串。
+        /// </summary>
+        public static string RightToolbarCustomize_TipSubtitle {
+            get {
+                return ResourceManager.GetString("RightToolbarCustomize_TipSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Customize 的本地化字符串。
+        /// </summary>
+        public static string RightToolbarCustomize_TipAction {
+            get {
+                return ResourceManager.GetString("RightToolbarCustomize_TipAction", resourceCulture);
+            }
+        }
     }
 }

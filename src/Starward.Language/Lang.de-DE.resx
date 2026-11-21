@@ -4680,4 +4680,25 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>Symbolleiste anpassen</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>Zum Neuordnen ziehen, zum Ausblenden ausschalten. Einige Einträge erscheinen erst nach der Anmeldung in der Symbolleiste.</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>Nur {0}</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>Symbolleiste der Startseite</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>Legt fest, welche Einträge die Symbolleiste rechts auf der Startseite zeigt und in welcher Reihenfolge. Wird für jedes Spiel separat gespeichert. Auch per Rechtsklick auf die Symbolleiste erreichbar.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>Rechtsklick auf die Symbolleiste, um festzulegen, welche Einträge in welcher Reihenfolge erscheinen.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>Anpassen</value>
+  </data>
 </root>

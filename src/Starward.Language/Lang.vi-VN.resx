@@ -4682,4 +4682,25 @@ You are welcome to submit exported data to:</value>
   <data name="AutoSignInNotify_FailedCount" xml:space="preserve">
     <value>{0} accounts could not be checked in</value>
   </data>
+  <data name="RightToolbarCustomize_Title" xml:space="preserve">
+    <value>Tùy chỉnh thanh công cụ</value>
+  </data>
+  <data name="RightToolbarCustomize_Hint" xml:space="preserve">
+    <value>Kéo để sắp xếp, tắt để ẩn. Một số mục chỉ hiển thị trên thanh sau khi đăng nhập.</value>
+  </data>
+  <data name="RightToolbarCustomize_ServerLimited" xml:space="preserve">
+    <value>Chỉ {0}</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingTitle" xml:space="preserve">
+    <value>Thanh công cụ trang chủ</value>
+  </data>
+  <data name="RightToolbarCustomize_SettingDesc" xml:space="preserve">
+    <value>Chọn các mục hiển thị trên thanh công cụ bên phải trang chủ và thứ tự của chúng. Mỗi trò chơi được lưu riêng. Bạn cũng có thể nhấp chuột phải vào thanh công cụ để mở.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipSubtitle" xml:space="preserve">
+    <value>Nhấp chuột phải vào thanh công cụ để chọn các mục hiển thị và thứ tự của chúng.</value>
+  </data>
+  <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
+    <value>Tùy chỉnh</value>
+  </data>
 </root>
