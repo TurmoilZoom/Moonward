@@ -10,6 +10,7 @@
              xmlns:sc="using:Starward.Controls"
              xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sf="using:Starward.Frameworks"
+             xmlns:sfgr="using:Starward.Features.GameRecord"
              xmlns:sfg="using:Starward.Features.Gacha"
              xmlns:su="using:Starward.Core.GameRecord.StarRail.SimulatedUniverse"
              x:DefaultBindMode="OneWay"
@@ -91,7 +92,8 @@
                   ItemsSource="{x:Bind RecordBasicList}"
                   SelectionChanged="ListView_SimulatedUniverse_SelectionChanged"
                   SelectionMode="Single"
-                  Visibility="{x:Bind RecordBasicList, Converter={StaticResource ObjectToVisibilityConverter}}">
+                  Visibility="{x:Bind RecordBasicList, Converter={StaticResource ObjectToVisibilityConverter}}"
+                  sfgr:GameRecordListDragScroll.IsEnabled="True">
             <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>

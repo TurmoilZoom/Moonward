@@ -11,6 +11,7 @@
              xmlns:scv="using:Starward.Converters"
              xmlns:sfgra="using:Starward.Features.GameRecord.AutoRefresh"
              xmlns:sf="using:Starward.Frameworks"
+             xmlns:sfgr="using:Starward.Features.GameRecord"
              xmlns:sfg="using:Starward.Features.Gacha"
              xmlns:helpers="using:Starward.Helpers"
              x:DefaultBindMode="OneWay"
@@ -95,7 +96,8 @@
                   ItemContainerStyle="{StaticResource GameRecordListViewItemStyle}"
                   ItemsSource="{x:Bind TheaterList}"
                   SelectionChanged="ListView_TheaterList_SelectionChanged"
-                  SelectionMode="Single">
+                  SelectionMode="Single"
+                  sfgr:GameRecordListDragScroll.IsEnabled="True">
             <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>

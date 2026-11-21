@@ -87,7 +87,8 @@
                   ItemsSource="{x:Bind ShiyuDefenseList}"
                   SelectionChanged="ListView_ShiyuDefense_SelectionChanged"
                   SelectionMode="Single"
-                  Visibility="{x:Bind ShiyuDefenseList, Converter={StaticResource ObjectToVisibilityConverter}}">
+                  Visibility="{x:Bind ShiyuDefenseList, Converter={StaticResource ObjectToVisibilityConverter}}"
+                  sfgr:GameRecordListDragScroll.IsEnabled="True">
             <!--  条数少、需要选择：用 StackPanel 关掉默认虚拟化，避免跨显示器 DPI 变化时 MeasureOverride 失败。  -->
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>

@@ -1,12 +1,15 @@
+using CommunityToolkit.WinUI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Starward.Controls;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using Windows.Foundation;
@@ -25,6 +28,7 @@ namespace Starward.Features.Gacha;
 /// 由 <see cref="CompositionTarget.Rendering"/> 按帧积分。
 /// </para>
 /// <para>拖拽或甩动中一旦滚动滚轮，立即结束自管滚动、交给 ScrollViewer 原生滚轮动画，避免两边争抢偏移。</para>
+/// <para>除抽卡记录列表外，米游社工具箱各页左侧的记录 <see cref="ListView"/> 也经 <see cref="BindSelectableList"/> 复用本行为（XAML 入口见 <c>GameRecordListDragScroll</c>）。</para>
 /// </summary>
 internal static class GachaStatsListDragScrollHelper
 {
@@ -46,6 +50,9 @@ internal static class GachaStatsListDragScrollHelper
     /// <summary>判定仍存在过拉位移的最小绝对值（像素），避免浮点残差挡住甩动。</summary>
     private const double OverscrollEpsilon = 0.5;
 
+    /// <summary>可点选列表中，按下后竖直移动超过此距离（DIP）才算拖拽；取系统拖放阈值 SM_CYDRAG 的默认值。</summary>
+    private const double ItemClickDragThreshold = 4d;
+
 
     /// <summary>
     /// 为指定的 <see cref="ScrollViewer"/> 注入鼠标拖拽滚动 + 回弹行为。
@@ -57,6 +64,22 @@ internal static class GachaStatsListDragScrollHelper
     public static GachaStatsListDragScrollBinding Bind(ScrollViewer scrollViewer, Action? onDragEnd = null, Action? onDragSettled = null)
     {
         return new GachaStatsListDragScrollBinding(scrollViewer, onDragEnd, onDragSettled);
+    }
+
+
+    /// <summary>
+    /// 为可点选的 <see cref="ListViewBase"/> 注入同样的拖拽滚动 + 回弹：原地单击仍交给列表项完成选中，
+    /// 按下后拖动超过 <see cref="ItemClickDragThreshold"/> 才接管为拖拽（此时列表项的按下被取消，不会选中）。
+    /// </summary>
+    /// <param name="listView">目标列表；须已应用模板（在 Loaded 及之后调用）。</param>
+    /// <returns>绑定句柄，须在页面卸载时 Dispose；模板内找不到 <see cref="ScrollViewer"/> 时返回 <c>null</c>。</returns>
+    public static GachaStatsListDragScrollBinding? BindSelectableList(ListViewBase listView)
+    {
+        if (listView.FindDescendant<ScrollViewer>() is not ScrollViewer scrollViewer || scrollViewer.Content is not FrameworkElement)
+        {
+            return null;
+        }
+        return new GachaStatsListDragScrollBinding(scrollViewer, itemsHandleClick: true);
     }
 
 
@@ -74,8 +97,26 @@ internal static class GachaStatsListDragScrollHelper
         private readonly Visual _contentVisual;
         private readonly Action? _onDragEnd;
         private readonly Action? _onDragSettled;
+        private readonly bool _itemsHandleClick;
+        private readonly PointerEventHandler _pressedHandler;
+        private readonly PointerEventHandler _movedHandler;
+        private readonly PointerEventHandler _releasedHandler;
+        private readonly PointerEventHandler _captureLostHandler;
+        private readonly PointerEventHandler _canceledHandler;
         private readonly PointerEventHandler _wheelHandler;
         private bool _disposed;
+
+        // 可点选列表：已按下但还没拖过阈值，指针仍归列表项（等待判定单击还是拖拽）
+        private bool _pressPending;
+        private Point _pressPosition;
+        private SelectorItem? _pressedItem;   // 收到这次按下的列表项容器（ListViewItem）
+
+        // 可点选列表的悬停高亮：拖拽中指针被本容器捕获，列表项收不到进出事件，由这里按指针位置代为切换可视状态。
+        // _hoverItem 是当前由本类设成 PointerOver 的项；停稳后指针第一次移动即交还列表项自己管理。
+        private SelectorItem? _hoverItem;
+        private Point? _lastWindowPoint;      // 指针最近位置（窗口坐标），用于命中测试
+        private XamlRoot? _suppressedRoot;    // 拖拽时对其设了 Tooltip 抑制的 XamlRoot；null = 当前没有抑制
+        private readonly PointerEventHandler _exitedHandler;
 
         // 拖拽状态
         private bool _isDragging;
@@ -101,7 +142,18 @@ internal static class GachaStatsListDragScrollHelper
         private static readonly double TickToSeconds = 1.0 / Stopwatch.Frequency;
 
 
-        public GachaStatsListDragScrollBinding(ScrollViewer scrollViewer, Action? onDragEnd = null, Action? onDragSettled = null)
+        /// <summary>
+        /// 创建绑定并挂上指针事件。
+        /// </summary>
+        /// <param name="scrollViewer">竖直滚动容器，其 Content 须为 <see cref="FrameworkElement"/>（过拉位移挂在它的 Translation 上）。</param>
+        /// <param name="onDragEnd">见 <see cref="Bind"/>。</param>
+        /// <param name="onDragSettled">见 <see cref="Bind"/>。</param>
+        /// <param name="itemsHandleClick">
+        /// 列表项自己要处理点击（如 <see cref="ListViewItem"/> 的选中）：按下时不抢指针捕获，拖过阈值才接管；
+        /// 并以 handledEventsToo 监听按下 / 移动 / 松开，因为列表项会把这些事件置为 Handled。
+        /// </param>
+        /// <exception cref="InvalidOperationException"><paramref name="scrollViewer"/> 的 Content 不是 <see cref="FrameworkElement"/>。</exception>
+        public GachaStatsListDragScrollBinding(ScrollViewer scrollViewer, Action? onDragEnd = null, Action? onDragSettled = null, bool itemsHandleClick = false)
         {
             _scrollViewer = scrollViewer;
             _content = scrollViewer.Content as FrameworkElement
@@ -110,12 +162,24 @@ internal static class GachaStatsListDragScrollHelper
             ElementCompositionPreview.SetIsTranslationEnabled(_content, true);
             _onDragEnd = onDragEnd;
             _onDragSettled = onDragSettled;
+            _itemsHandleClick = itemsHandleClick;
 
-            _scrollViewer.PointerPressed += OnPointerPressed;
-            _scrollViewer.PointerMoved += OnPointerMoved;
-            _scrollViewer.PointerReleased += OnPointerReleased;
-            _scrollViewer.PointerCaptureLost += OnPointerCaptureLost;
-            _scrollViewer.PointerCanceled += OnPointerCaptureLost;
+            _pressedHandler = OnPointerPressed;
+            _movedHandler = OnPointerMoved;
+            _releasedHandler = OnPointerReleased;
+            _captureLostHandler = OnPointerCaptureLost;
+            _canceledHandler = OnPointerCanceled;
+            // 抽卡记录项不处理指针，普通订阅即可；保持原样，免得记录里的可点控件（已置 Handled 的按下）也被当成拖拽起点。
+            _scrollViewer.AddHandler(UIElement.PointerPressedEvent, _pressedHandler, itemsHandleClick);
+            _scrollViewer.AddHandler(UIElement.PointerMovedEvent, _movedHandler, itemsHandleClick);
+            _scrollViewer.AddHandler(UIElement.PointerReleasedEvent, _releasedHandler, itemsHandleClick);
+            _scrollViewer.AddHandler(UIElement.PointerCaptureLostEvent, _captureLostHandler, itemsHandleClick);
+            _scrollViewer.AddHandler(UIElement.PointerCanceledEvent, _canceledHandler, itemsHandleClick);
+            _exitedHandler = OnPointerExited;
+            if (itemsHandleClick)
+            {
+                _scrollViewer.AddHandler(UIElement.PointerExitedEvent, _exitedHandler, handledEventsToo: true);
+            }
             // ScrollViewer 在自身 OnPointerWheelChanged 里处理滚轮并置 Handled，须 handledEventsToo 才收得到。
             _wheelHandler = OnPointerWheelChanged;
             _scrollViewer.AddHandler(UIElement.PointerWheelChangedEvent, _wheelHandler, handledEventsToo: true);
@@ -143,8 +207,15 @@ internal static class GachaStatsListDragScrollHelper
             {
                 return;
             }
+            // 可点选列表连已处理的按下也监听：滚动条（含拖动滑块）自己处理的按下也会冒泡到这里，
+            // 不能当成拖拽起点，否则过阈值时会抢走滑块的捕获，滑块拖不动、内容还反向走。
+            if (_itemsHandleClick && IsInsideScrollBar(e.OriginalSource as DependencyObject))
+            {
+                return;
+            }
 
             // 新按下打断进行中的甩动，并以当前真实偏移重新锚定。
+            bool interruptedFling = _flinging;
             StopFling();
             double seed = _scrollViewer.VerticalOffset;
             try
@@ -155,20 +226,134 @@ internal static class GachaStatsListDragScrollHelper
 
             _virtualOffset = seed;
             _lastAppliedClamped = seed;
-            _capturedPointer = e.Pointer;
-            _scrollViewer.CapturePointer(e.Pointer);
             _lastPosition = e.GetCurrentPoint(_scrollViewer).Position;
             _lastTimestamp = Stopwatch.GetTimestamp();
             _velocity = 0;
             _dragMoved = false;
+
+            if (_itemsHandleClick)
+            {
+                _lastWindowPoint = e.GetCurrentPoint(null).Position;
+                _pressedItem = FindItemContainer(e.OriginalSource as DependencyObject);
+                // 新的按下由列表项自己显示按下态；之前代管的悬停到此为止。
+                _hoverItem = null;
+            }
+
+            // 可点选列表：先不抢捕获，让列表项照常走按下→松开的选中流程，拖过阈值再接管。
+            // 甩动中按下只是想让列表停住（同触屏点停惯性），直接进入拖拽，不选中按下的那项。
+            if (_itemsHandleClick && !interruptedFling)
+            {
+                _pressPosition = _lastPosition;
+                _pressPending = true;
+                return;
+            }
+            BeginDrag(e.Pointer);
+        }
+
+
+        /// <summary>捕获指针进入拖拽状态。可点选列表里会抢走列表项的捕获，使其取消按下、不再选中。</summary>
+        /// <param name="pointer">要捕获的鼠标指针。</param>
+        private void BeginDrag(Pointer pointer)
+        {
+            _pressPending = false;
+            SelectorItem? pressedItem = _pressedItem;
+            _pressedItem = null;
+            if (pressedItem is not null)
+            {
+                // ListViewItem 被鼠标按下时只记「左键已按下」并排队一次点击，自己不捕获指针；本容器接管后它收不到松开，
+                // 会一直停在 Pressed 外观（指针移回来也只显示按下），松开时还可能照样选中。
+                // 让它拿到捕获再立即释放，触发它自己的 PointerCaptureLost：清掉按下 / 悬停标记并取消排队的点击。
+                // 不能拿着捕获直接转给本容器：那样本容器捕获失败，松开仍落到列表项上并选中它。
+                try
+                {
+                    if (pressedItem.CapturePointer(pointer))
+                    {
+                        pressedItem.ReleasePointerCapture(pointer);
+                    }
+                }
+                catch { }
+            }
+            _capturedPointer = pointer;
+            _scrollViewer.CapturePointer(pointer);
             _isDragging = true;
             // 拖拽滚动时隐藏记录项上的时间气泡，并避免列表移动时反复弹出。
-            InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, true);
+            // 抑制是整个窗口生效的；记下设置时的 XamlRoot，卸载时元素的 XamlRoot 可能已取不到。
+            _suppressedRoot = _scrollViewer.XamlRoot;
+            InstantTooltip.SetSuppressed(_suppressedRoot, true);
+            if (pressedItem is not null)
+            {
+                // 内容跟着指针走，被拖的那项一直在指针下：拖拽中保持它的悬停高亮（同抽卡记录列表）。
+                SetHoverItem(pressedItem);
+            }
+        }
+
+
+        /// <summary>从命中元素向上找到所属的列表项容器（<see cref="SelectorItem"/>），找不到返回 null。</summary>
+        /// <param name="element">命中的元素（如指针事件的 OriginalSource）。</param>
+        /// <returns>列表项容器，或 null（在列表空白处）。</returns>
+        private SelectorItem? FindItemContainer(DependencyObject? element)
+        {
+            for (DependencyObject? current = element; current is not null && !ReferenceEquals(current, _scrollViewer); current = VisualTreeHelper.GetParent(current))
+            {
+                if (current is SelectorItem item)
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+
+        /// <summary>命中元素是否位于本容器的滚动条内。</summary>
+        /// <param name="element">指针按下事件的 OriginalSource。</param>
+        /// <returns>在 <see cref="ScrollBar"/> 内返回 true。</returns>
+        private bool IsInsideScrollBar(DependencyObject? element)
+        {
+            for (DependencyObject? current = element; current is not null && !ReferenceEquals(current, _scrollViewer); current = VisualTreeHelper.GetParent(current))
+            {
+                if (current is ScrollBar)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
 
         private void OnPointerMoved(object sender, PointerRoutedEventArgs e)
         {
+            if (_itemsHandleClick)
+            {
+                _lastWindowPoint = e.GetCurrentPoint(null).Position;
+                if (!_isDragging && !_pressPending && _hoverItem is not null)
+                {
+                    // 停稳后指针第一次移动：列表项自己的进出事件已能正常判定（若还在该项内，它会收到 PointerEntered 自行点亮），
+                    // 代管到此结束；指针已不在该项上时，它收不到 PointerExited，须在这里撤掉代设的高亮。
+                    if (!IsPointerOver(_hoverItem, e))
+                    {
+                        ApplyRestState(_hoverItem);
+                    }
+                    _hoverItem = null;
+                }
+            }
+
+            if (_pressPending)
+            {
+                var pending = e.GetCurrentPoint(_scrollViewer);
+                if (!pending.Properties.IsLeftButtonPressed)
+                {
+                    _pressPending = false;
+                    return;
+                }
+                // 只看竖直位移：横向抖动不该把一次单击变成拖拽（列表本身也不横向滚动）。
+                if (Math.Abs(pending.Position.Y - _pressPosition.Y) < ItemClickDragThreshold)
+                {
+                    return;
+                }
+                // 过阈值：接管，并把按下以来的位移一并计入，内容仍贴着指针。
+                BeginDrag(e.Pointer);
+            }
+
             if (!_isDragging)
             {
                 return;
@@ -206,6 +391,13 @@ internal static class GachaStatsListDragScrollHelper
 
         private void OnPointerReleased(object sender, PointerRoutedEventArgs e)
         {
+            // 没拖过阈值就松开：是一次单击，交给列表项完成选中。
+            _pressPending = false;
+            _pressedItem = null;
+            if (_itemsHandleClick)
+            {
+                _lastWindowPoint = e.GetCurrentPoint(null).Position;
+            }
             if (!_isDragging)
             {
                 return;
@@ -216,12 +408,41 @@ internal static class GachaStatsListDragScrollHelper
 
         private void OnPointerCaptureLost(object sender, PointerRoutedEventArgs e)
         {
+            // 可点选列表里，接管拖拽时列表项丢失捕获，其 PointerCaptureLost 会冒泡上来；只认本容器自己的捕获丢失。
+            if (!ReferenceEquals(e.OriginalSource, _scrollViewer))
+            {
+                return;
+            }
+            OnPointerCanceled(sender, e);
+        }
+
+
+        private void OnPointerCanceled(object sender, PointerRoutedEventArgs e)
+        {
+            _pressPending = false;
+            _pressedItem = null;
             if (!_isDragging)
             {
                 return;
             }
-            // 捕获丢失与正常松手走同一条路径：有速度就甩，没有则回弹/停住。
+            // 捕获丢失 / 取消与正常松手走同一条路径：有速度就甩，没有则回弹/停住。
             TryFlingOrRestore();
+        }
+
+
+        /// <summary>
+        /// 指针离开列表：撤掉代设的悬停高亮。离开时不一定经过一次「在列表内」的移动，列表项也收不到 PointerExited，不撤会残留。
+        /// </summary>
+        /// <param name="sender">事件源（ScrollViewer）。</param>
+        /// <param name="e">列表项的 PointerExited 也会冒泡到这里，按指针是否仍在本容器内区分。</param>
+        private void OnPointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            if (_isDragging || _hoverItem is null || IsPointerOver(_scrollViewer, e))
+            {
+                return;
+            }
+            ApplyRestState(_hoverItem);
+            _hoverItem = null;
         }
 
 
@@ -237,6 +458,9 @@ internal static class GachaStatsListDragScrollHelper
         /// <param name="e">滚轮路由事件参数（通常已被 ScrollViewer 置为 Handled）。</param>
         private void OnPointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
+            // 按住未拖动时滚了滚轮：按下时记下的锚点已过期，这次按下不再转成拖拽。
+            _pressPending = false;
+            _pressedItem = null;
             if (_isDragging)
             {
                 _velocity = 0;
@@ -247,7 +471,7 @@ internal static class GachaStatsListDragScrollHelper
                 StopFling();
                 RestoreTooltip();
                 // 甩动被滚轮打断：内容停在当前位置，直接按停稳处理。
-                _onDragSettled?.Invoke();
+                NotifySettled();
             }
         }
 
@@ -291,7 +515,7 @@ internal static class GachaStatsListDragScrollHelper
 
             // 无甩动也无回弹：内容已停稳，通知回调方按最终位置校正。
             RestoreTooltip();
-            _onDragSettled?.Invoke();
+            NotifySettled();
         }
 
 
@@ -399,7 +623,7 @@ internal static class GachaStatsListDragScrollHelper
                 else
                 {
                     RestoreTooltip();
-                    _onDragSettled?.Invoke();
+                    NotifySettled();
                 }
                 return;
             }
@@ -408,7 +632,7 @@ internal static class GachaStatsListDragScrollHelper
             {
                 StopFling();
                 RestoreTooltip();
-                _onDragSettled?.Invoke();
+                NotifySettled();
             }
         }
 
@@ -492,7 +716,7 @@ internal static class GachaStatsListDragScrollHelper
                 {
                     if (!_disposed)
                     {
-                        _onDragSettled?.Invoke();
+                        NotifySettled();
                     }
                 };
             }
@@ -501,15 +725,151 @@ internal static class GachaStatsListDragScrollHelper
                 ClearOverscrollInstant();
                 if (!_disposed)
                 {
-                    _onDragSettled?.Invoke();
+                    NotifySettled();
                 }
             }
         }
 
 
+        /// <summary>解除拖拽时设下的 Tooltip 抑制（未设过则不动）。</summary>
         private void RestoreTooltip()
         {
-            InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, false);
+            if (_suppressedRoot is null)
+            {
+                return;
+            }
+            InstantTooltip.SetSuppressed(_suppressedRoot, false);
+            _suppressedRoot = null;
+        }
+
+        #endregion
+
+
+        #region Settled / item hover (selectable list)
+
+        /// <summary>内容彻底停稳：通知回调方；可点选列表再按最终指针位置校正悬停高亮。</summary>
+        private void NotifySettled()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            _onDragSettled?.Invoke();
+            // 停稳回调到达时若已开始新的按下 / 拖拽，交给那一轮处理，免得把列表项的按下态改掉。
+            if (_itemsHandleClick && !_isDragging && !_pressPending)
+            {
+                SyncHoverToPointer();
+            }
+        }
+
+
+        /// <summary>
+        /// 按指针最近位置命中列表项：命中的一项设为悬停，其余撤回静止态。
+        /// 拖拽 / 回弹 / 甩动期间内容在指针下移动，列表项收不到进出事件，这里统一校正。
+        /// </summary>
+        private void SyncHoverToPointer()
+        {
+            SelectorItem? hit = null;
+            try
+            {
+                if (_lastWindowPoint is Point point && _scrollViewer.XamlRoot is not null)
+                {
+                    // 只在视口内命中：滚出视口的项被裁剪但仍有布局位置，指针落在列表外时不能算到它们头上。
+                    Rect viewport = _scrollViewer.TransformToVisual(null).TransformBounds(new Rect(0, 0, _scrollViewer.ActualWidth, _scrollViewer.ActualHeight));
+                    if (viewport.Contains(point))
+                    {
+                        foreach (UIElement element in VisualTreeHelper.FindElementsInHostCoordinates(point, _scrollViewer))
+                        {
+                            if (FindItemContainer(element) is SelectorItem item)
+                            {
+                                hit = item;
+                                break;
+                            }
+                        }
+                    }
+                }
+                foreach (SelectorItem item in EnumerateItemContainers(_content))
+                {
+                    if (!ReferenceEquals(item, hit))
+                    {
+                        ApplyRestState(item);
+                    }
+                }
+            }
+            catch { }
+            _hoverItem = null;
+            SetHoverItem(hit);
+        }
+
+
+        /// <summary>把 <paramref name="item"/> 设为代管的悬停项（PointerOver 可视状态），并撤掉上一个代管项的高亮。</summary>
+        /// <param name="item">新的悬停项；null 只撤销。</param>
+        private void SetHoverItem(SelectorItem? item)
+        {
+            if (_hoverItem is not null && !ReferenceEquals(_hoverItem, item))
+            {
+                ApplyRestState(_hoverItem);
+            }
+            _hoverItem = item;
+            if (item is not null)
+            {
+                // 状态名与系统 ListViewItem 可视状态模板一致；用 ListViewItemPresenter 的默认模板没有这些状态，调用无效果。
+                VisualStateManager.GoToState(item, item.IsSelected ? "PointerOverSelected" : "PointerOver", true);
+            }
+        }
+
+
+        /// <summary>把列表项的 CommonStates 撤回静止态（选中 / 普通），不动其他状态组。</summary>
+        /// <param name="item">列表项容器。</param>
+        private static void ApplyRestState(SelectorItem item)
+        {
+            VisualStateManager.GoToState(item, item.IsSelected ? "Selected" : "Normal", true);
+        }
+
+
+        /// <summary>指针当前是否在 <paramref name="element"/> 的边界内。</summary>
+        /// <param name="element">要判断的元素。</param>
+        /// <param name="e">提供指针位置的路由事件参数。</param>
+        /// <returns>在边界内返回 true；元素已离开视觉树等取不到坐标时返回 false。</returns>
+        private static bool IsPointerOver(FrameworkElement element, PointerRoutedEventArgs e)
+        {
+            try
+            {
+                if (element.XamlRoot is null)
+                {
+                    return false;
+                }
+                Point p = e.GetCurrentPoint(element).Position;
+                return p.X >= 0 && p.Y >= 0 && p.X < element.ActualWidth && p.Y < element.ActualHeight;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+        /// <summary>枚举 <paramref name="root"/> 下的列表项容器（不进入列表项内部）。</summary>
+        /// <param name="root">滚动内容（ItemsPresenter）。</param>
+        /// <returns>已生成的 <see cref="SelectorItem"/>。</returns>
+        private static IEnumerable<SelectorItem> EnumerateItemContainers(DependencyObject root)
+        {
+            int count = VisualTreeHelper.GetChildrenCount(root);
+            for (int i = 0; i < count; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(root, i);
+                if (child is SelectorItem item)
+                {
+                    yield return item;
+                }
+                else
+                {
+                    foreach (SelectorItem nested in EnumerateItemContainers(child))
+                    {
+                        yield return nested;
+                    }
+                }
+            }
         }
 
         #endregion
@@ -527,23 +887,29 @@ internal static class GachaStatsListDragScrollHelper
 
             StopFling();
 
-            _scrollViewer.PointerPressed -= OnPointerPressed;
-            _scrollViewer.PointerMoved -= OnPointerMoved;
-            _scrollViewer.PointerReleased -= OnPointerReleased;
-            _scrollViewer.PointerCaptureLost -= OnPointerCaptureLost;
-            _scrollViewer.PointerCanceled -= OnPointerCaptureLost;
+            _pressPending = false;
+            _pressedItem = null;
+            _hoverItem = null;
+            _scrollViewer.RemoveHandler(UIElement.PointerPressedEvent, _pressedHandler);
+            _scrollViewer.RemoveHandler(UIElement.PointerMovedEvent, _movedHandler);
+            _scrollViewer.RemoveHandler(UIElement.PointerReleasedEvent, _releasedHandler);
+            _scrollViewer.RemoveHandler(UIElement.PointerCaptureLostEvent, _captureLostHandler);
+            _scrollViewer.RemoveHandler(UIElement.PointerCanceledEvent, _canceledHandler);
+            _scrollViewer.RemoveHandler(UIElement.PointerExitedEvent, _exitedHandler);
             _scrollViewer.RemoveHandler(UIElement.PointerWheelChangedEvent, _wheelHandler);
 
-            if (_isDragging)
-            {
-                InstantTooltip.SetSuppressed(_scrollViewer.XamlRoot, false);
-                _isDragging = false;
-            }
+            // 甩动中被卸载（如甩完立刻切到别的页面）时 _isDragging 已是 false，也要解除：抑制作用于整个窗口，
+            // 留着会让窗口里所有即时提示失效，直到下一次拖拽结束。
+            RestoreTooltip();
+            _isDragging = false;
 
-            if (_overscrollY != 0)
+            // 回弹动画可能还在跑：元素离开视觉树前停掉，并把位移归零。
+            try
             {
-                ClearOverscrollInstant();
+                _contentVisual.StopAnimation("Translation");
             }
+            catch { }
+            ClearOverscrollInstant();
         }
 
         #endregion
