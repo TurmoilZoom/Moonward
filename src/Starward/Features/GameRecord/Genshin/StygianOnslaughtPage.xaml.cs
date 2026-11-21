@@ -118,9 +118,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
                 ListView_StygianOnslaughtPageList.SelectedIndex = 0;
                 CurrentInfo = _gameRecordService.GetStygianOnslaughtInfo(gameRole, SOList[0].ScheduleId);
                 HasData = CurrentInfo?.Schedule?.ScheduleId > 0;
-                CurrentSelectedBattle = CurrentInfo?.SinglePlayer;
-                Segmented_PlayerMode.SelectedIndex = 0;
-                SegmentedItem_MultiPlayer.IsEnabled = CurrentInfo?.MultiPlayer?.HasData ?? false;
+                SelectDefaultPlayerMode();
                 Image_Emoji.Visibility = HasData ? Visibility.Collapsed : Visibility.Visible;
             }
             else
@@ -178,10 +176,8 @@ public sealed partial class StygianOnslaughtPage : PageBase
             if (e.AddedItems.FirstOrDefault() is StygianOnslaughtInfo info)
             {
                 CurrentInfo = _gameRecordService.GetStygianOnslaughtInfo(gameRole, info.ScheduleId);
-                CurrentSelectedBattle = CurrentInfo?.SinglePlayer;
                 HasData = CurrentInfo?.Schedule?.ScheduleId > 0;
-                Segmented_PlayerMode.SelectedIndex = 0;
-                SegmentedItem_MultiPlayer.IsEnabled = CurrentInfo?.MultiPlayer?.HasData ?? false;
+                SelectDefaultPlayerMode();
                 Image_Emoji.Visibility = HasData ? Visibility.Collapsed : Visibility.Visible;
             }
         }
@@ -189,6 +185,22 @@ public sealed partial class StygianOnslaughtPage : PageBase
         {
             _logger.LogError(ex, "Selection changed ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
         }
+    }
+
+
+
+    /// <summary>
+    /// 按 <see cref="CurrentInfo"/> 选默认的单人/多人模式：只有多人有数据时选多人，其余情况（含两边都有）选单人。
+    /// </summary>
+    private void SelectDefaultPlayerMode()
+    {
+        bool singleHasData = CurrentInfo?.SinglePlayer?.HasData ?? false;
+        bool multiHasData = CurrentInfo?.MultiPlayer?.HasData ?? false;
+        bool preferMulti = multiHasData && !singleHasData;
+        // 先启用多人项再选中；SelectedIndex 未变时不触发 SelectionChanged，所以这里直接赋 CurrentSelectedBattle
+        SegmentedItem_MultiPlayer.IsEnabled = multiHasData;
+        CurrentSelectedBattle = preferMulti ? CurrentInfo?.MultiPlayer : CurrentInfo?.SinglePlayer;
+        Segmented_PlayerMode.SelectedIndex = preferMulti ? 1 : 0;
     }
 
 
