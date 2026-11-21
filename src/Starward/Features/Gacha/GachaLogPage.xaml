@@ -17,6 +17,8 @@
         <local:RarityToGIBgConverter x:Key="RarityToGIBgConverter" />
         <local:RarityToSRBgConverter x:Key="RarityToSRBgConverter" />
         <local:RarityToZZZIconConverter x:Key="RarityToZZZIconConverter" />
+        <!--  抽卡资源弹出层右侧两列的列宽，由代码按内容量出；持有量、表头与各频段行（模板内）绑定同一实例  -->
+        <local:ZZZGachaResourcesColumnLayout x:Key="GachaResourcesColumnLayout" />
     </Page.Resources>
 
     <Grid>
@@ -185,9 +187,10 @@
                 <DropDownButton.Flyout>
                     <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
                         <!--
-                            两段共用列网格：图标 20 | 名称 * | （已垫 40）| 数字 72，列间距统一 10，行高统一 28。
-                            每行都以图标起头，名称同一起点；数字一律在定宽列里居中，持有量与「距保底」共用最右一列（同一条中轴）。
-                            宽度随最长的名称伸缩（外语频段名较长），各行右侧都是定宽列，伸缩只拉宽名称列，对齐不受影响
+                            两段共用列网格：图标 20 | 名称 * | （已垫）| 数量，列间距统一 10，行高统一 28。
+                            每行都以图标起头，名称同一起点；数字一律在列里居中，持有量与「距保底」共用最右一列（同一条中轴）。
+                            已垫、数量两列的宽度取该列最宽的表头或数字（GachaResourcesColumnLayout），最宽的内容贴着右内边距，左右留白一致；
+                            宽度随最长的名称伸缩（外语频段名较长），伸缩只拉宽名称列，对齐不受影响
                         -->
                         <StackPanel MinWidth="272"
                                     MaxWidth="360"
@@ -196,34 +199,35 @@
                                 <TextBlock VerticalAlignment="Center"
                                            FontSize="16"
                                            Text="{x:Bind lang:Lang.GachaLogPage_GachaResources}" />
-                                <!--  右边距 20 =（72 - 32）/ 2：按钮与下方 72 宽数字列同中轴，刷新图标正对一列数字  -->
-                                <Button Width="32"
-                                        Height="32"
-                                        Margin="0,0,20,0"
-                                        Padding="0"
-                                        HorizontalAlignment="Right"
-                                        AutomationProperties.Name="{x:Bind lang:Lang.Common_Refresh}"
-                                        Command="{x:Bind RefreshGachaResourcesCommand}"
-                                        Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                        sc:InstantTooltip.Placement="Top"
-                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
-                                    <!--  刷新反馈：刷新中转圈 → 成功后打勾约 1.5 秒 → 回到刷新图标；三者同格切换显隐  -->
-                                    <Grid>
-                                        <FontIcon x:Name="FontIcon_GachaResourcesRefresh"
-                                                  FontSize="14"
-                                                  Glyph="&#xE72C;" />
-                                        <ProgressRing x:Name="ProgressRing_GachaResourcesRefresh"
-                                                      Width="16"
-                                                      Height="16"
-                                                      IsActive="False"
+                                <!--  外层与下方数量列同宽、贴右：刷新按钮在数量列中轴上，刷新图标正对一列数字  -->
+                                <Grid Width="{Binding CountWidth, Source={StaticResource GachaResourcesColumnLayout}}" HorizontalAlignment="Right">
+                                    <Button Width="32"
+                                            Height="32"
+                                            Padding="0"
+                                            HorizontalAlignment="Center"
+                                            AutomationProperties.Name="{x:Bind lang:Lang.Common_Refresh}"
+                                            Command="{x:Bind RefreshGachaResourcesCommand}"
+                                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                            sc:InstantTooltip.Placement="Top"
+                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
+                                        <!--  刷新反馈：刷新中转圈 → 成功后打勾约 1.5 秒 → 回到刷新图标；三者同格切换显隐  -->
+                                        <Grid>
+                                            <FontIcon x:Name="FontIcon_GachaResourcesRefresh"
+                                                      FontSize="14"
+                                                      Glyph="&#xE72C;" />
+                                            <ProgressRing x:Name="ProgressRing_GachaResourcesRefresh"
+                                                          Width="16"
+                                                          Height="16"
+                                                          IsActive="False"
+                                                          Visibility="Collapsed" />
+                                            <FontIcon x:Name="FontIcon_GachaResourcesRefreshed"
+                                                      FontSize="14"
+                                                      Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                      Glyph="&#xE73E;"
                                                       Visibility="Collapsed" />
-                                        <FontIcon x:Name="FontIcon_GachaResourcesRefreshed"
-                                                  FontSize="14"
-                                                  Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                                                  Glyph="&#xE73E;"
-                                                  Visibility="Collapsed" />
-                                    </Grid>
-                                </Button>
+                                        </Grid>
+                                    </Button>
+                                </Grid>
                             </Grid>
 
                             <!--  当前持有量：图标 | 名称 | 数量（居中，与下方「距保底」同列）  -->
@@ -231,7 +235,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="20" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="72" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="28" />
@@ -240,6 +244,10 @@
                                     <RowDefinition Height="28" />
                                     <RowDefinition Height="28" />
                                 </Grid.RowDefinitions>
+                                <!--  撑开数量列：Auto 列宽 = 量好的数量列宽，与下方保底表同宽  -->
+                                <Border Grid.RowSpan="5"
+                                        Grid.Column="2"
+                                        Width="{Binding CountWidth, Source={StaticResource GachaResourcesColumnLayout}}" />
                                 <Image Grid.Row="0"
                                        Width="20"
                                        Height="20">
@@ -334,22 +342,24 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="20" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="40" />
-                                    <ColumnDefinition Width="72" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="2"
-                                           HorizontalAlignment="Center"
+                                           Width="{Binding PityWidth, Source={StaticResource GachaResourcesColumnLayout}}"
                                            VerticalAlignment="Center"
                                            FontSize="12"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                            Text="{x:Bind lang:Lang.GachaStatsCard_Pity}"
+                                           TextAlignment="Center"
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock Grid.Column="3"
-                                           HorizontalAlignment="Center"
+                                           Width="{Binding CountWidth, Source={StaticResource GachaResourcesColumnLayout}}"
                                            VerticalAlignment="Center"
                                            FontSize="12"
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                            Text="{x:Bind lang:Lang.GachaLogPage_ToHardPity}"
+                                           TextAlignment="Center"
                                            TextTrimming="CharacterEllipsis" />
                             </Grid>
                             <ItemsControl ItemsSource="{x:Bind GachaResources.PityProgress}">
@@ -359,8 +369,8 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="20" />
                                                 <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="40" />
-                                                <ColumnDefinition Width="72" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <!--  该频段消耗的抽卡券，与上方持有量同一图标  -->
                                             <Image Width="20" Height="20">
@@ -373,18 +383,23 @@
                                                        Text="{x:Bind GachaTypeText}"
                                                        TextTrimming="CharacterEllipsis" />
                                             <TextBlock Grid.Column="2"
-                                                       HorizontalAlignment="Center"
+                                                       Width="{Binding PityWidth, Source={StaticResource GachaResourcesColumnLayout}}"
                                                        VerticalAlignment="Center"
-                                                       Text="{x:Bind CurrentPity}" />
+                                                       Text="{x:Bind CurrentPity}"
+                                                       TextAlignment="Center" />
                                             <!--  数字居中占中间的 Auto 列，勾放在左侧 * 列里贴着数字：有没有勾，数字都停在同一条中轴上  -->
-                                            <Grid Grid.Column="3">
+                                            <Grid Grid.Column="3" Width="{Binding CountWidth, Source={StaticResource GachaResourcesColumnLayout}}">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <!--  裸 FontIcon 挂提示命中不稳，外包透明 Border  -->
-                                                <Border Margin="0,0,4,0"
+                                                <!--
+                                                    裸 FontIcon 挂提示命中不稳，外包透明 Border。
+                                                    数量列按内容收紧后，数字左侧可能放不下勾（12 + 间距 4）：左边距 -16 让勾不占测量宽度，
+                                                    放不下时伸进左侧列间距里，而不是被布局裁掉
+                                                -->
+                                                <Border Margin="-16,0,4,0"
                                                         HorizontalAlignment="Right"
                                                         VerticalAlignment="Center"
                                                         Background="Transparent"

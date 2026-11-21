@@ -366,6 +366,11 @@ public sealed partial class GachaLogPage : PageBase
     /// <param name="resources">抽卡资源；null 时隐藏胶囊。</param>
     private void ApplyGachaResources(ZZZGachaResources? resources)
     {
+        if (resources is not null)
+        {
+            // 先量列宽再换数据，弹出层开着时不会先按旧列宽排一帧
+            ((ZZZGachaResourcesColumnLayout)Resources["GachaResourcesColumnLayout"]).Update(resources);
+        }
         GachaResources = resources;
         IsGachaResourcesVisible = resources is not null;
         GachaResourcesCapsuleText = resources is null ? null : string.Format(Lang.GachaLogPage_ResourcePulls, resources.LimitedPulls);
