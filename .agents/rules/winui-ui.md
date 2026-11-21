@@ -70,6 +70,7 @@
 - `PointerEntered` / `PointerExited` 会冒泡：挂在大容器上，子元素的进出也会触发。只想响应某一块，就给那块单独做透明命中层（`Background="Transparent"` 的外层 Border）。
 - 弹出菜单的整行按钮里不要再嵌套 `ToggleSwitch` 等可点控件，两者会抢命中。
 - 拖拽期间 ScrollViewer 持有指针捕获，滚轮直接路由给 ScrollViewer，挂在 Content 上收不到；要拦截用 `AddHandler(PointerWheelChangedEvent, …, handledEventsToo: true)`。原生滚轮动画不会被 `ChangeView(disableAnimation: true)` 取消，自管拖拽 / 惯性时，滚轮一来就交给原生滚轮（`GachaStatsListDragScrollHelper`）。
+- `ListViewItem` 被鼠标按下时不捕获指针，只记「左键已按下」并排队一次点击（按下 / 移动 / 松开都置 Handled）。外层容器接管捕获做拖拽后，它收不到松开，会一直停在 Pressed 外观，指针移回来也只显示按下。接管前对它 `CapturePointer` 再 `ReleasePointerCapture`，靠它自己的 `PointerCaptureLost` 清掉标记并取消那次点击；不能让它拿着捕获直接转给外层，那样外层捕获失败，松开仍落到列表项上并选中它。拖拽中列表项收不到进出事件，悬停高亮要按指针位置自己用 `VisualStateManager.GoToState` 校正。用 `handledEventsToo` 监听按下时，滚动条滑块的按下也会冒泡上来，要排除，否则会抢走滑块的捕获（`GachaStatsListDragScrollHelper.BindSelectableList`）。
 - 刚好包住内容的小窗口（如托盘菜单）里，`Popup`（`Flyout`、`MenuFlyoutSubItem`、`InstantTooltip`）会被窗口边界裁掉，二级内容只能放在同一窗口里。
 
 ### 布局与尺寸
