@@ -16,6 +16,7 @@ using Starward.Features.Update;
 using Starward.Frameworks;
 using Starward.Helpers;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Velopack;
@@ -137,6 +138,7 @@ public sealed partial class SystemTrayWindow : WindowEx
         User32.CalculatePopupWindowPosition(point, windowSize, User32.TrackPopupMenuFlags.TPM_RIGHTALIGN | User32.TrackPopupMenuFlags.TPM_BOTTOMALIGN | User32.TrackPopupMenuFlags.TPM_WORKAREA, null, out RECT windowPos);
         User32.MoveWindow(WindowHandle, windowPos.X, windowPos.Y, windowPos.Width, windowPos.Height, true);
         base.Show();
+        RaiseMenuEvents(true);
     }
 
 
@@ -144,8 +146,56 @@ public sealed partial class SystemTrayWindow : WindowEx
     [RelayCommand]
     public override void Hide()
     {
+        RaiseMenuEvents(false);
         base.Hide();
     }
+
+
+    private bool _menuEventsRaised;
+
+    private const uint EVENT_SYSTEM_MENUSTART = 0x0004;
+    private const uint EVENT_SYSTEM_MENUEND = 0x0005;
+    private const uint EVENT_SYSTEM_MENUPOPUPSTART = 0x0006;
+    private const uint EVENT_SYSTEM_MENUPOPUPEND = 0x0007;
+    private const int OBJID_WINDOW = 0;
+    private const int OBJID_CLIENT = -4;
+    private const int CHILDID_SELF = 0;
+
+
+    /// <summary>
+    /// 按 <c>TrackPopupMenu</c> 弹出 #32768 菜单时的顺序广播「菜单开始 / 结束」事件：
+    /// MENUSTART 落在登记托盘图标的窗口（H.NotifyIcon 的消息窗口）上，MENUPOPUPSTART 落在菜单窗口上，结束时反序。
+    /// <para>
+    /// 图标收在「隐藏的图标」溢出面板里时，explorer 靠这组事件判断图标的右键菜单还开着：收到开始事件后面板一直开着，
+    /// 收到结束事件才恢复「鼠标离开就收起」。不发的话，鼠标一移进菜单约 0.5 s 面板就收起，菜单还在、面板先没了
+    /// （实测与谁拿着前台无关）。自绘菜单本也应这样通知读屏等辅助技术。
+    /// </para>
+    /// </summary>
+    /// <param name="start"><see langword="true"/> 广播开始事件，<see langword="false"/> 广播结束事件（仅当之前广播过开始）。</param>
+    private void RaiseMenuEvents(bool start)
+    {
+        nint iconWindow = trayIcon?.TrayIcon?.WindowHandle ?? 0;
+        // 托盘图标尚未创建时（如构造时 Show()/Hide() 闪一下那次）没有可落的窗口，不广播
+        if (start == _menuEventsRaised || (start && iconWindow == 0))
+        {
+            return;
+        }
+        _menuEventsRaised = start;
+        if (start)
+        {
+            NotifyWinEvent(EVENT_SYSTEM_MENUSTART, iconWindow, OBJID_WINDOW, CHILDID_SELF);
+            NotifyWinEvent(EVENT_SYSTEM_MENUPOPUPSTART, WindowHandle, OBJID_CLIENT, CHILDID_SELF);
+        }
+        else
+        {
+            NotifyWinEvent(EVENT_SYSTEM_MENUPOPUPEND, WindowHandle, OBJID_CLIENT, CHILDID_SELF);
+            NotifyWinEvent(EVENT_SYSTEM_MENUEND, iconWindow, OBJID_WINDOW, CHILDID_SELF);
+        }
+    }
+
+
+    [LibraryImport("user32.dll", EntryPoint = "NotifyWinEvent")]
+    private static partial void NotifyWinEvent(uint winEvent, nint hwnd, int idObject, int idChild);
 
 
 
