@@ -71,15 +71,16 @@ namespace Starward.Core.GameRecord;
 // 短信验证码登录（passport）
 [JsonSerializable(typeof(miHoYoApiWrapper<CreateLoginCaptchaResult>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<LoginByMobileCaptchaResult>))]
-[JsonSerializable(typeof(miHoYoApiWrapper<LTokenBySTokenResult>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<CookieTokenBySTokenResult>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<PassportExchangeResult>))]
 [JsonSerializable(typeof(CaptchaAigis))]
 [JsonSerializable(typeof(CreateLoginCaptchaResult))]
 [JsonSerializable(typeof(LoginByMobileCaptchaResult))]
 [JsonSerializable(typeof(PassportToken))]
 [JsonSerializable(typeof(PassportUserInfo))]
-[JsonSerializable(typeof(LTokenBySTokenResult))]
 [JsonSerializable(typeof(CookieTokenBySTokenResult))]
+[JsonSerializable(typeof(PassportExchangeRequest))]
+[JsonSerializable(typeof(PassportExchangeResult))]
 [JsonSerializable(typeof(DateTimeObjectJsonConverter.DateTimeObject))]
 internal partial class GameRecordJsonContext : JsonSerializerContext
 {

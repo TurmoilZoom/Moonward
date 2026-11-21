@@ -172,9 +172,17 @@ internal class CaptchaLoginService
 
         _logger.LogInformation("Captcha login succeeded for aid {aid}, exchanging tokens.", aid);
 
-        string ltoken = await _passportClient.GetLTokenBySTokenAsync(stoken, mid, cancellationToken);
-        string cookieToken = await _passportClient.GetCookieTokenBySTokenAsync(stoken, mid, cancellationToken);
-        return MihoyoPassportClient.BuildCookieString(aid, mid, stoken, ltoken, cookieToken);
+        try
+        {
+            string ltoken = await _passportClient.GetLTokenBySTokenAsync(stoken, mid, cancellationToken);
+            string cookieToken = await _passportClient.GetCookieTokenBySTokenAsync(stoken, mid, cancellationToken);
+            return MihoyoPassportClient.BuildCookieString(aid, mid, stoken, ltoken, cookieToken);
+        }
+        catch (miHoYoApiException ex)
+        {
+            _logger.LogWarning("Captcha login token exchange failed: retcode {retcode}, message {message}.", ex.ReturnCode, ex.ResponseMessage);
+            throw;
+        }
     }
 
 

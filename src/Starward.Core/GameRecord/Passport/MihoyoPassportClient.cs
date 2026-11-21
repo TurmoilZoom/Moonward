@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -15,7 +16,14 @@ public class MihoyoPassportClient
 
     private const string PassportBase = "https://passport-api.mihoyo.com/";
     private const string AppIdCaptcha = "bll8iq97cem8";
-    private const string AppVersion = "2.112.0";
+    private const string AppVersion = "2.119.0";
+
+    // 通行证 SDK 生产环境配置（米游社 Android 2.119.0，与 TeyvatGuide passportReq 一致）
+    private const string PassportSdkVersion = "2.44.0";
+    private const string PassportDsSalt = "JwYDpKvLj6MrMqqYU6jTKF17KNO2PXoS";
+
+    // 每次进程启动生成一次，模拟 SDK 的生命周期标识
+    private static readonly Guid LifecycleId = Guid.NewGuid();
 
     private readonly HttpClient _httpClient;
 
@@ -110,44 +118,44 @@ public class MihoyoPassportClient
 
 
     /// <summary>
-    /// 通过 stoken 换取 ltoken（对齐 TeyvatGuide <c>getLTokenBySToken</c>）。
+    /// 通过 stoken 换取 ltoken_v2（V2 会话换票接口，对齐 TeyvatGuide <c>exchangeWebToken</c>）。
     /// </summary>
     /// <param name="stoken">登录得到的 stoken。</param>
     /// <param name="mid">账号 mid。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>ltoken 字符串。</returns>
+    /// <returns>ltoken_v2 字符串。</returns>
     /// <exception cref="miHoYoApiException">retcode 非 0。</exception>
     public async Task<string> GetLTokenBySTokenAsync(string stoken, string mid, CancellationToken cancellationToken = default)
     {
-        // query 不预编码；由 HttpClient 负责传输编码
-        string url = $"{PassportBase}account/auth/api/getLTokenBySToken?stoken={stoken}";
-        var request = new HttpRequestMessage(HttpMethod.Get, url)
+        PassportExchangeResult data = await ExchangeTokenAsync(stoken, mid, PassportTokenType.LToken, cancellationToken);
+        if (string.IsNullOrWhiteSpace(data.Token?.Token))
         {
-            VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
-        };
-        AddAuthBySTokenHeaders(request, stoken, mid);
-        var data = await SendThrowingAsync<LTokenBySTokenResult>(request, cancellationToken);
-        return data.LToken;
+            throw new miHoYoApiException(-1, "Exchange response is incomplete.");
+        }
+        return data.Token.Token;
     }
 
 
     /// <summary>
-    /// 通过 stoken 换取 cookie_token 与账号 uid（对齐 TeyvatGuide <c>getCookieAccountInfoBySToken</c>）。
+    /// 通过 stoken 换取 cookie_token_v2 与账号 aid（V2 会话换票接口，对齐 TeyvatGuide <c>exchangeWebToken</c>）。
     /// </summary>
     /// <param name="stoken">登录得到的 stoken。</param>
     /// <param name="mid">账号 mid。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>含 <c>cookie_token</c> 与可选 <c>uid</c> 的换票结果。</returns>
+    /// <returns>含 <c>cookie_token_v2</c> 与可选 <c>uid</c> 的换票结果。</returns>
     /// <exception cref="miHoYoApiException">retcode 非 0。</exception>
     public async Task<CookieTokenBySTokenResult> GetCookieAccountInfoBySTokenAsync(string stoken, string mid, CancellationToken cancellationToken = default)
     {
-        string url = $"{PassportBase}account/auth/api/getCookieAccountInfoBySToken?stoken={stoken}";
-        var request = new HttpRequestMessage(HttpMethod.Get, url)
+        PassportExchangeResult data = await ExchangeTokenAsync(stoken, mid, PassportTokenType.CookieToken, cancellationToken);
+        if (string.IsNullOrWhiteSpace(data.Token?.Token))
         {
-            VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
+            throw new miHoYoApiException(-1, "Exchange response is incomplete.");
+        }
+        return new CookieTokenBySTokenResult
+        {
+            CookieToken = data.Token.Token,
+            Uid = data.UserInfo?.Aid,
         };
-        AddAuthBySTokenHeaders(request, stoken, mid);
-        return await SendThrowingAsync<CookieTokenBySTokenResult>(request, cancellationToken);
     }
 
 
@@ -214,11 +222,6 @@ public class MihoyoPassportClient
         $"Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Mobile miHoYoBBS/{AppVersion}";
 
 
-    /// <summary>换票用桌面端 UA（对齐 TeyvatGuide <c>TGBbs.uap</c> / getRequestHeader）。</summary>
-    private string DesktopUA =>
-        $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/{AppVersion}";
-
-
     /// <summary>
     /// 写入发码 / 登录共用的 passport 请求头。
     /// </summary>
@@ -244,21 +247,77 @@ public class MihoyoPassportClient
 
 
     /// <summary>
-    /// stoken 换 ltoken / cookie_token 的请求头（对齐 TeyvatGuide <c>getRequestHeader</c>）。
+    /// V2 会话换票：stoken 换 ltoken_v2 / cookie_token_v2。
     /// </summary>
-    private void AddAuthBySTokenHeaders(HttpRequestMessage request, string stoken, string mid)
+    /// <param name="stoken">登录得到的 stoken。</param>
+    /// <param name="mid">账号 mid。</param>
+    /// <param name="dstTokenType">目标 token 类型。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>含换得 token 的响应 data。</returns>
+    /// <exception cref="miHoYoApiException">retcode 非 0 或响应不完整。</exception>
+    private async Task<PassportExchangeResult> ExchangeTokenAsync(string stoken, string mid, PassportTokenType dstTokenType, CancellationToken cancellationToken)
     {
-        // cookie 键顺序与 TeyvatGuide transCookie 排序一致：mid;stoken
-        request.Headers.TryAddWithoutValidation("Cookie", $"mid={mid};stoken={stoken}");
+        var payload = new PassportExchangeRequest
+        {
+            DstTokenType = (int)dstTokenType,
+            SrcToken = new PassportToken { Token = stoken, TokenType = (int)PassportTokenType.SToken },
+            Mid = mid,
+        };
+        string body = JsonSerializer.Serialize(payload, typeof(PassportExchangeRequest), GameRecordJsonContext.Default) ?? "{}";
+
+        var request = new HttpRequestMessage(HttpMethod.Post, PassportBase + "account/ma-cn-session/app/exchange")
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json"),
+            VersionPolicy = HttpVersionPolicy.RequestVersionOrHigher,
+        };
+        // 换票请求头与 DS 对齐 TeyvatGuide exchangeWebToken（passport SDK 生产配置）
+        request.Headers.TryAddWithoutValidation("DS", CreatePassportSecret(body));
         request.Headers.TryAddWithoutValidation("x-rpc-app_version", AppVersion);
-        request.Headers.TryAddWithoutValidation("x-rpc-client_type", "5");
+        request.Headers.TryAddWithoutValidation("x-rpc-client_type", "2");
+        request.Headers.TryAddWithoutValidation("x-rpc-app_id", AppIdCaptcha);
+        request.Headers.TryAddWithoutValidation("x-rpc-device_fp", Uri.EscapeDataString(DeviceFp));
+        request.Headers.TryAddWithoutValidation("x-rpc-device_name", Uri.EscapeDataString(DeviceName));
         request.Headers.TryAddWithoutValidation("x-rpc-device_id", DeviceId);
-        request.Headers.TryAddWithoutValidation("x-rpc-device_fp", DeviceFp);
-        request.Headers.TryAddWithoutValidation("X-Requested-With", "com.mihoyo.hyperion");
-        request.Headers.TryAddWithoutValidation("Origin", "https://act.mihoyo.com");
-        request.Headers.TryAddWithoutValidation("Referer", "https://webstatic.mihoyo.com");
-        request.Headers.TryAddWithoutValidation("User-Agent", DesktopUA);
+        request.Headers.TryAddWithoutValidation("x-rpc-device_model", Uri.EscapeDataString(DeviceModel));
+        request.Headers.TryAddWithoutValidation("x-rpc-game_biz", "bbs_cn");
+        request.Headers.TryAddWithoutValidation("x-rpc-sys_version", "12");
+        request.Headers.TryAddWithoutValidation("x-rpc-sdk_version", PassportSdkVersion);
+        request.Headers.TryAddWithoutValidation("x-rpc-account_version", PassportSdkVersion);
+        request.Headers.TryAddWithoutValidation("x-rpc-lifecycle_id", LifecycleId.ToString("D"));
+        request.Headers.TryAddWithoutValidation("User-Agent", MobileUA);
         request.Headers.TryAddWithoutValidation("Accept", "application/json");
+        return await SendThrowingAsync<PassportExchangeResult>(request, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 生成 passport SDK 的 Gen2 DS 签名（salt&amp;t&amp;r&amp;b&amp;q，POST 无 query）。
+    /// </summary>
+    /// <param name="body">与请求体逐字节一致的 JSON 原文。</param>
+    /// <returns><c>t,r,check</c> 形式的 DS 头值。</returns>
+    private static string CreatePassportSecret(string body)
+    {
+        int t = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        string r = GetRandomNonce();
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes($"salt={PassportDsSalt}&t={t}&r={r}&b={body}&q="));
+        string check = Convert.ToHexString(bytes).ToLower();
+        return $"{t},{r},{check}";
+    }
+
+
+    /// <summary>
+    /// 生成 6 位小写字母数字随机串，作为 DS 的 r 参数。
+    /// </summary>
+    private static string GetRandomNonce()
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        return string.Create(6, chars, static (span, chars) =>
+        {
+            for (int i = 0; i < span.Length; i++)
+            {
+                span[i] = chars[Random.Shared.Next(chars.Length)];
+            }
+        });
     }
 
 

@@ -19,8 +19,8 @@ namespace Starward.Features.GameRecord;
 /// </summary>
 /// <remarks>
 /// 依赖验证码登录或手动 Cookie 中已包含有效的 <c>stoken</c>（或 <c>stoken_v2</c>）与 <c>mid</c>。
-/// 换票接口对齐社区文档（TeyvatGuide / UIGF mihoyo-api-collect）的
-/// <c>getLTokenBySToken</c> 与 <c>getCookieAccountInfoBySToken</c>。
+/// 换票走 passport V2 会话接口 <c>account/ma-cn-session/app/exchange</c>（对齐 TeyvatGuide exchangeWebToken），
+/// 分别换取 ltoken_v2 与 cookie_token_v2。
 /// </remarks>
 internal class GameRecordCookieRefreshService
 {
@@ -140,8 +140,9 @@ internal class GameRecordCookieRefreshService
             }
             catch (miHoYoApiException ex)
             {
-                // SToken 本身失效时不能继续静默恢复，调用方应保留原登录失效提示。
-                _logger.LogInformation(ex, "GameRecord cookie refresh rejected because the long-term token is no longer valid.");
+                // stoken 失效、换票接口被停用（-464 / 1002）或风控都无法静默恢复，调用方保留原登录失效提示；
+                // 日志带 retcode，便于区分凭据失效与服务端拒绝
+                _logger.LogInformation(ex, "GameRecord cookie refresh failed: retcode {retcode}.", ex.ReturnCode);
                 return null;
             }
 

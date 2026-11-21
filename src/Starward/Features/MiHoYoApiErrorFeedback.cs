@@ -237,6 +237,8 @@ internal static class MiHoYoApiErrorFeedbackFactory
             -3101 or -3235 or 1034 or -3503 => CreateCaptchaKnownFeedback("CaptchaLogin_Error_RiskControl", exception.ReturnCode),
             // 换票 / 会话失败
             -100 or -111 or 10001 => CreateCaptchaKnownFeedback("CaptchaLogin_Error_SessionFailed", exception.ReturnCode),
+            // passport 服务端拒绝请求（「系统请求失败，请返回重试」）
+            1002 => CreateCaptchaKnownFeedback("MiHoYoApiError_RequestRejected", exception.ReturnCode),
             _ => CreateCaptchaUnknownFeedback(exception.ResponseMessage, exception.ReturnCode),
         };
     }
