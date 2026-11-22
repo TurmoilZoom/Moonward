@@ -45,9 +45,9 @@
 
 
 
+        <!--  列表放在按钮栏下方：不吸顶后缩略图会一直滚到列表顶边，跨进第 0 行会钻到按钮底下  -->
         <GridView x:Name="GridView_Images"
-                  Grid.Row="0"
-                  Grid.RowSpan="2"
+                  Grid.Row="1"
                   Padding="24,0,12,12"
                   DragItemsStarting="GridView_Images_DragItemsStarting"
                   IsItemClickEnabled="True"
@@ -90,7 +90,8 @@
             </GridView.ItemContainerStyle>
             <GridView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <ItemsWrapGrid AreStickyGroupHeadersEnabled="True"
+                    <!--  不吸顶：每天多为一行，吸顶日期几乎每滚一行就被推走一次，移动中文字落在半像素位置忽明忽暗；当前日期改由按钮栏左侧的 TextBlock_CurrentDate 显示  -->
+                    <ItemsWrapGrid AreStickyGroupHeadersEnabled="False"
                                    ItemHeight="128"
                                    ItemWidth="218"
                                    Orientation="Horizontal" />
@@ -248,6 +249,17 @@
                 </DataTemplate>
             </GridView.ItemTemplate>
         </GridView>
+
+
+        <!--  当前日期：最后一个滚出列表顶边的分组标题，只换字不移动；与分组标题同字号同色，左边距对齐列表内容  -->
+        <TextBlock x:Name="TextBlock_CurrentDate"
+                   Margin="24,0,0,0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   FontSize="14"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   IsTextScaleFactorEnabled="False"
+                   Visibility="Collapsed" />
 
 
         <StackPanel Margin="0,0,28,0"

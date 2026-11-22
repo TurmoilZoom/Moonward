@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.WinUI;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -18,6 +19,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.System;
 
@@ -65,6 +67,14 @@ public sealed partial class ScreenshotPage : PageBase
     {
         await Task.Delay(16);
         Initialize();
+        _imagesScrollViewer = GridView_Images.FindDescendant<ScrollViewer>();
+        if (_imagesScrollViewer is not null)
+        {
+            _imagesScrollViewer.ViewChanged += ScrollViewer_Images_ViewChanged;
+        }
+        GridView_Images.SizeChanged += GridView_Images_SizeChanged;
+        GridView_Images.Items.VectorChanged += GridView_Images_Items_VectorChanged;
+        QueueUpdateCurrentDate();
     }
 
 
@@ -73,6 +83,13 @@ public sealed partial class ScreenshotPage : PageBase
     {
         try
         {
+            if (_imagesScrollViewer is not null)
+            {
+                _imagesScrollViewer.ViewChanged -= ScrollViewer_Images_ViewChanged;
+                _imagesScrollViewer = null;
+            }
+            GridView_Images.SizeChanged -= GridView_Images_SizeChanged;
+            GridView_Images.Items.VectorChanged -= GridView_Images_Items_VectorChanged;
             foreach (var item in _watchers)
             {
                 item.Dispose();
@@ -428,6 +445,129 @@ public sealed partial class ScreenshotPage : PageBase
     {
         UpdateSelectCountText();
     }
+
+
+
+    #region Current Date
+
+
+    private ScrollViewer? _imagesScrollViewer;
+
+    private bool _currentDateUpdateQueued;
+
+
+    private void ScrollViewer_Images_ViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
+    {
+        UpdateCurrentDate();
+        // 跳转式滚动（回到顶部、键盘翻页）触发时容器还在旧位置，算出的是跳转前的日期，且之后不会再触发；布局后再算一次
+        QueueUpdateCurrentDate();
+    }
+
+
+    private void GridView_Images_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        QueueUpdateCurrentDate();
+    }
+
+
+    private void GridView_Images_Items_VectorChanged(IObservableVector<object> sender, IVectorChangedEventArgs e)
+    {
+        QueueUpdateCurrentDate();
+    }
+
+
+    /// <summary>
+    /// 等下一轮布局完成后再刷新当前日期。增删截图、改变列表宽度后，容器位置要到下一轮布局才更新，立即计算会拿到旧位置。
+    /// </summary>
+    private void QueueUpdateCurrentDate()
+    {
+        if (_currentDateUpdateQueued)
+        {
+            return;
+        }
+        _currentDateUpdateQueued = true;
+        GridView_Images.LayoutUpdated += OnLayoutUpdated;
+
+        void OnLayoutUpdated(object? sender, object e)
+        {
+            GridView_Images.LayoutUpdated -= OnLayoutUpdated;
+            // 不在布局回调里同步读写界面，推到本轮布局之后
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+            {
+                _currentDateUpdateQueued = false;
+                UpdateCurrentDate();
+            });
+        }
+    }
+
+
+    /// <summary>
+    /// 刷新按钮栏左侧的当前日期：显示最后一个已滚出列表顶边的分组标题。
+    /// 第一个分组的标题还在列表里时隐藏，免得同一个日期上下各出现一次。
+    /// </summary>
+    private void UpdateCurrentDate()
+    {
+        try
+        {
+            string? date = null;
+            if (_imagesScrollViewer is not null
+                && ScreenshotGroups is { Count: > 0 } groups
+                && GridView_Images.ItemsPanelRoot is ItemsWrapGrid panel
+                && panel.FirstVisibleIndex >= 0
+                && GridView_Images.ContainerFromIndex(panel.FirstVisibleIndex) is DependencyObject container
+                && GridView_Images.ItemFromContainer(container) is ScreenshotItem item)
+            {
+                int groupIndex = -1;
+                for (int i = 0; i < groups.Count; i++)
+                {
+                    if (groups[i].Header == item.TimeMonthDay)
+                    {
+                        groupIndex = i;
+                        break;
+                    }
+                }
+                if (groupIndex >= 0)
+                {
+                    // 首个可见项所在分组的标题过半滚出顶边，才算进入这一组；之前仍显示上一组，交接时机和原来的吸顶一致。
+                    // 标题容器没有实现时说明它早已远离视口（标题总在本组项目上方），按已滚出处理。
+                    bool headerPassed = true;
+                    if (GridView_Images.GroupHeaderContainerFromItemContainer(container) is FrameworkElement header)
+                    {
+                        double top = header.TransformToVisual(_imagesScrollViewer).TransformPoint(default).Y;
+                        headerPassed = top + header.ActualHeight / 2 <= 0;
+                    }
+                    if (headerPassed)
+                    {
+                        date = groups[groupIndex].Header;
+                    }
+                    else if (groupIndex > 0)
+                    {
+                        date = groups[groupIndex - 1].Header;
+                    }
+                }
+            }
+            if (date is null)
+            {
+                TextBlock_CurrentDate.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                if (TextBlock_CurrentDate.Text != date)
+                {
+                    TextBlock_CurrentDate.Text = date;
+                }
+                TextBlock_CurrentDate.Visibility = Visibility.Visible;
+            }
+        }
+        catch (Exception ex)
+        {
+            // 滚动中每帧都会调用，用 Debug 级别避免刷屏
+            _logger.LogDebug(ex, "Update current date");
+        }
+    }
+
+
+    #endregion
 
 
     private void UpdateSelectCountText()
