@@ -11,6 +11,7 @@ import {
   screens,
 } from './data/content'
 import Screens from './components/Screens.vue'
+import UiIcon from './components/UiIcon.vue'
 import { asset } from './utils/asset'
 import { renderReleaseMarkdown } from './utils/markdown'
 import { vReveal } from './utils/reveal'
@@ -458,6 +459,16 @@ const sectionNav = [
   { id: 'advanced', zh: '进阶', en: 'Advanced' },
   { id: 'install', zh: '安装', en: 'Install' },
 ]
+
+/**
+ * 区块序号，与顶栏锚点顺序一致；区块标题上方和顶栏都用它，调整顺序只改 sectionNav。
+ * @param {string} id
+ * @returns {string} 两位数序号（如 "02"），未知 id 返回空串
+ */
+function sectionNum(id) {
+  const i = sectionNav.findIndex((s) => s.id === id)
+  return i < 0 ? '' : String(i + 1).padStart(2, '0')
+}
 const activeSection = ref('')
 const navSectionsRef = ref(null)
 const navAtStart = ref(true)
@@ -647,7 +658,7 @@ onUnmounted(() => {
                 :class="{ 'is-current': activeSection === item.id }"
                 :href="`#${item.id}`"
                 :aria-current="activeSection === item.id ? 'true' : undefined"
-              >{{ locale === 'zh' ? item.zh : item.en }}</a>
+              ><span class="nav-num mono" aria-hidden="true">{{ sectionNum(item.id) }}</span>{{ locale === 'zh' ? item.zh : item.en }}</a>
             </template>
             <a v-else class="nav-link nav-home" href="#">{{ locale === 'zh' ? '首页' : 'Home' }}</a>
             <a
@@ -662,6 +673,12 @@ onUnmounted(() => {
           </div>
           <span class="nav-divider" aria-hidden="true" />
           <div class="nav-tools">
+            <a
+              v-if="!isDocs && latestTag"
+              class="nav-ver mono"
+              href="#install"
+              :title="locale === 'zh' ? '最新版本' : 'Latest release'"
+            >{{ latestTag }}</a>
             <a
               class="icon-btn"
               :href="links.github"
@@ -922,6 +939,7 @@ onUnmounted(() => {
     <main class="wrap main">
       <!-- Feature cards -->
       <section id="features" v-reveal class="block" aria-labelledby="features-heading">
+        <p class="sec-num mono" aria-hidden="true">{{ sectionNum('features') }}</p>
         <h2 id="features-heading">{{ locale === 'zh' ? '功能一览' : 'Features' }}</h2>
         <p class="section-lead">
           {{
@@ -936,10 +954,9 @@ onUnmounted(() => {
             :key="card.id"
             v-reveal="i % 3"
             class="card"
-            :data-accent="card.accent"
           >
             <div class="card-top">
-              <span class="card-icon" aria-hidden="true">{{ card.icon }}</span>
+              <span class="card-icon" aria-hidden="true"><UiIcon :name="card.icon" /></span>
               <h3>{{ t(card.name) }}</h3>
             </div>
             <p>{{ t(card.detail) }}</p>
@@ -947,10 +964,11 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <Screens :locale="locale" />
+      <Screens :locale="locale" :num="sectionNum('screens')" />
 
       <!-- Advanced: launch + check-in folds -->
       <section id="advanced" v-reveal class="block advanced-block" aria-labelledby="advanced-heading">
+        <p class="sec-num mono" aria-hidden="true">{{ sectionNum('advanced') }}</p>
         <h2 id="advanced-heading">{{ locale === 'zh' ? '进阶' : 'Advanced' }}</h2>
         <p class="section-lead">
           {{
@@ -1277,6 +1295,7 @@ onUnmounted(() => {
       <section id="install" v-reveal class="block install-block" aria-labelledby="install-heading">
         <div class="install-head">
           <div>
+            <p class="sec-num mono" aria-hidden="true">{{ sectionNum('install') }}</p>
             <h2 id="install-heading">{{ locale === 'zh' ? '下载与安装' : 'Download & install' }}</h2>
             <p class="section-lead install-lead">
               {{
@@ -1615,6 +1634,33 @@ onUnmounted(() => {
 }
 
 .nav-link.is-current {
+  color: var(--ink);
+}
+
+/* 锚点前的序号，与区块标题上方的 01/02… 对应 */
+.nav-num {
+  margin-right: 0.3rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
+
+.nav-link.is-current .nav-num {
+  color: var(--accent);
+}
+
+.nav .nav-ver {
+  flex-shrink: 0;
+  padding: 0.22rem 0.15rem;
+  margin-right: 0.2rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.nav .nav-ver:hover {
   color: var(--ink);
 }
 
@@ -2397,16 +2443,6 @@ onUnmounted(() => {
   padding: 1.75rem 0 2.5rem;
 }
 
-.block {
-  margin-bottom: 2rem;
-  padding: 1.35rem 1.4rem 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  scroll-margin-top: 4.25rem;
-}
-
 /* —— Feature cards —— */
 .cards {
   display: grid;
@@ -2423,20 +2459,10 @@ onUnmounted(() => {
 }
 
 .card:hover {
-  border-color: color-mix(in srgb, var(--card-accent, var(--accent)) 45%, var(--line));
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
   box-shadow: var(--shadow);
   transform: translateY(-2px);
 }
-
-.card[data-accent='teal'] { --card-accent: var(--teal); }
-.card[data-accent='amber'] { --card-accent: var(--amber); }
-.card[data-accent='blue'] { --card-accent: var(--blue); }
-.card[data-accent='green'] { --card-accent: var(--green); }
-.card[data-accent='violet'] { --card-accent: var(--violet); }
-.card[data-accent='rose'] { --card-accent: var(--rose); }
-.card[data-accent='cyan'] { --card-accent: var(--cyan); }
-.card[data-accent='indigo'] { --card-accent: var(--indigo); }
-.card[data-accent='slate'] { --card-accent: var(--slate); }
 
 .card-top {
   display: flex;
@@ -2452,16 +2478,17 @@ onUnmounted(() => {
   width: 1.7rem;
   height: 1.7rem;
   border-radius: 6px;
-  font-size: 0.85rem;
-  background: color-mix(in srgb, var(--card-accent, var(--accent)) 12%, var(--bg));
-  color: var(--card-accent, var(--accent));
+  /* 图标统一用主色：卡片多，九种强调色并排只显得杂 */
+  font-size: 1rem;
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+  color: var(--accent);
   flex-shrink: 0;
   transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s ease;
 }
 
 .card:hover .card-icon {
   transform: scale(1.12) rotate(-4deg);
-  background: color-mix(in srgb, var(--card-accent, var(--accent)) 20%, var(--bg));
+  background: color-mix(in srgb, var(--accent) 20%, var(--bg));
 }
 
 .card h3 {
@@ -2913,9 +2940,7 @@ onUnmounted(() => {
 }
 
 /* —— Install —— */
-/* main 内最后一块：去掉 .block 的 margin-bottom，贴合页脚间距 */
 .install-block {
-  margin-bottom: 0;
   /* 左侧文案↔卡片 与 版本胶囊↔卡片 共用，改一处即可 */
   --install-stack-gap: 1rem;
 }
@@ -3694,10 +3719,6 @@ onUnmounted(() => {
     padding: 1.75rem 0 2rem;
   }
 
-  .block {
-    padding: 1.1rem 1rem 1.2rem;
-  }
-
   .main {
     padding-top: 1.15rem;
   }
@@ -3705,6 +3726,14 @@ onUnmounted(() => {
   .back-top {
     right: 0.85rem;
     bottom: 0.85rem;
+  }
+}
+
+/* 中等宽度先收起序号和版本号，给锚点留地方 */
+@media (max-width: 760px) {
+  .nav-num,
+  .nav .nav-ver {
+    display: none;
   }
 }
 

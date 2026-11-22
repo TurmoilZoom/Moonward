@@ -20,8 +20,7 @@ export const intro = {
 export const featureCards = [
   {
     id: 'profile',
-    icon: '⚙',
-    accent: 'teal',
+    icon: 'sliders',
     name: { zh: '多启动配置', en: 'Launch profiles' },
     detail: {
       zh: '同一个游戏可存多套设置：账号、启动参数各记一份。换着用点一下就行。',
@@ -30,8 +29,7 @@ export const featureCards = [
   },
   {
     id: 'shortcut',
-    icon: '⧉',
-    accent: 'amber',
+    icon: 'shortcut',
     name: { zh: '桌面快捷方式', en: 'Desktop shortcuts' },
     detail: {
       zh: '把某套设置做成桌面图标，双击就按这套开游戏，不必先打开启动器。图标也能换成自己的。',
@@ -40,8 +38,7 @@ export const featureCards = [
   },
   {
     id: 'uac',
-    icon: '⇧',
-    accent: 'cyan',
+    icon: 'shield',
     name: { zh: '关闭 UAC 提示', en: 'Skip UAC prompt' },
     detail: {
       zh: '开游戏时 Windows 常会问「是否允许更改」。做桌面图标时勾上这项，同意一次就行，之后双击直接进游戏。',
@@ -50,8 +47,7 @@ export const featureCards = [
   },
   {
     id: 'url',
-    icon: '↗',
-    accent: 'blue',
+    icon: 'link',
     name: { zh: 'URL 协议', en: 'URL protocol' },
     detail: {
       zh: '每套设置都有一条 moonward:// 链接，点开就按这套开游戏。可以放进脚本或别的工具里。',
@@ -60,8 +56,7 @@ export const featureCards = [
   },
   {
     id: 'cloud',
-    icon: '◷',
-    accent: 'cyan',
+    icon: 'cloud',
     name: { zh: '云游戏时长', en: 'Cloud gaming time' },
     detail: {
       zh: '国服的云·原神、云·绝区零可在首页看畅玩卡和剩余时长。打开自动获取，软件运行时每天替你领一次免费时长。',
@@ -70,8 +65,7 @@ export const featureCards = [
   },
   {
     id: 'checkin',
-    icon: '✓',
-    accent: 'green',
+    icon: 'calendar',
     name: { zh: '自动签到', en: 'Auto check-in' },
     detail: {
       zh: '每个游戏一个开关，打开后立刻开始领当天奖励。软件留在托盘时，过了零点还会再签。',
@@ -80,8 +74,7 @@ export const featureCards = [
   },
   {
     id: 'gacha',
-    icon: '◈',
-    accent: 'violet',
+    icon: 'sparkle',
     name: { zh: '抽卡记录', en: 'Gacha history' },
     detail: {
       zh: '出货次数、连 UP / 连歪、不歪概率都在同一张卡上。列表与紧凑网格随时切换，卡片可拖动排序，也能导出分享图。',
@@ -90,8 +83,7 @@ export const featureCards = [
   },
   {
     id: 'report',
-    icon: '▤',
-    accent: 'blue',
+    icon: 'chart',
     name: { zh: '战绩自动更新', en: 'Auto-refresh records' },
     detail: {
       zh: '深渊、式舆防卫战、月报可设每隔几天、每周或每月几号更新。软件启动时自动补上到期的，免得忘了刷新就缺一期。',
@@ -100,8 +92,7 @@ export const featureCards = [
   },
   {
     id: 'sync',
-    icon: '⇄',
-    accent: 'amber',
+    icon: 'swap',
     name: { zh: '局域网同步', en: 'LAN sync' },
     detail: {
       zh: '换电脑时，一台开共享、另一台输验证码，抽卡、战绩、游戏时长就并过来了。只补缺，不动已有记录。',
@@ -110,8 +101,7 @@ export const featureCards = [
   },
   {
     id: 'wallpaper',
-    icon: '❀',
-    accent: 'rose',
+    icon: 'image',
     name: { zh: '自定义背景', en: 'Custom backgrounds' },
     detail: {
       zh: '支持图片和视频。绝区零还可把百科好感壁纸、满影画设成背景，并可随机换一张。',
@@ -120,8 +110,7 @@ export const featureCards = [
   },
   {
     id: 'update',
-    icon: '↻',
-    accent: 'indigo',
+    icon: 'download',
     name: { zh: '静默更新', en: 'Silent update' },
     detail: {
       zh: '后台下载新版本，缩在托盘时也会检查。退出后自动安装，下次打开会看到更新内容。',
@@ -130,8 +119,7 @@ export const featureCards = [
   },
   {
     id: 'redeem',
-    icon: '#',
-    accent: 'slate',
+    icon: 'ticket',
     name: { zh: '前瞻直播兑换码', en: 'Livestream codes' },
     detail: {
       zh: '国服版本前瞻直播期间，首页展示官方兑换码，可单个或全部复制。不必去直播间翻评论。',
@@ -150,8 +138,7 @@ export const screens = [
     src: 'screens/config.webp',
     width: 1184,
     height: 668,
-    icon: '⚙',
-    accent: 'teal',
+    icon: 'sliders',
     name: { zh: '启动配置', en: 'Launch profile' },
     tag: { zh: '参数 · 账号 · 链接', en: 'Args · account · link' },
     caption: {
@@ -168,8 +155,7 @@ export const screens = [
     src: 'screens/betterGI.webp',
     width: 1184,
     height: 668,
-    icon: '⌘',
-    accent: 'amber',
+    icon: 'terminal',
     name: { zh: 'BetterGI 参数', en: 'BetterGI args' },
     tag: { zh: '常用命令行 · 一键勾选', en: 'Preset args · one tick' },
     caption: {
@@ -186,8 +172,7 @@ export const screens = [
     src: 'screens/cloud.webp',
     width: 1184,
     height: 668,
-    icon: '◷',
-    accent: 'cyan',
+    icon: 'cloud',
     name: { zh: '云游戏时长', en: 'Cloud gaming time' },
     tag: { zh: '免费时长 · 自动领取', en: 'Free time · auto claim' },
     caption: {
@@ -204,8 +189,7 @@ export const screens = [
     src: 'screens/checkin.webp',
     width: 1184,
     height: 668,
-    icon: '✓',
-    accent: 'green',
+    icon: 'calendar',
     name: { zh: '自动签到', en: 'Daily check-in' },
     tag: { zh: '月历 · 自动签到', en: 'Calendar · auto claim' },
     caption: {
@@ -222,8 +206,7 @@ export const screens = [
     src: 'screens/gacha.webp',
     width: 1184,
     height: 668,
-    icon: '◈',
-    accent: 'violet',
+    icon: 'sparkle',
     name: { zh: '抽卡记录', en: 'Gacha history' },
     tag: { zh: '卡池 · 拖动排序', en: 'Pools · drag to reorder' },
     caption: {
@@ -240,8 +223,7 @@ export const screens = [
     src: 'screens/gacha-compact.webp',
     width: 1184,
     height: 668,
-    icon: '⊞',
-    accent: 'rose',
+    icon: 'grid',
     name: { zh: '紧凑视图', en: 'Compact view' },
     tag: { zh: '图标网格 · 一屏看完', en: 'Icon grid · one screen' },
     caption: {
@@ -258,8 +240,7 @@ export const screens = [
     src: 'screens/report.webp',
     width: 1184,
     height: 668,
-    icon: '▤',
-    accent: 'blue',
+    icon: 'chart',
     name: { zh: '月报与战绩', en: 'Reports & records' },
     tag: { zh: '月报 · 自动更新', en: 'Report · auto refresh' },
     caption: {
@@ -276,8 +257,7 @@ export const screens = [
     src: 'screens/data.webp',
     width: 1184,
     height: 668,
-    icon: '⇄',
-    accent: 'amber',
+    icon: 'swap',
     name: { zh: '数据与同步', en: 'Data & sync' },
     tag: { zh: '备份 · 局域网同步', en: 'Backup · LAN sync' },
     caption: {

@@ -3,9 +3,12 @@ import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { screens } from '../data/content'
 import { asset } from '../utils/asset'
 import { vReveal } from '../utils/reveal'
+import UiIcon from './UiIcon.vue'
 
 const props = defineProps({
   locale: { type: String, required: true },
+  /** 区块序号（如 "02"），由 App.vue 按顶栏锚点顺序传入 */
+  num: { type: String, default: '' },
 })
 
 const t = (keyObj) => keyObj[props.locale] ?? keyObj.zh
@@ -234,6 +237,7 @@ onUnmounted(() => {
     aria-labelledby="screens-heading"
     @keydown="onSectionKeydown"
   >
+    <p v-if="num" class="sec-num mono" aria-hidden="true">{{ num }}</p>
     <h2 id="screens-heading">{{ locale === 'zh' ? '界面' : 'Screens' }}</h2>
     <p class="section-lead">
       {{
@@ -258,7 +262,6 @@ onUnmounted(() => {
           v-reveal="i"
           type="button"
           class="screen-tab"
-          :data-accent="s.accent"
           role="tab"
           :id="`screen-tab-${s.id}`"
           :aria-selected="s.id === activeId"
@@ -277,7 +280,7 @@ onUnmounted(() => {
             />
           </span>
           <span class="screen-tab-copy">
-            <span class="screen-tab-icon" aria-hidden="true">{{ s.icon }}</span>
+            <span class="screen-tab-icon" aria-hidden="true"><UiIcon :name="s.icon" /></span>
             <span class="screen-tab-name">{{ t(s.name) }}</span>
             <span class="screen-tab-tag">{{ t(s.tag) }}</span>
           </span>
@@ -289,7 +292,6 @@ onUnmounted(() => {
           id="screen-panel"
           class="screen-stage"
           role="tabpanel"
-          :data-accent="activeScreen.accent"
           :aria-labelledby="`screen-tab-${activeScreen.id}`"
         >
           <button
@@ -472,13 +474,6 @@ onUnmounted(() => {
 <style scoped>
 .screens-block {
   --screen-chrome: #161410;
-  margin-bottom: 2rem;
-  padding: 1.35rem 1.4rem 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  scroll-margin-top: 4.25rem;
 }
 
 .screen-board {
@@ -515,13 +510,13 @@ onUnmounted(() => {
 }
 
 .screen-tab:hover {
-  border-color: color-mix(in srgb, var(--card-accent, var(--accent)) 40%, var(--line));
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
   background: var(--surface-hover);
 }
 
 .screen-tab[aria-selected='true'] {
-  border-color: color-mix(in srgb, var(--card-accent, var(--accent)) 70%, var(--line));
-  background: color-mix(in srgb, var(--card-accent, var(--accent)) 16%, var(--bg-raised));
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--line));
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg-raised));
   box-shadow: var(--shadow-sm);
   color: var(--ink);
 }
@@ -530,16 +525,6 @@ onUnmounted(() => {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-
-.screen-tab[data-accent='teal'] { --card-accent: var(--teal); }
-.screen-tab[data-accent='amber'] { --card-accent: var(--amber); }
-.screen-tab[data-accent='blue'] { --card-accent: var(--blue); }
-.screen-tab[data-accent='green'] { --card-accent: var(--green); }
-.screen-tab[data-accent='violet'] { --card-accent: var(--violet); }
-.screen-tab[data-accent='rose'] { --card-accent: var(--rose); }
-.screen-tab[data-accent='cyan'] { --card-accent: var(--cyan); }
-.screen-tab[data-accent='indigo'] { --card-accent: var(--indigo); }
-.screen-tab[data-accent='slate'] { --card-accent: var(--slate); }
 
 .screen-tab-thumb {
   display: block;
@@ -567,7 +552,7 @@ onUnmounted(() => {
 }
 
 .screen-tab[aria-selected='true'] .screen-tab-thumb {
-  border-color: color-mix(in srgb, var(--card-accent, var(--accent)) 45%, var(--line));
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
 }
 
 .screen-tab-copy {
@@ -582,9 +567,9 @@ onUnmounted(() => {
 .screen-tab-icon {
   grid-row: 1;
   grid-column: 1;
-  font-size: 0.82rem;
-  line-height: 1.35;
-  color: var(--card-accent, var(--accent));
+  align-self: center;
+  font-size: 0.9rem;
+  color: var(--accent);
 }
 
 .screen-tab-name {
@@ -979,10 +964,6 @@ onUnmounted(() => {
 }
 
 @media (max-width: 560px) {
-  .screens-block {
-    padding: 1.1rem 1rem 1.2rem;
-  }
-
   .screen-nav {
     width: 1.9rem;
     height: 1.9rem;

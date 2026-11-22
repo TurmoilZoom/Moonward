@@ -238,6 +238,45 @@ ul {
   list-style: none;
 }
 
+/*
+ * 首页各区块：不再各包一层卡片面板（面板里再套卡片，层次太多），
+ * 直接铺在纸面上，区块之间一条发丝线；只有条目本身带框。
+ * 写在全局是因为「界面」区是子组件 Screens.vue 的根元素。
+ */
+.block {
+  scroll-margin-top: 4.25rem;
+}
+
+.block + .block {
+  margin-top: 2.75rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.block h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.4rem;
+}
+
+/* 区块标题上方的序号：等宽小字 + 一截短线，顺序见 App.vue 的 sectionNav */
+.sec-num {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+.sec-num::after {
+  content: '';
+  width: 2rem;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
 .section-lead {
   font-size: 0.98rem;
   color: var(--muted);
