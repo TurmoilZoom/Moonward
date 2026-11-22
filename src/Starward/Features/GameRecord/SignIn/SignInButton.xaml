@@ -179,7 +179,10 @@
                                       VerticalScrollBarVisibility="Hidden">
                             <ItemsRepeater ItemsSource="{x:Bind Awards}">
                                 <ItemsRepeater.Layout>
-                                    <UniformGridLayout MaximumRowsOrColumns="7"
+                                    <!--  格子只有 40 宽，7 列 + 间距共 292，默认靠左会在 320 宽卡片右侧空出 28：
+                                         Fill 把余量均分给各列，图标在格内居中  -->
+                                    <UniformGridLayout ItemsStretch="Fill"
+                                                       MaximumRowsOrColumns="7"
                                                        MinColumnSpacing="2"
                                                        MinRowSpacing="2"
                                                        Orientation="Horizontal" />
