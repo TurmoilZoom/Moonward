@@ -4744,4 +4744,7 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
     <value>Копировать имя файла</value>
   </data>
+  <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
+    <value>Скриншотов пока нет</value>
+  </data>
 </root>

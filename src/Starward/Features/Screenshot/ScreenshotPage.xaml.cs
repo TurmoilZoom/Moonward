@@ -14,6 +14,7 @@ using Starward.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -131,11 +132,46 @@ public sealed partial class ScreenshotPage : PageBase
 
     public CollectionViewSource ScreenshotViewSource { get; set => SetProperty(ref field, value); } = new() { IsSourceGrouped = true };
 
-    public ObservableCollection<ScreenshotItemGroup> ScreenshotGroups { get; set { if (SetProperty(ref field, value)) { ScreenshotViewSource.Source = value; } } }
+    public ObservableCollection<ScreenshotItemGroup> ScreenshotGroups
+    {
+        get;
+        set
+        {
+            var old = field;
+            if (SetProperty(ref field, value))
+            {
+                if (old is not null)
+                {
+                    old.CollectionChanged -= ScreenshotGroups_CollectionChanged;
+                }
+                if (value is not null)
+                {
+                    value.CollectionChanged += ScreenshotGroups_CollectionChanged;
+                }
+                ScreenshotViewSource.Source = value;
+                UpdateEmptyState();
+            }
+        }
+    }
+
+
+    // 分组变空时都会被移除，所以分组数为 0 就是没有截图；监听分组而不是列表项，因为移除空分组不一定触发列表的 VectorChanged
+    private void ScreenshotGroups_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        UpdateEmptyState();
+    }
+
+
+    /// <summary>
+    /// 首次扫描截图文件夹是否已完成。扫描期间列表本来就是空的，不能把这段时间当成「没有截图」。
+    /// </summary>
+    private bool _screenshotsLoaded;
 
 
     private async void Initialize()
     {
+        _screenshotsLoaded = false;
+        UpdateEmptyState();
         try
         {
             foreach (var item in _watchers)
@@ -216,6 +252,18 @@ public sealed partial class ScreenshotPage : PageBase
         {
             _logger.LogError(ex, "Initialize");
         }
+        _screenshotsLoaded = true;
+        UpdateEmptyState();
+    }
+
+
+    /// <summary>
+    /// 扫描完成且一张截图都没有时显示空状态。
+    /// </summary>
+    private void UpdateEmptyState()
+    {
+        bool empty = _screenshotsLoaded && (ScreenshotGroups is null || ScreenshotGroups.Count == 0);
+        StackPanel_Emoji.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
     }
 
 

@@ -4718,4 +4718,7 @@ You are welcome to submit exported data to:</value>
   <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
     <value>คัดลอกชื่อไฟล์</value>
   </data>
+  <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
+    <value>ยังไม่มีภาพหน้าจอ</value>
+  </data>
 </root>

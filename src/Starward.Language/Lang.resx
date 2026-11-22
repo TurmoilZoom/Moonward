@@ -4813,4 +4813,7 @@ Repository:</value>
   <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
     <value>Copy File Name</value>
   </data>
+  <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
+    <value>No screenshots yet</value>
+  </data>
 </root>

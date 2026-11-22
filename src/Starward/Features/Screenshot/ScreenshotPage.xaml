@@ -28,6 +28,7 @@
                    Text="{x:Bind lang:Lang.ScreenshotPage_GameScreenshot}" />-->
 
 
+        <!--  空状态：所有截图文件夹都没有截图时显示  -->
         <StackPanel Name="StackPanel_Emoji"
                     Grid.RowSpan="2"
                     HorizontalAlignment="Center"
@@ -40,7 +41,7 @@
             <TextBlock HorizontalAlignment="Center"
                        FontSize="16"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.ScreenshotPage_ScreenshotFolderDoesNotExist}" />
+                       Text="{x:Bind lang:Lang.ScreenshotPage_NoScreenshots}" />
         </StackPanel>
 
 

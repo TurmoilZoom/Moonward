@@ -4724,4 +4724,7 @@
   <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
     <value>파일 이름 복사</value>
   </data>
+  <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
+    <value>아직 스크린샷이 없습니다</value>
+  </data>
 </root>

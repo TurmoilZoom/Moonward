@@ -4722,4 +4722,7 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
     <value>Dateinamen kopieren</value>
   </data>
+  <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
+    <value>Noch keine Screenshots</value>
+  </data>
 </root>

@@ -4724,4 +4724,7 @@ You are welcome to submit exported data to:</value>
   <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
     <value>Sao chép tên tệp</value>
   </data>
+  <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
+    <value>Chưa có ảnh chụp màn hình</value>
+  </data>
 </root>

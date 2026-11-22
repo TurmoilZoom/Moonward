@@ -13843,5 +13843,14 @@ namespace Starward.Language {
                 return ResourceManager.GetString("ScreenshotPage_CopyFileName", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 No screenshots yet 的本地化字符串。
+        /// </summary>
+        public static string ScreenshotPage_NoScreenshots {
+            get {
+                return ResourceManager.GetString("ScreenshotPage_NoScreenshots", resourceCulture);
+            }
+        }
     }
 }
