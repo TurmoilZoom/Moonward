@@ -8,6 +8,7 @@ import {
   launchFlow,
   links,
   requirements,
+  screens,
 } from './data/content'
 import Screens from './components/Screens.vue'
 import { asset } from './utils/asset'
@@ -312,6 +313,107 @@ const moonLayerStyle = computed(() => {
   }
 })
 
+/* —— 首屏右侧：真实界面轮播 —— */
+/** 每张停留时长；同时是进度条填满所需的时间（CSS 变量 --showcase-ms） */
+const SHOWCASE_INTERVAL_MS = 5200
+const showcaseRef = ref(null)
+const showcaseIndex = ref(0)
+/** 只给看过的和下一张挂 <img>：8 张图合计约 1.8MB，首屏不该一次拉完 */
+const showcaseLoaded = ref(new Set([0, 1]))
+const showcaseHover = ref(false)
+const showcaseFocus = ref(false)
+const showcaseUserPaused = ref(false)
+const showcaseInView = ref(true)
+const pageHidden = ref(false)
+let showcaseObserver = null
+
+const showcaseScreen = computed(() => screens[showcaseIndex.value])
+
+/** 减少动态效果时不自动轮播，只能手动点进度段切换 */
+const showcaseAuto = computed(() => !reducedMotion.value && !showcaseUserPaused.value)
+
+const showcaseRunning = computed(
+  () =>
+    showcaseAuto.value &&
+    !showcaseHover.value &&
+    !showcaseFocus.value &&
+    showcaseInView.value &&
+    !pageHidden.value,
+)
+
+const showcaseStatus = computed(() => {
+  const latest = latestRelease.value
+  if (latest) {
+    const date = formatPublishedAt(latest.publishedAt, locale.value)
+    const bits = [latest.tag, locale.value === 'zh' ? '最新' : 'latest']
+    if (date) bits.push(date)
+    return bits.join(' · ')
+  }
+  if (releaseLoading.value) return locale.value === 'zh' ? '正在获取最新版本…' : 'Fetching latest release…'
+  return locale.value === 'zh' ? '查看全部版本' : 'All releases'
+})
+
+/**
+ * 切到第 i 张（越界取模），并预挂下一张的图。
+ * @param {number} i
+ */
+function showShowcase(i) {
+  const n = (i + screens.length) % screens.length
+  showcaseIndex.value = n
+  const loaded = new Set(showcaseLoaded.value)
+  loaded.add(n)
+  loaded.add((n + 1) % screens.length)
+  showcaseLoaded.value = loaded
+}
+
+/**
+ * 当前进度段填满（CSS 动画结束）即翻页：计时交给动画，暂停只需停 animation-play-state，
+ * 恢复时从停下的位置接着走，不必在 JS 里另记剩余时间。
+ * @param {AnimationEvent} e
+ */
+function onShowcaseSegEnd(e) {
+  // scoped 样式会把 keyframes 改名（seg-fill-<hash>），不能按 animationName 判断；
+  // 进度段只有这一个动画，认准事件来自自身即可
+  if (e.target !== e.currentTarget || !showcaseAuto.value) return
+  showShowcase(showcaseIndex.value + 1)
+}
+
+/** 只有鼠标悬停才暂停；触屏点按后不会有 pointerleave，按悬停算会一直停着 */
+function onShowcasePointer(e, inside) {
+  if (e.pointerType !== 'mouse') return
+  showcaseHover.value = inside
+}
+
+/**
+ * 键盘焦点进来时暂停。鼠标点进度段也会让按钮获得焦点，若按焦点算，
+ * 鼠标移开后轮播仍停着，所以只认 :focus-visible。
+ * @param {FocusEvent} e
+ */
+function onShowcaseFocusIn(e) {
+  showcaseFocus.value = e.target instanceof Element && e.target.matches(':focus-visible')
+}
+
+function onShowcaseFocusOut(e) {
+  if (!showcaseRef.value?.contains(/** @type {Node | null} */ (e.relatedTarget))) {
+    showcaseFocus.value = false
+  }
+}
+
+/**
+ * 点图跳到下方「界面」区并选中同一张。地址栏已经是同一个 `#screens/<id>` 时
+ * 浏览器不会再发 hashchange，这里补发一次，让 Screens.vue 照常滚动定位。
+ * @param {MouseEvent} e
+ */
+function onShowcaseOpen(e) {
+  if (window.location.hash !== `#screens/${showcaseScreen.value.id}`) return
+  e.preventDefault()
+  window.dispatchEvent(new HashChangeEvent('hashchange'))
+}
+
+function onVisibilityChange() {
+  pageHidden.value = document.visibilityState === 'hidden'
+}
+
 /* —— 站内路由 —— */
 /**
  * 首页用 hash 做页内锚点（#install、#screens/<id>），文档页因此走
@@ -490,7 +592,23 @@ onMounted(() => {
   onWindowScroll()
   syncFoldFromHash()
   syncDocumentTitle()
+  onVisibilityChange()
+  document.addEventListener('visibilitychange', onVisibilityChange)
+  observeShowcase()
 })
+
+/** 轮播滚出视口就停，回来再接着走；文档页没有首屏，切回首页时重新挂 */
+function observeShowcase() {
+  showcaseObserver?.disconnect()
+  showcaseObserver = null
+  if (!showcaseRef.value || !('IntersectionObserver' in window)) return
+  showcaseObserver = new IntersectionObserver((entries) => {
+    showcaseInView.value = entries.some((en) => en.isIntersecting)
+  })
+  showcaseObserver.observe(showcaseRef.value)
+}
+
+watch(showcaseRef, () => observeShowcase(), { flush: 'post' })
 
 onUnmounted(() => {
   themeGen += 1
@@ -498,6 +616,8 @@ onUnmounted(() => {
   window.removeEventListener('scroll', onWindowScroll)
   window.removeEventListener('hashchange', syncFoldFromHash)
   window.removeEventListener('hashchange', onRouteChange)
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+  showcaseObserver?.disconnect()
   navResizeObserver?.disconnect()
   stopSystemWatch?.()
   releaseAbort?.abort()
@@ -643,38 +763,159 @@ onUnmounted(() => {
       </div>
 
       <div class="wrap hero-content" :style="layerStyle(0.08)">
-        <p class="kicker mono">Windows · WinUI 3 · MIT</p>
-        <div class="hero-title-row">
-          <img class="hero-logo" :src="asset('logo.png')" alt="" width="56" height="56" :style="layerStyle(0.65)" />
-          <h1 id="hero-title" :style="layerStyle(0.35)">Moonward</h1>
+        <div class="hero-copy">
+          <p class="kicker mono">Windows · WinUI 3 · MIT</p>
+          <div class="hero-title-row">
+            <img class="hero-logo" :src="asset('logo.png')" alt="" width="56" height="56" :style="layerStyle(0.65)" />
+            <h1 id="hero-title" :style="layerStyle(0.35)">Moonward</h1>
+          </div>
+          <p class="lede">{{ t(intro) }}</p>
+          <ul class="games" aria-label="Supported games">
+            <li v-for="name in games[locale]" :key="name">{{ name }}</li>
+          </ul>
+          <p class="actions">
+            <a
+              class="btn"
+              :href="heroDownloadHref"
+              rel="noopener noreferrer"
+            >
+              {{
+                locale === 'zh'
+                  ? recommendedSetup
+                    ? `下载 ${recommendedSetup.arch === 'arm64' ? 'ARM64' : 'x64'} ${kindLabel(recommendedSetup.kind)}`
+                    : '选择安装包'
+                  : recommendedSetup
+                    ? `Download ${recommendedSetup.arch} ${kindLabel(recommendedSetup.kind)}`
+                    : 'Get installer'
+              }}
+            </a>
+            <a class="btn ghost" href="#install">
+              {{ locale === 'zh' ? '全部版本' : 'All packages' }}
+            </a>
+            <a class="text-link" :href="links.github" target="_blank" rel="noopener noreferrer">
+              GitHub
+            </a>
+          </p>
         </div>
-        <p class="lede">{{ t(intro) }}</p>
-        <ul class="games" aria-label="Supported games">
-          <li v-for="name in games[locale]" :key="name">{{ name }}</li>
-        </ul>
-        <p class="actions">
-          <a
-            class="btn"
-            :href="heroDownloadHref"
-            rel="noopener noreferrer"
-          >
-            {{
-              locale === 'zh'
-                ? recommendedSetup
-                  ? `下载 ${recommendedSetup.arch === 'arm64' ? 'ARM64' : 'x64'} ${kindLabel(recommendedSetup.kind)}`
-                  : '选择安装包'
-                : recommendedSetup
-                  ? `Download ${recommendedSetup.arch} ${kindLabel(recommendedSetup.kind)}`
-                  : 'Get installer'
-            }}
+
+        <!-- 首屏右侧：实际界面自动轮播，点图跳到下方「界面」区同一张 -->
+        <div
+          ref="showcaseRef"
+          class="hero-showcase"
+          :class="{ 'is-auto': showcaseAuto, 'is-paused': !showcaseRunning }"
+          :style="{ '--showcase-ms': `${SHOWCASE_INTERVAL_MS}ms` }"
+          role="region"
+          :aria-label="locale === 'zh' ? '界面预览' : 'Screen preview'"
+          @pointerenter="onShowcasePointer($event, true)"
+          @pointerleave="onShowcasePointer($event, false)"
+          @focusin="onShowcaseFocusIn"
+          @focusout="onShowcaseFocusOut"
+        >
+          <div class="showcase-window">
+            <div class="showcase-head">
+              <span class="showcase-count mono">
+                {{ String(showcaseIndex + 1).padStart(2, '0') }} / {{ String(screens.length).padStart(2, '0') }}
+              </span>
+              <span class="showcase-name">{{ t(showcaseScreen.name) }}</span>
+              <span class="showcase-tag">{{ t(showcaseScreen.tag) }}</span>
+              <button
+                v-if="!reducedMotion"
+                type="button"
+                class="showcase-toggle"
+                :aria-label="
+                  locale === 'zh'
+                    ? showcaseUserPaused ? '继续轮播' : '暂停轮播'
+                    : showcaseUserPaused ? 'Resume slideshow' : 'Pause slideshow'
+                "
+                :title="
+                  locale === 'zh'
+                    ? showcaseUserPaused ? '继续轮播' : '暂停轮播'
+                    : showcaseUserPaused ? 'Resume slideshow' : 'Pause slideshow'
+                "
+                @click="showcaseUserPaused = !showcaseUserPaused"
+              >
+                <svg v-if="showcaseUserPaused" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                  <path fill="currentColor" d="M8.5 6.2v11.6a.7.7 0 0 0 1.06.6l9.2-5.8a.7.7 0 0 0 0-1.2l-9.2-5.8a.7.7 0 0 0-1.06.6Z" />
+                </svg>
+                <svg v-else viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    d="M9 6.5v11M15 6.5v11"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <a
+              class="showcase-frame"
+              :href="`#screens/${showcaseScreen.id}`"
+              :aria-label="
+                locale === 'zh'
+                  ? `查看界面说明：${t(showcaseScreen.name)}`
+                  : `See screen notes: ${t(showcaseScreen.name)}`
+              "
+              @click="onShowcaseOpen"
+            >
+              <template v-for="(s, i) in screens" :key="s.id">
+                <img
+                  v-if="showcaseLoaded.has(i)"
+                  class="showcase-shot"
+                  :class="{ 'is-on': i === showcaseIndex }"
+                  :src="asset(s.src)"
+                  alt=""
+                  :width="s.width"
+                  :height="s.height"
+                  :fetchpriority="i === 0 ? 'high' : undefined"
+                  decoding="async"
+                  draggable="false"
+                />
+              </template>
+              <span class="showcase-more" aria-hidden="true">
+                {{ locale === 'zh' ? '查看说明' : 'Details' }}
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 5v14M6 13l6 6 6-6"
+                  />
+                </svg>
+              </span>
+            </a>
+
+            <div class="showcase-segs" role="group" :aria-label="locale === 'zh' ? '切换界面' : 'Pick a screen'">
+              <button
+                v-for="(s, i) in screens"
+                :key="s.id"
+                type="button"
+                class="seg"
+                :class="{ 'is-active': i === showcaseIndex, 'is-done': i < showcaseIndex }"
+                :aria-label="`${i + 1}. ${t(s.name)}`"
+                :aria-current="i === showcaseIndex ? 'true' : undefined"
+                :title="t(s.name)"
+                @click="showShowcase(i)"
+              >
+                <span class="seg-bar">
+                  <span class="seg-fill" @animationend="onShowcaseSegEnd" />
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <a class="showcase-status mono" href="#install">
+            <span
+              class="status-dot"
+              :class="{ 'is-ok': latestRelease, 'is-loading': !latestRelease && releaseLoading }"
+              aria-hidden="true"
+            />
+            {{ showcaseStatus }}
           </a>
-          <a class="btn ghost" href="#install">
-            {{ locale === 'zh' ? '全部版本' : 'All packages' }}
-          </a>
-          <a class="text-link" :href="links.github" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
-        </p>
+        </div>
       </div>
     </section>
 
@@ -1726,18 +1967,272 @@ onUnmounted(() => {
   position: relative;
   z-index: 2;
   will-change: transform;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  gap: 2rem 3rem;
+  align-items: center;
 }
 
 /* 首屏依次亮起；月亮、云层的 parallax 写在 inline style 上，这里只动子元素 */
-.hero-content > * {
+.hero-copy > *,
+.hero-showcase {
   animation: hero-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.hero-content > *:nth-child(1) { animation-delay: 0.05s; }
-.hero-content > *:nth-child(2) { animation-delay: 0.14s; }
-.hero-content > *:nth-child(3) { animation-delay: 0.23s; }
-.hero-content > *:nth-child(4) { animation-delay: 0.32s; }
-.hero-content > *:nth-child(5) { animation-delay: 0.41s; }
+.hero-copy > *:nth-child(1) { animation-delay: 0.05s; }
+.hero-copy > *:nth-child(2) { animation-delay: 0.14s; }
+.hero-copy > *:nth-child(3) { animation-delay: 0.23s; }
+.hero-copy > *:nth-child(4) { animation-delay: 0.32s; }
+.hero-copy > *:nth-child(5) { animation-delay: 0.41s; }
+
+.hero-showcase {
+  animation-name: hero-shot-rise;
+  animation-duration: 0.95s;
+  animation-delay: 0.22s;
+}
+
+@keyframes hero-shot-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-copy,
+.hero-showcase {
+  min-width: 0;
+}
+
+/* 截图本身是深色应用界面，两套主题下画框都用纸面色，只有图区固定深底 */
+.showcase-window {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 6%, transparent) inset,
+    0 30px 60px -30px rgba(0, 0, 0, 0.55),
+    0 12px 24px -16px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.showcase-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 2.3rem;
+  padding: 0 0.4rem 0 0.85rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+.showcase-count {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.showcase-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.showcase-tag {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.showcase-toggle {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.showcase-toggle svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+
+.showcase-toggle:hover {
+  color: var(--ink);
+  background: var(--surface-hover);
+}
+
+.showcase-toggle:focus-visible,
+.showcase-frame:focus-visible,
+.seg:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.showcase-frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 1184 / 668;
+  overflow: hidden;
+  background: #161410;
+  color: #f3eee6;
+}
+
+.showcase-shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.025);
+  transition:
+    opacity 0.6s ease,
+    transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.showcase-shot.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.showcase-more {
+  position: absolute;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.6rem 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #f3eee6 22%, transparent);
+  background: color-mix(in srgb, #161410 62%, transparent);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translate3d(0, 4px, 0);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.showcase-more svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.showcase-frame:hover .showcase-more,
+.showcase-frame:focus-visible .showcase-more {
+  opacity: 1;
+  transform: none;
+}
+
+/* 进度段：已看过的填满，当前段随 --showcase-ms 走满后由 animationend 翻页 */
+.showcase-segs {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.seg {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.6rem 0 0.65rem;
+}
+
+.seg-bar {
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+  transition: background 0.15s ease;
+}
+
+.seg:hover .seg-bar {
+  background: color-mix(in srgb, var(--ink) 26%, transparent);
+}
+
+.seg-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.seg.is-done .seg-fill,
+.seg.is-active .seg-fill {
+  transform: scaleX(1);
+}
+
+.seg.is-done .seg-fill {
+  opacity: 0.5;
+}
+
+.hero-showcase.is-auto .seg.is-active .seg-fill {
+  animation: seg-fill var(--showcase-ms) linear both;
+}
+
+.hero-showcase.is-paused .seg.is-active .seg-fill {
+  animation-play-state: paused;
+}
+
+@keyframes seg-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.showcase-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.showcase-status:hover {
+  color: var(--ink);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.status-dot.is-ok {
+  background: var(--green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 22%, transparent);
+}
+
+.status-dot.is-loading {
+  animation: status-blink 1.1s ease-in-out infinite;
+}
+
+@keyframes status-blink {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
 
 @keyframes hero-rise {
   from {
@@ -3108,6 +3603,41 @@ onUnmounted(() => {
 
   .path-summary {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 两栏时月亮挪到右上角更高处，从截图画框背后探出来，不整个被画框挡住；月晕同心跟着挪 */
+@media (min-width: 861px) {
+  .layer-moon {
+    top: -4.5rem;
+    right: 0.5%;
+  }
+
+  .layer-halo {
+    top: -10rem;
+    right: calc(0.5% - 5.5rem);
+  }
+}
+
+@media (max-width: 860px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-showcase {
+    max-width: 40rem;
+  }
+}
+
+/* 触屏没有悬停：「查看说明」常显，进度段加高点按区域 */
+@media (pointer: coarse) {
+  .showcase-more {
+    opacity: 0.92;
+    transform: none;
+  }
+
+  .seg {
+    padding: 0.8rem 0 0.85rem;
   }
 }
 
