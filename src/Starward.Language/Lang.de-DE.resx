@@ -3783,6 +3783,24 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="RedeemCode_HintDelay" xml:space="preserve">
     <value>Official API may lag the livestream by about 2 minutes</value>
   </data>
+  <data name="RedeemCodeButton_Notify" xml:space="preserve">
+    <value>Redeem code notifications</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyEach" xml:space="preserve">
+    <value>Notify for each code</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyMerged" xml:space="preserve">
+    <value>Merge into one notification when all are out</value>
+  </data>
+  <data name="RedeemCodeNotify_Title" xml:space="preserve">
+    <value>{0}: redeem code released</value>
+  </data>
+  <data name="RedeemCodeNotify_Copy" xml:space="preserve">
+    <value>Copy {0}</value>
+  </data>
   <data name="FavorWallpaper_Title" xml:space="preserve">
     <value>Trust Wallpapers</value>
   </data>

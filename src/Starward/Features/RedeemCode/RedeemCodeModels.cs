@@ -1,12 +1,22 @@
+using System;
 using System.Collections.Generic;
 
 namespace Starward.Features.RedeemCode;
 
 /// <summary>
-/// 兑换码展示快照（Service 输出，UI 只读）。
+/// 兑换码展示快照（Service 输出，UI 与后台通知只读）。
 /// </summary>
 internal class RedeemCodeSnapshot
 {
+
+    /// <summary>本期直播的 act_id；没找到活动时为空。</summary>
+    public string? ActId { get; init; }
+
+    /// <summary>计划开播时间（index 的 <c>start</c>，东八区墙钟换算）。</summary>
+    public DateTimeOffset? StartTime { get; init; }
+
+    /// <summary>计划结束时间（index 的 <c>end</c>）。</summary>
+    public DateTimeOffset? EndTime { get; init; }
 
     /// <summary>直播活动标题；可为空。</summary>
     public string? Title { get; init; }

@@ -123,6 +123,8 @@ public static partial class AppConfig
             // 首页兑换码：国服前瞻直播 miyolive（公开接口，无 Cookie，只展示）
             sc.AddSingleton<MiyoLiveClient>();
             sc.AddSingleton<RedeemCodeService>();
+            // 兑换码放出时发系统通知：常驻，按游戏开关，直播期间每分钟查一次
+            sc.AddSingleton<RedeemCodeNotifyService>();
 
             // 云游戏可用时长：凭证由当前登录账号的通行证 stoken 自动换取，无需用户手动输入
             sc.AddSingleton<CloudGameClient>();

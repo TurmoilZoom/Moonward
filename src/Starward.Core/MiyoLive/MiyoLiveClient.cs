@@ -17,6 +17,9 @@ public partial class MiyoLiveClient
     private const string TakumiHost = "https://api-takumi.mihoyo.com";
     private const string TakumiStaticHost = "https://api-takumi-static.mihoyo.com";
 
+    /// <summary>单次请求超时。</summary>
+    private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(15);
+
     private readonly HttpClient _httpClient;
 
 
@@ -34,15 +37,20 @@ public partial class MiyoLiveClient
 
 
     /// <summary>
-    /// 从官方账号动态列表中解析当次直播 <c>act_id</c>。
+    /// 从官方账号动态列表中找出可能是直播活动的 <c>act_id</c>，按动态从新到旧排列。
     /// </summary>
+    /// <remarks>
+    /// 只是候选：讨论活动帖里的往期 act_id 会一直留在列表里（星铁实测已下线的 act_id 返回 -500007），
+    /// 绝区零 3.4 起预告帖正文干脆不带链接，由调用方用 index 校验并择新。
+    /// </remarks>
     /// <param name="uid">官方账号 UID。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>act_id；未找到返回 null。</returns>
-    public async Task<string?> TryGetActIdFromUserInstantAsync(long uid, CancellationToken cancellationToken = default)
+    /// <returns>去重后的候选 act_id；没有时为空列表。</returns>
+    public async Task<List<string>> GetActIdCandidatesFromUserInstantAsync(long uid, CancellationToken cancellationToken = default)
     {
         string url = $"{PainterHost}/painter/api/user_instant/list?offset=0&size=20&uid={uid}";
         MiyoLiveUserInstantListData data = await CommonGetAsync(url, null, MiyoLiveJsonContext.Default.miHoYoApiWrapperMiyoLiveUserInstantListData, cancellationToken);
+        var result = new List<string>();
         foreach (MiyoLiveUserInstantItem item in data.List)
         {
             MiyoLivePost? post = item.Post?.Post;
@@ -54,40 +62,31 @@ public partial class MiyoLiveClient
             string content = post.StructuredContent;
             string subject = post.Subject ?? "";
 
-            // 优先：正文含官方直播页链接（云崽主路径）
-            if (ContainsLivePath(content))
+            // 正文含官方直播页链接（云崽主路径），或标题像前瞻/直播时再抠通用 act_id
+            if (ContainsLivePath(content) || IsLikelyLivestreamPost(subject))
             {
                 string? actId = ExtractActId(content);
-                if (!string.IsNullOrEmpty(actId))
+                if (!string.IsNullOrEmpty(actId) && !result.Contains(actId))
                 {
-                    return actId;
-                }
-            }
-
-            // 次选：标题像前瞻/直播，再抠通用 act_id
-            if (IsLikelyLivestreamPost(subject))
-            {
-                string? actId = ExtractActId(content);
-                if (!string.IsNullOrEmpty(actId))
-                {
-                    return actId;
+                    result.Add(actId);
                 }
             }
         }
-        return null;
+        return result;
     }
 
 
     /// <summary>
-    /// 从米游社首页导航中解析当次直播 <c>act_id</c>（备用路径）。
+    /// 从米游社首页导航中找出直播活动的 <c>act_id</c>。直播前后约一两天导航里会有「前瞻直播」入口（绝区零 3.4 实测）。
     /// </summary>
     /// <param name="gids">社区游戏 ID。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>act_id；未找到返回 null。</returns>
-    public async Task<string?> TryGetActIdFromHomeNavigatorAsync(int gids, CancellationToken cancellationToken = default)
+    /// <returns>去重后的候选 act_id；没有时为空列表。</returns>
+    public async Task<List<string>> GetActIdCandidatesFromHomeNavigatorAsync(int gids, CancellationToken cancellationToken = default)
     {
         string url = $"{MiyousheHost}/apihub/api/home/new?gids={gids}&parts=1%2C3%2C4";
         MiyoLiveHomeData data = await CommonGetAsync(url, null, MiyoLiveJsonContext.Default.miHoYoApiWrapperMiyoLiveHomeData, cancellationToken);
+        var result = new List<string>();
         foreach (MiyoLiveNavigatorItem nav in data.Navigator)
         {
             string name = nav.Name ?? "";
@@ -96,17 +95,18 @@ public partial class MiyoLiveClient
             {
                 continue;
             }
-            if (!IsLikelyLivestreamPost(name) && !name.Contains("前瞻", StringComparison.Ordinal) && !name.Contains("特别节目", StringComparison.Ordinal))
+            // 导航里还有签到、绘画征集等带 act_id 的入口，按名字筛
+            if (!ContainsLivePath(path) && !IsLikelyLivestreamPost(name))
             {
                 continue;
             }
             string? actId = ExtractActId(path);
-            if (!string.IsNullOrEmpty(actId))
+            if (!string.IsNullOrEmpty(actId) && !result.Contains(actId))
             {
-                return actId;
+                result.Add(actId);
             }
         }
-        return null;
+        return result;
     }
 
 
@@ -138,6 +138,16 @@ public partial class MiyoLiveClient
     }
 
 
+    /// <summary>
+    /// 发一次 GET 并解包 miHoYo 响应。
+    /// </summary>
+    /// <param name="url">完整地址。</param>
+    /// <param name="actId">需要时放进 <c>x-rpc-act_id</c> 头。</param>
+    /// <param name="typeInfo">响应的 JSON 类型信息。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>data 节点。</returns>
+    /// <exception cref="miHoYoApiException">retcode 非 0 或响应无法解析。</exception>
+    /// <exception cref="TimeoutException">单次请求超过 <see cref="RequestTimeout"/>。</exception>
     private async Task<T> CommonGetAsync<T>(string url, string? actId, JsonTypeInfo<miHoYoApiWrapper<T>> typeInfo, CancellationToken cancellationToken)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -145,9 +155,21 @@ public partial class MiyoLiveClient
         {
             request.Headers.TryAddWithoutValidation("x-rpc-act_id", actId);
         }
-        using HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        miHoYoApiWrapper<T>? wrapper = await response.Content.ReadFromJsonAsync(typeInfo, cancellationToken);
+        // 共享 HttpClient 的默认超时是 100 秒；后台通知每分钟查一次，单次卡住不能拖住整轮
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(RequestTimeout);
+        miHoYoApiWrapper<T>? wrapper;
+        try
+        {
+            using HttpResponseMessage response = await _httpClient.SendAsync(request, timeout.Token);
+            response.EnsureSuccessStatusCode();
+            wrapper = await response.Content.ReadFromJsonAsync(typeInfo, timeout.Token);
+        }
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested && timeout.IsCancellationRequested)
+        {
+            // 转成超时，免得调用方误判为自己取消而吞掉
+            throw new TimeoutException($"Request timed out after {RequestTimeout.TotalSeconds} s: {request.RequestUri?.GetLeftPart(UriPartial.Path)}", ex);
+        }
         if (wrapper is null)
         {
             throw new miHoYoApiException(-1, "Can not parse the response body.");

@@ -3843,6 +3843,24 @@
   <data name="RedeemCode_HintDelay" xml:space="preserve">
     <value>官方接口可能比直播晚约 2 分钟</value>
   </data>
+  <data name="RedeemCodeButton_Notify" xml:space="preserve">
+    <value>兑换码通知</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyOff" xml:space="preserve">
+    <value>不通知</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyEach" xml:space="preserve">
+    <value>每个码放出时都通知</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyMerged" xml:space="preserve">
+    <value>放齐后合并通知</value>
+  </data>
+  <data name="RedeemCodeNotify_Title" xml:space="preserve">
+    <value>{0}：兑换码已放出</value>
+  </data>
+  <data name="RedeemCodeNotify_Copy" xml:space="preserve">
+    <value>复制 {0}</value>
+  </data>
   <data name="FavorWallpaper_Title" xml:space="preserve">
     <value>好感壁纸</value>
   </data>

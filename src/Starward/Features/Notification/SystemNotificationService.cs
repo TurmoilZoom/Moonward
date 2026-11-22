@@ -54,6 +54,9 @@ internal static class SystemNotificationService
     /// <summary>ToastGeneric 主体最多显示 3 个文本元素（标题算一个），多出来的行并进最后一行。</summary>
     private const int MaxBodyLines = 2;
 
+    /// <summary>ToastGeneric 最多 5 个按钮。</summary>
+    private const int MaxButtons = 5;
+
     /// <summary><c>HRESULT_FROM_WIN32(ERROR_NOT_FOUND)</c>：读取从没发过通知的身份的 <see cref="ToastNotifier.Setting"/> 时返回。</summary>
     private const int E_ELEMENT_NOT_FOUND = unchecked((int)0x80070490);
 
@@ -187,6 +190,17 @@ internal static class SystemNotificationService
         {
             toast.Add(new XAttribute("activationType", "protocol"), new XAttribute("launch", notification.LaunchUri));
         }
+        List<SystemNotificationButton> buttons = notification.Buttons.Where(x => !string.IsNullOrWhiteSpace(x.Content) && !string.IsNullOrWhiteSpace(x.ActivationUri))
+                                                                     .Take(MaxButtons)
+                                                                     .ToList();
+        if (buttons.Count > 0)
+        {
+            // 按钮同样走协议激活：通知平台以普通权限拉起本程序，不需要 COM 激活器
+            toast.Add(new XElement("actions", buttons.Select(x => new XElement("action",
+                                                                               new XAttribute("content", x.Content),
+                                                                               new XAttribute("activationType", "protocol"),
+                                                                               new XAttribute("arguments", x.ActivationUri)))));
+        }
         return toast.ToString(SaveOptions.DisableFormatting);
     }
 
@@ -236,4 +250,16 @@ internal sealed class SystemNotification
     /// <summary>不弹出横幅，直接进通知中心。</summary>
     public bool SuppressPopup { get; set; }
 
+    /// <summary>底部按钮，最多 5 个，多出的忽略。</summary>
+    public List<SystemNotificationButton> Buttons { get; set; } = [];
+
 }
+
+
+
+/// <summary>
+/// 系统通知底部的一个按钮，点击时以协议激活 <see cref="ActivationUri"/>。
+/// </summary>
+/// <param name="Content">按钮文字。</param>
+/// <param name="ActivationUri">协议激活地址（见 <see cref="NotificationActivation"/>）。</param>
+internal sealed record SystemNotificationButton(string Content, string ActivationUri);

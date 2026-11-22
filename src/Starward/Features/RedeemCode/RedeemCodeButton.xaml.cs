@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
+using Starward.Core.MiyoLive;
 using Starward.Features.Setting;
 using Starward.Helpers;
 using Starward.Language;
@@ -53,6 +54,7 @@ public sealed partial class RedeemCodeButton : UserControl
         {
             DisplayTitle = Lang.RedeemCodeButton_Title;
         }
+        OnPropertyChanged(nameof(NotifyTooltip));
     }
 
 
@@ -65,12 +67,96 @@ public sealed partial class RedeemCodeButton : UserControl
         {
             if (SetProperty(ref field, value))
             {
+                OnPropertyChanged(nameof(NotifyGlyph));
+                OnPropertyChanged(nameof(NotifyTooltip));
                 if (IsLoaded)
                 {
                     InitializeForCurrentGame();
                 }
             }
         }
+    }
+
+
+    /// <summary>
+    /// 当前游戏的兑换码通知方式（按游戏，国服与 B 服共用）。不提供「合并」的游戏存着 Merged 时按逐条显示（两者对一个码没有区别）。
+    /// </summary>
+    private RedeemCodeNotifyMode NotifyMode
+    {
+        get
+        {
+            if (CurrentGameId is not { } id)
+            {
+                return RedeemCodeNotifyMode.Off;
+            }
+            RedeemCodeNotifyMode mode = AppConfig.GetRedeemCodeNotifyMode(id.GameBiz.Game);
+            return mode is RedeemCodeNotifyMode.Merged && !SupportsMergedNotify ? RedeemCodeNotifyMode.EachCode : mode;
+        }
+    }
+
+
+    /// <summary>
+    /// 当前游戏是否提供「放齐后合并通知」：每期预设多于一个码（<see cref="MiyoLiveGameConfig.ExpectedCodeCount"/>）才有意义，绝区零只有一个码就不显示。
+    /// </summary>
+    private bool SupportsMergedNotify => CurrentGameId is { } id && (MiyoLiveActivityConfig.FromGameBiz(id.GameBiz)?.ExpectedCodeCount ?? 1) > 1;
+
+
+    /// <summary>通知铃铛图标：不通知时为划掉的铃铛。</summary>
+    public string NotifyGlyph => NotifyMode is RedeemCodeNotifyMode.Off ? "" : "";
+
+
+    /// <summary>通知铃铛的悬停提示，带上当前选项（如「兑换码通知 · 不通知」）。</summary>
+    public string NotifyTooltip => $"{Lang.RedeemCodeButton_Notify} · {GetNotifyModeText(NotifyMode)}";
+
+
+    /// <summary>
+    /// 通知方式对应的菜单文字。
+    /// </summary>
+    /// <param name="mode">通知方式。</param>
+    /// <returns>本地化后的选项文字。</returns>
+    private static string GetNotifyModeText(RedeemCodeNotifyMode mode) => mode switch
+    {
+        RedeemCodeNotifyMode.EachCode => Lang.RedeemCodeButton_NotifyEach,
+        RedeemCodeNotifyMode.Merged => Lang.RedeemCodeButton_NotifyMerged,
+        _ => Lang.RedeemCodeButton_NotifyOff,
+    };
+
+
+    /// <summary>
+    /// 通知菜单打开时按当前设置勾选对应项；每期只有一个码的游戏收起「合并」项。
+    /// </summary>
+    private void MenuFlyout_Notify_Opening(object sender, object e)
+    {
+        RedeemCodeNotifyMode mode = NotifyMode;
+        RadioMenuFlyoutItem_NotifyMerged.Visibility = SupportsMergedNotify ? Visibility.Visible : Visibility.Collapsed;
+        RadioMenuFlyoutItem_NotifyOff.IsChecked = mode is RedeemCodeNotifyMode.Off;
+        RadioMenuFlyoutItem_NotifyEach.IsChecked = mode is RedeemCodeNotifyMode.EachCode;
+        RadioMenuFlyoutItem_NotifyMerged.IsChecked = mode is RedeemCodeNotifyMode.Merged;
+    }
+
+
+    /// <summary>
+    /// 选中通知方式：保存当前游戏的设置、唤醒后台通知服务，并刷新铃铛图标与提示。菜单项的 Tag 是 <see cref="RedeemCodeNotifyMode"/> 的取值。
+    /// </summary>
+    private void RadioMenuFlyoutItem_Notify_Click(object sender, RoutedEventArgs e)
+    {
+        if (CurrentGameId is not { } id
+            || sender is not FrameworkElement { Tag: string tag }
+            || !int.TryParse(tag, out int value)
+            || !Enum.IsDefined((RedeemCodeNotifyMode)value))
+        {
+            return;
+        }
+        string game = id.GameBiz.Game;
+        var mode = (RedeemCodeNotifyMode)value;
+        if (mode == AppConfig.GetRedeemCodeNotifyMode(game))
+        {
+            return;
+        }
+        AppConfig.SetRedeemCodeNotifyMode(game, mode);
+        AppConfig.GetService<RedeemCodeNotifyService>().NotifyConfigChanged(game);
+        OnPropertyChanged(nameof(NotifyGlyph));
+        OnPropertyChanged(nameof(NotifyTooltip));
     }
 
 

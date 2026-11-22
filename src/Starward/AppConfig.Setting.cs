@@ -3,6 +3,7 @@ using Starward.Core;
 using Starward.Features.Database;
 using Starward.Features.GameLauncher;
 using Starward.Features.GameRecord.SignIn;
+using Starward.Features.RedeemCode;
 using Starward.Features.ViewHost;
 using System;
 using System.Collections.Generic;
@@ -907,7 +908,28 @@ public static partial class AppConfig
     }
 
     /// <summary>
-    /// 有游戏在运行时，系统通知（便笺提醒、自动签到结果）不弹出横幅，直接进通知中心。默认开启。
+    /// 前瞻直播兑换码的系统通知方式（不通知 / 逐条 / 放齐后合并），按游戏（<see cref="GameBiz.Game"/>，如 hk4e）区分：国服与 B 服是同一场直播。默认不通知。
+    /// </summary>
+    /// <param name="game">游戏，如 hk4e。</param>
+    /// <returns>通知方式。</returns>
+    public static RedeemCodeNotifyMode GetRedeemCodeNotifyMode(string game)
+    {
+        return GetValue(RedeemCodeNotifyMode.Off, $"redeem_code_notify_{game}");
+    }
+
+    /// <summary>
+    /// 设置某游戏的前瞻直播兑换码通知方式。
+    /// </summary>
+    /// <param name="game">游戏，如 hk4e。</param>
+    /// <param name="value">通知方式。</param>
+    public static void SetRedeemCodeNotifyMode(string game, RedeemCodeNotifyMode value)
+    {
+        SetValue(value, $"redeem_code_notify_{game}");
+    }
+
+
+    /// <summary>
+    /// 有游戏在运行时，系统通知（便笺提醒、自动签到结果、兑换码）不弹出横幅，直接进通知中心。默认开启。
     /// 设置入口在提醒设置对话框；键名沿用最初只给便笺提醒用时的名字。
     /// </summary>
     public static bool DailyNoteNotifySilentWhenGameRunning

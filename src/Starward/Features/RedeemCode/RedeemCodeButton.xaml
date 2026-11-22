@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!--  启动页右侧「前瞻直播兑换码」：国服直播码展示（点击单条复制）  -->
+<!--  启动页右侧「前瞻直播兑换码」：国服直播码展示（点击单条复制）+ 码放出时的系统通知开关  -->
 <UserControl x:Class="Starward.Features.RedeemCode.RedeemCodeButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -50,14 +50,54 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <!--  标题  -->
-                    <TextBlock Margin="0,0,0,10"
-                               VerticalAlignment="Center"
-                               FontSize="14"
-                               FontWeight="SemiBold"
-                               Text="{x:Bind DisplayTitle}"
-                               TextTrimming="CharacterEllipsis"
-                               TextWrapping="NoWrap" />
+                    <!--  标题 + 兑换码通知铃铛（按游戏，国服与 B 服共用；与签到 / 便笺卡片的铃铛同样式）  -->
+                    <Grid Margin="0,0,0,10" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Text="{x:Bind DisplayTitle}"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap" />
+                        <!--  负边距：按钮比标题文字高，不让它把标题行撑高  -->
+                        <Button Grid.Column="1"
+                                Margin="0,-6,-6,-6"
+                                Padding="6"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="{x:Bind lang:Lang.RedeemCodeButton_Notify}"
+                                BorderThickness="0"
+                                CornerRadius="4"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind NotifyTooltip}">
+                            <FontIcon FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="{x:Bind NotifyGlyph}" />
+                            <Button.Flyout>
+                                <!--  Tag 与 RedeemCodeNotifyMode 的取值一一对应；每期只有一个码的游戏（绝区零）在 Opening 里收起「合并」项  -->
+                                <MenuFlyout Opening="MenuFlyout_Notify_Opening" Placement="BottomEdgeAlignedRight">
+                                    <RadioMenuFlyoutItem x:Name="RadioMenuFlyoutItem_NotifyOff"
+                                                         Click="RadioMenuFlyoutItem_Notify_Click"
+                                                         GroupName="RedeemCodeNotify"
+                                                         Tag="0"
+                                                         Text="{x:Bind lang:Lang.RedeemCodeButton_NotifyOff}" />
+                                    <RadioMenuFlyoutItem x:Name="RadioMenuFlyoutItem_NotifyEach"
+                                                         Click="RadioMenuFlyoutItem_Notify_Click"
+                                                         GroupName="RedeemCodeNotify"
+                                                         Tag="1"
+                                                         Text="{x:Bind lang:Lang.RedeemCodeButton_NotifyEach}" />
+                                    <RadioMenuFlyoutItem x:Name="RadioMenuFlyoutItem_NotifyMerged"
+                                                         Click="RadioMenuFlyoutItem_Notify_Click"
+                                                         GroupName="RedeemCodeNotify"
+                                                         Tag="2"
+                                                         Text="{x:Bind lang:Lang.RedeemCodeButton_NotifyMerged}" />
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
 
                     <!--  隐藏滚动条，仍可用滚轮/触控滚动  -->
                     <ScrollViewer Grid.Row="1"

@@ -3785,6 +3785,24 @@
   <data name="RedeemCode_HintDelay" xml:space="preserve">
     <value>官方介面可能比直播晚約 2 分鐘</value>
   </data>
+  <data name="RedeemCodeButton_Notify" xml:space="preserve">
+    <value>兌換碼通知</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyOff" xml:space="preserve">
+    <value>不通知</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyEach" xml:space="preserve">
+    <value>每個碼放出時都通知</value>
+  </data>
+  <data name="RedeemCodeButton_NotifyMerged" xml:space="preserve">
+    <value>放齊後合併通知</value>
+  </data>
+  <data name="RedeemCodeNotify_Title" xml:space="preserve">
+    <value>{0}：兌換碼已放出</value>
+  </data>
+  <data name="RedeemCodeNotify_Copy" xml:space="preserve">
+    <value>複製 {0}</value>
+  </data>
   <data name="FavorWallpaper_Title" xml:space="preserve">
     <value>好感壁紙</value>
   </data>

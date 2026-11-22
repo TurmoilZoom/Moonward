@@ -39,6 +39,13 @@ public class MiyoLiveInfo
 
 
     /// <summary>
+    /// 计划结束时间墙钟字符串（东八区，格式同 <see cref="Start"/>）。
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string? End { get; set; }
+
+
+    /// <summary>
     /// 是否已结束。
     /// </summary>
     [JsonPropertyName("is_end")]

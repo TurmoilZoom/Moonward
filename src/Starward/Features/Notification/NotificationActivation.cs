@@ -1,11 +1,14 @@
 using Starward.Core;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Starward.Features.Notification;
 
 /// <summary>
-/// 系统通知点击后的协议地址：生成与解析 <c>{scheme}://open/?biz={game_biz}&amp;uid={uid}</c>。
+/// 系统通知点击后的协议地址：生成与解析 <c>{scheme}://open/?biz={game_biz}&amp;uid={uid}</c>（打开主窗口）
+/// 与 <c>{scheme}://copy/?text={text}</c>（通知按钮：复制文本，如兑换码）。
 /// </summary>
 /// <remarks>
 /// 系统激活时会把 <c>scheme://open?x</c> 规范化成 <c>scheme://open/?x</c>（实测），这里生成时就带上斜杠，解析时两种都认。
@@ -14,6 +17,8 @@ internal static class NotificationActivation
 {
 
     private const string OpenHost = "open";
+
+    private const string CopyHost = "copy";
 
 
     /// <summary>
@@ -52,23 +57,12 @@ internal static class NotificationActivation
     {
         biz = null;
         uid = 0;
-        if (!IsActivationArgument(argument) || !Uri.TryCreate(argument, UriKind.Absolute, out Uri? uri))
+        if (!TryParse(argument, OpenHost, out Uri? uri))
         {
             return false;
         }
-        if (!string.Equals(uri.Host, OpenHost, StringComparison.OrdinalIgnoreCase))
+        foreach ((string key, string value) in ParseQuery(uri))
         {
-            return false;
-        }
-        foreach (string pair in uri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
-        {
-            int index = pair.IndexOf('=');
-            if (index <= 0)
-            {
-                continue;
-            }
-            string key = pair[..index];
-            string value = Uri.UnescapeDataString(pair[(index + 1)..]);
             if (key.Equals("biz", StringComparison.OrdinalIgnoreCase) && GameBiz.TryParse(value, out GameBiz parsed))
             {
                 biz = parsed;
@@ -79,6 +73,70 @@ internal static class NotificationActivation
             }
         }
         return true;
+    }
+
+
+    /// <summary>
+    /// 生成「复制文本」的激活地址，给通知按钮用。
+    /// </summary>
+    /// <param name="text">要复制的文本。</param>
+    /// <returns>协议激活地址。</returns>
+    public static string BuildCopyUri(string text)
+    {
+        return $"{SystemNotificationService.ActivationScheme}://{CopyHost}/?text={Uri.EscapeDataString(text)}";
+    }
+
+
+    /// <summary>
+    /// 解析「复制文本」激活地址。
+    /// </summary>
+    /// <param name="argument">命令行首个参数。</param>
+    /// <param name="text">要复制的文本；地址里没有时为空串。</param>
+    /// <returns>是「复制」地址返回 <see langword="true"/>。</returns>
+    public static bool TryParseCopy(string argument, out string text)
+    {
+        text = "";
+        if (!TryParse(argument, CopyHost, out Uri? uri))
+        {
+            return false;
+        }
+        foreach ((string key, string value) in ParseQuery(uri))
+        {
+            if (key.Equals("text", StringComparison.OrdinalIgnoreCase))
+            {
+                text = value;
+            }
+        }
+        return true;
+    }
+
+
+    /// <summary>
+    /// 是本应用通知协议、且主机名为 <paramref name="host"/> 的地址。
+    /// </summary>
+    private static bool TryParse(string argument, string host, [NotNullWhen(true)] out Uri? uri)
+    {
+        uri = null;
+        return IsActivationArgument(argument)
+            && Uri.TryCreate(argument, UriKind.Absolute, out uri)
+            && string.Equals(uri.Host, host, StringComparison.OrdinalIgnoreCase);
+    }
+
+
+    /// <summary>
+    /// 拆出查询串里的键值对（值已反转义）。
+    /// </summary>
+    private static IEnumerable<(string Key, string Value)> ParseQuery(Uri uri)
+    {
+        foreach (string pair in uri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            int index = pair.IndexOf('=');
+            if (index <= 0)
+            {
+                continue;
+            }
+            yield return (pair[..index], Uri.UnescapeDataString(pair[(index + 1)..]));
+        }
     }
 
 }

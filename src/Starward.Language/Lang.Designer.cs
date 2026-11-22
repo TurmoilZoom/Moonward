@@ -12330,6 +12330,60 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Redeem code notifications 的本地化字符串。
+        /// </summary>
+        public static string RedeemCodeButton_Notify {
+            get {
+                return ResourceManager.GetString("RedeemCodeButton_Notify", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Off 的本地化字符串。
+        /// </summary>
+        public static string RedeemCodeButton_NotifyOff {
+            get {
+                return ResourceManager.GetString("RedeemCodeButton_NotifyOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Notify for each code 的本地化字符串。
+        /// </summary>
+        public static string RedeemCodeButton_NotifyEach {
+            get {
+                return ResourceManager.GetString("RedeemCodeButton_NotifyEach", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Merge into one notification when all are out 的本地化字符串。
+        /// </summary>
+        public static string RedeemCodeButton_NotifyMerged {
+            get {
+                return ResourceManager.GetString("RedeemCodeButton_NotifyMerged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}: redeem code released 的本地化字符串。
+        /// </summary>
+        public static string RedeemCodeNotify_Title {
+            get {
+                return ResourceManager.GetString("RedeemCodeNotify_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Copy {0} 的本地化字符串。
+        /// </summary>
+        public static string RedeemCodeNotify_Copy {
+            get {
+                return ResourceManager.GetString("RedeemCodeNotify_Copy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Trust Wallpapers 的本地化字符串。
         /// </summary>
         public static string FavorWallpaper_Title {
