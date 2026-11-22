@@ -4720,4 +4720,7 @@
   <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
     <value>カスタマイズ</value>
   </data>
+  <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
+    <value>ファイル名をコピー</value>
+  </data>
 </root>

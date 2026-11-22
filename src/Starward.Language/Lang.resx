@@ -4810,4 +4810,7 @@ Repository:</value>
   <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
     <value>Customize</value>
   </data>
+  <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
+    <value>Copy File Name</value>
+  </data>
 </root>

@@ -165,6 +165,15 @@
                                         <FontIcon Glyph="&#xF413;" IsTextScaleFactorEnabled="False" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
+                                <!--  复制文件名  -->
+                                <MenuFlyoutItem x:Name="MenuFlyoutItem_CopyFileName"
+                                                Click="MenuFlyoutItem_CopyFileName_Click"
+                                                IsTextScaleFactorEnabled="False"
+                                                Text="{x:Bind lang:Lang.ScreenshotPage_CopyFileName}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8AC;" IsTextScaleFactorEnabled="False" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
                                 <MenuFlyoutSeparator />
                                 <!--  在资源管理器中打开  -->
                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_OpenInExplorer"

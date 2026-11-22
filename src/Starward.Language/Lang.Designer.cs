@@ -13834,5 +13834,14 @@ namespace Starward.Language {
                 return ResourceManager.GetString("RightToolbarCustomize_TipAction", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Copy File Name 的本地化字符串。
+        /// </summary>
+        public static string ScreenshotPage_CopyFileName {
+            get {
+                return ResourceManager.GetString("ScreenshotPage_CopyFileName", resourceCulture);
+            }
+        }
     }
 }

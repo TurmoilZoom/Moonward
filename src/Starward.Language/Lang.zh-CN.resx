@@ -4809,4 +4809,7 @@
   <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
     <value>去设置</value>
   </data>
+  <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
+    <value>复制文件名</value>
+  </data>
 </root>

@@ -699,6 +699,32 @@ public sealed partial class ScreenshotPage : PageBase
     }
 
 
+    /// <summary>
+    /// 复制文件名（含扩展名）到剪贴板；多选模式下复制全部选中项，每行一个。
+    /// </summary>
+    private void MenuFlyoutItem_CopyFileName_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (GridView_Images.SelectionMode is ListViewSelectionMode.Multiple && GridView_Images.SelectedItems.Count > 0)
+            {
+                var names = GridView_Images.SelectedItems.Cast<ScreenshotItem>().Select(x => x.FileName).ToList();
+                ClipboardHelper.SetText(string.Join(Environment.NewLine, names));
+                InAppToast.MainWindow?.Success(Lang.ImageViewWindow2_CopiedToClipboard, string.Format(Lang.ScreenshotPage_Total0Files, names.Count), 1500);
+            }
+            else if (sender is FrameworkElement { DataContext: ScreenshotItem item })
+            {
+                ClipboardHelper.SetText(item.FileName);
+                InAppToast.MainWindow?.Success(Lang.ImageViewWindow2_CopiedToClipboard, item.FileName, 1500);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to copy file name to clipboard");
+        }
+    }
+
+
     private async void MenuFlyoutItem_OpenInExplorer_Click(object sender, RoutedEventArgs e)
     {
         try

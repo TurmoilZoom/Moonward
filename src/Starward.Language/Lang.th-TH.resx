@@ -4715,4 +4715,7 @@ You are welcome to submit exported data to:</value>
   <data name="RightToolbarCustomize_TipAction" xml:space="preserve">
     <value>ปรับแต่ง</value>
   </data>
+  <data name="ScreenshotPage_CopyFileName" xml:space="preserve">
+    <value>คัดลอกชื่อไฟล์</value>
+  </data>
 </root>
