@@ -178,6 +178,7 @@ public sealed partial class ScreenshotPage : PageBase
             {
                 item.Dispose();
             }
+            _watchers.Clear();
             _folders.Clear();
             _screenshotDict.Clear();
             ScreenshotGroups = null!;
