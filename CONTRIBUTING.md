@@ -4,6 +4,8 @@
 
 Moonward 是 Windows 平台的米哈游游戏启动器（WinUI 3 / .NET 10），支持原神、星穹铁道、绝区零、崩坏 3 等 PC 端游戏。
 
+参与本项目即表示你同意遵守 [行为准则](CODE_OF_CONDUCT.md)。发现安全漏洞请按 [安全策略](SECURITY.md) 私下报告，不要公开提 Issue。
+
 ## 仓库说明
 
 本仓库（[TurmoilZoom/Moonward](https://github.com/TurmoilZoom/Moonward)）基于上游 [Scighost/Starward](https://github.com/Scighost/Starward) 维护，并包含额外的功能与修复。发布渠道见本仓库 [Releases](https://github.com/TurmoilZoom/Moonward/releases)。
@@ -161,7 +163,7 @@ src/Starward.Setup.Core/  GitHub Release 发行说明拉取
 
 ## Pull Request 检查清单
 
-提交 PR 前请确认：
+发起 PR 时会自动带出 [PR 模板](.github/pull_request_template.md)。提交 PR 前请确认：
 
 - [ ] 基于最新的 `rebase/develop`（或目标集成分支）创建分支
 - [ ] `dotnet build` 通过，0 error
