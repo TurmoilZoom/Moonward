@@ -463,6 +463,11 @@ public sealed partial class GameSelector : UserControl
     {
         if (sender is FrameworkElement fe && fe.DataContext is GameBizIcon icon)
         {
+            if (SelectIfCurrentGame(icon))
+            {
+                return;
+            }
+
             if (CurrentGameBizIcon is not null)
             {
                 CurrentGameBizIcon.IsSelected = false;
@@ -489,6 +494,13 @@ public sealed partial class GameSelector : UserControl
     {
         if (sender is FrameworkElement fe && fe.DataContext is GameBizIcon icon)
         {
+            // 双击时第一下的 Tapped 已经切过游戏，这里通常命中当前游戏，只收起全屏选择层
+            if (SelectIfCurrentGame(icon))
+            {
+                HideFullBackground();
+                return;
+            }
+
             if (CurrentGameBizIcon is not null)
             {
                 CurrentGameBizIcon.IsSelected = false;
@@ -503,6 +515,29 @@ public sealed partial class GameSelector : UserControl
             CurrentGameChanged?.Invoke(this, (icon.GameId, true));
             AppConfig.CurrentGameBiz = icon.GameBiz;
         }
+    }
+
+
+
+    /// <summary>
+    /// 点到的若是当前游戏，不再触发 <see cref="CurrentGameChanged"/>（否则当前页会整页重新导航），
+    /// 只把选中态同步到被点的图标：当前图标可能是选中未固定区服时的另一个实例，之后才固定了同一区服。
+    /// </summary>
+    /// <param name="icon">被点击的图标。</param>
+    /// <returns>是当前游戏时返回 <see langword="true"/>，调用方应跳过切换。</returns>
+    private bool SelectIfCurrentGame(GameBizIcon icon)
+    {
+        if (CurrentGameBizIcon is null || icon.GameBiz != CurrentGameBiz)
+        {
+            return false;
+        }
+        if (!ReferenceEquals(icon, CurrentGameBizIcon))
+        {
+            CurrentGameBizIcon.IsSelected = false;
+            CurrentGameBizIcon = icon;
+            icon.IsSelected = true;
+        }
+        return true;
     }
 
 
@@ -849,25 +884,25 @@ public sealed partial class GameSelector : UserControl
         {
             if (sender is FrameworkElement fe && fe.DataContext is GameBizIcon server)
             {
-                if (CurrentGameBizIcon is not null)
+                // 已固定的区服用待选区里的那个实例，选中态才会显示在图标栏上
+                GameBizIcon icon = GameBizIcons.FirstOrDefault(x => x.GameId == server.GameId) ?? server;
+                if (!SelectIfCurrentGame(icon))
                 {
-                    CurrentGameBizIcon.IsSelected = false;
-                }
+                    if (CurrentGameBizIcon is not null)
+                    {
+                        CurrentGameBizIcon.IsSelected = false;
+                    }
 
-                if (GameBizIcons.FirstOrDefault(x => x.GameId == server.GameId) is GameBizIcon icon)
-                {
+                    // 未固定的区服也要更新 CurrentGameBiz，否则之后点回原游戏会被当成「已是当前游戏」而忽略
                     CurrentGameBizIcon = icon;
                     CurrentGameBiz = icon.GameBiz;
                     CurrentGameId = icon.GameId;
                     icon.IsSelected = true;
-                }
-                else
-                {
-                    CurrentGameBizIcon = server;
-                    server.IsSelected = true;
+
+                    CurrentGameChanged?.Invoke(this, (server.GameId, false));
+                    AppConfig.CurrentGameBiz = server.GameBiz;
                 }
 
-                CurrentGameChanged?.Invoke(this, (server.GameId, false));
                 // 关闭弹出的服务器选择菜单
                 if (VisualTreeHelper.GetOpenPopupsForXamlRoot(this.XamlRoot).FirstOrDefault() is Popup popup)
                 {
@@ -875,7 +910,6 @@ public sealed partial class GameSelector : UserControl
                 }
                 HideFullBackground();
                 _isGameBizDisplayPressed = false;
-                AppConfig.CurrentGameBiz = server.GameBiz;
             }
         }
         catch { }
