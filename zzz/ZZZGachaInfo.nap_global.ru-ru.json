@@ -7,7 +7,7 @@
     "list": [
       {
         "id": 1011,
-        "name": "Энби",
+        "name": "安比",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1011.png",
         "rarity": 3,
         "element_type": 203,
@@ -15,7 +15,7 @@
       },
       {
         "id": 1021,
-        "name": "Нэкомата",
+        "name": "猫又",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1021.png",
         "rarity": 4,
         "element_type": 200,
@@ -23,7 +23,7 @@
       },
       {
         "id": 1031,
-        "name": "Николь",
+        "name": "妮可",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1031.png",
         "rarity": 3,
         "element_type": 205,
@@ -31,7 +31,7 @@
       },
       {
         "id": 1041,
-        "name": "Солдат\u00A011",
+        "name": "「11号」",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1041.png",
         "rarity": 4,
         "element_type": 201,
@@ -39,7 +39,7 @@
       },
       {
         "id": 1051,
-        "name": "Йидхари",
+        "name": "伊德海莉",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1051.png",
         "rarity": 4,
         "element_type": 202,
@@ -47,7 +47,7 @@
       },
       {
         "id": 1061,
-        "name": "Корин",
+        "name": "可琳",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1061.png",
         "rarity": 3,
         "element_type": 200,
@@ -55,7 +55,7 @@
       },
       {
         "id": 1071,
-        "name": "Цезарь",
+        "name": "凯撒",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1071.png",
         "rarity": 4,
         "element_type": 200,
@@ -63,7 +63,7 @@
       },
       {
         "id": 1081,
-        "name": "Билли",
+        "name": "比利",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1081.png",
         "rarity": 3,
         "element_type": 200,
@@ -71,7 +71,7 @@
       },
       {
         "id": 1091,
-        "name": "Мияби",
+        "name": "雅",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1091.png",
         "rarity": 4,
         "element_type": 202,
@@ -79,7 +79,7 @@
       },
       {
         "id": 1101,
-        "name": "Коляда",
+        "name": "珂蕾妲",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1101.png",
         "rarity": 4,
         "element_type": 201,
@@ -87,7 +87,7 @@
       },
       {
         "id": 1111,
-        "name": "Антон",
+        "name": "安东",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1111.png",
         "rarity": 3,
         "element_type": 203,
@@ -95,7 +95,7 @@
       },
       {
         "id": 1121,
-        "name": "Бен",
+        "name": "本",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1121.png",
         "rarity": 3,
         "element_type": 201,
@@ -103,7 +103,7 @@
       },
       {
         "id": 1131,
-        "name": "Сокаку",
+        "name": "苍角",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1131.png",
         "rarity": 3,
         "element_type": 202,
@@ -111,7 +111,7 @@
       },
       {
         "id": 1141,
-        "name": "Ликаон",
+        "name": "莱卡恩",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1141.png",
         "rarity": 4,
         "element_type": 202,
@@ -119,7 +119,7 @@
       },
       {
         "id": 1151,
-        "name": "Люси",
+        "name": "露西",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1151.png",
         "rarity": 3,
         "element_type": 201,
@@ -127,7 +127,7 @@
       },
       {
         "id": 1161,
-        "name": "Лайтер",
+        "name": "莱特",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1161.png",
         "rarity": 4,
         "element_type": 201,
@@ -135,7 +135,7 @@
       },
       {
         "id": 1171,
-        "name": "Бёрнис",
+        "name": "柏妮思",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1171.png",
         "rarity": 4,
         "element_type": 201,
@@ -143,7 +143,7 @@
       },
       {
         "id": 1181,
-        "name": "Грейс",
+        "name": "格莉丝",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1181.png",
         "rarity": 4,
         "element_type": 203,
@@ -151,7 +151,7 @@
       },
       {
         "id": 1191,
-        "name": "Эллен",
+        "name": "艾莲",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1191.png",
         "rarity": 4,
         "element_type": 202,
@@ -159,7 +159,7 @@
       },
       {
         "id": 1201,
-        "name": "Харумаса",
+        "name": "悠真",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1201.png",
         "rarity": 4,
         "element_type": 203,
@@ -167,7 +167,7 @@
       },
       {
         "id": 1211,
-        "name": "Рина",
+        "name": "丽娜",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1211.png",
         "rarity": 4,
         "element_type": 203,
@@ -175,7 +175,7 @@
       },
       {
         "id": 1221,
-        "name": "Янаги",
+        "name": "柳",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1221.png",
         "rarity": 4,
         "element_type": 203,
@@ -183,7 +183,7 @@
       },
       {
         "id": 1241,
-        "name": "Чжу Юань",
+        "name": "朱鸢",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1241.png",
         "rarity": 4,
         "element_type": 205,
@@ -191,7 +191,7 @@
       },
       {
         "id": 1251,
-        "name": "Цинъи",
+        "name": "青衣",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1251.png",
         "rarity": 4,
         "element_type": 203,
@@ -199,7 +199,7 @@
       },
       {
         "id": 1261,
-        "name": "Джейн",
+        "name": "简",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1261.png",
         "rarity": 4,
         "element_type": 200,
@@ -207,7 +207,7 @@
       },
       {
         "id": 1271,
-        "name": "Сет",
+        "name": "赛斯",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1271.png",
         "rarity": 3,
         "element_type": 203,
@@ -215,7 +215,7 @@
       },
       {
         "id": 1281,
-        "name": "Пайпер",
+        "name": "派派",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1281.png",
         "rarity": 3,
         "element_type": 200,
@@ -223,7 +223,7 @@
       },
       {
         "id": 1291,
-        "name": "Хуго",
+        "name": "雨果",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1291.png",
         "rarity": 4,
         "element_type": 202,
@@ -231,7 +231,7 @@
       },
       {
         "id": 1301,
-        "name": "Орфея и Магус",
+        "name": "奥菲丝&「鬼火」",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1301.png",
         "rarity": 4,
         "element_type": 201,
@@ -239,7 +239,7 @@
       },
       {
         "id": 1311,
-        "name": "Астра Яо",
+        "name": "耀嘉音",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1311.png",
         "rarity": 4,
         "element_type": 205,
@@ -247,7 +247,7 @@
       },
       {
         "id": 1321,
-        "name": "Эвелин",
+        "name": "伊芙琳",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1321.png",
         "rarity": 4,
         "element_type": 201,
@@ -255,7 +255,7 @@
       },
       {
         "id": 1331,
-        "name": "Вивиан",
+        "name": "薇薇安",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1331.png",
         "rarity": 4,
         "element_type": 205,
@@ -263,7 +263,7 @@
       },
       {
         "id": 1341,
-        "name": "Чжао",
+        "name": "照",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1341.png",
         "rarity": 4,
         "element_type": 202,
@@ -271,7 +271,7 @@
       },
       {
         "id": 1351,
-        "name": "Пульхра",
+        "name": "波可娜",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1351.png",
         "rarity": 3,
         "element_type": 200,
@@ -279,7 +279,7 @@
       },
       {
         "id": 1361,
-        "name": "Гашетка",
+        "name": "「扳机」",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1361.png",
         "rarity": 4,
         "element_type": 203,
@@ -287,7 +287,7 @@
       },
       {
         "id": 1371,
-        "name": "Исюань",
+        "name": "仪玄",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1371.png",
         "rarity": 4,
         "element_type": 205,
@@ -295,7 +295,7 @@
       },
       {
         "id": 1381,
-        "name": "Солдат 0 Энби",
+        "name": "零号·安比",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1381.png",
         "rarity": 4,
         "element_type": 203,
@@ -303,7 +303,7 @@
       },
       {
         "id": 1391,
-        "name": "Цзюй Фуфу",
+        "name": "橘福福",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1391.png",
         "rarity": 4,
         "element_type": 201,
@@ -311,7 +311,7 @@
       },
       {
         "id": 1401,
-        "name": "Элис",
+        "name": "爱丽丝",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1401.png",
         "rarity": 4,
         "element_type": 200,
@@ -319,7 +319,7 @@
       },
       {
         "id": 1411,
-        "name": "Юдзуха",
+        "name": "柚叶",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1411.png",
         "rarity": 4,
         "element_type": 200,
@@ -327,7 +327,7 @@
       },
       {
         "id": 1421,
-        "name": "Пань Иньху",
+        "name": "潘引壶",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1421.png",
         "rarity": 3,
         "element_type": 200,
@@ -335,7 +335,7 @@
       },
       {
         "id": 1431,
-        "name": "Е\u00A0Шуньгуан",
+        "name": "叶瞬光",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1431.png",
         "rarity": 4,
         "element_type": 200,
@@ -343,7 +343,7 @@
       },
       {
         "id": 1441,
-        "name": "Манато",
+        "name": "真斗",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1441.png",
         "rarity": 3,
         "element_type": 201,
@@ -351,7 +351,7 @@
       },
       {
         "id": 1451,
-        "name": "Люсия",
+        "name": "卢西娅",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1451.png",
         "rarity": 4,
         "element_type": 205,
@@ -359,7 +359,7 @@
       },
       {
         "id": 1461,
-        "name": "Сид",
+        "name": "「席德」",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1461.png",
         "rarity": 4,
         "element_type": 203,
@@ -367,7 +367,7 @@
       },
       {
         "id": 1471,
-        "name": "Баньюэ",
+        "name": "般岳",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1471.png",
         "rarity": 4,
         "element_type": 201,
@@ -375,7 +375,7 @@
       },
       {
         "id": 1481,
-        "name": "Диалинь",
+        "name": "琉音",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1481.png",
         "rarity": 4,
         "element_type": 200,
@@ -383,7 +383,7 @@
       },
       {
         "id": 1491,
-        "name": "Санна",
+        "name": "千夏",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1491.png",
         "rarity": 4,
         "element_type": 200,
@@ -391,7 +391,7 @@
       },
       {
         "id": 1501,
-        "name": "Ария",
+        "name": "爱芮",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1501.png",
         "rarity": 4,
         "element_type": 205,
@@ -399,7 +399,7 @@
       },
       {
         "id": 1511,
-        "name": "Наньгун Юй",
+        "name": "南宫羽",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1511.png",
         "rarity": 4,
         "element_type": 205,
@@ -407,7 +407,7 @@
       },
       {
         "id": 1521,
-        "name": "Циссия",
+        "name": "希希芙",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1521.png",
         "rarity": 4,
         "element_type": 203,
@@ -415,7 +415,7 @@
       },
       {
         "id": 1531,
-        "name": "Звёздный Билли",
+        "name": "星徽·比利",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1531.png",
         "rarity": 4,
         "element_type": 200,
@@ -423,7 +423,7 @@
       },
       {
         "id": 1541,
-        "name": "Промея",
+        "name": "普罗米娅",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1541.png",
         "rarity": 4,
         "element_type": 202,
@@ -431,7 +431,7 @@
       },
       {
         "id": 1551,
-        "name": "Пироис",
+        "name": "佩洛伊斯",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1551.png",
         "rarity": 4,
         "element_type": 205,
@@ -439,7 +439,7 @@
       },
       {
         "id": 1561,
-        "name": "Велина",
+        "name": "维琳娜",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1561.png",
         "rarity": 4,
         "element_type": 204,
@@ -447,7 +447,7 @@
       },
       {
         "id": 1571,
-        "name": "Норма",
+        "name": "诺姆",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1571.png",
         "rarity": 4,
         "element_type": 201,
@@ -455,7 +455,7 @@
       },
       {
         "id": 1581,
-        "name": "Ремиэлла",
+        "name": "蕾米埃尔",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1581.png",
         "rarity": 4,
         "element_type": 300,
@@ -463,7 +463,7 @@
       },
       {
         "id": 1591,
-        "name": "Сигрид",
+        "name": "希格莉德",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1591.png",
         "rarity": 4,
         "element_type": 202,
@@ -471,7 +471,7 @@
       },
       {
         "id": 1611,
-        "name": "Кларет",
+        "name": "克拉蕾",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1611.png",
         "rarity": 4,
         "element_type": 203,
@@ -479,7 +479,7 @@
       },
       {
         "id": 1621,
-        "name": "Рокси",
+        "name": "洛克茜",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1621.png",
         "rarity": 4,
         "element_type": 204,
@@ -487,7 +487,7 @@
       },
       {
         "id": 1631,
-        "name": "Севериан",
+        "name": "赛维里安",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1631.png",
         "rarity": 4,
         "element_type": 204,
@@ -495,7 +495,7 @@
       },
       {
         "id": 1641,
-        "name": "Феникс",
+        "name": "菲欧妮",
         "icon": "https://act-webstatic.hoyoverse.com/game_record/zzzv2/role_square_avatar/role_square_avatar_1641.png",
         "rarity": 4,
         "element_type": 201,
@@ -503,7 +503,7 @@
       },
       {
         "id": 12001,
-        "name": "Фаза луны: Полнолуние",
+        "name": "「月相」-望",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/576d535913d8b26569d8088ff35be205.png",
         "rarity": 2,
         "element_type": 0,
@@ -511,7 +511,7 @@
       },
       {
         "id": 12002,
-        "name": "Фаза луны: Убывающая",
+        "name": "「月相」-晦",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/bb25a385d84ac204636dc3d0c1367135.png",
         "rarity": 2,
         "element_type": 0,
@@ -519,7 +519,7 @@
       },
       {
         "id": 12003,
-        "name": "Фаза луны: Новолуние",
+        "name": "「月相」-朔",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/ceadca242d02ce3d723d47f6417283d9.png",
         "rarity": 2,
         "element_type": 0,
@@ -527,7 +527,7 @@
       },
       {
         "id": 12004,
-        "name": "Ревербератор I",
+        "name": "「残响」-Ⅰ型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/ae2c4de9abe1c6da6766e79e724d1ea2.png",
         "rarity": 2,
         "element_type": 0,
@@ -535,7 +535,7 @@
       },
       {
         "id": 12005,
-        "name": "Ревербератор II",
+        "name": "「残响」-Ⅱ型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/eb2c72af4da874f15a1cdc95533bb0f9.png",
         "rarity": 2,
         "element_type": 0,
@@ -543,7 +543,7 @@
       },
       {
         "id": 12006,
-        "name": "Ревербератор III",
+        "name": "「残响」-Ⅲ型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/e600c9afdb480230a7dc4c0ef3ea20b4.png",
         "rarity": 2,
         "element_type": 0,
@@ -551,7 +551,7 @@
       },
       {
         "id": 12007,
-        "name": "Турбулентность: Револьвер",
+        "name": "「湍流」-铳型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/a6fa50d96152de591b8b5c71f2407831.png",
         "rarity": 2,
         "element_type": 0,
@@ -559,7 +559,7 @@
       },
       {
         "id": 12008,
-        "name": "Турбулентность: Стрела",
+        "name": "「湍流」-矢型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/93040418f3847686e80c5fed5898f0d2.png",
         "rarity": 2,
         "element_type": 0,
@@ -567,7 +567,7 @@
       },
       {
         "id": 12009,
-        "name": "Турбулентность: Топор",
+        "name": "「湍流」-斧型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/2c093bdd3041d7936a8256bc07eabb27.png",
         "rarity": 2,
         "element_type": 0,
@@ -575,7 +575,7 @@
       },
       {
         "id": 12010,
-        "name": "Магнитная буря: Альфа",
+        "name": "「电磁暴」-壹式",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/6c1e9ad3d99ad9dbcd1d2bc1f2474f62.png",
         "rarity": 2,
         "element_type": 0,
@@ -583,7 +583,7 @@
       },
       {
         "id": 12011,
-        "name": "Магнитная буря: Браво",
+        "name": "「电磁暴」-贰式",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/47b48cb39f47b46da662c3e7326119d8.png",
         "rarity": 2,
         "element_type": 0,
@@ -591,7 +591,7 @@
       },
       {
         "id": 12012,
-        "name": "Магнитная буря: Чарли",
+        "name": "「电磁暴」-叁式",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/b75284a258146167dcbe01d50e8a6f9f.png",
         "rarity": 2,
         "element_type": 0,
@@ -599,7 +599,7 @@
       },
       {
         "id": 12013,
-        "name": "Идентичность: Постоянство",
+        "name": "「恒等式」-本格",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/01ac925625f3e768f57a5014fc90eb22.png",
         "rarity": 2,
         "element_type": 0,
@@ -607,7 +607,7 @@
       },
       {
         "id": 12014,
-        "name": "Идентичность: Изменчивость",
+        "name": "「恒等式」-变格",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/661f9708e296673050eea6934b107a1f.png",
         "rarity": 2,
         "element_type": 0,
@@ -615,7 +615,7 @@
       },
       {
         "id": 12015,
-        "name": "Пепел: Кобальт",
+        "name": "「灰烬」-钴蓝",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/b07624f6c5be891b7aedc386104980c6.png",
         "rarity": 2,
         "element_type": 0,
@@ -623,7 +623,7 @@
       },
       {
         "id": 12016,
-        "name": "Фаза луны: Полумесяц",
+        "name": "「月相」-弦",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7d4f33200dcc8a0d2d31b8477b771bc1.png",
         "rarity": 2,
         "element_type": 0,
@@ -631,7 +631,7 @@
       },
       {
         "id": 13001,
-        "name": "Звезда улиц",
+        "name": "街头巨星",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/1dc372ece839cf9bd7555056058be71d.png",
         "rarity": 3,
         "element_type": 0,
@@ -639,7 +639,7 @@
       },
       {
         "id": 13002,
-        "name": "Кадр на память",
+        "name": "时光切片",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/168db39ce850d70b671654c6c21ef681.png",
         "rarity": 3,
         "element_type": 0,
@@ -647,7 +647,7 @@
       },
       {
         "id": 13003,
-        "name": "Тропический гурман",
+        "name": "雨林饕客",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/594c4b3b2dc31da2b1b69ed8d1066075.png",
         "rarity": 3,
         "element_type": 0,
@@ -655,7 +655,7 @@
       },
       {
         "id": 13004,
-        "name": "Звёздный двигатель",
+        "name": "星徽引擎",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/05d59bc3aee2569c3a7349b809a521f9.png",
         "rarity": 3,
         "element_type": 0,
@@ -663,7 +663,7 @@
       },
       {
         "id": 13005,
-        "name": "Пароварка",
+        "name": "人为刀俎",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/ac026a9804cd078b0005ffbfcd537b06.png",
         "rarity": 3,
         "element_type": 0,
@@ -671,7 +671,7 @@
       },
       {
         "id": 13006,
-        "name": "Драгоценная окаменелость",
+        "name": "贵重骨核",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/4dcd0eb79bcbd28a706b5564dbeb85f8.png",
         "rarity": 3,
         "element_type": 0,
@@ -679,7 +679,7 @@
       },
       {
         "id": 13007,
-        "name": "Оригинальный трансформатор",
+        "name": "正版变身器",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/fa968058b1662c4d61b64f14d6a79023.png",
         "rarity": 3,
         "element_type": 0,
@@ -687,7 +687,7 @@
       },
       {
         "id": 13008,
-        "name": "Плачущие близнецы",
+        "name": "双生泣星",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/a09ff8c70fcee887459f2eac51faebdd.png",
         "rarity": 3,
         "element_type": 0,
@@ -695,7 +695,7 @@
       },
       {
         "id": 13009,
-        "name": "Электроблеск для губ",
+        "name": "触电唇彩",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/70fd3a13a78c7e04e39566dfbe0ade38.png",
         "rarity": 3,
         "element_type": 0,
@@ -703,7 +703,7 @@
       },
       {
         "id": 13010,
-        "name": "Заячья корзинка",
+        "name": "兔能环",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/9a882f54123b8905350ea2585d08cbc6.png",
         "rarity": 3,
         "element_type": 0,
@@ -711,7 +711,7 @@
       },
       {
         "id": 13011,
-        "name": "Весеннее тепло",
+        "name": "春日融融",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/0155e9dc4b3ea88b7f8edb8b61314949.png",
         "rarity": 3,
         "element_type": 0,
@@ -719,7 +719,7 @@
       },
       {
         "id": 13012,
-        "name": "Шар-головоломка",
+        "name": "幻变魔方",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/53da15477bde3c661ecf893020ee3cdc.png",
         "rarity": 3,
         "element_type": 0,
@@ -727,7 +727,7 @@
       },
       {
         "id": 13013,
-        "name": "Златоцвет",
+        "name": "鎏金花信",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/23bf5fe2f1b20c39567f8a43ec9e86d8.png",
         "rarity": 3,
         "element_type": 0,
@@ -735,7 +735,7 @@
       },
       {
         "id": 13014,
-        "name": "Радиопрогулка",
+        "name": "电波漫步",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/8bdfe054109336c4e62ae5e81df10275.png",
         "rarity": 3,
         "element_type": 0,
@@ -743,7 +743,7 @@
       },
       {
         "id": 13015,
-        "name": "Маркато-реверб",
+        "name": "强音热望",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/0e48bd881078bcd12cb9da7c560249d2.png",
         "rarity": 3,
         "element_type": 0,
@@ -751,7 +751,7 @@
       },
       {
         "id": 13016,
-        "name": "Кинопроектор",
+        "name": "光影刻刀",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/a878f88b99e48a954db2e5aa15417ce1.png",
         "rarity": 3,
         "element_type": 0,
@@ -759,7 +759,7 @@
       },
       {
         "id": 13017,
-        "name": "Котик удачи",
+        "name": "喵运当头",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/2c9c05d6cbf20b0002f991d6bcff8e65.png",
         "rarity": 3,
         "element_type": 0,
@@ -767,7 +767,7 @@
       },
       {
         "id": 13018,
-        "name": "Тадам-барабан",
+        "name": "咚哒回声",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/02b461cab8d6a9903f9849b00e495e89.png",
         "rarity": 3,
         "element_type": 0,
@@ -775,7 +775,7 @@
       },
       {
         "id": 13019,
-        "name": "Треножник поднебесья",
+        "name": "青漪灵鼎",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/b46e4de69b2bf96ccf8ca0af04e1b493.png",
         "rarity": 3,
         "element_type": 0,
@@ -783,7 +783,7 @@
       },
       {
         "id": 13020,
-        "name": "Клокочущий котелок",
+        "name": "炎炙沸釜",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/f96253d7e96057f5461d89a8bfab65c5.png",
         "rarity": 3,
         "element_type": 0,
@@ -791,7 +791,7 @@
       },
       {
         "id": 13021,
-        "name": "Кроветворный ларец",
+        "name": "血髓秘匣",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/2b0fa5eaf8059b543e63734b0dcd74f1.png",
         "rarity": 3,
         "element_type": 0,
@@ -799,7 +799,7 @@
       },
       {
         "id": 13022,
-        "name": "Шалость при свечах",
+        "name": "烛光诡计",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/12cb8f9d78a7b6b939b46d2252c4a478.png",
         "rarity": 3,
         "element_type": 0,
@@ -807,7 +807,7 @@
       },
       {
         "id": 13101,
-        "name": "Аккумулятор Демары II",
+        "name": "德玛拉电池Ⅱ型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7166806a191d019336886174f3c0e5d0.png",
         "rarity": 3,
         "element_type": 0,
@@ -815,7 +815,7 @@
       },
       {
         "id": 13103,
-        "name": "Сундук сокровищ",
+        "name": "聚宝箱",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/1e4319111db586105e69691ade46c0d1.png",
         "rarity": 3,
         "element_type": 0,
@@ -823,7 +823,7 @@
       },
       {
         "id": 13106,
-        "name": "Домработница",
+        "name": "家政员",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/1e9511ee33adc96c4018e0991988bcfc.png",
         "rarity": 3,
         "element_type": 0,
@@ -831,7 +831,7 @@
       },
       {
         "id": 13108,
-        "name": "Реплика Звёздного двигателя",
+        "name": "仿制星徽引擎",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/8767978bba9796020b17f2e178185fda.png",
         "rarity": 3,
         "element_type": 0,
@@ -839,7 +839,7 @@
       },
       {
         "id": 13111,
-        "name": "Бур — красная ось",
+        "name": "旋钻机-赤轴",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/1ceec044e8b1ebe86ca7a57953076ee1.png",
         "rarity": 3,
         "element_type": 0,
@@ -847,7 +847,7 @@
       },
       {
         "id": 13112,
-        "name": "Большой цилиндр",
+        "name": "比格气缸",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/0e179018de301ce7072cddc20207b119.png",
         "rarity": 3,
         "element_type": 0,
@@ -855,7 +855,7 @@
       },
       {
         "id": 13113,
-        "name": "Застенчивый монстр",
+        "name": "含羞恶面",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/12e35d2ad548c152b4675e77afcb0a2a.png",
         "rarity": 3,
         "element_type": 0,
@@ -863,7 +863,7 @@
       },
       {
         "id": 13115,
-        "name": "Бум-пушка",
+        "name": "好斗的阿炮",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/81491f719b0b7c7c59eee8daa19810c9.png",
         "rarity": 3,
         "element_type": 0,
@@ -871,7 +871,7 @@
       },
       {
         "id": 13127,
-        "name": "Миротворец — специализированный",
+        "name": "维序者-特化型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/8f8e41cd78e7a2d988c36b8e0a38e173.png",
         "rarity": 3,
         "element_type": 0,
@@ -879,7 +879,7 @@
       },
       {
         "id": 13128,
-        "name": "Ревущая тачка",
+        "name": "轰鸣座驾",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/25a5a87c0317f5baaadc99fd29c9e04a.png",
         "rarity": 3,
         "element_type": 0,
@@ -887,7 +887,7 @@
       },
       {
         "id": 13135,
-        "name": "Бумагорезка",
+        "name": "裁纸刀",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/f719078d9e9b1d37215f2139d3d8a0e1.png",
         "rarity": 3,
         "element_type": 0,
@@ -895,7 +895,7 @@
       },
       {
         "id": 13142,
-        "name": "Триграмма Гром",
+        "name": "震元奇枢",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/dbd592bc5cdd7eb9f73689a7af198ede.png",
         "rarity": 3,
         "element_type": 0,
@@ -903,7 +903,7 @@
       },
       {
         "id": 13144,
-        "name": "Жарево заката",
+        "name": "燔火胧夜",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/b44c970c22dcdaac12ed6a5c1c76e30f.png",
         "rarity": 3,
         "element_type": 0,
@@ -911,7 +911,7 @@
       },
       {
         "id": 14001,
-        "name": "Артиллерийский ротор",
+        "name": "加农转子",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/cd132c9626c81facf0213ca4b3a9e840.png",
         "rarity": 3,
         "element_type": 0,
@@ -919,7 +919,7 @@
       },
       {
         "id": 14002,
-        "name": "Мяч для игры без правил",
+        "name": "逍遥游球",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/6e744532c01ff112252b0fec0f764528.png",
         "rarity": 3,
         "element_type": 0,
@@ -927,7 +927,7 @@
       },
       {
         "id": 14003,
-        "name": "Шестизарядник",
+        "name": "左轮转子",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/8796f2aa02c5f7e5bda1c70f7531359b.png",
         "rarity": 3,
         "element_type": 0,
@@ -935,7 +935,7 @@
       },
       {
         "id": 14102,
-        "name": "Стальная лапа",
+        "name": "钢铁肉垫",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/e7e7fb8091ba845623cebde44a221bca.png",
         "rarity": 4,
         "element_type": 0,
@@ -943,7 +943,7 @@
       },
       {
         "id": 14104,
-        "name": "Сера",
+        "name": "硫磺石",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/5401033b46f120a988e3e3edd5e8be81.png",
         "rarity": 4,
         "element_type": 0,
@@ -951,7 +951,7 @@
       },
       {
         "id": 14105,
-        "name": "Колыбель кракена",
+        "name": "海妖摇篮",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/aa2b7c2217fa5e417045ff5f96d08ace.png",
         "rarity": 4,
         "element_type": 0,
@@ -959,7 +959,7 @@
       },
       {
         "id": 14107,
-        "name": "Клыки ярости",
+        "name": "奔袭獠牙",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/4ef2a285f4b6c670ff8fe4a9639a193b.png",
         "rarity": 4,
         "element_type": 0,
@@ -967,7 +967,7 @@
       },
       {
         "id": 14109,
-        "name": "Храм вьюги",
+        "name": "霰落星殿",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/26dbdb3bf90052f3d94138062eb86fc5.png",
         "rarity": 4,
         "element_type": 0,
@@ -975,7 +975,7 @@
       },
       {
         "id": 14110,
-        "name": "Шестерни адского пламени",
+        "name": "燃狱齿轮",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7e492e113ba6ae39725e6e9876bf55c4.png",
         "rarity": 4,
         "element_type": 0,
@@ -983,7 +983,7 @@
       },
       {
         "id": 14114,
-        "name": "Сдержанность",
+        "name": "拘缚者",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/63fa95fc651002fde0a8edc535eb915a.png",
         "rarity": 4,
         "element_type": 0,
@@ -991,7 +991,7 @@
       },
       {
         "id": 14116,
-        "name": "Пламенный венец",
+        "name": "焰心桂冠",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/19ce2cc52ad10c9993aa98139dcc7a93.png",
         "rarity": 4,
         "element_type": 0,
@@ -999,7 +999,7 @@
       },
       {
         "id": 14117,
-        "name": "Шейкер-огнемейкер",
+        "name": "灼心摇壶",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/f78242f3eeb0cddc9845251720486fc9.png",
         "rarity": 4,
         "element_type": 0,
@@ -1007,7 +1007,7 @@
       },
       {
         "id": 14118,
-        "name": "Встроенный компилятор",
+        "name": "嵌合编译器",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/15a128be97f0d8a1a16d5ddbfe8d0bd2.png",
         "rarity": 4,
         "element_type": 0,
@@ -1015,7 +1015,7 @@
       },
       {
         "id": 14119,
-        "name": "Гость из глубин",
+        "name": "深海访客",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/1a0eb59078b49d6d6210a85dcd4fddc9.png",
         "rarity": 4,
         "element_type": 0,
@@ -1023,7 +1023,7 @@
       },
       {
         "id": 14120,
-        "name": "Аптечка дзансин",
+        "name": "残心青囊",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/978586bc377c482c2a0f125338ca73f0.png",
         "rarity": 4,
         "element_type": 0,
@@ -1031,7 +1031,7 @@
       },
       {
         "id": 14121,
-        "name": "Колыбель плача",
+        "name": "啜泣摇篮",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/344b06003c40f533430d260964f371cd.png",
         "rarity": 4,
         "element_type": 0,
@@ -1039,7 +1039,7 @@
       },
       {
         "id": 14122,
-        "name": "Ткач времени",
+        "name": "时流贤者",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/a6d05fb01ed20afc5171669b68919e7d.png",
         "rarity": 4,
         "element_type": 0,
@@ -1047,7 +1047,7 @@
       },
       {
         "id": 14124,
-        "name": "Усмиритель беспорядков VI",
+        "name": "防暴者Ⅵ型",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/a04d183d02f694318e5177468d8dcedb.png",
         "rarity": 4,
         "element_type": 0,
@@ -1055,7 +1055,7 @@
       },
       {
         "id": 14125,
-        "name": "Чайник нефритовой чистоты",
+        "name": "玉壶青冰",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/91fa0d588270c331982ec1ed401c3985.png",
         "rarity": 4,
         "element_type": 0,
@@ -1063,7 +1063,7 @@
       },
       {
         "id": 14126,
-        "name": "Заострённые шипы",
+        "name": "淬锋钳刺",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/52065a95d76fe955332eb8b62b53fcb6.png",
         "rarity": 4,
         "element_type": 0,
@@ -1071,7 +1071,7 @@
       },
       {
         "id": 14129,
-        "name": "Тысяча затмений",
+        "name": "千面日陨",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/8b7e0ef75c3755df61874a78ae09e230.png",
         "rarity": 4,
         "element_type": 0,
@@ -1079,7 +1079,7 @@
       },
       {
         "id": 14130,
-        "name": "Пламя брани",
+        "name": "嚣枪喧焰",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/4c2c2f265c3d17e5f0cdc504ec42abd5.png",
         "rarity": 4,
         "element_type": 0,
@@ -1087,7 +1087,7 @@
       },
       {
         "id": 14131,
-        "name": "Стильная штучка",
+        "name": "玲珑妆匣",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/55b98391c464d881173c490db4188323.png",
         "rarity": 4,
         "element_type": 0,
@@ -1095,7 +1095,7 @@
       },
       {
         "id": 14132,
-        "name": "Струны ночи",
+        "name": "心弦夜响",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/9d8f0d8b6e575a3236f26c27e348a328.png",
         "rarity": 4,
         "element_type": 0,
@@ -1103,7 +1103,7 @@
       },
       {
         "id": 14133,
-        "name": "Полёт среди грёз",
+        "name": "飞鸟星梦",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/000bb30dcb9ab9f78403815c7a76db7a.png",
         "rarity": 4,
         "element_type": 0,
@@ -1111,7 +1111,7 @@
       },
       {
         "id": 14134,
-        "name": "Сладковатая зайка",
+        "name": "半糖雪兔",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/ae0e81760dbba96861814512161155f2.png",
         "rarity": 4,
         "element_type": 0,
@@ -1119,7 +1119,7 @@
       },
       {
         "id": 14136,
-        "name": "Призрачный взор",
+        "name": "索魂影眸",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/4e5e9409e1049aed47f0918dcffe78c6.png",
         "rarity": 4,
         "element_type": 0,
@@ -1127,7 +1127,7 @@
       },
       {
         "id": 14137,
-        "name": "Клетка Небесной птицы",
+        "name": "青溟笼舍",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/1ae82c91e2309d3eb123ab52f66af32e.png",
         "rarity": 4,
         "element_type": 0,
@@ -1135,7 +1135,7 @@
       },
       {
         "id": 14138,
-        "name": "Чистота утраты",
+        "name": "牺牲洁纯",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/8599e4fc49a939a2a9b116a6a2993df5.png",
         "rarity": 4,
         "element_type": 0,
@@ -1143,7 +1143,7 @@
       },
       {
         "id": 14139,
-        "name": "Вместилище фурчаний",
+        "name": "福虓炉炉",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/d54925ac2c7dcd33946fba247f65c6be.png",
         "rarity": 4,
         "element_type": 0,
@@ -1151,7 +1151,7 @@
       },
       {
         "id": 14140,
-        "name": "Всесторонняя отточенность",
+        "name": "十方锻星",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/398480ab3aa99c62ab3c5ea1ea911514.png",
         "rarity": 4,
         "element_type": 0,
@@ -1159,7 +1159,7 @@
       },
       {
         "id": 14141,
-        "name": "Семь уловок тануки",
+        "name": "狸法七变化",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/aa10571df27cd8a5543ced7b00057be9.png",
         "rarity": 4,
         "element_type": 0,
@@ -1167,7 +1167,7 @@
       },
       {
         "id": 14143,
-        "name": "Проблеск в облаках",
+        "name": "云霓孤光",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/8ef0425e4e1efe2918ded32c54b53723.png",
         "rarity": 4,
         "element_type": 0,
@@ -1175,7 +1175,7 @@
       },
       {
         "id": 14145,
-        "name": "Очаг грёз",
+        "name": "铸梦炉歌",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/177b3d2a547f3c95f68d82514198db95.png",
         "rarity": 4,
         "element_type": 0,
@@ -1183,7 +1183,7 @@
       },
       {
         "id": 14146,
-        "name": "Рукотворное сердце",
+        "name": "机巧心种",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/6dc780446ee031410aab7548e8ad4059.png",
         "rarity": 4,
         "element_type": 0,
@@ -1191,7 +1191,7 @@
       },
       {
         "id": 14147,
-        "name": "Грозный страж",
+        "name": "怒目金刚",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/6a540225445ee7e93773ef3aec2876d5.png",
         "rarity": 4,
         "element_type": 0,
@@ -1199,7 +1199,7 @@
       },
       {
         "id": 14148,
-        "name": "Звонок из прошлого",
+        "name": "昨夜来电",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/c778416e6c32123f051664d038bb21c6.png",
         "rarity": 4,
         "element_type": 0,
@@ -1207,7 +1207,7 @@
       },
       {
         "id": 14149,
-        "name": "Мысли в бит",
+        "name": "思络成歌",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/f05f8b052227fa104bd24ee1f1c7ca3a.png",
         "rarity": 4,
         "element_type": 0,
@@ -1215,7 +1215,7 @@
       },
       {
         "id": 14150,
-        "name": "Душа в доспехах",
+        "name": "壳中之灵",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7a1b37d78a350ab78af9df19947a9943.png",
         "rarity": 4,
         "element_type": 0,
@@ -1223,7 +1223,7 @@
       },
       {
         "id": 14151,
-        "name": "Неоновое наваждение",
+        "name": "霓虹妄想",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/9963ccaa852822f438421bec381a25c7.png",
         "rarity": 4,
         "element_type": 0,
@@ -1231,7 +1231,7 @@
       },
       {
         "id": 14152,
-        "name": "Рептилокатор",
+        "name": "鳞齿寻踪",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/c620f51a8e14c3598b6f611233da0768.png",
         "rarity": 4,
         "element_type": 0,
@@ -1239,7 +1239,7 @@
       },
       {
         "id": 14153,
-        "name": "Звёздное забрало",
+        "name": "辉骑面铠",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/772f076b12522d980d7c231d079d7ca3.png",
         "rarity": 4,
         "element_type": 0,
@@ -1247,7 +1247,7 @@
       },
       {
         "id": 14154,
-        "name": "Ледяное новолуние",
+        "name": "朔月裁霜",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/90effafdbe81502513b56a023bafc910.png",
         "rarity": 4,
         "element_type": 0,
@@ -1255,7 +1255,7 @@
       },
       {
         "id": 14155,
-        "name": "Солярный экзувий",
+        "name": "日冕遗蜕",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/d191839a3280960d17d27bcbc0a60a38.png",
         "rarity": 4,
         "element_type": 0,
@@ -1263,7 +1263,7 @@
       },
       {
         "id": 14156,
-        "name": "Драгоценная прохлада",
+        "name": "琳琅鎏心",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/2015cb82cddc3fc8470ded17f8f4f61e.png",
         "rarity": 4,
         "element_type": 0,
@@ -1271,7 +1271,7 @@
       },
       {
         "id": 14157,
-        "name": "Старший ассистент",
+        "name": "首席跟班",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/a14f530d78c5d823211c6c96639b2206.png",
         "rarity": 4,
         "element_type": 0,
@@ -1279,7 +1279,7 @@
       },
       {
         "id": 14158,
-        "name": "Ода о возвращении крыльев",
+        "name": "空羽复归之诗",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/0a06c2b3af6562c0fd91198f20120a11.png",
         "rarity": 4,
         "element_type": 0,
@@ -1287,7 +1287,7 @@
       },
       {
         "id": 14159,
-        "name": "Ход конём",
+        "name": "骁骑礼赞",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/0a1e6575b6ad96043c0dd44461ecd062.png",
         "rarity": 4,
         "element_type": 0,
@@ -1295,7 +1295,7 @@
       },
       {
         "id": 14161,
-        "name": "Алая жажда",
+        "name": "猩红渴望",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/6b9fb9acb9d84a5e993371f0b6f458a6.png",
         "rarity": 4,
         "element_type": 0,
@@ -1303,7 +1303,7 @@
       },
       {
         "id": 14162,
-        "name": "Багряный гроб",
+        "name": "绯月银棺",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/1a7409f56940c3b43f0291b81d692b95.png",
         "rarity": 4,
         "element_type": 0,
@@ -1311,7 +1311,7 @@
       },
       {
         "id": 14163,
-        "name": "Карательный захват",
+        "name": "禁罪囚笼",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/5fb81fcd1a978cd674adec4ede12ab3b.png",
         "rarity": 4,
         "element_type": 0,
@@ -1319,7 +1319,7 @@
       },
       {
         "id": 14164,
-        "name": "Перо перерождения",
+        "name": "涅槃初翎",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/144a82db949d37e40991ac2c52ffeb3b.png",
         "rarity": 4,
         "element_type": 0,
@@ -1327,7 +1327,7 @@
       },
       {
         "id": 53001,
-        "name": "Пингвибу",
+        "name": "企鹅布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/1cb338e10b492ad3185d4e380cd5575d.png",
         "rarity": 3,
         "element_type": 0,
@@ -1335,7 +1335,7 @@
       },
       {
         "id": 53002,
-        "name": "Счастливчик",
+        "name": "招财布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/4bbc517fa8095b41a0286372af35817e.png",
         "rarity": 3,
         "element_type": 0,
@@ -1343,7 +1343,7 @@
       },
       {
         "id": 53003,
-        "name": "Искатель",
+        "name": "寻宝布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/2b5494d179321f54774c0ccee8a7c481.png",
         "rarity": 3,
         "element_type": 0,
@@ -1351,7 +1351,7 @@
       },
       {
         "id": 53004,
-        "name": "Сумобу",
+        "name": "扑击布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/2e793f324a54ae7fb7e975a296856f7b.png",
         "rarity": 3,
         "element_type": 0,
@@ -1359,7 +1359,7 @@
       },
       {
         "id": 53005,
-        "name": "Бумабу",
+        "name": "纸壳布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/379d8b6e5cf501e6e1f1739801019649.png",
         "rarity": 3,
         "element_type": 0,
@@ -1367,7 +1367,7 @@
       },
       {
         "id": 53006,
-        "name": "Пакетник",
+        "name": "纸袋布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/eeda26235ee0b8e1fea462734220223b.png",
         "rarity": 3,
         "element_type": 0,
@@ -1375,7 +1375,7 @@
       },
       {
         "id": 53007,
-        "name": "Плаксабу",
+        "name": "泪眼布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7294643b8524f3f1d517607458c597ac.png",
         "rarity": 3,
         "element_type": 0,
@@ -1383,7 +1383,7 @@
       },
       {
         "id": 53008,
-        "name": "Авокабу",
+        "name": "果核布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/cf16dd32c040e8be1d16ad823d3881f7.png",
         "rarity": 3,
         "element_type": 0,
@@ -1391,7 +1391,7 @@
       },
       {
         "id": 53009,
-        "name": "Яблочкобу",
+        "name": "飞靶布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/b61cb40cb8bf162bdbab83274c01dab0.png",
         "rarity": 3,
         "element_type": 0,
@@ -1399,7 +1399,7 @@
       },
       {
         "id": 53010,
-        "name": "Электробу",
+        "name": "电击布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/8c5d64dbb6d0fbc37403df36b90970a3.png",
         "rarity": 3,
         "element_type": 0,
@@ -1407,7 +1407,7 @@
       },
       {
         "id": 53011,
-        "name": "Магнитобу",
+        "name": "磁力布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/afdf8a473f95350027f603c8c0b1c339.png",
         "rarity": 3,
         "element_type": 0,
@@ -1415,7 +1415,7 @@
       },
       {
         "id": 53012,
-        "name": "Баробу",
+        "name": "气压布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/87640f115cac1f37152524dd5cab494a.png",
         "rarity": 3,
         "element_type": 0,
@@ -1423,7 +1423,7 @@
       },
       {
         "id": 53013,
-        "name": "Злобнобу",
+        "name": "不良布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/04024f89590103570efb225a3d356af0.png",
         "rarity": 3,
         "element_type": 0,
@@ -1431,7 +1431,7 @@
       },
       {
         "id": 53014,
-        "name": "Перерабу",
+        "name": "加班布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/5f40c074c779d3a562dbe3e1903bec7b.png",
         "rarity": 3,
         "element_type": 0,
@@ -1439,7 +1439,7 @@
       },
       {
         "id": 53015,
-        "name": "Борьбу",
+        "name": "格斗布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7c1d3eea537ad7cdea7a6dfc307f66bf.png",
         "rarity": 3,
         "element_type": 0,
@@ -1447,7 +1447,7 @@
       },
       {
         "id": 53016,
-        "name": "Экскалибу",
+        "name": "圣剑布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7b4a162d2cc270348f154b99eeb75c1b.png",
         "rarity": 3,
         "element_type": 0,
@@ -1455,7 +1455,7 @@
       },
       {
         "id": 53017,
-        "name": "Рыцарьбу",
+        "name": "骑士布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/886a6bc357411827f4b3fdde254e9da4.png",
         "rarity": 3,
         "element_type": 0,
@@ -1463,7 +1463,7 @@
       },
       {
         "id": 53019,
-        "name": "Деталькабу",
+        "name": "乐玩布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/b037a608d95a14bc334bd6f8f468c1d9.png",
         "rarity": 3,
         "element_type": 0,
@@ -1471,7 +1471,7 @@
       },
       {
         "id": 53021,
-        "name": "Бурабашка",
+        "name": "幽浮布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/647473e6b17e2894585b2f66038bfec5.png",
         "rarity": 3,
         "element_type": 0,
@@ -1479,7 +1479,7 @@
       },
       {
         "id": 54001,
-        "name": "Акулабу",
+        "name": "鲨牙布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/dc5ba4a037e27b5315299f534dbaa048.png",
         "rarity": 4,
         "element_type": 0,
@@ -1487,7 +1487,7 @@
       },
       {
         "id": 54002,
-        "name": "Прорабу",
+        "name": "阿全",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/71f325cdba5c0bbe32fc1e2606aaba2f.png",
         "rarity": 4,
         "element_type": 0,
@@ -1495,7 +1495,7 @@
       },
       {
         "id": 54003,
-        "name": "Вельзебу",
+        "name": "恶魔布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/de0bccb4241f6762bd4ce591d4152ab3.png",
         "rarity": 3,
         "element_type": 0,
@@ -1503,7 +1503,7 @@
       },
       {
         "id": 54004,
-        "name": "Мажордом",
+        "name": "巴特勒",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/328be5f165f6d2ebe390ecfa72eda11b.png",
         "rarity": 4,
         "element_type": 0,
@@ -1511,7 +1511,7 @@
       },
       {
         "id": 54005,
-        "name": "Амиллион",
+        "name": "艾米莉安",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/27633558bb627c021fe66359cb07dc8e.png",
         "rarity": 4,
         "element_type": 0,
@@ -1519,7 +1519,7 @@
       },
       {
         "id": 54006,
-        "name": "Ракетабу",
+        "name": "飚速布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/ab79c6df356540ff6f2f2e3235e0cefd.png",
         "rarity": 4,
         "element_type": 0,
@@ -1527,7 +1527,7 @@
       },
       {
         "id": 54008,
-        "name": "Штекербу",
+        "name": "插头布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/b451cc5a5973df9d13a8e8308ff2d07b.png",
         "rarity": 4,
         "element_type": 0,
@@ -1535,7 +1535,7 @@
       },
       {
         "id": 54009,
-        "name": "Резонабу",
+        "name": "共鸣布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/97c05a66e281e5553baf0ff2bbf6c316.png",
         "rarity": 4,
         "element_type": 0,
@@ -1543,7 +1543,7 @@
       },
       {
         "id": 54010,
-        "name": "Фанбу",
+        "name": "阿饭",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/38a922a1c07622963654f53da234e15f.png",
         "rarity": 4,
         "element_type": 0,
@@ -1551,7 +1551,7 @@
       },
       {
         "id": 54011,
-        "name": "Красный Моккус",
+        "name": "赤红莫库斯",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/3b617965ea09808963cbc9b1e3a3624f.png",
         "rarity": 4,
         "element_type": 0,
@@ -1559,7 +1559,7 @@
       },
       {
         "id": 54012,
-        "name": "Офицер Цуй",
+        "name": "阿崔巡查",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/ffb718668e4060b30ff94288acac2c5a.png",
         "rarity": 4,
         "element_type": 0,
@@ -1567,7 +1567,7 @@
       },
       {
         "id": 54013,
-        "name": "Револьвербу",
+        "name": "左轮布",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/dd75b8b83c7636d13c8f283472db0041.png",
         "rarity": 4,
         "element_type": 0,
@@ -1575,7 +1575,7 @@
       },
       {
         "id": 54014,
-        "name": "Агент Гулливер",
+        "name": "格列佛探员",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7ac191333412238ea01bf1af6782b55f.png",
         "rarity": 4,
         "element_type": 0,
@@ -1583,7 +1583,7 @@
       },
       {
         "id": 54015,
-        "name": "Щелкун",
+        "name": "咔嚓仔",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7eafb28d0f66f68fc7f2ae0b9fb0cb7a.png",
         "rarity": 4,
         "element_type": 0,
@@ -1591,7 +1591,7 @@
       },
       {
         "id": 54016,
-        "name": "Робин",
+        "name": "罗宾",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/37f8894e41c737f2d71a8a5508075ff0.png",
         "rarity": 4,
         "element_type": 0,
@@ -1599,7 +1599,7 @@
       },
       {
         "id": 54017,
-        "name": "Львец",
+        "name": "狮耶",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/17bdb82961a5cbbb027d7c79cc0be27f.png",
         "rarity": 4,
         "element_type": 0,
@@ -1607,7 +1607,7 @@
       },
       {
         "id": 54018,
-        "name": "Госпожа Эсме",
+        "name": "艾丝弥小姐",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/378b0850adb26bd6e74a37c2f067eb66.png",
         "rarity": 4,
         "element_type": 0,
@@ -1615,7 +1615,7 @@
       },
       {
         "id": 54019,
-        "name": "Меркурий",
+        "name": "「墨丘利」",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/cf4655c10a3a500cfc7a5b08764673c5.png",
         "rarity": 4,
         "element_type": 0,
@@ -1623,7 +1623,7 @@
       },
       {
         "id": 54020,
-        "name": "Биркблик",
+        "name": "比克布利克",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/7c63f10eefe75205e34bb640c802575d.png",
         "rarity": 4,
         "element_type": 0,
@@ -1631,7 +1631,7 @@
       },
       {
         "id": 54021,
-        "name": "Колосок",
+        "name": "芽芽",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/b890b313dd95c0b2b8dade2a5cd39501.png",
         "rarity": 4,
         "element_type": 0,
@@ -1639,7 +1639,7 @@
       },
       {
         "id": 54022,
-        "name": "Супер-Джейк",
+        "name": "超极杰克",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/3c6fc8d5b1b5dfd9f9c714604dce3389.png",
         "rarity": 4,
         "element_type": 0,
@@ -1647,7 +1647,7 @@
       },
       {
         "id": 54023,
-        "name": "Ариэль",
+        "name": "艾瑞儿",
         "icon": "https://act-webstatic.hoyoverse.com/darkmatter/nap/prod_gf_cn/item_icon_u2a7le/df9dc166ffffc8301ac3429016319f1f.png",
         "rarity": 4,
         "element_type": 0,
