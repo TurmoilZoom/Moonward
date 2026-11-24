@@ -22,6 +22,7 @@ using Starward.Core.GameRecord.ZZZ.ThresholdSimulation;
 using Starward.Core.GameRecord.ZZZ.UpgradeGuide;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Starward.Core.GameRecord;
 
@@ -200,9 +201,12 @@ public class HyperionClient : GameRecordClient
         long nowMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         string currentFp = string.IsNullOrWhiteSpace(DeviceFp) || DeviceFp is "0000000000000" ? "0000000000000" : DeviceFp;
         // 与 UA（Pixel 5 / Android 13 / TQ3A.230901.001）对齐；禁止 hardware=windows_*、debugStatus=1，否则 getFp 会被标成模拟器，战绩接口直接 10041。
-        string extFields = $$"""
+        string extFieldsTemplate = $$"""
             {"proxyStatus":0,"isRoot":0,"romCapacity":"128","deviceName":"Pixel 5","productName":"redfin","romRemain":"64","hostname":"redfin","screenSize":"1080x2340","isTablet":0,"aaid":"","model":"Pixel 5","brand":"google","hardware":"redfin","deviceType":"redfin","devId":"REL","serialNumber":"unknown","sdCapacity":128000,"buildTime":"1692921600000","buildUser":"android-build","simState":1,"ramRemain":"5800","appUpdateTimeDiff":{{nowMs - 172800000}},"deviceInfo":"google/redfin/redfin:13/TQ3A.230901.001/10161073:user/release-keys","vaid":"","buildType":"user","sdkVersion":"33","ui_mode":"UI_MODE_TYPE_NORMAL","isMockLocation":0,"cpuType":"arm64-v8a","isAirMode":0,"ringMode":2,"chargeStatus":3,"manufacturer":"Google","emulatorStatus":0,"appMemory":"512","osVersion":"13","vendor":"unknown","accelerometer":"0.12x9.81x0.35","sdRemain":110000,"buildTags":"release-keys","packageName":"com.mihoyo.hyperion","networkType":"WiFi","oaid":"","debugStatus":0,"ramCapacity":"8192","magnetometer":"-12.4x3.1x41.7","display":"TQ3A.230901.001","appInstallTimeDiff":{{nowMs - 2592000000}},"packageVersion":"{{AppVersion}}","gyroscope":"0.001x-0.002x0.0","batteryStatus":82,"hasKeyboard":0,"board":"redfin"}
             """.ReplaceLineEndings("");
+        // 按服务端下发的 ext_list 过滤模板字段；服务端新增字段时补 "unknown"，保持采集集与服务端一致
+        IReadOnlyList<string>? extList = await GetDeviceFpExtListAsync(cancellationToken);
+        string extFields = FilterExtFieldsByExtList(extFieldsTemplate, extList);
         string postContent = $$"""
             {
                 "device_id": "{{DeviceAndroidId}}",
@@ -226,6 +230,74 @@ public class HyperionClient : GameRecordClient
         }
         DeviceFp = data.DeviceFp;
         return data.DeviceFp;
+    }
+
+
+    /// <summary>getExtList 缓存的扩展字段清单；获取失败保持 null，下次 getFp 时重试。</summary>
+    private IReadOnlyList<string>? _deviceFpExtList;
+
+
+    /// <summary>
+    /// 获取服务端下发的设备指纹扩展字段清单（platform=2，与 getFp 载荷一致）。
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns>字段清单；网络或服务端异常时返回 null，由调用方回退到完整模板。</returns>
+    private async Task<IReadOnlyList<string>?> GetDeviceFpExtListAsync(CancellationToken cancellationToken)
+    {
+        if (_deviceFpExtList is { Count: > 0 })
+        {
+            return _deviceFpExtList;
+        }
+        try
+        {
+            string url = "https://public-data-api.mihoyo.com/device-fp/api/getExtList?platform=2";
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var data = await CommonSendAsync<DeviceExtListResult>(request, cancellationToken);
+            if (data.Code != 200 || data.ExtList is not { Count: > 0 })
+            {
+                return null;
+            }
+            _deviceFpExtList = data.ExtList;
+            return _deviceFpExtList;
+        }
+        catch (Exception)
+        {
+            // getExtList 失败不阻断 getFp：回退到硬编码完整模板，维持现有行为
+            return null;
+        }
+    }
+
+
+    /// <summary>
+    /// 按服务端 ext_list 过滤模板字段，与官方采集集对齐；模板没有的字段填 "unknown"。
+    /// </summary>
+    /// <param name="templateJson">硬编码的完整模板 JSON。</param>
+    /// <param name="extList">服务端下发的字段清单，为空时原样返回模板。</param>
+    /// <returns>过滤后的 ext_fields JSON；模板或清单解析失败时原样返回模板。</returns>
+    private static string FilterExtFieldsByExtList(string templateJson, IReadOnlyList<string>? extList)
+    {
+        if (extList is not { Count: > 0 })
+        {
+            return templateJson;
+        }
+        try
+        {
+            if (JsonNode.Parse(templateJson) is not JsonObject template)
+            {
+                return templateJson;
+            }
+            var result = new JsonObject();
+            foreach (string name in extList)
+            {
+                // JsonNode 深拷贝保留原始值类型（数字/字符串），避免改变指纹输入
+                result[name] = template.TryGetPropertyValue(name, out JsonNode? value) ? value.DeepClone() : "unknown";
+            }
+            return result.ToJsonString();
+        }
+        catch (Exception)
+        {
+            return templateJson;
+        }
     }
 
 

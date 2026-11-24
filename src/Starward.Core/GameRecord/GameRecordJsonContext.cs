@@ -42,6 +42,7 @@ namespace Starward.Core.GameRecord;
 [JsonSerializable(typeof(miHoYoApiWrapper<SimulatedUniverseInfo>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ChallengePeakData>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<DeviceFpResult>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<DeviceExtListResult>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ImaginariumTheaterWarpper>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<InterKnotReportSummary>))]
 [JsonSerializable(typeof(miHoYoApiWrapper<InterKnotReportDetail>))]
