@@ -21,12 +21,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using Vanara.PInvoke;
 using Windows.Foundation;
 
 
@@ -129,7 +126,6 @@ public sealed partial class GameSelector : UserControl
         List<GameInfo> gameInfos = GetCachedGameInfos();
         InitializeGameIconsArea(gameInfos);
         InitializeGameServerArea(gameInfos);
-        InitializeInstalledGamesCommand.Execute(null);
     }
 
 
@@ -681,9 +677,7 @@ public sealed partial class GameSelector : UserControl
         Border_FullBackground.Opacity = 1;
         Border_FullBackground.IsHitTestVisible = true;
         Border_FullBackground.Visibility = Visibility.Visible;
-        Border_Pin.Opacity = 1;
-        Border_Pin.IsHitTestVisible = true;
-        Border_Pin.Visibility = Visibility.Visible;
+        SetPanelActionsVisible(true);
         GameIconsAreaVisible = true;
         // 卡片刚变为可见时还没布局，选中态要按布局槽位计算让位，推到本轮布局之后
         DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, SelectCurrentGameCard);
@@ -695,9 +689,7 @@ public sealed partial class GameSelector : UserControl
         Border_FullBackground.Opacity = 0;
         Border_FullBackground.IsHitTestVisible = false;
         Border_FullBackground.Visibility = Visibility.Collapsed;
-        Border_Pin.Opacity = 0;
-        Border_Pin.IsHitTestVisible = false;
-        Border_Pin.Visibility = Visibility.Collapsed;
+        SetPanelActionsVisible(false);
         if (!IsPinned)
         {
             GameIconsAreaVisible = false;
@@ -714,13 +706,26 @@ public sealed partial class GameSelector : UserControl
             Border_FullBackground.Opacity = 0;
             Border_FullBackground.IsHitTestVisible = false;
             Border_FullBackground.Visibility = Visibility.Collapsed;
-            Border_Pin.Opacity = 0;
-            Border_Pin.IsHitTestVisible = false;
-            Border_Pin.Visibility = Visibility.Collapsed;
+            SetPanelActionsVisible(false);
         }
         else
         {
             HideFullBackground();
+        }
+    }
+
+
+    /// <summary>
+    /// 显示或隐藏图标栏右侧随游戏选择面板出现的按钮（固定、自动查找）
+    /// </summary>
+    /// <param name="visible">是否显示。</param>
+    private void SetPanelActionsVisible(bool visible)
+    {
+        foreach (Border border in (Border[])[Border_Pin, Border_AutoSearch])
+        {
+            border.Opacity = visible ? 1 : 0;
+            border.IsHitTestVisible = visible;
+            border.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 
@@ -826,7 +831,6 @@ public sealed partial class GameSelector : UserControl
                     icon.UpdateInfo(info);
                 }
             }
-            await InitializeInstalledGamesCommand.ExecuteAsync(null);
         }
         catch { }
     }
@@ -1027,113 +1031,7 @@ public sealed partial class GameSelector : UserControl
 
 
 
-    #region Installed Games
-
-
-    /// <summary>
-    /// 已安装游戏的实际占用空间
-    /// </summary>
-    public string? InstalledGamesActualSize { get; set => SetProperty(ref field, value); }
-
-
-    /// <summary>
-    /// 已安装游戏的总空间
-    /// </summary>
-    public string? InstalledGamesSavedSize { get; set => SetProperty(ref field, value); }
-
-
-
-
-    public ObservableCollection<GameBizIcon> InstalledGames { get; set; } = new();
-
-
-
-    private CancellationTokenSource? _initializeInstalledGamesCancellationTokenSource;
-
-
-    /// <summary>
-    /// 初始化已安装游戏列表，计算已安装游戏的实际占用空间
-    /// </summary>
-    /// <returns></returns>
-    [RelayCommand]
-    private async Task InitializeInstalledGamesAsync()
-    {
-        const double GB = 1 << 30;
-        try
-        {
-            _initializeInstalledGamesCancellationTokenSource?.Cancel();
-            _initializeInstalledGamesCancellationTokenSource = new();
-            CancellationToken token = _initializeInstalledGamesCancellationTokenSource.Token;
-
-            InstalledGames.Clear();
-            InstalledGamesActualSize = null;
-            InstalledGamesSavedSize = null;
-            List<FileInfo> files = new();
-
-            foreach (GameBizDisplay display in GameBizDisplays)
-            {
-                List<FileInfo> _duplicateFiles = new();
-                int serverCount = 0;
-                foreach (GameBizIcon server in display.Servers)
-                {
-                    string? installPath = GameLauncherService.GetGameInstallPath(server.GameId);
-                    if (Directory.Exists(installPath))
-                    {
-                        server.InstallPath = installPath;
-                        var _files = new DirectoryInfo(installPath).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
-                        server.TotalSize = _files.Sum(x => x.Length);
-                        InstalledGames.Add(server);
-                        if (_files.Count() > 0)
-                        {
-                            serverCount++;
-                            _duplicateFiles.AddRange(_files);
-                        }
-                    }
-                }
-                if (serverCount > 1)
-                {
-                    files.AddRange(_duplicateFiles);
-                }
-            }
-            long totalSize = InstalledGames.Sum(x => x.TotalSize);
-            InstalledGamesActualSize = $"{totalSize / GB:F2}GB";
-
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
-
-            if (files.Count > 0)
-            {
-                (long fileSize, long actualSize) = await Task.Run(() =>
-                {
-                    long size = 0;
-                    Dictionary<string, long> dic = new();
-                    foreach (var file in files)
-                    {
-                        size += file.Length;
-                        using var handle = File.OpenHandle(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                        var idInfo = Kernel32.GetFileInformationByHandleEx<Kernel32.FILE_ID_INFO>(handle, Kernel32.FILE_INFO_BY_HANDLE_CLASS.FileIdInfo);
-                        var idInfoBytes = MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref idInfo, 1));
-                        dic[Convert.ToHexString(idInfoBytes)] = file.Length;
-                    }
-                    return (size, dic.Values.Sum());
-                }, token);
-
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                InstalledGamesActualSize = $"{(totalSize - fileSize + actualSize) / GB:F2}GB";
-                InstalledGamesSavedSize = $"{(fileSize - actualSize) / GB:F2}GB";
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-        }
-    }
+    #region Auto Search 自动查找已安装的游戏
 
 
 
@@ -1202,19 +1100,6 @@ public sealed partial class GameSelector : UserControl
         {
             Debug.WriteLine(ex);
         }
-    }
-
-
-
-
-    /// <summary>
-    /// 防止点击已安装游戏列表时，触发 <see cref="Border_FullBackground_Tapped(object, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs)"/>
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void Expander_InstalledGamesActualSize_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
-    {
-        e.Handled = true;
     }
 
 

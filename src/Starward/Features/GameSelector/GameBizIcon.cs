@@ -10,9 +10,6 @@ public partial class GameBizIcon : ObservableObject, IEquatable<GameBizIcon>
 {
 
 
-    private const double GB = 1 << 30;
-
-
     public GameId GameId { get; set; }
 
     public GameBiz GameBiz { get; set; }
@@ -30,11 +27,6 @@ public partial class GameBizIcon : ObservableObject, IEquatable<GameBizIcon>
 
     public bool IsPinned { get; set => SetProperty(ref field, value); }
 
-    public string? InstallPath { get; set => SetProperty(ref field, value); }
-
-    public long TotalSize { get; set { field = value; OnPropertyChanged(nameof(TotalSizeText)); } }
-
-    public string? TotalSizeText => TotalSize == 0 ? null : $"{TotalSize / GB:F2}GB";
 
 
     public bool IsSelected
