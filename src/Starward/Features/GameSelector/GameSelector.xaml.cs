@@ -49,6 +49,9 @@ public sealed partial class GameSelector : UserControl
     private readonly GameIconDragReorder _gameIconDragReorder;
 
 
+    private readonly GameCardSwitchAnimator _gameCardSwitchAnimator = new();
+
+
 
     public GameSelector()
     {
@@ -682,6 +685,8 @@ public sealed partial class GameSelector : UserControl
         Border_Pin.IsHitTestVisible = true;
         Border_Pin.Visibility = Visibility.Visible;
         GameIconsAreaVisible = true;
+        // 卡片刚变为可见时还没布局，选中态要按布局槽位计算让位，推到本轮布局之后
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, SelectCurrentGameCard);
     }
 
 
@@ -870,6 +875,80 @@ public sealed partial class GameSelector : UserControl
                 ShowMode = FlyoutShowMode.Transient,
             });
         }
+    }
+
+
+    /// <summary>
+    /// 指针进入游戏卡片的命中区（卡片加四周半个间距）：切换选中的卡片
+    /// </summary>
+    /// <param name="sender">卡片外层的命中容器。</param>
+    /// <param name="e">事件参数（未使用）。</param>
+    private void Border_GameBizDisplayHitArea_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        if (sender is FrameworkElement hitArea)
+        {
+            _gameCardSwitchAnimator.Select(hitArea);
+        }
+    }
+
+
+    /// <summary>
+    /// 游戏卡片加载：登记到切换动画，面板正显示且还没有选中卡片时（如切换语言后卡片重建）选中当前游戏
+    /// </summary>
+    /// <param name="sender">卡片外层的命中容器。</param>
+    /// <param name="e">事件参数（未使用）。</param>
+    private void Border_GameBizDisplayHitArea_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement hitArea && hitArea.FindName("Grid_GameBizDisplay") is FrameworkElement card)
+        {
+            _gameCardSwitchAnimator.Register(hitArea, card, hitArea.FindName("Border_GameBizDisplay_Dim") as UIElement, hitArea.FindName("Path_GameBizDisplay_Border") as Microsoft.UI.Xaml.Shapes.Shape);
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+            {
+                if (FullBackgroundVisible && !_gameCardSwitchAnimator.HasSelection)
+                {
+                    SelectCurrentGameCard();
+                }
+                else
+                {
+                    _gameCardSwitchAnimator.Refresh();
+                }
+            });
+        }
+    }
+
+
+    /// <summary>
+    /// 游戏卡片卸载：从切换动画注销
+    /// </summary>
+    /// <param name="sender">卡片外层的命中容器。</param>
+    /// <param name="e">事件参数（未使用）。</param>
+    private void Border_GameBizDisplayHitArea_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement hitArea)
+        {
+            _gameCardSwitchAnimator.Unregister(hitArea);
+        }
+    }
+
+
+    /// <summary>
+    /// 卡片列表尺寸变化（窗口缩放）可能改变换行，让位要按新布局重算；不在布局回调里同步改，推到本轮布局之后
+    /// </summary>
+    /// <param name="sender">卡片列表。</param>
+    /// <param name="e">事件参数（未使用）。</param>
+    private void ItemsControl_GameBizDisplays_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, _gameCardSwitchAnimator.Refresh);
+    }
+
+
+    /// <summary>
+    /// 选中当前游戏对应的卡片（不播放过渡），打开游戏选择面板时调用
+    /// </summary>
+    private void SelectCurrentGameCard()
+    {
+        string game = CurrentGameBiz.Game;
+        _gameCardSwitchAnimator.SelectByData(data => data is GameBizDisplay display && !string.IsNullOrEmpty(game) && display.GameInfo?.GameBiz.Game == game);
     }
 
 
