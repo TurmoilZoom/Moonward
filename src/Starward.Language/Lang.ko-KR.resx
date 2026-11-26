@@ -4727,4 +4727,25 @@
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>아직 스크린샷이 없습니다</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>비밀번호 로그인</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>이메일 / 사용자 이름</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>비밀번호</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>비밀번호 로그인 실패</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>이메일 또는 사용자 이름을 입력해 주세요.</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>비밀번호를 입력해 주세요.</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>본인 인증</value>
+  </data>
 </root>

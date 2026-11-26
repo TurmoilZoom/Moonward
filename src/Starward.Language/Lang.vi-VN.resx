@@ -4727,4 +4727,25 @@ You are welcome to submit exported data to:</value>
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>Chưa có ảnh chụp màn hình</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>Đăng nhập bằng mật khẩu</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>Email / Tên người dùng</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>Mật khẩu</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>Đăng nhập bằng mật khẩu thất bại</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>Vui lòng nhập email hoặc tên người dùng.</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>Vui lòng nhập mật khẩu.</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>Xác minh danh tính</value>
+  </data>
 </root>

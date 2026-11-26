@@ -82,6 +82,19 @@ namespace Starward.Core.GameRecord;
 [JsonSerializable(typeof(CookieTokenBySTokenResult))]
 [JsonSerializable(typeof(PassportExchangeRequest))]
 [JsonSerializable(typeof(PassportExchangeResult))]
+// 国际服密码登录（HoYoverse passport）
+[JsonSerializable(typeof(miHoYoApiWrapper<HoyoverseLoginResult>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<HoyoverseSmartCaptchaResult>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<HoyoverseGetBySTokenResult>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<System.Text.Json.Nodes.JsonNode>))]
+[JsonSerializable(typeof(HoyoverseLoginByPasswordRequest))]
+[JsonSerializable(typeof(HoyoverseLoginResult))]
+[JsonSerializable(typeof(HoyoverseRiskVerify))]
+[JsonSerializable(typeof(HoyoverseRiskVerifyDetail))]
+[JsonSerializable(typeof(HoyoverseSmartCaptchaRequest))]
+[JsonSerializable(typeof(HoyoverseSmartCaptchaResult))]
+[JsonSerializable(typeof(HoyoverseGetBySTokenRequest))]
+[JsonSerializable(typeof(HoyoverseGetBySTokenResult))]
 [JsonSerializable(typeof(DateTimeObjectJsonConverter.DateTimeObject))]
 internal partial class GameRecordJsonContext : JsonSerializerContext
 {

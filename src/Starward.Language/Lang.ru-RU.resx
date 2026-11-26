@@ -4747,4 +4747,25 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>Скриншотов пока нет</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>Вход по паролю</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>Эл. почта / имя пользователя</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>Не удалось войти по паролю</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>Введите эл. почту или имя пользователя.</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>Введите пароль.</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>Подтверждение личности</value>
+  </data>
 </root>

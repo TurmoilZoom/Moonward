@@ -4726,4 +4726,25 @@
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>仲未有截圖</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>密碼登入</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>電郵 / 用戶名稱</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>密碼</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>密碼登入失敗</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>請輸入電郵或用戶名稱</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>請輸入密碼</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>身份驗證</value>
+  </data>
 </root>

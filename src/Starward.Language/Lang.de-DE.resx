@@ -4725,4 +4725,25 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>Noch keine Screenshots</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>Passwort-Anmeldung</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>E-Mail / Benutzername</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>Passwort-Anmeldung fehlgeschlagen</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>Gib deine E-Mail-Adresse oder deinen Benutzernamen ein.</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>Gib dein Passwort ein.</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>Identität bestätigen</value>
+  </data>
 </root>

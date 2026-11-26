@@ -313,6 +313,16 @@ public static partial class AppConfig
         SetValue(value, $"right_toolbar_items_{game.Game}");
     }
 
+    /// <summary>
+    /// 国际服 passport（密码登录、stoken 换票）用的设备 id。本机没有米哈游 SDK 写下的设备 id 时生成一次并一直复用，
+    /// 免得每次登录都被当成新设备。
+    /// </summary>
+    public static string? HoyoversePassportDeviceId
+    {
+        get => GetValue<string>();
+        set => SetValue(value);
+    }
+
     public static StartGameAction StartGameAction
     {
         get => GetValue(Starward.Features.GameLauncher.StartGameAction.Minimize);

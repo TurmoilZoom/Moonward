@@ -106,8 +106,11 @@ public static partial class AppConfig
             // 国服 passport 换票 / 短信登录；Cookie 静默刷新依赖其 stoken 接口
             sc.AddSingleton<Starward.Core.GameRecord.Passport.MihoyoPassportClient>();
             sc.AddSingleton<GameRecordCookieRefreshService>();
+            // 国际服 passport 密码登录 / stoken 换票；国际服 Cookie 静默刷新也用它
+            sc.AddSingleton<Starward.Core.GameRecord.Passport.HoyoversePassportClient>();
             sc.AddSingleton<GameRecordService>();
             sc.AddSingleton<CaptchaLoginService>();
+            sc.AddSingleton<GlobalPasswordLoginService>();
             // 每日签到：业务编排 + 常驻循环（启动先签一轮，之后跨日再签）
             sc.AddSingleton<SignInService>();
             sc.AddSingleton<AutoSignInService>();

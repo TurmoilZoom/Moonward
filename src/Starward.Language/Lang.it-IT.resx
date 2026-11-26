@@ -4727,4 +4727,25 @@ You are welcome to submit exported data to:</value>
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>Ancora nessuno screenshot</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>Accesso con password</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>Email / Nome utente</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>Accesso con password non riuscito</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>Inserisci l'email o il nome utente.</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>Inserisci la password.</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>Verifica l'identità</value>
+  </data>
 </root>

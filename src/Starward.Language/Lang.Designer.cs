@@ -13852,5 +13852,68 @@ namespace Starward.Language {
                 return ResourceManager.GetString("ScreenshotPage_NoScreenshots", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Password Login 的本地化字符串。
+        /// </summary>
+        public static string HoyolabToolboxPage_PasswordLogin {
+            get {
+                return ResourceManager.GetString("HoyolabToolboxPage_PasswordLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Email / Username 的本地化字符串。
+        /// </summary>
+        public static string PasswordLogin_Account {
+            get {
+                return ResourceManager.GetString("PasswordLogin_Account", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Password 的本地化字符串。
+        /// </summary>
+        public static string PasswordLogin_Password {
+            get {
+                return ResourceManager.GetString("PasswordLogin_Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Password login failed 的本地化字符串。
+        /// </summary>
+        public static string PasswordLogin_ErrorTitle {
+            get {
+                return ResourceManager.GetString("PasswordLogin_ErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enter your email or username. 的本地化字符串。
+        /// </summary>
+        public static string PasswordLogin_AccountRequired {
+            get {
+                return ResourceManager.GetString("PasswordLogin_AccountRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enter your password. 的本地化字符串。
+        /// </summary>
+        public static string PasswordLogin_PasswordRequired {
+            get {
+                return ResourceManager.GetString("PasswordLogin_PasswordRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Verify your identity 的本地化字符串。
+        /// </summary>
+        public static string PasswordLogin_IdentityVerifyTitle {
+            get {
+                return ResourceManager.GetString("PasswordLogin_IdentityVerifyTitle", resourceCulture);
+            }
+        }
     }
 }

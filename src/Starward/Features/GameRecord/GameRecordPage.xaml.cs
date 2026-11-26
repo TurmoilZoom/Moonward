@@ -74,9 +74,17 @@ public sealed partial class GameRecordPage : PageBase
         _gameRecordService.Language = System.Globalization.CultureInfo.CurrentUICulture.Name;
         InitializeNavigationViewItemVisibility();
 
-        // 国服：短信验证码登录；国际服无 passport 短信，提供 WebView 网页登录
+        // 国服：短信验证码登录；国际服无 passport 短信，提供 WebView 网页登录与账号密码登录
         var captchaVisible = _gameRecordService.IsHoyolab ? Visibility.Collapsed : Visibility.Visible;
         var webLoginVisible = _gameRecordService.IsHoyolab ? Visibility.Visible : Visibility.Collapsed;
+        if (MenuFlyoutItem_PasswordLogin_1 is not null)
+        {
+            MenuFlyoutItem_PasswordLogin_1.Visibility = webLoginVisible;
+        }
+        if (MenuFlyoutItem_PasswordLogin_2 is not null)
+        {
+            MenuFlyoutItem_PasswordLogin_2.Visibility = webLoginVisible;
+        }
         if (MenuFlyoutItem_CaptchaLogin_1 is not null)
         {
             MenuFlyoutItem_CaptchaLogin_1.Visibility = captchaVisible;
@@ -436,19 +444,11 @@ public sealed partial class GameRecordPage : PageBase
 
 
     /// <summary>
-    /// 错误恢复 / 跨页重新登录入口：国际服直接网页登录，国服弹登录菜单。
+    /// 错误恢复 / 跨页重新登录入口：弹登录菜单（国服验证码 / Cookie，国际服网页 / 密码 / Cookie）。
     /// </summary>
     private void OpenLoginForRecovery()
     {
-        // 按本页当前游戏判断，不读 GameRecordService.IsHoyolab：那个字段会被后台任务改到
-        if (CurrentGameBiz.IsGlobalServer())
-        {
-            WebLogin();
-        }
-        else
-        {
-            OpenLoginMenu();
-        }
+        OpenLoginMenu();
     }
 
 
@@ -646,6 +646,45 @@ public sealed partial class GameRecordPage : PageBase
             _logger.LogError(ex, "Captcha login");
             // 入库阶段异常：验证码登录上下文统一走 Factory（retcode 语义与战绩分离）
             MiHoYoApiErrorFeedbackFactory.Show(ex, MiHoYoApiContext.PassportCaptcha);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 国际服账号密码登录：登录（含极验 / 身份验证弹层）→ stoken 换票 → 入库。
+    /// Cookie 带 stoken，过期后可静默刷新（网页登录拿不到 stoken）。
+    /// </summary>
+    [RelayCommand]
+    private async Task PasswordLoginAsync()
+    {
+        // 按本页当前游戏判断；密码登录只接了国际服 passport
+        if (!CurrentGameBiz.IsGlobalServer())
+        {
+            return;
+        }
+
+        try
+        {
+            var dialog = new GlobalPasswordLoginDialog();
+            var result = await dialog.ShowAsync(XamlRoot);
+            if (result is not ContentDialogResult.Primary || string.IsNullOrWhiteSpace(dialog.CookieResult))
+            {
+                return;
+            }
+
+            string cookie = dialog.CookieResult;
+            var user = await _gameRecordService.AddRecordUserAsync(cookie, isHoyolab: true);
+            var roles = await _gameRecordService.AddGameRolesAsync(cookie, isHoyolab: true);
+            _autoSignInService.NotifyRolesReauthenticated(roles);
+            InAppToast.MainWindow?.Success(null, string.Format(Lang.LoginPage_AlreadyAddedGameRoles, roles.Count, string.Join("\r\n", roles.Select(x => $"{x.Nickname}  {x.Uid}"))), 5000);
+            LoadGameRoles(roles.FirstOrDefault(x => x.GameBiz == CurrentGameBiz.ToString()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Password login");
+            // 入库阶段（拉账号与角色）用的是战绩接口，按战绩语义提示
+            MiHoYoApiErrorFeedbackFactory.Show(ex, MiHoYoApiContext.GameRecord);
         }
     }
 

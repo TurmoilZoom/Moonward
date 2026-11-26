@@ -14,13 +14,14 @@ using System.Threading.Tasks;
 namespace Starward.Features.GameRecord;
 
 /// <summary>
-/// 协调国服 GameRecord Cookie 的账号级静默刷新：凭 stoken 换取 ltoken / cookie_token 等键值，
+/// 协调 GameRecord Cookie 的账号级静默刷新：凭 stoken 换取 ltoken / cookie_token 等键值，
 /// 并保证同一账号只执行一次 Token 交换。
 /// </summary>
 /// <remarks>
-/// 依赖验证码登录或手动 Cookie 中已包含有效的 <c>stoken</c>（或 <c>stoken_v2</c>）与 <c>mid</c>。
-/// 换票走 passport V2 会话接口 <c>account/ma-cn-session/app/exchange</c>（对齐 TeyvatGuide exchangeWebToken），
-/// 分别换取 ltoken_v2 与 cookie_token_v2。
+/// 依赖 Cookie 中已包含有效的 <c>stoken</c>（或 <c>stoken_v2</c>）与 <c>mid</c>：国服来自验证码登录或手动 Cookie，
+/// 国际服来自账号密码登录（网页登录拿不到 stoken，无法刷新）。
+/// 国服换票走 passport V2 会话接口 <c>account/ma-cn-session/app/exchange</c>（对齐 TeyvatGuide exchangeWebToken）；
+/// 国际服走 <c>account/ma-passport/token/getBySToken</c>（见 <see cref="GlobalPasswordLoginService.ExchangeTokensAsync"/>）。
 /// </remarks>
 internal class GameRecordCookieRefreshService
 {
@@ -28,6 +29,8 @@ internal class GameRecordCookieRefreshService
     private readonly ILogger<GameRecordCookieRefreshService> _logger;
 
     private readonly MihoyoPassportClient _passportClient;
+
+    private readonly GlobalPasswordLoginService _globalPasswordLoginService;
 
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _accountLocks = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, string> _refreshedCookies = new(StringComparer.Ordinal);
@@ -38,29 +41,32 @@ internal class GameRecordCookieRefreshService
     /// </summary>
     /// <param name="logger">日志记录器，不得记录 Cookie 或 Token 明文。</param>
     /// <param name="passportClient">国服 passport 客户端，用于 stoken 换票。</param>
-    public GameRecordCookieRefreshService(ILogger<GameRecordCookieRefreshService> logger, MihoyoPassportClient passportClient)
+    /// <param name="globalPasswordLoginService">国际服 stoken 换票。</param>
+    public GameRecordCookieRefreshService(ILogger<GameRecordCookieRefreshService> logger, MihoyoPassportClient passportClient, GlobalPasswordLoginService globalPasswordLoginService)
     {
         _logger = logger;
         _passportClient = passportClient;
+        _globalPasswordLoginService = globalPasswordLoginService;
     }
 
 
     /// <summary>
-    /// 刷新尚未绑定到具体角色的国服 Cookie，例如验证码登录或手动输入 Cookie 后的首次账号加载。
+    /// 刷新尚未绑定到具体角色的 Cookie，例如登录或手动输入 Cookie 后的首次账号加载。
     /// </summary>
     /// <param name="cookie">待刷新的完整 Cookie，必须包含有效的 stoken_v2/stoken 与 mid。</param>
+    /// <param name="isGlobal">是否国际服 Cookie。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>刷新后的完整 Cookie；缺少长期凭据或长期登录态已失效时返回 null。</returns>
-    public Task<string?> RefreshCookieAsync(string cookie, CancellationToken cancellationToken = default)
+    public Task<string?> RefreshCookieAsync(string cookie, bool isGlobal, CancellationToken cancellationToken = default)
     {
-        return RefreshCookieCoreAsync(cookie, null, cancellationToken);
+        return RefreshCookieCoreAsync(cookie, null, isGlobal, cancellationToken);
     }
 
 
     /// <summary>
-    /// 刷新指定国服游戏角色所属账号的 Cookie。
+    /// 刷新指定游戏角色所属账号的 Cookie。
     /// </summary>
-    /// <param name="role">发生登录失效的国服角色，Cookie 不能为空。</param>
+    /// <param name="role">发生登录失效的角色，Cookie 不能为空；按 GameBiz 区分国服与国际服。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>刷新后的完整 Cookie；缺少长期凭据或长期登录态已失效时返回 null。</returns>
     public Task<string?> RefreshCookieAsync(GameRecordRole role, CancellationToken cancellationToken = default)
@@ -69,7 +75,8 @@ internal class GameRecordCookieRefreshService
         {
             return Task.FromResult<string?>(null);
         }
-        return RefreshCookieCoreAsync(role.Cookie, role, cancellationToken);
+        bool isGlobal = role.GameBiz?.EndsWith("_global", StringComparison.OrdinalIgnoreCase) ?? false;
+        return RefreshCookieCoreAsync(role.Cookie, role, isGlobal, cancellationToken);
     }
 
 
@@ -78,9 +85,10 @@ internal class GameRecordCookieRefreshService
     /// </summary>
     /// <param name="cookie">触发登录失效的 Cookie。</param>
     /// <param name="role">可选角色；非空时用于精确读取当前持久化 Cookie。</param>
+    /// <param name="isGlobal">是否国际服 Cookie，决定换票接口与回写范围。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>可重试请求的新 Cookie；无法刷新时返回 null。</returns>
-    private async Task<string?> RefreshCookieCoreAsync(string cookie, GameRecordRole? role, CancellationToken cancellationToken)
+    private async Task<string?> RefreshCookieCoreAsync(string cookie, GameRecordRole? role, bool isGlobal, CancellationToken cancellationToken)
     {
         if (_refreshedCookies.TryGetValue(cookie, out string? cachedCookie))
         {
@@ -128,15 +136,28 @@ internal class GameRecordCookieRefreshService
                 return null;
             }
 
-            SyncPassportDevice();
-
             string ltoken;
             CookieTokenBySTokenResult cookieAccount;
             try
             {
-                // 对齐验证码登录：stoken 同时换 ltoken 与 cookie_token
-                ltoken = await _passportClient.GetLTokenBySTokenAsync(stoken, mid, cancellationToken);
-                cookieAccount = await _passportClient.GetCookieAccountInfoBySTokenAsync(stoken, mid, cancellationToken);
+                if (isGlobal)
+                {
+                    // 国际服 getBySToken 的 Cookie 要带 stuid（账号 aid）
+                    string aid = GetFirstValue(currentCookies, "stuid", "account_id", "account_id_v2", "ltuid", "ltuid_v2");
+                    if (string.IsNullOrWhiteSpace(aid))
+                    {
+                        return null;
+                    }
+                    (ltoken, string cookieToken) = await _globalPasswordLoginService.ExchangeTokensAsync(stoken, mid, aid, cancellationToken);
+                    cookieAccount = new CookieTokenBySTokenResult { CookieToken = cookieToken };
+                }
+                else
+                {
+                    SyncPassportDevice();
+                    // 对齐验证码登录：stoken 同时换 ltoken 与 cookie_token
+                    ltoken = await _passportClient.GetLTokenBySTokenAsync(stoken, mid, cancellationToken);
+                    cookieAccount = await _passportClient.GetCookieAccountInfoBySTokenAsync(stoken, mid, cancellationToken);
+                }
             }
             catch (miHoYoApiException ex)
             {
@@ -153,7 +174,7 @@ internal class GameRecordCookieRefreshService
             }
 
             string newCookie = MergeTokens(currentCookies, ltoken, cookieAccount);
-            PersistCookie(currentCookie, newCookie);
+            PersistCookie(currentCookie, newCookie, isGlobal);
             _refreshedCookies[cookie] = newCookie;
             if (role is not null)
             {
@@ -204,12 +225,14 @@ internal class GameRecordCookieRefreshService
     /// </summary>
     /// <param name="oldCookie">数据库中待替换的旧 Cookie。</param>
     /// <param name="newCookie">包含新 Token 的完整 Cookie。</param>
-    private static void PersistCookie(string oldCookie, string newCookie)
+    /// <param name="isGlobal">是否国际服；只回写同平台的账号与角色。</param>
+    private static void PersistCookie(string oldCookie, string newCookie, bool isGlobal)
     {
         using var dapper = DatabaseService.CreateConnection();
         using var transaction = dapper.BeginTransaction();
-        dapper.Execute("UPDATE GameRecordUser SET Cookie = @newCookie WHERE Cookie = @oldCookie AND IsHoyolab = 0;", new { oldCookie, newCookie }, transaction);
-        dapper.Execute("UPDATE GameRecordRole SET Cookie = @newCookie WHERE Cookie = @oldCookie AND GameBiz LIKE '%_cn';", new { oldCookie, newCookie }, transaction);
+        string roleFilter = isGlobal ? "%_global" : "%_cn";
+        dapper.Execute("UPDATE GameRecordUser SET Cookie = @newCookie WHERE Cookie = @oldCookie AND IsHoyolab = @isGlobal;", new { oldCookie, newCookie, isGlobal }, transaction);
+        dapper.Execute("UPDATE GameRecordRole SET Cookie = @newCookie WHERE Cookie = @oldCookie AND GameBiz LIKE @roleFilter;", new { oldCookie, newCookie, roleFilter }, transaction);
         transaction.Commit();
     }
 

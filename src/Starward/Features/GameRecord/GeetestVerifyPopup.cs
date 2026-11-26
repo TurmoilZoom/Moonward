@@ -34,6 +34,27 @@ internal static class GeetestVerifyPopup
         {
             return null;
         }
+        string? validate = await ShowRawAsync(xamlRoot, aigis.Data, aigis.SessionId ?? "", cancellationToken);
+        return validate is null ? null : MihoyoPassportClient.FormatAigisHeader(aigis, validate);
+    }
+
+
+    /// <summary>
+    /// 显示人机验证；成功返回极验 <c>getValidate()</c> 结果的 JSON 文本，取消或失败返回 null。
+    /// 国际服 smart captcha 要的是这段原文（再 Base64），不是 aigis 头。
+    /// </summary>
+    /// <param name="xamlRoot">宿主 XamlRoot（通常为登录对话框）。</param>
+    /// <param name="geetestConfigJson">极验参数 JSON。</param>
+    /// <param name="sessionId">风控会话 id；没有时传空串。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>极验结果 JSON；取消时为 null。</returns>
+    public static async Task<string?> ShowRawAsync(XamlRoot xamlRoot, string geetestConfigJson, string sessionId, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(xamlRoot);
+        if (string.IsNullOrWhiteSpace(geetestConfigJson))
+        {
+            return null;
+        }
 
         var tcs = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
         using var reg = cancellationToken.Register(() => tcs.TrySetResult(null));
@@ -129,7 +150,7 @@ internal static class GeetestVerifyPopup
                     Complete(null);
                     return;
                 }
-                Complete(MihoyoPassportClient.FormatAigisHeader(aigis, message));
+                Complete(message);
             }
             catch
             {
@@ -147,7 +168,7 @@ internal static class GeetestVerifyPopup
             core.Settings.AreDefaultContextMenusEnabled = false;
             core.WebMessageReceived += OnMessage;
             webMessageHooked = true;
-            core.NavigateToString(GeetestHelper.BuildHtml(aigis.Data, aigis.SessionId ?? ""));
+            core.NavigateToString(GeetestHelper.BuildHtml(geetestConfigJson, sessionId));
             return await tcs.Task;
         }
         catch

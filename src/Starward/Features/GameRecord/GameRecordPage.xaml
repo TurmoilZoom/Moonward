@@ -107,6 +107,13 @@
                                         <FontIcon Glyph="&#xE774;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuFlyoutItem_PasswordLogin_1"
+                                                Command="{x:Bind PasswordLoginCommand}"
+                                                Text="{x:Bind lang:Lang.HoyolabToolboxPage_PasswordLogin}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8D7;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_CaptchaLogin_1"
                                                 Command="{x:Bind CaptchaLoginCommand}"
                                                 Text="{x:Bind lang:Lang.HoyolabToolboxPage_CaptchaLogin}">
@@ -192,6 +199,13 @@
                                                                 Text="{x:Bind lang:Lang.HoyolabToolboxPage_WebLogin}">
                                                     <MenuFlyoutItem.Icon>
                                                         <FontIcon Glyph="&#xE774;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="MenuFlyoutItem_PasswordLogin_2"
+                                                                Command="{x:Bind PasswordLoginCommand}"
+                                                                Text="{x:Bind lang:Lang.HoyolabToolboxPage_PasswordLogin}">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE8D7;" />
                                                     </MenuFlyoutItem.Icon>
                                                 </MenuFlyoutItem>
                                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_CaptchaLogin_2"

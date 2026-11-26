@@ -385,12 +385,8 @@ internal class GameRecordService
                 return aigisRetry.Result;
             }
 
-            if (client is not HyperionClient)
-            {
-                throw;
-            }
-
-            bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
+            // 设备指纹只有国服要刷新；登录失效两边都能凭 stoken 换票（国际服仅密码登录的 Cookie 带 stoken）
+            bool deviceFpUpdated = client is HyperionClient && await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
 
             if (ex.IsLoginExpired)
             {
@@ -425,7 +421,7 @@ internal class GameRecordService
     /// </summary>
     /// <typeparam name="T">请求返回类型。</typeparam>
     /// <param name="cookie">验证码登录或手动输入的完整 Cookie。</param>
-    /// <param name="isHoyolab">是否为国际服；国际服不尝试 Token 交换。</param>
+    /// <param name="isHoyolab">是否为国际服；国际服不刷新设备指纹，换票只对带 stoken 的密码登录 Cookie 有效。</param>
     /// <param name="action">接收平台 Client 与当前 Cookie 并发起请求的委托。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>首次请求或一次恢复重试后的结果。</returns>
@@ -451,17 +447,13 @@ internal class GameRecordService
                 return aigisRetry.Result;
             }
 
-            if (isHoyolab)
-            {
-                throw;
-            }
-
-            bool deviceFpUpdated = await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
+            // 同上：设备指纹只刷国服，换票两边都试
+            bool deviceFpUpdated = !isHoyolab && await TryUpdateDeviceFpAfterRequestFailureAsync(failedDeviceFp, ex, cancellationToken);
 
             string currentCookie = cookie;
             if (ex.IsLoginExpired)
             {
-                string? refreshedCookie = await _cookieRefreshService.RefreshCookieAsync(cookie, cancellationToken);
+                string? refreshedCookie = await _cookieRefreshService.RefreshCookieAsync(cookie, isHoyolab, cancellationToken);
                 if (string.IsNullOrWhiteSpace(refreshedCookie))
                 {
                     throw;

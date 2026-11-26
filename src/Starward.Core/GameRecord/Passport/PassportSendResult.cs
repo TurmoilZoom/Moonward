@@ -25,6 +25,12 @@ public sealed class PassportSendResult<T> where T : class
     public CaptchaAigis? Aigis { get; init; }
 
 
+    /// <summary>
+    /// 响应头 <c>x-rpc-verify</c> 解析结果（国际服 passport）；出现时调用方应完成对应验证后重试。
+    /// </summary>
+    public HoyoverseRiskVerify? Verify { get; init; }
+
+
     /// <summary>是否业务成功（retcode == 0 且 Data 非 null）。</summary>
     public bool IsSuccess => Retcode == 0 && Data is not null;
 

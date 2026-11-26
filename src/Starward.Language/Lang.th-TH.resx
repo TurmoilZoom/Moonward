@@ -4721,4 +4721,25 @@ You are welcome to submit exported data to:</value>
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>ยังไม่มีภาพหน้าจอ</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>เข้าสู่ระบบด้วยรหัสผ่าน</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>อีเมล / ชื่อผู้ใช้</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>รหัสผ่าน</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>เข้าสู่ระบบด้วยรหัสผ่านล้มเหลว</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>โปรดป้อนอีเมลหรือชื่อผู้ใช้</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>โปรดป้อนรหัสผ่าน</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>ยืนยันตัวตน</value>
+  </data>
 </root>

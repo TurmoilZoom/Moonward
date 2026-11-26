@@ -4816,4 +4816,25 @@ Repository:</value>
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>No screenshots yet</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>Password Login</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>Email / Username</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>Password login failed</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>Enter your email or username.</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>Enter your password.</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>Verify your identity</value>
+  </data>
 </root>

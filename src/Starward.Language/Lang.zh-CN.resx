@@ -4815,4 +4815,25 @@
   <data name="ScreenshotPage_NoScreenshots" xml:space="preserve">
     <value>还没有截图</value>
   </data>
+  <data name="HoyolabToolboxPage_PasswordLogin" xml:space="preserve">
+    <value>密码登录</value>
+  </data>
+  <data name="PasswordLogin_Account" xml:space="preserve">
+    <value>邮箱 / 用户名</value>
+  </data>
+  <data name="PasswordLogin_Password" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="PasswordLogin_ErrorTitle" xml:space="preserve">
+    <value>密码登录失败</value>
+  </data>
+  <data name="PasswordLogin_AccountRequired" xml:space="preserve">
+    <value>请输入邮箱或用户名</value>
+  </data>
+  <data name="PasswordLogin_PasswordRequired" xml:space="preserve">
+    <value>请输入密码</value>
+  </data>
+  <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
+    <value>身份验证</value>
+  </data>
 </root>
