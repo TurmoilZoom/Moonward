@@ -74,16 +74,16 @@ public sealed partial class GameRecordPage : PageBase
         _gameRecordService.Language = System.Globalization.CultureInfo.CurrentUICulture.Name;
         InitializeNavigationViewItemVisibility();
 
-        // 国服：短信验证码登录；国际服无 passport 短信，提供 WebView 网页登录与账号密码登录
+        // 国服：短信验证码登录；国际服无 passport 短信，提供账号密码登录
         var captchaVisible = _gameRecordService.IsHoyolab ? Visibility.Collapsed : Visibility.Visible;
-        var webLoginVisible = _gameRecordService.IsHoyolab ? Visibility.Visible : Visibility.Collapsed;
+        var passwordLoginVisible = _gameRecordService.IsHoyolab ? Visibility.Visible : Visibility.Collapsed;
         if (MenuFlyoutItem_PasswordLogin_1 is not null)
         {
-            MenuFlyoutItem_PasswordLogin_1.Visibility = webLoginVisible;
+            MenuFlyoutItem_PasswordLogin_1.Visibility = passwordLoginVisible;
         }
         if (MenuFlyoutItem_PasswordLogin_2 is not null)
         {
-            MenuFlyoutItem_PasswordLogin_2.Visibility = webLoginVisible;
+            MenuFlyoutItem_PasswordLogin_2.Visibility = passwordLoginVisible;
         }
         if (MenuFlyoutItem_CaptchaLogin_1 is not null)
         {
@@ -92,14 +92,6 @@ public sealed partial class GameRecordPage : PageBase
         if (MenuFlyoutItem_CaptchaLogin_2 is not null)
         {
             MenuFlyoutItem_CaptchaLogin_2.Visibility = captchaVisible;
-        }
-        if (MenuFlyoutItem_WebLogin_1 is not null)
-        {
-            MenuFlyoutItem_WebLogin_1.Visibility = webLoginVisible;
-        }
-        if (MenuFlyoutItem_WebLogin_2 is not null)
-        {
-            MenuFlyoutItem_WebLogin_2.Visibility = webLoginVisible;
         }
     }
 
@@ -444,30 +436,11 @@ public sealed partial class GameRecordPage : PageBase
 
 
     /// <summary>
-    /// 错误恢复 / 跨页重新登录入口：弹登录菜单（国服验证码 / Cookie，国际服网页 / 密码 / Cookie）。
+    /// 错误恢复 / 跨页重新登录入口：弹登录菜单（国服验证码 / Cookie，国际服密码 / Cookie）。
     /// </summary>
     private void OpenLoginForRecovery()
     {
         OpenLoginMenu();
-    }
-
-
-    /// <summary>
-    /// 国际服（HoYoLAB）网页登录：嵌入 WebView2 打开官网，登录后读取 Cookie 入库。
-    /// 国服优先短信验证码，不提供此项。
-    /// 已经停在登录页时也重新进入，否则第二次点击不会清掉当前会话，无法再加一个账号。
-    /// </summary>
-    [RelayCommand]
-    private void WebLogin()
-    {
-        bool replaceExistingLogin = frame.SourcePageType == typeof(LoginPage);
-        NavigateTo(typeof(LoginPage), CurrentGameBiz, force_navigate: true);
-        // 只删刚压进返回栈的旧登录页；导航没成功时末项是登录页之前的页面，不能动
-        if (replaceExistingLogin && frame.BackStackDepth > 0
-            && frame.BackStack[frame.BackStackDepth - 1].SourcePageType == typeof(LoginPage))
-        {
-            frame.BackStack.RemoveAt(frame.BackStackDepth - 1);
-        }
     }
 
 
@@ -513,8 +486,7 @@ public sealed partial class GameRecordPage : PageBase
         {
             CurrentRole = role;
             _gameRecordService.SetLastSelectGameRecordRole(CurrentGameBiz, role);
-            // 网页登录过程中切换角色列表选中项时不要把 LoginPage 冲掉
-            if (frame.SourcePageType?.Name is not nameof(LoginPage) && frame.SourcePageType is not null)
+            if (frame.SourcePageType is not null)
             {
                 NavigateTo(frame.SourcePageType, force_navigate: true);
             }

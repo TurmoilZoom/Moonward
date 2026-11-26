@@ -100,13 +100,6 @@
                             Visibility="{x:Bind CurrentRole, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
                         <Button.Flyout>
                             <MenuFlyout x:Name="Flyout_LoginMenu_1" Placement="BottomEdgeAlignedLeft">
-                                <MenuFlyoutItem x:Name="MenuFlyoutItem_WebLogin_1"
-                                                Command="{x:Bind WebLoginCommand}"
-                                                Text="{x:Bind lang:Lang.HoyolabToolboxPage_WebLogin}">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon Glyph="&#xE774;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_PasswordLogin_1"
                                                 Command="{x:Bind PasswordLoginCommand}"
                                                 Text="{x:Bind lang:Lang.HoyolabToolboxPage_PasswordLogin}">
@@ -194,13 +187,6 @@
                                         </StackPanel>
                                         <Button.Flyout>
                                             <MenuFlyout x:Name="Flyout_LoginMenu_2" Placement="RightEdgeAlignedTop">
-                                                <MenuFlyoutItem x:Name="MenuFlyoutItem_WebLogin_2"
-                                                                Command="{x:Bind WebLoginCommand}"
-                                                                Text="{x:Bind lang:Lang.HoyolabToolboxPage_WebLogin}">
-                                                    <MenuFlyoutItem.Icon>
-                                                        <FontIcon Glyph="&#xE774;" />
-                                                    </MenuFlyoutItem.Icon>
-                                                </MenuFlyoutItem>
                                                 <MenuFlyoutItem x:Name="MenuFlyoutItem_PasswordLogin_2"
                                                                 Command="{x:Bind PasswordLoginCommand}"
                                                                 Text="{x:Bind lang:Lang.HoyolabToolboxPage_PasswordLogin}">
