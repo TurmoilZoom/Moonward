@@ -270,7 +270,7 @@ la chiusura del programma durante la decompressione causerà la corruzione dei f
     <value>Nessun Registro Gacha</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>Aggiorna (incrementale)</value>
+    <value>Aggiorna</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>Aggiornamento nomi oggetti…</value>

@@ -270,7 +270,7 @@ cerrar el programa durante la descompresión causará corrupciones en los archiv
     <value>Sin registros de Gacha</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>Actualizar (incremental)</value>
+    <value>Actualizar</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>Actualizando nombres de objetos…</value>

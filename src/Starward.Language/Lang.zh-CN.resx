@@ -329,7 +329,7 @@
     <value>没有抽卡记录</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>更新（增量）</value>
+    <value>更新</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>正在更新物品名称…</value>

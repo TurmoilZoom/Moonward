@@ -270,7 +270,7 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
     <value>Không có bản ghi gacha</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>Cập nhật (tăng dần)</value>
+    <value>Cập nhật</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>Đang cập nhật tên vật phẩm…</value>

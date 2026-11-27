@@ -270,7 +270,7 @@ Wenn Sie das Programm während der Dekomprimierung schließen, wird die Spieldat
     <value>Keine Gacha-Datensätze</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>Aktualisieren (Inkrementell)</value>
+    <value>Aktualisieren</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>Gegenstandsnamen werden aktualisiert…</value>

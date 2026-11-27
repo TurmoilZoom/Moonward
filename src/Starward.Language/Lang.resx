@@ -329,7 +329,7 @@ closing the program during decompression will cause game file corruption.</value
     <value>No Gacha Records</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>Update (Incremental)</value>
+    <value>Update</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>Updating item names…</value>

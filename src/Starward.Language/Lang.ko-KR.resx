@@ -270,7 +270,7 @@
     <value>뽑기 기록이 없습니다.</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>업데이트 (증분)</value>
+    <value>업데이트</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>아이템 이름 업데이트 중…</value>

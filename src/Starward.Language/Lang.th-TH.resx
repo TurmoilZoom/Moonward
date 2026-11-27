@@ -269,7 +269,7 @@
     <value>ไม่มีประวัติการสุ่ม</value>
   </data>
   <data name="GachaLogPage_UpdateRecords" xml:space="preserve">
-    <value>อัปเดต (เพิ่มเติม)</value>
+    <value>อัปเดต</value>
   </data>
   <data name="GachaLogPage_UpdatingItemNames" xml:space="preserve">
     <value>กำลังอัปเดตชื่อไอเทม…</value>
