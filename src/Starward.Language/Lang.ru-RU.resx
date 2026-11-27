@@ -4610,10 +4610,10 @@ ChatGPT может допускать ошибки. Проверьте важн�
     <value>Account</value>
   </data>
   <data name="GachaLogPage_FillFromMiyoushe" xml:space="preserve">
-    <value>Fill missing from Miyoushe</value>
+    <value>Fill records from launch to now</value>
   </data>
   <data name="GachaLogPage_FillFromHoYoLAB" xml:space="preserve">
-    <value>Fill missing from HoYoLAB</value>
+    <value>Fill records from launch to now</value>
   </data>
   <data name="GachaLogPage_FillMissingRecordsConfirm" xml:space="preserve">
     <value>Your existing records won't be changed. Only the missing S-Rank records will be added for display.</value>

@@ -4589,10 +4589,10 @@
     <value>帳號</value>
   </data>
   <data name="GachaLogPage_FillFromMiyoushe" xml:space="preserve">
-    <value>從米遊社補全缺失</value>
+    <value>補全開服至今</value>
   </data>
   <data name="GachaLogPage_FillFromHoYoLAB" xml:space="preserve">
-    <value>從 HoYoLAB 補全缺失</value>
+    <value>補全開服至今</value>
   </data>
   <data name="GachaLogPage_FillMissingRecordsConfirm" xml:space="preserve">
     <value>不影響原有記錄，只補充顯示缺失的 S 級記錄</value>

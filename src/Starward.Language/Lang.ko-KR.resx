@@ -4590,10 +4590,10 @@
     <value>Account</value>
   </data>
   <data name="GachaLogPage_FillFromMiyoushe" xml:space="preserve">
-    <value>미유시에서 누락된 기록 채우기</value>
+    <value>오픈부터 현재까지 기록 채우기</value>
   </data>
   <data name="GachaLogPage_FillFromHoYoLAB" xml:space="preserve">
-    <value>HoYoLAB에서 누락된 기록 채우기</value>
+    <value>오픈부터 현재까지 기록 채우기</value>
   </data>
   <data name="GachaLogPage_FillMissingRecordsConfirm" xml:space="preserve">
     <value>기존 기록은 변경되지 않으며, 누락된 S급 기록만 보충하여 표시합니다.</value>

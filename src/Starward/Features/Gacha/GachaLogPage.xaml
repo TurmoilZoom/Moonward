@@ -488,7 +488,7 @@
                                             CommandParameter="all"
                                             Text="{x:Bind lang:Lang.GachaLogPage_SyncAllFromHoYoLAB}"
                                             Visibility="Collapsed" />
-                            <!--  补全缺失（绝区零）：先同步，再用米游社 / HoYoLAB 官方抽卡统计补全超出保留期的老记录  -->
+                            <!--  补全开服至今（绝区零）：先同步，再用米游社 / HoYoLAB 官方抽卡统计补全超出保留期的老记录  -->
                             <MenuFlyoutItem x:Name="MenuFlyoutItem_FillFromMiyoushe"
                                             Command="{x:Bind FillFromOfficialStatsCommand}"
                                             Text="{x:Bind lang:Lang.GachaLogPage_FillFromMiyoushe}"

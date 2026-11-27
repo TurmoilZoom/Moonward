@@ -4678,10 +4678,10 @@
     <value>账号</value>
   </data>
   <data name="GachaLogPage_FillFromMiyoushe" xml:space="preserve">
-    <value>从米游社补全缺失</value>
+    <value>补全开服至今</value>
   </data>
   <data name="GachaLogPage_FillFromHoYoLAB" xml:space="preserve">
-    <value>从 HoYoLAB 补全缺失</value>
+    <value>补全开服至今</value>
   </data>
   <data name="GachaLogPage_FillMissingRecordsConfirm" xml:space="preserve">
     <value>不影响原有记录，只补充展示缺失的 S 级记录</value>

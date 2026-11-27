@@ -4589,10 +4589,10 @@
     <value>Account</value>
   </data>
   <data name="GachaLogPage_FillFromMiyoushe" xml:space="preserve">
-    <value>米游社から欠けている記録を補完</value>
+    <value>開服から現在までの記録を補完</value>
   </data>
   <data name="GachaLogPage_FillFromHoYoLAB" xml:space="preserve">
-    <value>HoYoLABから欠けている記録を補完</value>
+    <value>開服から現在までの記録を補完</value>
   </data>
   <data name="GachaLogPage_FillMissingRecordsConfirm" xml:space="preserve">
     <value>既存の記録は変更されません。欠けているSランクの記録のみを補って表示します。</value>
