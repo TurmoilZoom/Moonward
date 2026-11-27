@@ -676,6 +676,23 @@ public class HoYoPlayClient
 
 
     /// <summary>
+    /// 预约中游戏（<see cref="GameInfoDisplayStatus.LAUNCHER_GAME_DISPLAY_STATUS_RESERVATION_ENABLED"/>）的详情页内容
+    /// </summary>
+    /// <param name="launcherId">游戏所属的启动器</param>
+    /// <param name="language">界面语言；国服启动器只有中文内容</param>
+    /// <param name="gameId">游戏</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>详情页内容</returns>
+    /// <exception cref="miHoYoApiException">retcode 非 0</exception>
+    public async Task<GameReservationContent> GetGameReservationContentAsync(string launcherId, string language, GameId gameId, CancellationToken cancellationToken = default)
+    {
+        string url = BuildUrl("getGameReservationContent", launcherId, language) + $"&game_id={gameId.Id}";
+        return await CommonGetAsync<GameReservationContent>(url, cancellationToken);
+    }
+
+
+
+    /// <summary>
     /// 获取 DirectX 配置
     /// </summary>
     /// <param name="launcherId"></param>

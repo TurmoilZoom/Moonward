@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Features.GameSelector.GameReservationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
+             xmlns:local="using:Starward.Features.GameSelector"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
+             xmlns:sch="using:Starward.Core.HoYoPlay"
+             xmlns:sh="using:Starward.Helpers"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="NoAnimationImageExStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <!--  点在空白处不冒泡到游戏选择面板（面板点空白会整体收起）  -->
+    <Grid Background="Transparent" Tapped="Grid_Root_Tapped">
+
+        <!--  背景：当前图片或视频封面，盖一层亚克力做出模糊的氛围色  -->
+        <sc:CachedImage HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsHitTestVisible="False"
+                        Source="{x:Bind SelectedItem.Media.Cover.Url, FallbackValue={x:Null}}"
+                        Stretch="UniformToFill" />
+        <Border Background="{ThemeResource CustomAcrylicBrush}" IsHitTestVisible="False" />
+
+
+        <!--  内容按默认窗口尺寸 1200×676 排版，窗口放大时整体等比缩放，布局比例与官方启动器一致  -->
+        <Viewbox Stretch="Uniform">
+            <Grid Width="1200" Height="676">
+
+                <!--  大图 / 视频  -->
+                <Grid x:Name="Grid_Media"
+                      Width="736"
+                      Height="414"
+                      Margin="60,92,0,0"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Top"
+                      Background="#40000000"
+                      CornerRadius="12"
+                      PointerEntered="Grid_Media_PointerEntered"
+                      PointerExited="Grid_Media_PointerExited">
+                    <FlipView x:Name="FlipView_Media"
+                              Background="Transparent"
+                              ItemsSource="{x:Bind MediaItems}"
+                              Loaded="FlipView_Media_Loaded"
+                              SelectionChanged="FlipView_Media_SelectionChanged"
+                              UseTouchAnimationsForAllNavigation="True">
+                        <FlipView.ItemTemplate>
+                            <DataTemplate x:DataType="local:GameReservationMediaItem">
+                                <sc:CachedImage HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Source="{x:Bind Media.Cover.Url}"
+                                                Stretch="UniformToFill"
+                                                Style="{StaticResource NoAnimationImageExStyle}" />
+                            </DataTemplate>
+                        </FlipView.ItemTemplate>
+                    </FlipView>
+                    <!--  视频：首帧出来前一直显示封面  -->
+                    <MediaPlayerElement x:Name="MediaPlayerElement_Video"
+                                        AreTransportControlsEnabled="False"
+                                        Stretch="UniformToFill"
+                                        Tapped="MediaPlayerElement_Video_Tapped"
+                                        Visibility="Collapsed" />
+                    <!--  暂停中  -->
+                    <Border x:Name="Border_VideoPaused"
+                            Width="64"
+                            Height="64"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            sh:PointerCursor.CursorShape="Hand"
+                            Background="#80000000"
+                            CornerRadius="32"
+                            Tapped="Border_VideoPaused_Tapped"
+                            Visibility="Collapsed">
+                        <FontIcon Margin="4,0,0,0"
+                                  FontSize="24"
+                                  Foreground="White"
+                                  Glyph="&#xF5B0;"
+                                  IsTextScaleFactorEnabled="False" />
+                    </Border>
+                    <ProgressRing x:Name="ProgressRing_Video"
+                                  Width="40"
+                                  Height="40"
+                                  IsActive="False"
+                                  IsHitTestVisible="False"
+                                  Visibility="Collapsed" />
+                    <!--  视频控制栏：指针在画面上或暂停时显示；隐藏时不参与命中，点画面仍是播放/暂停  -->
+                    <Grid x:Name="Grid_VideoControls"
+                          Height="64"
+                          Padding="12,20,16,6"
+                          VerticalAlignment="Bottom"
+                          ColumnSpacing="8"
+                          IsHitTestVisible="False"
+                          Opacity="0"
+                          Visibility="Collapsed">
+                        <Grid.OpacityTransition>
+                            <ScalarTransition />
+                        </Grid.OpacityTransition>
+                        <Grid.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="#00000000" />
+                                <GradientStop Offset="1" Color="#A6000000" />
+                            </LinearGradientBrush>
+                        </Grid.Background>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <!--  播放 / 暂停  -->
+                        <Button x:Name="Button_VideoPlayPause"
+                                Width="36"
+                                Height="36"
+                                Padding="0"
+                                VerticalAlignment="Center"
+                                sh:PointerCursor.CursorShape="Hand"
+                                Click="Button_VideoPlayPause_Click"
+                                CornerRadius="18"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                            <FontIcon x:Name="FontIcon_VideoPlayPause"
+                                      FontSize="16"
+                                      Foreground="White"
+                                      Glyph="&#xE769;"
+                                      IsTextScaleFactorEnabled="False" />
+                        </Button>
+                        <!--  进度  -->
+                        <Slider x:Name="Slider_VideoPosition"
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                IsThumbToolTipEnabled="False"
+                                Maximum="1"
+                                Minimum="0"
+                                StepFrequency="0.1"
+                                ValueChanged="Slider_VideoPosition_ValueChanged" />
+                        <TextBlock x:Name="TextBlock_VideoTime"
+                                   Grid.Column="2"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="White"
+                                   IsTextScaleFactorEnabled="False"
+                                   Text="00:00 / 00:00" />
+                        <!--  静音  -->
+                        <Button x:Name="Button_VideoMute"
+                                Grid.Column="3"
+                                Width="36"
+                                Height="36"
+                                Padding="0"
+                                VerticalAlignment="Center"
+                                sh:PointerCursor.CursorShape="Hand"
+                                Click="Button_VideoMute_Click"
+                                CornerRadius="18"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                            <FontIcon x:Name="FontIcon_VideoMute"
+                                      FontSize="16"
+                                      Foreground="White"
+                                      Glyph="&#xE767;"
+                                      IsTextScaleFactorEnabled="False" />
+                        </Button>
+                        <!--  音量  -->
+                        <Slider x:Name="Slider_VideoVolume"
+                                Grid.Column="4"
+                                Width="88"
+                                VerticalAlignment="Center"
+                                Maximum="100"
+                                Minimum="0"
+                                StepFrequency="1"
+                                ValueChanged="Slider_VideoVolume_ValueChanged" />
+                    </Grid>
+                </Grid>
+
+
+                <!--  缩略图  -->
+                <Grid Width="736"
+                      Height="52"
+                      Margin="60,562,0,0"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Top"
+                      ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Width="24"
+                            Height="52"
+                            Padding="0"
+                            sh:PointerCursor.CursorShape="Hand"
+                            Click="Button_PreviousMedia_Click"
+                            CornerRadius="6"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        <FontIcon FontSize="12"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE76B;"
+                                  IsTextScaleFactorEnabled="False" />
+                    </Button>
+                    <ScrollViewer x:Name="ScrollViewer_Thumbnails"
+                                  Grid.Column="1"
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  HorizontalScrollMode="Enabled"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  VerticalScrollMode="Disabled">
+                        <ItemsControl x:Name="ItemsControl_Thumbnails" ItemsSource="{x:Bind MediaItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="12" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="local:GameReservationMediaItem">
+                                    <Grid Width="92"
+                                          Height="52"
+                                          sh:PointerCursor.CursorShape="Hand"
+                                          Background="Transparent"
+                                          CornerRadius="6"
+                                          Tapped="Grid_Thumbnail_Tapped">
+                                        <sc:CachedImage HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Source="{x:Bind Media.Cover.Url}"
+                                                        Stretch="UniformToFill"
+                                                        Style="{StaticResource NoAnimationImageExStyle}" />
+                                        <!--  未选中压暗  -->
+                                        <Border Background="#73000000"
+                                                IsHitTestVisible="False"
+                                                Opacity="{x:Bind DimOpacity, Mode=OneWay}">
+                                            <Border.OpacityTransition>
+                                                <ScalarTransition />
+                                            </Border.OpacityTransition>
+                                        </Border>
+                                        <!--  视频标识  -->
+                                        <FontIcon HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  FontSize="14"
+                                                  Foreground="White"
+                                                  Glyph="&#xF5B0;"
+                                                  IsHitTestVisible="False"
+                                                  IsTextScaleFactorEnabled="False"
+                                                  Visibility="{x:Bind Media.IsVideo}" />
+                                        <!--  选中描边  -->
+                                        <Border BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
+                                                BorderThickness="2"
+                                                CornerRadius="6"
+                                                IsHitTestVisible="False"
+                                                Opacity="{x:Bind SelectedOpacity, Mode=OneWay}">
+                                            <Border.OpacityTransition>
+                                                <ScalarTransition />
+                                            </Border.OpacityTransition>
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <Button Grid.Column="2"
+                            Width="24"
+                            Height="52"
+                            Padding="0"
+                            sh:PointerCursor.CursorShape="Hand"
+                            Click="Button_NextMedia_Click"
+                            CornerRadius="6"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}">
+                        <FontIcon FontSize="12"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                  Glyph="&#xE76C;"
+                                  IsTextScaleFactorEnabled="False" />
+                    </Button>
+                </Grid>
+
+
+                <!--  Logo、简介、标签  -->
+                <StackPanel Width="260"
+                            Margin="836,92,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Spacing="16">
+                    <sc:CachedImage Height="64"
+                                    HorizontalAlignment="Left"
+                                    Source="{x:Bind LogoUrl}"
+                                    Stretch="Uniform" />
+                    <TextBlock FontSize="14"
+                               Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               LineHeight="22"
+                               MaxLines="10"
+                               Text="{x:Bind Introduction}"
+                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="Wrap" />
+                    <ItemsControl ItemsSource="{x:Bind Tags}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <cwc:WrapPanel HorizontalSpacing="8" VerticalSpacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sch:GameReservationTag">
+                                <Border Padding="10,4,10,5"
+                                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4">
+                                    <TextBlock FontSize="12"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               IsTextScaleFactorEnabled="False"
+                                               Text="{x:Bind Name}" />
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+
+                <!--  预约：打开官方预约网页  -->
+                <Button x:Name="Button_PreRegister"
+                        Width="260"
+                        Height="56"
+                        Margin="836,560,0,0"
+                        Padding="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="Stretch"
+                        sh:PointerCursor.CursorShape="Hand"
+                        BorderThickness="0"
+                        Click="Button_PreRegister_Click"
+                        CornerRadius="28"
+                        Style="{ThemeResource AccentButtonStyle}"
+                        Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Margin="22,0,0,0"
+                                  FontSize="18"
+                                  FontWeight="Bold"
+                                  Glyph="&#xEA8F;"
+                                  IsTextScaleFactorEnabled="False" />
+                        <TextBlock Grid.Column="1"
+                                   Margin="0,0,22,0"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   IsTextScaleFactorEnabled="False"
+                                   Text="{x:Bind lang:Lang.GameReservationView_PreRegister}" />
+                    </Grid>
+                </Button>
+
+            </Grid>
+        </Viewbox>
+
+
+        <!--  返回游戏卡片：放在左上角当前游戏图标的位置，不随内容缩放  -->
+        <Button Width="40"
+                Height="40"
+                Margin="8,10,0,0"
+                Padding="0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                sh:PointerCursor.CursorShape="Hand"
+                BorderThickness="0"
+                Click="Button_Back_Click"
+                CornerRadius="8"
+                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                sc:InstantTooltip.Placement="Bottom"
+                sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Back}">
+            <FontIcon FontSize="16"
+                      Glyph="&#xE72B;"
+                      IsTextScaleFactorEnabled="False" />
+        </Button>
+
+    </Grid>
+
+</UserControl>

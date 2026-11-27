@@ -1638,6 +1638,25 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 预约中游戏详情页宣传视频的音量（0-100），默认 100。
+    /// </summary>
+    public static int ReservationVideoVolume
+    {
+        get => Math.Clamp(GetValue(100), 0, 100);
+        set => SetValue(Math.Clamp(value, 0, 100));
+    }
+
+    /// <summary>
+    /// 预约中游戏详情页宣传视频是否静音。
+    /// </summary>
+    public static bool ReservationVideoMuted
+    {
+        get => GetValue<bool>();
+        set => SetValue(value);
+    }
+
+
+    /// <summary>
     /// 获取指定游戏的背景视频音量（0-100）。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>

@@ -4749,4 +4749,13 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>Symbole pro Zeile (Kompaktansicht)</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>Vorregistrieren</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>Details anzeigen</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>Jetzt vorregistrieren</value>
+  </data>
 </root>

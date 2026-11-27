@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -35,6 +36,9 @@ public sealed partial class GameSelector : UserControl
 
 
     public event EventHandler<(GameId, bool DoubleTapped)>? CurrentGameChanged;
+
+
+    private readonly ILogger<GameSelector> _logger = AppConfig.GetLogger<GameSelector>();
 
 
     private readonly HoYoPlayService _hoyoplayService = AppConfig.GetService<HoYoPlayService>();
@@ -125,7 +129,38 @@ public sealed partial class GameSelector : UserControl
     {
         List<GameInfo> gameInfos = GetCachedGameInfos();
         InitializeGameIconsArea(gameInfos);
+        UnpinReservationGames(gameInfos);
         InitializeGameServerArea(gameInfos);
+    }
+
+
+
+    /// <summary>
+    /// 把预约中的游戏从顶部图标栏取消固定。固定与取消固定都在区服菜单里，而预约游戏已经没有区服菜单，
+    /// 之前固定过的就再也取消不了；游戏上线（不再是预约状态）后照常可以固定。
+    /// 移除会触发 <see cref="GameBizIcons_CollectionChanged"/> 写回 <see cref="AppConfig.SelectedGameBizs"/>。
+    /// </summary>
+    /// <param name="gameInfos">各游戏的基本信息（含预约状态）</param>
+    private void UnpinReservationGames(List<GameInfo> gameInfos)
+    {
+        try
+        {
+            HashSet<GameBiz> reservationBizs = gameInfos.Where(x => x.DisplayStatus is GameInfoDisplayStatus.LAUNCHER_GAME_DISPLAY_STATUS_RESERVATION_ENABLED)
+                                                        .Select(x => x.GameBiz)
+                                                        .ToHashSet();
+            if (reservationBizs.Count == 0)
+            {
+                return;
+            }
+            foreach (GameBizIcon icon in GameBizIcons.Where(x => reservationBizs.Contains(x.GameBiz)).ToList())
+            {
+                GameBizIcons.Remove(icon);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Unpin reservation games");
+        }
     }
 
 
@@ -690,6 +725,7 @@ public sealed partial class GameSelector : UserControl
         Border_FullBackground.IsHitTestVisible = false;
         Border_FullBackground.Visibility = Visibility.Collapsed;
         SetPanelActionsVisible(false);
+        CloseReservationView();
         if (!IsPinned)
         {
             GameIconsAreaVisible = false;
@@ -707,6 +743,7 @@ public sealed partial class GameSelector : UserControl
             Border_FullBackground.IsHitTestVisible = false;
             Border_FullBackground.Visibility = Visibility.Collapsed;
             SetPanelActionsVisible(false);
+            CloseReservationView();
         }
         else
         {
@@ -728,6 +765,94 @@ public sealed partial class GameSelector : UserControl
             border.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
         }
     }
+
+
+    #endregion
+
+
+
+
+
+    #region Reservation 预约中的游戏
+
+
+
+    /// <summary>
+    /// 详情页取消显示后延迟折叠，保证淡出过渡播完
+    /// </summary>
+    private int _reservationViewCloseVersion;
+
+
+
+    /// <summary>
+    /// 打开预约游戏的详情页，叠在游戏卡片上方
+    /// </summary>
+    /// <param name="display">被点击的预约游戏卡片</param>
+    private async void OpenReservationView(GameBizDisplay display)
+    {
+        try
+        {
+            if (ReservationView is null)
+            {
+                FindName(nameof(ReservationView));
+            }
+            if (ReservationView is null)
+            {
+                return;
+            }
+            _reservationViewCloseVersion++;
+            ReservationView.Visibility = Visibility.Visible;
+            ReservationView.IsHitTestVisible = true;
+            ReservationView.Opacity = 1;
+            GameInfo gameInfo = display.GameInfo;
+            await ReservationView.ShowAsync(gameInfo, async () =>
+            {
+                try
+                {
+                    return await _hoyoplayService.GetGameReservationContentAsync(gameInfo);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Get reservation content ({GameBiz})", gameInfo.GameBiz);
+                    return null;
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Open reservation view ({GameBiz})", display.GameInfo?.GameBiz);
+        }
+    }
+
+
+
+    /// <summary>
+    /// 收起详情页，回到游戏卡片
+    /// </summary>
+    private async void CloseReservationView()
+    {
+        if (ReservationView is null || !ReservationView.IsHitTestVisible)
+        {
+            return;
+        }
+        ReservationView.Close();
+        ReservationView.IsHitTestVisible = false;
+        ReservationView.Opacity = 0;
+        int version = ++_reservationViewCloseVersion;
+        await Task.Delay(400);
+        if (version == _reservationViewCloseVersion && ReservationView is not null && !ReservationView.IsHitTestVisible)
+        {
+            ReservationView.Visibility = Visibility.Collapsed;
+        }
+    }
+
+
+
+    private void ReservationView_BackRequested(object? sender, EventArgs e)
+    {
+        CloseReservationView();
+    }
+
 
 
     #endregion
@@ -780,6 +905,11 @@ public sealed partial class GameSelector : UserControl
             // 分类每个游戏的服务器信息
             foreach (var item in list)
             {
+                if (item.IsReservation)
+                {
+                    // 预约中的游戏还没上线，不提供区服选择，点击卡片打开预约详情页
+                    continue;
+                }
                 string game = item.GameInfo.GameBiz.Game;
                 foreach (string suffix in (string[])["_cn", "_global", "_bilibili"])
                 {
@@ -802,7 +932,8 @@ public sealed partial class GameSelector : UserControl
                     }
                 }
             }
-            GameBizDisplays = new(list);
+            // 预约中的游戏排在已上线游戏后面，其余保持接口返回的顺序（OrderBy 是稳定排序）
+            GameBizDisplays = list.OrderBy(x => x.IsReservation).ToList();
         }
         catch { }
     }
@@ -818,6 +949,8 @@ public sealed partial class GameSelector : UserControl
         try
         {
             List<GameInfo> gameInfos = await _hoyoplayService.UpdateGameInfoListAsync();
+            // 首次运行没有缓存的游戏信息时，启动那一次查不到预约状态，拿到最新信息后再取消固定一次
+            UnpinReservationGames(gameInfos);
             InitializeGameServerArea(gameInfos);
             foreach (GameBizIcon icon in GameBizIcons)
             {
@@ -851,6 +984,13 @@ public sealed partial class GameSelector : UserControl
     /// <param name="e"></param>
     private void Grid_GameBizDisplay_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
     {
+        if (sender is FrameworkElement { DataContext: GameBizDisplay { IsReservation: true } display })
+        {
+            e.Handled = true;
+            _isGameBizDisplayPressed = false;
+            OpenReservationView(display);
+            return;
+        }
         if (sender is FrameworkElement ele)
         {
             e.Handled = true;
@@ -871,7 +1011,7 @@ public sealed partial class GameSelector : UserControl
     /// <param name="e"></param>
     private void Grid_GameBizDisplay_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        if (sender is FrameworkElement ele && _isGameBizDisplayPressed)
+        if (sender is FrameworkElement ele && _isGameBizDisplayPressed && ele.DataContext is not GameBizDisplay { IsReservation: true })
         {
             FlyoutBase.GetAttachedFlyout(ele)?.ShowAt(ele, new FlyoutShowOptions
             {

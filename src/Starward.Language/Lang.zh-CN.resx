@@ -4839,4 +4839,13 @@
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>紧凑视图每行图标数</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>预约</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>查看详情</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>立即预约</value>
+  </data>
 </root>

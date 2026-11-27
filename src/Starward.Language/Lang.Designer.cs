@@ -5771,6 +5771,33 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Pre-Register 的本地化字符串。
+        /// </summary>
+        public static string GameSelector_PreRegister {
+            get {
+                return ResourceManager.GetString("GameSelector_PreRegister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 View Details 的本地化字符串。
+        /// </summary>
+        public static string GameSelector_ViewDetails {
+            get {
+                return ResourceManager.GetString("GameSelector_ViewDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Pre-register 的本地化字符串。
+        /// </summary>
+        public static string GameReservationView_PreRegister {
+            get {
+                return ResourceManager.GetString("GameReservationView_PreRegister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Storage Space Saved by Hard Links 的本地化字符串。
         /// </summary>
         public static string GameSelector_StorageSpaceSavedByHardLinks {

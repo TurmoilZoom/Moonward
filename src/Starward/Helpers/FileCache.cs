@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Hashing;
 using System.Net;
@@ -376,6 +377,29 @@ internal static class FileCache
     {
         var fileInfo = new FileInfo(path);
         return fileInfo.Exists && fileInfo.Length > 0;
+    }
+
+
+    /// <summary>
+    /// 只查本地是否已有完整的缓存文件，不触发下载。会读文件元数据，不要在 UI 线程上频繁调用。
+    /// </summary>
+    /// <param name="uri">远程资源地址。</param>
+    /// <param name="path">缓存文件完整路径（文件名是哈希、没有扩展名）。</param>
+    /// <returns>已缓存返回 true。</returns>
+    public static bool TryGetCachedFile(Uri uri, [NotNullWhen(true)] out string? path)
+    {
+        path = null;
+        if (CacheFolder is null)
+        {
+            return false;
+        }
+        string file = Path.Combine(CacheFolder, GetCacheFileName(uri));
+        if (IsFileCacheAvailable(file))
+        {
+            path = file;
+            return true;
+        }
+        return false;
     }
 
 

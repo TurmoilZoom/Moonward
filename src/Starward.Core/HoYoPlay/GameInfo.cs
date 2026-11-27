@@ -94,6 +94,20 @@ public class GameInfoDisplay
     [JsonPropertyName("wpf_icon")]
     public GameImage? WpfIcon { get; set; }
 
+
+    /// <summary>
+    /// 官方启动器游戏列表悬停时显示在背景左上角的白色 Logo
+    /// </summary>
+    [JsonPropertyName("top_left_logo")]
+    public GameImage? TopLeftLogo { get; set; }
+
+
+    /// <summary>
+    /// 游戏简介，官方启动器游戏列表悬停时显示在背景上，可能含换行
+    /// </summary>
+    [JsonPropertyName("introduction")]
+    public string? Introduction { get; set; }
+
 }
 
 

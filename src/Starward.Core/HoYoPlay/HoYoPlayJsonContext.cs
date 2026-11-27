@@ -19,6 +19,7 @@ namespace Starward.Core.HoYoPlay;
 [JsonSerializable(typeof(miHoYoApiWrapper<GameSophonPatchBuild>))]
 [JsonSerializable(typeof(GetDXConfigsRequest))]
 [JsonSerializable(typeof(miHoYoApiWrapper<GetDXConfigsResponse>))]
+[JsonSerializable(typeof(miHoYoApiWrapper<GameReservationContent>))]
 
 internal partial class HoYoPlayJsonContext : JsonSerializerContext
 {

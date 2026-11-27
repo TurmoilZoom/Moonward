@@ -4751,4 +4751,13 @@ You are welcome to submit exported data to:</value>
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>Số biểu tượng mỗi hàng (dạng thu gọn)</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>Đăng ký trước</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>Xem chi tiết</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>Đăng ký trước ngay</value>
+  </data>
 </root>

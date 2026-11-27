@@ -4750,4 +4750,13 @@
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>1行のアイコン数（コンパクト表示）</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>事前登録</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>詳細を表示</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>今すぐ事前登録</value>
+  </data>
 </root>

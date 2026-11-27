@@ -4751,4 +4751,13 @@ You are welcome to submit exported data to:</value>
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>Iconos por fila (vista compacta)</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>Preinscribirse</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>Ver detalles</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>Preinscribirse ahora</value>
+  </data>
 </root>

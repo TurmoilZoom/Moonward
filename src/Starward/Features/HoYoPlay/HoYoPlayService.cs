@@ -202,6 +202,32 @@ public class HoYoPlayService
 
 
     /// <summary>
+    /// 预约中游戏的详情页内容（简介、标签、宣传图片与视频、社交媒体图标），按界面语言缓存 10 分钟
+    /// </summary>
+    /// <param name="gameId">处于预约状态的游戏</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>详情页内容；游戏不属于任何已知启动器时返回 <see langword="null"/></returns>
+    /// <exception cref="miHoYoApiException">retcode 非 0</exception>
+    public async Task<GameReservationContent?> GetGameReservationContentAsync(GameId gameId, CancellationToken cancellationToken = default)
+    {
+        string? launcherId = LauncherId.FromGameId(gameId);
+        if (launcherId is null)
+        {
+            return null;
+        }
+        string lang = CultureInfo.CurrentUICulture.Name;
+        string key = $"{nameof(GameReservationContent)}_{gameId.Id}_{lang}";
+        if (!_memoryCache.TryGetValue(key, out GameReservationContent? content))
+        {
+            content = await _client.GetGameReservationContentAsync(launcherId, lang, gameId, cancellationToken);
+            _memoryCache.Set(key, content, TimeSpan.FromMinutes(10));
+        }
+        return content;
+    }
+
+
+
+    /// <summary>
     /// 游戏安装包信息
     /// </summary>
     /// <returns>尚未发布安装包的游戏（如已在启动器中展示但未上线的新游戏）不在接口返回中，此时为 null</returns>

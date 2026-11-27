@@ -4840,4 +4840,13 @@ Repository:</value>
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>Icons per row (compact view)</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>Pre-Register</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>Pre-register</value>
+  </data>
 </root>

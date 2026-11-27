@@ -4751,4 +4751,13 @@
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>줄당 아이콘 수(간단히 보기)</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>사전 등록</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>상세 보기</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>지금 사전 등록</value>
+  </data>
 </root>

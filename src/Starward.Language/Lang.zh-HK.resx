@@ -4750,4 +4750,13 @@
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>精簡檢視每行圖示數</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>預約</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>查看詳情</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>立即預約</value>
+  </data>
 </root>

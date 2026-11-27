@@ -4771,4 +4771,13 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>Значков в строке (компактный вид)</value>
   </data>
+  <data name="GameSelector_PreRegister" xml:space="preserve">
+    <value>Предварительная регистрация</value>
+  </data>
+  <data name="GameSelector_ViewDetails" xml:space="preserve">
+    <value>Подробнее</value>
+  </data>
+  <data name="GameReservationView_PreRegister" xml:space="preserve">
+    <value>Зарегистрироваться сейчас</value>
+  </data>
 </root>
