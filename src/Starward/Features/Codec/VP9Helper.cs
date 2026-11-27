@@ -3,6 +3,7 @@ using Starward.Codec.VP9Decoder;
 using System;
 using System.Buffers;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Starward.Features.Codec;
 
@@ -85,6 +86,12 @@ public partial class VP9Helper
         {
             if (!VorbisMFTRegistered)
             {
+                // 2026-11-27 实测：MediaPlayer 串流播放 Vorbis 音轨的 webm（预约页宣传视频）时，本地注册的 libvorbis 解码器优先于系统解码器，
+                // 播放会话处于活动状态但峰值恒为 0（静音）；不注册、交给商店「Web 媒体扩展」的系统解码器则声音正常。系统已有解码器时就不注册。
+                if (IsSystemVorbisDecoderInstalled())
+                {
+                    return;
+                }
                 int hr = VP9Decoder.RegisterVorbisDecoderLocal();
                 if (hr >= 0)
                 {
@@ -111,6 +118,52 @@ public partial class VP9Helper
         }
         catch { }
     }
+
+
+    /// <summary>
+    /// 上次的查询结果；null 表示还没查过。
+    /// </summary>
+    private static bool? _systemVorbisDecoderInstalled;
+
+
+    /// <summary>
+    /// 系统里是否已有 Vorbis 解码器（商店「Web 媒体扩展」会注册）。用 MFTEnumEx 只枚举系统注册的 MFT，
+    /// 不含本进程本地注册的 libvorbis；结果在进程内缓存（每次枚举约 20~30ms）。
+    /// </summary>
+    /// <returns>有系统解码器返回 true；没有或查询失败返回 false（退回注册自带的解码器）。</returns>
+    public static bool IsSystemVorbisDecoderInstalled()
+    {
+        if (_systemVorbisDecoderInstalled is bool cached)
+        {
+            return cached;
+        }
+        bool installed = false;
+        try
+        {
+            var input = new MediaFoundation.MFT_REGISTER_TYPE_INFO
+            {
+                guidMajorType = MediaFoundation.MFMediaType_Audio,
+                guidSubtype = MediaFoundation.MFAudioFormat_Vorbis,
+            };
+            int hr = MediaFoundation.MFTEnumEx(MediaFoundation.MFT_CATEGORY_AUDIO_DECODER, MediaFoundation.MFT_ENUM_FLAG_SYSTEM_DECODERS, input, 0, out nint activates, out uint count);
+            if (hr >= 0)
+            {
+                if (activates != 0)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        Marshal.Release(Marshal.ReadIntPtr(activates, i * IntPtr.Size));
+                    }
+                    Marshal.FreeCoTaskMem(activates);
+                }
+                installed = count > 0;
+            }
+        }
+        catch { }
+        _systemVorbisDecoderInstalled = installed;
+        return installed;
+    }
+
 
 
     /// <summary>

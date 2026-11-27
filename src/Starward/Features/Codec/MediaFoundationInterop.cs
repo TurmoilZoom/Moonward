@@ -61,14 +61,26 @@ internal static partial class MediaFoundation
 
     public static Guid MFVideoFormat_HEVC = new("43564548-0000-0010-8000-00AA00389B71");
 
+    public static Guid MFMediaType_Audio = new("73647561-0000-0010-8000-00AA00389B71");
+
+    /// <summary>MFAudioFormat_Vorbis，系统 WebM 源输出的 Vorbis 音轨子类型。</summary>
+    public static Guid MFAudioFormat_Vorbis = new("8D2FD10B-5841-4A6B-8905-588FEC1ADED9");
+
     // MFT 类别 GUID
     public static Guid MFT_CATEGORY_VIDEO_DECODER = new("d6c02d4b-6833-45b4-971a-05a4b04bab91");
+
+    public static Guid MFT_CATEGORY_AUDIO_DECODER = new("9ea73fb4-ef7a-4559-8d5d-719d8f0426c7");
 
     /// <summary>
     /// MFT_ENUM_FLAG_SYNCMFT | ASYNCMFT | HARDWARE | LOCALMFT | SORTANDFILTER：同步、异步、硬件与本进程注册的 MFT 都算，
     /// 并按优先级过滤排序。实测商店扩展（如 HEVC 视频扩展）不加 UNTRUSTED_STOREMFT 也在结果里。
     /// </summary>
     public const uint MFT_ENUM_FLAG_PLAYBACK_DECODERS = 0x1 | 0x2 | 0x4 | 0x10 | 0x40;
+
+    /// <summary>
+    /// 同 <see cref="MFT_ENUM_FLAG_PLAYBACK_DECODERS"/> 但去掉 LOCALMFT：只看系统注册的解码器，不含本进程用 MFTRegisterLocal 注册的。
+    /// </summary>
+    public const uint MFT_ENUM_FLAG_SYSTEM_DECODERS = 0x1 | 0x2 | 0x4 | 0x40;
 
 
     /// <summary>MFT_REGISTER_TYPE_INFO，按主类型 + 子类型筛选 MFT。</summary>
