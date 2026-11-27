@@ -206,8 +206,9 @@
                         <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
                             <!--
                                 两段共用列网格：图标 20 | 名称 * | （已垫）| 数量，列间距统一 10，行高统一 28。
-                                每行都以图标起头，名称同一起点；数字一律在列里居中，持有量与「距保底」共用最右一列（同一条中轴）。
-                                已垫、数量两列的宽度取该列最宽的表头或数字（GachaResourcesColumnLayout），最宽的内容贴着右内边距，左右留白一致；
+                                每行都以图标起头，名称同一起点；数字与表头一律在列里右对齐，持有量与「距保底」共用最右一列，
+                                右边缘都贴着弹出层右内边距，与左侧图标到边框的距离一致。
+                                已垫、数量两列的宽度取该列最宽的表头或数字（GachaResourcesColumnLayout）；
                                 宽度随最长的名称伸缩（外语频段名较长），伸缩只拉宽名称列，对齐不受影响
                             -->
                             <StackPanel MinWidth="272"
@@ -217,38 +218,37 @@
                                     <TextBlock VerticalAlignment="Center"
                                                FontSize="16"
                                                Text="{x:Bind lang:Lang.GachaLogPage_GachaResources}" />
-                                    <!--  外层与下方数量列同宽、贴右：刷新按钮在数量列中轴上，刷新图标正对一列数字  -->
-                                    <Grid Width="{Binding CountWidth, Source={StaticResource GachaResourcesColumnLayout}}" HorizontalAlignment="Right">
-                                        <Button Width="32"
-                                                Height="32"
-                                                Padding="0"
-                                                HorizontalAlignment="Center"
-                                                AutomationProperties.Name="{x:Bind lang:Lang.Common_Refresh}"
-                                                Command="{x:Bind RefreshGachaResourcesCommand}"
-                                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
-                                                sc:InstantTooltip.Placement="Top"
-                                                sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
-                                            <!--  刷新反馈：刷新中转圈 → 成功后打勾约 1.5 秒 → 回到刷新图标；三者同格切换显隐  -->
-                                            <Grid>
-                                                <FontIcon x:Name="FontIcon_GachaResourcesRefresh"
-                                                          FontSize="14"
-                                                          Glyph="&#xE72C;" />
-                                                <ProgressRing x:Name="ProgressRing_GachaResourcesRefresh"
-                                                              Width="16"
-                                                              Height="16"
-                                                              IsActive="False"
-                                                              Visibility="Collapsed" />
-                                                <FontIcon x:Name="FontIcon_GachaResourcesRefreshed"
-                                                          FontSize="14"
-                                                          Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-                                                          Glyph="&#xE73E;"
+                                    <!--  贴右：右边距 -9 =（按钮宽 32 − 图标 14）/ 2，刷新图标右边缘与下方数字右边缘对齐，悬停底色伸进右内边距  -->
+                                    <Button Width="32"
+                                            Height="32"
+                                            Margin="0,0,-9,0"
+                                            Padding="0"
+                                            HorizontalAlignment="Right"
+                                            AutomationProperties.Name="{x:Bind lang:Lang.Common_Refresh}"
+                                            Command="{x:Bind RefreshGachaResourcesCommand}"
+                                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                            sc:InstantTooltip.Placement="Top"
+                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Refresh}">
+                                        <!--  刷新反馈：刷新中转圈 → 成功后打勾约 1.5 秒 → 回到刷新图标；三者同格切换显隐  -->
+                                        <Grid>
+                                            <FontIcon x:Name="FontIcon_GachaResourcesRefresh"
+                                                      FontSize="14"
+                                                      Glyph="&#xE72C;" />
+                                            <ProgressRing x:Name="ProgressRing_GachaResourcesRefresh"
+                                                          Width="16"
+                                                          Height="16"
+                                                          IsActive="False"
                                                           Visibility="Collapsed" />
-                                            </Grid>
-                                        </Button>
-                                    </Grid>
+                                            <FontIcon x:Name="FontIcon_GachaResourcesRefreshed"
+                                                      FontSize="14"
+                                                      Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                      Glyph="&#xE73E;"
+                                                      Visibility="Collapsed" />
+                                        </Grid>
+                                    </Button>
                                 </Grid>
 
-                                <!--  当前持有量：图标 | 名称 | 数量（居中，与下方「距保底」同列）  -->
+                                <!--  当前持有量：图标 | 名称 | 数量（右对齐，与下方「距保底」同列）  -->
                                 <Grid ColumnSpacing="10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="20" />
@@ -280,7 +280,7 @@
                                                TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Row="0"
                                                Grid.Column="2"
-                                               HorizontalAlignment="Center"
+                                               HorizontalAlignment="Right"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind GachaResources.Polychrome}" />
                                     <Image Grid.Row="1"
@@ -297,7 +297,7 @@
                                                TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Row="1"
                                                Grid.Column="2"
-                                               HorizontalAlignment="Center"
+                                               HorizontalAlignment="Right"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind GachaResources.Monochrome}" />
                                     <Image Grid.Row="2"
@@ -314,7 +314,7 @@
                                                TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Row="2"
                                                Grid.Column="2"
-                                               HorizontalAlignment="Center"
+                                               HorizontalAlignment="Right"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind GachaResources.EncryptedMasterTape}" />
                                     <Image Grid.Row="3"
@@ -331,7 +331,7 @@
                                                TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Row="3"
                                                Grid.Column="2"
-                                               HorizontalAlignment="Center"
+                                               HorizontalAlignment="Right"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind GachaResources.MasterTape}" />
                                     <Image Grid.Row="4"
@@ -348,14 +348,14 @@
                                                TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Row="4"
                                                Grid.Column="2"
-                                               HorizontalAlignment="Center"
+                                               HorizontalAlignment="Right"
                                                VerticalAlignment="Center"
                                                Text="{x:Bind GachaResources.Boopon}" />
                                 </Grid>
 
                                 <MenuFlyoutSeparator Margin="0,4" />
 
-                                <!--  各频段保底进度（官方统计覆盖全部历史）：频段 | 已垫 | 距保底（够到保底时数字前打勾）；表头与各行列宽一致，表头与数字都居中  -->
+                                <!--  各频段保底进度（官方统计覆盖全部历史）：频段 | 已垫 | 距保底（够到保底时数字前打勾）；表头与各行列宽一致，表头与数字都右对齐  -->
                                 <Grid Height="20" ColumnSpacing="10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="20" />
@@ -369,7 +369,7 @@
                                                FontSize="12"
                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                Text="{x:Bind lang:Lang.GachaStatsCard_Pity}"
-                                               TextAlignment="Center"
+                                               TextAlignment="Right"
                                                TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Column="3"
                                                Width="{Binding CountWidth, Source={StaticResource GachaResourcesColumnLayout}}"
@@ -377,7 +377,7 @@
                                                FontSize="12"
                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                Text="{x:Bind lang:Lang.GachaLogPage_ToHardPity}"
-                                               TextAlignment="Center"
+                                               TextAlignment="Right"
                                                TextTrimming="CharacterEllipsis" />
                                 </Grid>
                                 <ItemsControl ItemsSource="{x:Bind GachaResources.PityProgress}">
@@ -404,13 +404,12 @@
                                                            Width="{Binding PityWidth, Source={StaticResource GachaResourcesColumnLayout}}"
                                                            VerticalAlignment="Center"
                                                            Text="{x:Bind CurrentPity}"
-                                                           TextAlignment="Center" />
-                                                <!--  数字居中占中间的 Auto 列，勾放在左侧 * 列里贴着数字：有没有勾，数字都停在同一条中轴上  -->
+                                                           TextAlignment="Right" />
+                                                <!--  数字右对齐占最右的 Auto 列，勾放在左侧 * 列里贴着数字：有没有勾，数字右边缘都贴着右内边距  -->
                                                 <Grid Grid.Column="3" Width="{Binding CountWidth, Source={StaticResource GachaResourcesColumnLayout}}">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
                                                     <!--
                                                         裸 FontIcon 挂提示命中不稳，外包透明 Border。

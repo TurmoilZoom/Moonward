@@ -8,18 +8,14 @@ using Windows.Foundation;
 namespace Starward.Features.Gacha;
 
 /// <summary>
-/// 绝区零抽卡资源弹出层右侧两列（已垫、数量 / 距保底）的列宽。标题行的刷新按钮、持有量、表头与各频段行绑定同一实例。
+/// 绝区零抽卡资源弹出层右侧两列（已垫、数量 / 距保底）的列宽。持有量、表头与各频段行绑定同一实例。
 /// </summary>
 /// <remarks>
-/// 数字在列内居中，列宽取该列最宽的内容（表头或数字）：最宽的内容贴着弹出层右内边距，右侧留白与左侧图标到边框的距离一致。
-/// 定宽列比数字宽得多，居中后右侧会比左侧多空出一截。
+/// 数字与表头在列内右对齐，列宽取该列最宽的内容（表头或数字），「已垫」一列的表头与数字因此上下对齐。
 /// 各频段行在 ItemsControl 的模板里，不能与上方共享同一个 Grid 的 Auto 列，所以由代码量好宽度再绑定。
 /// </remarks>
 public sealed partial class ZZZGachaResourcesColumnLayout : ObservableObject
 {
-
-    /// <summary>数量列宽度下限：标题行 32 宽的刷新按钮要能放在这一列的中轴上。</summary>
-    private const double CountMinWidth = 32;
 
     /// <summary>列宽上限：外语表头过长时截断，不把名称列挤没。</summary>
     private const double MaxWidth = 96;
@@ -58,7 +54,7 @@ public sealed partial class ZZZGachaResourcesColumnLayout : ObservableObject
             count = Math.Max(count, MeasureTextWidth(progress.RemainingToHardPity.ToString(), NumberFontSize));
         }
         PityWidth = Math.Min(Math.Ceiling(pity), MaxWidth);
-        CountWidth = Math.Clamp(Math.Ceiling(count), CountMinWidth, MaxWidth);
+        CountWidth = Math.Min(Math.Ceiling(count), MaxWidth);
     }
 
 
