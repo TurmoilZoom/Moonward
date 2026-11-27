@@ -15,6 +15,7 @@ using Starward.Features.GameLauncher;
 using Starward.Features.Screenshot;
 using Starward.Frameworks;
 using Starward.Helpers;
+using Starward.Language;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -31,7 +32,7 @@ namespace Starward.Features.Gacha;
 
 /// <summary>
 /// 千星奇域颂愿记录页。界面与交互对齐 <see cref="GachaLogPage"/>：统计卡片复用 <see cref="GachaStatsCard"/>（横向排列、拖拽换位、列表 / 紧凑视图），
-/// 并提供卡池筛选、分享图与删除记录；卡池筛选与卡片次序按 hk4eugc 单独保存，视图模式与抽卡记录页共用。
+/// 并提供卡池筛选、分享图与删除记录；卡池筛选、卡片次序、每页卡池数与每行图标数按 hk4eugc 单独保存，视图模式与抽卡记录页共用。
 /// </summary>
 public sealed partial class GenshinBeyondGachaPage : PageBase
 {
@@ -44,7 +45,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
     private readonly GameLauncherService _gameLauncherService = AppConfig.GetService<GameLauncherService>();
 
 
-    /// <summary>千星奇域在按游戏保存的设置（上次 UID、卡池筛选、卡片次序）里使用的键。</summary>
+    /// <summary>千星奇域在按游戏保存的设置（上次 UID、卡池筛选、卡片次序、布局）里使用的键。</summary>
     private const string SettingGameKey = "hk4eugc";
 
 
@@ -68,6 +69,7 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         InitializeComponent();
         _dragReorder = new GachaStatsCardDragReorder(ScrollViewer_GachaStats, Grid_GachaStats, StackPanel_GachaStats, SaveGachaCardOrder);
         Segmented_RecordViewMode.SelectedIndex = (int)_recordViewMode;
+        InitializeCardsPerPage();
     }
 
 
@@ -533,8 +535,211 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
     }
 
 
-    /// <summary>统计卡片固定宽度，与抽卡记录页一致。</summary>
+    /// <summary>
+    /// 抽卡统计卡片的默认宽度，也是按「每页卡池数」均分时的最小宽度，与抽卡记录页一致：
+    /// 紧凑视图每行 5 个图标、平均抽数一行左右两段文字都是按这个宽度排的，再窄会换行或叠字。
+    /// </summary>
     private const double GachaStatsCardWidth = 262;
+
+
+    /// <summary>一页展示的卡池数（千星奇域设置的本页副本）。</summary>
+    private int _cardsPerPage = AppConfig.DefaultGachaCardsPerPage;
+
+
+    /// <summary>卡片宽度更新已排进调度队列、尚未执行。</summary>
+    private bool _cardWidthUpdateQueued;
+
+
+    /// <summary>紧凑视图每行图标数（千星奇域设置的本页副本）；新建卡片时传给卡片。</summary>
+    private int _compactColumns = AppConfig.DefaultGachaCompactColumns;
+
+
+    /// <summary>
+    /// 读出千星奇域的「每页卡池数」「紧凑视图每行图标数」，并让设置弹层里的两个下拉框选中对应项（未列出的值按默认值处理）。
+    /// 先写字段再选中：选中触发的 SelectionChanged 因数值未变而被忽略。
+    /// </summary>
+    private void InitializeCardsPerPage()
+    {
+        ComboBoxItem cardsItem = FindLayoutComboBoxItem(ComboBox_CardsPerPage, AppConfig.GetGachaCardsPerPage(SettingGameKey), AppConfig.DefaultGachaCardsPerPage);
+        _cardsPerPage = int.Parse((string)cardsItem.Tag);
+        ComboBox_CardsPerPage.SelectedItem = cardsItem;
+        ComboBoxItem columnsItem = FindLayoutComboBoxItem(ComboBox_CompactColumns, AppConfig.GetGachaCompactColumns(SettingGameKey), AppConfig.DefaultGachaCompactColumns);
+        _compactColumns = int.Parse((string)columnsItem.Tag);
+        ComboBox_CompactColumns.SelectedItem = columnsItem;
+    }
+
+
+    /// <summary>在布局下拉框里找 Tag 等于设置值的项；找不到时取默认值对应的项。</summary>
+    /// <param name="comboBox">布局下拉框，各项 Tag 为数值字符串。</param>
+    /// <param name="value">设置值。</param>
+    /// <param name="defaultValue">默认值，须在下拉项里。</param>
+    /// <returns>对应的下拉项。</returns>
+    private static ComboBoxItem FindLayoutComboBoxItem(ComboBox comboBox, int value, int defaultValue)
+    {
+        ComboBoxItem[] items = comboBox.Items.OfType<ComboBoxItem>().ToArray();
+        return items.FirstOrDefault(x => x.Tag as string == value.ToString())
+               ?? items.First(x => x.Tag as string == defaultValue.ToString());
+    }
+
+
+    /// <summary>「紧凑视图每行图标数」下拉框：持久化；正处于紧凑视图时整卡重建（与切换视图同一路径），列表视图下等切到紧凑时再生效。</summary>
+    /// <param name="sender">下拉框。</param>
+    /// <param name="e">选择变更参数（未使用，以选中项的 Tag 为准）。</param>
+    private void ComboBox_CompactColumns_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (ComboBox_CompactColumns.SelectedItem is not ComboBoxItem { Tag: string tag }
+                || !int.TryParse(tag, out int columns)
+                || columns == _compactColumns)
+            {
+                return;
+            }
+            _compactColumns = columns;
+            AppConfig.SetGachaCompactColumns(SettingGameKey, columns);
+            if (_recordViewMode == GachaRecordViewMode.Compact)
+            {
+                RebuildGachaCardsForViewMode();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Change beyond gacha compact columns");
+        }
+    }
+
+
+    /// <summary>「每页卡池数」下拉框：持久化并立即按新数目调整全部卡片宽度。</summary>
+    /// <param name="sender">下拉框。</param>
+    /// <param name="e">选择变更参数（未使用，以选中项的 Tag 为准）。</param>
+    private void ComboBox_CardsPerPage_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (ComboBox_CardsPerPage.SelectedItem is not ComboBoxItem { Tag: string tag }
+                || !int.TryParse(tag, out int count)
+                || count == _cardsPerPage)
+            {
+                return;
+            }
+            _cardsPerPage = count;
+            AppConfig.SetGachaCardsPerPage(SettingGameKey, count);
+            ApplyGachaCardWidth();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Change beyond gacha cards per page");
+        }
+    }
+
+
+    /// <summary>
+    /// 按「每页卡池数」算卡片宽度：把视口宽度（扣除左右边距与卡片间距）均分，
+    /// 按物理像素向下取整，免得布局取整后总宽多出一两个像素、冒出横向滚动条。不小于默认宽度，放不下时照旧横向滚动。
+    /// </summary>
+    /// <returns>卡片宽度（DIP）。</returns>
+    private double GetGachaCardWidth()
+    {
+        int count = Math.Max(1, _cardsPerPage);
+        Thickness margin = Grid_GachaStats.Margin;
+        double available = ScrollViewer_GachaStats.ActualWidth - margin.Left - margin.Right - StackPanel_GachaStats.Spacing * (count - 1);
+        if (available <= 0)
+        {
+            return GachaStatsCardWidth;
+        }
+        double scale = XamlRoot?.RasterizationScale ?? 1;
+        double width = Math.Floor(available / count * scale) / scale;
+        return Math.Max(GachaStatsCardWidth, width);
+    }
+
+
+    /// <summary>把当前卡片宽度应用到卡片池里的全部卡片（含筛掉隐藏的，重新勾选时宽度已经对了）。</summary>
+    private void ApplyGachaCardWidth()
+    {
+        double width = GetGachaCardWidth();
+        foreach (FrameworkElement card in _gachaCardPool.Values)
+        {
+            card.Width = width;
+        }
+    }
+
+
+    /// <summary>卡片区宽度变化时按「每页卡池数」重算卡片宽度。</summary>
+    /// <param name="sender">卡片区 ScrollViewer。</param>
+    /// <param name="e">尺寸变化参数。</param>
+    private void ScrollViewer_GachaStats_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (e.PreviousSize.Width == e.NewSize.Width || _cardWidthUpdateQueued)
+        {
+            return;
+        }
+        // 布局回调里同步改子元素尺寸会 fail-fast，推到本轮布局之后
+        _cardWidthUpdateQueued = true;
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            _cardWidthUpdateQueued = false;
+            ApplyGachaCardWidth();
+        });
+    }
+
+
+    /// <summary>顶栏「更新」按钮当前是否收成纯图标。</summary>
+    private bool _headerCompact;
+
+
+    /// <summary>上次文字可见时量下的「更新」文字宽度（含与图标的间距），收起后据此还原展开时的宽度。</summary>
+    private double _headerLabelsWidth;
+
+
+    /// <summary>顶栏重排已排进调度队列、尚未执行。</summary>
+    private bool _headerUpdateQueued;
+
+
+    /// <summary>顶栏、左侧工具或右侧按钮组宽度变化（外语文案、UID 列表变化）时重新判断是否收起按钮文字。</summary>
+    /// <param name="sender">尺寸变化的元素。</param>
+    /// <param name="e">尺寸变化参数（未使用）。</param>
+    private void Header_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_headerUpdateQueued)
+        {
+            return;
+        }
+        // 收起文字会改右侧宽度，不能在布局回调里同步改，推到本轮布局之后
+        _headerUpdateQueued = true;
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            _headerUpdateQueued = false;
+            UpdateHeaderCompact();
+        });
+    }
+
+
+    /// <summary>
+    /// 顶栏放不下时把「更新」收成纯图标（文字改为悬停提示），放得下时恢复；「设置」一直是纯图标。
+    /// 一律按展开时的宽度判断（收起时用量下的文字宽度补回），收起后右侧变窄不会让判断翻回去、来回切换。
+    /// </summary>
+    private void UpdateHeaderCompact()
+    {
+        double available = Grid_Header.ActualWidth;
+        if (available <= 0)
+        {
+            return;
+        }
+        if (!_headerCompact)
+        {
+            _headerLabelsWidth = TextBlock_UpdateRecordsLabel.ActualWidth + ((StackPanel)TextBlock_UpdateRecordsLabel.Parent).Spacing;
+        }
+        double rightWidth = StackPanel_HeaderRight.DesiredSize.Width + (_headerCompact ? _headerLabelsWidth : 0);
+        double required = StackPanel_HeaderTools.DesiredSize.Width + Grid_Header.ColumnSpacing + rightWidth;
+        bool compact = required > available;
+        if (compact == _headerCompact)
+        {
+            return;
+        }
+        _headerCompact = compact;
+        TextBlock_UpdateRecordsLabel.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        InstantTooltip.SetText(SplitButton_UpdateGachaLog, compact ? Lang.GachaLogPage_UpdateRecords : null);
+    }
 
 
     /// <summary>
@@ -598,9 +803,10 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         }
         var card = new GachaStatsCard
         {
-            Width = GachaStatsCardWidth,
+            Width = GetGachaCardWidth(),
             DataContext = stats,              // 供拖拽手柄识别其卡池数据
             RecordViewMode = _recordViewMode, // 须在加入可视化树前赋值：紧凑模式要在记录列表生成容器前换好面板与模板
+            CompactColumns = _compactColumns, // 紧凑视图的方块面板第一次测量时读取
             WarpTypeStats = stats,            // 须在加入可视化树前赋值，卡片内 OneTime x:Bind 与稀有度配色才能取到
         };
         _dragReorder.Attach(card.DragHandle);
@@ -628,14 +834,23 @@ public sealed partial class GenshinBeyondGachaPage : PageBase
         }
         _recordViewMode = mode;
         AppConfig.GachaRecordViewMode = mode;
+        RebuildGachaCardsForViewMode();
+    }
+
+
+    /// <summary>
+    /// 按当前视图模式与每行图标数整卡重建：不在运行中替换已有卡片的 ItemsPanel（跨 DPI 布局崩溃的历史）。还没有统计数据时不处理。
+    /// </summary>
+    private void RebuildGachaCardsForViewMode()
+    {
         try
         {
-            if (gachaTypeStats is not null)
+            if (gachaTypeStats is null)
             {
-                // 不在运行中替换已有卡片的 ItemsPanel（跨 DPI 布局崩溃的历史），整卡重建
-                _reconciledStatsSource = null;
-                UpdateDisplayGachaTypeStats(playEntranceAnimation: true);
+                return;
             }
+            _reconciledStatsSource = null;
+            UpdateDisplayGachaTypeStats(playEntranceAnimation: true);
         }
         catch (Exception ex)
         {

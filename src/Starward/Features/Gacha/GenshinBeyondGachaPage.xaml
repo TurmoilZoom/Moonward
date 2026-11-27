@@ -27,322 +27,387 @@
         </Grid.RowDefinitions>
 
 
-        <StackPanel Margin="24,0,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="6">
-            <TextBlock VerticalAlignment="Center"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       Text="{x:Bind lang:Lang.GenshinBeyondGachaPage_MiliastraWonderlandOde}" />
-            <!--  卡池筛选器（下拉按钮）：勾选=显示，含全选/清除/反选）。  -->
-            <DropDownButton x:Name="DropDownButton_GachaBannerFilter"
-                            Height="34"
-                            VerticalAlignment="Center"
-                            helpers:FluentAnimations.PressScale="0.94"
-                            sc:InstantTooltip.Placement="Top"
-                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}">
-                <FontIcon x:Name="FontIcon_GachaBannerFilter"
-                          FontSize="16"
-                          Glyph="&#xE71C;" />
-                <DropDownButton.Flyout>
-                    <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
-                        <StackPanel MinWidth="220" Spacing="8">
-                            <!--  卡池筛选 + 右上角拖拽说明  -->
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock VerticalAlignment="Center"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}" />
-                                <Border Grid.Column="1"
-                                        Padding="4"
-                                        VerticalAlignment="Center"
-                                        Background="Transparent"
-                                        helpers:PointerCursor.CursorShape="Hand"
-                                        sc:InstantTooltip.Placement="Top"
-                                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilterDragHint}"
-                                        sc:InstantTooltip.Trigger="Click">
-                                    <FontIcon FontSize="14"
-                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                              Glyph="&#xE9CE;" />
-                                </Border>
-                            </Grid>
-                            <!--  全选 / 清除 / 反选  -->
-                            <StackPanel Orientation="Horizontal" Spacing="16">
-                                <HyperlinkButton Padding="0"
-                                                 helpers:FluentAnimations.PressScale="0.92"
-                                                 Click="GachaBannerSelectAll_Click"
-                                                 Content="{x:Bind lang:Lang.Common_SelectAll}" />
-                                <HyperlinkButton Padding="0"
-                                                 helpers:FluentAnimations.PressScale="0.92"
-                                                 Click="GachaBannerClear_Click"
-                                                 Content="{x:Bind lang:Lang.Common_Clear}" />
-                                <HyperlinkButton Padding="0"
-                                                 helpers:FluentAnimations.PressScale="0.92"
-                                                 Click="GachaBannerInvert_Click"
-                                                 Content="{x:Bind lang:Lang.Common_InvertSelection}" />
+        <!--
+            顶栏：左侧标题与工具占剩余宽度，右侧（UID / 更新 / 设置 / 物品统计）按内容宽，两侧分列、窄时不会叠在一起。
+            放不下时把「更新」收成纯图标（UpdateHeaderCompact），与抽卡记录页一致
+        -->
+        <Grid x:Name="Grid_Header"
+              Margin="24,0,0,0"
+              ColumnSpacing="16"
+              SizeChanged="Header_SizeChanged">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel x:Name="StackPanel_HeaderTools"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="6"
+                        SizeChanged="Header_SizeChanged">
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Text="{x:Bind lang:Lang.GenshinBeyondGachaPage_MiliastraWonderlandOde}" />
+                <!--  卡池筛选器（下拉按钮）：勾选=显示，含全选/清除/反选）。  -->
+                <DropDownButton x:Name="DropDownButton_GachaBannerFilter"
+                                Height="32"
+                                VerticalAlignment="Center"
+                                helpers:FluentAnimations.PressScale="0.94"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}">
+                    <FontIcon x:Name="FontIcon_GachaBannerFilter"
+                              FontSize="16"
+                              Glyph="&#xE71C;" />
+                    <DropDownButton.Flyout>
+                        <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
+                            <StackPanel MinWidth="220" Spacing="8">
+                                <!--  卡池筛选 + 右上角拖拽说明  -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock VerticalAlignment="Center"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilter}" />
+                                    <Border Grid.Column="1"
+                                            Padding="4"
+                                            VerticalAlignment="Center"
+                                            Background="Transparent"
+                                            helpers:PointerCursor.CursorShape="Hand"
+                                            sc:InstantTooltip.Placement="Top"
+                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_GachaBannerFilterDragHint}"
+                                            sc:InstantTooltip.Trigger="Click">
+                                        <FontIcon FontSize="14"
+                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                  Glyph="&#xE9CE;" />
+                                    </Border>
+                                </Grid>
+                                <!--  全选 / 清除 / 反选  -->
+                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                    <HyperlinkButton Padding="0"
+                                                     helpers:FluentAnimations.PressScale="0.92"
+                                                     Click="GachaBannerSelectAll_Click"
+                                                     Content="{x:Bind lang:Lang.Common_SelectAll}" />
+                                    <HyperlinkButton Padding="0"
+                                                     helpers:FluentAnimations.PressScale="0.92"
+                                                     Click="GachaBannerClear_Click"
+                                                     Content="{x:Bind lang:Lang.Common_Clear}" />
+                                    <HyperlinkButton Padding="0"
+                                                     helpers:FluentAnimations.PressScale="0.92"
+                                                     Click="GachaBannerInvert_Click"
+                                                     Content="{x:Bind lang:Lang.Common_InvertSelection}" />
+                                </StackPanel>
+                                <!--  分割线  -->
+                                <MenuFlyoutSeparator />
+                                <!--  卡池列表  -->
+                                <ScrollViewer MaxHeight="420"
+                                              HorizontalScrollMode="Disabled"
+                                              VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl HorizontalAlignment="Stretch" ItemsSource="{x:Bind GachaBanners}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="local:GachaBanner">
+                                                <Grid Height="36" Margin="0,1">
+                                                    <!--  选中高亮框：选中时显示细微填充圆角框  -->
+                                                    <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                            CornerRadius="4"
+                                                            Visibility="{x:Bind IsSelected, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                    <!--  不用 MinWidth + 字符串 Content：默认模板 TextWrapping=Wrap，会按 MinWidth 在行内换行，再被 Height=36 裁成「内部截断」。  -->
+                                                    <CheckBox MinWidth="0"
+                                                              Margin="4,0,0,0"
+                                                              Padding="8,0,10,0"
+                                                              HorizontalAlignment="Stretch"
+                                                              VerticalAlignment="Center"
+                                                              VerticalContentAlignment="Center"
+                                                              helpers:FluentAnimations.HoverTranslateX="6"
+                                                              Click="GachaBannerCheckBox_Click"
+                                                              IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
+                                                        <TextBlock VerticalAlignment="Center"
+                                                                   Text="{x:Bind ToLocalization()}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   TextWrapping="NoWrap" />
+                                                    </CheckBox>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
                             </StackPanel>
-                            <!--  分割线  -->
-                            <MenuFlyoutSeparator />
-                            <!--  卡池列表  -->
-                            <ScrollViewer MaxHeight="420"
-                                          HorizontalScrollMode="Disabled"
-                                          VerticalScrollBarVisibility="Auto">
-                                <ItemsControl HorizontalAlignment="Stretch" ItemsSource="{x:Bind GachaBanners}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="local:GachaBanner">
-                                            <Grid Height="36" Margin="0,1">
-                                                <!--  选中高亮框：选中时显示细微填充圆角框  -->
-                                                <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                                        CornerRadius="4"
-                                                        Visibility="{x:Bind IsSelected, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                                <!--  不用 MinWidth + 字符串 Content：默认模板 TextWrapping=Wrap，会按 MinWidth 在行内换行，再被 Height=36 裁成「内部截断」。  -->
-                                                <CheckBox MinWidth="0"
-                                                          Margin="4,0,0,0"
-                                                          Padding="8,0,10,0"
-                                                          HorizontalAlignment="Stretch"
-                                                          VerticalAlignment="Center"
-                                                          VerticalContentAlignment="Center"
-                                                          helpers:FluentAnimations.HoverTranslateX="6"
-                                                          Click="GachaBannerCheckBox_Click"
-                                                          IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
-                                                    <TextBlock VerticalAlignment="Center"
-                                                               Text="{x:Bind ToLocalization()}"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               TextWrapping="NoWrap" />
-                                                </CheckBox>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </StackPanel>
-                    </Flyout>
-                </DropDownButton.Flyout>
-            </DropDownButton>
-            <!--  记录视图：列表 / 紧凑图标网格。与抽卡记录页共用同一全局设置。  -->
-            <cwc:Segmented x:Name="Segmented_RecordViewMode"
-                           VerticalAlignment="Center"
-                           SelectionChanged="Segmented_RecordViewMode_SelectionChanged">
-                <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_ListView}"
-                                   sc:InstantTooltip.Placement="Top"
-                                   sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ListView}">
-                    <cwc:SegmentedItem.Icon>
-                        <FontIcon Glyph="&#xE8FD;" />
-                    </cwc:SegmentedItem.Icon>
-                </cwc:SegmentedItem>
-                <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CompactView}"
-                                   sc:InstantTooltip.Placement="Top"
-                                   sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_CompactView}">
-                    <cwc:SegmentedItem.Icon>
-                        <FontIcon Glyph="&#xF0E2;" />
-                    </cwc:SegmentedItem.Icon>
-                </cwc:SegmentedItem>
-            </cwc:Segmented>
-            <Button Height="34"
-                    VerticalAlignment="Center"
-                    helpers:FluentAnimations.PressScale="0.94"
-                    Command="{x:Bind ShareGachaImageCommand}"
-                    sc:InstantTooltip.Placement="Top"
-                    sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
-                <FontIcon FontSize="16" Glyph="&#xE72D;" />
-            </Button>
-        </StackPanel>
+                        </Flyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+                <!--  记录视图：列表 / 紧凑图标网格。与抽卡记录页共用同一全局设置。  -->
+                <cwc:Segmented x:Name="Segmented_RecordViewMode"
+                               VerticalAlignment="Center"
+                               SelectionChanged="Segmented_RecordViewMode_SelectionChanged">
+                    <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_ListView}"
+                                       sc:InstantTooltip.Placement="Top"
+                                       sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ListView}">
+                        <cwc:SegmentedItem.Icon>
+                            <FontIcon Glyph="&#xE8FD;" />
+                        </cwc:SegmentedItem.Icon>
+                    </cwc:SegmentedItem>
+                    <cwc:SegmentedItem AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CompactView}"
+                                       sc:InstantTooltip.Placement="Top"
+                                       sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_CompactView}">
+                        <cwc:SegmentedItem.Icon>
+                            <FontIcon Glyph="&#xF0E2;" />
+                        </cwc:SegmentedItem.Icon>
+                    </cwc:SegmentedItem>
+                </cwc:Segmented>
+                <Button Height="32"
+                        VerticalAlignment="Center"
+                        helpers:FluentAnimations.PressScale="0.94"
+                        Command="{x:Bind ShareGachaImageCommand}"
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_ShareImage}">
+                    <FontIcon FontSize="16" Glyph="&#xE72D;" />
+                </Button>
+            </StackPanel>
 
 
-        <StackPanel HorizontalAlignment="Right"
-                    Orientation="Horizontal"
-                    Spacing="16">
-            <!--  Uid List  -->
-            <ComboBox Name="ComboBox_Uid"
-                      MinWidth="140"
-                      VerticalAlignment="Center"
-                      ItemsSource="{x:Bind UidList}"
-                      SelectedItem="{x:Bind SelectUid, Mode=TwoWay}" />
-            <!--  Update  -->
-            <SplitButton Height="32" Command="{x:Bind UpdateGachaLogCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Margin="0,2,0,0"
-                              FontSize="14"
-                              Glyph="&#xE72C;" />
-                    <!--  更新记录  -->
-                    <TextBlock Text="{x:Bind lang:Lang.GachaLogPage_UpdateRecords}" />
-                </StackPanel>
-                <SplitButton.Flyout>
-                    <MenuFlyout>
-                        <!--  更新全部：位于「通过 URL 更新」之上  -->
-                        <MenuFlyoutItem Command="{x:Bind UpdateGachaLogCommand}"
-                                        CommandParameter="all"
-                                        Text="{x:Bind lang:Lang.GachaLogPage_UpdateAll}" />
-                        <!--  通过 URL 更新（预填已保存 URL，可改/粘贴后更新）  -->
-                        <MenuFlyoutItem Command="{x:Bind InputUrlCommand}" Text="{x:Bind lang:Lang.GachaLogPage_InputURL}" />
-                    </MenuFlyout>
-                </SplitButton.Flyout>
-            </SplitButton>
-            <!--  Setting  -->
-            <Button>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <FontIcon Margin="0,2,0,0"
-                              FontSize="14"
-                              Glyph="&#xE713;" />
-                    <!--  设置  -->
-                    <TextBlock Text="{x:Bind lang:Lang.Common_Setting}" />
-                </StackPanel>
-                <Button.Flyout>
-                    <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
-                        <!--  显式 Presenter：关掉横向滚动；英文长说明在无 MaxWidth 的 StackPanel 里会按单行测宽，底部易出横条  -->
-                        <Flyout.FlyoutPresenterStyle>
-                            <Style BasedOn="{StaticResource DefaultFlyoutPresenterStyle}" TargetType="FlyoutPresenter">
-                                <Setter Property="BorderThickness" Value="0" />
-                                <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
-                                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
-                                <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled" />
-                                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
-                            </Style>
-                        </Flyout.FlyoutPresenterStyle>
-                        <StackPanel MinWidth="240"
-                                    MaxWidth="320"
-                                    Spacing="8">
-                            <!--  其他设置  -->
-                            <TextBlock FontSize="16" Text="{x:Bind lang:Lang.GachaLogPage_OtherSettings}" />
+            <StackPanel x:Name="StackPanel_HeaderRight"
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="16"
+                        SizeChanged="Header_SizeChanged">
+                <!--  Uid List  -->
+                <ComboBox Name="ComboBox_Uid"
+                          MinWidth="140"
+                          VerticalAlignment="Center"
+                          ItemsSource="{x:Bind UidList}"
+                          SelectedItem="{x:Bind SelectUid, Mode=TwoWay}" />
+                <!--  Update  -->
+                <SplitButton x:Name="SplitButton_UpdateGachaLog"
+                             Height="32"
+                             AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_UpdateRecords}"
+                             Command="{x:Bind UpdateGachaLogCommand}"
+                             sc:InstantTooltip.Placement="Top">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Margin="0,2,0,0"
+                                  FontSize="14"
+                                  Glyph="&#xE72C;" />
+                        <!--  更新记录  -->
+                        <TextBlock x:Name="TextBlock_UpdateRecordsLabel" Text="{x:Bind lang:Lang.GachaLogPage_UpdateRecords}" />
+                    </StackPanel>
+                    <SplitButton.Flyout>
+                        <MenuFlyout>
+                            <!--  更新全部：位于「通过 URL 更新」之上  -->
+                            <MenuFlyoutItem Command="{x:Bind UpdateGachaLogCommand}"
+                                            CommandParameter="all"
+                                            Text="{x:Bind lang:Lang.GachaLogPage_UpdateAll}" />
+                            <!--  通过 URL 更新（预填已保存 URL，可改/粘贴后更新）  -->
+                            <MenuFlyoutItem Command="{x:Bind InputUrlCommand}" Text="{x:Bind lang:Lang.GachaLogPage_InputURL}" />
+                        </MenuFlyout>
+                    </SplitButton.Flyout>
+                </SplitButton>
+                <!--  Setting：纯图标，文字放在悬停提示里  -->
+                <Button Height="32"
+                        AutomationProperties.Name="{x:Bind lang:Lang.Common_Setting}"
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Setting}">
+                    <FontIcon FontSize="14" Glyph="&#xE713;" />
+                    <Button.Flyout>
+                        <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
+                            <!--  显式 Presenter：关掉横向滚动；英文长说明在无 MaxWidth 的 StackPanel 里会按单行测宽，底部易出横条  -->
+                            <Flyout.FlyoutPresenterStyle>
+                                <Style BasedOn="{StaticResource DefaultFlyoutPresenterStyle}" TargetType="FlyoutPresenter">
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Background" Value="{ThemeResource CustomAcrylicBrush}" />
+                                    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+                                    <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled" />
+                                    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+                                </Style>
+                            </Flyout.FlyoutPresenterStyle>
+                            <StackPanel MinWidth="240"
+                                        MaxWidth="320"
+                                        Spacing="8">
+                                <!--  其他设置  -->
+                                <TextBlock FontSize="16" Text="{x:Bind lang:Lang.GachaLogPage_OtherSettings}" />
 
-                            <!--  复制 URL  -->
-                            <Button Margin="0,8,0,0"
-                                    HorizontalAlignment="Stretch"
-                                    Command="{x:Bind CopyUrlCommand}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Name="FontIcon_CopyUrl"
-                                              FontSize="16"
-                                              Glyph="&#xE8C8;" />
-                                    <TextBlock Text="{x:Bind lang:Lang.GachaLogPage_CopyURL}" />
-                                </StackPanel>
-                            </Button>
+                                <!--  布局设置（千星奇域单独保存，含义同抽卡记录页）：两行共用列，下拉框左缘对齐；外语说明较长时换行，不截断  -->
+                                <Grid Margin="0,8,0,0"
+                                      ColumnSpacing="12"
+                                      RowSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock VerticalAlignment="Center"
+                                               Text="{x:Bind lang:Lang.GachaLogPage_CardsPerPage}"
+                                               TextWrapping="Wrap" />
+                                    <ComboBox x:Name="ComboBox_CardsPerPage"
+                                              Grid.Column="1"
+                                              MinWidth="96"
+                                              VerticalAlignment="Center"
+                                              AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CardsPerPage}"
+                                              SelectionChanged="ComboBox_CardsPerPage_SelectionChanged">
+                                        <ComboBoxItem Content="2" Tag="2" />
+                                        <ComboBoxItem Content="3" Tag="3" />
+                                        <ComboBoxItem Content="4" Tag="4" />
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="1"
+                                               VerticalAlignment="Center"
+                                               Text="{x:Bind lang:Lang.GachaLogPage_CompactColumns}"
+                                               TextWrapping="Wrap" />
+                                    <ComboBox x:Name="ComboBox_CompactColumns"
+                                              Grid.Row="1"
+                                              Grid.Column="1"
+                                              MinWidth="96"
+                                              VerticalAlignment="Center"
+                                              AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CompactColumns}"
+                                              SelectionChanged="ComboBox_CompactColumns_SelectionChanged">
+                                        <ComboBoxItem Content="4" Tag="4" />
+                                        <ComboBoxItem Content="5" Tag="5" />
+                                        <ComboBoxItem Content="6" Tag="6" />
+                                        <ComboBoxItem Content="7" Tag="7" />
+                                        <ComboBoxItem Content="8" Tag="8" />
+                                        <ComboBoxItem Content="9" Tag="9" />
+                                        <ComboBoxItem Content="10" Tag="10" />
+                                    </ComboBox>
+                                </Grid>
 
-                            <!--  总是出现 Authkey Timeout  -->
-                            <TextBlock Margin="0,8,0,0"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind lang:Lang.GachaLogPage_AuthkeyTimeoutAlwaysOccurs}"
-                                       TextWrapping="Wrap" />
-                            <TextBlock Margin="0,-4,0,0"
-                                       FontSize="12"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                       Text="{x:Bind lang:Lang.GachaLogPage_RestartGameAfterDeletingTheCacheFolder}"
-                                       TextWrapping="Wrap" />
-                            <Button HorizontalAlignment="Stretch" Command="{x:Bind DeleteGachaCacheFolderCommand}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon FontSize="16" Glyph="&#xEA99;" />
-                                    <!--  删除缓存文件夹  -->
-                                    <TextBlock Text="{x:Bind lang:Lang.GachaLogPage_DeleteCacheFolder}" />
-                                </StackPanel>
-                            </Button>
+                                <!--  分割线  -->
+                                <MenuFlyoutSeparator />
 
-                            <!--  分割线  -->
-                            <MenuFlyoutSeparator />
+                                <!--  复制 URL  -->
+                                <Button HorizontalAlignment="Stretch" Command="{x:Bind CopyUrlCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Name="FontIcon_CopyUrl"
+                                                  FontSize="16"
+                                                  Glyph="&#xE8C8;" />
+                                        <TextBlock Text="{x:Bind lang:Lang.GachaLogPage_CopyURL}" />
+                                    </StackPanel>
+                                </Button>
 
-                            <!--  导入（左）/ 导出（右）同一行，无图标  -->
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <!--  导入  -->
-                                <Button HorizontalAlignment="Stretch"
-                                        Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Import}">
-                                    <Button.Flyout>
-                                        <Flyout>
-                                            <StackPanel MinWidth="200" Spacing="8">
-                                                <!--  顶栏：UIGF-Org 链接 + 问号说明支持的导入格式/版本  -->
-                                                <Grid>
+                                <!--  总是出现 Authkey Timeout  -->
+                                <TextBlock Margin="0,8,0,0"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_AuthkeyTimeoutAlwaysOccurs}"
+                                           TextWrapping="Wrap" />
+                                <TextBlock Margin="0,-4,0,0"
+                                           FontSize="12"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           Text="{x:Bind lang:Lang.GachaLogPage_RestartGameAfterDeletingTheCacheFolder}"
+                                           TextWrapping="Wrap" />
+                                <Button HorizontalAlignment="Stretch" Command="{x:Bind DeleteGachaCacheFolderCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontSize="16" Glyph="&#xEA99;" />
+                                        <!--  删除缓存文件夹  -->
+                                        <TextBlock Text="{x:Bind lang:Lang.GachaLogPage_DeleteCacheFolder}" />
+                                    </StackPanel>
+                                </Button>
+
+                                <!--  分割线  -->
+                                <MenuFlyoutSeparator />
+
+                                <!--  导入（左）/ 导出（右）同一行，无图标  -->
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <!--  导入  -->
+                                    <Button HorizontalAlignment="Stretch"
+                                            Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Import}">
+                                        <Button.Flyout>
+                                            <Flyout>
+                                                <StackPanel MinWidth="200" Spacing="8">
+                                                    <!--  顶栏：UIGF-Org 链接 + 问号说明支持的导入格式/版本  -->
+                                                    <Grid>
+                                                        <HyperlinkButton Padding="0"
+                                                                         HorizontalAlignment="Left"
+                                                                         VerticalAlignment="Center"
+                                                                         Content="UIGF-Org"
+                                                                         FontSize="12"
+                                                                         NavigateUri="https://uigf.org" />
+                                                        <Border Padding="4"
+                                                                HorizontalAlignment="Right"
+                                                                VerticalAlignment="Center"
+                                                                Background="Transparent"
+                                                                helpers:PointerCursor.CursorShape="Hand"
+                                                                sc:InstantTooltip.Placement="Top"
+                                                                sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_UIGFImportVersionsTip}"
+                                                                sc:InstantTooltip.Trigger="Click">
+                                                            <FontIcon FontSize="14"
+                                                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                      Glyph="&#xE9CE;" />
+                                                        </Border>
+                                                    </Grid>
+                                                    <!--  统一 UIGF 导入：选文件后自动识别（千星奇域数据在 v4.2 的 hk4e_ugc）  -->
+                                                    <Button HorizontalAlignment="Stretch"
+                                                            Command="{x:Bind OpenUIGF4WindowCommand}"
+                                                            CommandParameter="import"
+                                                            Content="UIGF" />
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                    <!--  导出：千星奇域只有 UIGF v4.2（hk4e_ugc）  -->
+                                    <Button Grid.Column="1"
+                                            HorizontalAlignment="Stretch"
+                                            Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Export}">
+                                        <Button.Flyout>
+                                            <Flyout>
+                                                <StackPanel MinWidth="200" Spacing="8">
                                                     <HyperlinkButton Padding="0"
                                                                      HorizontalAlignment="Left"
-                                                                     VerticalAlignment="Center"
                                                                      Content="UIGF-Org"
                                                                      FontSize="12"
                                                                      NavigateUri="https://uigf.org" />
-                                                    <Border Padding="4"
-                                                            HorizontalAlignment="Right"
-                                                            VerticalAlignment="Center"
-                                                            Background="Transparent"
-                                                            helpers:PointerCursor.CursorShape="Hand"
-                                                            sc:InstantTooltip.Placement="Top"
-                                                            sc:InstantTooltip.Text="{x:Bind lang:Lang.GachaLogPage_UIGFImportVersionsTip}"
-                                                            sc:InstantTooltip.Trigger="Click">
-                                                        <FontIcon FontSize="14"
-                                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                  Glyph="&#xE9CE;" />
-                                                    </Border>
-                                                </Grid>
-                                                <!--  统一 UIGF 导入：选文件后自动识别（千星奇域数据在 v4.2 的 hk4e_ugc）  -->
-                                                <Button HorizontalAlignment="Stretch"
-                                                        Command="{x:Bind OpenUIGF4WindowCommand}"
-                                                        CommandParameter="import"
-                                                        Content="UIGF" />
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                                <!--  导出：千星奇域只有 UIGF v4.2（hk4e_ugc）  -->
-                                <Button Grid.Column="1"
-                                        HorizontalAlignment="Stretch"
-                                        Content="{x:Bind lang:Lang.GachaImportAndExportWindow_Export}">
-                                    <Button.Flyout>
-                                        <Flyout>
-                                            <StackPanel MinWidth="200" Spacing="8">
-                                                <HyperlinkButton Padding="0"
-                                                                 HorizontalAlignment="Left"
-                                                                 Content="UIGF-Org"
-                                                                 FontSize="12"
-                                                                 NavigateUri="https://uigf.org" />
-                                                <Button HorizontalAlignment="Stretch"
-                                                        Command="{x:Bind OpenUIGF4WindowCommand}"
-                                                        CommandParameter="export|v4.2"
-                                                        Content="UIGF v4.2" />
-                                            </StackPanel>
-                                        </Flyout>
-                                    </Button.Flyout>
-                                </Button>
-                            </Grid>
+                                                    <Button HorizontalAlignment="Stretch"
+                                                            Command="{x:Bind OpenUIGF4WindowCommand}"
+                                                            CommandParameter="export|v4.2"
+                                                            Content="UIGF v4.2" />
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </Grid>
 
-                            <!--  删除记录  -->
-                            <Button HorizontalAlignment="Stretch">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon FontSize="14"
-                                              Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                              Glyph="&#xE74D;" />
-                                    <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind lang:Lang.GachaLogPage_DeleteRecords}" />
-                                </StackPanel>
-                                <Button.Flyout>
-                                    <MenuFlyout>
-                                        <MenuFlyoutItem Command="{x:Bind DeleteUidCommand}"
-                                                        FontSize="14"
-                                                        Text="{x:Bind lang:Lang.GachaLogPage_DeleteAll}" />
-                                        <MenuFlyoutItem Command="{x:Bind DeleteUidByTimeCommand}"
-                                                        FontSize="14"
-                                                        Text="{x:Bind lang:Lang.GachaLogPage_SpecificTimePeriod}" />
-                                    </MenuFlyout>
-                                </Button.Flyout>
-                            </Button>
-                        </StackPanel>
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
-            <!--  Pane  -->
-            <Button Height="32"
-                    BorderThickness="0"
-                    Command="{x:Bind OpenItemStatsPaneCommand}"
-                    CornerRadius="14,0,0,14"
-                    IsEnabled="{x:Bind GachaItemStats, Converter={StaticResource ObjectToBoolConverter}}"
-                    Style="{ThemeResource AccentButtonStyle}">
-                <FontIcon Margin="6,2,4,0"
-                          FontSize="18"
-                          Glyph="&#xE8A0;" />
-            </Button>
-        </StackPanel>
+                                <!--  删除记录  -->
+                                <Button HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontSize="14"
+                                                  Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                  Glyph="&#xE74D;" />
+                                        <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind lang:Lang.GachaLogPage_DeleteRecords}" />
+                                    </StackPanel>
+                                    <Button.Flyout>
+                                        <MenuFlyout>
+                                            <MenuFlyoutItem Command="{x:Bind DeleteUidCommand}"
+                                                            FontSize="14"
+                                                            Text="{x:Bind lang:Lang.GachaLogPage_DeleteAll}" />
+                                            <MenuFlyoutItem Command="{x:Bind DeleteUidByTimeCommand}"
+                                                            FontSize="14"
+                                                            Text="{x:Bind lang:Lang.GachaLogPage_SpecificTimePeriod}" />
+                                        </MenuFlyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+                <!--  Pane  -->
+                <Button Height="32"
+                        BorderThickness="0"
+                        Command="{x:Bind OpenItemStatsPaneCommand}"
+                        CornerRadius="14,0,0,14"
+                        IsEnabled="{x:Bind GachaItemStats, Converter={StaticResource ObjectToBoolConverter}}"
+                        Style="{ThemeResource AccentButtonStyle}">
+                    <FontIcon Margin="6,2,4,0"
+                              FontSize="18"
+                              Glyph="&#xE8A0;" />
+                </Button>
+            </StackPanel>
+        </Grid>
 
         <StackPanel Name="StackPanel_Emoji"
                     Grid.RowSpan="2"
@@ -374,6 +439,7 @@
             <ScrollViewer x:Name="ScrollViewer_GachaStats"
                           HorizontalScrollBarVisibility="Auto"
                           HorizontalScrollMode="Auto"
+                          SizeChanged="ScrollViewer_GachaStats_SizeChanged"
                           VerticalScrollBarVisibility="Disabled"
                           VerticalScrollMode="Disabled">
                 <Grid x:Name="Grid_GachaStats"
