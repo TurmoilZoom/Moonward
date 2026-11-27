@@ -87,7 +87,7 @@ public sealed partial class GachaLogPage : PageBase
     /// <summary>
     /// 页面导航到此时初始化游戏特定的抽卡服务、UI 标志位与表情图标。
     /// <para><b>输入：</b><paramref name="e"/> — 导航事件参数（基类 PageBase 从中解析 CurrentGameBiz / CurrentGameId）。</para>
-    /// <para><b>副作用：</b>设置 <see cref="SingleGameJsonFormatLabel"/>；
+    /// <para><b>副作用：</b>设置 <see cref="GachaTypeText"/>、<see cref="SingleGameJsonFormatLabel"/>；
     /// 根据游戏类型注入对应 <see cref="_gachaLogService"/>
     /// （GenshinGachaService / StarRailGachaService / ZZZGachaService）、启用对应物品统计视图标志位、
     /// 设置表情图标；对原神/绝区零国服（含 B 服）显示米游社同步、绝区零国际服显示 HoYoLAB 同步；
@@ -97,6 +97,7 @@ public sealed partial class GachaLogPage : PageBase
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        GachaTypeText = GachaLogService.GetGachaLogText(CurrentGameBiz);
         // 单游戏 Json 入口文案：原神/绝区零 UIGF v3、星铁 SRGF（协议名不翻译）
         SingleGameJsonFormatLabel = CurrentGameBiz.Game switch
         {
@@ -150,6 +151,9 @@ public sealed partial class GachaLogPage : PageBase
 
 
     public bool IsZZZGachaStatsCardVisible { get; set => SetProperty(ref field, value); }
+
+
+    public string GachaTypeText { get; set => SetProperty(ref field, value); }
 
 
     /// <summary>
@@ -1111,11 +1115,11 @@ public sealed partial class GachaLogPage : PageBase
     }
 
 
-    /// <summary>顶栏「更新」「设置」当前是否收成纯图标。</summary>
+    /// <summary>顶栏「更新」按钮当前是否收成纯图标。</summary>
     private bool _headerCompact;
 
 
-    /// <summary>上次文字可见时量下的两段文字宽度（含与图标的间距），收起后据此还原展开时的宽度。</summary>
+    /// <summary>上次文字可见时量下的「更新」文字宽度（含与图标的间距），收起后据此还原展开时的宽度。</summary>
     private double _headerLabelsWidth;
 
 
@@ -1143,7 +1147,7 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 顶栏放不下时把「更新」「设置」收成纯图标（文字改为悬停提示），放得下时恢复。
+    /// 顶栏放不下时把「更新」收成纯图标（文字改为悬停提示），放得下时恢复；「设置」一直是纯图标。
     /// 一律按展开时的宽度判断（收起时用量下的文字宽度补回），收起后右侧变窄不会让判断翻回去、来回切换。
     /// </summary>
     private void UpdateHeaderCompact()
@@ -1155,8 +1159,7 @@ public sealed partial class GachaLogPage : PageBase
         }
         if (!_headerCompact)
         {
-            _headerLabelsWidth = TextBlock_UpdateRecordsLabel.ActualWidth + TextBlock_SettingLabel.ActualWidth
-                                 + 2 * ((StackPanel)TextBlock_SettingLabel.Parent).Spacing;
+            _headerLabelsWidth = TextBlock_UpdateRecordsLabel.ActualWidth + ((StackPanel)TextBlock_UpdateRecordsLabel.Parent).Spacing;
         }
         double rightWidth = StackPanel_HeaderRight.DesiredSize.Width + (_headerCompact ? _headerLabelsWidth : 0);
         double required = StackPanel_HeaderTools.DesiredSize.Width + Grid_Header.ColumnSpacing + rightWidth;
@@ -1166,11 +1169,8 @@ public sealed partial class GachaLogPage : PageBase
             return;
         }
         _headerCompact = compact;
-        Visibility labelVisibility = compact ? Visibility.Collapsed : Visibility.Visible;
-        TextBlock_UpdateRecordsLabel.Visibility = labelVisibility;
-        TextBlock_SettingLabel.Visibility = labelVisibility;
+        TextBlock_UpdateRecordsLabel.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
         InstantTooltip.SetText(SplitButton_UpdateGachaLog, compact ? Lang.GachaLogPage_UpdateRecords : null);
-        InstantTooltip.SetText(Button_GachaSetting, compact ? Lang.Common_Setting : null);
     }
 
 

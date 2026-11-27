@@ -29,8 +29,8 @@
 
 
         <!--
-            顶栏：左侧工具占剩余宽度，右侧（UID / 更新 / 设置 / 物品统计）按内容宽，两侧分列、窄时不会叠在一起。
-            放不下时把「更新」「设置」收成纯图标（UpdateHeaderCompact）；外语文案较长时会用到
+            顶栏：左侧标题与工具占剩余宽度，右侧（UID / 更新 / 设置 / 物品统计）按内容宽，两侧分列、窄时不会叠在一起。
+            放不下时把「更新」收成纯图标（UpdateHeaderCompact）；外语文案较长时会用到
         -->
         <Grid x:Name="Grid_Header"
               Margin="24,0,0,0"
@@ -47,9 +47,13 @@
                         Orientation="Horizontal"
                         Spacing="6"
                         SizeChanged="Header_SizeChanged">
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Text="{x:Bind GachaTypeText}" />
                 <!--  卡池筛选器（下拉按钮）：勾选=显示，含全选/清除/反选）。  -->
                 <DropDownButton x:Name="DropDownButton_GachaBannerFilter"
-                                Height="34"
+                                Height="32"
                                 VerticalAlignment="Center"
                                 helpers:FluentAnimations.PressScale="0.94"
                                 sc:InstantTooltip.Placement="Top"
@@ -58,8 +62,11 @@
                               FontSize="16"
                               Glyph="&#xE71C;" />
                     <DropDownButton.Flyout>
-                        <!--  按钮在顶栏最左侧：弹层左缘与按钮对齐向右展开，居中会伸到左侧导航栏上  -->
-                        <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="BottomEdgeAlignedLeft">
+                        <!--
+                            居中对齐按钮：展开动画从弹层顶部中心长出，居中时正对按钮。
+                            按钮左侧有页面标题，居中后弹层左缘仍在导航栏右侧；去掉标题会伸到导航栏上，那时要改成左对齐
+                        -->
+                        <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
                             <StackPanel MinWidth="220" Spacing="8">
                                 <!--  卡池筛选 + 右上角拖拽说明  -->
                                 <Grid>
@@ -214,7 +221,7 @@
                     </cwc:Segmented>
                     <!--  按版本分组（原神、星铁、绝区零）：图标开关，开启时卡片记录列表按抽取时间所属版本插入标题；全局持久化，切换时重建卡片。  -->
                     <ToggleButton x:Name="ToggleButton_GroupByVersion"
-                                  Height="34"
+                                  Height="32"
                                   VerticalAlignment="Center"
                                   helpers:FluentAnimations.PressScale="0.94"
                                   AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_GroupByVersion}"
@@ -224,7 +231,7 @@
                         <FontIcon FontSize="16" Glyph="&#xF168;" />
                     </ToggleButton>
                 </StackPanel>
-                <Button Height="34"
+                <Button Height="32"
                         VerticalAlignment="Center"
                         helpers:FluentAnimations.PressScale="0.94"
                         Command="{x:Bind ShareGachaImageCommand}"
@@ -234,7 +241,7 @@
                 </Button>
                 <!--  绝区零抽卡资源胶囊：显示限定频段可抽数，点开看各资源与各频段保底进度。数据来自官方抽卡统计 index，只在当前 UID 有登录过的战绩角色时显示。  -->
                 <DropDownButton x:Name="DropDownButton_GachaResources"
-                                Height="34"
+                                Height="32"
                                 VerticalAlignment="Center"
                                 helpers:FluentAnimations.PressScale="0.94"
                                 AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_GachaResources}"
@@ -557,17 +564,13 @@
                         </MenuFlyout>
                     </SplitButton.Flyout>
                 </SplitButton>
-                <!--  Setting  -->
+                <!--  Setting：纯图标，文字放在悬停提示里  -->
                 <Button x:Name="Button_GachaSetting"
+                        Height="32"
                         AutomationProperties.Name="{x:Bind lang:Lang.Common_Setting}"
-                        sc:InstantTooltip.Placement="Top">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Margin="0,2,0,0"
-                                  FontSize="14"
-                                  Glyph="&#xE713;" />
-                        <!--  设置  -->
-                        <TextBlock x:Name="TextBlock_SettingLabel" Text="{x:Bind lang:Lang.Common_Setting}" />
-                    </StackPanel>
+                        sc:InstantTooltip.Placement="Top"
+                        sc:InstantTooltip.Text="{x:Bind lang:Lang.Common_Setting}">
+                    <FontIcon FontSize="14" Glyph="&#xE713;" />
                     <Button.Flyout>
                         <Flyout helpers:FluentAnimations.ExpandContractFlyout="True" Placement="Bottom">
                             <!--  显式 Presenter：关掉横向滚动；英文长说明在无 MaxWidth 的 StackPanel 里会按单行测宽，底部易出横条  -->
