@@ -151,15 +151,6 @@ namespace Starward.Language {
         }
         
         /// <summary>
-        ///   查找类似 Auto 的本地化字符串。
-        /// </summary>
-        public static string GachaLogPage_LayoutAuto {
-            get {
-                return ResourceManager.GetString("GachaLogPage_LayoutAuto", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Icons per row (compact view) 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_CompactColumns {

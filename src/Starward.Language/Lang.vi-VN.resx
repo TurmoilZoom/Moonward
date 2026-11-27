@@ -4745,9 +4745,6 @@ You are welcome to submit exported data to:</value>
   <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
     <value>Số banner mỗi trang</value>
   </data>
-  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
-    <value>Tự động</value>
-  </data>
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>Số biểu tượng mỗi hàng (dạng thu gọn)</value>
   </data>

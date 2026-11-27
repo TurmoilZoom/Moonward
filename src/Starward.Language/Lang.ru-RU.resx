@@ -4765,9 +4765,6 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
     <value>Баннеров на странице</value>
   </data>
-  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
-    <value>Авто</value>
-  </data>
   <data name="GachaLogPage_CompactColumns" xml:space="preserve">
     <value>Значков в строке (компактный вид)</value>
   </data>

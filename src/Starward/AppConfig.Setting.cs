@@ -1540,18 +1540,26 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>抽卡记录页「每页卡池数」的默认值：默认窗口宽度下均分 4 张正好是卡片的默认宽度。</summary>
+    public const int DefaultGachaCardsPerPage = 4;
+
+
+    /// <summary>抽卡记录紧凑视图「每行图标数」的默认值：卡片默认宽度下每行 5 个，方块约 44。</summary>
+    public const int DefaultGachaCompactColumns = 5;
+
+
     /// <summary>
-    /// 抽卡记录页一页展示的卡池数，按游戏持久化。0 = 自动（卡片保持默认宽度，放不下时横向滚动）；大于 0 时卡片按视口宽度均分。
+    /// 抽卡记录页一页展示的卡池数，按游戏持久化：卡片按视口宽度均分，不窄于默认宽度。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>
-    /// <returns>每页卡池数；未设置时为 0。</returns>
+    /// <returns>每页卡池数；未设置时为 <see cref="DefaultGachaCardsPerPage"/>。</returns>
     public static int GetGachaCardsPerPage(GameBiz biz)
     {
-        return GetValue<int>(0, $"gacha_cards_per_page_{biz}");
+        return GetValue<int>(DefaultGachaCardsPerPage, $"gacha_cards_per_page_{biz}");
     }
 
     /// <param name="biz">游戏业务线。</param>
-    /// <param name="value">每页卡池数，0 = 自动。</param>
+    /// <param name="value">每页卡池数。</param>
     public static void SetGachaCardsPerPage(GameBiz biz, int value)
     {
         SetValue(value, $"gacha_cards_per_page_{biz}");
@@ -1559,17 +1567,17 @@ public static partial class AppConfig
 
 
     /// <summary>
-    /// 抽卡记录紧凑视图每行图标数，按游戏持久化。0 = 自动（方块不小于默认尺寸时放得下几个就放几个，再拉宽铺满）。
+    /// 抽卡记录紧凑视图每行图标数，按游戏持久化：方块拉宽铺满一行，窄到放不下时自动少放。
     /// </summary>
     /// <param name="biz">游戏业务线。</param>
-    /// <returns>每行图标数；未设置时为 0。</returns>
+    /// <returns>每行图标数；未设置时为 <see cref="DefaultGachaCompactColumns"/>。</returns>
     public static int GetGachaCompactColumns(GameBiz biz)
     {
-        return GetValue<int>(0, $"gacha_compact_columns_{biz}");
+        return GetValue<int>(DefaultGachaCompactColumns, $"gacha_compact_columns_{biz}");
     }
 
     /// <param name="biz">游戏业务线。</param>
-    /// <param name="value">每行图标数，0 = 自动。</param>
+    /// <param name="value">每行图标数。</param>
     public static void SetGachaCompactColumns(GameBiz biz, int value)
     {
         SetValue(value, $"gacha_compact_columns_{biz}");

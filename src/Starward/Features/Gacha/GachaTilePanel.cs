@@ -11,7 +11,7 @@ namespace Starward.Features.Gacha;
 /// 卡片变宽（「每页卡池数」选得少）时方块跟着放大，右侧不再留一大片空白。
 /// </summary>
 /// <remarks>
-/// <para>每行个数取所在卡片的 <see cref="IGachaStatsDragCard.CompactColumns"/>（0 = 自动）。设置变化时页面整卡重建，所以第一次测量时取一次即可。</para>
+/// <para>每行个数取所在卡片的 <see cref="IGachaStatsDragCard.CompactColumns"/>（0 = 默认 5 个）。设置变化时页面整卡重建，所以第一次测量时取一次即可。</para>
 /// <para>方块模板不写死宽高，由本面板按算好的尺寸测量与排列。记录数有限，与原来的 WrapPanel 一样不做虚拟化。</para>
 /// </remarks>
 public sealed partial class GachaTilePanel : Panel
@@ -70,8 +70,8 @@ public sealed partial class GachaTilePanel : Panel
     }
 
 
-    /// <summary>沿视觉树向上找所在卡片，读出它的每行个数设置；找不到时按自动处理且下次再找。</summary>
-    /// <returns>每行个数，0 = 自动。</returns>
+    /// <summary>沿视觉树向上找所在卡片，读出它的每行个数设置；找不到时按默认个数处理且下次再找。</summary>
+    /// <returns>每行个数，0 = 默认个数。</returns>
     private int GetRequestedColumns()
     {
         if (_requestedColumns is int cached)

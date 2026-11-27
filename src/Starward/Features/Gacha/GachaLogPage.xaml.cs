@@ -971,42 +971,43 @@ public sealed partial class GachaLogPage : PageBase
     private const double GachaStatsCardWidth = 262;
 
 
-    /// <summary>一页展示的卡池数（当前游戏设置的本页副本）：0 = 自动，卡片保持 <see cref="GachaStatsCardWidth"/>。</summary>
-    private int _cardsPerPage;
+    /// <summary>一页展示的卡池数（当前游戏设置的本页副本）。</summary>
+    private int _cardsPerPage = AppConfig.DefaultGachaCardsPerPage;
 
 
     /// <summary>卡片宽度更新已排进调度队列、尚未执行。</summary>
     private bool _cardWidthUpdateQueued;
 
 
-    /// <summary>紧凑视图每行图标数（当前游戏设置的本页副本）：0 = 自动；新建卡片时传给卡片。</summary>
-    private int _compactColumns;
+    /// <summary>紧凑视图每行图标数（当前游戏设置的本页副本）；新建卡片时传给卡片。</summary>
+    private int _compactColumns = AppConfig.DefaultGachaCompactColumns;
 
 
     /// <summary>
-    /// 读出当前游戏的「每页卡池数」「紧凑视图每行图标数」，并让卡池筛选弹层里的两个下拉框选中对应项（未列出的值按自动处理）。
+    /// 读出当前游戏的「每页卡池数」「紧凑视图每行图标数」，并让设置弹层里的两个下拉框选中对应项（未列出的值按默认值处理）。
     /// 先写字段再选中：选中触发的 SelectionChanged 因数值未变而被忽略。
     /// </summary>
     private void InitializeCardsPerPage()
     {
-        ComboBoxItem cardsItem = FindLayoutComboBoxItem(ComboBox_CardsPerPage, AppConfig.GetGachaCardsPerPage(CurrentGameBiz.Game));
+        ComboBoxItem cardsItem = FindLayoutComboBoxItem(ComboBox_CardsPerPage, AppConfig.GetGachaCardsPerPage(CurrentGameBiz.Game), AppConfig.DefaultGachaCardsPerPage);
         _cardsPerPage = int.Parse((string)cardsItem.Tag);
         ComboBox_CardsPerPage.SelectedItem = cardsItem;
-        ComboBoxItem columnsItem = FindLayoutComboBoxItem(ComboBox_CompactColumns, AppConfig.GetGachaCompactColumns(CurrentGameBiz.Game));
+        ComboBoxItem columnsItem = FindLayoutComboBoxItem(ComboBox_CompactColumns, AppConfig.GetGachaCompactColumns(CurrentGameBiz.Game), AppConfig.DefaultGachaCompactColumns);
         _compactColumns = int.Parse((string)columnsItem.Tag);
         ComboBox_CompactColumns.SelectedItem = columnsItem;
     }
 
 
-    /// <summary>在布局下拉框里找 Tag 等于设置值的项，找不到时取第一项（自动）。</summary>
+    /// <summary>在布局下拉框里找 Tag 等于设置值的项；找不到（含早期测试版存下的 0 = 自动）时取默认值对应的项。</summary>
     /// <param name="comboBox">布局下拉框，各项 Tag 为数值字符串。</param>
     /// <param name="value">设置值。</param>
+    /// <param name="defaultValue">默认值，须在下拉项里。</param>
     /// <returns>对应的下拉项。</returns>
-    private static ComboBoxItem FindLayoutComboBoxItem(ComboBox comboBox, int value)
+    private static ComboBoxItem FindLayoutComboBoxItem(ComboBox comboBox, int value, int defaultValue)
     {
-        string tag = value.ToString();
-        return comboBox.Items.OfType<ComboBoxItem>().FirstOrDefault(x => x.Tag as string == tag)
-               ?? (ComboBoxItem)comboBox.Items[0];
+        ComboBoxItem[] items = comboBox.Items.OfType<ComboBoxItem>().ToArray();
+        return items.FirstOrDefault(x => x.Tag as string == value.ToString())
+               ?? items.First(x => x.Tag as string == defaultValue.ToString());
     }
 
 
@@ -1062,17 +1063,13 @@ public sealed partial class GachaLogPage : PageBase
 
 
     /// <summary>
-    /// 按「每页卡池数」算卡片宽度：自动时为默认宽度；否则把视口宽度（扣除左右边距与卡片间距）均分，
+    /// 按「每页卡池数」算卡片宽度：把视口宽度（扣除左右边距与卡片间距）均分，
     /// 按物理像素向下取整，免得布局取整后总宽多出一两个像素、冒出横向滚动条。不小于默认宽度，放不下时照旧横向滚动。
     /// </summary>
     /// <returns>卡片宽度（DIP）。</returns>
     private double GetGachaCardWidth()
     {
-        int count = _cardsPerPage;
-        if (count <= 0)
-        {
-            return GachaStatsCardWidth;
-        }
+        int count = Math.Max(1, _cardsPerPage);
         Thickness margin = Grid_GachaStats.Margin;
         double available = ScrollViewer_GachaStats.ActualWidth - margin.Left - margin.Right - StackPanel_GachaStats.Spacing * (count - 1);
         if (available <= 0)
@@ -1096,12 +1093,12 @@ public sealed partial class GachaLogPage : PageBase
     }
 
 
-    /// <summary>卡片区宽度变化时按「每页卡池数」重算卡片宽度；自动模式卡片宽度固定，不用管。</summary>
+    /// <summary>卡片区宽度变化时按「每页卡池数」重算卡片宽度。</summary>
     /// <param name="sender">卡片区 ScrollViewer。</param>
     /// <param name="e">尺寸变化参数。</param>
     private void ScrollViewer_GachaStats_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (_cardsPerPage <= 0 || e.PreviousSize.Width == e.NewSize.Width || _cardWidthUpdateQueued)
+        if (e.PreviousSize.Width == e.NewSize.Width || _cardWidthUpdateQueued)
         {
             return;
         }
