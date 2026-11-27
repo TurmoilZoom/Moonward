@@ -87,7 +87,7 @@ public sealed partial class GachaLogPage : PageBase
     /// <summary>
     /// 页面导航到此时初始化游戏特定的抽卡服务、UI 标志位与表情图标。
     /// <para><b>输入：</b><paramref name="e"/> — 导航事件参数（基类 PageBase 从中解析 CurrentGameBiz / CurrentGameId）。</para>
-    /// <para><b>副作用：</b>设置 <see cref="GachaTypeText"/>、<see cref="SingleGameJsonFormatLabel"/>；
+    /// <para><b>副作用：</b>设置 <see cref="SingleGameJsonFormatLabel"/>；
     /// 根据游戏类型注入对应 <see cref="_gachaLogService"/>
     /// （GenshinGachaService / StarRailGachaService / ZZZGachaService）、启用对应物品统计视图标志位、
     /// 设置表情图标；对原神/绝区零国服（含 B 服）显示米游社同步、绝区零国际服显示 HoYoLAB 同步；
@@ -97,7 +97,6 @@ public sealed partial class GachaLogPage : PageBase
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
-        GachaTypeText = GachaLogService.GetGachaLogText(CurrentGameBiz);
         // 单游戏 Json 入口文案：原神/绝区零 UIGF v3、星铁 SRGF（协议名不翻译）
         SingleGameJsonFormatLabel = CurrentGameBiz.Game switch
         {
@@ -150,9 +149,6 @@ public sealed partial class GachaLogPage : PageBase
 
 
     public bool IsZZZGachaStatsCardVisible { get; set => SetProperty(ref field, value); }
-
-
-    public string GachaTypeText { get; set => SetProperty(ref field, value); }
 
 
     /// <summary>
@@ -965,6 +961,69 @@ public sealed partial class GachaLogPage : PageBase
 
     /// <summary>抽卡统计卡片的固定宽度</summary>
     private const double GachaStatsCardWidth = 262;
+
+
+    /// <summary>顶栏「更新」「设置」当前是否收成纯图标。</summary>
+    private bool _headerCompact;
+
+
+    /// <summary>上次文字可见时量下的两段文字宽度（含与图标的间距），收起后据此还原展开时的宽度。</summary>
+    private double _headerLabelsWidth;
+
+
+    /// <summary>顶栏重排已排进调度队列、尚未执行。</summary>
+    private bool _headerUpdateQueued;
+
+
+    /// <summary>顶栏、左侧工具或右侧按钮组宽度变化（外语文案、资源胶囊出现、UID 列表变化）时重新判断是否收起按钮文字。</summary>
+    /// <param name="sender">尺寸变化的元素。</param>
+    /// <param name="e">尺寸变化参数（未使用）。</param>
+    private void Header_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_headerUpdateQueued)
+        {
+            return;
+        }
+        // 收起文字会改右侧宽度，不能在布局回调里同步改，推到本轮布局之后
+        _headerUpdateQueued = true;
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            _headerUpdateQueued = false;
+            UpdateHeaderCompact();
+        });
+    }
+
+
+    /// <summary>
+    /// 顶栏放不下时把「更新」「设置」收成纯图标（文字改为悬停提示），放得下时恢复。
+    /// 一律按展开时的宽度判断（收起时用量下的文字宽度补回），收起后右侧变窄不会让判断翻回去、来回切换。
+    /// </summary>
+    private void UpdateHeaderCompact()
+    {
+        double available = Grid_Header.ActualWidth;
+        if (available <= 0)
+        {
+            return;
+        }
+        if (!_headerCompact)
+        {
+            _headerLabelsWidth = TextBlock_UpdateRecordsLabel.ActualWidth + TextBlock_SettingLabel.ActualWidth
+                                 + 2 * ((StackPanel)TextBlock_SettingLabel.Parent).Spacing;
+        }
+        double rightWidth = StackPanel_HeaderRight.DesiredSize.Width + (_headerCompact ? _headerLabelsWidth : 0);
+        double required = StackPanel_HeaderTools.DesiredSize.Width + Grid_Header.ColumnSpacing + rightWidth;
+        bool compact = required > available;
+        if (compact == _headerCompact)
+        {
+            return;
+        }
+        _headerCompact = compact;
+        Visibility labelVisibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        TextBlock_UpdateRecordsLabel.Visibility = labelVisibility;
+        TextBlock_SettingLabel.Visibility = labelVisibility;
+        InstantTooltip.SetText(SplitButton_UpdateGachaLog, compact ? Lang.GachaLogPage_UpdateRecords : null);
+        InstantTooltip.SetText(Button_GachaSetting, compact ? Lang.Common_Setting : null);
+    }
 
 
     /// <summary>
