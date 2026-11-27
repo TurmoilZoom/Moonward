@@ -4741,4 +4741,13 @@
   <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
     <value>本人確認</value>
   </data>
+  <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
+    <value>1ページのバナー数</value>
+  </data>
+  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
+    <value>自動</value>
+  </data>
+  <data name="GachaLogPage_CompactColumns" xml:space="preserve">
+    <value>1行のアイコン数（コンパクト表示）</value>
+  </data>
 </root>

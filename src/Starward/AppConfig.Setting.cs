@@ -1541,6 +1541,42 @@ public static partial class AppConfig
 
 
     /// <summary>
+    /// 抽卡记录页一页展示的卡池数，按游戏持久化。0 = 自动（卡片保持默认宽度，放不下时横向滚动）；大于 0 时卡片按视口宽度均分。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <returns>每页卡池数；未设置时为 0。</returns>
+    public static int GetGachaCardsPerPage(GameBiz biz)
+    {
+        return GetValue<int>(0, $"gacha_cards_per_page_{biz}");
+    }
+
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">每页卡池数，0 = 自动。</param>
+    public static void SetGachaCardsPerPage(GameBiz biz, int value)
+    {
+        SetValue(value, $"gacha_cards_per_page_{biz}");
+    }
+
+
+    /// <summary>
+    /// 抽卡记录紧凑视图每行图标数，按游戏持久化。0 = 自动（方块不小于默认尺寸时放得下几个就放几个，再拉宽铺满）。
+    /// </summary>
+    /// <param name="biz">游戏业务线。</param>
+    /// <returns>每行图标数；未设置时为 0。</returns>
+    public static int GetGachaCompactColumns(GameBiz biz)
+    {
+        return GetValue<int>(0, $"gacha_compact_columns_{biz}");
+    }
+
+    /// <param name="biz">游戏业务线。</param>
+    /// <param name="value">每行图标数，0 = 自动。</param>
+    public static void SetGachaCompactColumns(GameBiz biz, int value)
+    {
+        SetValue(value, $"gacha_compact_columns_{biz}");
+    }
+
+
+    /// <summary>
     /// 获取指定游戏的外部截图文件夹路径。
     /// </summary>
     public static string? GetExternalScreenshotFolder(GameBiz biz)

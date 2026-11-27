@@ -4742,4 +4742,13 @@ You are welcome to submit exported data to:</value>
   <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
     <value>Verifica tu identidad</value>
   </data>
+  <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
+    <value>Banners por página</value>
+  </data>
+  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
+    <value>Automático</value>
+  </data>
+  <data name="GachaLogPage_CompactColumns" xml:space="preserve">
+    <value>Iconos por fila (vista compacta)</value>
+  </data>
 </root>

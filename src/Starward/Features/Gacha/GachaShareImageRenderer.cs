@@ -419,7 +419,7 @@ internal static class GachaShareImageRenderer
 
     /// <summary>
     /// 紧凑视图：把 5★/S 记录按 <see cref="CompactColumns"/> 列图标网格绘制（新→旧，自左向右、自上而下）。
-    /// 列间距按内容区宽度两端对齐；页面内 WrapPanel 为固定间距左对齐，差值不到 2px。
+    /// 列间距按内容区宽度两端对齐；分享图卡宽固定，不跟页面「每页卡池数」「每行图标数」走（页面内 GachaTilePanel 是固定间距、拉宽方块铺满）。
     /// </summary>
     /// <param name="ds">绘制会话。</param>
     /// <param name="device">用于创建圆角几何。</param>

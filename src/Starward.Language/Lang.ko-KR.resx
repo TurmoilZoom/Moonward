@@ -4742,4 +4742,13 @@
   <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
     <value>본인 인증</value>
   </data>
+  <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
+    <value>페이지당 배너 수</value>
+  </data>
+  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
+    <value>자동</value>
+  </data>
+  <data name="GachaLogPage_CompactColumns" xml:space="preserve">
+    <value>줄당 아이콘 수(간단히 보기)</value>
+  </data>
 </root>

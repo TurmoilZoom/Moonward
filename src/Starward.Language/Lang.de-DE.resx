@@ -4740,4 +4740,13 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
     <value>Identität bestätigen</value>
   </data>
+  <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
+    <value>Banner pro Seite</value>
+  </data>
+  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
+    <value>Automatisch</value>
+  </data>
+  <data name="GachaLogPage_CompactColumns" xml:space="preserve">
+    <value>Symbole pro Zeile (Kompaktansicht)</value>
+  </data>
 </root>

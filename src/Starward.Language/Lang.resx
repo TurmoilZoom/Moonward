@@ -4831,4 +4831,13 @@ Repository:</value>
   <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
     <value>Verify your identity</value>
   </data>
+  <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
+    <value>Banners per page</value>
+  </data>
+  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="GachaLogPage_CompactColumns" xml:space="preserve">
+    <value>Icons per row (compact view)</value>
+  </data>
 </root>

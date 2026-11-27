@@ -142,6 +142,33 @@ namespace Starward.Language {
         }
 
         /// <summary>
+        ///   查找类似 Banners per page 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_CardsPerPage {
+            get {
+                return ResourceManager.GetString("GachaLogPage_CardsPerPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Auto 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_LayoutAuto {
+            get {
+                return ResourceManager.GetString("GachaLogPage_LayoutAuto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Icons per row (compact view) 的本地化字符串。
+        /// </summary>
+        public static string GachaLogPage_CompactColumns {
+            get {
+                return ResourceManager.GetString("GachaLogPage_CompactColumns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Group by version 的本地化字符串。
         /// </summary>
         public static string GachaLogPage_GroupByVersion {

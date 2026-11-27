@@ -4736,4 +4736,13 @@ You are welcome to submit exported data to:</value>
   <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
     <value>ยืนยันตัวตน</value>
   </data>
+  <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
+    <value>จำนวนแบนเนอร์ต่อหน้า</value>
+  </data>
+  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
+    <value>อัตโนมัติ</value>
+  </data>
+  <data name="GachaLogPage_CompactColumns" xml:space="preserve">
+    <value>จำนวนไอคอนต่อแถว (มุมมองแบบกะทัดรัด)</value>
+  </data>
 </root>

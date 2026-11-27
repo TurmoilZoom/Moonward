@@ -111,8 +111,15 @@ public sealed partial class ZZZGachaStatsCard : UserControl, IGachaStatsDragCard
 
 
     /// <summary>
+    /// 紧凑视图每行图标数，0 = 自动（方块不小于默认尺寸时放得下几个就放几个，再拉宽铺满）。
+    /// 须在入树前赋值，由 <see cref="GachaTilePanel"/> 第一次测量时读取；运行中修改由页面重建卡片完成。
+    /// </summary>
+    public int CompactColumns { get; set; }
+
+
+    /// <summary>
     /// 按视图模式与是否分组，给 S/A 级两个记录列表配面板、模板与数据源：
-    /// 不分组时列表视图用记录行、紧凑视图用 WrapPanel + 图标方块；分组时外层竖排各版本，组内再按列表行或图标方块排。
+    /// 不分组时列表视图用记录行、紧凑视图用 <see cref="GachaTilePanel"/> + 图标方块；分组时外层竖排各版本，组内再按列表行或图标方块排。
     /// </summary>
     /// <remarks>
     /// 只在卡片入树、ItemsControl 生成容器之前调用（页面先赋视图与分组，再赋 <see cref="WarpTypeStats"/>）。

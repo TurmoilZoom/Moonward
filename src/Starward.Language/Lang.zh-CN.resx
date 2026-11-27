@@ -4830,4 +4830,13 @@
   <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
     <value>身份验证</value>
   </data>
+  <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
+    <value>每页卡池数</value>
+  </data>
+  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="GachaLogPage_CompactColumns" xml:space="preserve">
+    <value>紧凑视图每行图标数</value>
+  </data>
 </root>

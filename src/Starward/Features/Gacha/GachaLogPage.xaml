@@ -133,6 +133,60 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </ScrollViewer>
+                                <MenuFlyoutSeparator />
+                                <!--  布局设置（按游戏）：两行共用列，下拉框左缘对齐  -->
+                                <Grid ColumnSpacing="12" RowSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <!--
+                                        每页卡池数：自动 = 卡片保持默认宽度，放不下时横向滚动；数字 = 按页面宽度均分给这么多张卡片，
+                                        卡池名较长（外语）时选少一些，卡片变宽就能显示全。均分后最窄不小于默认宽度，所以只列到默认窗口宽度放得下的 4
+                                    -->
+                                    <TextBlock VerticalAlignment="Center"
+                                               Text="{x:Bind lang:Lang.GachaLogPage_CardsPerPage}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <ComboBox x:Name="ComboBox_CardsPerPage"
+                                              Grid.Column="1"
+                                              MinWidth="96"
+                                              VerticalAlignment="Center"
+                                              AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CardsPerPage}"
+                                              SelectionChanged="ComboBox_CardsPerPage_SelectionChanged">
+                                        <ComboBoxItem Content="{x:Bind lang:Lang.GachaLogPage_LayoutAuto}" Tag="0" />
+                                        <ComboBoxItem Content="2" Tag="2" />
+                                        <ComboBoxItem Content="3" Tag="3" />
+                                        <ComboBoxItem Content="4" Tag="4" />
+                                    </ComboBox>
+                                    <!--
+                                        紧凑视图每行图标数：自动 = 方块不小于默认尺寸时放得下几个就放几个；数字 = 固定个数。两种都把方块拉宽铺满一行，
+                                        方块窄到放不下指定个数时自动少放（GachaTileLayout）。列表视图不受影响
+                                    -->
+                                    <TextBlock Grid.Row="1"
+                                               VerticalAlignment="Center"
+                                               Text="{x:Bind lang:Lang.GachaLogPage_CompactColumns}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <ComboBox x:Name="ComboBox_CompactColumns"
+                                              Grid.Row="1"
+                                              Grid.Column="1"
+                                              MinWidth="96"
+                                              VerticalAlignment="Center"
+                                              AutomationProperties.Name="{x:Bind lang:Lang.GachaLogPage_CompactColumns}"
+                                              SelectionChanged="ComboBox_CompactColumns_SelectionChanged">
+                                        <ComboBoxItem Content="{x:Bind lang:Lang.GachaLogPage_LayoutAuto}" Tag="0" />
+                                        <ComboBoxItem Content="4" Tag="4" />
+                                        <ComboBoxItem Content="5" Tag="5" />
+                                        <ComboBoxItem Content="6" Tag="6" />
+                                        <ComboBoxItem Content="7" Tag="7" />
+                                        <ComboBoxItem Content="8" Tag="8" />
+                                        <ComboBoxItem Content="9" Tag="9" />
+                                        <ComboBoxItem Content="10" Tag="10" />
+                                    </ComboBox>
+                                </Grid>
                             </StackPanel>
                         </Flyout>
                     </DropDownButton.Flyout>
@@ -734,6 +788,7 @@
             <ScrollViewer x:Name="ScrollViewer_GachaStats"
                           HorizontalScrollBarVisibility="Auto"
                           HorizontalScrollMode="Auto"
+                          SizeChanged="ScrollViewer_GachaStats_SizeChanged"
                           VerticalScrollBarVisibility="Disabled"
                           VerticalScrollMode="Disabled">
                 <Grid x:Name="Grid_GachaStats"

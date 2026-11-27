@@ -145,6 +145,7 @@ public sealed partial class GachaLogPage : PageBase
         {
             MenuFlyoutItem_CloudGame.Visibility = Visibility.Collapsed;
         }
+        InitializeCardsPerPage();
     }
 
 
@@ -959,8 +960,155 @@ public sealed partial class GachaLogPage : PageBase
     }
 
 
-    /// <summary>抽卡统计卡片的固定宽度</summary>
+    /// <summary>
+    /// 抽卡统计卡片的默认宽度，也是按「每页卡池数」均分时的最小宽度：
+    /// 紧凑视图每行 5 个图标、平均抽数一行左右两段文字都是按这个宽度排的，再窄会换行或叠字。
+    /// </summary>
     private const double GachaStatsCardWidth = 262;
+
+
+    /// <summary>一页展示的卡池数（当前游戏设置的本页副本）：0 = 自动，卡片保持 <see cref="GachaStatsCardWidth"/>。</summary>
+    private int _cardsPerPage;
+
+
+    /// <summary>卡片宽度更新已排进调度队列、尚未执行。</summary>
+    private bool _cardWidthUpdateQueued;
+
+
+    /// <summary>紧凑视图每行图标数（当前游戏设置的本页副本）：0 = 自动；新建卡片时传给卡片。</summary>
+    private int _compactColumns;
+
+
+    /// <summary>
+    /// 读出当前游戏的「每页卡池数」「紧凑视图每行图标数」，并让卡池筛选弹层里的两个下拉框选中对应项（未列出的值按自动处理）。
+    /// 先写字段再选中：选中触发的 SelectionChanged 因数值未变而被忽略。
+    /// </summary>
+    private void InitializeCardsPerPage()
+    {
+        ComboBoxItem cardsItem = FindLayoutComboBoxItem(ComboBox_CardsPerPage, AppConfig.GetGachaCardsPerPage(CurrentGameBiz.Game));
+        _cardsPerPage = int.Parse((string)cardsItem.Tag);
+        ComboBox_CardsPerPage.SelectedItem = cardsItem;
+        ComboBoxItem columnsItem = FindLayoutComboBoxItem(ComboBox_CompactColumns, AppConfig.GetGachaCompactColumns(CurrentGameBiz.Game));
+        _compactColumns = int.Parse((string)columnsItem.Tag);
+        ComboBox_CompactColumns.SelectedItem = columnsItem;
+    }
+
+
+    /// <summary>在布局下拉框里找 Tag 等于设置值的项，找不到时取第一项（自动）。</summary>
+    /// <param name="comboBox">布局下拉框，各项 Tag 为数值字符串。</param>
+    /// <param name="value">设置值。</param>
+    /// <returns>对应的下拉项。</returns>
+    private static ComboBoxItem FindLayoutComboBoxItem(ComboBox comboBox, int value)
+    {
+        string tag = value.ToString();
+        return comboBox.Items.OfType<ComboBoxItem>().FirstOrDefault(x => x.Tag as string == tag)
+               ?? (ComboBoxItem)comboBox.Items[0];
+    }
+
+
+    /// <summary>「紧凑视图每行图标数」下拉框：持久化；正处于紧凑视图时整卡重建（与切换视图同一路径），列表视图下等切到紧凑时再生效。</summary>
+    /// <param name="sender">下拉框。</param>
+    /// <param name="e">选择变更参数（未使用，以选中项的 Tag 为准）。</param>
+    private void ComboBox_CompactColumns_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (ComboBox_CompactColumns.SelectedItem is not ComboBoxItem { Tag: string tag }
+                || !int.TryParse(tag, out int columns)
+                || columns == _compactColumns)
+            {
+                return;
+            }
+            _compactColumns = columns;
+            AppConfig.SetGachaCompactColumns(CurrentGameBiz.Game, columns);
+            if (_recordViewMode == GachaRecordViewMode.Compact)
+            {
+                RebuildGachaCardsForViewMode();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Change gacha compact columns");
+        }
+    }
+
+
+    /// <summary>「每页卡池数」下拉框：持久化并立即按新数目调整全部卡片宽度。</summary>
+    /// <param name="sender">下拉框。</param>
+    /// <param name="e">选择变更参数（未使用，以选中项的 Tag 为准）。</param>
+    private void ComboBox_CardsPerPage_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (ComboBox_CardsPerPage.SelectedItem is not ComboBoxItem { Tag: string tag }
+                || !int.TryParse(tag, out int count)
+                || count == _cardsPerPage)
+            {
+                return;
+            }
+            _cardsPerPage = count;
+            AppConfig.SetGachaCardsPerPage(CurrentGameBiz.Game, count);
+            ApplyGachaCardWidth();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Change gacha cards per page");
+        }
+    }
+
+
+    /// <summary>
+    /// 按「每页卡池数」算卡片宽度：自动时为默认宽度；否则把视口宽度（扣除左右边距与卡片间距）均分，
+    /// 按物理像素向下取整，免得布局取整后总宽多出一两个像素、冒出横向滚动条。不小于默认宽度，放不下时照旧横向滚动。
+    /// </summary>
+    /// <returns>卡片宽度（DIP）。</returns>
+    private double GetGachaCardWidth()
+    {
+        int count = _cardsPerPage;
+        if (count <= 0)
+        {
+            return GachaStatsCardWidth;
+        }
+        Thickness margin = Grid_GachaStats.Margin;
+        double available = ScrollViewer_GachaStats.ActualWidth - margin.Left - margin.Right - StackPanel_GachaStats.Spacing * (count - 1);
+        if (available <= 0)
+        {
+            return GachaStatsCardWidth;
+        }
+        double scale = XamlRoot?.RasterizationScale ?? 1;
+        double width = Math.Floor(available / count * scale) / scale;
+        return Math.Max(GachaStatsCardWidth, width);
+    }
+
+
+    /// <summary>把当前卡片宽度应用到卡片池里的全部卡片（含筛掉隐藏的，重新勾选时宽度已经对了）。</summary>
+    private void ApplyGachaCardWidth()
+    {
+        double width = GetGachaCardWidth();
+        foreach (FrameworkElement card in _gachaCardPool.Values)
+        {
+            card.Width = width;
+        }
+    }
+
+
+    /// <summary>卡片区宽度变化时按「每页卡池数」重算卡片宽度；自动模式卡片宽度固定，不用管。</summary>
+    /// <param name="sender">卡片区 ScrollViewer。</param>
+    /// <param name="e">尺寸变化参数。</param>
+    private void ScrollViewer_GachaStats_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_cardsPerPage <= 0 || e.PreviousSize.Width == e.NewSize.Width || _cardWidthUpdateQueued)
+        {
+            return;
+        }
+        // 布局回调里同步改子元素尺寸会 fail-fast，推到本轮布局之后
+        _cardWidthUpdateQueued = true;
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            _cardWidthUpdateQueued = false;
+            ApplyGachaCardWidth();
+        });
+    }
 
 
     /// <summary>顶栏「更新」「设置」当前是否收成纯图标。</summary>
@@ -1105,10 +1253,11 @@ public sealed partial class GachaLogPage : PageBase
             card = new GachaStatsCard();
         }
         FrameworkElement element = (FrameworkElement)card;
-        element.Width = GachaStatsCardWidth;
+        element.Width = GetGachaCardWidth();
         element.DataContext = stats;     // 供拖拽手柄识别其卡池数据
         card.RecordViewMode = _recordViewMode; // 须在加入可视化树前赋值：紧凑模式要在记录列表生成容器前换好面板与模板
         card.GroupByVersion = _groupByVersion; // 同上，且须早于 WarpTypeStats：卡片按它选模板与数据源
+        card.CompactColumns = _compactColumns; // 紧凑视图的方块面板第一次测量时读取
         card.WarpTypeStats = stats;      // 须在加入可视化树前赋值，卡片内 OneTime x:Bind 才能取到
         _dragReorder.Attach(card.DragHandle);
         _gachaCardPool[stats.GachaType] = element;

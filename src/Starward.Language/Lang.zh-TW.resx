@@ -4742,4 +4742,13 @@
   <data name="PasswordLogin_IdentityVerifyTitle" xml:space="preserve">
     <value>身分驗證</value>
   </data>
+  <data name="GachaLogPage_CardsPerPage" xml:space="preserve">
+    <value>每頁卡池數</value>
+  </data>
+  <data name="GachaLogPage_LayoutAuto" xml:space="preserve">
+    <value>自動</value>
+  </data>
+  <data name="GachaLogPage_CompactColumns" xml:space="preserve">
+    <value>精簡檢視每行圖示數</value>
+  </data>
 </root>
