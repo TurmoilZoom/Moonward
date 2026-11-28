@@ -3293,9 +3293,6 @@ You are welcome to submit exported data to:</value>
   <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
     <value>กำลังตรวจสอบ URL กาชา…</value>
   </data>
-  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
-    <value>เพิ่มคุณภาพกราฟิก</value>
-  </data>
   <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
     <value>เปิดตัวด้วย DX12</value>
   </data>

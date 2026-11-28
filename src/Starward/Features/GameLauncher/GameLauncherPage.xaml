@@ -723,23 +723,16 @@
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <CheckBox MinWidth="0"
                               Margin="0,-2,0,-2"
+                              Padding="8,0,0,0"
                               VerticalAlignment="Center"
                               VerticalContentAlignment="Center"
                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                               IsChecked="{x:Bind EnableDX12, Mode=TwoWay}"
                               Style="{ThemeResource CompactCheckBoxStyle}">
-                        <TextBlock Margin="0,0,0,4"
-                                   FontSize="12"
-                                   FontWeight="Bold"
-                                   Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                        <TextBlock FontSize="12"
                                    IsTextScaleFactorEnabled="False"
-                                   Text="{x:Bind lang:Lang.GameLauncherPage_GraphicsQualityEnhancement}" />
+                                   Text="{x:Bind lang:Lang.GameLauncherPage_LaunchWithDX12}" />
                     </CheckBox>
-                    <TextBlock VerticalAlignment="Center"
-                               FontSize="12"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               IsTextScaleFactorEnabled="False"
-                               Text="{x:Bind lang:Lang.GameLauncherPage_LaunchWithDX12}" />
                     <TextBlock VerticalAlignment="Center"
                                FontSize="12"
                                IsTextScaleFactorEnabled="False">

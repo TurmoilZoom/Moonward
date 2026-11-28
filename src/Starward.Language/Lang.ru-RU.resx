@@ -3319,9 +3319,6 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
     <value>Проверка URL гачи…</value>
   </data>
-  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
-    <value>Улучшение качества графики</value>
-  </data>
   <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
     <value>Запуск с DX12</value>
   </data>

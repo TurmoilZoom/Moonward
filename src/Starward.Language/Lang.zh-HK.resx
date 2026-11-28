@@ -3298,9 +3298,6 @@
   <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
     <value>正在校驗抽卡連結…</value>
   </data>
-  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
-    <value>畫質增強</value>
-  </data>
   <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
     <value>使用 DX12 啟動</value>
   </data>

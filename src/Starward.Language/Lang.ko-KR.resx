@@ -3299,9 +3299,6 @@
   <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
     <value>가챠 URL 확인 중…</value>
   </data>
-  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
-    <value>화질 향상</value>
-  </data>
   <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
     <value>DX12로 시작</value>
   </data>

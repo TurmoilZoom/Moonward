@@ -3299,9 +3299,6 @@ You are welcome to submit exported data to:</value>
   <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
     <value>Đang kiểm tra URL gacha…</value>
   </data>
-  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
-    <value>Nâng cao chất lượng đồ họa</value>
-  </data>
   <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
     <value>Khởi chạy với DX12</value>
   </data>

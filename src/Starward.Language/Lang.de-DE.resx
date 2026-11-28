@@ -3297,9 +3297,6 @@ Exportierte Daten gerne an folgendes Repository senden:</value>
   <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
     <value>Gacha-URL wird überprüft…</value>
   </data>
-  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
-    <value>Grafikverbesserung</value>
-  </data>
   <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
     <value>Mit DX12 starten</value>
   </data>

@@ -3298,9 +3298,6 @@
   <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
     <value>ガチャ URL を検証中…</value>
   </data>
-  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
-    <value>画質向上</value>
-  </data>
   <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
     <value>DX12で起動</value>
   </data>

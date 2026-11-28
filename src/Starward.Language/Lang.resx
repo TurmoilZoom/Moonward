@@ -3357,9 +3357,6 @@ Repository:</value>
   <data name="GachaLogPage_ValidatingGachaUrl" xml:space="preserve">
     <value>Validating gacha URL…</value>
   </data>
-  <data name="GameLauncherPage_GraphicsQualityEnhancement" xml:space="preserve">
-    <value>Graphics Quality Enhancement</value>
-  </data>
   <data name="GameLauncherPage_LaunchWithDX12" xml:space="preserve">
     <value>Launch with DX12</value>
   </data>
