@@ -11,6 +11,7 @@
              xmlns:local="using:Starward.Features.GameRecord.SignIn"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sc="using:Starward.Controls"
+             xmlns:sfgh="using:Starward.Features.GameRecord.HomeRole"
              xmlns:sh="using:Starward.Helpers"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -66,21 +67,51 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <sc:CachedImage Width="40"
-                                        Height="40"
-                                        CornerRadius="40"
-                                        Source="{x:Bind GameRecordRole.HeadIcon}" />
-                        <StackPanel Grid.Column="1"
-                                    Margin="12,0,0,0"
-                                    VerticalAlignment="Center"
-                                    Spacing="2">
-                            <TextBlock Text="{x:Bind GameRecordRole.Nickname}" TextTrimming="CharacterEllipsis" />
-                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                <Run Text="{x:Bind GameRecordRole.RegionName}" />
-                                <Run Text="" />
-                                <Run Text="{x:Bind GameRecordRole.Uid}" />
-                            </TextBlock>
-                        </StackPanel>
+                        <!--
+                          点击弹出账号列表，切换首页便笺、签到卡片显示的角色（两张卡片共用，不影响米游社工具箱当前选中的账号）。
+                          负边距抵掉按钮内边距，头像仍与下方内容左缘对齐。
+                        -->
+                        <Button Grid.ColumnSpan="2"
+                                Margin="-6,-6,8,-6"
+                                Padding="6"
+                                HorizontalAlignment="Left"
+                                AutomationProperties.Name="{x:Bind lang:Lang.HomeRolePicker_Title}"
+                                BorderThickness="0"
+                                CornerRadius="6"
+                                Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                                sc:InstantTooltip.Placement="Top"
+                                sc:InstantTooltip.Text="{x:Bind lang:Lang.HomeRolePicker_Title}">
+                            <Button.Flyout>
+                                <Flyout x:Name="Flyout_SignInRole"
+                                        FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
+                                        Opening="Flyout_SignInRole_Opening"
+                                        Placement="BottomEdgeAlignedLeft">
+                                    <sfgh:HomeRolePicker x:Name="HomeRolePicker_SignIn" />
+                                </Flyout>
+                            </Button.Flyout>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <sc:CachedImage Width="40"
+                                                Height="40"
+                                                CornerRadius="40"
+                                                Source="{x:Bind GameRecordRole.HeadIcon}" />
+                                <StackPanel VerticalAlignment="Center" Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock MaxWidth="160"
+                                                   Text="{x:Bind GameRecordRole.Nickname}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <FontIcon VerticalAlignment="Center"
+                                                  FontSize="10"
+                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                  Glyph="&#xE70D;" />
+                                    </StackPanel>
+                                    <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                        <Run Text="{x:Bind GameRecordRole.RegionName}" />
+                                        <Run Text="" />
+                                        <Run Text="{x:Bind GameRecordRole.Uid}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+                        </Button>
 
                         <!--  签到通知（对所有游戏生效，与便笺卡片的提醒铃铛同位置） / 刷新  -->
                         <StackPanel Grid.Column="2"

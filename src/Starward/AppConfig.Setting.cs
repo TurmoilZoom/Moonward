@@ -1496,6 +1496,24 @@ public static partial class AppConfig
     }
 
 
+    /// <summary>
+    /// 获取首页便笺、签到卡片显示的角色 UID；0 表示没在首页选过，跟随米游社工具箱当前选中的角色。
+    /// </summary>
+    /// <remarks>与工具箱的 <c>last_select_game_record_role_{biz}</c> 分开存，在首页切换不影响工具箱。</remarks>
+    public static long GetHomeRoleUid(GameBiz biz)
+    {
+        return GetValue<long>(0, $"home_role_uid_{biz}");
+    }
+
+    /// <summary>
+    /// 保存首页便笺、签到卡片显示的角色 UID。
+    /// </summary>
+    public static void SetHomeRoleUid(GameBiz biz, long value)
+    {
+        SetValue(value, $"home_role_uid_{biz}");
+    }
+
+
     [Obsolete("已不用")]
     public static GameBiz GetLastRegionOfGame(GameBiz game)
     {

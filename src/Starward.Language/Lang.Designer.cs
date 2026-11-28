@@ -2014,6 +2014,15 @@ namespace Starward.Language {
         }
         
         /// <summary>
+        ///   查找类似 Switch Account 的本地化字符串。
+        /// </summary>
+        public static string HomeRolePicker_Title {
+            get {
+                return ResourceManager.GetString("HomeRolePicker_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Open the gacha records page in game, and then click the button on the right. 的本地化字符串。
         /// </summary>
         public static string CloudGameGachaWindow_OpenTheGachaRecordsPageInGameAndThenClickTheButtonOnTheRight {

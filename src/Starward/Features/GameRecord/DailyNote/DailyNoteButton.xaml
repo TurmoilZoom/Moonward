@@ -9,6 +9,7 @@
              xmlns:local="using:Starward.Features.GameRecord.DailyNote"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sc="using:Starward.Controls"
+             xmlns:sfgh="using:Starward.Features.GameRecord.HomeRole"
              xmlns:scggd="using:Starward.Core.GameRecord.Genshin.DailyNote"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
@@ -81,23 +82,50 @@
                         </Button>
                     </StackPanel>
 
-                    <!--  角色信息  -->
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <sc:CachedImage Width="40"
-                                        Height="40"
-                                        CornerRadius="40"
-                                        Source="{x:Bind GameRecordRole.HeadIcon}" />
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    Spacing="2">
-                            <TextBlock Text="{x:Bind GameRecordRole.Nickname}" TextTrimming="CharacterEllipsis" />
-                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                <Run Text="{x:Bind GameRecordRole.RegionName}" />
-                                <Run Text="" />
-                                <Run Text="Lv." /><Run Text="{x:Bind GameRecordRole.Level}" />
-                            </TextBlock>
+                    <!--
+                      角色信息：点击弹出账号列表，切换首页便笺、签到卡片显示的角色（两张卡片共用，不影响米游社工具箱当前选中的账号）。
+                      负边距抵掉按钮内边距，头像仍与下方内容左缘对齐；右边距给右上角的提醒 / 刷新按钮留位置，昵称过长时截断而不是压到它们下面。
+                    -->
+                    <Button Margin="-6,-6,40,-6"
+                            Padding="6"
+                            HorizontalAlignment="Left"
+                            AutomationProperties.Name="{x:Bind lang:Lang.HomeRolePicker_Title}"
+                            BorderThickness="0"
+                            CornerRadius="6"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                            sc:InstantTooltip.Placement="Top"
+                            sc:InstantTooltip.Text="{x:Bind lang:Lang.HomeRolePicker_Title}">
+                        <Button.Flyout>
+                            <Flyout x:Name="Flyout_DailyNoteRole"
+                                    FlyoutPresenterStyle="{StaticResource RightToolbarFlyoutPresenterStyle}"
+                                    Opening="Flyout_DailyNoteRole_Opening"
+                                    Placement="BottomEdgeAlignedLeft">
+                                <sfgh:HomeRolePicker x:Name="HomeRolePicker_DailyNote" />
+                            </Flyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <sc:CachedImage Width="40"
+                                            Height="40"
+                                            CornerRadius="40"
+                                            Source="{x:Bind GameRecordRole.HeadIcon}" />
+                            <StackPanel VerticalAlignment="Center" Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock MaxWidth="160"
+                                               Text="{x:Bind GameRecordRole.Nickname}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <FontIcon VerticalAlignment="Center"
+                                              FontSize="10"
+                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                              Glyph="&#xE70D;" />
+                                </StackPanel>
+                                <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                    <Run Text="{x:Bind GameRecordRole.RegionName}" />
+                                    <Run Text="" />
+                                    <Run Text="Lv." /><Run Text="{x:Bind GameRecordRole.Level}" />
+                                </TextBlock>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </Button>
 
 
                     <MenuFlyoutSeparator Grid.Row="1" Margin="0,8,0,8" />

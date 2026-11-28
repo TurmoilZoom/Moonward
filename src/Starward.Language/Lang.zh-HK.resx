@@ -2218,6 +2218,9 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>實時便箋</value>
   </data>
+  <data name="HomeRolePicker_Title" xml:space="preserve">
+    <value>切換帳號</value>
+  </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>絕區零抽卡物品圖片</value>
   </data>

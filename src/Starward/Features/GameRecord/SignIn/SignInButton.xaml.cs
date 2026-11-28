@@ -11,6 +11,7 @@ using Starward.Core;
 using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.SignIn;
 using Starward.Core.HoYoPlay;
+using Starward.Features.GameRecord.HomeRole;
 using Starward.Features.Setting;
 using Starward.Features.ViewHost;
 using Starward.Helpers;
@@ -45,6 +46,9 @@ public sealed partial class SignInButton : UserControl
     /// <summary>Flyout 是否已加载过签到状态，避免重复请求。</summary>
     private bool _statusLoaded;
 
+    /// <summary>当前显示的签到状态（日历、今日已签、累计天数）属于哪个角色；没有显示时为 0。</summary>
+    private long _statusRoleUid;
+
     /// <summary>最近一次拉取的累计签到天数，语言切换时用于重算 <see cref="TotalSignDaysHint"/>。</summary>
     private int _totalSignDay;
 
@@ -58,6 +62,7 @@ public sealed partial class SignInButton : UserControl
         this.InitializeComponent();
         this.Visibility = Visibility.Collapsed;
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
+        HomeRolePicker_SignIn.RoleSelected += HomeRolePicker_SignIn_RoleSelected;
         InstantTooltip.SetActionCallback(Border_AutoSignInHint, OpenStartAtLoginSetting);
         InstantTooltip.SetOpenChangedCallback(Border_AutoSignInHint, OnAutoSignInHintTooltipOpenChanged);
     }
@@ -231,6 +236,12 @@ public sealed partial class SignInButton : UserControl
     /// <summary>控件加载时按当前游戏初始化可见性与角色。</summary>
     private void SignInButton_Loaded(object sender, RoutedEventArgs e)
     {
+        // 只在加载期间订阅：页面换掉（如切换游戏）后旧卡片的原生对象会被释放，而构造函数里的订阅要等 GC 才失效，
+        // 消息一来就会在已释放的对象上访问属性，抛 ObjectDisposedException 导致崩溃
+        if (!WeakReferenceMessenger.Default.IsRegistered<HomeGameRecordRoleChangedMessage>(this))
+        {
+            WeakReferenceMessenger.Default.Register<HomeGameRecordRoleChangedMessage>(this, OnHomeRoleChanged);
+        }
         // 静止显示首帧，避免 AutoPlay 常驻动画
         Lottie_SignIn.SetProgress(0);
         InitializeForCurrentGame();
@@ -240,10 +251,12 @@ public sealed partial class SignInButton : UserControl
     /// <summary>控件卸载时清理状态，避免切换页面后残留旧数据。</summary>
     private void SignInButton_Unloaded(object sender, RoutedEventArgs e)
     {
+        WeakReferenceMessenger.Default.Unregister<HomeGameRecordRoleChangedMessage>(this);
         Lottie_SignIn.Stop();
         GameRecordRole = null;
         _resignInfo = null;
         _statusLoaded = false;
+        _statusRoleUid = 0;
         Awards.Clear();
         ErrorMessage = null;
         IsLoading = false;
@@ -287,17 +300,13 @@ public sealed partial class SignInButton : UserControl
                 this.Visibility = Visibility.Collapsed;
                 return;
             }
-            GameBiz gameBiz = CurrentGameId.GameBiz;
-            if (gameBiz.Server is "bilibili")
-            {
-                gameBiz = $"{gameBiz.Game}_cn";
-            }
+            GameBiz gameBiz = HomeGameRecordRole.GetRoleGameBiz(CurrentGameId.GameBiz);
             // 自动签到开关按游戏区分：切换游戏时同步开关状态（直接写字段，避免把读到的值回写设置）
             _signInGameBiz = gameBiz;
             _autoSignInEnabled = _autoSignInService.IsEnabled(gameBiz);
             OnPropertyChanged(nameof(AutoSignInEnabled));
             _gameRecordService.IsHoyolab = gameBiz.Server is "global";
-            GameRecordRole = _gameRecordService.GetLastSelectGameRecordRoleOrTheFirstOne(gameBiz);
+            GameRecordRole = HomeGameRecordRole.Resolve(_gameRecordService, gameBiz);
             if (GameRecordRole is null)
             {
                 this.Visibility = Visibility.Collapsed;
@@ -315,6 +324,65 @@ public sealed partial class SignInButton : UserControl
         }
     }
 
+
+
+    /// <summary>
+    /// 账号列表打开前按当前区服重读角色，并选中签到卡片正在显示的那个。
+    /// </summary>
+    private void Flyout_SignInRole_Opening(object sender, object e)
+    {
+        if (string.IsNullOrEmpty(_signInGameBiz.Value))
+        {
+            return;
+        }
+        try
+        {
+            HomeRolePicker_SignIn.Load(_gameRecordService.GetGameRoles(_signInGameBiz), GameRecordRole?.Uid ?? 0);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Load home roles failed (Biz: {GameBiz})", _signInGameBiz);
+        }
+    }
+
+
+    /// <summary>
+    /// 在账号列表里选了角色：收起列表，换了角色就保存为首页卡片的角色（便笺和签到随后各自重新加载）。
+    /// </summary>
+    private void HomeRolePicker_SignIn_RoleSelected(object? sender, GameRecordRole role)
+    {
+        Flyout_SignInRole.Hide();
+        if (string.IsNullOrEmpty(_signInGameBiz.Value) || role.Uid == GameRecordRole?.Uid)
+        {
+            return;
+        }
+        HomeGameRecordRole.Select(_signInGameBiz, role);
+    }
+
+
+    /// <summary>
+    /// 首页卡片的角色换了（可能是在便笺卡片里换的）：重新解析角色，卡片开着就立即按新角色加载，否则等下次打开。
+    /// </summary>
+    /// <remarks>
+    /// 显示中的签到状态先留着，等新角色的状态到了再整体替换：多数时候两个账号今天的状态一样，
+    /// 先清空的话签到按钮、已签标记和累计天数会闪一下又变回原样。新角色加载失败时再清掉（见 <see cref="ClearStatusOfOtherRole"/>）。
+    /// </remarks>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="message">切换到的区服与角色。</param>
+    private void OnHomeRoleChanged(object _, HomeGameRecordRoleChangedMessage message)
+    {
+        if (message.GameBiz != _signInGameBiz || message.Role.Uid == GameRecordRole?.Uid)
+        {
+            return;
+        }
+        // 补签确认框要显示的消耗属于上一个角色，不能沿用（不影响界面）
+        _resignInfo = null;
+        InitializeForCurrentGame();
+        if (Flyout_SignIn.IsOpen)
+        {
+            RefreshSignInStatusCommand.Execute(null);
+        }
+    }
 
 
     /// <summary>Flyout 首次打开时懒加载签到状态。</summary>
@@ -374,7 +442,7 @@ public sealed partial class SignInButton : UserControl
     [RelayCommand]
     private async Task RefreshSignInStatusAsync()
     {
-        if (GameRecordRole is null || IsLoading)
+        if (GameRecordRole is not { } role || IsLoading)
         {
             return;
         }
@@ -382,7 +450,12 @@ public sealed partial class SignInButton : UserControl
         try
         {
             ErrorMessage = null;
-            SignInStatus status = await _signInService.GetSignInStatusAsync(GameRecordRole);
+            SignInStatus status = await _signInService.GetSignInStatusAsync(role);
+            // 请求期间在首页卡片里换了账号：旧角色的状态不再写回，以免盖掉新角色的
+            if (role != GameRecordRole)
+            {
+                return;
+            }
             _resignInfo = status.ResignInfo;
             IsTodaySigned = status.Info.IsSign;
             _totalSignDay = status.Info.TotalSignDay;
@@ -398,27 +471,48 @@ public sealed partial class SignInButton : UserControl
                 Awards.Add(view);
                 day++;
             }
+            _statusRoleUid = role.Uid;
             _statusLoaded = true;
-        }
-        catch (miHoYoApiException ex)
-        {
-            ErrorMessage = GameRecordPage.GetMiHoYoApiExceptionMessage(ex);
-            _logger.LogError(ex, "Refresh sign-in status failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
-        }
-        catch (HttpRequestException ex)
-        {
-            ErrorMessage = MiHoYoApiErrorFeedbackFactory.Create(ex, MiHoYoApiContext.SignIn).Message;
-            _logger.LogError(ex, "Refresh sign-in status failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
-            _logger.LogError(ex, "Refresh sign-in status failed (Biz: {GameBiz}, Uid: {Uid})", GameRecordRole?.GameBiz, GameRecordRole?.Uid);
+            _logger.LogError(ex, "Refresh sign-in status failed (Biz: {GameBiz}, Uid: {Uid})", role.GameBiz, role.Uid);
+            // 请求期间已换了账号：旧角色的失败不再显示
+            if (role != GameRecordRole)
+            {
+                return;
+            }
+            ErrorMessage = ex switch
+            {
+                miHoYoApiException apiException => GameRecordPage.GetMiHoYoApiExceptionMessage(apiException),
+                HttpRequestException httpException => MiHoYoApiErrorFeedbackFactory.Create(httpException, MiHoYoApiContext.SignIn).Message,
+                _ => ex.Message,
+            };
+            ClearStatusOfOtherRole(role);
         }
         finally
         {
             IsLoading = false;
         }
+    }
+
+
+    /// <summary>
+    /// 显示中的签到状态不属于这个角色时清空（切换账号后为了不闪而保留的上一个角色的状态），
+    /// 免得新角色加载失败时把上一个角色的签到情况当成它的。
+    /// </summary>
+    /// <param name="role">当前角色。</param>
+    private void ClearStatusOfOtherRole(GameRecordRole role)
+    {
+        if (_statusRoleUid == role.Uid)
+        {
+            return;
+        }
+        _resignInfo = null;
+        Awards.Clear();
+        IsTodaySigned = false;
+        TotalSignDaysHint = null;
+        _statusRoleUid = 0;
     }
 
 

@@ -13,6 +13,7 @@ using Starward.Core.GameRecord.StarRail.DailyNote;
 using Starward.Core.GameRecord.ZZZ.DailyNote;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameRecord.DailyNote.Notify;
+using Starward.Features.GameRecord.HomeRole;
 using Starward.Features.Setting;
 using System;
 using System.Net.Http;
@@ -39,6 +40,7 @@ public sealed partial class DailyNoteButton : UserControl
         this.InitializeComponent();
         this.Visibility = Visibility.Collapsed;
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, OnLanguageChanged);
+        HomeRolePicker_DailyNote.RoleSelected += HomeRolePicker_DailyNote_RoleSelected;
     }
 
 
@@ -127,6 +129,12 @@ public sealed partial class DailyNoteButton : UserControl
 
     private void Button_DailyNote_Loaded(object sender, RoutedEventArgs e)
     {
+        // 只在加载期间订阅：页面换掉（如切换游戏）后旧卡片的原生对象会被释放，而构造函数里的订阅要等 GC 才失效，
+        // 消息一来就会在已释放的对象上访问属性，抛 ObjectDisposedException 导致崩溃
+        if (!WeakReferenceMessenger.Default.IsRegistered<HomeGameRecordRoleChangedMessage>(this))
+        {
+            WeakReferenceMessenger.Default.Register<HomeGameRecordRoleChangedMessage>(this, OnHomeRoleChanged);
+        }
         // 静止显示首帧，避免 AutoPlay 常驻动画
         Lottie_DailyNote.SetProgress(0);
         if (CurrentGameId is null)
@@ -144,6 +152,7 @@ public sealed partial class DailyNoteButton : UserControl
 
     private void Button_DailyNote_Unloaded(object sender, RoutedEventArgs e)
     {
+        WeakReferenceMessenger.Default.Unregister<HomeGameRecordRoleChangedMessage>(this);
         Lottie_DailyNote.Stop();
         GameRecordRole = null;
         BH3DailyNote = null!;
@@ -183,36 +192,54 @@ public sealed partial class DailyNoteButton : UserControl
             {
                 forceUpdate = true;
             }
-            GameBiz gameBiz = CurrentGameId.GameBiz;
-            if (gameBiz.Server is "bilibili")
-            {
-                gameBiz = $"{gameBiz.Game}_cn";
-            }
+            GameBiz gameBiz = HomeGameRecordRole.GetRoleGameBiz(CurrentGameId.GameBiz);
             _gameRecordService.IsHoyolab = gameBiz.Server is "global";
-            GameRecordRole = _gameRecordService.GetLastSelectGameRecordRoleOrTheFirstOne(gameBiz);
-            if (GameRecordRole is not null)
+            GameRecordRole? role = HomeGameRecordRole.Resolve(_gameRecordService, gameBiz);
+            GameRecordRole = role;
+            if (role is not null)
             {
                 this.Visibility = Visibility.Visible;
                 ClearRecoveryState();
                 await _gameRecordService.UpdateDeviceFpAsync();
+                // 请求期间可能已在首页卡片里换了账号（新的一次刷新已经开始），旧角色的结果不再写回，以免盖掉新角色的便笺
                 if (IsBH3Enabled)
                 {
-                    BH3DailyNote = await _gameRecordService.GetBH3DailyNoteAsync(GameRecordRole, forceUpdate.Value);
+                    BH3DailyNote result = await _gameRecordService.GetBH3DailyNoteAsync(role, forceUpdate.Value);
+                    if (role != GameRecordRole)
+                    {
+                        return;
+                    }
+                    BH3DailyNote = result;
                 }
                 if (IsGenshinEnabled)
                 {
-                    GenshinDailyNote = await _gameRecordService.GetGenshinDailyNoteAsync(GameRecordRole, forceUpdate.Value);
+                    GenshinDailyNote result = await _gameRecordService.GetGenshinDailyNoteAsync(role, forceUpdate.Value);
+                    if (role != GameRecordRole)
+                    {
+                        return;
+                    }
+                    GenshinDailyNote = result;
                 }
                 if (IsStarRailEnabled)
                 {
-                    StarRailDailyNote = await _gameRecordService.GetStarRailDailyNoteAsync(GameRecordRole, forceUpdate.Value);
+                    StarRailDailyNote result = await _gameRecordService.GetStarRailDailyNoteAsync(role, forceUpdate.Value);
+                    if (role != GameRecordRole)
+                    {
+                        return;
+                    }
+                    StarRailDailyNote = result;
                 }
                 if (IsZZZEnabled)
                 {
-                    ZZZDailyNote = await _gameRecordService.GetZZZDailyNoteAsync(GameRecordRole, forceUpdate.Value);
+                    ZZZDailyNote result = await _gameRecordService.GetZZZDailyNoteAsync(role, forceUpdate.Value);
+                    if (role != GameRecordRole)
+                    {
+                        return;
+                    }
+                    ZZZDailyNote = result;
                 }
                 // 交给便笺提醒判定，免得后台为同一份数据再请求一次
-                _dailyNoteNotifyService.ReportSnapshot(GameRecordRole, GetCurrentDailyNote());
+                _dailyNoteNotifyService.ReportSnapshot(role, GetCurrentDailyNote());
             }
         }
         catch (Exception ex)
@@ -225,6 +252,60 @@ public sealed partial class DailyNoteButton : UserControl
             }
             _logger.LogError(ex, "Refresh daily note failed (Biz: {GameBiz}, Server: {GameServer}, Uid: {Uid})", CurrentGameId?.GameBiz, GameRecordRole?.Region, GameRecordRole?.Uid);
         }
+    }
+
+
+    /// <summary>
+    /// 账号列表打开前按当前区服重读角色，并选中便笺正在显示的那个。
+    /// </summary>
+    private void Flyout_DailyNoteRole_Opening(object sender, object e)
+    {
+        if (CurrentGameId is null)
+        {
+            return;
+        }
+        try
+        {
+            HomeRolePicker_DailyNote.Load(_gameRecordService.GetGameRoles(HomeGameRecordRole.GetRoleGameBiz(CurrentGameId.GameBiz)), GameRecordRole?.Uid ?? 0);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Load home roles failed (Biz: {GameBiz})", CurrentGameId.GameBiz);
+        }
+    }
+
+
+    /// <summary>
+    /// 在账号列表里选了角色：收起列表，换了角色就保存为首页卡片的角色（便笺和签到随后各自重新加载）。
+    /// </summary>
+    private void HomeRolePicker_DailyNote_RoleSelected(object? sender, GameRecordRole role)
+    {
+        Flyout_DailyNoteRole.Hide();
+        if (CurrentGameId is null || role.Uid == GameRecordRole?.Uid)
+        {
+            return;
+        }
+        HomeGameRecordRole.Select(HomeGameRecordRole.GetRoleGameBiz(CurrentGameId.GameBiz), role);
+    }
+
+
+    /// <summary>
+    /// 首页卡片的角色换了（可能是在签到卡片里换的）：清掉上一个角色的便笺，按新角色重新加载。
+    /// </summary>
+    /// <param name="_">消息发送方（未使用）。</param>
+    /// <param name="message">切换到的区服与角色。</param>
+    private void OnHomeRoleChanged(object _, HomeGameRecordRoleChangedMessage message)
+    {
+        if (CurrentGameId is null || message.GameBiz != HomeGameRecordRole.GetRoleGameBiz(CurrentGameId.GameBiz) || message.Role.Uid == GameRecordRole?.Uid)
+        {
+            return;
+        }
+        BH3DailyNote = null!;
+        GenshinDailyNote = null!;
+        StarRailDailyNote = null!;
+        ZZZDailyNote = null!;
+        ClearRecoveryState();
+        RefreshDailyNoteCommand.Execute(false);
     }
 
 

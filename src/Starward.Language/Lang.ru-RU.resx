@@ -2220,6 +2220,9 @@
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Заметка в реальном времени</value>
   </data>
+  <data name="HomeRolePicker_Title" xml:space="preserve">
+    <value>Сменить аккаунт</value>
+  </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>ZZZ Изображения предметов из гачи</value>
   </data>

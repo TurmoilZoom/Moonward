@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  首页便笺、签到卡片头部点开的账号列表：标题 + 当前区服已登录的角色（头像、昵称、区服与 UID）。
+  放在宿主卡片里某个按钮的 Flyout 中；选中后由宿主收起弹层并保存（HomeGameRecordRole.Select）。
+-->
+<UserControl x:Class="Starward.Features.GameRecord.HomeRole.HomeRolePicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
+             xmlns:local="using:Starward.Features.GameRecord.HomeRole"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
+             xmlns:scg="using:Starward.Core.GameRecord"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <Grid Width="280">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock FontSize="14"
+                   FontWeight="SemiBold"
+                   Text="{x:Bind lang:Lang.HomeRolePicker_Title, Mode=OneTime}" />
+
+        <!--
+          条数少、需要选中态：ItemsPanel 用 StackPanel 关掉虚拟化（同战绩页角色列表，避免跨 DPI 时 MeasureOverride 失败）。
+          左右负边距抵掉列表项模板的外边距与内边距，让头像左缘与标题对齐。
+        -->
+        <ListView x:Name="ListView_Roles"
+                  Grid.Row="1"
+                  Margin="-16,8,-16,-4"
+                  IsItemClickEnabled="True"
+                  ItemClick="ListView_Roles_ItemClick"
+                  ItemsSource="{x:Bind Roles}"
+                  SelectionMode="Single">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="scg:GameRecordRole">
+                    <Grid Padding="0,8"
+                          ColumnSpacing="12"
+                          Loaded="RoleItem_Loaded">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <sc:CachedImage Width="32"
+                                        Height="32"
+                                        VerticalAlignment="Center"
+                                        CornerRadius="16"
+                                        Source="{x:Bind local:HomeRolePicker.GetAvatarUrl(HeadIcon, GameBiz), Mode=OneTime}" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
+                            <TextBlock Text="{x:Bind Nickname, Mode=OneTime}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       TextTrimming="CharacterEllipsis">
+                                <Run Text="{x:Bind RegionName, Mode=OneTime}" />
+                                <Run Text="" />
+                                <Run Text="{x:Bind Uid, Mode=OneTime}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+
+</UserControl>

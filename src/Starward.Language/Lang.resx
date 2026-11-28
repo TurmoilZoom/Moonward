@@ -2277,6 +2277,9 @@ Do you accept the risk and continue to use it?</value>
   <data name="DailyNoteButton_Title" xml:space="preserve">
     <value>Real-time Note</value>
   </data>
+  <data name="HomeRolePicker_Title" xml:space="preserve">
+    <value>Switch Account</value>
+  </data>
   <data name="ToolboxSetting_ZZZGachaItemImages" xml:space="preserve">
     <value>ZZZ Gacha Item Images</value>
   </data>
