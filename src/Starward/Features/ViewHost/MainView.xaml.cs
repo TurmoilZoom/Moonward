@@ -18,6 +18,7 @@ using Starward.Features.Setting;
 using Starward.Features.Update;
 using Starward.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -301,14 +302,11 @@ public sealed partial class MainView : UserControl
             // 当前游戏不支持该页时回退启动器（设置页始终可用）
             page = typeof(GameLauncherPage);
         }
-        // 仅对启动器/设置强制同步 SelectedItem；其余项由用户点击时系统维护
-        if (page.Name is nameof(GameLauncherPage))
+        // 选中项跟着目标页走：其它页面通过消息跳转时导航栏不会自己变，仍停在原来的项上，
+        // 再点那一项会被「重复点击当前选中项」的判断吞掉，就回不去了
+        if (FindNavigationItem(page.Name) is NavigationViewItem navigationItem)
         {
-            MainView_NavigationView.SelectedItem = NavigationViewItem_Launcher;
-        }
-        else if (page.Name is nameof(SettingPage))
-        {
-            MainView_NavigationView.SelectedItem = NavigationViewItem_Setting;
+            MainView_NavigationView.SelectedItem = navigationItem;
         }
         MainView_Frame.Navigate(page, param ?? CurrentGameId, infoOverride);
         // 启动器与空白页展示完整背景；其它功能页加亚克力遮罩便于阅读
@@ -320,6 +318,27 @@ public sealed partial class MainView : UserControl
         {
             Border_OverlayMask.Opacity = 1;
         }
+    }
+
+
+    /// <summary>
+    /// 找到 <see cref="NavigationViewItem.Tag"/> 为该页面类型名的导航项（含底部的设置）。
+    /// </summary>
+    /// <param name="pageName">页面类型名，如 <c>GameRecordPage</c>。</param>
+    /// <returns>对应的导航项；没有对应项（如空白页）时为 null。</returns>
+    private NavigationViewItem? FindNavigationItem(string pageName)
+    {
+        foreach (IList<object> items in (IList<object>[])[MainView_NavigationView.MenuItems, MainView_NavigationView.FooterMenuItems])
+        {
+            foreach (object item in items)
+            {
+                if (item is NavigationViewItem { Tag: string tag } navigationItem && tag == pageName)
+                {
+                    return navigationItem;
+                }
+            }
+        }
+        return null;
     }
 
 
