@@ -31,6 +31,7 @@ using Starward.Core.GameRecord.Passport;
 #if !DEBUG
 using System.Net.Http.Json;
 #endif
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -1352,6 +1353,191 @@ public abstract class GameRecordClient
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>icon_info 数据。</returns>
     public abstract Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, string cookie, CancellationToken cancellationToken = default);
+
+
+
+    /// <summary>
+    /// badge 登录换来的 Cookie 缓存，键为「UID|语言」。养成指南页点一个代理人就要发请求，
+    /// 每次都重新登录会让请求数翻倍、更容易触发 act 风控；<c>e_nap_token</c> 约 48h 有效，过期（-100）时再重登。
+    /// </summary>
+    private readonly ConcurrentDictionary<string, (string BaseCookie, string Cookie, DateTimeOffset Time)> _zzzCultivateCookieCache = new();
+
+
+    /// <summary>
+    /// 养成指南 badge Cookie 缓存的有效期，短于 <c>e_nap_token</c> 的约 48h。
+    /// </summary>
+    private static readonly TimeSpan ZZZCultivateCookieLifetime = TimeSpan.FromHours(12);
+
+
+    /// <summary>
+    /// 养成指南：全部代理人（含未拥有）。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">badge 登录用的语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>代理人列表。</returns>
+    /// <exception cref="miHoYoApiException">接口业务失败。</exception>
+    public Task<ZZZCultivateAvatarBasicList> GetZZZCultivateAvatarListAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        return SendZZZCultivateAsync<ZZZCultivateAvatarBasicList>(role, language, HttpMethod.Get, "avatar_basic_list", null, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 养成指南：代理人与邦布头像。列表 / 详情里的 <c>group_icon_path</c> 是阵营图标，头像要从这里取。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">badge 登录用的语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>以代理人 / 邦布 Id 字符串为键的头像表。</returns>
+    /// <exception cref="miHoYoApiException">接口业务失败。</exception>
+    public Task<UpgradeGuidIconInfo> GetZZZCultivateIconInfoAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        return SendZZZCultivateAsync<UpgradeGuidIconInfo>(role, language, HttpMethod.Get, "icon_info", null, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 养成指南：代理人详情（面板、技能、音擎、驱动盘、推荐方案）。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="avatars">要查的代理人；未拥有的也能查，预告代理人要设 <see cref="ZZZCultivateAvatarDetailRequestItem.IsTeaser"/>。</param>
+    /// <param name="language">badge 登录用的语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>详情列表，顺序与 <paramref name="avatars"/> 一致。</returns>
+    /// <exception cref="miHoYoApiException">接口业务失败。</exception>
+    public Task<ZZZCultivateAvatarDetailList> GetZZZCultivateAvatarDetailAsync(GameRecordRole role, IEnumerable<ZZZCultivateAvatarDetailRequestItem> avatars, string? language = null, CancellationToken cancellationToken = default)
+    {
+        var body = new ZZZCultivateAvatarDetailRequest { AvatarList = avatars.ToList() };
+        return SendZZZCultivateAsync<ZZZCultivateAvatarDetailList>(role, language, HttpMethod.Post, "batch_avatar_detail_v2", body, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 养成指南：物品目录（音擎含玩家持有的每把等级与突破阶段，养成计算要用）。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="avatarId">当前查看的代理人 Id，接口仍返回全量目录。</param>
+    /// <param name="language">badge 登录用的语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>物品目录。</returns>
+    /// <exception cref="miHoYoApiException">接口业务失败。</exception>
+    public Task<UpgradeGuideItemList> GetZZZCultivateItemListAsync(GameRecordRole role, int avatarId, string? language = null, CancellationToken cancellationToken = default)
+    {
+        return SendZZZCultivateAsync<UpgradeGuideItemList>(role, language, HttpMethod.Get, $"item_list?avatar_id={avatarId}", null, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 养成指南：计算从当前等级养到目标等级需要的材料、现有库存与缺口。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="request">代理人、技能与音擎的当前 / 目标等级。</param>
+    /// <param name="language">badge 登录用的语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>材料计算结果。</returns>
+    /// <exception cref="miHoYoApiException">接口业务失败。</exception>
+    public Task<ZZZCultivateCalcResult> CalculateZZZCultivateAsync(GameRecordRole role, ZZZCultivateCalcRequest request, string? language = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return SendZZZCultivateAsync<ZZZCultivateCalcResult>(role, language, HttpMethod.Post, "avatar_calc", request, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 发养成指南请求：用缓存的 badge Cookie，登录失效（-100）时清缓存重登一次再发。
+    /// </summary>
+    /// <typeparam name="T">响应数据类型，须已在 <see cref="GameRecordJsonContext"/> 注册。</typeparam>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">badge 登录用的语言。</param>
+    /// <param name="method">HTTP 方法。</param>
+    /// <param name="pathAndQuery"><c>nap_cultivate_tool/user/</c> 之后的路径，可带查询参数。</param>
+    /// <param name="body">POST 请求体，须已在 <see cref="GameRecordJsonContext"/> 注册；GET 传 null。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>响应 data。</returns>
+    private async Task<T> SendZZZCultivateAsync<T>(GameRecordRole role, string? language, HttpMethod method, string pathAndQuery, object? body, CancellationToken cancellationToken) where T : class
+    {
+        ArgumentNullException.ThrowIfNull(role);
+        string lang = LanguageUtil.FilterLanguage(language);
+        string cookie = await GetZZZCultivateCookieAsync(role, lang, false, cancellationToken);
+        try
+        {
+            return await CommonSendCultivateAsync<T>(CreateZZZCultivateRequest(role, cookie, method, pathAndQuery, body), cancellationToken);
+        }
+        catch (miHoYoApiException ex) when (ex.IsLoginExpired)
+        {
+            // 缓存的 e_nap_token 过期或被顶掉，重登一次；role.Cookie 本身失效时这里会再抛 -100，交给上层换票
+            cookie = await GetZZZCultivateCookieAsync(role, lang, true, cancellationToken);
+            return await CommonSendCultivateAsync<T>(CreateZZZCultivateRequest(role, cookie, method, pathAndQuery, body), cancellationToken);
+        }
+    }
+
+
+    /// <summary>
+    /// 取养成指南 badge Cookie：缓存未过期且账号 Cookie 没变时直接用，否则重新 badge 登录。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">过滤后的语言代码。</param>
+    /// <param name="forceLogin">忽略缓存强制重登。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>合并了 <c>e_nap_token</c> 的 Cookie。</returns>
+    private async Task<string> GetZZZCultivateCookieAsync(GameRecordRole role, string language, bool forceLogin, CancellationToken cancellationToken)
+    {
+        string key = $"{role.Uid}|{language}";
+        string baseCookie = role.Cookie ?? "";
+        if (!forceLogin
+            && _zzzCultivateCookieCache.TryGetValue(key, out var cached)
+            && cached.BaseCookie == baseCookie
+            && DateTimeOffset.Now - cached.Time < ZZZCultivateCookieLifetime)
+        {
+            return cached.Cookie;
+        }
+        string cookie = await LoginZZZCultivateBadgeAsync(role, language, cancellationToken);
+        _zzzCultivateCookieCache[key] = (baseCookie, cookie, DateTimeOffset.Now);
+        return cookie;
+    }
+
+
+    /// <summary>
+    /// 构造养成指南请求（国服 / 国际服主机与请求头不同）。UA、Origin、X-Requested-With 由 <see cref="CommonSendCultivateAsync{T}"/> 补齐。
+    /// </summary>
+    /// <param name="role">提供 uid / region 查询参数的角色。</param>
+    /// <param name="cookie">合并了 <c>e_nap_token</c> 的 Cookie。</param>
+    /// <param name="method">HTTP 方法。</param>
+    /// <param name="pathAndQuery"><c>nap_cultivate_tool/user/</c> 之后的路径，可带查询参数。</param>
+    /// <param name="body">POST 请求体；GET 传 null。</param>
+    /// <returns>待发送的请求。</returns>
+    protected abstract HttpRequestMessage CreateZZZCultivateRequest(GameRecordRole role, string cookie, HttpMethod method, string pathAndQuery, object? body);
+
+
+    /// <summary>
+    /// 拼养成指南请求地址：网页每个请求都在查询参数里带 uid 与 region。
+    /// </summary>
+    /// <param name="host">接口主机。</param>
+    /// <param name="role">提供 uid / region 的角色。</param>
+    /// <param name="pathAndQuery"><c>nap_cultivate_tool/user/</c> 之后的路径，可带查询参数。</param>
+    /// <returns>完整地址。</returns>
+    protected static string BuildZZZCultivateUrl(string host, GameRecordRole role, string pathAndQuery)
+    {
+        string separator = pathAndQuery.Contains('?') ? "&" : "?";
+        return $"https://{host}/event/nap_cultivate_tool/user/{pathAndQuery}{separator}uid={role.Uid}&region={role.Region}";
+    }
+
+
+    /// <summary>
+    /// 把养成指南请求体序列化为 JSON 内容。
+    /// </summary>
+    /// <param name="body">已在 <see cref="GameRecordJsonContext"/> 注册的请求体；null 时返回 null。</param>
+    /// <returns>JSON 请求内容。</returns>
+    protected static HttpContent? CreateZZZCultivateContent(object? body)
+    {
+        if (body is null)
+        {
+            return null;
+        }
+        string json = JsonSerializer.Serialize(body, body.GetType(), GameRecordJsonContext.Default);
+        return new StringContent(json, Encoding.UTF8, Application_Json);
+    }
 
 
 

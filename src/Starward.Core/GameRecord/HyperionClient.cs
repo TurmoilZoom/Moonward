@@ -1115,6 +1115,31 @@ public class HyperionClient : GameRecordClient
 
 
     /// <summary>
+    /// 养成指南请求（国服 act-api-takumi，与网页一致）。禁止 x-rpc-device_id；<c>x-rpc-cultivate_source</c> 照网页桌面端填 pc。
+    /// </summary>
+    protected override HttpRequestMessage CreateZZZCultivateRequest(GameRecordRole role, string cookie, HttpMethod method, string pathAndQuery, object? body)
+    {
+        var request = new HttpRequestMessage(method, BuildZZZCultivateUrl("act-api-takumi.mihoyo.com", role, pathAndQuery))
+        {
+            Content = CreateZZZCultivateContent(body),
+        };
+        request.Headers.Add(Cookie, cookie);
+        request.Headers.Add(Referer, "https://act.mihoyo.com/zzz/gt/character-builder-h/index.html");
+        request.Headers.Add(x_rpc_app_version, AppVersion);
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add("x-rpc-cultivate_source", "pc");
+        // 网页每个请求都带；不带时代理人列表不含未实装的预告代理人
+        request.Headers.Add("x-rpc-is_teaser", "1");
+        if (!string.IsNullOrWhiteSpace(DeviceFp))
+        {
+            request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        }
+        return request;
+    }
+
+
+
+    /// <summary>
     /// 养成指南 icon_info（国服 api-takumi）。
     /// </summary>
     public override async Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, string cookie, CancellationToken cancellationToken = default)

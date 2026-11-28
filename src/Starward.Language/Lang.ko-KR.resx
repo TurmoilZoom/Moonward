@@ -4757,4 +4757,181 @@
   <data name="GameReservationView_PreRegister" xml:space="preserve">
     <value>지금 사전 등록</value>
   </data>
+  <data name="HoyolabToolboxPage_ZZZCultivateGuide" xml:space="preserve">
+    <value>육성 가이드</value>
+  </data>
+  <data name="ZZZCultivatePage_NotOwned" xml:space="preserve">
+    <value>미보유</value>
+  </data>
+  <data name="ZZZCultivatePage_Skills" xml:space="preserve">
+    <value>스킬</value>
+  </data>
+  <data name="ZZZCultivatePage_WEngine" xml:space="preserve">
+    <value>W-엔진</value>
+  </data>
+  <data name="ZZZCultivatePage_WEngineLevel" xml:space="preserve">
+    <value>W-엔진 레벨</value>
+  </data>
+  <data name="ZZZCultivatePage_NotEquipped" xml:space="preserve">
+    <value>미장착</value>
+  </data>
+  <data name="ZZZCultivatePage_RecommendedPlan" xml:space="preserve">
+    <value>추천 빌드</value>
+  </data>
+  <data name="ZZZCultivatePage_PlanAuthorFormat" xml:space="preserve">
+    <value>작성자: {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_DiscSets" xml:space="preserve">
+    <value>세트</value>
+  </data>
+  <data name="ZZZCultivatePage_MainStats" xml:space="preserve">
+    <value>주 옵션</value>
+  </data>
+  <data name="ZZZCultivatePage_SlotFormat" xml:space="preserve">
+    <value>{0}번</value>
+  </data>
+  <data name="ZZZCultivatePage_SubStats" xml:space="preserve">
+    <value>부 옵션</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillPriority" xml:space="preserve">
+    <value>스킬 우선순위</value>
+  </data>
+  <data name="ZZZCultivatePage_Team" xml:space="preserve">
+    <value>파티</value>
+  </data>
+  <data name="ZZZCultivatePage_Calculator" xml:space="preserve">
+    <value>육성 계산</value>
+  </data>
+  <data name="ZZZCultivatePage_AgentLevel" xml:space="preserve">
+    <value>에이전트 레벨</value>
+  </data>
+  <data name="ZZZCultivatePage_Calculate" xml:space="preserve">
+    <value>계산</value>
+  </data>
+  <data name="ZZZCultivatePage_SkipWEngine" xml:space="preserve">
+    <value>W-엔진 제외</value>
+  </data>
+  <data name="ZZZCultivatePage_NeedFormat" xml:space="preserve">
+    <value>필요 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_LackFormat" xml:space="preserve">
+    <value>부족 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_Enough" xml:space="preserve">
+    <value>충분</value>
+  </data>
+  <data name="ZZZCultivatePage_NotOpened" xml:space="preserve">
+    <value>미개방</value>
+  </data>
+  <data name="ZZZCultivatePage_AllEnough" xml:space="preserve">
+    <value>재료가 모두 충분합니다.</value>
+  </data>
+  <data name="ZZZCultivatePage_RefinementFormat" xml:space="preserve">
+    <value>Phase {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_MindscapeFormat" xml:space="preserve">
+    <value>마인드스케이프 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillBasicAttack" xml:space="preserve">
+    <value>일반 공격</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillSpecialAttack" xml:space="preserve">
+    <value>특수 스킬</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillDodge" xml:space="preserve">
+    <value>회피</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillChainAttack" xml:space="preserve">
+    <value>연계 스킬</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillCore" xml:space="preserve">
+    <value>코어 스킬</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillAssist" xml:space="preserve">
+    <value>지원 스킬</value>
+  </data>
+  <data name="ZZZCultivatePage_Teaser" xml:space="preserve">
+    <value>미출시</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserHint" xml:space="preserve">
+    <value>미출시 에이전트의 재료는 공식 예고 데이터이며 출시 전에 바뀔 수 있습니다.</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserIncludeWEngine" xml:space="preserve">
+    <value>전용 W-엔진 포함</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserMaxSkills" xml:space="preserve">
+    <value>우선 스킬 Lv.12까지</value>
+  </data>
+  <data name="ZZZCultivatePage_SearchPlaceholder" xml:space="preserve">
+    <value>에이전트 또는 진영 검색</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterOwnership" xml:space="preserve">
+    <value>보유 여부</value>
+  </data>
+  <data name="ZZZCultivatePage_Owned" xml:space="preserve">
+    <value>보유</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterRarity" xml:space="preserve">
+    <value>등급</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterAttribute" xml:space="preserve">
+    <value>속성</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterSpecialty" xml:space="preserve">
+    <value>특성</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributePhysical" xml:space="preserve">
+    <value>물리</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeFire" xml:space="preserve">
+    <value>불</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeIce" xml:space="preserve">
+    <value>얼음</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeElectric" xml:space="preserve">
+    <value>전기</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeEther" xml:space="preserve">
+    <value>에테르</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeWind" xml:space="preserve">
+    <value>바람</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeLumen" xml:space="preserve">
+    <value>Lumen</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyAttack" xml:space="preserve">
+    <value>강공</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyStun" xml:space="preserve">
+    <value>격파</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyAnomaly" xml:space="preserve">
+    <value>이상</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtySupport" xml:space="preserve">
+    <value>지원</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyDefense" xml:space="preserve">
+    <value>방어</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyRupture" xml:space="preserve">
+    <value>Rupture</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyArmorer" xml:space="preserve">
+    <value>Armorer</value>
+  </data>
+  <data name="ZZZCultivatePage_Materials" xml:space="preserve">
+    <value>육성 재료</value>
+  </data>
+  <data name="ZZZCultivatePage_SynthesisHint" xml:space="preserve">
+    <value>남는 하위 재료는 3개당 상위 재료 1개로 계산합니다(상위 재료는 분해할 수 없습니다).</value>
+  </data>
+  <data name="ZZZCultivatePage_OwnedFormat" xml:space="preserve">
+    <value>보유 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_OwnedSynthFormat" xml:space="preserve">
+    <value>보유 {0} + 합성 {1}</value>
+  </data>
 </root>

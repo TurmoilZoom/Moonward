@@ -50,6 +50,30 @@ public class UpgradeGuideWeapon
     [JsonPropertyName("profession")]
     public int Profession { get; set; }
 
+
+    /// <summary>
+    /// 玩家持有的该音擎（每把一条）；未持有时为空。
+    /// </summary>
+    [JsonPropertyName("user_weapon_info")]
+    public List<UpgradeGuideUserWeapon>? UserWeaponInfo { get; set; }
+
+}
+
+
+/// <summary>
+/// 玩家持有的一把音擎。
+/// </summary>
+public class UpgradeGuideUserWeapon
+{
+
+    [JsonPropertyName("level")]
+    public int Level { get; set; }
+
+
+    /// <summary>突破阶段，养成计算的 <c>weapon_promotes</c>。</summary>
+    [JsonPropertyName("promotes")]
+    public int Promotes { get; set; }
+
 }
 
 

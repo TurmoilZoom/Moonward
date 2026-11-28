@@ -24,6 +24,7 @@ using Starward.Core.GameRecord.ZZZ.GachaStat;
 using Starward.Core.GameRecord.SignIn;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
+using Starward.Core.GameRecord.ZZZ.UpgradeGuide;
 using Starward.Core.GameRecord.Passport;
 using Starward.Features.Database;
 using Starward.Features.ViewHost;
@@ -2011,7 +2012,81 @@ internal class GameRecordService
 
 
     /// <summary>
-    /// 官方抽卡统计请求前的准备：国际服设置请求语言，国服确保设备指纹已就绪。
+    /// 养成指南：全部代理人（含未拥有）。登录失效时按通用恢复逻辑凭 stoken 刷新 Cookie 后重试一次。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">期望语言；国服名称固定中文，国际服随此语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>代理人列表。</returns>
+    public async Task<ZZZCultivateAvatarBasicList> GetZZZCultivateAvatarListAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        string lang = await PrepareZZZOfficialGachaRequestAsync(role, language, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZCultivateAvatarListAsync(role, lang, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 养成指南：代理人与邦布头像（列表接口里的图标是阵营图标）。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="language">期望语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>头像表。</returns>
+    public async Task<UpgradeGuidIconInfo> GetZZZCultivateIconInfoAsync(GameRecordRole role, string? language = null, CancellationToken cancellationToken = default)
+    {
+        string lang = await PrepareZZZOfficialGachaRequestAsync(role, language, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZCultivateIconInfoAsync(role, lang, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 养成指南：单个代理人详情（面板、技能、音擎、驱动盘、推荐方案）。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="request">代理人 Id；预告代理人另带是否含专武、技能是否升满。</param>
+    /// <param name="language">期望语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>详情；接口没返回该代理人时为 null。</returns>
+    public async Task<ZZZCultivateAvatarDetail?> GetZZZCultivateAvatarDetailAsync(GameRecordRole role, ZZZCultivateAvatarDetailRequestItem request, string? language = null, CancellationToken cancellationToken = default)
+    {
+        string lang = await PrepareZZZOfficialGachaRequestAsync(role, language, cancellationToken);
+        var list = await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZCultivateAvatarDetailAsync(role, [request], lang, cancellationToken), cancellationToken);
+        return list.List?.FirstOrDefault(x => x.Avatar?.Id == request.AvatarId);
+    }
+
+
+    /// <summary>
+    /// 养成指南：物品目录（含玩家持有音擎的等级与突破阶段）。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="avatarId">当前查看的代理人 Id。</param>
+    /// <param name="language">期望语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>物品目录。</returns>
+    public async Task<UpgradeGuideItemList> GetZZZCultivateItemListAsync(GameRecordRole role, int avatarId, string? language = null, CancellationToken cancellationToken = default)
+    {
+        string lang = await PrepareZZZOfficialGachaRequestAsync(role, language, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.GetZZZCultivateItemListAsync(role, avatarId, lang, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 养成指南：计算养到目标等级需要的材料与缺口。
+    /// </summary>
+    /// <param name="role">已登录的绝区零角色。</param>
+    /// <param name="request">当前 / 目标等级。</param>
+    /// <param name="language">期望语言。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>材料计算结果。</returns>
+    public async Task<ZZZCultivateCalcResult> CalculateZZZCultivateAsync(GameRecordRole role, ZZZCultivateCalcRequest request, string? language = null, CancellationToken cancellationToken = default)
+    {
+        string lang = await PrepareZZZOfficialGachaRequestAsync(role, language, cancellationToken);
+        return await ExecuteWithRequestRecoveryAsync(role, client => client.CalculateZZZCultivateAsync(role, request, lang, cancellationToken), cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 官方抽卡统计与养成指南请求前的准备：国际服设置请求语言，国服确保设备指纹已就绪。
     /// </summary>
     /// <param name="role">绝区零角色。</param>
     /// <param name="language">期望语言。</param>

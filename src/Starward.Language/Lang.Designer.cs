@@ -13942,5 +13942,536 @@ namespace Starward.Language {
                 return ResourceManager.GetString("PasswordLogin_IdentityVerifyTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 Cultivation Guide 的本地化字符串。
+        /// </summary>
+        public static string HoyolabToolboxPage_ZZZCultivateGuide {
+            get {
+                return ResourceManager.GetString("HoyolabToolboxPage_ZZZCultivateGuide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not owned 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_NotOwned {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_NotOwned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Skills 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_Skills {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_Skills", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 W-Engine 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_WEngine {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_WEngine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 W-Engine Level 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_WEngineLevel {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_WEngineLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not equipped 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_NotEquipped {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_NotEquipped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Recommended Build 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_RecommendedPlan {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_RecommendedPlan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Community build by {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_PlanAuthorFormat {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_PlanAuthorFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disc Sets 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_DiscSets {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_DiscSets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Main Stats 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_MainStats {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_MainStats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Slot {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SlotFormat {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SlotFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sub-stats 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SubStats {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SubStats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Skill Priority 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SkillPriority {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SkillPriority", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Team 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_Team {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_Team", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Material Calculator 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_Calculator {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_Calculator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Agent Level 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AgentLevel {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AgentLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Calculate 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_Calculate {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_Calculate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Don't include W-Engine 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SkipWEngine {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SkipWEngine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Need {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_NeedFormat {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_NeedFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Short {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_LackFormat {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_LackFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enough 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_Enough {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_Enough", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not yet available 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_NotOpened {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_NotOpened", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 You have all the materials. 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AllEnough {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AllEnough", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Phase {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_RefinementFormat {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_RefinementFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Mindscape {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_MindscapeFormat {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_MindscapeFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Basic Attack 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SkillBasicAttack {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SkillBasicAttack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Special Attack 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SkillSpecialAttack {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SkillSpecialAttack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Dodge 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SkillDodge {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SkillDodge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Chain Attack 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SkillChainAttack {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SkillChainAttack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Core Skill 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SkillCore {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SkillCore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Assist 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SkillAssist {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SkillAssist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Upcoming 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_Teaser {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_Teaser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Materials for upcoming agents are official preview data and may change before release. 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_TeaserHint {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_TeaserHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Include signature W-Engine 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_TeaserIncludeWEngine {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_TeaserIncludeWEngine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Priority skills to Lv.12 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_TeaserMaxSkills {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_TeaserMaxSkills", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Search agents or factions 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SearchPlaceholder {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SearchPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Ownership 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_FilterOwnership {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_FilterOwnership", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Owned 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_Owned {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_Owned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Rarity 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_FilterRarity {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_FilterRarity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Attribute 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_FilterAttribute {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_FilterAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Specialty 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_FilterSpecialty {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_FilterSpecialty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Physical 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AttributePhysical {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AttributePhysical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fire 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AttributeFire {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AttributeFire", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Ice 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AttributeIce {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AttributeIce", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Electric 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AttributeElectric {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AttributeElectric", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Ether 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AttributeEther {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AttributeEther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Wind 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AttributeWind {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AttributeWind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lumen 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_AttributeLumen {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_AttributeLumen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Attack 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SpecialtyAttack {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SpecialtyAttack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Stun 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SpecialtyStun {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SpecialtyStun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Anomaly 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SpecialtyAnomaly {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SpecialtyAnomaly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Support 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SpecialtySupport {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SpecialtySupport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Defense 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SpecialtyDefense {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SpecialtyDefense", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Rupture 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SpecialtyRupture {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SpecialtyRupture", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Armorer 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SpecialtyArmorer {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SpecialtyArmorer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Materials 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_Materials {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_Materials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Spare lower-tier materials count toward the next tier at 3:1; higher tiers can't be broken down. 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_SynthesisHint {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_SynthesisHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Have {0} 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_OwnedFormat {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_OwnedFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Have {0} + {1} crafted 的本地化字符串。
+        /// </summary>
+        public static string ZZZCultivatePage_OwnedSynthFormat {
+            get {
+                return ResourceManager.GetString("ZZZCultivatePage_OwnedSynthFormat", resourceCulture);
+            }
+        }
     }
 }

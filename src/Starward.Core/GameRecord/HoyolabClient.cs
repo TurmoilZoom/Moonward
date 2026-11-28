@@ -926,6 +926,33 @@ public class HoyolabClient : GameRecordClient
 
 
     /// <summary>
+    /// 养成指南请求（国际服 sg-act-public-api）。禁止 x-rpc-device_id；名称语言由 mi18nLang 与 x-rpc-lang 决定。
+    /// </summary>
+    protected override HttpRequestMessage CreateZZZCultivateRequest(GameRecordRole role, string cookie, HttpMethod method, string pathAndQuery, object? body)
+    {
+        var request = new HttpRequestMessage(method, BuildZZZCultivateUrl("sg-act-public-api.hoyolab.com", role, pathAndQuery))
+        {
+            Content = CreateZZZCultivateContent(body),
+        };
+        request.Headers.Add(Cookie, ApplyMi18nLangToCookie(cookie, Language));
+        request.Headers.Add(Referer, "https://act.hoyolab.com/zzz/gt/character-builder-h/index.html");
+        request.Headers.Add(x_rpc_app_version, "1.5.0");
+        request.Headers.Add(x_rpc_client_type, "5");
+        request.Headers.Add(x_rpc_language, Language);
+        request.Headers.Add("x-rpc-lang", Language);
+        request.Headers.Add("x-rpc-cultivate_source", "pc");
+        // 网页每个请求都带；不带时代理人列表不含未实装的预告代理人
+        request.Headers.Add("x-rpc-is_teaser", "1");
+        if (!string.IsNullOrWhiteSpace(DeviceFp))
+        {
+            request.Headers.Add(x_rpc_device_fp, DeviceFp);
+        }
+        return request;
+    }
+
+
+
+    /// <summary>
     /// 养成指南 icon_info（国际服）。
     /// </summary>
     public override async Task<UpgradeGuidIconInfo> GetZZZUpgradeGuideIconInfoAsync(GameRecordRole role, string cookie, CancellationToken cancellationToken = default)

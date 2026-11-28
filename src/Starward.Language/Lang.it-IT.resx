@@ -4757,4 +4757,181 @@ You are welcome to submit exported data to:</value>
   <data name="GameReservationView_PreRegister" xml:space="preserve">
     <value>Pre-registrati ora</value>
   </data>
+  <data name="HoyolabToolboxPage_ZZZCultivateGuide" xml:space="preserve">
+    <value>Guida allo sviluppo</value>
+  </data>
+  <data name="ZZZCultivatePage_NotOwned" xml:space="preserve">
+    <value>Non posseduto</value>
+  </data>
+  <data name="ZZZCultivatePage_Skills" xml:space="preserve">
+    <value>Abilità</value>
+  </data>
+  <data name="ZZZCultivatePage_WEngine" xml:space="preserve">
+    <value>W-Engine</value>
+  </data>
+  <data name="ZZZCultivatePage_WEngineLevel" xml:space="preserve">
+    <value>Livello W-Engine</value>
+  </data>
+  <data name="ZZZCultivatePage_NotEquipped" xml:space="preserve">
+    <value>Non equipaggiato</value>
+  </data>
+  <data name="ZZZCultivatePage_RecommendedPlan" xml:space="preserve">
+    <value>Build consigliata</value>
+  </data>
+  <data name="ZZZCultivatePage_PlanAuthorFormat" xml:space="preserve">
+    <value>Build della community di {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_DiscSets" xml:space="preserve">
+    <value>Disc Sets</value>
+  </data>
+  <data name="ZZZCultivatePage_MainStats" xml:space="preserve">
+    <value>Statistiche principali</value>
+  </data>
+  <data name="ZZZCultivatePage_SlotFormat" xml:space="preserve">
+    <value>Slot {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_SubStats" xml:space="preserve">
+    <value>Statistiche secondarie</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillPriority" xml:space="preserve">
+    <value>Priorità abilità</value>
+  </data>
+  <data name="ZZZCultivatePage_Team" xml:space="preserve">
+    <value>Squadra</value>
+  </data>
+  <data name="ZZZCultivatePage_Calculator" xml:space="preserve">
+    <value>Calcolatore materiali</value>
+  </data>
+  <data name="ZZZCultivatePage_AgentLevel" xml:space="preserve">
+    <value>Livello agente</value>
+  </data>
+  <data name="ZZZCultivatePage_Calculate" xml:space="preserve">
+    <value>Calcola</value>
+  </data>
+  <data name="ZZZCultivatePage_SkipWEngine" xml:space="preserve">
+    <value>Senza W-Engine</value>
+  </data>
+  <data name="ZZZCultivatePage_NeedFormat" xml:space="preserve">
+    <value>Richiesti {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_LackFormat" xml:space="preserve">
+    <value>Mancano {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_Enough" xml:space="preserve">
+    <value>Sufficiente</value>
+  </data>
+  <data name="ZZZCultivatePage_NotOpened" xml:space="preserve">
+    <value>Non ancora disponibile</value>
+  </data>
+  <data name="ZZZCultivatePage_AllEnough" xml:space="preserve">
+    <value>Hai tutti i materiali.</value>
+  </data>
+  <data name="ZZZCultivatePage_RefinementFormat" xml:space="preserve">
+    <value>Phase {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_MindscapeFormat" xml:space="preserve">
+    <value>Mindscape {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillBasicAttack" xml:space="preserve">
+    <value>Basic Attack</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillSpecialAttack" xml:space="preserve">
+    <value>Special Attack</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillDodge" xml:space="preserve">
+    <value>Dodge</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillChainAttack" xml:space="preserve">
+    <value>Chain Attack</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillCore" xml:space="preserve">
+    <value>Core Skill</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillAssist" xml:space="preserve">
+    <value>Assist</value>
+  </data>
+  <data name="ZZZCultivatePage_Teaser" xml:space="preserve">
+    <value>In arrivo</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserHint" xml:space="preserve">
+    <value>I materiali degli agenti in arrivo sono dati di anteprima ufficiali e potrebbero cambiare prima dell'uscita.</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserIncludeWEngine" xml:space="preserve">
+    <value>Includi W-Engine esclusivo</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserMaxSkills" xml:space="preserve">
+    <value>Abilità prioritarie al Liv. 12</value>
+  </data>
+  <data name="ZZZCultivatePage_SearchPlaceholder" xml:space="preserve">
+    <value>Cerca agenti o fazioni</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterOwnership" xml:space="preserve">
+    <value>Possesso</value>
+  </data>
+  <data name="ZZZCultivatePage_Owned" xml:space="preserve">
+    <value>Posseduto</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterRarity" xml:space="preserve">
+    <value>Rarità</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterAttribute" xml:space="preserve">
+    <value>Attributo</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterSpecialty" xml:space="preserve">
+    <value>Specialità</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributePhysical" xml:space="preserve">
+    <value>Physical</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeFire" xml:space="preserve">
+    <value>Fire</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeIce" xml:space="preserve">
+    <value>Ice</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeElectric" xml:space="preserve">
+    <value>Electric</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeEther" xml:space="preserve">
+    <value>Ether</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeWind" xml:space="preserve">
+    <value>Wind</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeLumen" xml:space="preserve">
+    <value>Lumen</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyAttack" xml:space="preserve">
+    <value>Attack</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyStun" xml:space="preserve">
+    <value>Stun</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyAnomaly" xml:space="preserve">
+    <value>Anomaly</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtySupport" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyDefense" xml:space="preserve">
+    <value>Defense</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyRupture" xml:space="preserve">
+    <value>Rupture</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyArmorer" xml:space="preserve">
+    <value>Armorer</value>
+  </data>
+  <data name="ZZZCultivatePage_Materials" xml:space="preserve">
+    <value>Materiali</value>
+  </data>
+  <data name="ZZZCultivatePage_SynthesisHint" xml:space="preserve">
+    <value>I materiali di livello inferiore in eccesso valgono per il livello successivo in rapporto 3:1; quelli superiori non si possono scomporre.</value>
+  </data>
+  <data name="ZZZCultivatePage_OwnedFormat" xml:space="preserve">
+    <value>Possiedi {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_OwnedSynthFormat" xml:space="preserve">
+    <value>Possiedi {0} + {1} sintetizzati</value>
+  </data>
 </root>

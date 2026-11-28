@@ -1,0 +1,731 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:PageBase x:Class="Starward.Features.GameRecord.ZZZ.ZZZCultivatePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cc="using:CommunityToolkit.WinUI.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:lang="using:Starward.Language"
+             xmlns:local="using:Starward.Features.GameRecord.ZZZ"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
+             xmlns:sf="using:Starward.Frameworks"
+             xmlns:sfgr="using:Starward.Features.GameRecord"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <Page.Resources>
+        <local:ZZZRarityToIconConverter x:Key="ZZZRarityToIconConverter" />
+        <Style x:Key="ZZZCultivateCardTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="ZZZCultivateLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Style>
+        <!--  材料格：需要 / 持有（含合成补充）/ 结论（按状态着色）  -->
+        <DataTemplate x:Key="ZZZCultivateMaterialTemplate" x:DataType="local:ZZZCultivateMaterialView">
+            <Grid Width="176"
+                  Padding="8,6,8,6"
+                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                  BorderThickness="1"
+                  ColumnSpacing="8"
+                  CornerRadius="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <sc:CachedImage Width="40"
+                                Height="40"
+                                Source="{x:Bind Icon}"
+                                ToolTipService.ToolTip="{x:Bind Name}" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock FontSize="12"
+                               Text="{x:Bind Name}"
+                               TextTrimming="CharacterEllipsis"
+                               ToolTipService.ToolTip="{x:Bind Name}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind NeedText}"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind OwnedText}"
+                               TextTrimming="CharacterEllipsis"
+                               ToolTipService.ToolTip="{x:Bind OwnedText}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                               Text="{x:Bind StatusText}"
+                               TextTrimming="CharacterEllipsis"
+                               Visibility="{x:Bind LackVisibility}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                               Text="{x:Bind StatusText}"
+                               TextTrimming="CharacterEllipsis"
+                               Visibility="{x:Bind EnoughVisibility}" />
+                    <TextBlock FontSize="12"
+                               Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                               Text="{x:Bind StatusText}"
+                               TextTrimming="CharacterEllipsis"
+                               Visibility="{x:Bind NotOpenedVisibility}" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Name="Image_Emoji"
+                    Grid.RowSpan="3"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="16"
+                    Visibility="Collapsed">
+            <Image Width="160"
+                   Height="160"
+                   Source="{StaticResource EmojiBangboo}" />
+            <TextBlock HorizontalAlignment="Center"
+                       FontSize="16"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Text="{x:Bind lang:Lang.HoyolabToolboxPage_NoData}" />
+        </StackPanel>
+
+        <!--  刷新  -->
+        <StackPanel Margin="0,24,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top">
+            <Button Height="36"
+                    BorderThickness="0"
+                    Command="{x:Bind RefreshDataCommand}"
+                    CornerRadius="0,18,18,0"
+                    Style="{ThemeResource AccentButtonStyle}">
+                <StackPanel Margin="4,0,4,0"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                    <Grid>
+                        <ProgressRing Width="16"
+                                      Height="16"
+                                      IsActive="{x:Bind IsLoading}" />
+                        <FontIcon FontSize="16"
+                                  Glyph="&#xE72C;"
+                                  Visibility="{x:Bind IsLoading, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                    </Grid>
+                    <TextBlock Text="{x:Bind lang:Lang.Common_Refresh}" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+
+        <!--  快速定位：按名称 / 英文名 / 阵营搜索；筛选按钮弹出可勾选的选项（拥有情况、稀有度、属性、特性；组内或、组间且）  -->
+        <Grid Grid.Row="1"
+              Width="176"
+              Margin="12,12,12,0"
+              HorizontalAlignment="Left"
+              ColumnSpacing="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="TextBox_Search"
+                     AutomationProperties.Name="{x:Bind lang:Lang.ZZZCultivatePage_SearchPlaceholder}"
+                     PlaceholderText="{x:Bind lang:Lang.ZZZCultivatePage_SearchPlaceholder}"
+                     TextChanged="TextBox_Search_TextChanged" />
+            <Button x:Name="Button_Filter"
+                    Grid.Column="1"
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    AutomationProperties.Name="{x:Bind lang:Lang.Common_Filter}"
+                    ToolTipService.ToolTip="{x:Bind lang:Lang.Common_Filter}">
+                <Grid Width="20" Height="20">
+                    <FontIcon HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              FontSize="14"
+                              Glyph="&#xE71C;" />
+                    <!--  有勾选时的提示圆点  -->
+                    <Ellipse Width="6"
+                             Height="6"
+                             HorizontalAlignment="Right"
+                             VerticalAlignment="Top"
+                             Fill="{ThemeResource AccentFillColorDefaultBrush}"
+                             Visibility="{x:Bind FilterActiveVisibility}" />
+                </Grid>
+                <Button.Flyout>
+                    <Flyout Placement="BottomEdgeAlignedLeft">
+                        <Grid Width="320" RowSpacing="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid>
+                                <TextBlock VerticalAlignment="Center"
+                                           Style="{StaticResource ZZZCultivateCardTitleStyle}"
+                                           Text="{x:Bind lang:Lang.Common_Filter}" />
+                                <HyperlinkButton x:Name="Button_FilterReset"
+                                                 Padding="8,4,8,4"
+                                                 HorizontalAlignment="Right"
+                                                 Click="Button_FilterReset_Click"
+                                                 Content="{x:Bind lang:Lang.Common_Reset}" />
+                            </Grid>
+                            <!--  主窗口固定约 676 高，弹层从搜索栏下方展开，400 才放得下不被窗口底边裁掉  -->
+                            <ScrollViewer Grid.Row="1"
+                                          MaxHeight="400"
+                                          Margin="0,0,-12,0"
+                                          Padding="0,0,12,0">
+                                <ItemsControl ItemsSource="{x:Bind FilterGroups}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="10" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="local:ZZZCultivateFilterGroup">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}" Text="{x:Bind Title}" />
+                                                <ItemsControl ItemsSource="{x:Bind Options}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <cc:WrapPanel HorizontalSpacing="4" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="local:ZZZCultivateFilterOption">
+                                                            <CheckBox MinWidth="0"
+                                                                      Margin="0,0,8,0"
+                                                                      Content="{x:Bind Label}"
+                                                                      IsChecked="{x:Bind IsChecked, Mode=TwoWay}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </Grid>
+
+        <!--  代理人列表：预告在最上，其次已拥有，未拥有调淡  -->
+        <ListView Name="ListView_Agents"
+                  Grid.Row="2"
+                  Margin="0,8,0,0"
+                  Padding="12,0,12,12"
+                  ItemContainerStyle="{StaticResource GameRecordListViewItemStyle}"
+                  ItemsSource="{x:Bind AgentList}"
+                  SelectionChanged="ListView_Agents_SelectionChanged"
+                  SelectionMode="Single"
+                  Visibility="{x:Bind AgentList, Converter={StaticResource ObjectToVisibilityConverter}}"
+                  sfgr:GameRecordListDragScroll.IsEnabled="True">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="local:ZZZCultivateAgentItem">
+                    <Grid Width="176"
+                          Padding="8,6,8,6"
+                          Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                          ColumnSpacing="10"
+                          CornerRadius="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <sc:CachedImage Width="40"
+                                        Height="40"
+                                        CornerRadius="20"
+                                        Opacity="{x:Bind Opacity}"
+                                        Source="{x:Bind Icon}"
+                                        Stretch="UniformToFill" />
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Opacity="{x:Bind Opacity}">
+                            <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind LevelText}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="{x:Bind LevelVisibility}" />
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                       Text="{x:Bind lang:Lang.ZZZCultivatePage_Teaser}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="{x:Bind TeaserVisibility}" />
+                        </StackPanel>
+                        <Image Grid.Column="2"
+                               Width="16"
+                               Height="16"
+                               VerticalAlignment="Center"
+                               Opacity="{x:Bind Opacity}"
+                               Source="{x:Bind Rarity, Converter={StaticResource ZZZRarityToIconConverter}}" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!--  详情  -->
+        <Grid Grid.RowSpan="3" Grid.Column="1">
+            <ScrollViewer x:Name="ScrollViewer_Detail" Visibility="{x:Bind CurrentView, Converter={StaticResource ObjectToVisibilityConverter}}">
+                <StackPanel Margin="24,24,24,24" Spacing="16">
+
+                    <!--  养成计算（含代理人信息）  -->
+                    <Grid Padding="16,12,16,16"
+                          Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                          CornerRadius="8"
+                          Shadow="{ThemeResource ThemeShadow}"
+                          Translation="0,0,16">
+                        <StackPanel Spacing="12">
+                            <!--  代理人  -->
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Grid Width="64" Height="64">
+                                    <sc:CachedImage CornerRadius="32"
+                                                    Source="{x:Bind CurrentView.Icon}"
+                                                    Stretch="UniformToFill" />
+                                    <Image Width="18"
+                                           Height="18"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Top"
+                                           Source="{x:Bind CurrentView.Rarity, Converter={StaticResource ZZZRarityToIconConverter}}" />
+                                </Grid>
+                                <StackPanel Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="2">
+                                    <TextBlock>
+                                        <Run FontSize="20"
+                                             FontWeight="SemiBold"
+                                             Text="{x:Bind CurrentView.Name}" />
+                                        <Run Text="  " />
+                                        <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentView.LevelText}" />
+                                        <Run Text="  " />
+                                        <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentView.RankText}" />
+                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <sc:CachedImage Width="16"
+                                                        Height="16"
+                                                        VerticalAlignment="Center"
+                                                        Source="{x:Bind CurrentView.CampIcon}" />
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Style="{StaticResource ZZZCultivateLabelStyle}"
+                                                   Text="{x:Bind CurrentView.CampName}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}"
+                                               TextWrapping="Wrap"
+                                               Visibility="{x:Bind CurrentView.SkillPriorityVisibility, FallbackValue=Collapsed}">
+                                        <Run Text="{x:Bind lang:Lang.ZZZCultivatePage_SkillPriority}" />
+                                        <Run Text="  " />
+                                        <Run Foreground="{ThemeResource TextFillColorPrimaryBrush}" Text="{x:Bind CurrentView.SkillPriority}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Style="{StaticResource ZZZCultivateCardTitleStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_Calculator}" />
+
+                            <!--  预告代理人：官方按开关算好的全套材料  -->
+                            <StackPanel Spacing="4" Visibility="{x:Bind CurrentView.TeaserVisibility, FallbackValue=Collapsed}">
+                                <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}"
+                                           Text="{x:Bind lang:Lang.ZZZCultivatePage_TeaserHint}"
+                                           TextWrapping="Wrap" />
+                                <StackPanel Orientation="Horizontal" Spacing="24">
+                                    <CheckBox x:Name="CheckBox_TeaserIncludeWeapon"
+                                              Checked="TeaserOption_Changed"
+                                              Unchecked="TeaserOption_Changed"
+                                              Content="{x:Bind lang:Lang.ZZZCultivatePage_TeaserIncludeWEngine}"
+                                              IsChecked="True" />
+                                    <CheckBox x:Name="CheckBox_TeaserMaxSkills"
+                                              Checked="TeaserOption_Changed"
+                                              Unchecked="TeaserOption_Changed"
+                                              Content="{x:Bind lang:Lang.ZZZCultivatePage_TeaserMaxSkills}"
+                                              IsChecked="True" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!--  已实装代理人：自定义目标等级  -->
+                            <StackPanel Spacing="12" Visibility="{x:Bind CurrentView.CalculatorVisibility, FallbackValue=Collapsed}">
+                                <ItemsControl ItemsSource="{x:Bind CurrentView.CalcRows}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <cc:WrapPanel HorizontalSpacing="32" VerticalSpacing="8" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="local:ZZZCultivateCalcRow">
+                                            <Grid Width="272" ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition />
+                                                    <ColumnDefinition Width="44" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="104" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock VerticalAlignment="Center"
+                                                           Text="{x:Bind Name}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="1"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           Text="{x:Bind CurrentText}" />
+                                                <FontIcon Grid.Column="2"
+                                                          FontSize="12"
+                                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                          Glyph="&#xE72A;" />
+                                                <NumberBox Grid.Column="3"
+                                                           Maximum="{x:Bind Maximum}"
+                                                           Minimum="{x:Bind Minimum}"
+                                                           SmallChange="1"
+                                                           SpinButtonPlacementMode="Compact"
+                                                           Value="{x:Bind Target, Mode=TwoWay}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <!--  音擎  -->
+                                <cc:WrapPanel HorizontalSpacing="32" VerticalSpacing="8">
+                                    <Grid Width="272" ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock VerticalAlignment="Center" Text="{x:Bind lang:Lang.ZZZCultivatePage_WEngine}" />
+                                        <ComboBox Grid.Column="1"
+                                                  HorizontalAlignment="Stretch"
+                                                  ItemsSource="{x:Bind CurrentView.WeaponOptions}"
+                                                  SelectedItem="{x:Bind CurrentView.SelectedWeaponOption}"
+                                                  SelectionChanged="ComboBox_Weapon_SelectionChanged" />
+                                    </Grid>
+                                    <Grid Width="272"
+                                          ColumnSpacing="8"
+                                          Visibility="{x:Bind CurrentView.WeaponRowVisibility, FallbackValue=Collapsed}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition Width="44" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="104" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{x:Bind lang:Lang.ZZZCultivatePage_WEngineLevel}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="1"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                   Text="{x:Bind CurrentView.WeaponRow.CurrentText}" />
+                                        <FontIcon Grid.Column="2"
+                                                  FontSize="12"
+                                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                  Glyph="&#xE72A;" />
+                                        <NumberBox Grid.Column="3"
+                                                   Maximum="{x:Bind CurrentView.WeaponRow.Maximum, FallbackValue=60}"
+                                                   Minimum="{x:Bind CurrentView.WeaponRow.Minimum, FallbackValue=0}"
+                                                   SmallChange="1"
+                                                   SpinButtonPlacementMode="Compact"
+                                                   Value="{x:Bind CurrentView.WeaponRow.Target, Mode=TwoWay}" />
+                                    </Grid>
+                                </cc:WrapPanel>
+                                <Button HorizontalAlignment="Left"
+                                        Command="{x:Bind CalculateCommand}"
+                                        Style="{ThemeResource AccentButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Grid>
+                                            <ProgressRing Width="16"
+                                                          Height="16"
+                                                          IsActive="{x:Bind CalculateCommand.IsRunning}" />
+                                            <FontIcon FontSize="16"
+                                                      Glyph="&#xE8EF;"
+                                                      Visibility="{x:Bind CalculateCommand.IsRunning, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                                        </Grid>
+                                        <TextBlock Text="{x:Bind lang:Lang.ZZZCultivatePage_Calculate}" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
+                            <!--  结果：每种材料的需要 / 持有 / 缺口，低阶富余按 3:1 合成计入高阶  -->
+                            <StackPanel Spacing="8" Visibility="{x:Bind CurrentView.ResultVisibility, FallbackValue=Collapsed}">
+                                <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}" TextWrapping="Wrap">
+                                    <Run FontWeight="SemiBold"
+                                         Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                         Text="{x:Bind lang:Lang.ZZZCultivatePage_Materials}" />
+                                    <Run Text="  " />
+                                    <Run Text="{x:Bind lang:Lang.ZZZCultivatePage_SynthesisHint}" />
+                                </TextBlock>
+                                <TextBlock Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                           Text="{x:Bind lang:Lang.ZZZCultivatePage_AllEnough}"
+                                           Visibility="{x:Bind CurrentView.AllEnoughVisibility, FallbackValue=Collapsed}" />
+                                <ItemsControl ItemTemplate="{StaticResource ZZZCultivateMaterialTemplate}" ItemsSource="{x:Bind CurrentView.Result.Items}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <cc:WrapPanel HorizontalSpacing="8" VerticalSpacing="8" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <!--  技能与音擎（已拥有）  -->
+                    <Grid Padding="16,12,16,12"
+                          Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                          ColumnSpacing="32"
+                          CornerRadius="8"
+                          Shadow="{ThemeResource ThemeShadow}"
+                          Translation="0,0,16"
+                          Visibility="{x:Bind CurrentView.OwnedVisibility, FallbackValue=Collapsed}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="8">
+                            <TextBlock Style="{StaticResource ZZZCultivateCardTitleStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_Skills}" />
+                            <ItemsControl ItemsSource="{x:Bind CurrentView.Skills}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="6" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="local:ZZZCultivateSkillRow">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="72" />
+                                                <ColumnDefinition />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       Text="{x:Bind TypeName}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{x:Bind Title}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="2"
+                                                       FontWeight="SemiBold"
+                                                       Text="{x:Bind LevelText}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Style="{StaticResource ZZZCultivateCardTitleStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_WEngine}" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="{x:Bind lang:Lang.ZZZCultivatePage_NotEquipped}"
+                                       Visibility="{x:Bind CurrentView.NoWeaponVisibility, FallbackValue=Collapsed}" />
+                            <Grid ColumnSpacing="12"
+                                  RowSpacing="8"
+                                  Visibility="{x:Bind CurrentView.WeaponVisibility, FallbackValue=Collapsed}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Width="64" Height="64">
+                                    <sc:CachedImage Source="{x:Bind CurrentView.Weapon.Icon}" Stretch="Uniform" />
+                                    <Image Width="16"
+                                           Height="16"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Top"
+                                           Source="{x:Bind CurrentView.Weapon.Rarity, Converter={StaticResource ZZZRarityToIconConverter}}" />
+                                </Grid>
+                                <StackPanel Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="2">
+                                    <TextBlock FontWeight="SemiBold"
+                                               Text="{x:Bind CurrentView.Weapon.Name}"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}" Text="{x:Bind CurrentView.Weapon.LevelText}" />
+                                    <TextBlock FontSize="12" Text="{x:Bind CurrentView.Weapon.MainStat}" />
+                                    <TextBlock FontSize="12" Text="{x:Bind CurrentView.Weapon.SubStat}" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1"
+                                            Grid.ColumnSpan="2"
+                                            Spacing="4">
+                                    <TextBlock FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Text="{x:Bind CurrentView.Weapon.TalentTitle}" />
+                                    <sc:ColorfulTextBlock FontSize="12"
+                                                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                          Text="{x:Bind CurrentView.Weapon.TalentContent}"
+                                                          TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+
+                    <!--  推荐方案（玩家投稿）  -->
+                    <Grid Padding="16,12,16,16"
+                          Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                          CornerRadius="8"
+                          Shadow="{ThemeResource ThemeShadow}"
+                          Translation="0,0,16"
+                          Visibility="{x:Bind CurrentView.PlanVisibility, FallbackValue=Collapsed}">
+                        <StackPanel Spacing="12">
+                            <StackPanel Spacing="2">
+                                <TextBlock Style="{StaticResource ZZZCultivateCardTitleStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_RecommendedPlan}" />
+                                <TextBlock FontWeight="SemiBold"
+                                           IsTextSelectionEnabled="True"
+                                           Text="{x:Bind CurrentView.Plan.Name}"
+                                           TextWrapping="Wrap" />
+                                <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}"
+                                           Text="{x:Bind CurrentView.Plan.Author}"
+                                           Visibility="{x:Bind CurrentView.Plan.AuthorVisibility, FallbackValue=Collapsed}" />
+                            </StackPanel>
+                            <TextBlock FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       IsTextSelectionEnabled="True"
+                                       Text="{x:Bind CurrentView.Plan.Desc}"
+                                       TextWrapping="Wrap"
+                                       Visibility="{x:Bind CurrentView.Plan.DescVisibility, FallbackValue=Collapsed}" />
+                            <Grid ColumnSpacing="32">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <!--  推荐音擎  -->
+                                <StackPanel Spacing="6" Visibility="{x:Bind CurrentView.Plan.WeaponsVisibility, FallbackValue=Collapsed}">
+                                    <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_WEngine}" />
+                                    <ItemsControl ItemsSource="{x:Bind CurrentView.Plan.Weapons}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Spacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="local:ZZZCultivateWeaponView">
+                                                <Grid ColumnSpacing="8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid Width="44" Height="44">
+                                                        <sc:CachedImage Source="{x:Bind Icon}" Stretch="Uniform" />
+                                                        <Image Width="14"
+                                                               Height="14"
+                                                               HorizontalAlignment="Left"
+                                                               VerticalAlignment="Top"
+                                                               Source="{x:Bind Rarity, Converter={StaticResource ZZZRarityToIconConverter}}" />
+                                                    </Grid>
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}"
+                                                                   Text="{x:Bind TalentTitle}"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                                <!--  推荐套装  -->
+                                <StackPanel Grid.Column="1"
+                                            Spacing="6"
+                                            Visibility="{x:Bind CurrentView.Plan.SuitsVisibility, FallbackValue=Collapsed}">
+                                    <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_DiscSets}" />
+                                    <ItemsControl ItemsSource="{x:Bind CurrentView.Plan.Suits}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Spacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="local:ZZZCultivateSuitView">
+                                                <Grid ColumnSpacing="8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition />
+                                                    </Grid.ColumnDefinitions>
+                                                    <sc:CachedImage Width="36"
+                                                                    Height="36"
+                                                                    VerticalAlignment="Top"
+                                                                    Source="{x:Bind Icon}" />
+                                                    <StackPanel Grid.Column="1" Spacing="2">
+                                                        <TextBlock>
+                                                            <Run Text="{x:Bind Name}" />
+                                                            <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CountText}" />
+                                                        </TextBlock>
+                                                        <sc:ColorfulTextBlock FontSize="12"
+                                                                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                              Text="{x:Bind Desc}"
+                                                                              TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+                            <Grid ColumnSpacing="32" RowSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Spacing="4" Visibility="{x:Bind CurrentView.Plan.MainStatsVisibility, FallbackValue=Collapsed}">
+                                    <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_MainStats}" />
+                                    <TextBlock Text="{x:Bind CurrentView.Plan.MainStats}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1"
+                                            Spacing="4"
+                                            Visibility="{x:Bind CurrentView.Plan.SubStatsVisibility, FallbackValue=Collapsed}">
+                                    <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_SubStats}" />
+                                    <TextBlock Text="{x:Bind CurrentView.Plan.SubStats}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1"
+                                            Grid.ColumnSpan="2"
+                                            Spacing="4"
+                                            Visibility="{x:Bind CurrentView.Plan.TeamVisibility, FallbackValue=Collapsed}">
+                                    <TextBlock Style="{StaticResource ZZZCultivateLabelStyle}" Text="{x:Bind lang:Lang.ZZZCultivatePage_Team}" />
+                                    <ItemsControl ItemsSource="{x:Bind CurrentView.Plan.Team}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="local:ZZZCultivateTeamMember">
+                                                <StackPanel Width="56" Spacing="2">
+                                                    <sc:CachedImage Width="44"
+                                                                    Height="44"
+                                                                    CornerRadius="22"
+                                                                    Source="{x:Bind Icon}"
+                                                                    Stretch="UniformToFill" />
+                                                    <TextBlock HorizontalAlignment="Center"
+                                                               FontSize="12"
+                                                               Text="{x:Bind Name}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <ProgressRing x:Name="ProgressRing_Detail"
+                          Width="40"
+                          Height="40"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          IsActive="False" />
+        </Grid>
+    </Grid>
+</sf:PageBase>

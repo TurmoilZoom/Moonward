@@ -4756,4 +4756,181 @@
   <data name="GameReservationView_PreRegister" xml:space="preserve">
     <value>今すぐ事前登録</value>
   </data>
+  <data name="HoyolabToolboxPage_ZZZCultivateGuide" xml:space="preserve">
+    <value>育成ガイド</value>
+  </data>
+  <data name="ZZZCultivatePage_NotOwned" xml:space="preserve">
+    <value>未所持</value>
+  </data>
+  <data name="ZZZCultivatePage_Skills" xml:space="preserve">
+    <value>スキル</value>
+  </data>
+  <data name="ZZZCultivatePage_WEngine" xml:space="preserve">
+    <value>音動機</value>
+  </data>
+  <data name="ZZZCultivatePage_WEngineLevel" xml:space="preserve">
+    <value>音動機レベル</value>
+  </data>
+  <data name="ZZZCultivatePage_NotEquipped" xml:space="preserve">
+    <value>未装備</value>
+  </data>
+  <data name="ZZZCultivatePage_RecommendedPlan" xml:space="preserve">
+    <value>おすすめビルド</value>
+  </data>
+  <data name="ZZZCultivatePage_PlanAuthorFormat" xml:space="preserve">
+    <value>投稿者：{0}</value>
+  </data>
+  <data name="ZZZCultivatePage_DiscSets" xml:space="preserve">
+    <value>セット効果</value>
+  </data>
+  <data name="ZZZCultivatePage_MainStats" xml:space="preserve">
+    <value>メインステータス</value>
+  </data>
+  <data name="ZZZCultivatePage_SlotFormat" xml:space="preserve">
+    <value>{0}番</value>
+  </data>
+  <data name="ZZZCultivatePage_SubStats" xml:space="preserve">
+    <value>サブステータス</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillPriority" xml:space="preserve">
+    <value>スキル優先度</value>
+  </data>
+  <data name="ZZZCultivatePage_Team" xml:space="preserve">
+    <value>編成</value>
+  </data>
+  <data name="ZZZCultivatePage_Calculator" xml:space="preserve">
+    <value>育成計算</value>
+  </data>
+  <data name="ZZZCultivatePage_AgentLevel" xml:space="preserve">
+    <value>エージェントレベル</value>
+  </data>
+  <data name="ZZZCultivatePage_Calculate" xml:space="preserve">
+    <value>計算</value>
+  </data>
+  <data name="ZZZCultivatePage_SkipWEngine" xml:space="preserve">
+    <value>音動機を含めない</value>
+  </data>
+  <data name="ZZZCultivatePage_NeedFormat" xml:space="preserve">
+    <value>必要 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_LackFormat" xml:space="preserve">
+    <value>不足 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_Enough" xml:space="preserve">
+    <value>充足</value>
+  </data>
+  <data name="ZZZCultivatePage_NotOpened" xml:space="preserve">
+    <value>未開放</value>
+  </data>
+  <data name="ZZZCultivatePage_AllEnough" xml:space="preserve">
+    <value>素材はすべて揃っています。</value>
+  </data>
+  <data name="ZZZCultivatePage_RefinementFormat" xml:space="preserve">
+    <value>Phase {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_MindscapeFormat" xml:space="preserve">
+    <value>マインドスケープ {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillBasicAttack" xml:space="preserve">
+    <value>通常攻撃</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillSpecialAttack" xml:space="preserve">
+    <value>特殊スキル</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillDodge" xml:space="preserve">
+    <value>回避</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillChainAttack" xml:space="preserve">
+    <value>連携スキル</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillCore" xml:space="preserve">
+    <value>コアスキル</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillAssist" xml:space="preserve">
+    <value>支援スキル</value>
+  </data>
+  <data name="ZZZCultivatePage_Teaser" xml:space="preserve">
+    <value>未実装</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserHint" xml:space="preserve">
+    <value>未実装エージェントの素材は公式の予告データで、実装前に変更される場合があります。</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserIncludeWEngine" xml:space="preserve">
+    <value>専用音動機を含める</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserMaxSkills" xml:space="preserve">
+    <value>優先スキルをLv.12まで</value>
+  </data>
+  <data name="ZZZCultivatePage_SearchPlaceholder" xml:space="preserve">
+    <value>エージェント・陣営を検索</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterOwnership" xml:space="preserve">
+    <value>所持状況</value>
+  </data>
+  <data name="ZZZCultivatePage_Owned" xml:space="preserve">
+    <value>所持</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterRarity" xml:space="preserve">
+    <value>レア度</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterAttribute" xml:space="preserve">
+    <value>属性</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterSpecialty" xml:space="preserve">
+    <value>特性</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributePhysical" xml:space="preserve">
+    <value>物理</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeFire" xml:space="preserve">
+    <value>炎</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeIce" xml:space="preserve">
+    <value>氷</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeElectric" xml:space="preserve">
+    <value>電気</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeEther" xml:space="preserve">
+    <value>エーテル</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeWind" xml:space="preserve">
+    <value>風</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeLumen" xml:space="preserve">
+    <value>Lumen</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyAttack" xml:space="preserve">
+    <value>強攻</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyStun" xml:space="preserve">
+    <value>撃破</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyAnomaly" xml:space="preserve">
+    <value>異常</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtySupport" xml:space="preserve">
+    <value>支援</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyDefense" xml:space="preserve">
+    <value>防護</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyRupture" xml:space="preserve">
+    <value>Rupture</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyArmorer" xml:space="preserve">
+    <value>Armorer</value>
+  </data>
+  <data name="ZZZCultivatePage_Materials" xml:space="preserve">
+    <value>育成素材</value>
+  </data>
+  <data name="ZZZCultivatePage_SynthesisHint" xml:space="preserve">
+    <value>下位素材の余りは 3 個で上位素材 1 個として計算します（上位素材は分解できません）。</value>
+  </data>
+  <data name="ZZZCultivatePage_OwnedFormat" xml:space="preserve">
+    <value>所持 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_OwnedSynthFormat" xml:space="preserve">
+    <value>所持 {0} + 合成 {1}</value>
+  </data>
 </root>

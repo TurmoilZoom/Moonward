@@ -46,6 +46,7 @@
 		<Compile Include="..\..\src\Starward\Features\GameLauncher\RightToolbarItem.cs" Link="Linked\GameLauncher\RightToolbarItem.cs" />
 		<Compile Include="..\..\src\Starward\Features\GameLauncher\RightToolbarLayout.cs" Link="Linked\GameLauncher\RightToolbarLayout.cs" />
 		<Compile Include="..\..\src\Starward\Features\RedeemCode\RedeemCodeNotifySchedule.cs" Link="Linked\RedeemCode\RedeemCodeNotifySchedule.cs" />
+		<Compile Include="..\..\src\Starward\Features\GameRecord\ZZZ\ZZZCultivateMaterialPlanner.cs" Link="Linked\GameRecord\ZZZCultivateMaterialPlanner.cs" />
 	</ItemGroup>
 
 </Project>

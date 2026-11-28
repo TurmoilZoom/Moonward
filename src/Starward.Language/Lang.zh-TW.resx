@@ -4757,4 +4757,181 @@
   <data name="GameReservationView_PreRegister" xml:space="preserve">
     <value>立即預約</value>
   </data>
+  <data name="HoyolabToolboxPage_ZZZCultivateGuide" xml:space="preserve">
+    <value>養成指南</value>
+  </data>
+  <data name="ZZZCultivatePage_NotOwned" xml:space="preserve">
+    <value>未擁有</value>
+  </data>
+  <data name="ZZZCultivatePage_Skills" xml:space="preserve">
+    <value>技能</value>
+  </data>
+  <data name="ZZZCultivatePage_WEngine" xml:space="preserve">
+    <value>音擎</value>
+  </data>
+  <data name="ZZZCultivatePage_WEngineLevel" xml:space="preserve">
+    <value>音擎等級</value>
+  </data>
+  <data name="ZZZCultivatePage_NotEquipped" xml:space="preserve">
+    <value>未裝備</value>
+  </data>
+  <data name="ZZZCultivatePage_RecommendedPlan" xml:space="preserve">
+    <value>推薦方案</value>
+  </data>
+  <data name="ZZZCultivatePage_PlanAuthorFormat" xml:space="preserve">
+    <value>玩家投稿：{0}</value>
+  </data>
+  <data name="ZZZCultivatePage_DiscSets" xml:space="preserve">
+    <value>套裝</value>
+  </data>
+  <data name="ZZZCultivatePage_MainStats" xml:space="preserve">
+    <value>主詞條</value>
+  </data>
+  <data name="ZZZCultivatePage_SlotFormat" xml:space="preserve">
+    <value>{0}號位</value>
+  </data>
+  <data name="ZZZCultivatePage_SubStats" xml:space="preserve">
+    <value>副詞條</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillPriority" xml:space="preserve">
+    <value>技能優先級</value>
+  </data>
+  <data name="ZZZCultivatePage_Team" xml:space="preserve">
+    <value>配隊</value>
+  </data>
+  <data name="ZZZCultivatePage_Calculator" xml:space="preserve">
+    <value>養成計算</value>
+  </data>
+  <data name="ZZZCultivatePage_AgentLevel" xml:space="preserve">
+    <value>代理人等級</value>
+  </data>
+  <data name="ZZZCultivatePage_Calculate" xml:space="preserve">
+    <value>計算</value>
+  </data>
+  <data name="ZZZCultivatePage_SkipWEngine" xml:space="preserve">
+    <value>不計算音擎</value>
+  </data>
+  <data name="ZZZCultivatePage_NeedFormat" xml:space="preserve">
+    <value>需要 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_LackFormat" xml:space="preserve">
+    <value>還差 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_Enough" xml:space="preserve">
+    <value>已足夠</value>
+  </data>
+  <data name="ZZZCultivatePage_NotOpened" xml:space="preserve">
+    <value>未開放</value>
+  </data>
+  <data name="ZZZCultivatePage_AllEnough" xml:space="preserve">
+    <value>材料都夠了。</value>
+  </data>
+  <data name="ZZZCultivatePage_RefinementFormat" xml:space="preserve">
+    <value>精{0}</value>
+  </data>
+  <data name="ZZZCultivatePage_MindscapeFormat" xml:space="preserve">
+    <value>影畫 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillBasicAttack" xml:space="preserve">
+    <value>普通攻擊</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillSpecialAttack" xml:space="preserve">
+    <value>特殊技</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillDodge" xml:space="preserve">
+    <value>閃避</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillChainAttack" xml:space="preserve">
+    <value>連攜技</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillCore" xml:space="preserve">
+    <value>核心技</value>
+  </data>
+  <data name="ZZZCultivatePage_SkillAssist" xml:space="preserve">
+    <value>支援技</value>
+  </data>
+  <data name="ZZZCultivatePage_Teaser" xml:space="preserve">
+    <value>未實裝</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserHint" xml:space="preserve">
+    <value>未實裝代理人的材料來自官方預告資料，正式上線前可能調整。</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserIncludeWEngine" xml:space="preserve">
+    <value>包含專屬音擎</value>
+  </data>
+  <data name="ZZZCultivatePage_TeaserMaxSkills" xml:space="preserve">
+    <value>優先技能升到 12 級</value>
+  </data>
+  <data name="ZZZCultivatePage_SearchPlaceholder" xml:space="preserve">
+    <value>搜尋代理人或陣營</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterOwnership" xml:space="preserve">
+    <value>擁有情況</value>
+  </data>
+  <data name="ZZZCultivatePage_Owned" xml:space="preserve">
+    <value>已擁有</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterRarity" xml:space="preserve">
+    <value>稀有度</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterAttribute" xml:space="preserve">
+    <value>屬性</value>
+  </data>
+  <data name="ZZZCultivatePage_FilterSpecialty" xml:space="preserve">
+    <value>特性</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributePhysical" xml:space="preserve">
+    <value>物理</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeFire" xml:space="preserve">
+    <value>火</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeIce" xml:space="preserve">
+    <value>冰</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeElectric" xml:space="preserve">
+    <value>電</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeEther" xml:space="preserve">
+    <value>以太</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeWind" xml:space="preserve">
+    <value>風</value>
+  </data>
+  <data name="ZZZCultivatePage_AttributeLumen" xml:space="preserve">
+    <value>流明</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyAttack" xml:space="preserve">
+    <value>強攻</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyStun" xml:space="preserve">
+    <value>擊破</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyAnomaly" xml:space="preserve">
+    <value>異常</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtySupport" xml:space="preserve">
+    <value>支援</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyDefense" xml:space="preserve">
+    <value>防護</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyRupture" xml:space="preserve">
+    <value>命破</value>
+  </data>
+  <data name="ZZZCultivatePage_SpecialtyArmorer" xml:space="preserve">
+    <value>鋒御</value>
+  </data>
+  <data name="ZZZCultivatePage_Materials" xml:space="preserve">
+    <value>養成材料</value>
+  </data>
+  <data name="ZZZCultivatePage_SynthesisHint" xml:space="preserve">
+    <value>低階材料多出的部分按 3 個合成 1 個計入高一階；高階不能拆成低階。</value>
+  </data>
+  <data name="ZZZCultivatePage_OwnedFormat" xml:space="preserve">
+    <value>持有 {0}</value>
+  </data>
+  <data name="ZZZCultivatePage_OwnedSynthFormat" xml:space="preserve">
+    <value>持有 {0} + 合成 {1}</value>
+  </data>
 </root>
