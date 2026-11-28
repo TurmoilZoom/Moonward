@@ -19,6 +19,11 @@ export function escapeHtml(s) {
  */
 function inline(s) {
   s = s.replace(/`([^`]+)`/g, '<code>$1</code>')
+  // 图片要先于链接替换，否则 ![alt](src) 会被链接规则吃成「!<a>」
+  s = s.replace(
+    /!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g,
+    '<img src="$2" alt="$1" loading="lazy" referrerpolicy="no-referrer" />',
+  )
   s = s.replace(
     /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
     '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
@@ -59,7 +64,8 @@ export function renderReleaseMarkdown(md) {
     }
   }
 
-  for (const raw of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i]
     const line = raw.replace(/\s+$/, '')
 
     if (/^\s*---+\s*$/.test(line)) {
@@ -73,6 +79,30 @@ export function renderReleaseMarkdown(md) {
       closeList()
       const n = heading[1].length
       html.push(`<h${n}>${inline(escapeHtml(heading[2]))}</h${n}>`)
+      continue
+    }
+
+    // 单独成行的图片（tag-release 的发行说明配图）渲染成独立图块
+    const img = line.match(/^\s*!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/)
+    if (img) {
+      closeList()
+      html.push(
+        `<figure class="notes-figure"><img src="${escapeHtml(img[2])}" alt="${escapeHtml(img[1])}"` +
+          ' loading="lazy" referrerpolicy="no-referrer" /></figure>',
+      )
+      continue
+    }
+
+    // 原始 HTML 图片块（<p align="center"><img …/></p>）：逐行收集到首个非 < 开头的行，
+    // 只放行其中的 <img>，其余标签丢弃
+    if (/^\s*</.test(line)) {
+      closeList()
+      const block = [line]
+      while (i + 1 < lines.length && /^\s*</.test(lines[i + 1].replace(/\s+$/, ''))) {
+        i += 1
+        block.push(lines[i].replace(/\s+$/, ''))
+      }
+      html.push(renderHtmlBlock(block.join('\n'), 'notes-figure'))
       continue
     }
 
@@ -205,8 +235,12 @@ function splitRow(line) {
     .map((c) => c.trim().replace(/\\\|/g, '|'))
 }
 
-/** 只放行图片；其余原始 HTML 当作文本转义输出。 */
-function renderHtmlBlock(block) {
+/**
+ * 只放行图片；其余原始 HTML 当作文本转义输出。
+ * @param {string} block
+ * @param {string} [figureClass]
+ */
+function renderHtmlBlock(block, figureClass = 'md-figure') {
   const imgs = block.match(/<img\b[^>]*>/gi)
   if (!imgs) return `<p>${escapeHtml(block.trim())}</p>`
   return imgs
@@ -215,7 +249,7 @@ function renderHtmlBlock(block) {
       if (!src) return ''
       const alt = (tag.match(/\balt\s*=\s*"([^"]*)"/i) || [])[1] || ''
       return (
-        `<figure class="md-figure"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}"` +
+        `<figure class="${figureClass}"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}"` +
         ' loading="lazy" referrerpolicy="no-referrer" /></figure>'
       )
     })

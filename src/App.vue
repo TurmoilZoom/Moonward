@@ -3129,6 +3129,20 @@ onUnmounted(() => {
   color: var(--accent);
 }
 
+.notes-body :deep(.notes-figure) {
+  margin: 0.4rem 0 0.75rem;
+  text-align: center;
+}
+
+.notes-body :deep(img) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
 .notes-body :deep(hr) {
   border: 0;
   border-top: 1px solid var(--line);
